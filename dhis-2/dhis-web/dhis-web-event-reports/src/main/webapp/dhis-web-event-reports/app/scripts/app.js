@@ -2522,6 +2522,7 @@ Ext.onReady( function() {
 			endDate,
             startEndDate,
             onRelativePeriodChange,
+            relativePeriodCmpMap = {},
             relativePeriod,
             checkboxes = [],
 			period,
@@ -2547,10 +2548,12 @@ Ext.onReady( function() {
 			validateView,
 
         // constants
-            baseWidth = 444,
+            baseWidth = 446,
             toolWidth = 36,
 
             accBaseWidth = baseWidth - 2;
+
+        ns.app.relativePeriodCmpMap = relativePeriodCmpMap;
 
 		// stores
 
@@ -2612,6 +2615,29 @@ Ext.onReady( function() {
 			}
 		});
 
+        periodTypeStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: ns.core.conf.period.periodTypes
+		});
+
+		fixedPeriodAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		});
+
+		fixedPeriodSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
         // components
 
             // data element
@@ -2627,7 +2653,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			queryMode: 'remote',
 			columnWidth: 0.5,
-			style: 'margin:1px 1px 2px 0',
+			style: 'margin:1px 1px 1px 0',
 			storage: {},
 			store: programStore,
             getRecord: function() {
@@ -2715,7 +2741,7 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			forceSelection: true,
 			columnWidth: 0.5,
-			style: 'margin:1px 0 2px 1px',
+			style: 'margin:1px 0 1px 0',
 			disabled: true,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -2784,10 +2810,10 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			width: accBaseWidth,
-            height: 176,
+            height: 180,
 			valueField: 'id',
 			displayField: 'name',
-            style: 'margin-bottom:2px',
+            style: 'margin-bottom:1px',
 			store: dataElementsByStageStore,
 			tbar: [
 				{
@@ -2952,7 +2978,7 @@ Ext.onReady( function() {
 
         dataElement = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-data">Data</div>',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
                 {
@@ -2983,12 +3009,13 @@ Ext.onReady( function() {
             queryMode: 'local',
             width: accBaseWidth,
             listConfig: {loadMask: false},
+            style: 'padding-bottom:1px; border-bottom:1px solid #ddd; margin-bottom:1px',
             value: 'periods',
             store: {
                 fields: ['id', 'name'],
                 data: [
-                    {id: 'periods', name: 'Select by fixed or relative periods'},
-                    {id: 'dates', name: 'Select by start/end dates'}
+                    {id: 'periods', name: 'Select fixed and relative periods'},
+                    {id: 'dates', name: 'Select start/end dates'}
                 ]
             }
         });
@@ -3018,7 +3045,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin:5px 1px 7px 0; color: #333;',
+			style: 'margin:3px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -3029,7 +3056,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-left: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
+			style: 'margin:3px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date()
 		});
@@ -3037,6 +3064,7 @@ Ext.onReady( function() {
         startEndDate = Ext.create('Ext.container.Container', {
             cls: 'ns-container-default',
             layout: 'column',
+            hidden: true,
             items: [
                 {
                     xtype: 'container',
@@ -3226,354 +3254,370 @@ Ext.onReady( function() {
             }
         };
 
-        relativePeriod = {
-			xtype: 'container',
-            cls: 'ns-container-default',
-            style: 'margin-top: 13px; padding-top: 6px; border-top: 1px dashed #ccc',
-            width: accBaseWidth,
+        onCheckboxAdd = function(cmp) {
+            if (cmp.xtype === 'checkbox') {
+                checkboxes.push(cmp);
+                relativePeriodCmpMap[cmp.relativePeriodId] = cmp;
+            }
+        };
+
+        weeks = Ext.create('Ext.container.Container', {
+            columnWidth: 0.34,
+            bodyStyle: 'border-style:none; padding:0 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.weeks,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_WEEK',
+                    boxLabel: NS.i18n.last_week
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_4_WEEKS',
+                    boxLabel: NS.i18n.last_4_weeks
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_12_WEEKS',
+                    boxLabel: NS.i18n.last_12_weeks
+                }
+            ]
+        });
+
+        months = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.months,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_MONTH',
+                    boxLabel: NS.i18n.last_month
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_3_MONTHS',
+                    boxLabel: NS.i18n.last_3_months
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_12_MONTHS',
+                    boxLabel: NS.i18n.last_12_months,
+                    checked: true
+                }
+            ]
+        });
+
+        bimonths = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.bimonths,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_BIMONTH',
+                    boxLabel: NS.i18n.last_bimonth
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_6_BIMONTHS',
+                    boxLabel: NS.i18n.last_6_bimonths
+                }
+            ]
+        });
+
+        quarters = Ext.create('Ext.container.Container', {
+            columnWidth: 0.34,
+            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.quarters,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_QUARTER',
+                    boxLabel: NS.i18n.last_quarter
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_4_QUARTERS',
+                    boxLabel: NS.i18n.last_4_quarters
+                }
+            ]
+        });
+
+        sixMonths = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none; padding:5px 0 0',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.sixmonths,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_SIX_MONTH',
+                    boxLabel: NS.i18n.last_sixmonth
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_2_SIXMONTHS',
+                    boxLabel: NS.i18n.last_2_sixmonths
+                }
+            ]
+        });
+
+        financialYears = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none; padding:5px 0 0',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.financial_years,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_FINANCIAL_YEAR',
+                    boxLabel: NS.i18n.last_financial_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
+                    boxLabel: NS.i18n.last_5_financial_years
+                }
+            ]
+        });
+
+        years = Ext.create('Ext.container.Container', {
+            columnWidth: 0.35,
+            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: {
+                    added: function(cmp) {
+                        onCheckboxAdd(cmp);
+                    }
+                }
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.years,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'THIS_YEAR',
+                    boxLabel: NS.i18n.this_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_YEAR',
+                    boxLabel: NS.i18n.last_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_5_YEARS',
+                    boxLabel: NS.i18n.last_5_years
+                }
+            ]
+        });
+
+        relativePeriod = Ext.create('Ext.container.Container', {
 			hideCollapseTool: true,
 			autoScroll: true,
-			valueComponentMap: {},
-			getRecords: function() {
-				var map = this.valueComponentMap,
-					records = [];
-
-				for (var rp in map) {
-					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
-						records.push({id: map[rp].relativePeriodId});
-					}
-				}
-
-				return records.length ? records : null;
-			},
+			bodyStyle: 'border:0 none',
 			items: [
 				{
 					xtype: 'container',
-                    cls: 'ns-container-default',
 					layout: 'column',
+					bodyStyle: 'border-style:none',
 					items: [
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.34,
-							style: 'padding: 0 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom: 2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.weeks,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_WEEK',
-									boxLabel: NS.i18n.last_week
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_WEEKS',
-									boxLabel: NS.i18n.last_4_weeks
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_WEEKS',
-									boxLabel: NS.i18n.last_12_weeks
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.months,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_MONTH',
-									boxLabel: NS.i18n.last_month
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_3_MONTHS',
-									boxLabel: NS.i18n.last_3_months
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: NS.i18n.last_12_months
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.bimonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_BIMONTH',
-									boxLabel: NS.i18n.last_bimonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_6_BIMONTHS',
-									boxLabel: NS.i18n.last_6_bimonths
-								}
-							]
-						}
+                        weeks,
+						months,
+                        bimonths
 					]
 				},
 				{
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    layout: 'column',
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border-style:none',
 					items: [
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.34,
-							style: 'padding: 5px 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.quarters,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_QUARTER',
-									boxLabel: NS.i18n.last_quarter
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_QUARTERS',
-									boxLabel: NS.i18n.last_4_quarters
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							style: 'padding: 5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.sixmonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_SIX_MONTH',
-									boxLabel: NS.i18n.last_sixmonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_2_SIXMONTHS',
-									boxLabel: NS.i18n.last_2_sixmonths
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							style: 'padding: 5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.financial_years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_FINANCIAL_YEAR',
-									boxLabel: NS.i18n.last_financial_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
-									boxLabel: NS.i18n.last_5_financial_years
-								}
-							]
-						}
-
-						//{
-							//xtype: 'panel',
-							//layout: 'anchor',
-							//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
-							//defaults: {
-								//labelSeparator: '',
-								//style: 'margin-bottom:2px',
-							//},
-							//items: [
-								//{
-									//xtype: 'label',
-									//text: 'Options',
-									//cls: 'ns-label-period-heading-options'
-								//},
-								//rewind
-							//]
-						//}
+						quarters,
+						sixMonths,
+						financialYears
 					]
 				},
 				{
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    layout: 'column',
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border-style:none',
 					items: [
-                        {
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.35,
-							style: 'padding: 5px 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'THIS_YEAR',
-									boxLabel: NS.i18n.this_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_YEAR',
-									boxLabel: NS.i18n.last_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_YEARS',
-									boxLabel: NS.i18n.last_5_years
-								}
-							]
-						}
+                        years
 					]
 				}
 			]
-		};
+		});
 
-        period = Ext.create('Ext.panel.Panel', {
+		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			height: 180,
+			valueField: 'id',
+			displayField: 'name',
+			store: fixedPeriodAvailableStore,
+			tbar: [
+				{
+					xtype: 'label',
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
+				},
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowright.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowrightdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+					}
+				},
+				' '
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+					}, this);
+				}
+			}
+		});
+
+		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-right',
+			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+			height: 180,
+			valueField: 'id',
+			displayField: 'name',
+			ddReorder: false,
+			store: fixedPeriodSelectedStore,
+			tbar: [
+				' ',
+				{
+					xtype: 'button',
+					icon: 'images/arrowleftdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowleft.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+					}
+				},
+				'->',
+				{
+					xtype: 'label',
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+					}, this);
+				}
+			}
+		});
+
+		period = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-period">Periods</div>',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             width: accBaseWidth,
-            checkboxes: checkboxes,
             isNoRelativePeriods: function() {
 				var a = this.checkboxes;
 				for (var i = 0; i < a.length; i++) {
@@ -3583,17 +3627,127 @@ Ext.onReady( function() {
 				}
 				return true;
 			},
-            items: [
-                periodMode,
-                startEndDate,
-                relativePeriod
-            ],
-            listeners: {
-				added: function(cmp) {
-					accordionPanels.push(cmp);
+			getDimension: function() {
+				var config = {
+						dimension: dimConf.period.objectName,
+						items: []
+					};
+
+				fixedPeriodSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				for (var i = 0; i < this.checkboxes.length; i++) {
+					if (this.checkboxes[i].getValue()) {
+						config.items.push({
+							id: this.checkboxes[i].relativePeriodId,
+							name: ''
+						});
+					}
+				}
+
+				return config.items.length ? config : null;
+			},
+			resetRelativePeriods: function() {
+				var a = this.checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					a[i].setValue(false);
+				}
+			},
+			isNoRelativePeriods: function() {
+				var a = this.checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].getValue()) {
+						return false;
+					}
+				}
+				return true;
+			},
+			items: [
+				{
+					xtype: 'panel',
+					layout: 'column',
+					bodyStyle: 'border-style:none',
+					style: 'margin-top:0px',
+					items: [
+                        periodMode,
+						{
+							xtype: 'combobox',
+							cls: 'ns-combo',
+							style: 'margin-bottom:2px',
+							width: accBaseWidth - 62 - 62 - 4,
+							valueField: 'id',
+							displayField: 'name',
+							emptyText: NS.i18n.select_period_type,
+							editable: false,
+							queryMode: 'remote',
+							store: periodTypeStore,
+							periodOffset: 0,
+							listeners: {
+								select: function() {
+									var nsype = new PeriodType(),
+										periodType = this.getValue();
+
+									var periods = nsype.get(periodType).generatePeriods({
+										offset: this.periodOffset,
+										filterFuturePeriods: true,
+										reversePeriods: true
+									});
+
+									fixedPeriodAvailableStore.setIndex(periods);
+									fixedPeriodAvailableStore.loadData(periods);
+									ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+								}
+							}
+						},
+						{
+							xtype: 'button',
+							text: NS.i18n.prev_year,
+							style: 'margin-left:2px; border-radius:2px',
+							height: 24,
+							handler: function() {
+								var cb = this.up('panel').down('combobox');
+								if (cb.getValue()) {
+									cb.periodOffset--;
+									cb.fireEvent('select');
+								}
+							}
+						},
+						{
+							xtype: 'button',
+							text: NS.i18n.next_year,
+							style: 'margin-left:2px; border-radius:2px',
+							height: 24,
+							handler: function() {
+								var cb = this.up('panel').down('combobox');
+								if (cb.getValue() && cb.periodOffset < 0) {
+									cb.periodOffset++;
+									cb.fireEvent('select');
+								}
+							}
+						}
+					]
+				},
+				{
+					xtype: 'panel',
+					layout: 'column',
+					bodyStyle: 'border-style:none; padding-bottom:2px',
+					items: [
+						fixedPeriodAvailable,
+						fixedPeriodSelected
+					]
+				},
+				relativePeriod
+			],
+			listeners: {
+				added: function() {
+					accordionPanels.push(this);
 				}
 			}
-        });
+		});
 
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
@@ -5621,7 +5775,7 @@ Ext.onReady( function() {
 			periodRecords = recMap[dimConf.period.objectName] || [];
 			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
 				periodRecord = periodRecords[i];
-				checkbox = relativePeriod.valueComponentMap[periodRecord.id];
+				checkbox = ns.app.relativePeriodCmpMap[periodRecord.id];
 				if (checkbox) {
 					checkbox.setValue(true);
 				}
