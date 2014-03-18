@@ -3017,10 +3017,24 @@ Ext.onReady( function() {
                     {id: 'periods', name: 'Select fixed and relative periods'},
                     {id: 'dates', name: 'Select start/end dates'}
                 ]
+            },
+            listeners: {
+                select: function(cmp) {
+                    onPeriodModeSelect(cmp.getValue());
+                }
             }
         });
 
-        //onPeriodModeSelect = function(mode) {
+        onPeriodModeSelect = function(mode) {
+            if (mode === 'dates') {
+                startEndDate.show();
+                fixedPeriod.hide();
+            }
+            else if (mode === 'periods') {
+                startEndDate.hide();
+                fixedPeriod.show();
+            }
+        };
 
         getDateLink = function(text, fn, style) {
             return Ext.create('Ext.form.Label', {
@@ -3691,7 +3705,8 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none',
             items: [
                 fixedPeriodSettings,
-                fixedPeriodAvailableSelected
+                fixedPeriodAvailableSelected,
+                relativePeriod
             ]
         });
 
@@ -3750,8 +3765,8 @@ Ext.onReady( function() {
 			},
 			items: [
                 periodMode,
-				fixedPeriod,
-				relativePeriod
+                startEndDate,
+                fixedPeriod
 			],
 			listeners: {
 				added: function() {
