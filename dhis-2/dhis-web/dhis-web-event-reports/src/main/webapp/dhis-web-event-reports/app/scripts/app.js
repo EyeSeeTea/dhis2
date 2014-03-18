@@ -3612,9 +3612,23 @@ Ext.onReady( function() {
 			}
 		});
 
+        onPeriodTypeSelect = function(value) {
+            var ptype = new PeriodType(),
+
+                periods = ptype.get(value).generatePeriods({
+                    offset: periodType.periodOffset,
+                    filterFuturePeriods: true,
+                    reversePeriods: true
+                });
+
+            fixedPeriodAvailableStore.setIndex(periods);
+            fixedPeriodAvailableStore.loadData(periods);
+            ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+        };
+
         periodType = Ext.create('Ext.form.field.ComboBox', {
             cls: 'ns-combo',
-            style: 'margin-bottom:1px',
+            style: 'margin-right:1px; margin-bottom:1px',
             width: accBaseWidth - 62 - 62 - 2,
             valueField: 'id',
             displayField: 'name',
@@ -3624,45 +3638,32 @@ Ext.onReady( function() {
             store: periodTypeStore,
             periodOffset: 0,
             listeners: {
-                select: function() {
-                    var nsype = new PeriodType(),
-                        periodType = this.getValue();
-
-                    var periods = nsype.get(periodType).generatePeriods({
-                        offset: this.periodOffset,
-                        filterFuturePeriods: true,
-                        reversePeriods: true
-                    });
-
-                    fixedPeriodAvailableStore.setIndex(periods);
-                    fixedPeriodAvailableStore.loadData(periods);
-                    ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+                select: function(cmp) {
+                    onPeriodTypeSelect(cmp.getValue());
                 }
             }
         });
 
         prevYear = Ext.create('Ext.button.Button', {
             text: NS.i18n.prev_year,
-            style: 'margin-left:2px; border-radius:2px',
+            style: 'border-radius:1px; margin-right:1px',
             height: 24,
             handler: function() {
-                var cb = this.up('panel').down('combobox');
-                if (cb.getValue()) {
-                    cb.periodOffset--;
-                    cb.fireEvent('select');
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect(periodType.getValue());
                 }
             }
         });
 
         nextYear = Ext.create('Ext.button.Button', {
             text: NS.i18n.next_year,
-            style: 'margin-left:2px; border-radius:2px',
+            style: 'border-radius:1px',
             height: 24,
             handler: function() {
-                var cb = this.up('panel').down('combobox');
-                if (cb.getValue() && cb.periodOffset < 0) {
-                    cb.periodOffset++;
-                    cb.fireEvent('select');
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect(periodType.getValue());
                 }
             }
         });
