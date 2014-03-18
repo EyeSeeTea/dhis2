@@ -2547,7 +2547,7 @@ Ext.onReady( function() {
 			validateView,
 
         // constants
-            baseWidth = 442,
+            baseWidth = 444,
             toolWidth = 36,
 
             accBaseWidth = baseWidth - 2;
@@ -2616,7 +2616,6 @@ Ext.onReady( function() {
 
             // data element
 		program = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: NS.i18n.programs,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -2705,7 +2704,6 @@ Ext.onReady( function() {
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: NS.i18n.indicator,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -2786,7 +2784,7 @@ Ext.onReady( function() {
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			width: accBaseWidth,
-            height: 162,
+            height: 176,
 			valueField: 'id',
 			displayField: 'name',
             style: 'margin-bottom:2px',
@@ -2835,7 +2833,7 @@ Ext.onReady( function() {
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: accBaseWidth,
-            height: 204,
+            height: 240,
             bodyStyle: 'padding:2px 0 5px 3px; overflow-y: scroll',
             tbar: {
                 height: 27,
@@ -2978,6 +2976,26 @@ Ext.onReady( function() {
 
             // date
 
+        periodMode = Ext.create('Ext.form.field.ComboBox', {
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            queryMode: 'local',
+            width: accBaseWidth,
+            listConfig: {loadMask: false},
+            value: 'periods',
+            store: {
+                fields: ['id', 'name'],
+                data: [
+                    {id: 'periods', name: 'Select by fixed or relative periods'},
+                    {id: 'dates', name: 'Select by start/end dates'}
+                ]
+            }
+        });
+
+        //onPeriodModeSelect = function(mode) {
+
+
         getDateLink = function(text, fn, style) {
             return Ext.create('Ext.form.Label', {
                 text: text,
@@ -3000,7 +3018,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-right: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
+			style: 'margin:5px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -3552,7 +3570,7 @@ Ext.onReady( function() {
 
         period = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-period">Periods</div>',
-            bodyStyle: 'padding:5px 2px 2px',
+            bodyStyle: 'padding:2px',
             hideCollapseTool: true,
             width: accBaseWidth,
             checkboxes: checkboxes,
@@ -3566,6 +3584,7 @@ Ext.onReady( function() {
 				return true;
 			},
             items: [
+                periodMode,
                 startEndDate,
                 relativePeriod
             ],
@@ -3579,7 +3598,7 @@ Ext.onReady( function() {
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'ns-tree',
-			height: 333,
+			height: 433,
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
@@ -4044,7 +4063,7 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
-			height: 500,
+			height: 550,
 			items: [
                 dataElement,
                 period,
@@ -4995,9 +5014,11 @@ Ext.onReady( function() {
 		// viewport
 
         aggregateButton = Ext.create('Ext.button.Button', {
-			flex: 1,
+			//flex: 1,
+            width: 223,
 			param: 'aggregate',
-            text: '<b>Aggregated</b><br/>Aggregated event report',
+            text: '<b>Aggregated values</b><br/>Show aggregated event report',
+            style: 'margin-right:1px',
             pressed: true,
             listeners: {
 				mouseout: function(cmp) {
@@ -5008,9 +5029,11 @@ Ext.onReady( function() {
         paramButtonMap[aggregateButton.param] = aggregateButton;
 
 		caseButton = Ext.create('Ext.button.Button', {
-			flex: 1,
+			//flex: 1,'
+            width: 224,
 			param: 'query',
-            text: '<b>Case-based</b><br/>Case-based event report',
+            text: '<b>Individual cases</b><br/>Show case-based event report',
+            style: 'margin-right:1px',
 			listeners: {
 				mouseout: function(cmp) {
 					cmp.addCls('x-btn-default-toolbar-small-over');
@@ -5020,7 +5043,7 @@ Ext.onReady( function() {
         paramButtonMap[caseButton.param] = caseButton;
 
 		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
-			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
+			style: 'padding:1px; background:#f5f5f5; border:0 none',
             height: 41,
             getType: function() {
 				return aggregateButton.pressed ? 'aggregate' : 'query';
@@ -5065,7 +5088,7 @@ Ext.onReady( function() {
 		accordionBody = LayerWidgetEvent();
 
 		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
 			panels: accordionBody.accordionPanels,
 			setThisHeight: function(mx) {
 				var panelHeight = this.panels.length * 28,
@@ -5766,13 +5789,13 @@ Ext.onReady( function() {
 				afterrender: function() {
 
 					// resize event handler
-					westRegion.on('resize', function() {
-						var panel = accordion.getExpandedPanel();
+					//westRegion.on('resize', function() {
+						//var panel = accordion.getExpandedPanel();
 
-						if (panel) {
+						//if (panel) {
 							//panel.onExpand(); //todo
-						}
-					});
+						//}
+					//});
 
 					// left gui
 					var viewportHeight = westRegion.getHeight(),
@@ -5816,7 +5839,7 @@ Ext.onReady( function() {
 						Ext.getBody().fadeIn({
 							duration: 500
 						});
-					}, 300 );
+					}, 300);
 				}
 			}
 		});
