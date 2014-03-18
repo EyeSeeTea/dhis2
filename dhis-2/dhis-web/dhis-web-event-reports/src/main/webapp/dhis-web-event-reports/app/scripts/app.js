@@ -619,12 +619,12 @@ Ext.onReady( function() {
 			dimensionStore.add(getData(all));
 		};
 		ns.app.stores.dimension = dimensionStore;
-		//dimensionStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
 
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 
 		rowStore = getStore();
+        rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		filterStore = getStore();
 
@@ -2971,7 +2971,7 @@ Ext.onReady( function() {
 
 				addUxFromDataElement(element);
 
-                ns.app.aggregateLayoutWindow.rowStore.add(element);
+                ns.app.aggregateLayoutWindow.colStore.add(element);
                 ns.app.queryLayoutWindow.colStore.add(element);
 			}
         };
@@ -3000,8 +3000,7 @@ Ext.onReady( function() {
 			}
         });
 
-            // date
-
+            // dates
         periodMode = Ext.create('Ext.form.field.ComboBox', {
             editable: false,
             valueField: 'id',
@@ -3028,11 +3027,11 @@ Ext.onReady( function() {
         onPeriodModeSelect = function(mode) {
             if (mode === 'dates') {
                 startEndDate.show();
-                fixedPeriod.hide();
+                periods.hide();
             }
             else if (mode === 'periods') {
                 startEndDate.hide();
-                fixedPeriod.show();
+                periods.show();
             }
         };
 
@@ -3254,16 +3253,13 @@ Ext.onReady( function() {
             ]
         });
 
-        onRelativePeriodChange = function() {
-            if (period.isNoRelativePeriods()) {
-                startEndDate.enable();
-
-                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
+            // relative periods
+        onPeriodChange = function() {
+            if ((period.isRelativePeriods() || fixedPeriodSelectedStore.getRange().length) && !ns.app.aggregateLayoutWindow.hasDimension(dimConf.period.dimensionName)) {
+                ns.app.aggregateLayoutWindow.rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
             }
-            else if (!startEndDate.isDisabled()) {
-                startEndDate.disable();
-
-                ns.app.aggregateLayoutWindow.rowStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
+            else {
+                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
             }
         };
 
@@ -3274,17 +3270,24 @@ Ext.onReady( function() {
             }
         };
 
+        intervalListeners = {
+            added: function(cmp) {
+                onCheckboxAdd(cmp);
+            },
+            change: function() {
+                if (relativePeriod.getRecords().length < 2) {
+                    onPeriodChange();
+                }
+            }
+        };
+
         weeks = Ext.create('Ext.container.Container', {
             columnWidth: 0.34,
             bodyStyle: 'border-style:none; padding:0 0 0 8px',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3316,11 +3319,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3353,11 +3352,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3384,11 +3379,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3415,11 +3406,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3446,11 +3433,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3477,11 +3460,7 @@ Ext.onReady( function() {
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:2px',
-                listeners: {
-                    added: function(cmp) {
-                        onCheckboxAdd(cmp);
-                    }
-                }
+                listeners: intervalListeners
             },
             items: [
                 {
@@ -3539,9 +3518,21 @@ Ext.onReady( function() {
                         years
 					]
 				}
-			]
+			],
+            getRecords: function() {
+                var a = [];
+
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].getValue()) {
+                        a.push(checkboxes[i].relativePeriodId);
+                    }
+                }
+
+                return a;
+            }
 		});
 
+            // fixed periods
 		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
             width: accBaseWidth / 2,
@@ -3562,6 +3553,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
 					}
 				},
 				{
@@ -3570,6 +3562,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						ns.core.web.multiSelect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+                        onPeriodChange();
 					}
 				},
 				' '
@@ -3578,6 +3571,7 @@ Ext.onReady( function() {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
 						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
 					}, this);
 				}
 			}
@@ -3599,6 +3593,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						ns.core.web.multiSelect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
 					}
 				},
 				{
@@ -3607,6 +3602,7 @@ Ext.onReady( function() {
 					width: 22,
 					handler: function() {
 						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
 					}
 				},
 				'->',
@@ -3620,6 +3616,7 @@ Ext.onReady( function() {
 				afterrender: function() {
 					this.boundList.on('itemdblclick', function() {
 						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
 					}, this);
 				}
 			}
@@ -3701,8 +3698,25 @@ Ext.onReady( function() {
             ]
         });
 
-        fixedPeriod = Ext.create('Ext.container.Container', {
+        periods = Ext.create('Ext.container.Container', {
             bodyStyle: 'border-style:none',
+            getRecords: function() {
+                var map = relativePeriodCmpMap,
+                    selectedPeriods = fixedPeriodSelected.getValue(),
+					records = [];
+
+                for (var i = 0; i < selectedPeriods.length; i++) {
+                    records.push({id: selectedPeriods[i]});
+                }
+
+				for (var rp in map) {
+					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
+						records.push({id: map[rp].relativePeriodId});
+					}
+				}
+
+				return records.length ? records : null;
+            },
             items: [
                 fixedPeriodSettings,
                 fixedPeriodAvailableSelected,
@@ -3715,14 +3729,14 @@ Ext.onReady( function() {
             bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             width: accBaseWidth,
-            isNoRelativePeriods: function() {
-				var a = this.checkboxes;
+            isRelativePeriods: function() {
+				var a = checkboxes;
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].getValue()) {
-						return false;
+						return true;
 					}
 				}
-				return true;
+				return false;
 			},
 			getDimension: function() {
 				var config = {
@@ -3737,10 +3751,10 @@ Ext.onReady( function() {
 					});
 				});
 
-				for (var i = 0; i < this.checkboxes.length; i++) {
-					if (this.checkboxes[i].getValue()) {
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].getValue()) {
 						config.items.push({
-							id: this.checkboxes[i].relativePeriodId,
+							id: checkboxes[i].relativePeriodId,
 							name: ''
 						});
 					}
@@ -3749,13 +3763,13 @@ Ext.onReady( function() {
 				return config.items.length ? config : null;
 			},
 			resetRelativePeriods: function() {
-				var a = this.checkboxes;
+				var a = checkboxes;
 				for (var i = 0; i < a.length; i++) {
 					a[i].setValue(false);
 				}
 			},
 			isNoRelativePeriods: function() {
-				var a = this.checkboxes;
+				var a = checkboxes;
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].getValue()) {
 						return false;
@@ -3763,10 +3777,10 @@ Ext.onReady( function() {
 				}
 				return true;
 			},
-			items: [
+            items: [
                 periodMode,
                 startEndDate,
-                fixedPeriod
+                periods
 			],
 			listeners: {
 				added: function() {
@@ -4379,7 +4393,7 @@ Ext.onReady( function() {
             view.startDate = startDate.getSubmitValue();
             view.endDate = endDate.getSubmitValue();
 
-            view.relativePeriods = relativePeriod.getRecords();
+            view.periods = periods.getRecords();
 
             view.dataElements = [];
 
@@ -4391,7 +4405,7 @@ Ext.onReady( function() {
 
             view.organisationUnits = treePanel.getDimension().items;
 
-            if (!(view.program && view.stage && ((view.startDate && view.endDate) || view.relativePeriods.length))) {
+            if (!(view.program && view.stage && ((view.startDate && view.endDate) || view.periods.length))) {
 				return;
 			}
 
@@ -4994,11 +5008,11 @@ Ext.onReady( function() {
 				}
 
 				// pe
-				if (Ext.isArray(view.relativePeriods)) {
+				if (Ext.isArray(view.periods)) {
 					paramString += '&dimension=pe:';
 
-					for (var i = 0; i < view.relativePeriods.length; i++) {
-						paramString += view.relativePeriods[i].id + (i < view.relativePeriods.length - 1 ?  ';' : '');
+					for (var i = 0; i < view.periods.length; i++) {
+						paramString += view.periods[i].id + (i < view.periods.length - 1 ?  ';' : '');
 					}
 				}
 				else {
