@@ -2532,8 +2532,8 @@ Ext.onReady( function() {
             intervalListeners,
             relativePeriodCmpMap = {},
             weeks,
-            months
-            bimonths,
+            months,
+            biMonths,
             quarters,
             sixMonths,
             financialYears,
@@ -3373,7 +3373,7 @@ Ext.onReady( function() {
             ]
         });
 
-        bimonths = Ext.create('Ext.container.Container', {
+        biMonths = Ext.create('Ext.container.Container', {
             columnWidth: 0.33,
             bodyStyle: 'border-style:none',
             defaults: {
@@ -3524,7 +3524,7 @@ Ext.onReady( function() {
 					items: [
                         weeks,
 						months,
-                        bimonths
+                        biMonths
 					]
 				},
 				{
