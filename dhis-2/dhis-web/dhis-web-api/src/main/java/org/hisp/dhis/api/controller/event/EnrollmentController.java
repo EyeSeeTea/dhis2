@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -156,7 +156,7 @@ public class EnrollmentController
     @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')")
     public void postEnrollmentXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsXml( request.getInputStream() );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsXml( request.getInputStream() );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
@@ -181,7 +181,7 @@ public class EnrollmentController
     @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')")
     public void postEnrollmentJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsJson( request.getInputStream() );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream() );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {

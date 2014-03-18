@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,7 +86,7 @@ public class DefaultTrackedEntityAttributeService
         return attributeStore.get( id );
     }
 
-    public int saveTrackedEntityAttribute( TrackedEntityAttribute attribute )
+    public int addTrackedEntityAttribute( TrackedEntityAttribute attribute )
     {
         return attributeStore.save( attribute );
     }

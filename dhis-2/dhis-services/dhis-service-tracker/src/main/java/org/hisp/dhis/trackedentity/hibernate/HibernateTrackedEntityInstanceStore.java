@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.hibernate;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,8 +28,8 @@ package org.hisp.dhis.trackedentity.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
-import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_EVENT_BY_STATUS;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_INSTANCE;
@@ -61,8 +61,8 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
-import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -73,9 +73,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.system.grid.GridUtils;
-import org.hisp.dhis.system.grid.ListGrid;
-import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.MapMap;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -123,106 +120,128 @@ public class HibernateTrackedEntityInstanceStore
     // -------------------------------------------------------------------------
     
     @Override
-    public Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
+    public List<Map<String, String>> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
-        Grid grid = new ListGrid();
+        SqlHelper hlp = new SqlHelper();
+
+        // ---------------------------------------------------------------------
+        // Select clause
+        // ---------------------------------------------------------------------
         
-        grid.addHeader( new GridHeader( TRACKED_ENTITY_INSTANCE_ID, "Instance" ) );
-        grid.addHeader( new GridHeader( CREATED_ID, "Created" ) );
-        grid.addHeader( new GridHeader( LAST_UPDATED_ID, "Last updated" ) );
-        grid.addHeader( new GridHeader( TRACKED_ENTITY_ID, "Tracked entity" ) );
-        grid.addHeader( new GridHeader( ORG_UNIT_ID, "Org unit" ) );
+        String sql = 
+            "select tei.uid as " + TRACKED_ENTITY_INSTANCE_ID + ", " +
+            "tei.created as " + CREATED_ID + ", " +
+            "tei.lastupdated as " + LAST_UPDATED_ID + ", " +
+            "ou.uid as " + ORG_UNIT_ID + ", " +
+            "te.uid as " + TRACKED_ENTITY_ID + ", ";
         
         for ( QueryItem item : params.getItems() )
         {
-            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName() ) );
+            String col = statementBuilder.columnQuote( item.getItemId() );
+            
+            sql += col + ".value as " + col + ", ";
         }
         
-        Collection<Map<String, String>> entities = getEntities( params );
+        sql = sql.substring( 0, sql.length() - 2 ) + " "; // Remove last comma
+
+        // ---------------------------------------------------------------------
+        // From, join and restriction clause
+        // ---------------------------------------------------------------------
         
-        for ( Map<String, String> entity : entities )
-        {
-            grid.addValue( entity.get( TRACKED_ENTITY_INSTANCE_ID ) );
-            grid.addValue( entity.get( LAST_UPDATED_ID ) );
-            grid.addValue( entity.get( TRACKED_ENTITY_ID ) );
-            grid.addValue( entity.get( ORG_UNIT_ID ) );
-        }
-        
-        return grid;
-    }
-    
-    private Collection<Map<String, String>> getEntities( TrackedEntityInstanceQueryParams params )
-    {
-        SqlHelper hlp = new SqlHelper();
-        
-        String sql = 
-            "select tei.uid, tei.created, tei.lastupdated, te.uid, ou.uid, tav.value, ta.uid " +
+        sql +=        
             "from trackedentityinstance tei " +
-            "left join trackedentity te on tei.trackedentityid = te.trackedentityid " +
-            "left join organisationunit ou on tei.organisationunitid = ou.organisationunitid " +
-            "left join trackedentityattributevalue tav on tei.trackedentityinstanceid = tav.trackedentityinstanceid " +
-            "left join trackedentityattribute ta on tav.trackedentityattributeid = ta.trackedentityattributeid ";
+            "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
+            "inner join organisationunit ou on tei.organisationunitid = ou.organisationunitid ";
         
-        if ( !params.isOrganisationUnitMode( DimensionalObject.OU_MODE_SELECTED ) )
+        for ( QueryItem item : params.getItems() )
         {
-            sql += "left join _orgunitstructure ous using tei.organisationunitid=ous.organisationunitid ";
+            String col = statementBuilder.columnQuote( item.getItemId() );
+            
+            sql += 
+                "inner join trackedentityattributevalue as " + col + " " +
+                "on " + col + ".trackedentityinstanceid = tei.trackedentityinstanceid " +
+                "and " + col + ".trackedentityattributeid = " + item.getItem().getId() + " ";
+            
+            String filter = statementBuilder.encode( item.getFilter(), false );
+            
+            if ( item.hasFilter() )
+            {
+                sql += "and " + col + ".value " + item.getSqlOperator() + " " + item.getSqlFilter( filter ) + " ";
+            }
+        }
+        
+        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_DESCENDANTS ) )
+        {
+            sql += "left join _orgunitstructure ous on tei.organisationunitid = ous.organisationunitid ";
         }
         
         if ( params.hasTrackedEntity() )
         {
-            sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId();
+            sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId() + " ";
         }
-        
-        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_SELECTED ) )
+
+        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_DESCENDANTS ) )
         {
-            sql += hlp.whereAnd() + " tei.organisationunitid in (" + getQuotedCommaDelimitedString( getUids( params.getOrganisationUnits() ) ) + ") ";
+            SetMap<Integer, OrganisationUnit> levelOuMap = params.getLevelOrgUnitMap();
+            
+            for ( Integer level : levelOuMap.keySet() )
+            {
+                sql += hlp.whereAnd() + " ous.idlevel" + level + " in (" + getCommaDelimitedString( getIdentifiers( levelOuMap.get( level ) ) ) + ") or ";
+            }
+            
+            sql = sql.substring( 0, sql.length() - 3 ); // Reomove last or
         }
-        
-        for ( QueryItem item : params.getItems() )
+        else // SELECTED
         {
-            String filter = statementBuilder.encode( item.getFilter(), false );
-            
-            String valClause = "tav.value " + item.getSqlOperator() + " " + item.getSqlFilter( filter );
-            
-            if ( item.hasFilter() )
-            {
-                sql += hlp.whereAnd() + " (ta.uid = " + item.getItemId() + " and " + valClause + ") ";
-            }
-            else
-            {
-                sql += hlp.whereAnd() + " (" + valClause + ") ";
-            }
+            sql += hlp.whereAnd() + " tei.organisationunitid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
         }
         
-        MapMap<String, String, String> entityMap = new MapMap<String, String, String>();
+        if ( params.hasProgram() )
+        {
+            sql += 
+                hlp.whereAnd() + " exists ( select trackedentityinstanceid from programinstance pi " +
+                "where pi.trackedentityinstanceid=tei.trackedentityinstanceid " +
+                "and pi.programid = " + params.getProgram().getId() + ") ";
+        }
+
+        // ---------------------------------------------------------------------
+        // Paging clause
+        // ---------------------------------------------------------------------
+
+        if ( params.isPaging() )
+        {
+            sql += "limit " + params.getPageSizeWithDefault() + " offset " + params.getOffset();
+        }
 
         log.info( "Tracked entity instance query SQL: " + sql );
-        
+
+        // ---------------------------------------------------------------------
+        // Query
+        // ---------------------------------------------------------------------
+
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+        
+        List<Map<String, String>> list = new ArrayList<Map<String,String>>();
         
         while ( rowSet.next() )
         {
-            String key = rowSet.getString( "tei.uid" );
-            String att = rowSet.getString( "ta.uid" );
-            String val = rowSet.getString( "tav.value" );
+            final Map<String, String> map = new HashMap<String, String>();
             
-            Map<String, String> entity = entityMap.get( key );
+            map.put( TRACKED_ENTITY_INSTANCE_ID, rowSet.getString( TRACKED_ENTITY_INSTANCE_ID ) );
+            map.put( CREATED_ID, rowSet.getString( CREATED_ID ) );
+            map.put( LAST_UPDATED_ID, rowSet.getString( LAST_UPDATED_ID ) );
+            map.put( ORG_UNIT_ID, rowSet.getString( ORG_UNIT_ID ) );
+            map.put( TRACKED_ENTITY_ID, rowSet.getString( TRACKED_ENTITY_ID ) );
             
-            if ( entity == null )
+            for ( QueryItem item : params.getItems() )
             {
-                Map<String, String> map = new HashMap<String, String>();
-                map.put( TRACKED_ENTITY_INSTANCE_ID, key );
-                map.put( CREATED_ID, DateUtils.getLongDateString( rowSet.getDate( "teu.created" ) ) );
-                map.put( LAST_UPDATED_ID, DateUtils.getLongDateString( rowSet.getDate( "tei.lastupdated" ) ) );
-                map.put( TRACKED_ENTITY_ID, rowSet.getString( "te.uid" ) );
-                map.put( ORG_UNIT_ID, rowSet.getString( "ou.uid" ) );
-                entityMap.putEntries( key, map );
+                map.put( item.getItemId(), rowSet.getString( item.getItemId() ) );
             }
             
-            entityMap.putEntry( key, att, val );            
+            list.add( map );
         }
         
-        return entityMap.values();
+        return list;
     }
     
     @Override

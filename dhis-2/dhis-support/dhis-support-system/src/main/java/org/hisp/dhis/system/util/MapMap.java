@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,8 +42,7 @@ public class MapMap<T, U, V>
         Map<U, V> map = this.get( key );
         map = map == null ? new HashMap<U, V>() : map;
         map.put( valueKey, value );
-        this.put( key, map );
-        return null;
+        return this.put( key, map );
     }
     
     public void putEntries( T key, Map<U, V> m )

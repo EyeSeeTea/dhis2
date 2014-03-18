@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,7 @@ public class JacksonTrackedEntityInstanceService extends AbstractTrackedEntityIn
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries saveTrackedEntityInstanceXml( InputStream inputStream ) throws IOException
+    public ImportSummaries addTrackedEntityInstanceXml( InputStream inputStream ) throws IOException
     {
         ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
@@ -106,21 +106,21 @@ public class JacksonTrackedEntityInstanceService extends AbstractTrackedEntityIn
             for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances.getTrackedEntityInstances() )
             {
                 trackedEntityInstance.setTrackedEntityInstance( null );
-                importSummaries.addImportSummary( saveTrackedEntityInstance( trackedEntityInstance ) );
+                importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
             }
         }
         catch ( Exception ex )
         {
             TrackedEntityInstance trackedEntityInstance = fromXml( input, TrackedEntityInstance.class );
             trackedEntityInstance.setTrackedEntityInstance( null );
-            importSummaries.addImportSummary( saveTrackedEntityInstance( trackedEntityInstance ) );
+            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
         }
 
         return importSummaries;
     }
 
     @Override
-    public ImportSummaries saveTrackedEntityInstanceJson( InputStream inputStream ) throws IOException
+    public ImportSummaries addTrackedEntityInstanceJson( InputStream inputStream ) throws IOException
     {
         ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
@@ -132,14 +132,14 @@ public class JacksonTrackedEntityInstanceService extends AbstractTrackedEntityIn
             for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances.getTrackedEntityInstances() )
             {
                 trackedEntityInstance.setTrackedEntityInstance( null );
-                importSummaries.addImportSummary( saveTrackedEntityInstance( trackedEntityInstance ) );
+                importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
             }
         }
         catch ( Exception ex )
         {
             TrackedEntityInstance trackedEntityInstance = fromJson( input, TrackedEntityInstance.class );
             trackedEntityInstance.setTrackedEntityInstance( null );
-            importSummaries.addImportSummary( saveTrackedEntityInstance( trackedEntityInstance ) );
+            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
         }
 
         return importSummaries;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -145,7 +145,7 @@ public class TrackedEntityInstanceServiceTest
         // person.setName( "NAME" );
         trackedEntityInstance.setOrgUnit( organisationUnitA.getUid() );
 
-        ImportSummary importSummary = trackedEntityInstanceService.saveTrackedEntityInstance( trackedEntityInstance );
+        ImportSummary importSummary = trackedEntityInstanceService.addTrackedEntityInstance( trackedEntityInstance );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
 
         // assertEquals( "NAME", personService.getTrackedEntityInstance( importSummary.getReference() ).getName() );

@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 
@@ -47,14 +48,18 @@ public class TrackedEntityInstanceQueryParams
     public static final String LAST_UPDATED_ID = "lastupdated";
     public static final String ORG_UNIT_ID = "ou";
     public static final String TRACKED_ENTITY_ID = "te";
+    public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
+    public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";
+    
+    private String query;
     
     private List<QueryItem> items = new ArrayList<QueryItem>();
 
+    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+    
     private Program program;
     
     private TrackedEntity trackedEntity;
-    
-    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
     
     private String organisationUnitMode;
 
@@ -74,24 +79,111 @@ public class TrackedEntityInstanceQueryParams
     // Logic
     // -------------------------------------------------------------------------
 
+    /**
+     * Returns a mapping between level and organisation units.
+     */
+    public SetMap<Integer, OrganisationUnit> getLevelOrgUnitMap()
+    {
+        SetMap<Integer, OrganisationUnit> setMap = new SetMap<Integer, OrganisationUnit>();
+        
+        for ( OrganisationUnit ou : organisationUnits )
+        {
+            setMap.putValue( ou.getLevel(), ou );
+        }
+        
+        return setMap;
+    }
+    
+    public boolean isOrQuery()
+    {
+        return hasQuery();
+    }
+    
+    /**
+     * Indicates whether this params specifies a query.
+     */
+    public boolean hasQuery()
+    {
+        return query != null && !query.isEmpty();
+    }
+
+    /**
+     * Indicates whether this params specifies any query items.
+     */
+    public boolean hasItems()
+    {
+        return items != null && !items.isEmpty();
+    }
+    
+    /**
+     * Indicates whether this params specifies a program.
+     */
     public boolean hasProgram()
     {
         return program != null;
     }
     
+    /**
+     * Indicates whether this params specifies a tracked entity.
+     */
     public boolean hasTrackedEntity()
     {
         return trackedEntity != null;
     }
     
+    /**
+     * Indicates whethert this params is of the given organisation unit mode.
+     */
     public boolean isOrganisationUnitMode( String mode )
     {
-        return organisationUnitMode != null && organisationUnitMode.equals( mode );
+        return organisationUnitMode != null && organisationUnitMode.equalsIgnoreCase( mode );
+    }
+
+    /**
+     * Indicates whether paging is enabled.
+     */
+    public boolean isPaging()
+    {
+        return page != null || pageSize != null;
+    }
+
+    /**
+     * Returns the page number, falls back to default value of 1 if not specified.
+     */
+    public int getPageWithDefault()
+    {
+        return page != null && page > 0 ? page : 1;
+    }
+    
+    /**
+     * Returns the page size, falls back to default value of 50 if not specified.
+     */
+    public int getPageSizeWithDefault()
+    {
+        return pageSize != null && pageSize >= 0 ? pageSize : 50;
+    }
+
+    /**
+     * Returns the offset based on the page number and page size.
+     */
+    public int getOffset()
+    {
+        return ( getPageWithDefault() - 1 ) * getPageSizeWithDefault();
     }
     
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    public String getQuery()
+    {
+        return query;
+    }
+
+    public void setQuery( String query )
+    {
+        this.query = query;
+    }
 
     public List<QueryItem> getItems()
     {
@@ -101,6 +193,16 @@ public class TrackedEntityInstanceQueryParams
     public void setItems( List<QueryItem> items )
     {
         this.items = items;
+    }
+
+    public String getOrganisationUnitMode()
+    {
+        return organisationUnitMode;
+    }
+
+    public void setOrganisationUnitMode( String organisationUnitMode )
+    {
+        this.organisationUnitMode = organisationUnitMode;
     }
 
     public Program getProgram()
@@ -131,16 +233,6 @@ public class TrackedEntityInstanceQueryParams
     public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
         this.organisationUnits = organisationUnits;
-    }
-
-    public String getOrganisationUnitMode()
-    {
-        return organisationUnitMode;
-    }
-
-    public void setOrganisationUnitMode( String organisationUnitMode )
-    {
-        this.organisationUnitMode = organisationUnitMode;
     }
 
     public Integer getPage()

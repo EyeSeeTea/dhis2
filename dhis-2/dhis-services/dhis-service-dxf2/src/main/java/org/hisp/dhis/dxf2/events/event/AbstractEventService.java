@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -124,14 +124,14 @@ public abstract class AbstractEventService
 
     @Override
     @Transactional
-    public ImportSummary saveEvent( Event event )
+    public ImportSummary addEvent( Event event )
     {
-        return saveEvent( event, null );
+        return addEvent( event, null );
     }
 
     @Override
     @Transactional
-    public ImportSummary saveEvent( Event event, ImportOptions importOptions )
+    public ImportSummary addEvent( Event event, ImportOptions importOptions )
     {
         Program program = programService.getProgram( event.getProgram() );
         ProgramInstance programInstance;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ public class Program
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<OrganisationUnitGroup>();
 
     /**
-     * Allow enrolling person to all orgunit no matter what the program is
+     * Allow enrolling trackedEntity to all orgunit no matter what the program is
      * assigned for the orgunit or not
      */
     private Boolean displayOnAllOrgunit = true;
@@ -555,10 +555,10 @@ public class Program
         this.dataEntryMethod = dataEntryMethod;
     }
 
-    @JsonProperty( value = "programPersonAttributes" )
+    @JsonProperty( value = "programTrackedEntityAttributes" )
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
-    @JacksonXmlElementWrapper( localName = "programPersonAttributes", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "programPersonAttribute", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "programTrackedEntityAttributes", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramTrackedEntityAttribute> getAttributes()
     {
         return attributes;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,27 @@ public class IdentifiableObjectUtils
             for ( T object : objects )
             {
                 uids.add( object.getUid() );
+            }
+        }
+
+        return uids;
+    }
+
+    /**
+     * Returns a list of internal identifiers for the given collection of IdentifiableObjects.
+     *
+     * @param objects the list of IdentifiableObjects.
+     * @return a list of uids.
+     */
+    public static <T extends IdentifiableObject> List<Integer> getIdentifiers( Collection<T> objects )
+    {
+        List<Integer> uids = new ArrayList<Integer>();
+
+        if ( objects != null )
+        {
+            for ( T object : objects )
+            {
+                uids.add( object.getId() );
             }
         }
 

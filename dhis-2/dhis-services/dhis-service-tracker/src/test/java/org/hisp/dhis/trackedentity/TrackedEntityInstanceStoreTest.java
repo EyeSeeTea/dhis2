@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -113,10 +113,10 @@ public class TrackedEntityInstanceStoreTest
 
         TrackedEntityAttribute entityInstanceAttributeB = createTrackedEntityAttribute( 'B' );
         entityInstanceAttributeB.setUnique( true );
-        attributeService.saveTrackedEntityAttribute( entityInstanceAttributeB );
+        attributeService.addTrackedEntityAttribute( entityInstanceAttributeB );
 
         entityInstanceAttribute = createTrackedEntityAttribute( 'A' );
-        attributeId = attributeService.saveTrackedEntityAttribute( entityInstanceAttribute );
+        attributeId = attributeService.addTrackedEntityAttribute( entityInstanceAttribute );
 
         entityInstanceA1 = createTrackedEntityInstance( 'A', organisationUnit );
         entityInstanceA2 = createTrackedEntityInstance( 'A', organisationUnitB );
@@ -264,19 +264,19 @@ public class TrackedEntityInstanceStoreTest
 
         TrackedEntityAttribute attribute = createTrackedEntityAttribute( 'C' );
         attribute.setValueType( TrackedEntityAttribute.TYPE_PHONE_NUMBER );
-        attributeService.saveTrackedEntityAttribute( attribute );
+        attributeService.addTrackedEntityAttribute( attribute );
 
         TrackedEntityAttributeValue attributeValue = createTrackedEntityAttributeValue( 'A', entityInstanceA1,
             attribute );
         attributeValue.setValue( "123456789" );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValue );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValue );
 
         entityInstanceA1.addAttributeValue( attributeValue );
         entityInstanceStore.update( entityInstanceA1 );
 
         attributeValue = createTrackedEntityAttributeValue( 'A', entityInstanceB1, attribute );
         attributeValue.setValue( "123456789" );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValue );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValue );
 
         entityInstanceB1.addAttributeValue( attributeValue );
         entityInstanceStore.update( entityInstanceB1 );
@@ -298,7 +298,7 @@ public class TrackedEntityInstanceStoreTest
 
         TrackedEntityAttributeValue attributeValue = createTrackedEntityAttributeValue( 'A', entityInstanceA3,
             entityInstanceAttribute );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValue );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValue );
 
         programInstanceService.enrollTrackedEntityInstance( entityInstanceA3, programA, date, date, organisationUnit,
             null );

@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,7 @@ public class TrackedEntityController extends AbstractCrudController<TrackedEntit
         }
 
         TrackedEntity newTrackedEntity = JacksonUtils.fromXml( input, TrackedEntity.class );
+        newTrackedEntity.setUid( trackedEntity.getUid() );
         trackedEntity.mergeWith( newTrackedEntity );
 
         trackedEntityService.updateTrackedEntity( trackedEntity );
@@ -116,6 +117,7 @@ public class TrackedEntityController extends AbstractCrudController<TrackedEntit
         }
 
         TrackedEntity newTrackedEntity = JacksonUtils.fromJson( input, TrackedEntity.class );
+        newTrackedEntity.setUid( trackedEntity.getUid() );
         trackedEntity.mergeWith( newTrackedEntity );
 
         trackedEntityService.updateTrackedEntity( trackedEntity );

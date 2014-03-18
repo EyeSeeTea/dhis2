@@ -1,7 +1,7 @@
 package org.hisp.dhis.relationship;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,13 +34,14 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
 /**
  * @author Abyot Asalefew
  */
-@JacksonXmlRootElement( localName = "relationshipType", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement(localName = "relationshipType", namespace = DxfNamespaces.DXF_2_0)
 public class RelationshipType
     extends BaseIdentifiableObject
 {
@@ -106,5 +107,19 @@ public class RelationshipType
             "aIsToB='" + aIsToB + '\'' +
             ", bIsToA='" + bIsToA + '\'' +
             '}';
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            RelationshipType relationshipType = (RelationshipType) other;
+
+            this.aIsToB = relationshipType.getaIsToB();
+            this.bIsToA = relationshipType.getbIsToA();
+        }
     }
 }

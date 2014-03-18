@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentityattributevalue;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,7 +115,7 @@ public class DefaultTrackedEntityAttributeValueService
     }
 
     @Override
-    public void saveTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
+    public void addTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
     {
         if ( attributeValue.getValue() != null )
         {
@@ -206,7 +206,7 @@ public class DefaultTrackedEntityAttributeValueService
             TrackedEntityAttributeValue _attributeValue = new TrackedEntityAttributeValue(
                 attributeValue.getAttribute(), destination, attributeValue.getValue() );
 
-            saveTrackedEntityAttributeValue( _attributeValue );
+            addTrackedEntityAttributeValue( _attributeValue );
         }
     }
 

@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,8 +55,8 @@ public interface TrackedEntityInstanceService
 
     Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
     
-    TrackedEntityInstanceQueryParams getFromUrl( Set<String> items, String program, String trackedEntity, 
-        Set<String> ou, String ouMode, Integer page, Integer pageSize );
+    TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> items, Set<String> ou, String ouMode, 
+        String program, String trackedEntity, Integer page, Integer pageSize );
     
     /**
      * Adds an {@link TrackedEntityInstance}
@@ -65,7 +65,7 @@ public interface TrackedEntityInstanceService
      * 
      * @return A generated unique id of the added {@link TrackedEntityInstance}.
      */
-    int saveTrackedEntityInstance( TrackedEntityInstance entityInstance );
+    int addTrackedEntityInstance( TrackedEntityInstance entityInstance );
 
     /**
      * Deletes a {@link TrackedEntityInstance}.

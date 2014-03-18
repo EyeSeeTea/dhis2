@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,8 +32,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -43,7 +46,7 @@ public class Enrollment
 {
     private String enrollment;
 
-    private String person;
+    private String trackedEntityInstance;
 
     private String program;
 
@@ -53,20 +56,22 @@ public class Enrollment
 
     private Date dateOfIncident;
 
+    private List<Attribute> attributes = new ArrayList<Attribute>();
+
     public Enrollment()
     {
     }
 
     @JsonProperty( required = true )
     @JacksonXmlProperty( isAttribute = true )
-    public String getPerson()
+    public String getTrackedEntityInstance()
     {
-        return person;
+        return trackedEntityInstance;
     }
 
-    public void setPerson( String person )
+    public void setTrackedEntityInstance( String trackedEntityInstance )
     {
-        this.person = person;
+        this.trackedEntityInstance = trackedEntityInstance;
     }
 
     @JsonProperty( required = true )
@@ -129,29 +134,34 @@ public class Enrollment
         this.dateOfIncident = dateOfIncident;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public void setAttributes( List<Attribute> attributes )
+    {
+        this.attributes = attributes;
+    }
+
     @Override
     public boolean equals( Object o )
     {
-        if ( this == o )
-            return true;
-        if ( o == null || getClass() != o.getClass() )
-            return false;
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
 
         Enrollment that = (Enrollment) o;
 
-        if ( dateOfEnrollment != null ? !dateOfEnrollment.equals( that.dateOfEnrollment )
-            : that.dateOfEnrollment != null )
+        if ( attributes != null ? !attributes.equals( that.attributes ) : that.attributes != null ) return false;
+        if ( dateOfEnrollment != null ? !dateOfEnrollment.equals( that.dateOfEnrollment ) : that.dateOfEnrollment != null ) return false;
+        if ( dateOfIncident != null ? !dateOfIncident.equals( that.dateOfIncident ) : that.dateOfIncident != null ) return false;
+        if ( enrollment != null ? !enrollment.equals( that.enrollment ) : that.enrollment != null ) return false;
+        if ( trackedEntityInstance != null ? !trackedEntityInstance.equals( that.trackedEntityInstance ) : that.trackedEntityInstance != null )
             return false;
-        if ( dateOfIncident != null ? !dateOfIncident.equals( that.dateOfIncident ) : that.dateOfIncident != null )
-            return false;
-        if ( enrollment != null ? !enrollment.equals( that.enrollment ) : that.enrollment != null )
-            return false;
-        if ( person != null ? !person.equals( that.person ) : that.person != null )
-            return false;
-        if ( program != null ? !program.equals( that.program ) : that.program != null )
-            return false;
-        if ( status != that.status )
-            return false;
+        if ( program != null ? !program.equals( that.program ) : that.program != null ) return false;
+        if ( status != that.status ) return false;
 
         return true;
     }
@@ -160,19 +170,26 @@ public class Enrollment
     public int hashCode()
     {
         int result = enrollment != null ? enrollment.hashCode() : 0;
-        result = 31 * result + (person != null ? person.hashCode() : 0);
+        result = 31 * result + (trackedEntityInstance != null ? trackedEntityInstance.hashCode() : 0);
         result = 31 * result + (program != null ? program.hashCode() : 0);
         result = 31 * result + (status != null ? status.hashCode() : 0);
         result = 31 * result + (dateOfEnrollment != null ? dateOfEnrollment.hashCode() : 0);
         result = 31 * result + (dateOfIncident != null ? dateOfIncident.hashCode() : 0);
+        result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString()
     {
-        return "Enrollment{" + "enrollment='" + enrollment + '\'' + ", person='" + person + '\'' + ", program='"
-            + program + '\'' + ", status=" + status + ", dateOfEnrollment=" + dateOfEnrollment + ", dateOfIncident="
-            + dateOfIncident + '}';
+        return "Enrollment{" +
+            "enrollment='" + enrollment + '\'' +
+            ", trackedEntityInstance='" + trackedEntityInstance + '\'' +
+            ", program='" + program + '\'' +
+            ", status=" + status +
+            ", dateOfEnrollment=" + dateOfEnrollment +
+            ", dateOfIncident=" + dateOfIncident +
+            ", attributes=" + attributes +
+            '}';
     }
 }

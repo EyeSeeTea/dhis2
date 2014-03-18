@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.trackedentityattribute;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -196,7 +196,7 @@ public class AddAttributeAction
             attribute.setProgramScope( programScope );
         }
 
-        attributeService.saveTrackedEntityAttribute( attribute );
+        attributeService.addTrackedEntityAttribute( attribute );
 
         if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( valueType ) )
         {
