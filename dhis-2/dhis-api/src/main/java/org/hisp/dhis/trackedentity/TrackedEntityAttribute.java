@@ -315,7 +315,7 @@ public class TrackedEntityAttribute
     @JsonProperty
     @JsonView( { DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean getUnique()
+    public Boolean isUnique()
     {
         return unique;
     }
@@ -330,7 +330,7 @@ public class TrackedEntityAttribute
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getOrgunitScope()
     {
-        return orgunitScope;
+        return orgunitScope != null ? orgunitScope : false;
     }
 
     public void setOrgunitScope( Boolean orgunitScope )
@@ -343,7 +343,7 @@ public class TrackedEntityAttribute
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getProgramScope()
     {
-        return programScope;
+        return programScope != null ? programScope : false;
     }
 
     public void setProgramScope( Boolean programScope )
@@ -429,7 +429,7 @@ public class TrackedEntityAttribute
             sortOrderInVisitSchedule = trackedEntityAttribute.getSortOrderInVisitSchedule();
             displayInListNoProgram = trackedEntityAttribute.getDisplayInListNoProgram();
             sortOrderInListNoProgram = trackedEntityAttribute.getSortOrderInListNoProgram();
-            unique = trackedEntityAttribute.getUnique();
+            unique = trackedEntityAttribute.isUnique();
             orgunitScope = trackedEntityAttribute.getOrgunitScope();
             programScope = trackedEntityAttribute.getProgramScope();
             periodType = trackedEntityAttribute.getPeriodType();
