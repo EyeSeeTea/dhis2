@@ -3022,7 +3022,6 @@ Ext.onReady( function() {
 
         //onPeriodModeSelect = function(mode) {
 
-
         getDateLink = function(text, fn, style) {
             return Ext.create('Ext.form.Label', {
                 text: text,
@@ -3532,8 +3531,8 @@ Ext.onReady( function() {
 
 		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
-			height: 180,
+            width: accBaseWidth / 2,
+            height: 180,
 			valueField: 'id',
 			displayField: 'name',
 			store: fixedPeriodAvailableStore,
@@ -3573,7 +3572,7 @@ Ext.onReady( function() {
 
 		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
-			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
+            width: accBaseWidth / 2,
 			height: 180,
 			valueField: 'id',
 			displayField: 'name',
@@ -3612,6 +3611,89 @@ Ext.onReady( function() {
 				}
 			}
 		});
+
+        periodType = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'ns-combo',
+            style: 'margin-bottom:1px',
+            width: accBaseWidth - 62 - 62 - 2,
+            valueField: 'id',
+            displayField: 'name',
+            emptyText: NS.i18n.select_period_type,
+            editable: false,
+            queryMode: 'remote',
+            store: periodTypeStore,
+            periodOffset: 0,
+            listeners: {
+                select: function() {
+                    var nsype = new PeriodType(),
+                        periodType = this.getValue();
+
+                    var periods = nsype.get(periodType).generatePeriods({
+                        offset: this.periodOffset,
+                        filterFuturePeriods: true,
+                        reversePeriods: true
+                    });
+
+                    fixedPeriodAvailableStore.setIndex(periods);
+                    fixedPeriodAvailableStore.loadData(periods);
+                    ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+                }
+            }
+        });
+
+        prevYear = Ext.create('Ext.button.Button', {
+            text: NS.i18n.prev_year,
+            style: 'margin-left:2px; border-radius:2px',
+            height: 24,
+            handler: function() {
+                var cb = this.up('panel').down('combobox');
+                if (cb.getValue()) {
+                    cb.periodOffset--;
+                    cb.fireEvent('select');
+                }
+            }
+        });
+
+        nextYear = Ext.create('Ext.button.Button', {
+            text: NS.i18n.next_year,
+            style: 'margin-left:2px; border-radius:2px',
+            height: 24,
+            handler: function() {
+                var cb = this.up('panel').down('combobox');
+                if (cb.getValue() && cb.periodOffset < 0) {
+                    cb.periodOffset++;
+                    cb.fireEvent('select');
+                }
+            }
+        });
+
+        fixedPeriodSettings = Ext.create('Ext.container.Container', {
+            layout: 'column',
+            bodyStyle: 'border-style:none',
+            style: 'margin-top:0px',
+            items: [
+                periodType,
+                prevYear,
+                nextYear
+            ]
+        });
+
+        fixedPeriodAvailableSelected = Ext.create('Ext.container.Container', {
+            layout: 'column',
+            bodyStyle: 'border-style:none; padding-bottom:2px',
+            items: [
+                fixedPeriodAvailable,
+                fixedPeriodSelected
+            ]
+        });
+
+        fixedPeriod = Ext.create('Ext.container.Container', {
+            bodyStyle: 'border-style:none',
+            items: [
+                fixedPeriodSettings,
+                fixedPeriodAvailableSelected
+            ]
+        });
 
 		period = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-period">Periods</div>',
@@ -3667,79 +3749,8 @@ Ext.onReady( function() {
 				return true;
 			},
 			items: [
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					style: 'margin-top:0px',
-					items: [
-                        periodMode,
-						{
-							xtype: 'combobox',
-							cls: 'ns-combo',
-							style: 'margin-bottom:2px',
-							width: accBaseWidth - 62 - 62 - 4,
-							valueField: 'id',
-							displayField: 'name',
-							emptyText: NS.i18n.select_period_type,
-							editable: false,
-							queryMode: 'remote',
-							store: periodTypeStore,
-							periodOffset: 0,
-							listeners: {
-								select: function() {
-									var nsype = new PeriodType(),
-										periodType = this.getValue();
-
-									var periods = nsype.get(periodType).generatePeriods({
-										offset: this.periodOffset,
-										filterFuturePeriods: true,
-										reversePeriods: true
-									});
-
-									fixedPeriodAvailableStore.setIndex(periods);
-									fixedPeriodAvailableStore.loadData(periods);
-									ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
-								}
-							}
-						},
-						{
-							xtype: 'button',
-							text: NS.i18n.prev_year,
-							style: 'margin-left:2px; border-radius:2px',
-							height: 24,
-							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue()) {
-									cb.periodOffset--;
-									cb.fireEvent('select');
-								}
-							}
-						},
-						{
-							xtype: 'button',
-							text: NS.i18n.next_year,
-							style: 'margin-left:2px; border-radius:2px',
-							height: 24,
-							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue() && cb.periodOffset < 0) {
-									cb.periodOffset++;
-									cb.fireEvent('select');
-								}
-							}
-						}
-					]
-				},
-				{
-					xtype: 'panel',
-					layout: 'column',
-					bodyStyle: 'border-style:none; padding-bottom:2px',
-					items: [
-						fixedPeriodAvailable,
-						fixedPeriodSelected
-					]
-				},
+                periodMode,
+				fixedPeriod,
 				relativePeriod
 			],
 			listeners: {
