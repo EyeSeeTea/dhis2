@@ -2499,6 +2499,9 @@ Ext.onReady( function() {
 			stagesByProgramStore,
             dataElementsByStageStore,
             organisationUnitGroupStore,
+            periodTypeStore,
+            fixedPeriodAvailableStore,
+            fixedPeriodSelectedStore,
 
         // cache
             stageStorage = {},
@@ -2517,14 +2520,36 @@ Ext.onReady( function() {
             selectDataElements,
             dataElement,
 
+            periodMode,
+            onPeriodModeSelect,
             getDateLink,
 			startDate,
 			endDate,
             startEndDate,
-            onRelativePeriodChange,
+
+            onPeriodChange,
+            onCheckboxAdd,
+            intervalListeners,
             relativePeriodCmpMap = {},
+            weeks,
+            months
+            bimonths,
+            quarters,
+            sixMonths,
+            financialYears,
+            years,
             relativePeriod,
             checkboxes = [],
+
+            fixedPeriodAvailable,
+            fixedPeriodSelected,
+            onPeriodTypeSelect,
+            periodType,
+            prevYear,
+            nextYear,
+            fixedPeriodSettings,
+            fixedPeriodAvailableSelected,
+            periods,
 			period,
 
 			treePanel,
@@ -2533,19 +2558,21 @@ Ext.onReady( function() {
 			userOrganisationUnitGrandChildren,
 			organisationUnitLevel,
 			organisationUnitGroup,
+            organisationUnitPanel,
 			toolMenu,
 			tool,
 			toolPanel,
             organisationUnit,
 
+            accordionBody,
 			accordionPanels = [],
-			panel,
 
 		// functions
 			reset,
 			setGui,
 			getView,
 			validateView,
+			panel,
 
         // constants
             baseWidth = 446,
@@ -3057,7 +3084,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin:3px 1px 7px 0; color: #333;',
+			style: 'margin:4px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -3068,7 +3095,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin:3px 1px 7px 0; color: #333;',
+			style: 'margin:4px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date()
 		});
