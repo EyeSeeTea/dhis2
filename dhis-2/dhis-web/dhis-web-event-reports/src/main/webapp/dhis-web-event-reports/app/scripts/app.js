@@ -3496,12 +3496,11 @@ Ext.onReady( function() {
         relativePeriod = Ext.create('Ext.container.Container', {
 			hideCollapseTool: true,
 			autoScroll: true,
-			bodyStyle: 'border:0 none',
+			style: 'border:0 none; padding:2px 0 0 7px',
 			items: [
 				{
 					xtype: 'container',
 					layout: 'column',
-					bodyStyle: 'border-style:none',
 					items: [
                         weeks,
 						months,
@@ -3511,7 +3510,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'container',
 					layout: 'column',
-					bodyStyle: 'border-style:none',
+                    style: 'padding-top:4px',
 					items: [
 						quarters,
 						sixMonths,
@@ -3521,7 +3520,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'container',
 					layout: 'column',
-					bodyStyle: 'border-style:none',
+                    style: 'padding-top:4px',
 					items: [
                         years
 					]
@@ -3532,7 +3531,7 @@ Ext.onReady( function() {
 		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
             width: accBaseWidth / 2,
-            height: 180,
+            height: 160,
 			valueField: 'id',
 			displayField: 'name',
 			store: fixedPeriodAvailableStore,
@@ -3573,7 +3572,7 @@ Ext.onReady( function() {
 		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-right',
             width: accBaseWidth / 2,
-			height: 180,
+			height: 160,
 			valueField: 'id',
 			displayField: 'name',
 			ddReorder: false,
