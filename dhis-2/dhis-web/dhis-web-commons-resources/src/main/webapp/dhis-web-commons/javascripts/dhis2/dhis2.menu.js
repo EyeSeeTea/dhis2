@@ -40,6 +40,7 @@
             var menuOrder = [],
                 menuItems = {},
                 orderIndex;
+
             return {
                 getItem: function (key) {
                     return menuItems[key];
@@ -301,9 +302,27 @@
     }
 
     function saveOrder() {
-        console.log('Save the new order');
-        console.log(dhis2.menu.getMenuItems().getOrder());
-        localStorage.setItem('dhis2.menuItemOrder',  dhis2.menu.getMenuItems().getOrder());
+        var menuOrder = dhis2.menu.getMenuItems().getOrder();
+        console.log(menuOrder);
+        localStorage.setItem('dhis2.menuItemOrder',  menuOrder);
+        if (menuOrder.length !== 0) {
+            //Save to local storage
+
+
+            //Persist the order on the server
+            $.ajax({
+                contentType:"application/json; charset=utf-8",
+                data: JSON.stringify(menuOrder),
+                dataType: "json",
+                type:"POST",
+                url: "../api/menu/"
+            }).success(function () {
+                console.log("Saved!");
+            }).error(function () {
+                console.log("Failed to save menu order.")
+            });
+        }
+
     }
 
     /**
@@ -412,9 +431,6 @@
         $.ajax('../dhis-web-commons/menu/getModules.action').success(function (data) {
             if (typeof data.modules === 'object') {
                 menu.addMenuItems(data.modules);
-            }
-            if (localStorage.getItem('dhis2.menuItemOrder')) {
-                menu.getMenuItems().setOrder(localStorage.getItem('dhis2.menuItemOrder'));
             }
         }).error(function () {
             alert('Can not load apps from server.');

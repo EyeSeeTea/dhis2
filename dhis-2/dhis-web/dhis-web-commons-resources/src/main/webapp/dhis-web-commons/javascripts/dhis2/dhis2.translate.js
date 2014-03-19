@@ -59,7 +59,7 @@ dhis2.util.namespace( 'dhis2.translate' );
      */
     function getTranslationsFromServer(translateKeys, callback) {
         $.ajax({
-            url:'../api/i18n',
+            url:"../api/i18n",
             type:"POST",
             data: JSON.stringify(translateKeys),
             contentType:"application/json; charset=utf-8",

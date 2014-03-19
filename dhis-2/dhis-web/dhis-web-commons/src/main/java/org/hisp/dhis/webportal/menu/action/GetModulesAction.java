@@ -86,7 +86,7 @@ public class GetModulesAction
                 
                 return i1 != -1 ? ( i2 != -1 ? i1.compareTo( i2 ) : -1 ) : 1;
             }
-        } );        
+        } );
         
         return SUCCESS;
     }

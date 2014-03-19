@@ -28,12 +28,13 @@
 .app-menu .app-menu-placeholder {
     margin: 10px;
     display: block;
-    border: 2px solid transparent;
+    border: 2px solid lightgray;
     background: rgba(245, 245, 245, .9);
     width: 225px;
     height: 56px;
     border-radius: 5px;
-    padding: 10px
+    padding: 10px;
+    box-shadow: 1px 1px 7px lightgray;
 }
 .app-menu .app-menu-item img {
     max-height: 36px;
@@ -237,8 +238,13 @@
     left: 575px;
 }
 
+#menuDropDown3 {
+    top: 55px;
+}
+
 hr.app-separator {
-    border-top: 1px dotted #4A89BA;
+    border: none;
+    border-top: 1px solid #4A89BA;
     height: 1px;
     position: absolute;
     top: 293px;
@@ -248,4 +254,9 @@ hr.app-separator {
 #menuDropDown1 .caret-up-background,
 #menuDropDown1 .caret-up-border {
     left: 190px;
+}
+
+#menuDropDown3 .caret-up-background,
+#menuDropDown3 .caret-up-border {
+    left: 120px;
 }
