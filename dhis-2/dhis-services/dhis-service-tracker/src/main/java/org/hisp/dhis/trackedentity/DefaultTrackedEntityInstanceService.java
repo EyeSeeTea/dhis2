@@ -212,11 +212,6 @@ public class DefaultTrackedEntityInstanceService
         {
             throw new IllegalQueryException( "Params cannot be null" );
         }
-        
-        if ( !params.hasQuery() && !params.hasAttributes() )
-        {
-            violation = "At least one of query and attributes must be specified";
-        }
 
         if ( !params.hasOrganisationUnits() )
         {
