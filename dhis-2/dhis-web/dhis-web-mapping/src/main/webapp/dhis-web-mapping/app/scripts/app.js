@@ -3043,11 +3043,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'mapLegendSets'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(store, records) {
