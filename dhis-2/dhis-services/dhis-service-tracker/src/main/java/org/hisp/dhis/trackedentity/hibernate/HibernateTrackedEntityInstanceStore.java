@@ -135,7 +135,7 @@ public class HibernateTrackedEntityInstanceStore
             "ou.uid as " + ORG_UNIT_ID + ", " +
             "te.uid as " + TRACKED_ENTITY_ID + ", ";
         
-        for ( QueryItem item : params.getItems() )
+        for ( QueryItem item : params.getAttributes() )
         {
             String col = statementBuilder.columnQuote( item.getItemId() );
             
@@ -145,7 +145,8 @@ public class HibernateTrackedEntityInstanceStore
         sql = sql.substring( 0, sql.length() - 2 ) + " "; // Remove last comma
 
         // ---------------------------------------------------------------------
-        // From, join and restriction clause
+        // From, join and where clause. For attribute params, restriction is set
+        // in inner join. For query params, restriction is set in where clause.
         // ---------------------------------------------------------------------
         
         sql +=        
@@ -153,18 +154,20 @@ public class HibernateTrackedEntityInstanceStore
             "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
             "inner join organisationunit ou on tei.organisationunitid = ou.organisationunitid ";
         
-        for ( QueryItem item : params.getItems() )
+        for ( QueryItem item : params.getAttributesAndFilters() )
         {
             String col = statementBuilder.columnQuote( item.getItemId() );
             
+            String joinClause = params.isOrQuery() ? "full outer join" : "inner join";
+            
             sql += 
-                "inner join trackedentityattributevalue as " + col + " " +
+                joinClause + " trackedentityattributevalue as " + col + " " +
                 "on " + col + ".trackedentityinstanceid = tei.trackedentityinstanceid " +
                 "and " + col + ".trackedentityattributeid = " + item.getItem().getId() + " ";
             
             String filter = statementBuilder.encode( item.getFilter(), false );
             
-            if ( item.hasFilter() )
+            if ( !params.isOrQuery() && item.hasFilter() )
             {
                 sql += "and " + col + ".value " + item.getSqlOperator() + " " + item.getSqlFilter( filter ) + " ";
             }
@@ -189,9 +192,9 @@ public class HibernateTrackedEntityInstanceStore
                 sql += hlp.whereAnd() + " ous.idlevel" + level + " in (" + getCommaDelimitedString( getIdentifiers( levelOuMap.get( level ) ) ) + ") or ";
             }
             
-            sql = sql.substring( 0, sql.length() - 3 ); // Reomove last or
+            sql = sql.substring( 0, sql.length() - 3 ); // Remove last or
         }
-        else // SELECTED
+        else // OU_MODE_SELECTED
         {
             sql += hlp.whereAnd() + " tei.organisationunitid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
         }
@@ -202,6 +205,21 @@ public class HibernateTrackedEntityInstanceStore
                 hlp.whereAnd() + " exists ( select trackedentityinstanceid from programinstance pi " +
                 "where pi.trackedentityinstanceid=tei.trackedentityinstanceid " +
                 "and pi.programid = " + params.getProgram().getId() + ") ";
+        }
+        
+        if ( params.isOrQuery() && params.hasAttributesOrFilters() )
+        {
+            sql += hlp.whereAnd() + " (";
+            
+            for ( QueryItem item : params.getAttributesAndFilters() )
+            {
+                String col = statementBuilder.columnQuote( item.getItemId() );
+                String query = statementBuilder.encode( params.getQuery(), false );
+                
+                sql += col + ".value = '" + query + "' or ";
+            }
+            
+            sql = sql.substring( 0, sql.length() - 3 ) + ") "; // Remove last or
         }
 
         // ---------------------------------------------------------------------
@@ -233,7 +251,7 @@ public class HibernateTrackedEntityInstanceStore
             map.put( ORG_UNIT_ID, rowSet.getString( ORG_UNIT_ID ) );
             map.put( TRACKED_ENTITY_ID, rowSet.getString( TRACKED_ENTITY_ID ) );
             
-            for ( QueryItem item : params.getItems() )
+            for ( QueryItem item : params.getAttributes() )
             {
                 map.put( item.getItemId(), rowSet.getString( item.getItemId() ) );
             }

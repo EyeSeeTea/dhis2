@@ -53,8 +53,10 @@ public class TrackedEntityInstanceQueryParams
     
     private String query;
     
-    private List<QueryItem> items = new ArrayList<QueryItem>();
+    private List<QueryItem> attributes = new ArrayList<QueryItem>();
 
+    private List<QueryItem> filters = new ArrayList<QueryItem>();
+    
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
     
     private Program program;
@@ -78,7 +80,7 @@ public class TrackedEntityInstanceQueryParams
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
+    
     /**
      * Returns a mapping between level and organisation units.
      */
@@ -94,6 +96,12 @@ public class TrackedEntityInstanceQueryParams
         return setMap;
     }
     
+    /**
+     * Indicates whether this is a logical OR query, meaning that a query string
+     * is specified and instances which matches this query on one or more attributes
+     * should be included in the response. The opposite is an item-specific query,
+     * where the instances which matches the specific attributes should be included.
+     */
     public boolean isOrQuery()
     {
         return hasQuery();
@@ -106,13 +114,48 @@ public class TrackedEntityInstanceQueryParams
     {
         return query != null && !query.isEmpty();
     }
+    
+    /**
+     * Returns a list of attributes and filters combined.
+     */
+    public List<QueryItem> getAttributesAndFilters()
+    {
+        List<QueryItem> items = new ArrayList<QueryItem>();
+        items.addAll( attributes );
+        items.addAll( filters );
+        return items;
+    }
 
     /**
-     * Indicates whether this params specifies any query items.
+     * Indicates whether this params specifies any attributes and/or filters.
      */
-    public boolean hasItems()
+    public boolean hasAttributesOrFilters()
     {
-        return items != null && !items.isEmpty();
+        return hasAttributes() || hasFilters();
+    }
+
+    /**
+     * Indicates whether this params specifies any attributes.
+     */
+    public boolean hasAttributes()
+    {
+        return attributes != null && !attributes.isEmpty();
+    }
+    
+    /**
+     * Indicates whether this params specifies any filters.
+     */
+    public boolean hasFilters()
+    {
+        return filters != null && !filters.isEmpty();
+    }
+
+    /**
+     * Indicates whether this params specifies any organisation units.
+     */
+    public boolean hasOrganisationUnits()
+    {
+        return organisationUnits != null && !organisationUnits.isEmpty();
     }
     
     /**
@@ -185,14 +228,24 @@ public class TrackedEntityInstanceQueryParams
         this.query = query;
     }
 
-    public List<QueryItem> getItems()
+    public List<QueryItem> getAttributes()
     {
-        return items;
+        return attributes;
     }
 
-    public void setItems( List<QueryItem> items )
+    public void setAttributes( List<QueryItem> attributes )
     {
-        this.items = items;
+        this.attributes = attributes;
+    }
+
+    public List<QueryItem> getFilters()
+    {
+        return filters;
+    }
+
+    public void setFilters( List<QueryItem> filters )
+    {
+        this.filters = filters;
     }
 
     public String getOrganisationUnitMode()
