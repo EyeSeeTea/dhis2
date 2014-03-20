@@ -2751,11 +2751,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataSets.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataSets/filtered.json?include=id,name',
 				reader: {
 					type: 'json',
-					root: 'dataSets'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			storage: {},
 			sortStore: function() {
