@@ -2480,7 +2480,6 @@ Ext.onReady( function() {
             },
             loadPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
@@ -2614,7 +2613,6 @@ Ext.onReady( function() {
             },
             loadTotalsPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2622,10 +2620,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/dataElements/filtered.json?include=id,name&filter=dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
+					path = '/dataElements/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2648,7 +2646,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.dataElements || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2657,7 +2655,6 @@ Ext.onReady( function() {
             },
 			loadDetailsPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2665,10 +2662,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
+					path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
 				}
 				else if (uid === 0) {
-					path = '/generatedDataElementOperands' + filterPath + '.json';
+					path = '/generatedDataElementOperands/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2681,8 +2678,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2691,7 +2686,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-							data = response.dataElementOperands || [],
+							data = response.objects || response.dataElementOperands || [],
                             pager = response.pager;
 
 						//for (var i = 0; i < data.length; i++) {
@@ -2729,10 +2724,10 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataElementGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'dataElementGroups'
+					root: 'objects'
 				}
 			},
 			listeners: {
@@ -3169,8 +3164,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = dataElementGroup.getValue(),
