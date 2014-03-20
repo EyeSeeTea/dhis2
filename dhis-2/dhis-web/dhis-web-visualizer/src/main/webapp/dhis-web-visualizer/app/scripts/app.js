@@ -2682,7 +2682,7 @@ Ext.onReady( function() {
 
         indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
             cls: 'ns-combo',
-            style: 'margin-bottom:2px; margin-top:0px',
+            style: 'margin-bottom:1px; margin-top:0px',
             width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
             valueField: 'id',
             displayField: 'name',
@@ -3003,7 +3003,7 @@ Ext.onReady( function() {
 
 		dataElementGroup = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin:0 2px 2px 0',
+			style: 'margin:0 1px 1px 0',
 			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 90,
 			valueField: 'id',
 			displayField: 'name',
@@ -3033,13 +3033,13 @@ Ext.onReady( function() {
 
 		dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:1px',
 			baseBodyCls: 'small',
 			queryMode: 'local',
 			editable: false,
 			valueField: 'id',
 			displayField: 'text',
-			width: 90 - 2,
+			width: 90 - 1,
 			value: dimConf.dataElement.objectName,
 			store: {
 				fields: ['id', 'text'],
@@ -3728,8 +3728,8 @@ Ext.onReady( function() {
 						{
 							xtype: 'combobox',
 							cls: 'ns-combo',
-							style: 'margin-bottom:2px',
-							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 4,
+							style: 'margin-bottom:1px',
+							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 2,
 							valueField: 'id',
 							displayField: 'name',
 							emptyText: NS.i18n.select_period_type,
@@ -3757,7 +3757,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'button',
 							text: NS.i18n.prev_year,
-							style: 'margin-left:2px; border-radius:2px',
+							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
 							handler: function() {
 								var cb = this.up('panel').down('combobox');
@@ -3770,7 +3770,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'button',
 							text: NS.i18n.next_year,
-							style: 'margin-left:2px; border-radius:2px',
+							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
 							handler: function() {
 								var cb = this.up('panel').down('combobox');
@@ -3785,7 +3785,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'panel',
 					layout: 'column',
-					bodyStyle: 'border-style:none; padding-bottom:2px',
+					bodyStyle: 'border-style:none; padding-bottom:1px',
 					items: [
 						fixedPeriodAvailable,
 						fixedPeriodSelected
@@ -4154,7 +4154,7 @@ Ext.onReady( function() {
 		organisationUnit = {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
-			bodyStyle: 'padding:2px',
+			bodyStyle: 'padding:1px',
 			hideCollapseTool: true,
 			collapsed: false,
 			getDimension: function() {
@@ -4238,7 +4238,7 @@ Ext.onReady( function() {
                 {
                     layout: 'column',
                     bodyStyle: 'border:0 none',
-                    style: 'padding-bottom:2px',
+                    style: 'padding-bottom:1px',
                     items: [
                         toolPanel,
                         {
@@ -4547,7 +4547,7 @@ Ext.onReady( function() {
 		});
 
 		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
 			items: accordionBody,
 			panels: accordionPanels,
 			setThisHeight: function(mx) {
