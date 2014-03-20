@@ -2496,10 +2496,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/indicatorGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name&filter=indicatorGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/indicators' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2512,8 +2512,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2522,7 +2520,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.indicators || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2935,8 +2933,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = indicatorGroup.getValue(),
