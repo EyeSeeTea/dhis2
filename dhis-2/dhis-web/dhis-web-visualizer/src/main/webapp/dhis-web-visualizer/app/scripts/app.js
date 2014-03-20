@@ -2054,7 +2054,7 @@ Ext.onReady( function() {
             editable: false,
             valueField: 'id',
             displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            width: (ns.core.conf.layout.west_fieldset_width / 3),
             value: ns.core.conf.finals.dimension.data.dimensionName,
             filterNext: function() {
                 category.filter(this.getValue());
@@ -2081,7 +2081,7 @@ Ext.onReady( function() {
             lastQuery: '',
             valueField: 'id',
             displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            width: (ns.core.conf.layout.west_fieldset_width / 3),
             value: ns.core.conf.finals.dimension.period.dimensionName,
             filter: function(value) {
                 if (Ext.isString(value)) {
@@ -2121,7 +2121,7 @@ Ext.onReady( function() {
             lastQuery: '',
             valueField: 'id',
             displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3) - 1,
+            width: (ns.core.conf.layout.west_fieldset_width / 3) + 1,
             value: ns.core.conf.finals.dimension.organisationUnit.dimensionName,
             filter: function(values) {
                 var a = Ext.clone(this.getValue()),
@@ -2150,12 +2150,13 @@ Ext.onReady( function() {
 
         layout = Ext.create('Ext.toolbar.Toolbar', {
             id: 'chartlayout_tb',
-            style: 'padding:2px 0 0 2px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
-            height: 46,
+            style: 'padding:2px 0 0 1px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
+            height: 45,
             items: [
                 {
-                    xtype: 'panel',
+                    xtype: 'container',
                     bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+                    style: 'margin:0',
                     items: [
                         {
                             xtype: 'label',
@@ -2167,8 +2168,9 @@ Ext.onReady( function() {
                     ]
                 },
                 {
-                    xtype: 'panel',
+                    xtype: 'container',
                     bodyStyle: 'border-style:none; background-color:transparent; padding:0',
+                    style: 'margin:0',
                     items: [
                         {
                             xtype: 'label',
@@ -2180,7 +2182,7 @@ Ext.onReady( function() {
                     ]
                 },
                 {
-                    xtype: 'panel',
+                    xtype: 'container',
                     bodyStyle: 'border-style:none; background-color:transparent; padding:0',
                     items: [
                         {
@@ -4029,7 +4031,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_levels,
@@ -4042,7 +4044,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_groups,
@@ -4147,7 +4149,7 @@ Ext.onReady( function() {
 		toolPanel = Ext.create('Ext.panel.Panel', {
 			width: 36,
 			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
+			style: 'margin-right:1px',
 			items: tool
 		});
 
@@ -4242,7 +4244,7 @@ Ext.onReady( function() {
                     items: [
                         toolPanel,
                         {
-                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
