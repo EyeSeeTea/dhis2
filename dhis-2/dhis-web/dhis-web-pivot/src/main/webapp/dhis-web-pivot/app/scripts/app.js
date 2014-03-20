@@ -2861,11 +2861,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'organisationUnitGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			}
 		});
 		ns.app.stores.organisationUnitGroup = organisationUnitGroupStore;
