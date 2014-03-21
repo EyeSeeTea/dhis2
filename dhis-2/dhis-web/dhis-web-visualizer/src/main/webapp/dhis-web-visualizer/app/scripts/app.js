@@ -2661,8 +2661,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = indicatorGroup.getValue(),
@@ -2895,8 +2897,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = dataElementGroup.getValue(),
