@@ -619,7 +619,7 @@ Ext.onReady( function() {
 							this.currentValue = this.getValue();
 
 							var value = this.getValue(),
-								url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								url = value ? ns.core.init.contextPath + '/api/charts/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 								store = ns.app.stores.chart;
 
 							store.page = 1;
@@ -635,7 +635,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/charts/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.chart;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -647,7 +647,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/charts/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/charts/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.chart;
 
 				store.page = store.page + 1;
@@ -2549,13 +2549,15 @@ Ext.onReady( function() {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'charts'
-				}
+					root: 'objects'
+				},
+				startParam: false,
+				limitParam: false
 			},
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: ns.core.init.contextPath + '/api/charts.json?viewClass=sharing&links=false',
+			defaultUrl: ns.core.init.contextPath + '/api/charts/filtered.json?viewClass=sharing&include=id,name,access',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 

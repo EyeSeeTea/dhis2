@@ -241,7 +241,7 @@ public class GetTrackedEntityInstanceAction
                 {
                     for ( ProgramTrackedEntityAttribute programAttribute : p.getAttributes() )
                     {
-                        if ( !programAttribute.getDisplayedInList() )
+                        if ( !programAttribute.isDisplayInList() )
                         {
                             attributes.remove( programAttribute.getAttribute() );
                         }

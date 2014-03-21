@@ -352,7 +352,7 @@ public class ShowAddTrackedEntityInstanceFormAction
 
             if ( program == null )
             {
-                attributes = new ArrayList<TrackedEntityAttribute>( attributeService.getTrackedEntityAttributesDisplayedInList( true ) );
+                attributes = new ArrayList<TrackedEntityAttribute>( attributeService.getTrackedEntityAttributesDisplayInList( true ) );
                 Collection<Program> programs = programService.getAllPrograms();
 
                 for ( Program p : programs )

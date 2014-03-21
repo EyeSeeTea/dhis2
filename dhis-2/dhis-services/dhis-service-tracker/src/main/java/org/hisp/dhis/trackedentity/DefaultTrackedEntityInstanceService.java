@@ -139,8 +139,6 @@ public class DefaultTrackedEntityInstanceService
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
-
-    //TODO Bug: use full outer join when no filter
     
     //TODO queries with multiple words
     //TODO lower index on attribute value?
@@ -164,7 +162,7 @@ public class DefaultTrackedEntityInstanceService
             else 
             {
                 Collection<TrackedEntityAttribute> filters = attributeService.getAllTrackedEntityAttributes();
-                Collection<TrackedEntityAttribute> attributes = attributeService.getTrackedEntityAttributesDisplayedInList( true );
+                Collection<TrackedEntityAttribute> attributes = attributeService.getTrackedEntityAttributesDisplayInList( true );
                 filters.removeAll( attributes );
                 
                 params.getAttributes().addAll( QueryItem.getQueryItems( attributes ) );
