@@ -2559,7 +2559,10 @@ Ext.onReady( function() {
 				reader: {
 					type: 'json',
 					root: 'objects'
-				}
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(s) {
@@ -2636,8 +2639,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },

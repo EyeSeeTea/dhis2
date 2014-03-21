@@ -2211,7 +2211,6 @@ Ext.onReady( function() {
             },
             loadPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
@@ -2227,10 +2226,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/indicatorGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name&filter=indicatorGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/indicators' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2243,8 +2242,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2253,7 +2250,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.indicators || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2289,11 +2286,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/indicatorGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'indicatorGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(s) {
@@ -2355,10 +2355,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/dataElements/filtered.json?include=id,name&filter=dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
+					path = '/dataElements/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2371,8 +2371,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2381,7 +2379,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.dataElements || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2398,10 +2396,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
+					path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
 				}
 				else if (uid === 0) {
-					path = '/generatedDataElementOperands' + filterPath + '.json';
+					path = '/generatedDataElementOperands/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2424,7 +2422,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-							data = response.dataElementOperands || [],
+							data = response.objects || response.dataElementOperands || [],
                             pager = response.pager;
 
 						for (var i = 0; i < data.length; i++) {
@@ -2462,11 +2460,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataElementGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'dataElementGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(s) {
@@ -2489,11 +2490,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataSets.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataSets/filtered.json?include=id,name',
 				reader: {
 					type: 'json',
-					root: 'dataSets'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			storage: {},
 			sortStore: function() {
@@ -2598,11 +2602,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'organisationUnitGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			}
 		});
 		ns.app.stores.organisationUnitGroup = organisationUnitGroupStore;
