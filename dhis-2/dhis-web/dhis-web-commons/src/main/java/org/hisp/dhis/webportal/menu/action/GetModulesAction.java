@@ -59,23 +59,29 @@ public class GetModulesAction
     {
         return modules;
     }
-    
+
+    private static final List<String> DEFAULT_APP_LIST = new ArrayList<String>() {{
+        add("dhis-web-dashboard-integration");
+        add("dhis-web-dataentry");
+        add("dhis-web-reporting");
+        add("dhis-web-maintenance-user");
+        add("dhis-web-maintenance-appmanager");
+    }};
+
     @Override
     public String execute()
         throws Exception
     {
         modules = manager.getAccessibleMenuModulesAndApps();
-        
-        User user = currentUserService.getCurrentUser();
-        
-        final List<String> userApps = user.getApps();        
+
+        final List<String> userApps = getMenuOrder();
         final List<String> allApps = new ArrayList<String>();
         
         for ( Module module : modules )
         {
             allApps.add( module.getName() );
         }        
-        
+
         Collections.sort( modules, new Comparator<Module>()
         {
             @Override
@@ -89,5 +95,15 @@ public class GetModulesAction
         } );
         
         return SUCCESS;
+    }
+
+    private List<String> getMenuOrder() {
+        final User user = currentUserService.getCurrentUser();
+        final List <String> userApps = user.getApps();
+
+        if (userApps.isEmpty()) {
+            return this.DEFAULT_APP_LIST;
+        }
+        return userApps;
     }
 }

@@ -66,6 +66,5 @@ public class MenuController
         user.getApps().addAll(apps);
 
         userService.updateUser(user);
-
     }
 }

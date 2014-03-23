@@ -28,7 +28,7 @@
  */
 
 /**
- * Menu service
+ * Created by Mark Polak on 28/01/14.
  */
 (function (dhis2, undefined) {
     var MAX_FAVORITES = 9,
@@ -65,7 +65,6 @@
                 }
             }
         })();
-
 
     dhis2.util.namespace( 'dhis2.menu' );
 
@@ -123,6 +122,44 @@
             for (callBackIndex in callBacks) {
                 callBacks[callBackIndex](menuItems);
             }
+        }
+
+        //TODO: Function seems complicated and can be improved perhaps
+        /**
+         * Sort apps (objects with a name property) by name
+         *
+         * @param apps
+         * @param inverse {boolean} Return the elements in an inverted order (DESC sort)
+         * @returns {Array}
+         */
+        function sortAppsByName (apps, inverse) {
+            var smaller = [],
+                bigger = [],
+                center = Math.floor(apps.length / 2),
+                appIndex,
+                comparisonResult,
+                result;
+
+            //If nothing left to sort return the app list
+            if (apps.length <= 1)
+                return apps;
+
+            center = apps[center];
+            for (appIndex in apps) {
+                comparisonResult = center.name.localeCompare(apps[appIndex].name);
+                if (comparisonResult === -1) {
+                    bigger.push(apps[appIndex]);
+                }
+                if (comparisonResult === 1) {
+                    smaller.push(apps[appIndex]);
+                }
+            }
+
+            smaller = sortAppsByName(smaller);
+            bigger = sortAppsByName(bigger);
+
+            result = smaller.concat([center]).concat(bigger);
+            return inverse ? result.reverse() : result;
         }
 
         /***********************************************************************
@@ -257,12 +294,16 @@
             return menuItems.list().slice(MAX_FAVORITES);
         };
 
+        that.sortNonFavAppsByName = function (inverse) {
+            return sortAppsByName(that.getNonFavoriteApps(), inverse);
+        }
+
         return that;
     }();
 })(dhis2);
 
 /**
- * jQuery template
+ * jQuery part of the menu
  */
 (function ($, menu, undefined) {
     var displayOrder = 'custom',
@@ -303,8 +344,7 @@
 
     function saveOrder() {
         var menuOrder = dhis2.menu.getMenuItems().getOrder();
-        console.log(menuOrder);
-        localStorage.setItem('dhis2.menuItemOrder',  menuOrder);
+
         if (menuOrder.length !== 0) {
             //Save to local storage
 
@@ -347,6 +387,7 @@
                             dhis2.menu.orderMenuItemsByList(reorderedApps);
                             break;
                     }
+                    saveOrder();
 
                     //Render the dropdown menu
                     renderDropDownFavorites();
@@ -369,59 +410,20 @@
     function getOrderedAppList() {
         var favApps = dhis2.menu.getFavorites(),
             nonFavApps = dhis2.menu.getNonFavoriteApps();
-
         switch (displayOrder) {
             case 'name-asc':
-                nonFavApps = sortAppsByName(nonFavApps);
+                nonFavApps = dhis2.menu.sortNonFavAppsByName();
                 break;
             case 'name-desc':
-                nonFavApps = sortAppsByName(nonFavApps, true);
+                nonFavApps = dhis2.menu.sortNonFavAppsByName(true);
                 break;
         }
 
         return favApps.concat(nonFavApps);;
     }
 
-    //TODO: Function seems complicated and can be improved perhaps
-    /**
-     * Sort apps (objects with a name property) by name
-     *
-     * @param apps
-     * @param inverse Return the elements in an inverted order (DESC sort)
-     * @returns {Array}
-     */
-    function sortAppsByName(apps, inverse) {
-        var smaller = [],
-            bigger = [],
-            center = Math.floor(apps.length / 2),
-            appIndex,
-            comparisonResult,
-            result;
-
-        //If nothing left to sort return the app list
-        if (apps.length <= 1)
-            return apps;
-
-        center = apps[center];
-        for (appIndex in apps) {
-            comparisonResult = center.name.localeCompare(apps[appIndex].name);
-            if (comparisonResult === -1) {
-                bigger.push(apps[appIndex]);
-            }
-            if (comparisonResult === 1) {
-                smaller.push(apps[appIndex]);
-            }
-        }
-
-        smaller = sortAppsByName(smaller);
-        bigger = sortAppsByName(bigger);
-
-        result = smaller.concat([center]).concat(bigger);
-        return inverse ? result.reverse() : result;
-    }
-
     menu.subscribe(renderMenu);
-    menu.subscribe(saveOrder);
+    //menu.subscribe(saveOrder);
 
     /**
      * jQuery events that communicate with the web api

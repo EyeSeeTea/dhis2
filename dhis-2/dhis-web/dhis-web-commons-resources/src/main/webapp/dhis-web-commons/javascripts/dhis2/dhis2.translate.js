@@ -27,7 +27,7 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * Created by mark on 28/01/14.
+ * Created by Mark Polak on 28/01/14.
  */
 
 dhis2.util.namespace( 'dhis2.translate' );
