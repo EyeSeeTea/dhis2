@@ -26,13 +26,15 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 /**
  * Created by Mark Polak on 28/01/14.
+ *
+ * @see Underscore.js (http://underscorejs.org)
  */
-
 dhis2.util.namespace( 'dhis2.translate' );
 
-(function ($, translate) {
+(function ($,  _, translate, undefined) {
     var translationCache = {
         get: function (key) {
             if (this.hasOwnProperty(key))
@@ -99,4 +101,4 @@ dhis2.util.namespace( 'dhis2.translate' );
 
     };
 
-})(jQuery, dhis2.translate);
+})(jQuery, _, dhis2.translate);

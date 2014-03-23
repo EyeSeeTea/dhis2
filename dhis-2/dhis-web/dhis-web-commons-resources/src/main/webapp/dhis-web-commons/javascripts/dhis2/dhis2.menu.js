@@ -29,8 +29,10 @@
 
 /**
  * Created by Mark Polak on 28/01/14.
+ *
+ * @see Underscore.js (http://underscorejs.org)
  */
-(function (dhis2, undefined) {
+(function (dhis2, _, undefined) {
     var MAX_FAVORITES = 9,
         /**
          * Object that represents the list of menu items
@@ -166,6 +168,8 @@
          * Public methods
          **********************************************************************/
 
+        that.displayOrder = 'custom';
+
         that.getMenuItems = function () {
             return menuItems;
         }
@@ -255,8 +259,10 @@
          */
         that.subscribe = function (callback, onlyOnce) {
             var once = onlyOnce ? true : false;
-            if (typeof callback !== 'function')
+
+            if ( ! _.isFunction(callback)) {
                 return false;
+            }
 
             if (menuItems !== undefined) {
                 callback(menuItems);
@@ -283,7 +289,6 @@
          * Get the current menuItems
          */
         that.getApps = function () {
-            console.log(menuItems.list());
             return menuItems.list();
         };
 
@@ -298,16 +303,61 @@
             return sortAppsByName(that.getNonFavoriteApps(), inverse);
         }
 
+        /**
+         * Gets the applist based on the current display order
+         *
+         * @returns {Array} Array of app objects
+         */
+        that.getOrderedAppList = function () {
+            var favApps = dhis2.menu.getFavorites(),
+                nonFavApps = that.getNonFavoriteApps();
+            switch (that.displayOrder) {
+                case 'name-asc':
+                    nonFavApps = that.sortNonFavAppsByName();
+                    break;
+                case 'name-desc':
+                    nonFavApps = that.sortNonFavAppsByName(true);
+                    break;
+            }
+
+            return favApps.concat(nonFavApps);;
+        }
+
+        that.updateOrder = function (reorderedApps) {
+            switch (dhis2.menu.displayOrder) {
+                case 'name-asc':
+                case 'name-desc':
+                    that.updateFavoritesFromList(reorderedApps);
+                    break;
+
+                default:
+                    //Update the menu object with the changed order
+                    that.orderMenuItemsByList(reorderedApps);
+                    break;
+            }
+        }
+
+        that.save = function (saveMethod) {
+            if ( ! _.isFunction(saveMethod)) {
+                return false;
+            }
+
+            return saveMethod(that.getMenuItems().getOrder());
+        }
+
         return that;
     }();
-})(dhis2);
+})(dhis2, _);
 
 /**
- * jQuery part of the menu
+ * Created by Mark Polak on 28/01/14.
+ *
+ * @description jQuery part of the menu
+ *
+ * @see jQuery (http://jquery.com)
  */
 (function ($, menu, undefined) {
-    var displayOrder = 'custom',
-        markup = '',
+    var markup = '',
         selector = 'appsMenu';
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
@@ -330,7 +380,7 @@
     }
 
     function renderAppManager(selector) {
-        var apps = getOrderedAppList();
+        var apps = dhis2.menu.getOrderedAppList();
         $('#' + selector).html('');
         $('#' + selector).append($('<ul></ul><hr class="app-separator">').addClass('ui-helper-clearfix'));
         $('#' + selector).addClass('app-menu');
@@ -342,13 +392,13 @@
         });
     }
 
-    function saveOrder() {
-        var menuOrder = dhis2.menu.getMenuItems().getOrder();
-
+    /**
+     * Saves the given order to the server using jquery ajax
+     *
+     * @param menuOrder {Array}
+     */
+    function saveOrder(menuOrder) {
         if (menuOrder.length !== 0) {
-            //Save to local storage
-
-
             //Persist the order on the server
             $.ajax({
                 contentType:"application/json; charset=utf-8",
@@ -357,12 +407,13 @@
                 type:"POST",
                 url: "../api/menu/"
             }).success(function () {
-                console.log("Saved!");
+                //TODO: Give user feedback for successful save
             }).error(function () {
-                console.log("Failed to save menu order.")
+                //TODO: Give user feedback for failure to save
+                //TODO: Translate this error message
+                alert('Unable to save your app order to the server.');
             });
         }
-
     }
 
     /**
@@ -376,18 +427,8 @@
                 update: function (event, ui) {
                     var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
 
-                    switch (displayOrder) {
-                        case 'name-asc':
-                        case 'name-desc':
-                            dhis2.menu.updateFavoritesFromList(reorderedApps);
-                            break;
-
-                        default:
-                            //Update the menu object with the changed order
-                            dhis2.menu.orderMenuItemsByList(reorderedApps);
-                            break;
-                    }
-                    saveOrder();
+                    dhis2.menu.updateOrder(reorderedApps);
+                    dhis2.menu.save(saveOrder);
 
                     //Render the dropdown menu
                     renderDropDownFavorites();
@@ -402,28 +443,7 @@
         $('.app-menu ul').sortable(options).disableSelection();
     }
 
-    /**
-     * Gets the applist based on the current display order
-     *
-     * @returns {Array} Array of app objects
-     */
-    function getOrderedAppList() {
-        var favApps = dhis2.menu.getFavorites(),
-            nonFavApps = dhis2.menu.getNonFavoriteApps();
-        switch (displayOrder) {
-            case 'name-asc':
-                nonFavApps = dhis2.menu.sortNonFavAppsByName();
-                break;
-            case 'name-desc':
-                nonFavApps = dhis2.menu.sortNonFavAppsByName(true);
-                break;
-        }
-
-        return favApps.concat(nonFavApps);;
-    }
-
     menu.subscribe(renderMenu);
-    //menu.subscribe(saveOrder);
 
     /**
      * jQuery events that communicate with the web api
@@ -435,6 +455,7 @@
                 menu.addMenuItems(data.modules);
             }
         }).error(function () {
+            //TODO: Translate this error message
             alert('Can not load apps from server.');
         });
 
@@ -444,9 +465,9 @@
         $('#menuOrderBy').change(function (event) {
             var orderBy = $(event.target).val();
 
-            displayOrder = orderBy;
+            dhis2.menu.displayOrder = orderBy;
 
-            renderMenu(selector);
+            renderMenu();
         });
     });
 
