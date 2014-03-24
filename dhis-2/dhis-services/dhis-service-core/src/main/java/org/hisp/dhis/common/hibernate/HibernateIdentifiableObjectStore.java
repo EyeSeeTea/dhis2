@@ -1,7 +1,7 @@
 package org.hisp.dhis.common.hibernate;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -307,8 +307,7 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
             return query.list();
         }
 
-        // fallback to using name
-        return getAllLikeName( shortName );
+        return getAllLikeName( shortName ); // Fallback to name
     }
 
     private Query getQueryAllLikeShortNameAcl( String shortName )

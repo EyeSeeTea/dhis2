@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,7 @@ package org.hisp.dhis.trackedentity;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
@@ -49,6 +50,8 @@ public interface TrackedEntityInstanceStore
 
     final int MAX_RESULTS = 50000;
 
+    List<Map<String, String>> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
+    
     /**
      * Search entityInstances who registered in a certain organisation unit
      * 
@@ -77,8 +80,6 @@ public interface TrackedEntityInstanceStore
      */
     Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program,
         Integer min, Integer max );
-
-    List<TrackedEntityInstance> query( TrackedEntityQueryParams params );
 
     /**
      * Search instances who has the same representative

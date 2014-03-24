@@ -143,7 +143,7 @@ Ext.onReady( function() {
 		});
 		layers.openStreetMap.id = 'openStreetMap';
 
-		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: 0.8});
+		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: gis.conf.layout.layer.opacity});
 		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
 			layer: layers.event,
 			gis: gis
@@ -155,7 +155,7 @@ Ext.onReady( function() {
 			gis: gis
 		});
 
-		layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: 0.8});
+		layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: gis.conf.layout.layer.opacity});
 		layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
 			layer: layers.boundary,
 			gis: gis
@@ -164,7 +164,7 @@ Ext.onReady( function() {
 		for (var i = 0, number; i < layerNumbers.length; i++) {
 			number = layerNumbers[i];
 
-			layers['thematic' + number] = GIS.core.VectorLayer(gis, 'thematic' + number, GIS.i18n.thematic_layer + ' ' + number, {opacity: 0.8});
+			layers['thematic' + number] = GIS.core.VectorLayer(gis, 'thematic' + number, GIS.i18n.thematic_layer + ' ' + number, {opacity: gis.conf.layout.layer.opacity});
 			layers['thematic' + number].layerCategory = gis.conf.finals.layer.category_thematic,
 			layers['thematic' + number].core = new mapfish.GeoStat['Thematic' + number](gis.olmap, {
 				layer: layers['thematic' + number],
@@ -2229,6 +2229,9 @@ Ext.onReady( function() {
 				},
 				grid: {
 					row_height: 27
+				},
+				layer: {
+					opacity: 0.8
 				}
 			};
 
@@ -2299,6 +2302,18 @@ Ext.onReady( function() {
 				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
 					layer = gis.olmap.layers[i];
 					if (layer.layerType === conf.finals.layer.type_vector && layer.visibility && layer.features.length) {
+						layers.push(layer);
+					}
+				}
+				return layers;
+			};
+
+			util.map.getRenderedVectorLayers = function() {
+				var layers = [];
+
+				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
+					layer = gis.olmap.layers[i];
+					if (layer.layerType === conf.finals.layer.type_vector && layer.features.length) {
 						layers.push(layer);
 					}
 				}
@@ -2555,6 +2570,10 @@ Ext.onReady( function() {
 
 				// legendSet: object
 
+                // areaRadius: integer
+
+                // hidden: boolean (false)
+
 				getValidatedDimensionArray = function(dimensionArray) {
 					var dimensions = [];
 
@@ -2692,7 +2711,9 @@ Ext.onReady( function() {
 					layout.colorHigh = Ext.isString(config.colorHigh) && !Ext.isEmpty(config.colorHigh) ? config.colorHigh : '00ff00';
 					layout.radiusLow = Ext.isNumber(config.radiusLow) && !Ext.isEmpty(config.radiusLow) ? config.radiusLow : 5;
 					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
-					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : 0.8;
+					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : gis.conf.layout.layer.opacity;
+					layout.areaRadius = config.areaRadius;
+                    layout.hidden = !!config.hidden;
 
 					layout.userOrganisationUnit = isOu;
 					layout.userOrganisationUnitChildren = isOuc;
@@ -2703,7 +2724,6 @@ Ext.onReady( function() {
 					layout.legendSet = config.legendSet;
 
 					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
-					layout.areaRadius = config.areaRadius;
 
 					return layout;
 				}();

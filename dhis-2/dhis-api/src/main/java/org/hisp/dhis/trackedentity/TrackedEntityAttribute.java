@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,19 +30,19 @@ package org.hisp.dhis.trackedentity;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.common.view.WithoutOrganisationUnitsView;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.period.PeriodType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -86,15 +86,11 @@ public class TrackedEntityAttribute
 
     private String valueType;
 
-    private boolean mandatory;
-
     private Boolean inherit = false;
-
-    private Boolean groupBy = false;
 
     private TrackedEntityAttributeGroup attributeGroup;
 
-    private Set<TrackedEntityAttributeOption> attributeOptions = new HashSet<TrackedEntityAttributeOption>();
+    private OptionSet optionSet;
 
     private String expression;
 
@@ -125,13 +121,12 @@ public class TrackedEntityAttribute
         setAutoFields();
     }
 
-    public TrackedEntityAttribute( String name, String description, String valueType, boolean mandatory,
+    public TrackedEntityAttribute( String name, String description, String valueType, 
         Boolean inherit, Boolean displayOnVisitSchedule )
     {
         this.name = name;
         this.description = description;
         this.valueType = valueType;
-        this.mandatory = mandatory;
         this.inherit = inherit;
         this.displayOnVisitSchedule = displayOnVisitSchedule;
 
@@ -154,30 +149,6 @@ public class TrackedEntityAttribute
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @JsonProperty( "personAttributeOptions" )
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlElementWrapper( localName = "personAttributeOptions", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "personAttributeOption", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<TrackedEntityAttributeOption> getAttributeOptions()
-    {
-        return attributeOptions == null ? new HashSet<TrackedEntityAttributeOption>() : attributeOptions;
-    }
-
-    public void setAttributeOptions( Set<TrackedEntityAttributeOption> attributeOptions )
-    {
-        this.attributeOptions = attributeOptions;
-    }
-
-    public void addAttributeOptions( TrackedEntityAttributeOption option )
-    {
-        if ( attributeOptions == null )
-        {
-            attributeOptions = new HashSet<TrackedEntityAttributeOption>();
-        }
-
-        attributeOptions.add( option );
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -190,33 +161,7 @@ public class TrackedEntityAttribute
     {
         this.inherit = inherit;
     }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean getGroupBy()
-    {
-        return groupBy;
-    }
-
-    public void setGroupBy( Boolean groupBy )
-    {
-        this.groupBy = groupBy;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isMandatory()
-    {
-        return mandatory;
-    }
-
-    public void setMandatory( boolean mandatory )
-    {
-        this.mandatory = mandatory;
-    }
-
+    
     @JsonProperty
     @JsonView( { DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -244,10 +189,10 @@ public class TrackedEntityAttribute
         this.valueType = valueType;
     }
 
-    @JsonProperty( "personAttributeGroup" )
+    @JsonProperty( "trackedEntityAttributeGroup" )
     @JsonView( { DetailedView.class } )
     @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JacksonXmlProperty( localName = "personAttributeGroup", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "trackedEntityAttributeGroup", namespace = DxfNamespaces.DXF_2_0 )
     public TrackedEntityAttributeGroup getAttributeGroup()
     {
         return attributeGroup;
@@ -326,9 +271,9 @@ public class TrackedEntityAttribute
     @JsonProperty
     @JsonView( { DetailedView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Boolean getUnique()
+    public Boolean isUnique()
     {
-        return unique;
+        return unique != null ? unique : false;
     }
 
     public void setUnique( Boolean unique )
@@ -341,7 +286,7 @@ public class TrackedEntityAttribute
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getOrgunitScope()
     {
-        return orgunitScope;
+        return orgunitScope != null ? orgunitScope : false;
     }
 
     public void setOrgunitScope( Boolean orgunitScope )
@@ -354,7 +299,7 @@ public class TrackedEntityAttribute
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getProgramScope()
     {
-        return programScope;
+        return programScope != null ? programScope : false;
     }
 
     public void setProgramScope( Boolean programScope )
@@ -370,6 +315,19 @@ public class TrackedEntityAttribute
     public void setPeriodType( PeriodType periodType )
     {
         this.periodType = periodType;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public OptionSet getOptionSet()
+    {
+        return optionSet;
+    }
+
+    public void setOptionSet( OptionSet optionSet )
+    {
+        this.optionSet = optionSet;
     }
 
     // -------------------------------------------------------------------------
@@ -414,5 +372,31 @@ public class TrackedEntityAttribute
         }
 
         return age;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            TrackedEntityAttribute trackedEntityAttribute = (TrackedEntityAttribute) other;
+
+            description = trackedEntityAttribute.getDescription();
+            valueType = trackedEntityAttribute.getValueType();
+            inherit = trackedEntityAttribute.getInherit();
+            attributeGroup = trackedEntityAttribute.getAttributeGroup();
+
+            expression = trackedEntityAttribute.getExpression();
+            displayOnVisitSchedule = trackedEntityAttribute.getDisplayOnVisitSchedule();
+            sortOrderInVisitSchedule = trackedEntityAttribute.getSortOrderInVisitSchedule();
+            displayInListNoProgram = trackedEntityAttribute.getDisplayInListNoProgram();
+            sortOrderInListNoProgram = trackedEntityAttribute.getSortOrderInListNoProgram();
+            unique = trackedEntityAttribute.isUnique();
+            orgunitScope = trackedEntityAttribute.getOrgunitScope();
+            programScope = trackedEntityAttribute.getProgramScope();
+            periodType = trackedEntityAttribute.getPeriodType();
+        }
     }
 }

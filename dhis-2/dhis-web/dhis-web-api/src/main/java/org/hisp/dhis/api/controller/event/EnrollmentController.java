@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollments;
-import org.hisp.dhis.dxf2.events.person.Person;
-import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
@@ -74,7 +74,7 @@ public class EnrollmentController
     private EnrollmentService enrollmentService;
 
     @Autowired
-    private PersonService personService;
+    private TrackedEntityInstanceService trackedEntityInstanceService;
 
     @Autowired
     private IdentifiableObjectManager manager;
@@ -87,14 +87,14 @@ public class EnrollmentController
     public String getEnrollments(
         @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
         @RequestParam( value = "program", required = false ) String programUid,
-        @RequestParam( value = "person", required = false ) String personUid,
+        @RequestParam( value = "trackedEntityInstance", required = false ) String trackedEntityInstanceUid,
         @RequestParam( value = "status", required = false ) EnrollmentStatus status,
         @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
         Enrollments enrollments;
 
-        if ( orgUnitUid == null && programUid == null && personUid == null )
+        if ( orgUnitUid == null && programUid == null && trackedEntityInstanceUid == null )
         {
             enrollments = status != null ? enrollmentService.getEnrollments( status ) : enrollmentService.getEnrollments();
         }
@@ -105,13 +105,13 @@ public class EnrollmentController
 
             enrollments = enrollmentService.getEnrollments( program, organisationUnit );
         }
-        else if ( programUid != null && personUid != null )
+        else if ( programUid != null && trackedEntityInstanceUid != null )
         {
             Program program = getProgram( programUid );
-            Person person = getPerson( personUid );
+            TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( trackedEntityInstanceUid );
 
-            enrollments = status != null ? enrollmentService.getEnrollments( program, person, status )
-                : enrollmentService.getEnrollments( program, person );
+            enrollments = status != null ? enrollmentService.getEnrollments( program, trackedEntityInstance, status )
+                : enrollmentService.getEnrollments( program, trackedEntityInstance );
         }
         else if ( orgUnitUid != null )
         {
@@ -126,8 +126,8 @@ public class EnrollmentController
         }
         else
         {
-            Person person = getPerson( personUid );
-            enrollments = status != null ? enrollmentService.getEnrollments( person, status ) : enrollmentService.getEnrollments( person );
+            TrackedEntityInstance trackedEntityInstance = getTrackedEntityInstance( trackedEntityInstanceUid );
+            enrollments = status != null ? enrollmentService.getEnrollments( trackedEntityInstance, status ) : enrollmentService.getEnrollments( trackedEntityInstance );
         }
 
         model.addAttribute( "model", enrollments );
@@ -153,10 +153,10 @@ public class EnrollmentController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
     public void postEnrollmentXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsXml( request.getInputStream() );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsXml( request.getInputStream() );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
@@ -178,10 +178,10 @@ public class EnrollmentController
     }
 
     @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
     public void postEnrollmentJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        ImportSummaries importSummaries = enrollmentService.saveEnrollmentsJson( request.getInputStream() );
+        ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream() );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
@@ -208,7 +208,7 @@ public class EnrollmentController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentXml( id, request.getInputStream() );
@@ -217,7 +217,7 @@ public class EnrollmentController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void updateEnrollmentJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentJson( id, request.getInputStream() );
@@ -226,19 +226,21 @@ public class EnrollmentController
 
     @RequestMapping( value = "/{id}/cancelled", method = RequestMethod.PUT )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void cancelEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
+        enrollment.setStatus( EnrollmentStatus.CANCELLED );
         enrollmentService.cancelEnrollment( enrollment );
     }
 
     @RequestMapping( value = "/{id}/completed", method = RequestMethod.PUT )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void completedEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
+        enrollment.setStatus( EnrollmentStatus.COMPLETED );
         enrollmentService.completeEnrollment( enrollment );
     }
 
@@ -248,7 +250,7 @@ public class EnrollmentController
 
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
     @ResponseStatus( HttpStatus.NO_CONTENT )
-    @PreAuthorize("hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')")
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void deleteEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
@@ -271,16 +273,16 @@ public class EnrollmentController
         return enrollment;
     }
 
-    private Person getPerson( String id ) throws NotFoundException
+    private TrackedEntityInstance getTrackedEntityInstance( String id ) throws NotFoundException
     {
-        Person person = personService.getPerson( id );
+        TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( id );
 
-        if ( person == null )
+        if ( trackedEntityInstance == null )
         {
-            throw new NotFoundException( "Person", id );
+            throw new NotFoundException( "TrackedEntityInstance", id );
         }
 
-        return person;
+        return trackedEntityInstance;
     }
 
     private OrganisationUnit getOrganisationUnit( String id ) throws NotFoundException

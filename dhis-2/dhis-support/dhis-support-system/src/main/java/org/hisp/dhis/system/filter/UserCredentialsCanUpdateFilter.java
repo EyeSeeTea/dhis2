@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.filter;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,21 +40,24 @@ public class UserCredentialsCanUpdateFilter
 {
     private UserCredentials userCredentials;
     
+    private boolean canGrantOwnUserAuthorityGroups = false;
+    
     protected UserCredentialsCanUpdateFilter()
     {
     }
     
-    public UserCredentialsCanUpdateFilter( User user )
+    public UserCredentialsCanUpdateFilter( User user, boolean canGrantOwnUserAuthorityGroups )
     {
         if ( user != null && user.getUserCredentials() != null )
         {
             this.userCredentials = user.getUserCredentials();
+            this.canGrantOwnUserAuthorityGroups = canGrantOwnUserAuthorityGroups;
         }
     }
     
     @Override
     public boolean retain( UserCredentials credentials )
     {
-        return userCredentials != null && credentials != null && userCredentials.canIssueAll( credentials.getUserAuthorityGroups() );
+        return userCredentials != null && credentials != null && userCredentials.canIssueAll( credentials.getUserAuthorityGroups(), canGrantOwnUserAuthorityGroups );
     }
 }

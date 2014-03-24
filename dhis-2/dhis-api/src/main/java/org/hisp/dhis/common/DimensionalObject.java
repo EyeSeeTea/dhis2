@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,6 +48,11 @@ public interface DimensionalObject
     final String ORGUNIT_DIM_ID = "ou";
     final String ORGUNIT_GROUP_DIM_ID = "oug"; // Used for org unit target
     final String ITEM_DIM_ID = "item";
+
+    final String OU_MODE_SELECTED = "selected"; //TODO replace with OrganisationUnitSelectionMode
+    final String OU_MODE_CHILDREN = "children";
+    final String OU_MODE_DESCENDANTS = "descendants";
+    final String OU_MODE_ALL = "all";
     
     final String DIMENSION_SEP = "-";
 

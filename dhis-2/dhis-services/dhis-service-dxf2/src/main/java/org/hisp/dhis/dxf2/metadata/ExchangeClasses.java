@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -71,6 +71,7 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.user.User;
@@ -168,6 +169,7 @@ final public class ExchangeClasses
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
         allExportClasses.put( RelationshipType.class, "relationshipTypes" );
+        allExportClasses.put( TrackedEntity.class, "trackedEntities" );
         allExportClasses.put( TrackedEntityAttribute.class, "trackedEntityAttributes" );
         allExportClasses.put( TrackedEntityAttributeGroup.class, "trackedEntityAttributeGroups" );
 
@@ -190,11 +192,13 @@ final public class ExchangeClasses
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
         exportClasses.remove( RelationshipType.class );
+        exportClasses.remove( TrackedEntity.class );
         exportClasses.remove( TrackedEntityAttribute.class );
         exportClasses.remove( TrackedEntityAttributeGroup.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
         importClasses.remove( RelationshipType.class );
+        importClasses.remove( TrackedEntity.class );
         importClasses.remove( TrackedEntityAttribute.class );
         importClasses.remove( TrackedEntityAttributeGroup.class );
 

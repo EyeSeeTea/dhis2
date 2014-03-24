@@ -1,7 +1,7 @@
 package org.hisp.dhis.mobile.api.model;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,7 @@ public class OrgUnitTest
         unit.setId( 1 );
         unit.setName( "name" );
         unit.setDownloadAllUrl( "downloadAllUrl" );
+        unit.setDownloadFacilityReportUrl( "downloadFacilityReportUrl" );
         unit.setUpdateActivityPlanUrl( "updateActivityPlanUrl" );
         unit.setUploadFacilityReportUrl( "uploadFacilityReportUrl" );
         unit.setUploadActivityReportUrl( "uploadActivityReportUrl" );

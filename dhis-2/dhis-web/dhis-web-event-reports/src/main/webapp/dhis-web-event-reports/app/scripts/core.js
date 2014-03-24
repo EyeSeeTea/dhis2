@@ -124,8 +124,6 @@ Ext.onReady( function() {
 
 			conf.layout = {
 				west_width: 452,
-				west_fieldset_width: 416,
-				west_width_padding: 4,
 				west_fill: 2,
 				west_fill_accordion_indicator: 59,
 				west_fill_accordion_dataelement: 59,
@@ -1579,7 +1577,6 @@ Ext.onReady( function() {
 
 					response.idValueMap[id] = row[valueHeaderIndex];
 				}
-console.log("response.idValueMap", response.idValueMap);
 
 				return response;
 			};
@@ -2614,12 +2611,12 @@ console.log("response.idValueMap", response.idValueMap);
 			}
 
 			// legend set map
-			init.idLegendSetMap = {};
+			//init.idLegendSetMap = {};
 
-			for (var i = 0, set; i < init.legendSets.length; i++) {
-				set = init.legendSets[i];
-				init.idLegendSetMap[set.id] = set;
-			}
+			//for (var i = 0, set; i < init.legendSets.length; i++) {
+				//set = init.legendSets[i];
+				//init.idLegendSetMap[set.id] = set;
+			//}
 		}());
 
 		// instance

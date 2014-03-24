@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.mobile.model;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +52,8 @@ public class MobileOrgUnitLinks
     private String updateActivityPlanUrl;
 
     private String uploadFacilityReportUrl;
+
+    private String downloadFacilityReportUrl;
 
     private String uploadActivityReportUrl;
 
@@ -129,6 +131,16 @@ public class MobileOrgUnitLinks
     public void setUploadFacilityReportUrl( String uploadFacilityReportUrl )
     {
         this.uploadFacilityReportUrl = uploadFacilityReportUrl;
+    }
+
+    public String getDownloadFacilityReportUrl()
+    {
+        return downloadFacilityReportUrl;
+    }
+
+    public void setDownloadFacilityReportUrl( String downloadFacilityReportUrl )
+    {
+        this.downloadFacilityReportUrl = downloadFacilityReportUrl;
     }
 
     public String getUploadActivityReportUrl()
@@ -332,7 +344,6 @@ public class MobileOrgUnitLinks
     }
 
     public void serialize( DataOutputStream dataOutputStream )
-
         throws IOException
     {
         dataOutputStream.writeInt( id );
@@ -340,6 +351,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( downloadAllUrl );
         dataOutputStream.writeUTF( updateActivityPlanUrl );
         dataOutputStream.writeUTF( uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( downloadFacilityReportUrl );
         dataOutputStream.writeUTF( uploadActivityReportUrl );
         dataOutputStream.writeUTF( updateDataSetUrl );
         dataOutputStream.writeUTF( changeUpdateDataSetLangUrl );
@@ -368,6 +380,7 @@ public class MobileOrgUnitLinks
         downloadAllUrl = dataInputStream.readUTF();
         updateActivityPlanUrl = dataInputStream.readUTF();
         uploadFacilityReportUrl = dataInputStream.readUTF();
+        downloadFacilityReportUrl = dataInputStream.readUTF();
         uploadActivityReportUrl = dataInputStream.readUTF();
         updateDataSetUrl = dataInputStream.readUTF();
         changeUpdateDataSetLangUrl = dataInputStream.readUTF();
@@ -397,6 +410,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( this.downloadAllUrl );
         dataOutputStream.writeUTF( this.updateActivityPlanUrl );
         dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( this.downloadFacilityReportUrl );
         dataOutputStream.writeUTF( this.uploadActivityReportUrl );
         dataOutputStream.writeUTF( this.updateDataSetUrl );
         dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
@@ -412,6 +426,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( this.downloadAllUrl );
         dataOutputStream.writeUTF( this.updateActivityPlanUrl );
         dataOutputStream.writeUTF( this.uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( this.downloadFacilityReportUrl );
         dataOutputStream.writeUTF( this.uploadActivityReportUrl );
         dataOutputStream.writeUTF( this.updateDataSetUrl );
         dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
@@ -429,6 +444,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( downloadAllUrl );
         dataOutputStream.writeUTF( updateActivityPlanUrl );
         dataOutputStream.writeUTF( uploadFacilityReportUrl );
+        dataOutputStream.writeUTF( downloadFacilityReportUrl );
         dataOutputStream.writeUTF( uploadActivityReportUrl );
         dataOutputStream.writeUTF( updateDataSetUrl );
         dataOutputStream.writeUTF( changeUpdateDataSetLangUrl );

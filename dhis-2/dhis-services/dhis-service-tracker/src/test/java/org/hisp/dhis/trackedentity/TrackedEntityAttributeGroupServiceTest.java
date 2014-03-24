@@ -1,17 +1,20 @@
+package org.hisp.dhis.trackedentity;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,8 +28,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.trackedentity;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -36,10 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroupService;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -68,9 +65,9 @@ public class TrackedEntityAttributeGroupServiceTest
         TrackedEntityAttribute attributeB = createTrackedEntityAttribute( 'B' );
         TrackedEntityAttribute attributeC = createTrackedEntityAttribute( 'C' );
 
-        attributeService.saveTrackedEntityAttribute( attributeA );
-        attributeService.saveTrackedEntityAttribute( attributeB );
-        attributeService.saveTrackedEntityAttribute( attributeC );
+        attributeService.addTrackedEntityAttribute( attributeA );
+        attributeService.addTrackedEntityAttribute( attributeB );
+        attributeService.addTrackedEntityAttribute( attributeC );
 
         List<TrackedEntityAttribute> attributesA = new ArrayList<TrackedEntityAttribute>();
         attributesA.add( attributeA );
@@ -86,8 +83,8 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testsaveTrackedEntityAttributeGroup()
     {
-        int idA = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
-        int idB = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupB );
+        int idA = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
+        int idB = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupB );
 
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idA ) );
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idB ) );
@@ -96,8 +93,8 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testdeleteTrackedEntityAttributeGroup()
     {
-        int idA = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
-        int idB = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupB );
+        int idA = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
+        int idB = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupB );
 
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idA ) );
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idB ) );
@@ -116,7 +113,7 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testUpdateEntityInstanceAttributeGroup()
     {
-        int idA = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
+        int idA = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
 
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idA ) );
 
@@ -129,8 +126,8 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testgetTrackedEntityAttributeGroupById()
     {
-        int idA = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
-        int idB = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupB );
+        int idA = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
+        int idB = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupB );
 
         assertEquals( attributeGroupA, attributeGroupService.getTrackedEntityAttributeGroup( idA ) );
         assertEquals( attributeGroupB, attributeGroupService.getTrackedEntityAttributeGroup( idB ) );
@@ -139,7 +136,7 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testgetTrackedEntityAttributeGroupByName()
     {
-        int idA = attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
+        int idA = attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
 
         assertNotNull( attributeGroupService.getTrackedEntityAttributeGroup( idA ) );
         assertEquals( attributeGroupA.getName(),
@@ -149,8 +146,8 @@ public class TrackedEntityAttributeGroupServiceTest
     @Test
     public void testGetAllTrackedEntityAttributeGroups()
     {
-        attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupA );
-        attributeGroupService.saveTrackedEntityAttributeGroup( attributeGroupB );
+        attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupA );
+        attributeGroupService.addTrackedEntityAttributeGroup( attributeGroupB );
 
         assertTrue( equals( attributeGroupService.getAllTrackedEntityAttributeGroups(), attributeGroupA, attributeGroupB ) );
     }

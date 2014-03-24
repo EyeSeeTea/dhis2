@@ -163,7 +163,10 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -235,7 +238,10 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -297,7 +303,10 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -508,7 +517,10 @@ Ext.onReady( function() {
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
                     width: buttonCmpWidth,
-                    style: 'font-weight:bold'
+                    style: 'font-weight:bold',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -554,6 +566,8 @@ Ext.onReady( function() {
 			getSetup,
             addDimension,
             removeDimension,
+            hasDimension,
+            saveState,
             dimensionStoreMap = {},
 
 			dimensionPanel,
@@ -619,10 +633,10 @@ Ext.onReady( function() {
 			dimensionStore.add(getData(all));
 		};
 		ns.app.stores.dimension = dimensionStore;
-		//dimensionStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
 
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+        colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		rowStore = getStore();
 
@@ -805,9 +819,12 @@ Ext.onReady( function() {
 			};
 		};
 
-        addDimension = function(record) {
-            var store = dimensionStoreMap[record.id] || dimensionStore;
-            store.add(record);
+        addDimension = function(record, store) {
+            var store = dimensionStoreMap[record.id] || store || dimensionStore;
+
+            if (!hasDimension(record.id)) {
+                store.add(record);
+            }
         };
 
         removeDimension = function(dataElementId) {
@@ -824,6 +841,39 @@ Ext.onReady( function() {
             }
         };
 
+        hasDimension = function(id) {
+            var stores = [dimensionStore, colStore, rowStore, filterStore];
+
+            for (var i = 0, store, index; i < stores.length; i++) {
+                store = stores[i];
+                index = store.findExact('id', id);
+
+                if (index != -1) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        saveState = function() {
+            colStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = colStore;
+            });
+
+            rowStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = rowStore;
+            });
+
+            filterStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = filterStore;
+            });
+
+            dimensionStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = dimensionStore;
+            });
+        };
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:2px',
@@ -838,6 +888,8 @@ Ext.onReady( function() {
 			filterStore: filterStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
+            hasDimension: hasDimension,
+            saveState: saveState,
 			hideOnBlur: true,
 			items: {
 				layout: 'column',
@@ -2499,6 +2551,14 @@ Ext.onReady( function() {
 			stagesByProgramStore,
             dataElementsByStageStore,
             organisationUnitGroupStore,
+            periodTypeStore,
+            fixedPeriodAvailableStore,
+            fixedPeriodSelectedStore,
+
+        // cache
+            stageStorage = {},
+            attributeStorage = {},
+            dataElementStorage = {},
 
 		// components
 			program,
@@ -2512,13 +2572,36 @@ Ext.onReady( function() {
             selectDataElements,
             dataElement,
 
+            periodMode,
+            onPeriodModeSelect,
             getDateLink,
 			startDate,
 			endDate,
             startEndDate,
-            onRelativePeriodChange,
+
+            onPeriodChange,
+            onCheckboxAdd,
+            intervalListeners,
+            relativePeriodCmpMap = {},
+            weeks,
+            months,
+            biMonths,
+            quarters,
+            sixMonths,
+            financialYears,
+            years,
             relativePeriod,
             checkboxes = [],
+
+            fixedPeriodAvailable,
+            fixedPeriodSelected,
+            onPeriodTypeSelect,
+            periodType,
+            prevYear,
+            nextYear,
+            fixedPeriodSettings,
+            fixedPeriodAvailableSelected,
+            periods,
 			period,
 
 			treePanel,
@@ -2527,25 +2610,29 @@ Ext.onReady( function() {
 			userOrganisationUnitGrandChildren,
 			organisationUnitLevel,
 			organisationUnitGroup,
+            organisationUnitPanel,
 			toolMenu,
 			tool,
 			toolPanel,
             organisationUnit,
 
+            accordionBody,
 			accordionPanels = [],
-			panel,
 
 		// functions
 			reset,
 			setGui,
 			getView,
 			validateView,
+			panel,
 
         // constants
-            baseWidth = 442,
+            baseWidth = 446,
             toolWidth = 36,
 
             accBaseWidth = baseWidth - 2;
+
+        ns.app.relativePeriodCmpMap = relativePeriodCmpMap;
 
 		// stores
 
@@ -2575,27 +2662,7 @@ Ext.onReady( function() {
 
 		stagesByProgramStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: '',
-				reader: {
-					type: 'json',
-					root: 'programStages'
-				}
-			},
 			isLoaded: false,
-			loadFn: function(fn) {
-				if (Ext.isFunction(fn)) {
-					if (this.isLoaded) {
-						fn.call();
-					}
-					else {
-						this.load({
-							callback: fn
-						});
-					}
-				}
-			},
 			listeners: {
 				load: function() {
 					if (!this.isLoaded) {
@@ -2627,11 +2694,33 @@ Ext.onReady( function() {
 			}
 		});
 
-		// components
+        periodTypeStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: ns.core.conf.period.periodTypes
+		});
+
+		fixedPeriodAvailableStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name', 'index'],
+			data: [],
+			setIndex: function(periods) {
+				for (var i = 0; i < periods.length; i++) {
+					periods[i].index = i;
+				}
+			},
+			sortStore: function() {
+				this.sort('index', 'ASC');
+			}
+		});
+
+		fixedPeriodSelectedStore = Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			data: []
+		});
+
+        // components
 
             // data element
 		program = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: NS.i18n.programs,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -2643,7 +2732,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			queryMode: 'remote',
 			columnWidth: 0.5,
-			style: 'margin:1px 1px 2px 0',
+			style: 'margin:1px 1px 1px 0',
 			storage: {},
 			store: programStore,
             getRecord: function() {
@@ -2659,31 +2748,67 @@ Ext.onReady( function() {
 			}
 		});
 
-		onProgramSelect = function(programId) {
+		onProgramSelect = function(programId, favorite) {
+            var load;
+
+            programId = favorite ? favorite.program.id : programId;
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
-			stagesByProgramStore.proxy.url = ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
-			stagesByProgramStore.load({
-				callback: function(records) {
-					stage.enable();
-					stage.clearValue();
-					stage.queryMode = 'local';
+            load = function(stages) {
+                stage.enable();
+                stage.clearValue();
 
-					if (records.length === 1) {
-						stage.setValue(records[0].data.id);
+                stagesByProgramStore.removeAll();
+                stagesByProgramStore.loadData(stages);
 
-						onStageSelect(records[0].data.id);
-					}
-				}
-			});
+                stageId = (favorite ? favorite.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
 
+                if (stageId) {
+                    stage.setValue(stageId);
+                    onStageSelect(stageId, favorite);
+                }
+            };
+
+            if (stageStorage.hasOwnProperty(programId)) {
+                load(stageStorage[programId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api/programs/filtered.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                    success: function(r) {
+                        var objects = Ext.decode(r.responseText).objects,
+                            stages,
+                            attributes,
+                            stageId;
+
+                        if (!objects.length) {
+                            return;
+                        }
+
+                        stages = objects[0].programStages;
+                        attributes = objects[0].attributes;
+
+                        // attributes cache
+                        if (Ext.isArray(attributes) && attributes.length) {
+                            attributeStorage[programId] = attributes;
+                        }
+
+                        if (Ext.isArray(stages) && stages.length) {
+
+                            // stages cache
+                            stageStorage[programId] = stages;
+
+                            load(stages);
+                        }
+                    }
+                });
+            }
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
-			fieldLabel: NS.i18n.indicator,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
@@ -2692,10 +2817,10 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
 			emptyText: 'Select stage',
-			queryMode: 'remote',
+			queryMode: 'local',
 			forceSelection: true,
 			columnWidth: 0.5,
-			style: 'margin:1px 0 2px 1px',
+			style: 'margin:1px 0 1px 0',
 			disabled: true,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -2712,73 +2837,62 @@ Ext.onReady( function() {
 			}
 		});
 
-		onStageSelect = function(stageId) {
+		onStageSelect = function(stageId, favorite) {
 			dataElementSelected.removeAll();
 
-			loadDataElements(stageId);
+			loadDataElements(stageId, favorite);
 		};
 
-		loadDataElements = function(item, programId) {
-			var dataElements,
-				load,
-				fn;
+		loadDataElements = function(stageId, favorite) {
+			var programId = program.getValue() || null,
+                load;
 
-			programId = programId || program.getValue() || null;
+			load = function(dataElements) {
+                var attributes = attributeStorage[programId],
+                    data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 
-			load = function(attributes, dataElements) {
-				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 				dataElementsByStageStore.loadData(data);
 			};
 
-			fn = function(attributes) {
+            // favorite
+            if (favorite) {
+                dataElementsByStageStore.loadData(favorite.data); //todo
+                return;
+            }
 
-				// data elements
-				if (Ext.isString(item)) {
-					Ext.Ajax.request({
-						url: ns.core.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
-						success: function(r) {
-							var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
-							load(attributes, dataElements);
-						}
-					});
-				}
-				else if (Ext.isArray(item)) {
-					load(attributes, item);
-				}
-			};
+            // data elements
+            if (dataElementStorage.hasOwnProperty(stageId)) {
+                load(dataElementStorage[stageId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api/programStages/filtered.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    success: function(r) {
+                        var objects = Ext.decode(r.responseText).objects,
+                            dataElements;
 
-			// attributes
-			if (programId) {
-				if (program.storage[programId]) {
-					fn(program.storage[programId]);
-				}
-				else {
-					Ext.Ajax.request({
-						url: ns.core.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
-						success: function(r) {
-							var attributes = Ext.decode(r.responseText).attributes;
+                        if (!objects.length) {
+                            load();
+                            return;
+                        }
 
-							if (attributes) {
-								for (var i = 0; i < attributes.length; i++) {
-									attributes[i].type = attributes[i].valueType;
-								}
+                        dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
 
-								program.storage[programId] = attributes;
-							}
+                        // data elements cache
+                        dataElementStorage[stageId] = dataElements;
 
-							fn(attributes);
-						}
-					});
-				}
-			}
+                        load(dataElements);
+                    }
+                });
+            }
 		};
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			width: accBaseWidth,
-            height: 162,
+            height: 180,
 			valueField: 'id',
 			displayField: 'name',
-            style: 'margin-bottom:2px',
+            style: 'margin-bottom:1px',
 			store: dataElementsByStageStore,
 			tbar: [
 				{
@@ -2824,7 +2938,7 @@ Ext.onReady( function() {
 
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: accBaseWidth,
-            height: 204,
+            height: 240,
             bodyStyle: 'padding:2px 0 5px 3px; overflow-y: scroll',
             tbar: {
                 height: 27,
@@ -2936,14 +3050,14 @@ Ext.onReady( function() {
 
 				addUxFromDataElement(element);
 
-                ns.app.aggregateLayoutWindow.rowStore.add(element);
+                ns.app.aggregateLayoutWindow.addDimension(element, ns.app.aggregateLayoutWindow.rowStore);
                 ns.app.queryLayoutWindow.colStore.add(element);
 			}
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-data">Data</div>',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
                 {
@@ -2965,7 +3079,44 @@ Ext.onReady( function() {
 			}
         });
 
-            // date
+            // dates
+        periodMode = Ext.create('Ext.form.field.ComboBox', {
+            editable: false,
+            valueField: 'id',
+            displayField: 'name',
+            queryMode: 'local',
+            width: accBaseWidth,
+            listConfig: {loadMask: false},
+            style: 'padding-bottom:1px; border-bottom:1px solid #ddd; margin-bottom:1px',
+            value: 'periods',
+            store: {
+                fields: ['id', 'name'],
+                data: [
+                    {id: 'periods', name: 'Select fixed and relative periods'},
+                    {id: 'dates', name: 'Select start/end dates'}
+                ]
+            },
+            listeners: {
+                select: function(cmp) {
+                    onPeriodModeSelect(cmp.getValue());
+                }
+            }
+        });
+
+        onPeriodModeSelect = function(mode) {
+            if (mode === 'dates') {
+                startEndDate.show();
+                periods.hide();
+
+                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
+            }
+            else if (mode === 'periods') {
+                startEndDate.hide();
+                periods.show();
+
+                ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
+            }
+        };
 
         getDateLink = function(text, fn, style) {
             return Ext.create('Ext.form.Label', {
@@ -2989,7 +3140,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-right: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
+			style: 'margin:4px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
 		});
@@ -3000,7 +3151,7 @@ Ext.onReady( function() {
 			labelCls: 'ns-form-item-label-top',
 			labelSeparator: '',
             width: (accBaseWidth / 2) - 1,
-			style: 'margin-left: 1px; margin-bottom: 7px; font-weight: bold; color: #333;',
+			style: 'margin:4px 1px 7px 0; color: #333;',
 			format: 'Y-m-d',
 			value: new Date()
 		});
@@ -3008,206 +3159,468 @@ Ext.onReady( function() {
         startEndDate = Ext.create('Ext.container.Container', {
             cls: 'ns-container-default',
             layout: 'column',
+            hidden: true,
+            items: [
+                startDate,
+                endDate
+            ]
+        });
+
+            // relative periods
+        onPeriodChange = function() {
+            if ((period.isRelativePeriods() || fixedPeriodSelectedStore.getRange().length)) {
+                ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
+            }
+            else {
+                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
+            }
+        };
+
+        onCheckboxAdd = function(cmp) {
+            if (cmp.xtype === 'checkbox') {
+                checkboxes.push(cmp);
+                relativePeriodCmpMap[cmp.relativePeriodId] = cmp;
+            }
+        };
+
+        intervalListeners = {
+            added: function(cmp) {
+                onCheckboxAdd(cmp);
+            },
+            change: function() {
+                if (relativePeriod.getRecords().length < 2) {
+                    onPeriodChange();
+                }
+            }
+        };
+
+        weeks = Ext.create('Ext.container.Container', {
+            columnWidth: 0.34,
+            bodyStyle: 'border-style:none; padding:0 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
             items: [
                 {
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    items: [
-                        startDate,
-                        {
-                            xtype: 'container',
-                            cls: 'ns-container-default',
-                            layout: 'column',
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    layout: 'anchor',
-                                    items: [
-                                        getDateLink('+1 year', function() {
-                                            var date = startDate.getValue();
-                                            date.setFullYear(date.getFullYear() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 year', function() {
-                                            var date = startDate.getValue();
-                                            date.setFullYear(date.getFullYear() - 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-01-01', function() {
-                                            startDate.setValue((new Date()).getFullYear() + '-01-01');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-01-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-01-01');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-01-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-01-01');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 month', function() {
-                                            var date = startDate.getValue();
-                                            date.setMonth(date.getMonth() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 month', function() {
-                                            var date = startDate.getValue();
-                                            date.setMonth(date.getMonth() - 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-07-01', function() {
-                                            startDate.setValue((new Date()).getFullYear() + '-07-01');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-07-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 1) + '-07-01');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-07-01', function() {
-                                            startDate.setValue(((new Date()).getFullYear() - 2) + '-07-01');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 day', function() {
-                                            var date = startDate.getValue();
-                                            date.setDate(date.getDate() + 1);
-                                            startDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 day', function() {
-                                            var date = startDate.getValue();
-                                            date.setDate(date.getDate() - 1);
-                                            startDate.setValue(date);
-                                        })
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
+                    xtype: 'label',
+                    text: NS.i18n.weeks,
+                    cls: 'ns-label-period-heading'
                 },
                 {
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    items: [
-                        endDate,
-                        {
-                            xtype: 'container',
-                            cls: 'ns-container-default',
-                            layout: 'column',
-                            items: [
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    layout: 'anchor',
-                                    items: [
-                                        getDateLink('+1 year', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) + 1).toString();
-
-                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
-                                        }),
-                                        getDateLink('-1 year', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                year = (parseInt(a[0]) - 1).toString();
-
-                                            endDate.setValue((year.length === 1 ? '0' + year : year) + '-' + a[1] + '-' + a[2]);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-06-30', function() {
-                                            endDate.setValue((new Date()).getFullYear() + '-06-30');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-06-30', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-06-30');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-06-30', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-06-30');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 month', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) + 1).toString();
-
-                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
-                                        }),
-                                        getDateLink('-1 month', function() {
-                                            var a = endDate.getRawValue().split('-'),
-                                                month = (parseInt(a[1]) - 1).toString();
-
-                                            endDate.setValue(a[0] + '-' + (month.length === 1 ? '0' + month : month) + '-' + a[2]);
-                                        }),
-                                        getDateLink((new Date()).getFullYear() + '-12-31', function() {
-                                            endDate.setValue((new Date()).getFullYear() + '-12-31');
-                                        }, 'margin-top: 7px'),
-                                        getDateLink(((new Date()).getFullYear() - 1) + '-12-31', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 1) + '-12-31');
-                                        }),
-                                        getDateLink(((new Date()).getFullYear() - 2) + '-12-31', function() {
-                                            endDate.setValue(((new Date()).getFullYear() - 2) + '-12-31');
-                                        })
-                                    ]
-                                },
-                                {
-                                    xtype: 'container',
-                                    cls: 'ns-container-default',
-                                    columnWidth: 0.3,
-                                    items: [
-                                        getDateLink('+1 day', function() {
-                                            var date = endDate.getValue();
-                                            date.setDate(date.getDate() + 1);
-                                            endDate.setValue(date);
-                                        }),
-                                        getDateLink('-1 day', function() {
-                                            var date = endDate.getValue();
-                                            date.setDate(date.getDate() - 1);
-                                            endDate.setValue(date);
-                                        })
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_WEEK',
+                    boxLabel: NS.i18n.last_week
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_4_WEEKS',
+                    boxLabel: NS.i18n.last_4_weeks
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_12_WEEKS',
+                    boxLabel: NS.i18n.last_12_weeks
                 }
             ]
         });
 
-        onRelativePeriodChange = function() {
-            if (period.isNoRelativePeriods()) {
-                startEndDate.enable();
+        months = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.months,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_MONTH',
+                    boxLabel: NS.i18n.last_month
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_3_MONTHS',
+                    boxLabel: NS.i18n.last_3_months
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_12_MONTHS',
+                    boxLabel: NS.i18n.last_12_months,
+                    checked: true
+                }
+            ]
+        });
 
-                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
-            }
-            else if (!startEndDate.isDisabled()) {
-                startEndDate.disable();
+        biMonths = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.bimonths,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_BIMONTH',
+                    boxLabel: NS.i18n.last_bimonth
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_6_BIMONTHS',
+                    boxLabel: NS.i18n.last_6_bimonths
+                }
+            ]
+        });
 
-                ns.app.aggregateLayoutWindow.rowStore.add({id: dimConf.period.dimensionName, name: dimConf.relativePeriod.name});
-            }
-        };
+        quarters = Ext.create('Ext.container.Container', {
+            columnWidth: 0.34,
+            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.quarters,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_QUARTER',
+                    boxLabel: NS.i18n.last_quarter
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_4_QUARTERS',
+                    boxLabel: NS.i18n.last_4_quarters
+                }
+            ]
+        });
 
-        relativePeriod = {
-			xtype: 'container',
-            cls: 'ns-container-default',
-            style: 'margin-top: 13px; padding-top: 6px; border-top: 1px dashed #ccc',
-            width: accBaseWidth,
+        sixMonths = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none; padding:5px 0 0',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.sixmonths,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_SIX_MONTH',
+                    boxLabel: NS.i18n.last_sixmonth
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_2_SIXMONTHS',
+                    boxLabel: NS.i18n.last_2_sixmonths
+                }
+            ]
+        });
+
+        financialYears = Ext.create('Ext.container.Container', {
+            columnWidth: 0.33,
+            bodyStyle: 'border-style:none; padding:5px 0 0',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.financial_years,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_FINANCIAL_YEAR',
+                    boxLabel: NS.i18n.last_financial_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
+                    boxLabel: NS.i18n.last_5_financial_years
+                }
+            ]
+        });
+
+        years = Ext.create('Ext.container.Container', {
+            columnWidth: 0.35,
+            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+            defaults: {
+                labelSeparator: '',
+                style: 'margin-bottom:2px',
+                listeners: intervalListeners
+            },
+            items: [
+                {
+                    xtype: 'label',
+                    text: NS.i18n.years,
+                    cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'THIS_YEAR',
+                    boxLabel: NS.i18n.this_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_YEAR',
+                    boxLabel: NS.i18n.last_year
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_5_YEARS',
+                    boxLabel: NS.i18n.last_5_years
+                }
+            ]
+        });
+
+        relativePeriod = Ext.create('Ext.container.Container', {
 			hideCollapseTool: true,
 			autoScroll: true,
-			valueComponentMap: {},
-			getRecords: function() {
-				var map = this.valueComponentMap,
+			style: 'border:0 none; padding:2px 0 0 7px',
+			items: [
+				{
+					xtype: 'container',
+					layout: 'column',
+					items: [
+                        weeks,
+						months,
+                        biMonths
+					]
+				},
+				{
+					xtype: 'container',
+					layout: 'column',
+                    style: 'padding-top:4px',
+					items: [
+						quarters,
+						sixMonths,
+						financialYears
+					]
+				},
+				{
+					xtype: 'container',
+					layout: 'column',
+                    style: 'padding-top:4px',
+					items: [
+                        years
+					]
+				}
+			],
+            getRecords: function() {
+                var a = [];
+
+                for (var i = 0; i < checkboxes.length; i++) {
+                    if (checkboxes[i].getValue()) {
+                        a.push(checkboxes[i].relativePeriodId);
+                    }
+                }
+
+                return a;
+            }
+		});
+
+            // fixed periods
+		fixedPeriodAvailable = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-left',
+            width: accBaseWidth / 2,
+            height: 160,
+			valueField: 'id',
+			displayField: 'name',
+			store: fixedPeriodAvailableStore,
+			tbar: [
+				{
+					xtype: 'label',
+					text: NS.i18n.available,
+					cls: 'ns-toolbar-multiselect-left-label'
+				},
+				'->',
+				{
+					xtype: 'button',
+					icon: 'images/arrowright.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowrightdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.selectAll(fixedPeriodAvailable, fixedPeriodSelected, true);
+                        onPeriodChange();
+					}
+				},
+				' '
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.select(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
+					}, this);
+				}
+			}
+		});
+
+		fixedPeriodSelected = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-right',
+            width: accBaseWidth / 2,
+			height: 160,
+			valueField: 'id',
+			displayField: 'name',
+			ddReorder: false,
+			store: fixedPeriodSelectedStore,
+			tbar: [
+				' ',
+				{
+					xtype: 'button',
+					icon: 'images/arrowleftdouble.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselectAll(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
+					}
+				},
+				{
+					xtype: 'button',
+					icon: 'images/arrowleft.png',
+					width: 22,
+					handler: function() {
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
+					}
+				},
+				'->',
+				{
+					xtype: 'label',
+					text: NS.i18n.selected,
+					cls: 'ns-toolbar-multiselect-right-label'
+				}
+			],
+			listeners: {
+				afterrender: function() {
+					this.boundList.on('itemdblclick', function() {
+						ns.core.web.multiSelect.unselect(fixedPeriodAvailable, fixedPeriodSelected);
+                        onPeriodChange();
+					}, this);
+				}
+			}
+		});
+
+        onPeriodTypeSelect = function(value) {
+            var ptype = new PeriodType(),
+
+                periods = ptype.get(value).generatePeriods({
+                    offset: periodType.periodOffset,
+                    filterFuturePeriods: true,
+                    reversePeriods: true
+                });
+
+            fixedPeriodAvailableStore.setIndex(periods);
+            fixedPeriodAvailableStore.loadData(periods);
+            ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+        };
+
+        periodType = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'ns-combo',
+            style: 'margin-right:1px; margin-bottom:1px',
+            width: accBaseWidth - 62 - 62 - 2,
+            valueField: 'id',
+            displayField: 'name',
+            emptyText: NS.i18n.select_period_type,
+            editable: false,
+            queryMode: 'remote',
+            store: periodTypeStore,
+            periodOffset: 0,
+            listeners: {
+                select: function(cmp) {
+                    onPeriodTypeSelect(cmp.getValue());
+                }
+            }
+        });
+
+        prevYear = Ext.create('Ext.button.Button', {
+            text: NS.i18n.prev_year,
+            style: 'border-radius:1px; margin-right:1px',
+            height: 24,
+            handler: function() {
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect(periodType.getValue());
+                }
+            }
+        });
+
+        nextYear = Ext.create('Ext.button.Button', {
+            text: NS.i18n.next_year,
+            style: 'border-radius:1px',
+            height: 24,
+            handler: function() {
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect(periodType.getValue());
+                }
+            }
+        });
+
+        fixedPeriodSettings = Ext.create('Ext.container.Container', {
+            layout: 'column',
+            bodyStyle: 'border-style:none',
+            style: 'margin-top:0px',
+            items: [
+                periodType,
+                prevYear,
+                nextYear
+            ]
+        });
+
+        fixedPeriodAvailableSelected = Ext.create('Ext.container.Container', {
+            layout: 'column',
+            bodyStyle: 'border-style:none; padding-bottom:2px',
+            items: [
+                fixedPeriodAvailable,
+                fixedPeriodSelected
+            ]
+        });
+
+        periods = Ext.create('Ext.container.Container', {
+            bodyStyle: 'border-style:none',
+            getRecords: function() {
+                var map = relativePeriodCmpMap,
+                    selectedPeriods = fixedPeriodSelected.getValue(),
 					records = [];
+
+                for (var i = 0; i < selectedPeriods.length; i++) {
+                    records.push({id: selectedPeriods[i]});
+                }
 
 				for (var rp in map) {
 					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
@@ -3216,337 +3629,60 @@ Ext.onReady( function() {
 				}
 
 				return records.length ? records : null;
-			},
-			items: [
-				{
-					xtype: 'container',
-                    cls: 'ns-container-default',
-					layout: 'column',
-					items: [
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.34,
-							style: 'padding: 0 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom: 2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.weeks,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_WEEK',
-									boxLabel: NS.i18n.last_week
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_WEEKS',
-									boxLabel: NS.i18n.last_4_weeks
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_WEEKS',
-									boxLabel: NS.i18n.last_12_weeks
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.months,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_MONTH',
-									boxLabel: NS.i18n.last_month
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_3_MONTHS',
-									boxLabel: NS.i18n.last_3_months
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: NS.i18n.last_12_months
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.bimonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_BIMONTH',
-									boxLabel: NS.i18n.last_bimonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_6_BIMONTHS',
-									boxLabel: NS.i18n.last_6_bimonths
-								}
-							]
-						}
-					]
-				},
-				{
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    layout: 'column',
-					items: [
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.34,
-							style: 'padding: 5px 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.quarters,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_QUARTER',
-									boxLabel: NS.i18n.last_quarter
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_QUARTERS',
-									boxLabel: NS.i18n.last_4_quarters
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							style: 'padding: 5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.sixmonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_SIX_MONTH',
-									boxLabel: NS.i18n.last_sixmonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_2_SIXMONTHS',
-									boxLabel: NS.i18n.last_2_sixmonths
-								}
-							]
-						},
-						{
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.33,
-							style: 'padding: 5px 0 0',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.financial_years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_FINANCIAL_YEAR',
-									boxLabel: NS.i18n.last_financial_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
-									boxLabel: NS.i18n.last_5_financial_years
-								}
-							]
-						}
+            },
+            items: [
+                fixedPeriodSettings,
+                fixedPeriodAvailableSelected,
+                relativePeriod
+            ]
+        });
 
-						//{
-							//xtype: 'panel',
-							//layout: 'anchor',
-							//bodyStyle: 'border-style:none; padding:5px 0 0 46px',
-							//defaults: {
-								//labelSeparator: '',
-								//style: 'margin-bottom:2px',
-							//},
-							//items: [
-								//{
-									//xtype: 'label',
-									//text: 'Options',
-									//cls: 'ns-label-period-heading-options'
-								//},
-								//rewind
-							//]
-						//}
-					]
-				},
-				{
-                    xtype: 'container',
-                    cls: 'ns-container-default',
-                    layout: 'column',
-					items: [
-                        {
-							xtype: 'container',
-                            cls: 'ns-container-default',
-							columnWidth: 0.35,
-							style: 'padding: 5px 0 0 6px',
-							defaults: {
-								labelSeparator: '',
-								style: 'margin-bottom:2px',
-								listeners: {
-									added: function(chb) {
-										if (chb.xtype === 'checkbox') {
-											checkboxes.push(chb);
-											relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
-										}
-									},
-									change: function() {
-										onRelativePeriodChange();
-									}
-								}
-							},
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'THIS_YEAR',
-									boxLabel: NS.i18n.this_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_YEAR',
-									boxLabel: NS.i18n.last_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_YEARS',
-									boxLabel: NS.i18n.last_5_years
-								}
-							]
-						}
-					]
-				}
-			]
-		};
-
-        period = Ext.create('Ext.panel.Panel', {
+		period = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-period">Periods</div>',
-            bodyStyle: 'padding:5px 2px 2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             width: accBaseWidth,
-            checkboxes: checkboxes,
-            isNoRelativePeriods: function() {
-				var a = this.checkboxes;
+            isRelativePeriods: function() {
+				var a = checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					if (a[i].getValue()) {
+						return true;
+					}
+				}
+				return false;
+			},
+			getDimension: function() {
+				var config = {
+						dimension: dimConf.period.objectName,
+						items: []
+					};
+
+				fixedPeriodSelectedStore.each( function(r) {
+					config.items.push({
+						id: r.data.id,
+						name: r.data.name
+					});
+				});
+
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].getValue()) {
+						config.items.push({
+							id: checkboxes[i].relativePeriodId,
+							name: ''
+						});
+					}
+				}
+
+				return config.items.length ? config : null;
+			},
+			resetRelativePeriods: function() {
+				var a = checkboxes;
+				for (var i = 0; i < a.length; i++) {
+					a[i].setValue(false);
+				}
+			},
+			isNoRelativePeriods: function() {
+				var a = checkboxes;
 				for (var i = 0; i < a.length; i++) {
 					if (a[i].getValue()) {
 						return false;
@@ -3555,20 +3691,22 @@ Ext.onReady( function() {
 				return true;
 			},
             items: [
+                periodMode,
                 startEndDate,
-                relativePeriod
-            ],
-            listeners: {
-				added: function(cmp) {
-					accordionPanels.push(cmp);
+                periods
+			],
+			listeners: {
+				added: function() {
+					accordionPanels.push(this);
 				}
 			}
-        });
+		});
 
             // organisation unit
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'ns-tree',
-			height: 333,
+			height: 436,
+			width: accBaseWidth,
             bodyStyle: 'border:0 none',
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
@@ -3864,7 +4002,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: accBaseWidth - toolWidth - 2,
+			width: accBaseWidth - toolWidth - 1,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_levels,
@@ -3880,7 +4018,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: accBaseWidth - toolWidth - 2,
+			width: accBaseWidth - toolWidth - 1,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_groups,
@@ -3890,7 +4028,7 @@ Ext.onReady( function() {
 		});
 
         organisationUnitPanel = Ext.create('Ext.panel.Panel', {
-			width: accBaseWidth - toolWidth - 2,
+			width: accBaseWidth - toolWidth - 1,
             layout: 'column',
             bodyStyle: 'border:0 none',
             items: [
@@ -3998,21 +4136,20 @@ Ext.onReady( function() {
 		toolPanel = Ext.create('Ext.panel.Panel', {
 			width: toolWidth,
 			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
+			style: 'margin-right:1px',
 			items: tool
 		});
 
         organisationUnit = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
             cls: 'ns-accordion-last',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
                 {
                     layout: 'column',
-                    width: accBaseWidth,
-                    bodyStyle: 'border:0 none',
-                    style: 'padding-bottom:2px',
+                    bodyStyle: 'border:0 none;',
+                    style: 'padding-bottom:1px',
                     items: [
                         toolPanel,
                         organisationUnitPanel
@@ -4033,7 +4170,7 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
-			height: 500,
+			height: 550,
 			items: [
                 dataElement,
                 period,
@@ -4148,16 +4285,6 @@ Ext.onReady( function() {
 
 				treePanel.selectGraphMap(view.parentGraphMap);
 			}());
-
-			// layer gui
-			if (layer) {
-
-				// layer item
-				layer.item.setValue(true, view.opacity);
-
-				// layer menu
-				layer.menu.enableItems();
-			}
 		};
 
 		getView = function(config) {
@@ -4166,10 +4293,25 @@ Ext.onReady( function() {
             view.program = program.getRecord();
             view.stage = stage.getRecord();
 
-            view.startDate = startDate.getSubmitValue();
-            view.endDate = endDate.getSubmitValue();
+            if (!view.stage) {
+                return;
+            }
 
-            view.relativePeriods = relativePeriod.getRecords();
+            if (periodMode.getValue() === 'dates') {
+                view.startDate = startDate.getSubmitValue();
+                view.endDate = endDate.getSubmitValue();
+
+                if (!(view.startDate && view.endDate)) {
+                    return;
+                }
+            }
+            else if (periodMode.getValue() === 'periods') {
+                view.periods = periods.getRecords();
+
+                if (!view.periods) {
+                    return;
+                }
+            }
 
             view.dataElements = [];
 
@@ -4180,10 +4322,6 @@ Ext.onReady( function() {
             }
 
             view.organisationUnits = treePanel.getDimension().items;
-
-            if (!(view.program && view.stage && ((view.startDate && view.endDate) || view.relativePeriods.length))) {
-				return;
-			}
 
 			return view;
 		};
@@ -4662,7 +4800,7 @@ Ext.onReady( function() {
 				else {
 					layout.sorting = {
 						id: id,
-						direction: 'DESC'
+						direction: 'ASC'
 					};
 				}
 
@@ -4763,8 +4901,11 @@ Ext.onReady( function() {
 
 				// ou
 				if (Ext.isArray(view.organisationUnits)) {
+                    paramString += '&dimension=ou:';
+
 					for (var i = 0; i < view.organisationUnits.length; i++) {
-						paramString += '&dimension=ou:' + view.organisationUnits[i].id;
+						paramString += view.organisationUnits[i].id;
+                        paramString += i < (view.organisationUnits.length - 1) ? ';' : '';
 					}
 				}
 
@@ -4784,11 +4925,11 @@ Ext.onReady( function() {
 				}
 
 				// pe
-				if (Ext.isArray(view.relativePeriods)) {
+				if (Ext.isArray(view.periods)) {
 					paramString += '&dimension=pe:';
 
-					for (var i = 0; i < view.relativePeriods.length; i++) {
-						paramString += view.relativePeriods[i].id + (i < view.relativePeriods.length - 1 ?  ';' : '');
+					for (var i = 0; i < view.periods.length; i++) {
+						paramString += view.periods[i].id + (i < view.periods.length - 1 ?  ';' : '');
 					}
 				}
 				else {
@@ -4984,9 +5125,11 @@ Ext.onReady( function() {
 		// viewport
 
         aggregateButton = Ext.create('Ext.button.Button', {
-			flex: 1,
+			//flex: 1,
+            width: 223,
 			param: 'aggregate',
-            text: '<b>Aggregated</b><br/>Aggregated event report',
+            text: '<b>Aggregated values</b><br/>Show aggregated event report',
+            style: 'margin-right:1px',
             pressed: true,
             listeners: {
 				mouseout: function(cmp) {
@@ -4997,9 +5140,11 @@ Ext.onReady( function() {
         paramButtonMap[aggregateButton.param] = aggregateButton;
 
 		caseButton = Ext.create('Ext.button.Button', {
-			flex: 1,
+			//flex: 1,'
+            width: 224,
 			param: 'query',
-            text: '<b>Case-based</b><br/>Case-based event report',
+            text: '<b>Individual cases</b><br/>Show case-based event report',
+            style: 'margin-right:1px',
 			listeners: {
 				mouseout: function(cmp) {
 					cmp.addCls('x-btn-default-toolbar-small-over');
@@ -5009,7 +5154,7 @@ Ext.onReady( function() {
         paramButtonMap[caseButton.param] = caseButton;
 
 		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
-			style: 'padding-top:1px; background:#f5f5f5; border:0 none',
+			style: 'padding:1px; background:#f5f5f5; border:0 none',
             height: 41,
             getType: function() {
 				return aggregateButton.pressed ? 'aggregate' : 'query';
@@ -5054,7 +5199,7 @@ Ext.onReady( function() {
 		accordionBody = LayerWidgetEvent();
 
 		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
 			panels: accordionBody.accordionPanels,
 			setThisHeight: function(mx) {
 				var panelHeight = this.panels.length * 28,
@@ -5096,11 +5241,14 @@ Ext.onReady( function() {
 
 		update = function() {
 			var config = ns.core.web.report.getLayoutConfig();
-				//layout = ns.core.api.layout.Layout(config);
 
 			if (!config) {
 				return;
 			}
+
+            if (typeToolbar.getType() === 'aggregate') {
+                ns.app.aggregateLayoutWindow.saveState();
+            }
 
 			ns.core.web.report.getData(config, false);
 		};
@@ -5587,7 +5735,7 @@ Ext.onReady( function() {
 			periodRecords = recMap[dimConf.period.objectName] || [];
 			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
 				periodRecord = periodRecords[i];
-				checkbox = relativePeriod.valueComponentMap[periodRecord.id];
+				checkbox = ns.app.relativePeriodCmpMap[periodRecord.id];
 				if (checkbox) {
 					checkbox.setValue(true);
 				}
@@ -5755,13 +5903,13 @@ Ext.onReady( function() {
 				afterrender: function() {
 
 					// resize event handler
-					westRegion.on('resize', function() {
-						var panel = accordion.getExpandedPanel();
+					//westRegion.on('resize', function() {
+						//var panel = accordion.getExpandedPanel();
 
-						if (panel) {
+						//if (panel) {
 							//panel.onExpand(); //todo
-						}
-					});
+						//}
+					//});
 
 					// left gui
 					var viewportHeight = westRegion.getHeight(),
@@ -5805,7 +5953,7 @@ Ext.onReady( function() {
 						Ext.getBody().fadeIn({
 							duration: 500
 						});
-					}, 300 );
+					}, 300);
 				}
 			}
 		});
@@ -5866,38 +6014,42 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?level=1&paging=false&links=false&viewClass=detailed',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userDataViewFallback=true&include=id,name,children[id,name]',
 									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+										init.rootNodes = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});
 
 								// organisation unit levels
 								requests.push({
-									url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
+									url: init.contextPath + '/api/organisationUnitLevels/filtered.json?include=id,name,level&paging=false',
 									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+										init.organisationUnitLevels = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});
 
 								// user orgunits and children
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userOnly=true&include=id,name,children[id,name]&paging=false',
 									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+										var organisationUnits = Ext.decode(r.responseText).objects || [],
+											ou = [],
+											ouc = [];
 
 										if (organisationUnits.length) {
-											var ou = organisationUnits[0];
+											for (var i = 0, org; i < organisationUnits.length; i++) {
+												org = organisationUnits[i];
 
-											if (ou.id) {
-												init.user = {
-													ou: ou.id
-												};
+												ou.push(org.id);
+												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+											}
 
-												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
-											};
+											init.user = {
+												ou: ou,
+												ouc: ouc
+											}
 										}
 										else {
 											alert('User is not assigned to any organisation units');
@@ -5908,13 +6060,13 @@ Ext.onReady( function() {
 								});
 
 								// legend sets
-								requests.push({
-									url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
-									success: function(r) {
-										init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
-										fn();
-									}
-								});
+								//requests.push({
+									//url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
+									//success: function(r) {
+										//init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
+										//fn();
+									//}
+								//});
 
 								// dimensions
 								requests.push({

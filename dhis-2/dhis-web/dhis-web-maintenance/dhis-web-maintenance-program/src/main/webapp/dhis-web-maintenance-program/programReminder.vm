@@ -31,10 +31,10 @@
 			</thead>
 			<tbody id="list">
           #foreach( $reminder in $program.reminders )
-            <tr id="tr${reminders.id}" 
-				data-id="$!reminders.id" 
-				data-type="reminders" 
-				data-name="$encoder.htmlEncode( $!reminders.name )">
+            <tr id="tr${reminder.id}" 
+				data-id="$!reminder.id" 
+				data-type="reminder" 
+				data-name="$encoder.htmlEncode( $!reminder.name )">
                 <td>$encoder.htmlEncode( $!reminders.name )</td>
             </tr>
           #end

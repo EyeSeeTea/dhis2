@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.mobile.controller;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -141,6 +141,7 @@ public class MobileClientController
         orgUnit.setDownloadAllUrl( getUrl( request, unit.getId(), "all" ) );
         orgUnit.setUpdateActivityPlanUrl( getUrl( request, unit.getId(), "activitiyplan" ) );
         orgUnit.setUploadFacilityReportUrl( getUrl( request, unit.getId(), "dataSets" ) );
+        orgUnit.setDownloadFacilityReportUrl( getUrl( request, unit.getId(), "dataSetValue" ) );
         orgUnit.setUploadActivityReportUrl( getUrl( request, unit.getId(), "activities" ) );
         orgUnit.setUpdateDataSetUrl( getUrl( request, unit.getId(), "updateDataSets" ) );
         orgUnit.setChangeUpdateDataSetLangUrl( getUrl( request, unit.getId(), "changeLanguageDataSet" ) );

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,13 +32,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 
-import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -53,21 +52,21 @@ public interface EnrollmentService
 
     Enrollments getEnrollments( EnrollmentStatus status );
 
-    Enrollments getEnrollments( Person person );
+    Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance );
 
-    Enrollments getEnrollments( Person person, EnrollmentStatus status );
+    Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status );
 
-    Enrollments getEnrollments( TrackedEntityInstance entityInstance );
+    Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance );
 
-    Enrollments getEnrollments( TrackedEntityInstance entityInstance, EnrollmentStatus status );
+    Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, EnrollmentStatus status );
 
     Enrollments getEnrollments( Program program );
 
     Enrollments getEnrollments( Program program, EnrollmentStatus status );
 
-    Enrollments getEnrollments( Program program, Person person );
+    Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance );
 
-    Enrollments getEnrollments( Program program, Person person, EnrollmentStatus status );
+    Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status );
 
     Enrollments getEnrollments( OrganisationUnit organisationUnit );
 
@@ -85,11 +84,11 @@ public interface EnrollmentService
     // CREATE
     // -------------------------------------------------------------------------
 
-    ImportSummary saveEnrollment( Enrollment enrollment );
+    ImportSummary addEnrollment( Enrollment enrollment );
 
-    ImportSummaries saveEnrollmentsJson( InputStream inputStream ) throws IOException;
+    ImportSummaries addEnrollmentsJson( InputStream inputStream ) throws IOException;
 
-    ImportSummaries saveEnrollmentsXml( InputStream inputStream ) throws IOException;
+    ImportSummaries addEnrollmentsXml( InputStream inputStream ) throws IOException;
 
     // -------------------------------------------------------------------------
     // UPDATE

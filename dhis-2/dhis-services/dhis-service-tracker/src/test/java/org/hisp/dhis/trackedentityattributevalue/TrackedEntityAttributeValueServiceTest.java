@@ -1,17 +1,20 @@
+package org.hisp.dhis.trackedentityattributevalue;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.trackedentityattributevalue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,7 +41,6 @@ import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -74,10 +74,6 @@ public class TrackedEntityAttributeValueServiceTest
 
     private TrackedEntityAttribute attributeC;
 
-    private TrackedEntityAttributeOption attributeOpionA;
-
-    private TrackedEntityAttributeOption attributeOpionB;
-
     private TrackedEntityInstance entityInstanceA;
 
     private TrackedEntityInstance entityInstanceB;
@@ -96,10 +92,6 @@ public class TrackedEntityAttributeValueServiceTest
 
     private TrackedEntityAttributeValue attributeValueC;
 
-    private TrackedEntityAttributeValue attributeValueD;
-
-    private TrackedEntityAttributeValue attributeValueE;
-
     @Override
     public void setUpTest()
     {
@@ -111,40 +103,30 @@ public class TrackedEntityAttributeValueServiceTest
         entityInstanceC = createTrackedEntityInstance( 'C', organisationUnit );
         entityInstanceD = createTrackedEntityInstance( 'D', organisationUnit );
 
-        entityInstanceAId = entityInstanceService.saveTrackedEntityInstance( entityInstanceA );
-        entityInstanceBId = entityInstanceService.saveTrackedEntityInstance( entityInstanceB );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceC );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceD );
+        entityInstanceAId = entityInstanceService.addTrackedEntityInstance( entityInstanceA );
+        entityInstanceBId = entityInstanceService.addTrackedEntityInstance( entityInstanceB );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceC );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceD );
 
         attributeA = createTrackedEntityAttribute( 'A' );
         attributeB = createTrackedEntityAttribute( 'B' );
         attributeC = createTrackedEntityAttribute( 'C' );
 
-        attributeService.saveTrackedEntityAttribute( attributeA );
-        attributeService.saveTrackedEntityAttribute( attributeB );
-        attributeService.saveTrackedEntityAttribute( attributeC );
-
-        attributeOpionA = createTrackedEntityAttributeOption( 'A', attributeC );
-        attributeOpionB = createTrackedEntityAttributeOption( 'B', attributeC );
-
-        attributeService.addTrackedEntityAttributeOption( attributeOpionA );
-        attributeService.addTrackedEntityAttributeOption( attributeOpionB );
+        attributeService.addTrackedEntityAttribute( attributeA );
+        attributeService.addTrackedEntityAttribute( attributeB );
+        attributeService.addTrackedEntityAttribute( attributeC );
 
         attributeValueA = new TrackedEntityAttributeValue( attributeA, entityInstanceA, "A" );
         attributeValueB = new TrackedEntityAttributeValue( attributeB, entityInstanceA, "B" );
         attributeValueC = new TrackedEntityAttributeValue( attributeA, entityInstanceB, "C" );
-        attributeValueD = new TrackedEntityAttributeValue( attributeC, entityInstanceC, "AttributeOptionA" );
-        attributeValueD.setAttributeOption( attributeOpionA );
-        attributeValueE = new TrackedEntityAttributeValue( attributeC, entityInstanceD, "AttributeOptionB" );
-        attributeValueE.setAttributeOption( attributeOpionB );
     }
 
     @Test
     public void testSaveTrackedEntityAttributeValue()
     {
 
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
 
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
@@ -153,7 +135,7 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testUpdateTrackedEntityAttributeValue()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
 
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
 
@@ -166,8 +148,8 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testDeleteTrackedEntityAttributeValue()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
 
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeB ) );
@@ -186,9 +168,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testDeleteTrackedEntityAttributeValueByEntityInstance()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeB ) );
@@ -209,9 +191,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testDeleteTrackedEntityAttributeValueByAttribute()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
         assertNotNull( attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeB ) );
@@ -233,8 +215,8 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValue()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         assertEquals( attributeValueA, attributeValueService.getTrackedEntityAttributeValue( entityInstanceA, attributeA ) );
         assertEquals( attributeValueC, attributeValueService.getTrackedEntityAttributeValue( entityInstanceB, attributeA ) );
@@ -243,9 +225,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValuesByEntityInstance()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService.getTrackedEntityAttributeValues( entityInstanceA );
 
@@ -261,9 +243,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValuesbyAttribute()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService
             .getTrackedEntityAttributeValues( attributeA );
@@ -279,9 +261,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValuesbyEntityInstanceList()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
         entityInstances.add( entityInstanceA );
@@ -295,9 +277,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetAllTrackedEntityAttributeValues()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         assertTrue( equals( attributeValueService.getAllTrackedEntityAttributeValues(), attributeValueA, attributeValueB,
             attributeValueC ) );
@@ -306,9 +288,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValueMapForEntityInstances()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
         entityInstances.add( entityInstanceA );
@@ -325,9 +307,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetTrackedEntityAttributeValueMapForEntityInstancesAttributes()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
         entityInstances.add( entityInstanceA );
@@ -344,9 +326,9 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testSearchTrackedEntityAttributeValue()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService.searchTrackedEntityAttributeValue(
             attributeA, "A" );
@@ -356,8 +338,8 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testCopyTrackedEntityAttributeValues()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         attributeValueService.copyTrackedEntityAttributeValues( entityInstanceA, entityInstanceB );
 
@@ -371,24 +353,13 @@ public class TrackedEntityAttributeValueServiceTest
     @Test
     public void testGetEntityInstances()
     {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueB );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueC );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueA );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueB );
+        attributeValueService.addTrackedEntityAttributeValue( attributeValueC );
 
         Collection<TrackedEntityInstance> entityInstances = attributeValueService.getTrackedEntityInstance( attributeA, "A" );
         assertEquals( 1, entityInstances.size() );
         assertTrue( entityInstances.contains( entityInstanceA ) );
-    }
-
-    @Test
-    public void testCountByEntityInstanceAttributeoption()
-    {
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueA );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueD );
-        attributeValueService.saveTrackedEntityAttributeValue( attributeValueE );
-
-        int count = attributeValueService.countByAttributeOption( attributeOpionA );
-        assertEquals( 1, count );
     }
 
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -42,19 +44,51 @@ import org.hisp.dhis.validation.ValidationCriteria;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
-
 public interface TrackedEntityInstanceService
 {
     String ID = TrackedEntityInstanceService.class.getName();
 
     public static final int ERROR_NONE = 0;
-
     public static final int ERROR_DUPLICATE_IDENTIFIER = 1;
-
     public static final int ERROR_ENROLLMENT = 2;
 
+    /**
+     * Returns a grid with tracked entity instance values based on the given
+     * TrackedEntityInstanceQueryParams.
+     * 
+     * @param params the TrackedEntityInstanceQueryParams.
+     * @return a grid.
+     */
+    Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
+    
+    /**
+     * Returns a TrackedEntityInstanceQueryParams based on the given input.
+     * 
+     * @param query the query string.
+     * @param attribute the set of attributes.
+     * @param filter the set of filters.
+     * @param ou the organisation unit string.
+     * @param ouMode the OrganisationUnitSelectionMode.
+     * @param program the Program uid.
+     * @param trackedEntity the TrackedEntity uid.
+     * @param page the page number.
+     * @param pageSize the page size.
+     * @return a TrackedEntityInstanceQueryParams.
+     */
+    TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, 
+        Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, String trackedEntity, Integer page, Integer pageSize );
+    
+    /**
+     * Validates the given TrackedEntityInstanceQueryParams. The params is
+     * considered valid if no exception are thrown and the method returns normally.
+     * 
+     * @param params the TrackedEntityInstanceQueryParams.
+     * @throws IllegalQueryException if the given params is invalid.
+     */
+    void validate( TrackedEntityInstanceQueryParams params )
+        throws IllegalQueryException;
+    
     /**
      * Adds an {@link TrackedEntityInstance}
      * 
@@ -62,7 +96,7 @@ public interface TrackedEntityInstanceService
      * 
      * @return A generated unique id of the added {@link TrackedEntityInstance}.
      */
-    int saveTrackedEntityInstance( TrackedEntityInstance entityInstance );
+    int addTrackedEntityInstance( TrackedEntityInstance entityInstance );
 
     /**
      * Deletes a {@link TrackedEntityInstance}.

@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentityattributevalue;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
 /**
@@ -49,7 +48,7 @@ public interface TrackedEntityAttributeValueService
      * @param attributeValue The to TrackedEntityAttribute add.
      * 
      */
-    void saveTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue );
+    void addTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue );
 
     /**
      * Updates an {@link TrackedEntityAttribute}.
@@ -182,21 +181,4 @@ public interface TrackedEntityAttributeValueService
      */
     Collection<TrackedEntityInstance> getTrackedEntityInstance( TrackedEntityAttribute attribute, String value );
 
-    /**
-     * Update attribute values which belong to the pre-defined attribute
-     * when a value pre-defined of this attribute is modified
-     * 
-     * @param attributeOption TrackedEntityAttributeOption
-     */
-    void updateTrackedEntityAttributeValues( TrackedEntityAttributeOption attributeOption );
-
-    /**
-     * Get the number of {@link TrackedEntityAttributeOption} in all
-     * {@link TrackedEntityAttribute}
-     * 
-     * @param attributeOption TrackedEntityAttributeOption
-     * 
-     * @return The number of TrackedEntityAttributeOptions
-     */
-    int countByAttributeOption( TrackedEntityAttributeOption attributeOption );
 }

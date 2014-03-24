@@ -1,7 +1,7 @@
 package org.hisp.dhis.mobile.service;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,7 +84,6 @@ import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.sms.SmsSender;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -289,8 +288,6 @@ public class ActivityReportingServiceImpl
             }
         }
 
-        this.setGroupByAttribute( attService.getTrackedEntityAttributeByGroupBy() );
-
         if ( items.isEmpty() )
         {
             return null;
@@ -317,8 +314,6 @@ public class ActivityReportingServiceImpl
                 items.add( getActivity( programStageInstance, false ) );
             }
         }
-
-        this.setGroupByAttribute( attService.getTrackedEntityAttributeByGroupBy() );
 
         if ( items.isEmpty() )
         {
@@ -413,7 +408,7 @@ public class ActivityReportingServiceImpl
         }
 
         Collection<TrackedEntityAttribute> displayAttributes = attributeService
-            .getTrackedEntityAttributesDisplayedInList( true );
+            .getTrackedEntityAttributesDisplayInList( true );
         String resultSet = "";
 
         for ( TrackedEntityInstance patient : patients )
@@ -1124,7 +1119,7 @@ public class ActivityReportingServiceImpl
             relationship.setEntityInstanceA( patientB );
             relationship.setEntityInstanceB( patientA );
         }
-        relationshipService.saveRelationship( relationship );
+        relationshipService.addRelationship( relationship );
         // return getPatientModel( orgUnitId, patientA );
         return getPatientModel( patientA );
     }
@@ -1384,7 +1379,7 @@ public class ActivityReportingServiceImpl
         if ( programId != null && !programId.trim().equals( "" ) )
         {
             Program program = programService.getProgram( Integer.parseInt( programId ) );
-            patientAttributes = program.getEntityAttributes();
+            patientAttributes = program.getTrackedEntityAttributes();
         }
         else
         {
@@ -1400,8 +1395,7 @@ public class ActivityReportingServiceImpl
 
         for ( TrackedEntityAttribute patientAtt : getPatientAtts( null ) )
         {
-            list.add( new PatientAttribute( patientAtt.getName(), null, patientAtt.getValueType(), patientAtt
-                .isMandatory(), new ArrayList<String>() ) );
+            list.add( new PatientAttribute( patientAtt.getName(), null, patientAtt.getValueType(), false, new ArrayList<String>() ) );
         }
 
         return list;
@@ -1420,16 +1414,7 @@ public class ActivityReportingServiceImpl
             patientAttribute.setName( name );
             patientAttribute.setType( pa.getValueType() );
             patientAttribute.setValue( "" );
-            List<String> optionList = new ArrayList<String>();
-            if ( pa.getAttributeOptions() != null )
-            {
-                for ( TrackedEntityAttributeOption option : pa.getAttributeOptions() )
-                {
-                    optionList.add( option.getName() );
-                }
-            }
-
-            patientAttribute.setPredefinedValues( optionList );
+           
             list.add( patientAttribute );
         }
         return list;
@@ -1560,7 +1545,7 @@ public class ActivityReportingServiceImpl
 
         String resultSet = "";
 
-        Collection<TrackedEntityAttribute> displayAttributes = attributeService.getTrackedEntityAttributesDisplayedInList( true );
+        Collection<TrackedEntityAttribute> displayAttributes = attributeService.getTrackedEntityAttributesDisplayInList( true );
         for ( TrackedEntityInstance patient : patients )
         {
             resultSet += patient.getId() + "/";

@@ -1,17 +1,20 @@
+package org.hisp.dhis.trackedentityattributevalue;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -25,8 +28,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.trackedentityattributevalue;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -39,7 +40,6 @@ import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -72,10 +72,6 @@ public class TrackedEntityAttributeValueStoreTest
 
     private TrackedEntityAttribute attributeC;
 
-    private TrackedEntityAttributeOption attributeOpionA;
-
-    private TrackedEntityAttributeOption attributeOpionB;
-
     private TrackedEntityInstance entityInstanceA;
 
     private TrackedEntityInstance entityInstanceB;
@@ -90,10 +86,6 @@ public class TrackedEntityAttributeValueStoreTest
 
     private TrackedEntityAttributeValue attributeValueC;
 
-    private TrackedEntityAttributeValue attributeValueD;
-
-    private TrackedEntityAttributeValue attributeValueE;
-
     @Override
     public void setUpTest()
     {
@@ -105,32 +97,22 @@ public class TrackedEntityAttributeValueStoreTest
         entityInstanceC = createTrackedEntityInstance( 'C', organisationUnit );
         entityInstanceD = createTrackedEntityInstance( 'D', organisationUnit );
 
-        entityInstanceService.saveTrackedEntityInstance(  entityInstanceA );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceB );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceC );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceD );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceA );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceB );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceC );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceD );
 
         attributeA = createTrackedEntityAttribute(  'A' );
         attributeB = createTrackedEntityAttribute( 'B' );
         attributeC = createTrackedEntityAttribute( 'C' );
 
-        attributeService.saveTrackedEntityAttribute( attributeA );
-        attributeService.saveTrackedEntityAttribute( attributeB );
-        attributeService.saveTrackedEntityAttribute( attributeC );
-
-        attributeOpionA = createTrackedEntityAttributeOption( 'A', attributeC );
-        attributeOpionB = createTrackedEntityAttributeOption( 'B', attributeC );
-
-        attributeService.addTrackedEntityAttributeOption( attributeOpionA );
-        attributeService.addTrackedEntityAttributeOption( attributeOpionB );
+        attributeService.addTrackedEntityAttribute( attributeA );
+        attributeService.addTrackedEntityAttribute( attributeB );
+        attributeService.addTrackedEntityAttribute( attributeC );
 
         attributeValueA = new TrackedEntityAttributeValue( attributeA, entityInstanceA, "A" );
         attributeValueB = new TrackedEntityAttributeValue( attributeB, entityInstanceA, "B" );
         attributeValueC = new TrackedEntityAttributeValue( attributeA, entityInstanceB, "C" );
-        attributeValueD = new TrackedEntityAttributeValue( attributeC, entityInstanceC, "AttributeOptionA" );
-        attributeValueD.setAttributeOption( attributeOpionA );
-        attributeValueE = new TrackedEntityAttributeValue( attributeC, entityInstanceD, "AttributeOptionB" );
-        attributeValueE.setAttributeOption( attributeOpionB );
     }
 
     @Test
@@ -272,17 +254,6 @@ public class TrackedEntityAttributeValueStoreTest
         Collection<TrackedEntityInstance> entityInstances = attributeValueStore.getTrackedEntityInstances( attributeA, "A" );
         assertEquals( 1, entityInstances.size() );
         assertTrue( entityInstances.contains( entityInstanceA ) );
-    }
-
-    @Test
-    public void testCountByTrackedEntityAttributeoption()
-    {
-        attributeValueStore.saveVoid( attributeValueA );
-        attributeValueStore.saveVoid( attributeValueD );
-        attributeValueStore.saveVoid( attributeValueE );
-
-        int count = attributeValueStore.countByAttributeOption( attributeOpionA );
-        assertEquals( 1, count );
     }
 
 }

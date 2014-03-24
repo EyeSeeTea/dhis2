@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ public interface TrackedEntityAttributeService
      * @return A generated unique id of the added {@link TrackedEntityAttribute}
      *         .
      */
-    int saveTrackedEntityAttribute( TrackedEntityAttribute attribute );
+    int addTrackedEntityAttribute( TrackedEntityAttribute attribute );
 
     /**
      * Deletes a {@link TrackedEntityAttribute}.
@@ -108,25 +108,11 @@ public interface TrackedEntityAttributeService
     Collection<TrackedEntityAttribute> getTrackedEntityAttributesByValueType( String valueType );
 
     /**
-     * Get mandatory attributes without groups
+     * Get attributes without groups
      * 
      * @return List of attributes
      */
     Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup();
-
-    /**
-     * Get attributes by mandatory option
-     * 
-     * @param mandatory True/False value
-     */
-    Collection<TrackedEntityAttribute> getTrackedEntityAttributesByMandatory( boolean mandatory );
-
-    /**
-     * Get attributes by groupBy option
-     * 
-     * @return TrackedEntityAttribute with groupby as true
-     */
-    TrackedEntityAttribute getTrackedEntityAttributeByGroupBy();
 
     /**
      * Get attributes without groups
@@ -161,7 +147,7 @@ public interface TrackedEntityAttributeService
      * 
      * @return List of attributes
      */
-    Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayedInList( boolean displayInListNoProgram );
+    Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayInList( boolean displayInListNoProgram );
 
     /**
      * Returns {@link TrackedEntityAttribute} list with paging
@@ -199,61 +185,5 @@ public interface TrackedEntityAttributeService
      * 
      */
     int getTrackedEntityAttributeCountByName( String name );
-    
-    // -------------------------------------------------------------------------
-    // TrackedEntityAttributeOption
-    // -------------------------------------------------------------------------
-    
-    /**
-     * Adds an {@link TrackedEntityAttributeOption}
-     * 
-     * @param option The to TrackedEntityAttributeOption add.
-     * 
-     * @return A generated unique id of the added {@link TrackedEntityAttributeOption}.
-     */
-    int addTrackedEntityAttributeOption( TrackedEntityAttributeOption option );
-
-    /**
-     * Updates a {@link TrackedEntityAttributeOption}.
-     * 
-     * @param option the TrackedEntityAttributeOption to update.
-     */
-    void updateTrackedEntityAttributeOption( TrackedEntityAttributeOption option );
-
-    /**
-     * Deletes a {@link TrackedEntityAttributeOption}.
-     * 
-     * @param option the TrackedEntityAttributeOption to delete.
-     */
-    void deleteTrackedEntityAttributeOption( TrackedEntityAttributeOption option );
-
-    /**
-     * Returns a {@link TrackedEntityAttributeOption} with a given name.
-     * 
-     * @param attribute {@link TrackedEntityAttribute}
-     * @param name the name of the TrackedEntityAttributeOption to return.
-     * 
-     * @return the TrackedEntityAttributeOption with the given name, or null if no
-     *         match.
-     */
-    TrackedEntityAttributeOption getTrackedEntityAttributeOption( TrackedEntityAttribute attribute, String name );
-
-    /**
-     * Returns a {@link TrackedEntityAttributeOption}.
-     * 
-     * @param id the id of the TrackedEntityAttributeOption to return.
-     * 
-     * @return the TrackedEntityAttributeOption with the given id
-     */
-    TrackedEntityAttributeOption getTrackedEntityAttributeOption( int id );
-
-    /**
-     * Get all {@link TrackedEntityAttributeOption} of a {@link TrackedEntityAttribute}
-     * 
-     * @param attribute {@link TrackedEntityAttribute}
-     * 
-     * @return {@link TrackedEntityAttributeOption}
-     */
-    Collection<TrackedEntityAttributeOption> getTrackedEntityAttributeOption( TrackedEntityAttribute attribute );
 
 }

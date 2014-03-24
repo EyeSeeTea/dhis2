@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -73,7 +73,7 @@ public class ImportEventTask
         {
             try
             {
-                eventService.saveEventsJson( inputStream, taskId, importOptions );
+                eventService.addEventsJson( inputStream, taskId, importOptions );
             }
             catch ( IOException ignored )
             {
@@ -83,7 +83,7 @@ public class ImportEventTask
         {
             try
             {
-                eventService.saveEventsXml( inputStream, taskId, importOptions );
+                eventService.addEventsXml( inputStream, taskId, importOptions );
             }
             catch ( IOException ignored )
             {

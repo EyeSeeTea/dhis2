@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,13 +33,11 @@ import java.util.Collection;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -179,48 +177,22 @@ public class SaveAttributeAction
                     {
                         value = format.formatDate( TrackedEntityAttribute.getDateFromAge( Integer.parseInt( value ) ) );
                     }
-                    
+
                     if ( attributeValue == null )
                     {
                         attributeValue = new TrackedEntityAttributeValue();
                         attributeValue.setEntityInstance( entityInstance );
                         attributeValue.setAttribute( attribute );
                         attributeValue.setValue( value.trim() );
-
-                        if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
-                        {
-                            TrackedEntityAttributeOption option = attributeService
-                                .getTrackedEntityAttributeOption( Integer.parseInt( value ) );
-
-                            if ( option != null )
-                            {
-                                attributeValue.setAttributeOption( option );
-                                attributeValue.setValue( option.getName() );
-                            }
-                        }
-
-                        attributeValueService.saveTrackedEntityAttributeValue( attributeValue );
-                        entityInstance.getAttributeValues().add( attributeValue );
+                        attributeValueService.addTrackedEntityAttributeValue( attributeValue );
                     }
                     else
                     {
-                        if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
-                        {
-                            TrackedEntityAttributeOption option = attributeService
-                                .getTrackedEntityAttributeOption( NumberUtils.toInt( value, 0 ) );
-                            if ( option != null )
-                            {
-                                attributeValue.setAttributeOption( option );
-                                attributeValue.setValue( option.getName() );
-                            }
-                        }
-                        else
-                        {
-                            attributeValue.setValue( value.trim() );
-                        }
+                        attributeValue.setValue( value.trim() );
                         attributeValueService.updateTrackedEntityAttributeValue( attributeValue );
-                        entityInstance.getAttributeValues().add( attributeValue );
                     }
+
+                    entityInstance.getAttributeValues().add( attributeValue );
                 }
                 else if ( attributeValue != null )
                 {

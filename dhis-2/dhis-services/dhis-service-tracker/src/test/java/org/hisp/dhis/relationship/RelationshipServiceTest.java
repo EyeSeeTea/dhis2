@@ -1,17 +1,20 @@
+package org.hisp.dhis.relationship;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.relationship;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -85,19 +86,19 @@ public class RelationshipServiceTest
         organisationUnitService.addOrganisationUnit( organisationUnit );
 
         entityInstanceA = createTrackedEntityInstance( 'A', organisationUnit );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceA );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceA );
 
         entityInstanceB = createTrackedEntityInstance( 'B', organisationUnit );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceB );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceB );
 
         entityInstanceC = createTrackedEntityInstance( 'C', organisationUnit );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceC );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceC );
 
         entityInstanceD = createTrackedEntityInstance( 'D', organisationUnit );
-        entityInstanceService.saveTrackedEntityInstance( entityInstanceD );
+        entityInstanceService.addTrackedEntityInstance( entityInstanceD );
 
         relationshipType = createRelationshipType( 'A' );
-        relationshipTypeService.saveRelationshipType( relationshipType );
+        relationshipTypeService.addRelationshipType( relationshipType );
 
         relationshipA = new Relationship( entityInstanceA, relationshipType, entityInstanceB );
         relationshipB = new Relationship( entityInstanceC, relationshipType, entityInstanceD );
@@ -107,8 +108,8 @@ public class RelationshipServiceTest
     @Test
     public void testSaveRelationship()
     {
-        int idA = relationshipService.saveRelationship( relationshipA );
-        int idB = relationshipService.saveRelationship( relationshipB );
+        int idA = relationshipService.addRelationship( relationshipA );
+        int idB = relationshipService.addRelationship( relationshipB );
 
         assertNotNull( relationshipService.getRelationship( idA ) );
         assertNotNull( relationshipService.getRelationship( idB ) );
@@ -117,8 +118,8 @@ public class RelationshipServiceTest
     @Test
     public void testDeleteRelationship()
     {
-        int idA = relationshipService.saveRelationship( relationshipA );
-        int idB = relationshipService.saveRelationship( relationshipB );
+        int idA = relationshipService.addRelationship( relationshipA );
+        int idB = relationshipService.addRelationship( relationshipB );
 
         assertNotNull( relationshipService.getRelationship( idA ) );
         assertNotNull( relationshipService.getRelationship( idB ) );
@@ -137,7 +138,7 @@ public class RelationshipServiceTest
     @Test
     public void testUpdateRelationship()
     {
-        int idA = relationshipService.saveRelationship( relationshipA );
+        int idA = relationshipService.addRelationship( relationshipA );
 
         assertNotNull( relationshipService.getRelationship( idA ) );
 
@@ -150,8 +151,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationshipById()
     {
-        int idA = relationshipService.saveRelationship( relationshipA );
-        int idB = relationshipService.saveRelationship( relationshipB );
+        int idA = relationshipService.addRelationship( relationshipA );
+        int idB = relationshipService.addRelationship( relationshipB );
 
         assertEquals( relationshipA, relationshipService.getRelationship( idA ) );
         assertEquals( relationshipB, relationshipService.getRelationship( idB ) );
@@ -160,8 +161,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationshipByTypeEntityInstance()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipB );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipB );
 
         Relationship relationship = relationshipService.getRelationship( entityInstanceA, entityInstanceB,
             relationshipType );
@@ -174,8 +175,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationshipByTwoEntityInstance()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipB );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipB );
 
         Relationship relationship = relationshipService.getRelationship( entityInstanceA, entityInstanceB );
         assertEquals( relationshipA, relationship );
@@ -187,8 +188,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetAllRelationships()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipB );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipB );
 
         assertTrue( equals( relationshipService.getAllRelationships(), relationshipA, relationshipB ) );
     }
@@ -196,8 +197,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationshipsForEntityInstance()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipC );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipC );
 
         Collection<Relationship> relationships = relationshipService
             .getRelationshipsForTrackedEntityInstance( entityInstanceA );
@@ -207,8 +208,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationships()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipC );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipC );
 
         Collection<Relationship> relationships = relationshipService.getRelationships( entityInstanceA,
             relationshipType );
@@ -218,8 +219,8 @@ public class RelationshipServiceTest
     @Test
     public void testGetRelationshipsByRelationshipType()
     {
-        relationshipService.saveRelationship( relationshipA );
-        relationshipService.saveRelationship( relationshipC );
+        relationshipService.addRelationship( relationshipA );
+        relationshipService.addRelationship( relationshipC );
 
         Collection<Relationship> relationships = relationshipService
             .getRelationshipsByRelationshipType( relationshipType );

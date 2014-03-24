@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,9 @@ import static org.junit.Assert.assertEquals;
 import static org.hisp.dhis.system.util.TextUtils.subString;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
 import static org.hisp.dhis.system.util.TextUtils.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -75,5 +78,12 @@ public class TextUtilsTest
     public void testTrim()
     {
         assertEquals( "abcdefgh", trimEnd( "abcdefghijkl", 4 ) );
+    }
+    
+    @Test
+    public void testGetTokens()
+    {
+        assertEquals( new ArrayList<String>( Arrays.asList( "John", "Doe", "Main", "Road", "25" ) ), TextUtils.getTokens( "John Doe Main Road 25" ) );
+        assertEquals( new ArrayList<String>( Arrays.asList( "Ted,Johnson", "Upper-Road", "45" ) ), TextUtils.getTokens( "Ted,Johnson Upper-Road 45" ) );        
     }
 }

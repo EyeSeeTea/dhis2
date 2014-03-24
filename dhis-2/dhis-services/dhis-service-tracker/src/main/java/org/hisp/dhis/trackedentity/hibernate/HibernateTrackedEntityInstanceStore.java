@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.hibernate;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,20 +28,30 @@ package org.hisp.dhis.trackedentity.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_EVENT_BY_STATUS;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_INSTANCE;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_STAGE;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.CREATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.LAST_UPDATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_UNIT_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
@@ -51,9 +61,12 @@ import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
@@ -63,11 +76,11 @@ import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceStore;
-import org.hisp.dhis.trackedentity.TrackedEntityQueryParams;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.jdbc.core.RowMapper;
@@ -94,11 +107,166 @@ public class HibernateTrackedEntityInstanceStore
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private StatementBuilder statementBuilder;
+
+    public void setStatementBuilder( StatementBuilder statementBuilder )
+    {
+        this.statementBuilder = statementBuilder;
+    }
 
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
+    
+    @Override
+    public List<Map<String, String>> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
+    {
+        SqlHelper hlp = new SqlHelper();
 
+        // ---------------------------------------------------------------------
+        // Select clause
+        // ---------------------------------------------------------------------
+        
+        String sql = 
+            "select tei.uid as " + TRACKED_ENTITY_INSTANCE_ID + ", " +
+            "tei.created as " + CREATED_ID + ", " +
+            "tei.lastupdated as " + LAST_UPDATED_ID + ", " +
+            "ou.uid as " + ORG_UNIT_ID + ", " +
+            "te.uid as " + TRACKED_ENTITY_ID + ", ";
+        
+        for ( QueryItem item : params.getAttributes() )
+        {
+            String col = statementBuilder.columnQuote( item.getItemId() );
+            
+            sql += col + ".value as " + col + ", ";
+        }
+        
+        sql = sql.substring( 0, sql.length() - 2 ) + " "; // Remove last comma
+
+        // ---------------------------------------------------------------------
+        // From, join and where clause. For attribute params, restriction is set
+        // in inner join. For query params, restriction is set in where clause.
+        // ---------------------------------------------------------------------
+        
+        sql +=        
+            "from trackedentityinstance tei " +
+            "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
+            "inner join organisationunit ou on tei.organisationunitid = ou.organisationunitid ";
+        
+        for ( QueryItem item : params.getAttributesAndFilters() )
+        {
+            String col = statementBuilder.columnQuote( item.getItemId() );
+            
+            String joinClause = item.hasFilter() ? "inner join" : "left join";
+            
+            sql += 
+                joinClause + " trackedentityattributevalue as " + col + " " +
+                "on " + col + ".trackedentityinstanceid = tei.trackedentityinstanceid " +
+                "and " + col + ".trackedentityattributeid = " + item.getItem().getId() + " ";
+            
+            String filter = statementBuilder.encode( item.getFilter(), false );
+            
+            if ( !params.isOrQuery() && item.hasFilter() )
+            {
+                String queryCol = item.isNumeric() ? ( col + ".value" ) : "lower(" + col + ".value)";
+                
+                sql += "and " + queryCol + item.getSqlOperator() + " " + StringUtils.lowerCase( item.getSqlFilter( filter ) ) + " ";
+            }
+        }
+        
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
+        {
+            sql += "left join _orgunitstructure ous on tei.organisationunitid = ous.organisationunitid ";
+        }
+        
+        if ( params.hasTrackedEntity() )
+        {
+            sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId() + " ";
+        }
+
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
+        {
+            SetMap<Integer, OrganisationUnit> levelOuMap = params.getLevelOrgUnitMap();
+            
+            for ( Integer level : levelOuMap.keySet() )
+            {
+                sql += hlp.whereAnd() + " ous.idlevel" + level + " in (" + getCommaDelimitedString( getIdentifiers( levelOuMap.get( level ) ) ) + ") or ";
+            }
+            
+            sql = sql.substring( 0, sql.length() - 3 ); // Remove last or
+        }
+        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        {
+        }
+        else // SELECTED (default)
+        {
+            sql += hlp.whereAnd() + " tei.organisationunitid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
+        }
+        
+        if ( params.hasProgram() )
+        {
+            sql += 
+                hlp.whereAnd() + " exists (select trackedentityinstanceid from programinstance pi " +
+                "where pi.trackedentityinstanceid=tei.trackedentityinstanceid " +
+                "and pi.programid = " + params.getProgram().getId() + ") ";
+        }
+        
+        if ( params.isOrQuery() && params.hasAttributesOrFilters() )
+        {
+            sql += hlp.whereAnd() + " (";
+            
+            for ( QueryItem item : params.getAttributesAndFilters() )
+            {
+                String col = statementBuilder.columnQuote( item.getItemId() );
+                String query = statementBuilder.encode( params.getQuery(), false );
+                
+                sql += "lower(" + col + ".value) = '" + StringUtils.lowerCase( query ) + "' or ";
+            }
+            
+            sql = sql.substring( 0, sql.length() - 3 ) + ") "; // Remove last or
+        }
+
+        // ---------------------------------------------------------------------
+        // Paging clause
+        // ---------------------------------------------------------------------
+
+        if ( params.isPaging() )
+        {
+            sql += "limit " + params.getPageSizeWithDefault() + " offset " + params.getOffset();
+        }
+
+        log.info( "Tracked entity instance query SQL: " + sql );
+
+        // ---------------------------------------------------------------------
+        // Query
+        // ---------------------------------------------------------------------
+
+        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+        
+        List<Map<String, String>> list = new ArrayList<Map<String,String>>();
+        
+        while ( rowSet.next() )
+        {
+            final Map<String, String> map = new HashMap<String, String>();
+            
+            map.put( TRACKED_ENTITY_INSTANCE_ID, rowSet.getString( TRACKED_ENTITY_INSTANCE_ID ) );
+            map.put( CREATED_ID, rowSet.getString( CREATED_ID ) );
+            map.put( LAST_UPDATED_ID, rowSet.getString( LAST_UPDATED_ID ) );
+            map.put( ORG_UNIT_ID, rowSet.getString( ORG_UNIT_ID ) );
+            map.put( TRACKED_ENTITY_ID, rowSet.getString( TRACKED_ENTITY_ID ) );
+            
+            for ( QueryItem item : params.getAttributes() )
+            {
+                map.put( item.getItemId(), rowSet.getString( item.getItemId() ) );
+            }
+            
+            list.add( map );
+        }
+        
+        return list;
+    }
+    
     @Override
     @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getByOrgUnit( OrganisationUnit organisationUnit, Integer min, Integer max )
@@ -129,30 +297,6 @@ public class HibernateTrackedEntityInstanceStore
         query.setEntity( "organisationUnit", organisationUnit );
         query.setEntity( "program", program );
         query.setInteger( "status", ProgramInstance.STATUS_ACTIVE );
-
-        return query.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public List<TrackedEntityInstance> query( TrackedEntityQueryParams params )
-    {
-        SqlHelper hlp = new SqlHelper();
-
-        String hql = "select pt from TrackedEntityInstance pt left join pt.attributeValues av";
-
-        for ( QueryItem at : params.getAttributes() )
-        {
-            hql += " " + hlp.whereAnd();
-            hql += " (av.attribute = :attr" + at.getItemId() + " and av.value = :filt" + at.getItemId() + ")";
-        }
-
-        Query query = getQuery( hql );
-
-        for ( QueryItem at : params.getAttributes() )
-        {
-            query.setEntity( "attr" + at.getItemId(), at.getItem() );
-            query.setString( "filt" + at.getItemId(), at.getFilter() );
-        }
 
         return query.list();
     }
@@ -310,7 +454,7 @@ public class HibernateTrackedEntityInstanceStore
             {
                 TrackedEntityAttribute attribute = attributeValue.getAttribute();
 
-                if ( attribute.getUnique() )
+                if ( attribute.isUnique() )
                 {
                     hasUnique = true;
                     break;
@@ -330,7 +474,7 @@ public class HibernateTrackedEntityInstanceStore
                 {
                     TrackedEntityAttribute attribute = attributeValue.getAttribute();
 
-                    if ( attribute.getUnique() )
+                    if ( attribute.isUnique() )
                     {
                         Conjunction conjunction = Restrictions.conjunction();
                         conjunction.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );

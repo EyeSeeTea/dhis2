@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentityattributevalue;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,7 +114,7 @@ public class DefaultTrackedEntityAttributeValueService
     }
 
     @Override
-    public void saveTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
+    public void addTrackedEntityAttributeValue( TrackedEntityAttributeValue attributeValue )
     {
         if ( attributeValue.getValue() != null )
         {
@@ -150,8 +149,8 @@ public class DefaultTrackedEntityAttributeValueService
             {
                 if ( attributeValueMap.containsKey( attributeValue.getEntityInstance().getId() ) )
                 {
-                    Collection<TrackedEntityAttributeValue> values = attributeValueMap.get( attributeValue.getEntityInstance()
-                        .getId() );
+                    Collection<TrackedEntityAttributeValue> values = attributeValueMap.get( attributeValue
+                        .getEntityInstance().getId() );
                     values.add( attributeValue );
                 }
                 else
@@ -206,26 +205,14 @@ public class DefaultTrackedEntityAttributeValueService
             TrackedEntityAttributeValue _attributeValue = new TrackedEntityAttributeValue(
                 attributeValue.getAttribute(), destination, attributeValue.getValue() );
 
-            saveTrackedEntityAttributeValue( _attributeValue );
+            addTrackedEntityAttributeValue( _attributeValue );
         }
-    }
-
-    @Override
-    public int countByAttributeOption( TrackedEntityAttributeOption attributeOption )
-    {
-        return attributeValueStore.countByAttributeOption( attributeOption );
     }
 
     @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstance( TrackedEntityAttribute attribute, String value )
     {
         return attributeValueStore.getTrackedEntityInstances( attribute, value );
-    }
-
-    @Override
-    public void updateTrackedEntityAttributeValues( TrackedEntityAttributeOption attributeOption )
-    {
-        attributeValueStore.updateTrackedEntityAttributeValues( attributeOption );
     }
 
 }

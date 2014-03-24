@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics.event.data;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,6 @@ package org.hisp.dhis.analytics.event.data;
 
 import static org.hisp.dhis.analytics.AnalyticsService.NAMES_META_KEY;
 import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
-import static org.hisp.dhis.analytics.DataQueryParams.DIMENSION_NAME_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
@@ -46,8 +45,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.analytics.AnalyticsService;
-import org.hisp.dhis.analytics.DataQueryParams;
-import org.hisp.dhis.analytics.IllegalQueryException;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
@@ -55,10 +52,12 @@ import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.QueryItem;
@@ -93,8 +92,8 @@ public class DefaultEventAnalyticsService
     private static final String ITEM_ORG_UNIT_CODE = "oucode";
     private static final String COL_NAME_EVENTDATE = "executiondate";
 
-    private static final List<String> SORTABLE_ITEMS = Arrays.asList( ITEM_EXECUTION_DATE, ITEM_ORG_UNIT_NAME,
-        ITEM_ORG_UNIT_CODE );
+    private static final List<String> SORTABLE_ITEMS = Arrays.asList( 
+        ITEM_EXECUTION_DATE, ITEM_ORG_UNIT_NAME, ITEM_ORG_UNIT_CODE );
 
     @Autowired
     private ProgramService programService;
@@ -324,11 +323,11 @@ public class DefaultEventAnalyticsService
         {
             for ( String dim : dimension )
             {
-                String dimensionId = DataQueryParams.getDimensionFromParam( dim );
+                String dimensionId = DimensionalObjectUtils.getDimensionFromParam( dim );
 
                 if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
                 {
-                    List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
+                    List<String> items = DimensionalObjectUtils.getDimensionItemsFromParam( dim );
                     params.getDimensions().addAll( analyticsService.getDimension( dimensionId, items, date, format ) );
                 }
                 else
@@ -342,11 +341,11 @@ public class DefaultEventAnalyticsService
         {
             for ( String dim : filter )
             {
-                String dimensionId = DataQueryParams.getDimensionFromParam( dim );
+                String dimensionId = DimensionalObjectUtils.getDimensionFromParam( dim );
 
                 if ( ORGUNIT_DIM_ID.equals( dimensionId ) || PERIOD_DIM_ID.equals( dimensionId ) )
                 {
-                    List<String> items = DataQueryParams.getDimensionItemsFromParam( dim );
+                    List<String> items = DimensionalObjectUtils.getDimensionItemsFromParam( dim );
                     params.getFilters().addAll( analyticsService.getDimension( dimensionId, items, date, format ) );
                 }
                 else
@@ -401,13 +400,13 @@ public class DefaultEventAnalyticsService
     {
         List<QueryItem> items = new ArrayList<QueryItem>();
 
-        if ( !dimension.contains( DIMENSION_NAME_SEP ) )
+        if ( !dimension.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
         {
             items.add( getItem( program, dimension, null, null ) );
         }
         else // Filter
         {
-            String[] split = dimension.split( DIMENSION_NAME_SEP );
+            String[] split = dimension.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
 
             if ( split == null || split.length != 3 )
             {

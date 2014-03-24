@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,8 @@ package org.hisp.dhis.analytics;
  */
 
 import java.util.List;
+
+import org.hisp.dhis.common.IllegalQueryException;
 
 /**
  * @author Lars Helge Overland

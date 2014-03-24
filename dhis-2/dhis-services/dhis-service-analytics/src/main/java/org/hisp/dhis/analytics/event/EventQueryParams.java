@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,10 +51,6 @@ import org.hisp.dhis.program.ProgramStage;
 public class EventQueryParams
     extends DataQueryParams
 {
-    public static final String OU_MODE_SELECTED = "selected";
-    public static final String OU_MODE_CHILDREN = "children";
-    public static final String OU_MODE_DESCENDANTS = "descendants";
-    
     private Program program;
     
     private ProgramStage programStage;

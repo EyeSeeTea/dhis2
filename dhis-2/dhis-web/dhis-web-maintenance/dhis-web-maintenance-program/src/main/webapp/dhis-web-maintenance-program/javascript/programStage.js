@@ -5,6 +5,10 @@ $(function() {
   });
 });
 
+function programStageReminder(context){
+	 location.href = 'programStageReminder.action?id=' + context.id;
+}
+
 function removeProgramStage( context ) {
   removeItem( context.id, context.name, i18n_confirm_delete , 'removeProgramStage.action' );
 }
@@ -78,9 +82,6 @@ function showProgramStageDetails( context )
 		setInnerHTML( 'descriptionField', json.programStage.description );
 		setInnerHTML( 'scheduledDaysFromStartField', json.programStage.minDaysFromStart ); 
 		
-		var relatedTrackedEntity = (json.programStage.relatedTrackedEntity=='true') ? i18n_yes : i18n_no;
-		setInnerHTML( 'relatedTrackedEntityField', relatedPatient );  
-		
 		var irregular = (json.programStage.irregular=='true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'irregularField', irregular );  
 		
@@ -119,17 +120,6 @@ function showProgramStageDetails( context )
 		setInnerHTML( 'openAfterEnrollmentField', openAfterEnrollment );   	
 		
 		setInnerHTML( 'reportDateToUseField', json.programStage.reportDateToUse );   	
-		
-		var templateMessage = "";
-		for(var i in json.programStage.reminders){
-			var index = eval(i) + 1;
-			templateMessage += "<p class='bold'>" + i18n_template_reminder_message + " " + index + "</p>";
-			templateMessage += "<p class='bold'>" + i18n_send_message + ":</p>" ;
-			templateMessage	+= "<p>" + json.programStage.reminders[i].daysAllowedSendMessage + "</p>";
-			templateMessage	+= "<p class='bold'>" + i18n_message + ":</p>";
-			templateMessage	+= "<p>" + json.programStage.reminders[i].templateMessage + "</p>";
-		}
-		setInnerHTML('templateMessageField', templateMessage);
 		
 		showDetails();
 	});
@@ -306,12 +296,6 @@ function repeatableOnChange()
 		disable('standardInterval');
 		disable('displayGenerateEventBox');
 	}
-}
-
-function insertParams( paramValue, rowId )
-{
-	var templateMessage = paramValue;
-	insertTextCommon('templateMessage' + rowId, templateMessage);
 }
 
 // --------------------------------------------------------------------

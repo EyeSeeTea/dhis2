@@ -41,7 +41,7 @@
 		}, function(){
 			enable('messageType');
 		});
-		checkValueIsExist( "name", "validateProgramReminder.action",{id:getFieldValue('id')} );
+		checkValueIsExist( "name", "validateReminder.action",{id:getFieldValue('id')} );
 	});
 
 </script>

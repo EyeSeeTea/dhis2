@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseaggregation;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ public class CaseAggregationCondition
 
     public static String MINUS_DATAELEMENT_OPERATOR = "DEDATEDIFF";
 
-    public static String AUTO_STORED_BY = "DHIS-SYSTEM";
+    public static String AUTO_STORED_BY = "aggregated_from_tracker";
 
     public static final String regExp = "\\[(" + OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE + "|" + OBJECT_PROGRAM + "|"
         + OBJECT_PROGRAM_STAGE_PROPERTY + "|" + OBJECT_PROGRAM_STAGE + "|" + OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY
