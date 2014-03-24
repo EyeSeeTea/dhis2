@@ -3103,10 +3103,14 @@ Ext.onReady( function() {
             if (mode === 'dates') {
                 startEndDate.show();
                 periods.hide();
+
+                ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
             }
             else if (mode === 'periods') {
                 startEndDate.hide();
                 periods.show();
+
+                ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
             }
         };
 
