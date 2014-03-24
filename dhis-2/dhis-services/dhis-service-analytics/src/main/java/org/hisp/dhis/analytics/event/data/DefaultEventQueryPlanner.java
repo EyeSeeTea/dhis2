@@ -45,8 +45,9 @@ import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
-import org.hisp.dhis.program.Program;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -62,11 +63,15 @@ public class DefaultEventQueryPlanner
 
     @Autowired
     private EventAnalyticsManager analyticsManager;
+    
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
 
     // -------------------------------------------------------------------------
     // EventQueryPlanner implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public void validate( EventQueryParams params )
         throws IllegalQueryException
     {
@@ -113,7 +118,8 @@ public class DefaultEventQueryPlanner
         }
     }
     
-    public List<EventQueryParams> planQuery( EventQueryParams params )
+    @Override
+    public List<EventQueryParams> planAggregateQuery( EventQueryParams params )
     {
         List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
 
@@ -134,6 +140,32 @@ public class DefaultEventQueryPlanner
         return queries;
     }
 
+    @Override
+    public EventQueryParams planEventQuery( EventQueryParams params )
+    {
+        List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
+
+        String tableSuffix = "_" + params.getProgram().getUid();
+        
+        if ( params.hasStartEndDate() )
+        {
+            Period queryPeriod = new Period();
+            queryPeriod.setStartDate( params.getStartDate() );
+            queryPeriod.setEndDate( params.getEndDate() );            
+            params.setPartitions( PartitionUtils.getPartitions( queryPeriod, TABLE_PREFIX, tableSuffix, validPartitions ) );
+        }
+        
+        for ( NameableObject object : params.getOrganisationUnits() )
+        {
+            OrganisationUnit unit = (OrganisationUnit) object; 
+            unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getUid() ) );
+        }
+        
+        //TODO periods, convert to start/end dates
+        
+        return params;
+    }
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -142,9 +174,7 @@ public class DefaultEventQueryPlanner
     {
         List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
         
-        Program program = params.getProgram();
-
-        String tableSuffix = "_" + program.getUid();
+        String tableSuffix = "_" + params.getProgram().getUid();
         
         if ( params.hasStartEndDate() )
         {

@@ -38,6 +38,7 @@ import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.program.Program;
 import org.junit.Test;
@@ -56,6 +57,9 @@ public class EventQueryPlannerTest
     @Autowired
     private EventQueryPlanner queryPlanner;
     
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
     @Override
     public void setUpTest()
     {
@@ -65,12 +69,15 @@ public class EventQueryPlannerTest
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B' );
         
+        organisationUnitService.addOrganisationUnit( ouA );
+        organisationUnitService.addOrganisationUnit( ouB );
+        
         ouA.setLevel( 1 );
         ouB.setLevel( 2 );        
     }
     
     @Test
-    public void testPlanQueryA()
+    public void testPlanAggregateQueryA()
     {        
         EventQueryParams params = new EventQueryParams();
         params.setProgram( prA );
@@ -78,7 +85,7 @@ public class EventQueryPlannerTest
         params.setEndDate( new Cal( 2012, 3, 20 ).time() );
         params.setOrganisationUnits( Arrays.asList( ouA ) );
         
-        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
         
         assertEquals( 1, queries.size() );
         
@@ -96,7 +103,7 @@ public class EventQueryPlannerTest
     }
 
     @Test
-    public void testPlanQueryB()
+    public void testPlanAggregateQueryB()
     {        
         EventQueryParams params = new EventQueryParams();
         params.setProgram( prA );
@@ -104,7 +111,7 @@ public class EventQueryPlannerTest
         params.setEndDate( new Cal( 2010, 9, 20 ).time() );
         params.setOrganisationUnits( Arrays.asList( ouA ) );
         
-        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
 
         assertEquals( 1, queries.size() );
 
@@ -120,7 +127,7 @@ public class EventQueryPlannerTest
     }
 
     @Test
-    public void testPlanQueryC()
+    public void testPlanAggregateQueryC()
     {        
         EventQueryParams params = new EventQueryParams();
         params.setProgram( prA );
@@ -128,10 +135,52 @@ public class EventQueryPlannerTest
         params.setEndDate( new Cal( 2012, 3, 20 ).time() );
         params.setOrganisationUnits( Arrays.asList( ouA, ouB ) );
         
-        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
         
         assertEquals( 2, queries.size() );
         assertEquals( ouA, queries.get( 0 ).getOrganisationUnits().get( 0 ) );
         assertEquals( ouB, queries.get( 1 ).getOrganisationUnits().get( 0 ) );
+    }
+
+    @Test
+    public void testPlanEventQueryA()
+    {        
+        EventQueryParams params = new EventQueryParams();
+        params.setProgram( prA );
+        params.setStartDate( new Cal( 2010, 6, 1 ).time() );
+        params.setEndDate( new Cal( 2012, 3, 20 ).time() );
+        params.setOrganisationUnits( Arrays.asList( ouA ) );
+        
+        params = queryPlanner.planEventQuery( params );
+        
+        assertEquals( new Cal( 2010, 6, 1 ).time(), params.getStartDate() );
+        assertEquals( new Cal( 2012, 3, 20 ).time(), params.getEndDate() );
+        
+        Partitions partitions = params.getPartitions();
+        
+        assertEquals( 3, partitions.getPartitions().size() );
+        assertEquals( "analytics_event_2010_programuida", partitions.getPartitions().get( 0 ) );
+        assertEquals( "analytics_event_2011_programuida", partitions.getPartitions().get( 1 ) );
+        assertEquals( "analytics_event_2012_programuida", partitions.getPartitions().get( 2 ) );
+    }
+
+    @Test
+    public void testPlanEventQueryB()
+    {        
+        EventQueryParams params = new EventQueryParams();
+        params.setProgram( prA );
+        params.setStartDate( new Cal( 2010, 3, 1 ).time() );
+        params.setEndDate( new Cal( 2010, 9, 20 ).time() );
+        params.setOrganisationUnits( Arrays.asList( ouA ) );
+        
+        params = queryPlanner.planEventQuery( params );
+
+        assertEquals( new Cal( 2010, 3, 1 ).time(), params.getStartDate() );
+        assertEquals( new Cal( 2010, 9, 20 ).time(), params.getEndDate() );
+
+        Partitions partitions = params.getPartitions();
+
+        assertEquals( 1, partitions.getPartitions().size() );
+        assertEquals( "analytics_event_2010_programuida", partitions.getSinglePartition() );
     }
 }

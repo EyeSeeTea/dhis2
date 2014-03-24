@@ -152,7 +152,7 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
-        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
 
         for ( EventQueryParams query : queries )
         {
@@ -219,24 +219,24 @@ public class DefaultEventAnalyticsService
 
         Timer t = new Timer().start();
 
-        List<EventQueryParams> queries = queryPlanner.planQuery( params );
+        params = queryPlanner.planEventQuery( params );
 
-        t.getSplitTime( "Planned query, got: " + queries.size() );
+        t.getSplitTime( "Planned query, got partitions: " + params.getPartitions() );
 
         int count = 0;
 
-        for ( EventQueryParams query : queries )
+        if ( params.getPartitions().hasAny() )
         {
             if ( params.isPaging() )
             {
-                count += analyticsManager.getEventCount( query );
+                count += analyticsManager.getEventCount( params );
             }
-
-            analyticsManager.getEvents( query, grid );
+    
+            analyticsManager.getEvents( params, grid );
+    
+            t.getTime( "Queried events, got: " + grid.getHeight() );
         }
-
-        t.getTime( "Queried events, got: " + grid.getHeight() );
-
+        
         // ---------------------------------------------------------------------
         // Meta-data
         // ---------------------------------------------------------------------

@@ -47,5 +47,7 @@ public interface EventQueryPlanner
      * 
      * @param params the query params.
      */
-    List<EventQueryParams> planQuery( EventQueryParams params );
+    List<EventQueryParams> planAggregateQuery( EventQueryParams params );
+    
+    EventQueryParams planEventQuery( EventQueryParams params );
 }
