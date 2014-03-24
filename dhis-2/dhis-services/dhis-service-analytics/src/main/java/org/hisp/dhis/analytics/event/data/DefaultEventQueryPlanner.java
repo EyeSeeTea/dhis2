@@ -39,6 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.QueryPlanner;
+import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.table.PartitionUtils;
@@ -60,7 +61,14 @@ public class DefaultEventQueryPlanner
     
     @Autowired
     private QueryPlanner queryPlanner;
-    
+
+    @Autowired
+    private EventAnalyticsManager analyticsManager;
+
+    // -------------------------------------------------------------------------
+    // EventQueryPlanner implementation
+    // -------------------------------------------------------------------------
+
     public void validate( EventQueryParams params )
         throws IllegalQueryException
     {
@@ -107,8 +115,10 @@ public class DefaultEventQueryPlanner
         }
     }
     
-    public List<EventQueryParams> planQuery( EventQueryParams params, List<String> validPartitions )
+    public List<EventQueryParams> planQuery( EventQueryParams params )
     {
+        List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
+
         List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
         
         List<EventQueryParams> groupedByPartition = groupByPartition( params, validPartitions );
@@ -125,7 +135,11 @@ public class DefaultEventQueryPlanner
         
         return queries;
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
     private List<EventQueryParams> groupByPartition( EventQueryParams params, List<String> validPartitions )
     {
         List<EventQueryParams> queries = new ArrayList<EventQueryParams>();

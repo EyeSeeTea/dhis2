@@ -51,6 +51,8 @@ import org.hisp.dhis.program.ProgramStage;
 public class EventQueryParams
     extends DataQueryParams
 {
+    public static final int DEFAULT_PAGE_SIZE = 50;
+    
     private Program program;
     
     private ProgramStage programStage;
@@ -192,7 +194,7 @@ public class EventQueryParams
     
     public int getPageSizeWithDefault()
     {
-        return pageSize != null && pageSize >= 0 ? pageSize : 50;
+        return pageSize != null && pageSize >= 0 ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
     public int getOffset()

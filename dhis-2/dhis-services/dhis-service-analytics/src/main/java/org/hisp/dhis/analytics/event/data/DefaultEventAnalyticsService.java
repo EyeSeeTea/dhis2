@@ -125,14 +125,11 @@ public class DefaultEventAnalyticsService
 
     // TODO order event analytics tables on execution date to avoid default
     // TODO sorting in queries
-    // TODO parallel processing of queries
 
     public Grid getAggregatedEventData( EventQueryParams params )
     {
         queryPlanner.validate( params );
         
-        List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
-
         Grid grid = new ListGrid();
 
         // ---------------------------------------------------------------------
@@ -155,7 +152,7 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
-        List<EventQueryParams> queries = queryPlanner.planQuery( params, validPartitions );
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
         for ( EventQueryParams query : queries )
         {
@@ -222,7 +219,7 @@ public class DefaultEventAnalyticsService
 
         Timer t = new Timer().start();
 
-        List<EventQueryParams> queries = queryPlanner.planQuery( params, null );
+        List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
         t.getSplitTime( "Planned query, got: " + queries.size() );
 

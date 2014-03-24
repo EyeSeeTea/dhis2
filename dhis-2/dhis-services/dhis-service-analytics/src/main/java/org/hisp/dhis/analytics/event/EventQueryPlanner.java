@@ -46,8 +46,6 @@ public interface EventQueryPlanner
      * Plans the given params and returns a list of params.
      * 
      * @param params the query params.
-     * @param validPartitions the list of existing database partition names, only
-     *        required for aggregate queries.
      */
-    List<EventQueryParams> planQuery( EventQueryParams params, List<String> validPartitions );
+    List<EventQueryParams> planQuery( EventQueryParams params );
 }
