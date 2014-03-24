@@ -54,9 +54,10 @@
                 list: function () {
                     var result = [];
 
-                    for (orderIndex in menuOrder) {
-                        result.push(menuItems[menuOrder[orderIndex]]);
-                    }
+                    menuOrder.forEach(function (element, index, array) {
+                        result.push(menuItems[element]);
+                    });
+
                     return result;
                 },
                 setOrder: function (order) {
@@ -85,14 +86,15 @@
             var itemIndex,
                 items = dhis2.menu.getApps();
 
-            for (itemIndex in items) {
-                if (translations[items[itemIndex].id]) {
-                    items[itemIndex].name = translations.get(items[itemIndex].id);
+            items.forEach(function (element, index, items) {
+                if (element.id && translations[element.id]) {
+                    items[index].name = translations.get(element.id);
                 }
-                if (items[itemIndex].description === '' && translations.get('intro_' + items[itemIndex].id) !== items[itemIndex].id) {
-                    items[itemIndex].description = translations['intro_' + items[itemIndex].id];
+                if (element.description === '' && translations.get('intro_' + element.id) !== element.id){
+                    element.description = translations['intro_' + element.id];
                 }
-            }
+            });
+
             setReady();
         }
 
@@ -120,10 +122,9 @@
                 onceCallBack = onceCallBacks.pop();
                 onceCallBack(menuItems);
             }
-
-            for (callBackIndex in callBacks) {
-                callBacks[callBackIndex](menuItems);
-            }
+            callBacks.forEach(function (callback, index, callBacks) {
+               callback.apply(dhis2.menu, [menuItems]);
+            });
         }
 
         //TODO: Function seems complicated and can be improved perhaps
@@ -147,15 +148,15 @@
                 return apps;
 
             center = apps[center];
-            for (appIndex in apps) {
-                comparisonResult = center.name.localeCompare(apps[appIndex].name);
+            apps.forEach(function (app, index, apps) {
+                comparisonResult = center.name.localeCompare(app.name);
                 if (comparisonResult === -1) {
-                    bigger.push(apps[appIndex]);
+                    bigger.push(app);
                 }
                 if (comparisonResult === 1) {
-                    smaller.push(apps[appIndex]);
+                    smaller.push(app);
                 }
-            }
+            });
 
             smaller = sortAppsByName(smaller);
             bigger = sortAppsByName(bigger);
@@ -198,29 +199,26 @@
         that.updateFavoritesFromList = function (orderedIdList) {
             var newFavsIds = orderedIdList.slice(0, MAX_FAVORITES),
                 oldFavsIds = menuItems.getOrder().slice(0, MAX_FAVORITES),
-                oldFavId,
                 currentOrder = menuItems.getOrder(),
-                currentOrderId,
-                i,
                 newOrder;
 
             //Take the new favorites as the new order
             newOrder = newFavsIds;
 
             //Find the favorites that were pushed out and add  them to the list on the top of the order
-            for (oldFavId  in oldFavsIds) {
-                if (-1 === newFavsIds.indexOf(oldFavsIds[oldFavId])) {
-                    newOrder.push(oldFavsIds[oldFavId]);
+            oldFavsIds.forEach(function (id, index, ids) {
+                if (-1 === newFavsIds.indexOf(id)) {
+                    newOrder.push(id);
                 }
-            }
+            });
 
             //Loop through the remaining current order to add the remaining apps to the new order
-            for (currentOrderId in currentOrder) {
+            currentOrder.forEach(function (id, index, ids) {
                 //Add id to the order when it's not already in there
-                if (-1 === newOrder.indexOf(currentOrder[currentOrderId])) {
-                    newOrder.push(currentOrder[currentOrderId]);
+                if (-1 === newOrder.indexOf(id)) {
+                    newOrder.push(id);
                 }
-            }
+            });
 
             menuItems.setOrder(newOrder);
 
@@ -233,19 +231,16 @@
          * Adds the menu items given to the menu
          */
         that.addMenuItems = function (items) {
-            var itemIndex,
-                currentItem,
-                keysToTranslate = [];
+            var keysToTranslate = [];
 
-            for (itemIndex in items) {
-                currentItem = items[itemIndex];
-                currentItem.id = currentItem.name;
-                keysToTranslate.push(currentItem.name);
-                if (currentItem.description === "") {
-                    keysToTranslate.push( "intro_" + currentItem.name );
+            items.forEach(function (item, index, items) {
+                item.id = item.name;
+                keysToTranslate.push(item.name);
+                if(item.description === "") {
+                    keysToTranslate.push("intro_" + item.name);
                 }
-                menuItems.setItem(currentItem.id, currentItem);
-            }
+                menuItems.setItem(item.id, item);
+            });
 
             dhis2.translate.get(keysToTranslate, processTranslations);
         };

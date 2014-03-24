@@ -86,11 +86,12 @@ dhis2.util.namespace( 'dhis2.translate' );
             key;
 
         //Only ask for the translations that we do not already have
-        for (key in translate) {
-            if ( ! (translate[key] in translationCache)) {
-                translateKeys.push(translate[key]);
+        translate.forEach(function (text, index, translate) {
+            if ( ! (text in translationCache)) {
+                translateKeys.push(text);
             }
-        }
+        });
+
         if (translateKeys.length > 0) {
             //Ask for translations of the app names
             getTranslationsFromServer(translateKeys, callback);

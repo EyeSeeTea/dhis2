@@ -235,11 +235,12 @@
  */
 #menuDropDown1 {
     top: 55px;
-    left: 575px;
+    left: 603px;
 }
 
 #menuDropDown3 {
     top: 55px;
+    left: 733px;
 }
 
 hr.app-separator {
@@ -253,10 +254,10 @@ hr.app-separator {
 
 #menuDropDown1 .caret-up-background,
 #menuDropDown1 .caret-up-border {
-    left: 190px;
+    left: 182px;
 }
 
 #menuDropDown3 .caret-up-background,
 #menuDropDown3 .caret-up-border {
-    left: 120px;
+    left: 182px;
 }
