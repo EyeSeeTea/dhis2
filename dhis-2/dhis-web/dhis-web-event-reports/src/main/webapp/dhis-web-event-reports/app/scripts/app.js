@@ -872,7 +872,6 @@ Ext.onReady( function() {
             dimensionStore.each(function(record) {
                 dimensionStoreMap[record.data.id] = dimensionStore;
             });
-console.log("STATE", dimensionStoreMap);
         };
 
 		window = Ext.create('Ext.window.Window', {
@@ -4896,14 +4895,17 @@ console.log("STATE", dimensionStoreMap);
 			web.report.getData = function(view, isUpdateGui) {
 				var paramString = '?',
 					features = [];
-console.log("pe", view.periods);
+
 				// stage
 				paramString += 'stage=' + view.stage.id;
 
 				// ou
 				if (Ext.isArray(view.organisationUnits)) {
+                    paramString += '&dimension=ou:';
+
 					for (var i = 0; i < view.organisationUnits.length; i++) {
-						paramString += '&dimension=ou:' + view.organisationUnits[i].id;
+						paramString += view.organisationUnits[i].id;
+                        paramString += i < (view.organisationUnits.length - 1) ? ';' : '';
 					}
 				}
 
