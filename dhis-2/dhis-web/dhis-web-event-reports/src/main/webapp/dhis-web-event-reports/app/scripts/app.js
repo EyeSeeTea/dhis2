@@ -566,6 +566,8 @@ Ext.onReady( function() {
 			getSetup,
             addDimension,
             removeDimension,
+            hasDimension,
+            saveState,
             dimensionStoreMap = {},
 
 			dimensionPanel,
@@ -634,9 +636,9 @@ Ext.onReady( function() {
 
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+        colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		rowStore = getStore();
-        rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		filterStore = getStore();
 
@@ -817,8 +819,8 @@ Ext.onReady( function() {
 			};
 		};
 
-        addDimension = function(record) {
-            var store = dimensionStoreMap[record.id] || dimensionStore;
+        addDimension = function(record, store) {
+            var store = dimensionStoreMap[record.id] || store || dimensionStore;
             store.add(record);
         };
 
@@ -849,6 +851,24 @@ Ext.onReady( function() {
             }
 
             return false;
+        };
+
+        saveState = function() {
+            colStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = colStore;
+            });
+
+            rowStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = rowStore;
+            });
+
+            filterStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = filterStore;
+            });
+
+            dimensionStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = dimensionStore;
+            });
         };
 
 		window = Ext.create('Ext.window.Window', {
@@ -3026,7 +3046,7 @@ Ext.onReady( function() {
 
 				addUxFromDataElement(element);
 
-                ns.app.aggregateLayoutWindow.colStore.add(element);
+                ns.app.aggregateLayoutWindow.addDimension(element, ns.app.aggregateLayoutWindow.rowStore);
                 ns.app.queryLayoutWindow.colStore.add(element);
 			}
         };
@@ -3141,7 +3161,7 @@ Ext.onReady( function() {
             // relative periods
         onPeriodChange = function() {
             if ((period.isRelativePeriods() || fixedPeriodSelectedStore.getRange().length) && !ns.app.aggregateLayoutWindow.hasDimension(dimConf.period.dimensionName)) {
-                ns.app.aggregateLayoutWindow.rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+                ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
             }
             else {
                 ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
@@ -4257,16 +4277,6 @@ Ext.onReady( function() {
 
 				treePanel.selectGraphMap(view.parentGraphMap);
 			}());
-
-			// layer gui
-			if (layer) {
-
-				// layer item
-				layer.item.setValue(true, view.opacity);
-
-				// layer menu
-				layer.menu.enableItems();
-			}
 		};
 
 		getView = function(config) {
@@ -5220,11 +5230,14 @@ console.log("pe", view.periods);
 
 		update = function() {
 			var config = ns.core.web.report.getLayoutConfig();
-				//layout = ns.core.api.layout.Layout(config);
 
 			if (!config) {
 				return;
 			}
+
+            if (typeToolbar.getType() === 'aggregated') {
+                ns.app.aggregateLayoutWindow.saveState();
+            }
 
 			ns.core.web.report.getData(config, false);
 		};
