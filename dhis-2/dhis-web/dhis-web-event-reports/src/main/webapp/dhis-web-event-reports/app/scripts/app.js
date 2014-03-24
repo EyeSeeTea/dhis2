@@ -841,7 +841,7 @@ Ext.onReady( function() {
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
-                index = store.findExact('id', dataElementId);
+                index = store.findExact('id', id);
 
                 if (index != -1) {
                     return true;
@@ -4275,10 +4275,25 @@ Ext.onReady( function() {
             view.program = program.getRecord();
             view.stage = stage.getRecord();
 
-            view.startDate = startDate.getSubmitValue();
-            view.endDate = endDate.getSubmitValue();
+            if (!view.stage) {
+                return;
+            }
 
-            view.periods = periods.getRecords();
+            if (periodMode.getValue() === 'dates') {
+                view.startDate = startDate.getSubmitValue();
+                view.endDate = endDate.getSubmitValue();
+
+                if (!(view.startDate && view.endDate)) {
+                    return;
+                }
+            }
+            else if (periodMode.getValue() === 'periods') {
+                view.periods = periods.getRecords();
+
+                if (!view.periods) {
+                    return;
+                }
+            }
 
             view.dataElements = [];
 
@@ -4289,10 +4304,6 @@ Ext.onReady( function() {
             }
 
             view.organisationUnits = treePanel.getDimension().items;
-
-            if (!(view.program && view.stage && ((view.startDate && view.endDate) || view.periods.length))) {
-				return;
-			}
 
 			return view;
 		};
@@ -4866,7 +4877,7 @@ Ext.onReady( function() {
 			web.report.getData = function(view, isUpdateGui) {
 				var paramString = '?',
 					features = [];
-
+console.log("pe", view.periods);
 				// stage
 				paramString += 'stage=' + view.stage.id;
 
