@@ -86,8 +86,8 @@ public class EventQueryParams
     // -------------------------------------------------------------------------
     
     private String periodType;
-    
-    private boolean aggregate;
+
+    private boolean aggregate;    
     
     // -------------------------------------------------------------------------
     // Constructors

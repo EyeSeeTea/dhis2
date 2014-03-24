@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -59,7 +60,7 @@ public class EventQueryPlannerTest
     public void setUpTest()
     {
         prA = new Program();
-        prA.setUid( "programuidA" );
+        prA.setUid( "programuida" );
         
         ouA = createOrganisationUnit( 'A' );
         ouB = createOrganisationUnit( 'B' );
@@ -79,18 +80,19 @@ public class EventQueryPlannerTest
         
         List<EventQueryParams> queries = queryPlanner.planQuery( params );
         
-        assertEquals( 3, queries.size() );
+        assertEquals( 1, queries.size() );
         
-        assertEquals( new Cal( 2010, 6, 1 ).time(), queries.get( 0 ).getStartDate() );
-        assertEquals( new Cal( 2010, 12, 31 ).time(), queries.get( 0 ).getEndDate() );
-        assertEquals( new Cal( 2011, 1, 1 ).time(), queries.get( 1 ).getStartDate() );
-        assertEquals( new Cal( 2011, 12, 31 ).time(), queries.get( 1 ).getEndDate() );
-        assertEquals( new Cal( 2012, 1, 1 ).time(), queries.get( 2 ).getStartDate() );
-        assertEquals( new Cal( 2012, 3, 20 ).time(), queries.get( 2 ).getEndDate() );
+        EventQueryParams query = queries.get( 0 );
         
-        assertEquals( "analytics_event_2010_programuidA", queries.get( 0 ).getPartitions().getSinglePartition() );
-        assertEquals( "analytics_event_2011_programuidA", queries.get( 1 ).getPartitions().getSinglePartition() );
-        assertEquals( "analytics_event_2012_programuidA", queries.get( 2 ).getPartitions().getSinglePartition() );
+        assertEquals( new Cal( 2010, 6, 1 ).time(), query.getStartDate() );
+        assertEquals( new Cal( 2012, 3, 20 ).time(), query.getEndDate() );
+        
+        Partitions partitions = query.getPartitions();
+        
+        assertEquals( 3, partitions.getPartitions().size() );
+        assertEquals( "analytics_event_2010_programuida", partitions.getPartitions().get( 0 ) );
+        assertEquals( "analytics_event_2011_programuida", partitions.getPartitions().get( 1 ) );
+        assertEquals( "analytics_event_2012_programuida", partitions.getPartitions().get( 2 ) );
     }
 
     @Test
@@ -105,12 +107,17 @@ public class EventQueryPlannerTest
         List<EventQueryParams> queries = queryPlanner.planQuery( params );
 
         assertEquals( 1, queries.size() );
-        
-        assertEquals( new Cal( 2010, 3, 1 ).time(), queries.get( 0 ).getStartDate() );
-        assertEquals( new Cal( 2010, 9, 20 ).time(), queries.get( 0 ).getEndDate() );
 
-        assertEquals( "analytics_event_2010_programuidA", queries.get( 0 ).getPartitions().getSinglePartition() );
-    }    
+        EventQueryParams query = queries.get( 0 );
+        
+        assertEquals( new Cal( 2010, 3, 1 ).time(), query.getStartDate() );
+        assertEquals( new Cal( 2010, 9, 20 ).time(), query.getEndDate() );
+
+        Partitions partitions = query.getPartitions();
+
+        assertEquals( 1, partitions.getPartitions().size() );
+        assertEquals( "analytics_event_2010_programuida", partitions.getSinglePartition() );
+    }
 
     @Test
     public void testPlanQueryC()
@@ -123,6 +130,8 @@ public class EventQueryPlannerTest
         
         List<EventQueryParams> queries = queryPlanner.planQuery( params );
         
-        assertEquals( 6, queries.size() );
+        assertEquals( 2, queries.size() );
+        assertEquals( ouA, queries.get( 0 ).getOrganisationUnits().get( 0 ) );
+        assertEquals( ouB, queries.get( 1 ).getOrganisationUnits().get( 0 ) );
     }
 }
