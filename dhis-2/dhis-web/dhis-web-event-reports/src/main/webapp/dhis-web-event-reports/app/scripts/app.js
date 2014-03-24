@@ -821,7 +821,10 @@ Ext.onReady( function() {
 
         addDimension = function(record, store) {
             var store = dimensionStoreMap[record.id] || store || dimensionStore;
-            store.add(record);
+
+            if (!hasDimension(record.id)) {
+                store.add(record);
+            }
         };
 
         removeDimension = function(dataElementId) {
@@ -869,6 +872,7 @@ Ext.onReady( function() {
             dimensionStore.each(function(record) {
                 dimensionStoreMap[record.data.id] = dimensionStore;
             });
+console.log("STATE", dimensionStoreMap);
         };
 
 		window = Ext.create('Ext.window.Window', {
@@ -886,6 +890,7 @@ Ext.onReady( function() {
             addDimension: addDimension,
             removeDimension: removeDimension,
             hasDimension: hasDimension,
+            saveState: saveState,
 			hideOnBlur: true,
 			items: {
 				layout: 'column',
@@ -3164,7 +3169,7 @@ Ext.onReady( function() {
 
             // relative periods
         onPeriodChange = function() {
-            if ((period.isRelativePeriods() || fixedPeriodSelectedStore.getRange().length) && !ns.app.aggregateLayoutWindow.hasDimension(dimConf.period.dimensionName)) {
+            if ((period.isRelativePeriods() || fixedPeriodSelectedStore.getRange().length)) {
                 ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
             }
             else {
@@ -5239,7 +5244,7 @@ console.log("pe", view.periods);
 				return;
 			}
 
-            if (typeToolbar.getType() === 'aggregated') {
+            if (typeToolbar.getType() === 'aggregate') {
                 ns.app.aggregateLayoutWindow.saveState();
             }
 
