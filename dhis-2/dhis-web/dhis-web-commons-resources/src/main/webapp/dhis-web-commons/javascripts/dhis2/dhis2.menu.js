@@ -40,8 +40,7 @@
          */
         menuItemsList = (function () {
             var menuOrder = [],
-                menuItems = {},
-                orderIndex;
+                menuItems = {};
 
             return {
                 getItem: function (key) {
@@ -139,7 +138,6 @@
             var smaller = [],
                 bigger = [],
                 center = Math.floor(apps.length / 2),
-                appIndex,
                 comparisonResult,
                 result;
 
@@ -150,10 +148,10 @@
             center = apps[center];
             apps.forEach(function (app, index, apps) {
                 comparisonResult = center.name.localeCompare(app.name);
-                if (comparisonResult === -1) {
+                if (comparisonResult <= -1) {
                     bigger.push(app);
                 }
-                if (comparisonResult === 1) {
+                if (comparisonResult >= 1) {
                     smaller.push(app);
                 }
             });
@@ -162,6 +160,7 @@
             bigger = sortAppsByName(bigger);
 
             result = smaller.concat([center]).concat(bigger);
+
             return inverse ? result.reverse() : result;
         }
 
@@ -314,7 +313,6 @@
                     nonFavApps = that.sortNonFavAppsByName(true);
                     break;
             }
-
             return favApps.concat(nonFavApps);;
         }
 
@@ -357,7 +355,7 @@
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
     markup += '  <a href="${defaultAction}" class="app-menu-item" title="${name}">';
-    markup += '    <img src="${icon}">';
+    markup += '    <img src="${icon}" onError="javascript: this.onerror=null; this.src = \'../icons/program.png\';">';
     markup += '    <span>${name}</span>';
     markup += '    <div class="app-menu-item-description"><span>${name}</span><i class="fa fa-arrows"></i>${description}</div>';
     markup += '  </a>';

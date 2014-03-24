@@ -36,6 +36,7 @@
     padding: 10px;
     box-shadow: 1px 1px 7px lightgray;
 }
+
 .app-menu .app-menu-item img {
     max-height: 36px;
     max-width: 36px;
@@ -44,11 +45,11 @@
     top: 25%;
     position: absolute;
 }
+
 .app-menu .app-menu-item span {
-    font-size: 1.3em;
+    font-size: 1.25em;
     padding-left: 48px;
     display: block;
-    padding-left: 50px;
     padding-top: 15px;
 }
 
