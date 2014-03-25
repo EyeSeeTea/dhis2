@@ -1,4 +1,4 @@
-package org.hisp.dhis.webportal.menu.action;
+package org.hisp.dhis.dxf2.render;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,59 +28,18 @@ package org.hisp.dhis.webportal.menu.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import com.fasterxml.jackson.core.JsonParseException;
 
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.webportal.module.Module;
-import org.hisp.dhis.webportal.module.ModuleManager;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.opensymphony.xwork2.Action;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class GetModulesAction
-    implements Action
+public interface RenderService
 {
-    @Autowired
-    private ModuleManager manager;
+    void toJson( OutputStream output, Object value ) throws IOException;
 
-    @Autowired
-    private CurrentUserService currentUserService;
-    
-    private List<Module> modules;
-    
-    public List<Module> getModules()
-    {
-        return modules;
-    }
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        modules = manager.getAccessibleMenuModulesAndApps();
-
-        final List<String> userApps = currentUserService.getCurrentUser().getApps();
-        
-        if ( userApps != null )
-        {
-            Collections.sort( modules, new Comparator<Module>()
-            {
-                @Override
-                public int compare( Module m1, Module m2 )
-                {
-                    Integer i1 = userApps.indexOf( m1.getName() );
-                    Integer i2 = userApps.indexOf( m2.getName() );
-                    
-                    return i1 != -1 ? ( i2 != -1 ? i1.compareTo( i2 ) : -1 ) : 1;
-                }
-            } );
-        }
-        
-        return SUCCESS;
-    }
+    <T> T fromJson( InputStream input, Class<?> clazz ) throws IOException;
 }
