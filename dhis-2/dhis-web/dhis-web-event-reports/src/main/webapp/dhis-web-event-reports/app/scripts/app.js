@@ -718,7 +718,14 @@ Ext.onReady( function() {
 							ms.boundList.getSelectionModel().deselectAll();
 						}, 10);
 					});
-				}
+				},
+                added: function(n1, n2, n3, n4) {
+                    console.log(arguments);
+                    nissa1 = n1;
+                    nissa2 = n2;
+                    nissa3 = n3;
+                    nissa4 = n4;
+                }
 			}
 		});
 
