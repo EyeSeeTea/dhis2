@@ -41,6 +41,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -65,13 +66,9 @@ public class UserController
 
     @Override
     @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
-    public String getObjectList(
-        @RequestParam( required = false ) String include,
-        @RequestParam( required = false ) String exclude,
-        @RequestParam( value = "filter", required = false ) List<String> filters,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    public String getObjectList( @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
     {
-        return super.getObjectList( include, exclude, filters, parameters, model, response, request );
+        return super.getObjectList( parameters, model, response, request );
     }
 
     @Override

@@ -48,6 +48,7 @@ import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -100,6 +101,35 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @RequestMapping( method = RequestMethod.GET )
     public String getObjectList(
+        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
+    {
+        WebOptions options = new WebOptions( parameters );
+        WebMetaData metaData = new WebMetaData();
+        List<T> entityList = getEntityList( metaData, options );
+        String viewClass = options.getViewClass( "basic" );
+
+        postProcessEntities( entityList );
+        postProcessEntities( entityList, options, parameters );
+
+        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
+
+        if ( viewClass.equals( "basic" ) )
+        {
+            handleLinksAndAccess( options, metaData, entityList, false );
+        }
+        else
+        {
+            handleLinksAndAccess( options, metaData, entityList, true );
+        }
+
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", viewClass );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
+    }
+
+    @RequestMapping( method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE } )
+    public void getObjectListJson(
         @RequestParam( required = false ) String include,
         @RequestParam( required = false ) String exclude,
         @RequestParam( value = "filter", required = false ) List<String> filters,
@@ -139,15 +169,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
         }
 
-        if ( options.getViewClass( "basic" ).equals( "basic" ) )
-        {
-            handleLinksAndAccess( options, metaData, entityList, false );
-        }
-        else
-        {
-            handleLinksAndAccess( options, metaData, entityList, true );
-        }
-
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
@@ -177,12 +198,21 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-            model.addAttribute( "model", metaData );
-            model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-        }
+            String viewClass = options.getViewClass( "basic" );
 
-        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
+            if ( viewClass.equals( "basic" ) )
+            {
+                handleLinksAndAccess( options, metaData, entityList, false );
+            }
+            else
+            {
+                handleLinksAndAccess( options, metaData, entityList, true );
+            }
+
+            renderService.toJson( response.getOutputStream(), metaData, JacksonUtils.getViewClass( viewClass ) );
+        }
     }
+
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     public String getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
@@ -236,14 +266,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
+        input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
+        input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
     }
@@ -254,7 +286,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws
+        Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
     }
@@ -268,6 +301,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
+
     protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters )
     {
 
