@@ -1848,7 +1848,6 @@ Ext.onReady( function() {
                     }
 
                     // renderer
-console.log(store.hasDecimals(), store.getMaximum() < 20, store.getMaximum());                    
                     renderer = store.hasDecimals() && (store.getMaximum() < 20) ? '0.0' : '0,0';
 
                     axis = {
