@@ -2260,7 +2260,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.objects || [],
+                            data = response.indicators || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2299,7 +2299,7 @@ Ext.onReady( function() {
 				url: ns.core.init.contextPath + '/api/indicatorGroups.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'indicatorGroups'
 				},
 				pageParam: false,
 				startParam: false,
@@ -2389,7 +2389,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.objects || [],
+                            data = response.dataElements || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2473,7 +2473,7 @@ Ext.onReady( function() {
 				url: ns.core.init.contextPath + '/api/dataElementGroups.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'dataElementGroups'
 				},
 				pageParam: false,
 				startParam: false,
@@ -2503,7 +2503,7 @@ Ext.onReady( function() {
 				url: ns.core.init.contextPath + '/api/dataSets.json?include=id,name',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'dataSets'
 				},
 				pageParam: false,
 				startParam: false,
@@ -2563,7 +2563,7 @@ Ext.onReady( function() {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'charts'
 				},
 				startParam: false,
 				limitParam: false
@@ -2615,7 +2615,7 @@ Ext.onReady( function() {
 				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'organisationUnitGroups'
 				},
 				pageParam: false,
 				startParam: false,
@@ -5385,7 +5385,7 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&include=id,name,children[id,name]',
 									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).objects || [];
+										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();
 									}
 								});
@@ -5394,7 +5394,7 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/organisationUnitLevels.json?include=id,name,level&paging=false',
 									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).objects || [];
+										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 										fn();
 									}
 								});
@@ -5403,7 +5403,7 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&include=id,name,children[id,name]&paging=false',
 									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).objects || [],
+										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
 											ou = [],
 											ouc = [];
 
