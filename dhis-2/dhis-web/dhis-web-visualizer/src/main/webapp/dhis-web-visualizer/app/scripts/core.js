@@ -315,6 +315,8 @@ Ext.onReady( function() {
 
                 // showValues: boolean (true)
 
+                // hideEmptyRows: boolean (false)
+
                 // hideLegend: boolean (false)
 
                 // hideTitle: boolean (false)
@@ -541,6 +543,7 @@ Ext.onReady( function() {
                     // properties
                     layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+                    layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
 
                     layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
                     layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
