@@ -60,8 +60,8 @@ import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
@@ -81,7 +81,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceStore;
-import org.hisp.dhis.trackedentity.TrackedEntityQueryParams;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.jdbc.core.RowMapper;
@@ -176,7 +175,7 @@ public class HibernateTrackedEntityInstanceStore
             }
         }
         
-        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_DESCENDANTS ) )
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
         {
             sql += "left join _orgunitstructure ous on tei.organisationunitid = ous.organisationunitid ";
         }
@@ -186,7 +185,7 @@ public class HibernateTrackedEntityInstanceStore
             sql += hlp.whereAnd() + " tei.trackedentityid = " + params.getTrackedEntity().getId() + " ";
         }
 
-        if ( params.isOrganisationUnitMode( DimensionalObject.OU_MODE_DESCENDANTS ) )
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS ) )
         {
             SetMap<Integer, OrganisationUnit> levelOuMap = params.getLevelOrgUnitMap();
             
@@ -197,7 +196,10 @@ public class HibernateTrackedEntityInstanceStore
             
             sql = sql.substring( 0, sql.length() - 3 ); // Remove last or
         }
-        else // OU_MODE_SELECTED
+        else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        {
+        }
+        else // SELECTED (default)
         {
             sql += hlp.whereAnd() + " tei.organisationunitid in (" + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
         }
@@ -295,30 +297,6 @@ public class HibernateTrackedEntityInstanceStore
         query.setEntity( "organisationUnit", organisationUnit );
         query.setEntity( "program", program );
         query.setInteger( "status", ProgramInstance.STATUS_ACTIVE );
-
-        return query.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public List<TrackedEntityInstance> query( TrackedEntityQueryParams params )
-    {
-        SqlHelper hlp = new SqlHelper();
-
-        String hql = "select pt from TrackedEntityInstance pt left join pt.attributeValues av";
-
-        for ( QueryItem at : params.getAttributes() )
-        {
-            hql += " " + hlp.whereAnd();
-            hql += " (av.attribute = :attr" + at.getItemId() + " and av.value = :filt" + at.getItemId() + ")";
-        }
-
-        Query query = getQuery( hql );
-
-        for ( QueryItem at : params.getAttributes() )
-        {
-            query.setEntity( "attr" + at.getItemId(), at.getItem() );
-            query.setString( "filt" + at.getItemId(), at.getFilter() );
-        }
 
         return query.list();
     }

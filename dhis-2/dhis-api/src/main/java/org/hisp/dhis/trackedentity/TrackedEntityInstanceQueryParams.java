@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -51,22 +52,50 @@ public class TrackedEntityInstanceQueryParams
     public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
     public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";
     
+    /**
+     * Query value, will apply to all relevant attributes.
+     */
     private String query;
     
+    /**
+     * Attributes to be included in the response. Can be used to filter response.
+     */
     private List<QueryItem> attributes = new ArrayList<QueryItem>();
 
+    /**
+     * Filters for the response.
+     */
     private List<QueryItem> filters = new ArrayList<QueryItem>();
     
+    /**
+     * Organisation units for which instances in the response were registered at.
+     * Is related to the specified OrganisationUnitMode.
+     */
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
     
+    /**
+     * Program for which instances in the response must be enrolled in.
+     */
     private Program program;
     
+    /**
+     * Tracked entity of the instances in the response.
+     */
     private TrackedEntity trackedEntity;
     
-    private String organisationUnitMode;
+    /**
+     * Selection mode for the specified organisation units.
+     */
+    private OrganisationUnitSelectionMode organisationUnitMode;
 
+    /**
+     * Page number.
+     */
     private Integer page;
     
+    /**
+     * Page size.
+     */
     private Integer pageSize;
 
     // -------------------------------------------------------------------------
@@ -177,11 +206,11 @@ public class TrackedEntityInstanceQueryParams
     /**
      * Indicates whethert this params is of the given organisation unit mode.
      */
-    public boolean isOrganisationUnitMode( String mode )
+    public boolean isOrganisationUnitMode( OrganisationUnitSelectionMode mode )
     {
-        return organisationUnitMode != null && organisationUnitMode.equalsIgnoreCase( mode );
+        return organisationUnitMode != null && organisationUnitMode.equals( mode );
     }
-
+    
     /**
      * Indicates whether paging is enabled.
      */
@@ -248,12 +277,12 @@ public class TrackedEntityInstanceQueryParams
         this.filters = filters;
     }
 
-    public String getOrganisationUnitMode()
+    public OrganisationUnitSelectionMode getOrganisationUnitMode()
     {
         return organisationUnitMode;
     }
 
-    public void setOrganisationUnitMode( String organisationUnitMode )
+    public void setOrganisationUnitMode( OrganisationUnitSelectionMode organisationUnitMode )
     {
         this.organisationUnitMode = organisationUnitMode;
     }

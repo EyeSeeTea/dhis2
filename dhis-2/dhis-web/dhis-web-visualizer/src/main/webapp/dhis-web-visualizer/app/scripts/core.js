@@ -1809,8 +1809,8 @@ Ext.onReady( function() {
                         
                         for (var i = 0; i < records.length; i++) {
                             for (var j = 0, value; j < store.rangeFields.length; j++) {
-                                value = records[i][store.rangeFields[j]];
-
+                                value = records[i].data[store.rangeFields[j]];
+                                
                                 if (Ext.isNumber(value) && (value % 1)) {
                                     return true;
                                 }
@@ -1848,7 +1848,8 @@ Ext.onReady( function() {
                     }
 
                     // renderer
-                    
+console.log(store.hasDecimals(), store.getMaximum() < 20, store.getMaximum());                    
+                    renderer = store.hasDecimals() && (store.getMaximum() < 20) ? '0.0' : '0,0';
 
                     axis = {
                         type: 'Numeric',
@@ -1856,7 +1857,7 @@ Ext.onReady( function() {
                         fields: store.numericFields,
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer('0.0')
+                            renderer: Ext.util.Format.numberRenderer(renderer)
                         },
                         grid: {
                             odd: {

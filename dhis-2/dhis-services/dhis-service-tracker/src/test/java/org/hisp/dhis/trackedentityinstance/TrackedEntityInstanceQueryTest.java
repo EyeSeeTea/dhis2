@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.trackedentityinstance;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,27 +28,27 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class DataElementGroupSetSchemaDescriptor implements SchemaDescriptor
+public class TrackedEntityInstanceQueryTest
+    extends DhisSpringTest
 {
-    @Override
-    public Schema getSchema()
+    @Autowired
+    private TrackedEntityInstanceService instanceService;
+    
+    @Test
+    public void testValidateNoOrgUnitsModeAll()
     {
-        Schema schema = new Schema( DataElementGroupSet.class, "dataElementGroupSet", "dataElementGroupSets", true, true, true );
-
-        schema.setShareable( true );
-        schema.setPublicAuthorities( Lists.newArrayList( "F_DATAELEMENTGROUPSET_PUBLIC_ADD" ) );
-        schema.setPrivateAuthorities( Lists.newArrayList( "F_DATAELEMENTGROUPSET_PRIVATE_ADD" ) );
-
-        return schema;
+        TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
+        params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
+        instanceService.validate( params );
     }
 }
