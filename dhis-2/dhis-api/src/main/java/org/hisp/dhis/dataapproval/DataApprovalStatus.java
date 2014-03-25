@@ -45,10 +45,18 @@ public class DataApprovalStatus
     private DataApprovalState dataApprovalState;
 
     /**
-     * Data approval object (if any) for a given selection of data from a
-     * data set.
+     * If the selection of data is approved, the data approval object.
+     * If the selection is approved at more than one level, this is the
+     * approval object for the highest level of approval.
      */
     private DataApproval dataApproval;
+
+    /**
+     * If the selection of data is approved, the data approval level object
+     * at which it is approved. If the selection is approved at more than
+     * one level, this is for the highest level of approval.
+     */
+    private DataApprovalLevel dataApprovalLevel;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -58,10 +66,13 @@ public class DataApprovalStatus
     {
     }
 
-    public DataApprovalStatus( DataApprovalState dataApprovalState, DataApproval dataApproval )
+    public DataApprovalStatus( DataApprovalState dataApprovalState,
+                               DataApproval dataApproval,
+                               DataApprovalLevel dataApprovalLevel )
     {
         this.dataApprovalState = dataApprovalState;
         this.dataApproval = dataApproval;
+        this.dataApprovalLevel = dataApprovalLevel;
     }
 
     // -------------------------------------------------------------------------
@@ -86,5 +97,15 @@ public class DataApprovalStatus
     public void setDataApproval( DataApproval dataApproval )
     {
         this.dataApproval = dataApproval;
+    }
+
+    public DataApprovalLevel getDataApprovalLevel()
+    {
+        return dataApprovalLevel;
+    }
+
+    public void setDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
+    {
+        this.dataApprovalLevel = dataApprovalLevel;
     }
 }
