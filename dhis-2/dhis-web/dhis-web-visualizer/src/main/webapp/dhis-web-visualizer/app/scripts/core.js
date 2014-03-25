@@ -1698,18 +1698,28 @@ Ext.onReady( function() {
                         store;
 
                     // data
-                    for (var i = 0, obj, category; i < rowIds.length; i++) {
+                    for (var i = 0, obj, category, rowValues, isEmpty; i < rowIds.length; i++) {
                         obj = {};
                         category = rowIds[i];
+                        rowValues = [];
+                        isEmpty = false;
+                        
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
-                        for (var j = 0, id; j < columnIds.length; j++) {
+                        
+                        for (var j = 0, id, value; j < columnIds.length; j++) {
                             id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
+                            value = xResponse.idValueMap[id];
+                            rowValues.push(value);
 
-                            obj[columnIds[j]] = parseFloat(xResponse.idValueMap[id]) || 0;
+                            obj[columnIds[j]] = value ? parseFloat(value) : '0.0';
                         }
 
-                        data.push(obj);
+                        isEmpty = !(Ext.Array.clean(rowValues).length);
+
+                        if (!(isEmpty && xLayout.hideEmptyRows)) {
+                            data.push(obj);
+                        }
                     }
 
                     // trend lines
@@ -1943,7 +1953,10 @@ Ext.onReady( function() {
                             display: 'outside',
                             'text-anchor': 'middle',
                             field: store.rangeFields,
-                            font: conf.chart.style.fontFamily
+                            font: conf.chart.style.fontFamily,
+                            renderer: function(n) {
+                                return n === '0.0' ? '-' : n;                                    
+                            }
                         };
                     }
 
@@ -2014,7 +2027,8 @@ Ext.onReady( function() {
                         trackMouse: true,
                         cls: 'dv-chart-tips',
                         renderer: function(si, item) {
-                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.value[1] + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                            var value = item.value[1] === '0.0' ? '-' : item.value[1];
+                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
                         }
                     };
                 };
