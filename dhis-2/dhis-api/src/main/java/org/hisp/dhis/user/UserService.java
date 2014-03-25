@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ public interface UserService
     Collection<User> getAllUsers();
 
     List<User> getAllUsersBetween( int first, int max );
-    
+
     List<User> getAllUsersBetweenByName( String name, int first, int max );
 
     Collection<User> getUsersByLastUpdated( Date lastUpdated );
@@ -113,7 +113,6 @@ public interface UserService
      * Returns a Collection of the Users which are associated with OrganisationUnits.
      *
      * @param units a Collection of the organization units.
-     *
      * @return a Collection of Users.
      */
     Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> units );
@@ -144,11 +143,11 @@ public interface UserService
     int getUsersByOrganisationUnitCount( OrganisationUnit orgUnit );
 
     int getUsersByOrganisationUnitCountByName( OrganisationUnit orgUnit, String name );
-    
+
     List<User> getUsersByUid( List<String> uids );
-    
+
     User searchForUser( String query );
-    
+
     List<User> queryForUsers( String query );
 
     // -------------------------------------------------------------------------
@@ -221,6 +220,8 @@ public interface UserService
 
     Collection<UserCredentials> searchUsersByName( String key );
 
+    Collection<UserCredentials> searchUsersByName( String name, int first, int max );
+
     Collection<UserCredentials> getUsersBetween( int first, int max );
 
     Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
@@ -234,9 +235,9 @@ public interface UserService
     Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit orgUnit, String name, int first, int max );
 
     Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max );
-    
+
     int getSelfRegisteredUserCredentialsCount();
-    
+
     Collection<UserCredentials> getInactiveUsers( int months );
 
     Collection<UserCredentials> getInactiveUsers( int months, int first, int max );
@@ -244,9 +245,17 @@ public interface UserService
     int getInactiveUsersCount( int months );
 
     int getActiveUsersCount( int days );
-    
+
     int getActiveUsersCount( Date since );
 
+    /**
+     * Filters the given list of user credentials based on whether the current
+     * user is allowed to update.
+     * 
+     * @param userCredentials the list of user credentials.
+     */
+    void canUpdateFilter( Collection<UserCredentials> userCredentials );
+    
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -324,6 +333,14 @@ public interface UserService
 
     int getUserRoleCountByName( String name );
 
+    /**
+     * Filters the given collection of user roles based on whether the current user
+     * is allowed to issue it.
+     * 
+     * @param userRoles the collection of user roles.
+     */
+    void canIssueFilter( Collection<UserAuthorityGroup> userRoles );
+    
     // -------------------------------------------------------------------------
     // UserSettings
     // -------------------------------------------------------------------------
@@ -338,11 +355,11 @@ public interface UserService
     /**
      * If a matching UserSetting exists, based on its user and name, it will be
      * updated, if not, the given UserSetting will be added.
-     * 
+     *
      * @param userSetting the UserSetting.
      */
     void addOrUpdateUserSetting( UserSetting userSetting );
-    
+
     /**
      * Updates a UserSetting.
      *
@@ -364,14 +381,14 @@ public interface UserService
      * Retrieves a user setting value for the given user and setting name. Returns
      * the given default value if the setting does not exist or the setting value
      * is null.
-     * 
-     * @param user the user.
-     * @param name the setting name.
+     *
+     * @param user         the user.
+     * @param name         the setting name.
      * @param defaultValue the default value.
      * @return a setting value.
      */
     Serializable getUserSettingValue( User user, String name, Serializable defaultValue );
-    
+
     /**
      * Retrieves all UserSettings for the given User.
      *
@@ -379,7 +396,7 @@ public interface UserService
      * @return a Collection of UserSettings.
      */
     Collection<UserSetting> getAllUserSettings( User user );
-    
+
     Collection<UserSetting> getUserSettings( String name );
 
     /**
@@ -401,13 +418,13 @@ public interface UserService
 
     /**
      * Removes all user settings associated with the given user.
-     * 
+     *
      * @param user the user.
      */
     void removeUserSettings( User user );
-    
-    Collection<User> getUsersByName( String name );  
-    
+
+    Collection<User> getUsersByName( String name );
+
     Collection<String> getUsernames( String query, Integer max );
 
     int countDataSetUserAuthorityGroups( DataSet dataSet );

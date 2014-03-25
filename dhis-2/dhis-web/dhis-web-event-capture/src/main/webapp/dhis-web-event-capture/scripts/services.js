@@ -5,7 +5,7 @@
 var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource'])
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($http, DHIS2URL) {
+.factory('ProgramFactory', function($http) {
     
     var programUid, programPromise;
     var programs, programsPromise;
@@ -14,7 +14,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         
         get: function(uid){
             if( programUid !== uid ){
-                programPromise = $http.get(DHIS2URL + '/api/programs/' + uid + '.json?viewClass=detailed&paging=false').then(function(response){
+                programPromise = $http.get('../api/programs/' + uid + '.json?viewClass=detailed&paging=false').then(function(response){
                     programUid = response.data.id; 
                     program = response.data;                     
                     return program;
@@ -25,7 +25,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         
         getMine: function(type){ 
             if( !programsPromise ){
-                programsPromise = $http.get(DHIS2URL + '/api/me/programs?includeDescendants=true&type='+type).then(function(response){
+                programsPromise = $http.get('../api/me/programs?includeDescendants=true&type='+type).then(function(response){
                    programs = response.data;
                    return programs;
                 });
@@ -35,7 +35,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         
         getEventProgramsByOrgUnit: function(orgUnit, type){
                        
-            var promise = $http.get( DHIS2URL + '/api/programs.json?orgUnit=' + orgUnit + '&type=' + type ).then(function(response){
+            var promise = $http.get( '../api/programs.json?orgUnit=' + orgUnit + '&type=' + type ).then(function(response){
                 programs = response.data;
                 return programs;
             });            
@@ -45,13 +45,13 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 })
 
 /* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($http, DHIS2URL, storage) {  
+.factory('ProgramStageFactory', function($http, storage) {  
     
     var programStage, promise;   
     return {        
         get: function(uid){
             if( programStage !== uid ){
-                promise = $http.get( DHIS2URL + '/api/programStages/' + uid + '.json?viewClass=detailed&paging=false').then(function(response){
+                promise = $http.get( '../api/programStages/' + uid + '.json?viewClass=detailed&paging=false').then(function(response){
                    programStage = response.data.id;
 
                    //store locally - might need them for event data values
@@ -68,13 +68,13 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 })
 
 /* factory for loading logged in user profiles from DHIS2 */
-.factory('CurrentUserProfile', function($http, DHIS2URL) { 
+.factory('CurrentUserProfile', function($http) { 
            
     var profile, promise;
     return {
         get: function() {
             if( !promise ){
-                promise = $http.get(DHIS2URL + '/api/me/profile').then(function(response){
+                promise = $http.get('../api/me/profile').then(function(response){
                    profile = response.data;
                    return profile;
                 });
@@ -85,49 +85,35 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 })
 
 /* factory for handling events */
-.factory('DHIS2EventFactory', function($http, DHIS2URL) {   
+.factory('DHIS2EventFactory', function($http) {   
     
     return {
-        
-        getByPerson: function(person, orgUnit, program){   
-            var promise = $http.get(DHIS2URL + '/api/events.json?' + 'person=' + person + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
-                return response.data.eventList;
-            });            
-            return promise;
-        },
-        
-        getByStage: function(orgUnit, programStage){
-            var promise = $http.get(DHIS2URL + '/api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&paging=false')
-                    .then(function(response){
-                        
-                return response.data.eventList;             
-        
-            }, function(){
-                
-                return dhis2.ec.storageManager.getEvents(orgUnit, programStage);
-                
+        getByStage: function(orgUnit, programStage, pager){
+            var url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&pageSize=' + pager.pageSize + '&page=' + pager.page;            
+            
+            var promise = $http.get( url ).then(function(response){                        
+                return response.data;        
+            }, function(){                
+                return dhis2.ec.storageManager.getEvents(orgUnit, programStage);                
             });            
             
             return promise;
         },
         
-        get: function(eventUid){
-            
-            var promise = $http.get(DHIS2URL + '/api/events/' + eventUid + '.json').then(function(response){               
-                return response.data;
-                
+        get: function(eventUid){            
+            var promise = $http.get('../api/events/' + eventUid + '.json').then(function(response){               
+                return response.data;                
             }, function(){
                 return dhis2.ec.storageManager.getEvent(eventUid);
             });            
             return promise;
         },
         
-        create: function(dhis2Event){
-            
+        create: function(dhis2Event){            
             var e = angular.copy(dhis2Event);            
             dhis2.ec.storageManager.saveEvent(e);            
         
-            var promise = $http.post(DHIS2URL + '/api/events.json', dhis2Event).then(function(response){
+            var promise = $http.post('../api/events.json', dhis2Event).then(function(response){
                 dhis2.ec.storageManager.clearEvent(e);
                 return response.data;
             }, function(){
@@ -138,7 +124,7 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         
         delete: function(dhis2Event){
             dhis2.ec.storageManager.clearEvent(dhis2Event);
-            var promise = $http.delete(DHIS2URL + '/api/events/' + dhis2Event.event).then(function(response){
+            var promise = $http.delete('../api/events/' + dhis2Event.event).then(function(response){
                 return response.data;
             }, function(){                
             });
@@ -147,18 +133,16 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     
         update: function(dhis2Event){   
             dhis2.ec.storageManager.saveEvent(dhis2Event);
-            var promise = $http.put(DHIS2URL + '/api/events/' + dhis2Event.event, dhis2Event).then(function(response){
+            var promise = $http.put('../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
                 dhis2.ec.storageManager.clearEvent(dhis2Event);
                 return response.data;
             });
             return promise;
         },
         
-        updateForSingleValue: function(singleValue, fullValue){                
-            
+        updateForSingleValue: function(singleValue, fullValue){            
             dhis2.ec.storageManager.saveEvent(fullValue);            
-            
-            var promise = $http.put(DHIS2URL + '/api/events/' + singleValue.event + '/' + singleValue.dataValues[0].dataElement, singleValue ).then(function(response){
+            var promise = $http.put('../api/events/' + singleValue.event + '/' + singleValue.dataValues[0].dataElement, singleValue ).then(function(response){
                 dhis2.ec.storageManager.clearEvent(fullValue);
                 return response.data;
             }, function(){                
@@ -298,13 +282,14 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
 
 /* Pagination service */
 .service('Paginator', function () {
-    this.page = 0;
-    this.rowsPerPage = 50;
+    this.page = 1;
+    this.pageSize = 50;
     this.itemCount = 0;
-    this.limitPerPage = 5;
+    this.pageCount = 0;
+    this.toolBarDisplay = 5;
 
     this.setPage = function (page) {
-        if (page > this.pageCount()) {
+        if (page > this.getPageCount()) {
             return;
         }
 
@@ -315,59 +300,42 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         return this.page;
     };
     
-    this.getRowsPerPage = function(){
-        return this.rowsPerPage;
+    this.setPageSize = function(pageSize){
+      this.pageSize = pageSize;
+    };
+    
+    this.getPageSize = function(){
+        return this.pageSize;
+    };
+    
+    this.setItemCount = function(itemCount){
+      this.itemCount = itemCount;
+    };
+    
+    this.getItemCount = function(){
+        return this.itemCount;
+    };
+    
+    this.setPageCount = function(pageCount){
+        this.pageCount = pageCount;
     };
 
-    this.nextPage = function () {
-        if (this.isLastPage()) {
-            return;
-        }
-
-        this.page++;
-    };
-
-    this.perviousPage = function () {
-        if (this.isFirstPage()) {
-            return;
-        }
-
-        this.page--;
-    };
-
-    this.firstPage = function () {
-        this.page = 0;
-    };
-
-    this.lastPage = function () {
-        this.page = this.pageCount() - 1;
-    };
-
-    this.isFirstPage = function () {
-        return this.page == 0;
-    };
-
-    this.isLastPage = function () {
-        return this.page == this.pageCount() - 1;
-    };
-
-    this.pageCount = function () {
-        var count = Math.ceil(parseInt(this.itemCount, 10) / parseInt(this.rowsPerPage, 10)); 
-        if (count === 1) { this.page = 0; } return count;
+    this.getPageCount = function () {
+        return this.pageCount;
     };
 
     this.lowerLimit = function() { 
-        var pageCountLimitPerPageDiff = this.pageCount() - this.limitPerPage;
+        var pageCountLimitPerPageDiff = this.getPageCount() - this.toolBarDisplay;
 
         if (pageCountLimitPerPageDiff < 0) { 
             return 0; 
         }
 
-        if (this.page > pageCountLimitPerPageDiff + 1) { 
+        if (this.getPage() > pageCountLimitPerPageDiff + 1) { 
             return pageCountLimitPerPageDiff; 
         } 
 
-        var low = this.page - (Math.ceil(this.limitPerPage/2) - 1); 
+        var low = this.getPage() - (Math.ceil(this.toolBarDisplay/2) - 1); 
 
         return Math.max(low, 0);
     };

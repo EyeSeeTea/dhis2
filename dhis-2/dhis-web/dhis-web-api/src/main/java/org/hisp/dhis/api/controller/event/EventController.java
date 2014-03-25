@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,19 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.api.controller.WebOptions;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.event.ImportEventTask;
-import org.hisp.dhis.dxf2.events.person.Person;
-import org.hisp.dhis.dxf2.events.person.PersonService;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
@@ -66,6 +69,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -73,6 +77,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 
@@ -102,7 +107,7 @@ public class EventController
     private EventService eventService;
 
     @Autowired
-    private PersonService personService;
+    private TrackedEntityInstanceService trackedEntityInstanceService;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -119,7 +124,7 @@ public class EventController
     public String getEvents(
         @RequestParam( value = "program", required = false ) String programUid,
         @RequestParam( value = "programStage", required = false ) String programStageUid,
-        @RequestParam( value = "person", required = false ) String personUid,
+        @RequestParam( value = "trackedEntityInstance", required = false ) String trackedEntityInstanceUid,
         @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
         @RequestParam( value = "includeChildren", required = false, defaultValue = "false" ) boolean includeChildren,
         @RequestParam( value = "includeDescendants", required = false, defaultValue = "false" ) boolean includeDescendants,
@@ -127,20 +132,22 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws NotFoundException
     {
-        WebOptions options = new WebOptions( parameters );
+        WebOptions options = new WebOptions( parameters );        
+        WebMetaData metaData = new WebMetaData();
+        
         Program program = manager.get( Program.class, programUid );
         ProgramStage programStage = manager.get( ProgramStage.class, programStageUid );
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
         OrganisationUnit rootOrganisationUnit;
-        Person person = null;
+        TrackedEntityInstance trackedEntityInstance = null;
 
-        if ( personUid != null )
+        if ( trackedEntityInstanceUid != null )
         {
-            person = personService.getPerson( personUid );
+            trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstanceUid );
 
-            if ( person == null )
+            if ( trackedEntityInstance == null )
             {
-                throw new NotFoundException( "Person", personUid );
+                throw new NotFoundException( "TrackedEntityInstance", trackedEntityInstanceUid );
             }
         }
 
@@ -157,15 +164,16 @@ public class EventController
             }
         }
 
-        if ( rootOrganisationUnit == null && person != null )
+        if ( rootOrganisationUnit == null && trackedEntityInstance != null )
         {
-            Events events = eventService.getEvents( Arrays.asList( program ), Arrays.asList( programStage ), null, person, startDate, endDate );
+            Events events = eventService.getEvents( Arrays.asList( program ), Arrays.asList( programStage ), null, trackedEntityInstance, startDate, endDate );
 
             model.addAttribute( "model", events );
             model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
-            return "events";
-        }
+            return "events";            
+        }        
+        
 
         if ( rootOrganisationUnit == null )
         {
@@ -186,17 +194,28 @@ public class EventController
             organisationUnits.add( rootOrganisationUnit );
         }
 
-        Events events = eventService.getEvents( Arrays.asList( program ), Arrays.asList( programStage ), organisationUnits, person, startDate, endDate );
+        Events events = eventService.getEvents( Arrays.asList( program ), Arrays.asList( programStage ), organisationUnits, trackedEntityInstance, startDate, endDate );
+        
+        List<Event> eventList = new ArrayList<Event>( events.getEvents() );
 
         if ( options.hasLinks() )
         {
-            for ( Event event : events.getEvents() )
+            for ( Event event : eventList )
             {
                 event.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + event.getEvent() );
             }
         }
+        
+        if ( options.hasPaging() )
+        {      	
+            Pager pager = new Pager( options.getPage(), eventList.size(), options.getPageSize() );
+            metaData.setPager( pager );
+            eventList = PagerUtils.pageCollection( eventList, pager );        	
+        }        
+        
+        metaData.setEvents( eventList );
 
-        model.addAttribute( "model", events );
+        model.addAttribute( "model", metaData );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return "events";
@@ -239,7 +258,7 @@ public class EventController
 
         if ( !importOptions.isAsync() )
         {
-            ImportSummaries importSummaries = eventService.saveEventsXml( inputStream, importOptions );
+            ImportSummaries importSummaries = eventService.addEventsXml( inputStream, importOptions );
 
             for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
             {
@@ -284,7 +303,7 @@ public class EventController
 
         if ( !importOptions.isAsync() )
         {
-            ImportSummaries importSummaries = eventService.saveEventsJson( inputStream, importOptions );
+            ImportSummaries importSummaries = eventService.addEventsJson( inputStream, importOptions );
 
             for ( ImportSummary importSummary : importSummaries.getImportSummaries() )
             {

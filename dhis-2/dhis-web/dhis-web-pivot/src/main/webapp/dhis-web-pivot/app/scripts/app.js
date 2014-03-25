@@ -1034,7 +1034,7 @@ Ext.onReady( function() {
 							this.currentValue = this.getValue();
 
 							var value = this.getValue(),
-								url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								url = value ? ns.core.init.contextPath + '/api/reportTables/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 								store = ns.app.stores.reportTable;
 
 							store.page = 1;
@@ -1050,7 +1050,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/reportTables/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1062,7 +1062,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/reportTables/filtered.json?viewClass=sharing&include=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.reportTable;
 
 				store.page = store.page + 1;
@@ -2480,7 +2480,6 @@ Ext.onReady( function() {
             },
             loadPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
@@ -2496,10 +2495,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/indicatorGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name&filter=indicatorGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/indicators' + filterPath + '.json';
+					path = '/indicators/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2512,8 +2511,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2522,7 +2519,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.indicators || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2558,11 +2555,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/indicatorGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/indicatorGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'indicatorGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(s) {
@@ -2616,7 +2616,6 @@ Ext.onReady( function() {
             },
             loadTotalsPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2624,10 +2623,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/members' + filterPath + '.json';
+					path = '/dataElements/filtered.json?include=id,name&filter=dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/dataElements' + filterPath + '.json?domainType=aggregate';
+					path = '/dataElements/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2640,8 +2639,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2650,7 +2647,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-                            data = response.dataElements || [],
+                            data = response.objects || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
@@ -2659,7 +2656,6 @@ Ext.onReady( function() {
             },
 			loadDetailsPage: function(uid, filter, append) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2667,10 +2663,10 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + filterPath + '.json';
+					path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
 				}
 				else if (uid === 0) {
-					path = '/generatedDataElementOperands' + filterPath + '.json';
+					path = '/generatedDataElementOperands/filtered.json?include=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2683,8 +2679,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
@@ -2693,7 +2687,7 @@ Ext.onReady( function() {
                     },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
-							data = response.dataElementOperands || [],
+							data = response.objects || response.dataElementOperands || [],
                             pager = response.pager;
 
 						//for (var i = 0; i < data.length; i++) {
@@ -2731,11 +2725,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataElementGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataElementGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'dataElementGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(s) {
@@ -2758,11 +2755,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataSets.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/dataSets/filtered.json?include=id,name',
 				reader: {
 					type: 'json',
-					root: 'dataSets'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			storage: {},
 			sortStore: function() {
@@ -2818,13 +2818,15 @@ Ext.onReady( function() {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'reportTables'
-				}
+					root: 'objects'
+				},
+				startParam: false,
+				limitParam: false
 			},
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
+			defaultUrl: ns.core.init.contextPath + '/api/reportTables/filtered.json?viewClass=sharing&include=id,name,access',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 
@@ -2865,11 +2867,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'organisationUnitGroups'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			}
 		});
 		ns.app.stores.organisationUnitGroup = organisationUnitGroupStore;
@@ -2935,8 +2940,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = indicatorGroup.getValue(),
@@ -2967,7 +2974,7 @@ Ext.onReady( function() {
 
         indicatorGroup = Ext.create('Ext.form.field.ComboBox', {
             cls: 'ns-combo',
-            style: 'margin-bottom:2px; margin-top:0px',
+            style: 'margin-bottom:1px; margin-top:0px',
             width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding,
             valueField: 'id',
             displayField: 'name',
@@ -3169,8 +3176,10 @@ Ext.onReady( function() {
             fieldStyle: 'height:22px; border-right:0 none',
             style: 'height:22px',
             onTriggerClick: function() {
-                this.reset();
-                this.onKeyUp();
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
             },
             onKeyUp: function() {
                 var value = dataElementGroup.getValue(),
@@ -3288,7 +3297,7 @@ Ext.onReady( function() {
 
 		dataElementGroup = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin:0 2px 2px 0',
+			style: 'margin:0 1px 1px 0',
 			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 90,
 			valueField: 'id',
 			displayField: 'name',
@@ -3318,13 +3327,13 @@ Ext.onReady( function() {
 
 		dataElementDetailLevel = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:1px',
 			baseBodyCls: 'small',
 			queryMode: 'local',
 			editable: false,
 			valueField: 'id',
 			displayField: 'text',
-			width: 90 - 2,
+			width: 90 - 1,
 			value: dimConf.dataElement.objectName,
 			store: {
 				fields: ['id', 'text'],
@@ -4013,8 +4022,8 @@ Ext.onReady( function() {
 						{
 							xtype: 'combobox',
 							cls: 'ns-combo',
-							style: 'margin-bottom:2px',
-							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 4,
+							style: 'margin-bottom:1px',
+							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 2,
 							valueField: 'id',
 							displayField: 'name',
 							emptyText: NS.i18n.select_period_type,
@@ -4042,7 +4051,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'button',
 							text: NS.i18n.prev_year,
-							style: 'margin-left:2px; border-radius:2px',
+							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
 							handler: function() {
 								var cb = this.up('panel').down('combobox');
@@ -4055,7 +4064,7 @@ Ext.onReady( function() {
 						{
 							xtype: 'button',
 							text: NS.i18n.next_year,
-							style: 'margin-left:2px; border-radius:2px',
+							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
 							handler: function() {
 								var cb = this.up('panel').down('combobox');
@@ -4314,7 +4323,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_levels,
@@ -4327,7 +4336,7 @@ Ext.onReady( function() {
 			cls: 'ns-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+			width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: NS.i18n.select_organisation_unit_groups,
@@ -4432,14 +4441,14 @@ Ext.onReady( function() {
 		toolPanel = Ext.create('Ext.panel.Panel', {
 			width: 36,
 			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
+			style: 'margin-right:1px',
 			items: tool
 		});
 
 		organisationUnit = {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
-			bodyStyle: 'padding:2px',
+			bodyStyle: 'padding:1px',
 			hideCollapseTool: true,
 			collapsed: false,
 			getDimension: function() {
@@ -4523,11 +4532,11 @@ Ext.onReady( function() {
                 {
                     layout: 'column',
                     bodyStyle: 'border:0 none',
-                    style: 'padding-bottom:2px',
+                    style: 'padding-bottom:1px',
                     items: [
                         toolPanel,
                         {
-                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 38,
+                            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 37,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
@@ -4835,7 +4844,7 @@ Ext.onReady( function() {
 		});
 
 		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:2px; padding-bottom:0; overflow-y:scroll;',
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
 			items: accordionBody,
 			panels: accordionPanels,
 			setThisHeight: function(mx) {
@@ -5771,29 +5780,33 @@ Ext.onReady( function() {
 
 								// organisation unit levels
 								requests.push({
-									url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
+									url: init.contextPath + '/api/organisationUnitLevels/filtered.json?include=id,name,level&paging=false',
 									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+										init.organisationUnitLevels = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});
 
 								// user orgunits and children
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userOnly=true&include=id,name,children[id,name]&paging=false',
 									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+										var organisationUnits = Ext.decode(r.responseText).objects || [],
+											ou = [],
+											ouc = [];
 
 										if (organisationUnits.length) {
-											var ou = organisationUnits[0];
+											for (var i = 0, org; i < organisationUnits.length; i++) {
+												org = organisationUnits[i];
 
-											if (ou.id) {
-												init.user = {
-													ou: ou.id
-												};
+												ou.push(org.id);
+												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+											}
 
-												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
-											};
+											init.user = {
+												ou: ou,
+												ouc: ouc
+											}
 										}
 										else {
 											alert('User is not assigned to any organisation units');
@@ -5805,9 +5818,9 @@ Ext.onReady( function() {
 
 								// legend sets
 								requests.push({
-									url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
+									url: init.contextPath + '/api/mapLegendSets/filtered.json?include=id,name,mapLegends[id,name,startValue,endValue,color]&paging=false',
 									success: function(r) {
-										init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
+										init.legendSets = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});

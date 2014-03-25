@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,12 +28,15 @@ package org.hisp.dhis.dxf2.events.enrollment;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import org.hisp.dhis.dxf2.events.person.Person;
-import org.hisp.dhis.dxf2.events.person.PersonService;
+import com.google.common.collect.Maps;
+import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.dxf2.events.trackedentity.Attribute;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.i18n.I18nManager;
@@ -42,10 +45,19 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -60,10 +72,19 @@ public abstract class AbstractEnrollmentService
     private ProgramService programService;
 
     @Autowired
-    private PersonService personService;
+    private TrackedEntityInstanceService trackedEntityInstanceService;
 
     @Autowired
-    private TrackedEntityInstanceService entityInstanceService;
+    private org.hisp.dhis.trackedentity.TrackedEntityInstanceService teiService;
+
+    @Autowired
+    private TrackedEntityAttributeService trackedEntityAttributeService;
+
+    @Autowired
+    private TrackedEntityAttributeValueService trackedEntityAttributeValueService;
+
+    @Autowired
+    private IdentifiableObjectManager manager;
 
     @Autowired
     private I18nManager i18nManager;
@@ -95,21 +116,22 @@ public abstract class AbstractEnrollmentService
     }
 
     @Override
-    public Enrollments getEnrollments( Person person )
+    public Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance )
     {
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( person.getPerson() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
+
         return getEnrollments( entityInstance );
     }
 
     @Override
-    public Enrollments getEnrollments( Person person, EnrollmentStatus status )
+    public Enrollments getEnrollments( TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status )
     {
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( person.getPerson() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
         return getEnrollments( entityInstance, status );
     }
 
     @Override
-    public Enrollments getEnrollments( TrackedEntityInstance entityInstance )
+    public Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance )
     {
         List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>( entityInstance.getProgramInstances() );
 
@@ -117,7 +139,7 @@ public abstract class AbstractEnrollmentService
     }
 
     @Override
-    public Enrollments getEnrollments( TrackedEntityInstance entityInstance, EnrollmentStatus status )
+    public Enrollments getEnrollments( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, EnrollmentStatus status )
     {
         List<ProgramInstance> programInstances = new ArrayList<ProgramInstance>(
             programInstanceService.getProgramInstances( entityInstance, status.getValue() ) );
@@ -169,16 +191,16 @@ public abstract class AbstractEnrollmentService
     }
 
     @Override
-    public Enrollments getEnrollments( Program program, Person person )
+    public Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance )
     {
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( person.getPerson() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
         return getEnrollments( programInstanceService.getProgramInstances( entityInstance, program ) );
     }
 
     @Override
-    public Enrollments getEnrollments( Program program, Person person, EnrollmentStatus status )
+    public Enrollments getEnrollments( Program program, TrackedEntityInstance trackedEntityInstance, EnrollmentStatus status )
     {
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( person.getPerson() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() );
         return getEnrollments( programInstanceService.getProgramInstances( entityInstance, program, status.getValue() ) );
     }
 
@@ -212,10 +234,15 @@ public abstract class AbstractEnrollmentService
     @Override
     public Enrollment getEnrollment( ProgramInstance programInstance )
     {
+        if ( programInstance.getEntityInstance() == null )
+        {
+            return null;
+        }
+
         Enrollment enrollment = new Enrollment();
 
         enrollment.setEnrollment( programInstance.getUid() );
-        enrollment.setPerson( programInstance.getEntityInstance().getUid() );
+        enrollment.setTrackedEntityInstance( programInstance.getEntityInstance().getUid() );
         enrollment.setProgram( programInstance.getProgram().getUid() );
         enrollment.setStatus( EnrollmentStatus.fromInt( programInstance.getStatus() ) );
         enrollment.setDateOfEnrollment( programInstance.getEnrollmentDate() );
@@ -229,18 +256,35 @@ public abstract class AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummary saveEnrollment( Enrollment enrollment )
+    public ImportSummary addEnrollment( Enrollment enrollment )
     {
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( enrollment.getPerson() );
-        Person person = personService.getPerson( entityInstance );
+        ImportSummary importSummary = new ImportSummary();
+        importSummary.setDataValueCount( null );
+
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( enrollment.getTrackedEntityInstance() );
+        TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( entityInstance );
         Program program = getProgram( enrollment.getProgram() );
 
-        Enrollments enrollments = getEnrollments( program, person, EnrollmentStatus.ACTIVE );
+        Enrollments enrollments = getEnrollments( program, trackedEntityInstance, EnrollmentStatus.ACTIVE );
 
         if ( !enrollments.getEnrollments().isEmpty() )
         {
-            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "Person " + person.getPerson()
+            importSummary.setStatus( ImportStatus.ERROR );
+            importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
                 + " already have an active enrollment in program " + program.getUid() );
+            importSummary.getImportCount().incrementIgnored();
+
+            return importSummary;
+        }
+
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+        importConflicts.addAll( checkAttributes( enrollment ) );
+
+        importSummary.setConflicts( importConflicts );
+
+        if ( !importConflicts.isEmpty() )
+        {
+            importSummary.setStatus( ImportStatus.ERROR );
             importSummary.getImportCount().incrementIgnored();
 
             return importSummary;
@@ -252,13 +296,17 @@ public abstract class AbstractEnrollmentService
 
         if ( programInstance == null )
         {
-            return new ImportSummary( ImportStatus.ERROR, "Could not enroll person " + enrollment.getPerson()
+            importSummary.setStatus( ImportStatus.ERROR );
+            importSummary.setDescription( "Could not enroll TrackedEntityInstance " + enrollment.getTrackedEntityInstance()
                 + " into program " + enrollment.getProgram() );
+
+            return importSummary;
         }
 
-        ImportSummary importSummary = new ImportSummary( ImportStatus.SUCCESS );
+        updateAttributeValues( enrollment );
+        programInstanceService.updateProgramInstance( programInstance );
+
         importSummary.setReference( programInstance.getUid() );
-        importSummary.setDataValueCount( null );
         importSummary.getImportCount().incrementImported();
 
         return importSummary;
@@ -271,10 +319,12 @@ public abstract class AbstractEnrollmentService
     @Override
     public ImportSummary updateEnrollment( Enrollment enrollment )
     {
+        ImportSummary importSummary = new ImportSummary();
+        importSummary.setDataValueCount( null );
+
         if ( enrollment == null || enrollment.getEnrollment() == null )
         {
-            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR,
-                "No enrollment or enrollment ID was supplied" );
+            importSummary = new ImportSummary( ImportStatus.ERROR, "No enrollment or enrollment ID was supplied" );
             importSummary.getImportCount().incrementIgnored();
 
             return importSummary;
@@ -284,13 +334,26 @@ public abstract class AbstractEnrollmentService
 
         if ( programInstance == null )
         {
-            ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." );
+            importSummary = new ImportSummary( ImportStatus.ERROR, "Enrollment ID was not valid." );
             importSummary.getImportCount().incrementIgnored();
 
             return importSummary;
         }
 
-        TrackedEntityInstance entityInstance = getTrackedEntityInstance( enrollment.getPerson() );
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+        importConflicts.addAll( checkAttributes( enrollment ) );
+
+        importSummary.setConflicts( importConflicts );
+
+        if ( !importConflicts.isEmpty() )
+        {
+            importSummary.setStatus( ImportStatus.ERROR );
+            importSummary.getImportCount().incrementIgnored();
+
+            return importSummary;
+        }
+
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( enrollment.getTrackedEntityInstance() );
         Program program = getProgram( enrollment.getProgram() );
 
         programInstance.setProgram( program );
@@ -310,7 +373,7 @@ public abstract class AbstractEnrollmentService
             }
             else
             {
-                ImportSummary importSummary = new ImportSummary( ImportStatus.ERROR,
+                importSummary = new ImportSummary( ImportStatus.ERROR,
                     "Re-enrollment is not allowed, please create a new enrollment." );
                 importSummary.getImportCount().incrementIgnored();
 
@@ -318,11 +381,10 @@ public abstract class AbstractEnrollmentService
             }
         }
 
+        updateAttributeValues( enrollment );
         programInstanceService.updateProgramInstance( programInstance );
 
-        ImportSummary importSummary = new ImportSummary( ImportStatus.SUCCESS );
         importSummary.setReference( enrollment.getEnrollment() );
-        importSummary.setDataValueCount( null );
         importSummary.getImportCount().incrementImported();
 
         return importSummary;
@@ -353,6 +415,7 @@ public abstract class AbstractEnrollmentService
     @Override
     public void completeEnrollment( Enrollment enrollment )
     {
+
         ProgramInstance programInstance = programInstanceService.getProgramInstance( enrollment.getEnrollment() );
         Assert.notNull( programInstance );
 
@@ -363,6 +426,146 @@ public abstract class AbstractEnrollmentService
     // HELPERS
     // -------------------------------------------------------------------------
 
+    private List<ImportConflict> checkAttributes( Enrollment enrollment )
+    {
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+
+        Program program = getProgram( enrollment.getProgram() );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance trackedEntityInstance = teiService.getTrackedEntityInstance(
+            enrollment.getTrackedEntityInstance() );
+
+        Map<TrackedEntityAttribute, Boolean> mandatoryMap = Maps.newHashMap();
+        Map<String, String> attributeValueMap = Maps.newHashMap();
+
+        for ( ProgramTrackedEntityAttribute programTrackedEntityAttribute : program.getAttributes() )
+        {
+            mandatoryMap.put( programTrackedEntityAttribute.getAttribute(), programTrackedEntityAttribute.isMandatory() );
+        }
+
+        for ( TrackedEntityAttributeValue value : trackedEntityInstance.getAttributeValues() )
+        {
+            // ignore attributes which do not belong to this program
+            if ( mandatoryMap.containsKey( value.getAttribute() ) )
+            {
+                attributeValueMap.put( value.getAttribute().getUid(), value.getValue() );
+            }
+        }
+
+        for ( Attribute attribute : enrollment.getAttributes() )
+        {
+            attributeValueMap.put( attribute.getAttribute(), attribute.getValue() );
+        }
+
+        TrackedEntityInstance instance = trackedEntityInstanceService.getTrackedEntityInstance( enrollment.getTrackedEntityInstance() );
+
+        for ( TrackedEntityAttribute trackedEntityAttribute : mandatoryMap.keySet() )
+        {
+            Boolean mandatory = mandatoryMap.get( trackedEntityAttribute );
+
+            if ( mandatory && !attributeValueMap.containsKey( trackedEntityAttribute.getUid() ) )
+            {
+                importConflicts.add( new ImportConflict( "Attribute.attribute", "Missing mandatory attribute " +
+                    trackedEntityAttribute.getUid() ) );
+                continue;
+            }
+
+            if ( trackedEntityAttribute.isUnique() )
+            {
+                OrganisationUnit organisationUnit = manager.get( OrganisationUnit.class, instance.getOrgUnit() );
+
+                importConflicts.addAll(
+                    checkScope( trackedEntityInstance, trackedEntityAttribute, attributeValueMap.get( trackedEntityAttribute.getUid() ), organisationUnit, program )
+                );
+            }
+
+            attributeValueMap.remove( trackedEntityAttribute.getUid() );
+        }
+
+        if ( !attributeValueMap.isEmpty() )
+        {
+            importConflicts.add( new ImportConflict( "Attribute.attribute", "Only program attributes is allowed for enrollment " +
+                attributeValueMap ) );
+        }
+
+        return importConflicts;
+    }
+
+    private List<ImportConflict> checkScope( org.hisp.dhis.trackedentity.TrackedEntityInstance tei, TrackedEntityAttribute attribute, String value, OrganisationUnit organisationUnit, Program program )
+    {
+        List<ImportConflict> importConflicts = new ArrayList<ImportConflict>();
+
+        TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
+
+        QueryItem queryItem = new QueryItem( attribute, "eq", value, false );
+        params.getAttributes().add( queryItem );
+
+        if ( attribute.getOrgunitScope() && attribute.getProgramScope() )
+        {
+            params.setProgram( program );
+            params.getOrganisationUnits().add( organisationUnit );
+        }
+        else if ( attribute.getOrgunitScope() )
+        {
+            params.getOrganisationUnits().add( organisationUnit );
+        }
+        else if ( attribute.getProgramScope() )
+        {
+            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
+            params.setProgram( program );
+        }
+
+        Grid instances = teiService.getTrackedEntityInstances( params );
+
+        if ( instances.getHeight() == 0 || (instances.getHeight() == 1 && instances.getRow( 0 ).contains( tei.getUid() )) )
+        {
+            return importConflicts;
+        }
+
+        importConflicts.add( new ImportConflict( "Attribute.value", "Non-unique attribute value '" + value + "' for attribute " + attribute.getUid() ) );
+
+        return importConflicts;
+    }
+
+    private void updateAttributeValues( Enrollment enrollment )
+    {
+        org.hisp.dhis.trackedentity.TrackedEntityInstance trackedEntityInstance = teiService.getTrackedEntityInstance(
+            enrollment.getTrackedEntityInstance() );
+        Map<String, String> attributeValueMap = Maps.newHashMap();
+
+        for ( Attribute attribute : enrollment.getAttributes() )
+        {
+            attributeValueMap.put( attribute.getAttribute(), attribute.getValue() );
+        }
+
+        for ( TrackedEntityAttributeValue value : trackedEntityInstance.getAttributeValues() )
+        {
+            if ( attributeValueMap.containsKey( value.getAttribute().getUid() ) )
+            {
+                String newValue = attributeValueMap.get( value.getAttribute().getUid() );
+                value.setValue( newValue );
+
+                trackedEntityAttributeValueService.updateTrackedEntityAttributeValue( value );
+
+                attributeValueMap.remove( value.getAttribute().getUid() );
+            }
+        }
+
+        for ( String key : attributeValueMap.keySet() )
+        {
+            TrackedEntityAttribute attribute = trackedEntityAttributeService.getTrackedEntityAttribute( key );
+
+            if ( attribute != null )
+            {
+                TrackedEntityAttributeValue value = new TrackedEntityAttributeValue();
+                value.setValue( attributeValueMap.get( key ) );
+                value.setAttribute( attribute );
+
+                trackedEntityAttributeValueService.addTrackedEntityAttributeValue( value );
+                trackedEntityInstance.addAttributeValue( value );
+            }
+        }
+    }
+
     private List<Program> getProgramsWithRegistration()
     {
         List<Program> programs = new ArrayList<Program>();
@@ -372,13 +575,13 @@ public abstract class AbstractEnrollmentService
         return programs;
     }
 
-    private TrackedEntityInstance getTrackedEntityInstance( String person )
+    private org.hisp.dhis.trackedentity.TrackedEntityInstance getTrackedEntityInstance( String trackedEntityInstance )
     {
-        TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( person );
+        org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = teiService.getTrackedEntityInstance( trackedEntityInstance );
 
         if ( entityInstance == null )
         {
-            throw new IllegalArgumentException( "Person does not exist." );
+            throw new IllegalArgumentException( "TrackedEntityInstance does not exist." );
         }
 
         return entityInstance;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ import static org.hisp.dhis.user.UserSettingService.KEY_DB_LOCALE;
 import static org.hisp.dhis.user.UserSettingService.KEY_UI_LOCALE;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,15 +41,13 @@ import java.util.Map;
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.hisp.dhis.system.util.AttributeUtils;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
@@ -88,13 +85,6 @@ public class SetupTreeAction
     public void setUserService( UserService userService )
     {
         this.userService = userService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     private AttributeService attributeService;
@@ -136,9 +126,9 @@ public class SetupTreeAction
         return userCredentials;
     }
 
-    private Collection<UserAuthorityGroup> userAuthorityGroups;
+    private List<UserAuthorityGroup> userAuthorityGroups;
 
-    public Collection<UserAuthorityGroup> getUserAuthorityGroups()
+    public List<UserAuthorityGroup> getUserAuthorityGroups()
     {
         return userAuthorityGroups;
     }
@@ -201,8 +191,8 @@ public class SetupTreeAction
     {
         userAuthorityGroups = new ArrayList<UserAuthorityGroup>( userService.getAllUserAuthorityGroups() );
 
-        FilterUtils.filter( userAuthorityGroups, new UserAuthorityGroupCanIssueFilter( currentUserService.getCurrentUser() ) );
-
+        userService.canIssueFilter( userAuthorityGroups );
+        
         availableLocales = localeManager.getAvailableLocales();
         
         availableLocalesDb = i18nService.getAvailableLocales();
@@ -236,6 +226,8 @@ public class SetupTreeAction
             currentLocale = LocaleManager.DHIS_STANDARD_LOCALE;
         }
 
+        Collections.sort( userAuthorityGroups, IdentifiableObjectNameComparator.INSTANCE );
+        
         attributes = new ArrayList<Attribute>( attributeService.getUserAttributes() );
         Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
 

@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -117,7 +117,7 @@ public class SelectAction
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         Collection<TrackedEntityAttribute> _attributes = attributeService.getTrackedEntityAttributesWithoutProgram();
-        _attributes.addAll( attributeService.getTrackedEntityAttributesDisplayedInList( true ));
+        _attributes.addAll( attributeService.getTrackedEntityAttributesDisplayInList( true ));
         
         attributes = new ArrayList<TrackedEntityAttribute>( _attributes );
 

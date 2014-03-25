@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -175,6 +175,15 @@ public interface GenericIdentifiableObjectStore<T>
      * @return a list of objects.
      */
     List<T> getByUid( Collection<String> uids );
+
+    /**
+     * Retrieves a list of objects referenced by the given List of uids. 
+     * Bypasses the ACL system.
+     *
+     * @param uids a List of uids.
+     * @return a list of objects.
+     */
+    List<T> getByUidNoAcl( Collection<String> uids );
 
     /**
      * Returns all objects that are equal to or newer than given date.

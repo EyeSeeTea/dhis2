@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.mobile.model;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,7 +43,7 @@ public class DataSetValue
     extends Model
 {
     private String clientVersion;
-    
+
     private String periodName;
 
     private boolean completed;
@@ -82,7 +82,7 @@ public class DataSetValue
     {
         return dataValues;
     }
-    
+
     public String getClientVersion()
     {
         return clientVersion;
@@ -97,7 +97,20 @@ public class DataSetValue
     public void serialize( DataOutputStream dataOutputStream )
         throws IOException
     {
-        // FIXME: Implement..
+        dataOutputStream.writeInt( this.getId() );
+        dataOutputStream.writeUTF( this.getName() );
+        dataOutputStream.writeUTF( this.getPeriodName() );
+        dataOutputStream.writeBoolean( this.isCompleted() );
+
+        dataOutputStream.writeInt( dataValues.size() );
+
+        for ( DataValue datavalue : dataValues )
+        {
+            dataOutputStream.writeInt( datavalue.getId() );
+            dataOutputStream.writeInt( datavalue.getCategoryOptComboID() );
+            dataOutputStream.writeUTF( datavalue.getValue() );
+        }
+
     }
 
     @Override

@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,13 +95,13 @@ public class Partitions
     
     /**
      * Prunes this instance so that it retains only the partitions included in 
-     * the given list. No operation takes place if the given live is null.
+     * the given list. No operation takes place if the given list is null or empty.
      * 
      * @param validPartitions list of valid partitions to retain.
      */
     public Partitions prunePartitions( List<String> validPartitions )
     {
-        if ( validPartitions != null )
+        if ( validPartitions != null && !validPartitions.isEmpty() )
         {
             partitions.retainAll( validPartitions );
         }

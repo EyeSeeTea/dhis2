@@ -1,17 +1,20 @@
+package org.hisp.dhis.relationship;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * * Redistributions of source code must retain the above copyright notice, this
- *   list of conditions and the following disclaimer.
- * * Redistributions in binary form must reproduce the above copyright notice,
- *   this list of conditions and the following disclaimer in the documentation
- *   and/or other materials provided with the distribution.
- * * Neither the name of the HISP project nor the names of its contributors may
- *   be used to endorse or promote products derived from this software without
- *   specific prior written permission.
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following disclaimer in the documentation
+ * and/or other materials provided with the distribution.
+ * Neither the name of the HISP project nor the names of its contributors may
+ * be used to endorse or promote products derived from this software without
+ * specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -24,8 +27,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.hisp.dhis.relationship;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -61,8 +62,8 @@ public class RelationshipTypeServiceTest
     @Test
     public void testSaveRelationshipType()
     {
-        int idA = relationshipTypeService.saveRelationshipType( relationshipTypeA );
-        int idB = relationshipTypeService.saveRelationshipType( relationshipTypeB );
+        int idA = relationshipTypeService.addRelationshipType( relationshipTypeA );
+        int idB = relationshipTypeService.addRelationshipType( relationshipTypeB );
 
         assertNotNull( relationshipTypeService.getRelationshipType( idA ) );
         assertNotNull( relationshipTypeService.getRelationshipType( idB ) );
@@ -71,8 +72,8 @@ public class RelationshipTypeServiceTest
     @Test
     public void testDeleteRelationshipType()
     {
-        int idA = relationshipTypeService.saveRelationshipType( relationshipTypeA );
-        int idB = relationshipTypeService.saveRelationshipType( relationshipTypeB );
+        int idA = relationshipTypeService.addRelationshipType( relationshipTypeA );
+        int idB = relationshipTypeService.addRelationshipType( relationshipTypeB );
 
         assertNotNull( relationshipTypeService.getRelationshipType( idA ) );
         assertNotNull( relationshipTypeService.getRelationshipType( idB ) );
@@ -91,7 +92,7 @@ public class RelationshipTypeServiceTest
     @Test
     public void testUpdateRelationshipType()
     {
-        int idA = relationshipTypeService.saveRelationshipType( relationshipTypeA );
+        int idA = relationshipTypeService.addRelationshipType( relationshipTypeA );
 
         assertNotNull( relationshipTypeService.getRelationshipType( idA ) );
 
@@ -104,8 +105,8 @@ public class RelationshipTypeServiceTest
     @Test
     public void testGetRelationshipTypeById()
     {
-        int idA = relationshipTypeService.saveRelationshipType( relationshipTypeA );
-        int idB = relationshipTypeService.saveRelationshipType( relationshipTypeB );
+        int idA = relationshipTypeService.addRelationshipType( relationshipTypeA );
+        int idB = relationshipTypeService.addRelationshipType( relationshipTypeB );
 
         assertEquals( relationshipTypeA, relationshipTypeService.getRelationshipType( idA ) );
         assertEquals( relationshipTypeB, relationshipTypeService.getRelationshipType( idB ) );
@@ -114,15 +115,15 @@ public class RelationshipTypeServiceTest
     @Test
     public void testGetRelationshipTypeByDescription()
     {
-        relationshipTypeService.saveRelationshipType( relationshipTypeA );
+        relationshipTypeService.addRelationshipType( relationshipTypeA );
         assertEquals( relationshipTypeA, relationshipTypeService.getRelationshipType( "aIsToB", "bIsToA" ) );
     }
 
     @Test
     public void testGetAllRelationshipTypes()
     {
-        relationshipTypeService.saveRelationshipType( relationshipTypeA );
-        relationshipTypeService.saveRelationshipType( relationshipTypeB );
+        relationshipTypeService.addRelationshipType( relationshipTypeA );
+        relationshipTypeService.addRelationshipType( relationshipTypeB );
 
         assertTrue( equals( relationshipTypeService.getAllRelationshipTypes(), relationshipTypeA, relationshipTypeB ) );
     }

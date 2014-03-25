@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,11 +39,6 @@ import java.util.HashMap;
 public class MimicingHashMap<K, V>
     extends HashMap<K, V>
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = -1314511873888181449L;
-
     @Override
     @SuppressWarnings( "unchecked" )
     public V get( Object key )

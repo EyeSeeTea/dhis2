@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,11 +35,11 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
@@ -50,6 +50,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS;
 
 /**
  * @author Chau Thu Tran
@@ -94,7 +96,6 @@ public class DefaultUserService
 
     private SystemSettingManager systemSettingManager;
 
-    @Autowired
     public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
         this.systemSettingManager = systemSettingManager;
@@ -229,9 +230,11 @@ public class DefaultUserService
 
     public Collection<UserCredentials> getUsers( final Collection<Integer> identifiers, User user )
     {
+        boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
+
         Collection<UserCredentials> userCredentials = getAllUserCredentials();
 
-        FilterUtils.filter( userCredentials, new UserCredentialsCanUpdateFilter( user ) );
+        FilterUtils.filter( userCredentials, new UserCredentialsCanUpdateFilter( user, canGrantOwnUserAuthorityGroups ) );
 
         return identifiers == null ? userCredentials : FilterUtils.filter( userCredentials,
             new Filter<UserCredentials>()
@@ -240,7 +243,8 @@ public class DefaultUserService
                 {
                     return identifiers.contains( object.getId() );
                 }
-            } );
+            }
+        );
     }
 
     public List<User> getUsersByUid( List<String> uids )
@@ -399,6 +403,15 @@ public class DefaultUserService
         }
     }
 
+    public void canIssueFilter( Collection<UserAuthorityGroup> userRoles )
+    {
+        User user = currentUserService.getCurrentUser();
+
+        boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
+
+        FilterUtils.filter( userRoles, new UserAuthorityGroupCanIssueFilter( user, canGrantOwnUserAuthorityGroups ) );
+    }
+
     // -------------------------------------------------------------------------
     // UserCredentials
     // -------------------------------------------------------------------------
@@ -464,9 +477,14 @@ public class DefaultUserService
         return userCredentialsStore.getUsersWithoutOrganisationUnitBetweenByName( username, first, max );
     }
 
-    public Collection<UserCredentials> searchUsersByName( String username )
+    public Collection<UserCredentials> searchUsersByName( String name )
     {
-        return userCredentialsStore.searchUsersByName( username );
+        return userCredentialsStore.searchUsersByName( name );
+    }
+
+    public Collection<UserCredentials> searchUsersByName( String name, int first, int max )
+    {
+        return userCredentialsStore.searchUsersByName( name, first, max );
     }
 
     public void setLastLogin( String username )
@@ -521,6 +539,15 @@ public class DefaultUserService
     public int getActiveUsersCount( Date since )
     {
         return userCredentialsStore.getActiveUsersCount( since );
+    }
+
+    public void canUpdateFilter( Collection<UserCredentials> userCredentials )
+    {
+        User user = currentUserService.getCurrentUser();
+
+        boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
+
+        FilterUtils.filter( userCredentials, new UserCredentialsCanUpdateFilter( user, canGrantOwnUserAuthorityGroups ) );
     }
 
     // -------------------------------------------------------------------------

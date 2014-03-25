@@ -1,7 +1,7 @@
 package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,6 +98,13 @@ public class SetAccessSettingsAction
     {
         this.accountInvite = accountInvite;
     }
+    
+    private Boolean canGrantOwnUserAuthorityGroups;
+
+    public void setCanGrantOwnUserAuthorityGroups( Boolean canGrantOwnUserAuthorityGroups )
+    {
+        this.canGrantOwnUserAuthorityGroups = canGrantOwnUserAuthorityGroups;
+    }
 
     private Integer credentialsExpires;
 
@@ -164,8 +171,10 @@ public class SetAccessSettingsAction
 
         systemSettingManager.saveSystemSetting( KEY_ACCOUNT_RECOVERY, accountRecovery );
         systemSettingManager.saveSystemSetting( KEY_ACCOUNT_INVITE, accountInvite );
+        systemSettingManager.saveSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, canGrantOwnUserAuthorityGroups );
         systemSettingManager.saveSystemSetting( KEY_SELF_REGISTRATION_NO_RECAPTCHA, selfRegistrationNoRecaptcha );
-        systemSettingManager.saveSystemSetting( KEY_OPENID_PROVIDER, openIdProvider );
+
+        systemSettingManager.saveSystemSetting( KEY_OPENID_PROVIDER, StringUtils.isEmpty( openIdProvider ) ? null : openIdProvider );
 
         if ( !StringUtils.isEmpty( openIdProviderLabel ) )
         {

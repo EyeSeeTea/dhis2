@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,7 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
@@ -91,7 +92,7 @@ public class GetTrackedEntityInstanceAction
 
     @Autowired
     private ProgramInstanceService programInstanceService;
-    
+
     private I18n i18n;
 
     private I18nFormat format;
@@ -113,12 +114,6 @@ public class GetTrackedEntityInstanceAction
     private Collection<TrackedEntityAttribute> noGroupAttributes = new HashSet<TrackedEntityAttribute>();
 
     private List<TrackedEntityAttributeGroup> attributeGroups;
-
-    private Map<Integer, String> identiferMap;
-
-    private String childContactName;
-
-    private String childContactType;
 
     private Relationship relationship;
 
@@ -178,6 +173,13 @@ public class GetTrackedEntityInstanceAction
         return trackedEntities;
     }
 
+    private Map<Integer, Boolean> mandatoryMap = new HashMap<Integer, Boolean>();
+
+    public Map<Integer, Boolean> getMandatoryMap()
+    {
+        return mandatoryMap;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -207,7 +209,7 @@ public class GetTrackedEntityInstanceAction
         {
             program = programService.getProgram( programId );
             trackedEntityForm = trackedEntityFormService.getTrackedEntityForm( program );
-           
+
             Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstance,
                 program, ProgramInstance.STATUS_ACTIVE );
             ProgramInstance programIntance = null;
@@ -237,18 +239,26 @@ public class GetTrackedEntityInstanceAction
                 Collection<Program> programs = programService.getAllPrograms();
                 for ( Program p : programs )
                 {
-                    for ( TrackedEntityAttribute attribute : p.getEntityAttributes() )
+                    for ( ProgramTrackedEntityAttribute programAttribute : p.getAttributes() )
                     {
-                        if ( !attribute.getDisplayInListNoProgram() )
+                        if ( !programAttribute.isDisplayInList() )
                         {
-                            attributes.remove( attribute );
+                            attributes.remove( programAttribute.getAttribute() );
                         }
                     }
+                }
+                
+
+                for( TrackedEntityAttribute attribute : attributes){
+                    mandatoryMap.put( attribute.getId(), false );
                 }
             }
             else
             {
-                attributes = program.getEntityAttributes();
+                attributes = program.getTrackedEntityAttributes();
+                for( ProgramTrackedEntityAttribute programAttribute : program.getAttributes() ){
+                    mandatoryMap.put( programAttribute.getAttribute().getId(), programAttribute.isMandatory() );
+                }
             }
 
             for ( TrackedEntityAttribute attribute : attributes )
@@ -356,21 +366,6 @@ public class GetTrackedEntityInstanceAction
     public List<TrackedEntityAttributeGroup> getAttributeGroups()
     {
         return attributeGroups;
-    }
-
-    public Map<Integer, String> getIdentiferMap()
-    {
-        return identiferMap;
-    }
-
-    public String getChildContactName()
-    {
-        return childContactName;
-    }
-
-    public String getChildContactType()
-    {
-        return childContactType;
     }
 
     public void setEntityInstanceService( TrackedEntityInstanceService entityInstanceService )

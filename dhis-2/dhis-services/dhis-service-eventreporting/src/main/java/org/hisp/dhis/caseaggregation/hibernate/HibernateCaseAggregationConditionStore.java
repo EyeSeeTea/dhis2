@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseaggregation.hibernate;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ public class HibernateCaseAggregationConditionStore
 
     private static final String IN_CONDITION_COUNT_X_TIMES = "COUNT";
 
-    public static final String STORED_BY_DHIS_SYSTEM = "DHIS-System";
+    public static final String STORED_BY_DHIS_SYSTEM = "aggregated_from_tracker";
 
     // -------------------------------------------------------------------------
     // Dependencies
@@ -548,7 +548,7 @@ public class HibernateCaseAggregationConditionStore
                 }
                 else
                 {
-                    condition = getConditionForProgramStage( ids[0], operator, orgunitIds, startDate, endDate );
+                    condition = getConditionForProgramStage( ids[0], orgunitIds, startDate, endDate );
                 }
             }
             else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE_PROPERTY ) )
@@ -634,6 +634,11 @@ public class HibernateCaseAggregationConditionStore
             {
                 sql += " AND _pdv.value ";
             }
+        }
+        
+        if( !isExist )
+        {
+            sql = "(" + sql + " ) AND " + getConditionForProgramStage( programStageId, orgunitIds, startDate, endDate ) + ")";
         }
 
         return sql;
@@ -730,7 +735,7 @@ public class HibernateCaseAggregationConditionStore
      * [PS:1]
      * 
      */
-    private String getConditionForProgramStage( String programStageId, String operator, Collection<Integer> orgunitIds,
+    private String getConditionForProgramStage( String programStageId, Collection<Integer> orgunitIds,
         String startDate, String endDate )
     {
         String sql = " EXISTS ( SELECT _psi.programstageinstanceid FROM programstageinstance _psi "

@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller.user;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -109,21 +109,5 @@ public class UserController
     protected User getEntity( String uid )
     {
         return userService.getUser( uid );
-    }
-
-    //--------------------------------------------------------------------------
-    // Overrides
-    //--------------------------------------------------------------------------
-
-    @Override
-    public User searchForEntity( Class<User> clazz, String query )
-    {
-        return userService.searchForUser( query );
-    }
-    
-    @Override
-    public List<User> queryForList( Class<User> clazz, String query )
-    {
-        return userService.queryForUsers( query );
     }
 }

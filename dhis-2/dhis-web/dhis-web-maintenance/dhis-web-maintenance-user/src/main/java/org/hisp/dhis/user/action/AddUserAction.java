@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -46,13 +47,13 @@ import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.user.UserSettingService;
+import org.springframework.util.StringUtils;
 
 import com.opensymphony.xwork2.Action;
 
@@ -101,13 +102,6 @@ public class AddUserAction
     public void setPasswordManager( PasswordManager passwordManager )
     {
         this.passwordManager = passwordManager;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     private AttributeService attributeService;
@@ -238,9 +232,6 @@ public class AddUserAction
     public String execute()
             throws Exception
     {
-        UserCredentials currentUserCredentials = currentUserService.getCurrentUser() != null ? currentUserService
-                .getCurrentUser().getUserCredentials() : null;
-
         // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
@@ -267,7 +258,11 @@ public class AddUserAction
         user.setUserCredentials( userCredentials );
 
         userCredentials.setUsername( username );
-        userCredentials.setOpenId( openId );
+
+        if ( !StringUtils.isEmpty( openId ) )
+        {
+            userCredentials.setOpenId( openId );
+        }
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
@@ -288,15 +283,16 @@ public class AddUserAction
 
         user.updateOrganisationUnits( new HashSet<OrganisationUnit>( orgUnits ) );
 
+        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
+        
         for ( String id : selectedList )
         {
-            UserAuthorityGroup group = userService.getUserAuthorityGroup( Integer.parseInt( id ) );
-
-            if ( currentUserCredentials != null && currentUserCredentials.canIssue( group ) )
-            {
-                userCredentials.getUserAuthorityGroups().add( group );
-            }
+            userAuthorityGroups.add( userService.getUserAuthorityGroup( Integer.parseInt( id ) ) );
         }
+
+        userService.canIssueFilter( userAuthorityGroups );
+        
+        userCredentials.setUserAuthorityGroups( userAuthorityGroups );
 
         if ( jsonAttributeValues != null )
         {

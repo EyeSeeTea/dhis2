@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,17 +30,17 @@ package org.hisp.dhis.api.controller;
 
 import com.google.common.collect.Maps;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
-import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
 import org.hisp.dhis.api.utils.WebUtils;
-import org.hisp.dhis.common.Access;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
-import org.hisp.dhis.common.SharingUtils;
+import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.sharing.Access;
+import org.hisp.dhis.sharing.SharingService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +61,6 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -80,26 +79,33 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     @Autowired
     protected CurrentUserService currentUserService;
 
+    @Autowired
+    protected FilterService filterService;
+
+    @Autowired
+    protected SharingService sharingService;
+
     //--------------------------------------------------------------------------
     // GET
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/filtered", method = RequestMethod.GET )
-    public void getJacksonClassMap(
+    @RequestMapping( method = RequestMethod.GET )
+    public String getObjectList(
         @RequestParam( required = false ) String include,
         @RequestParam( required = false ) String exclude,
         @RequestParam( value = "filter", required = false ) List<String> filters,
-        @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws IOException
+        @RequestParam Map<String, String> parameters, HttpServletResponse response, Model model ) throws IOException
     {
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
-        options.getOptions().put( "links", "false" );
 
-        boolean hasPaging = false;
+        boolean hasPaging = options.hasPaging();
 
         // get full list if we are using filters
         if ( filters != null && !filters.isEmpty() )
         {
+            options.getOptions().put( "links", "false" );
+
             if ( options.hasPaging() )
             {
                 hasPaging = true;
@@ -109,14 +115,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         List<T> entityList = getEntityList( metaData, options );
 
-        handleLinksAndAccess( options, metaData, entityList, true );
-
-        postProcessEntities( entityList );
-        postProcessEntities( entityList, options, parameters );
-
+        // enable object filter
         if ( filters != null && !filters.isEmpty() )
         {
-            entityList = WebUtils.filterObjects( entityList, filters );
+            entityList = filterService.filterObjects( entityList, filters );
 
             if ( hasPaging )
             {
@@ -125,28 +127,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                 entityList = PagerUtils.pageCollection( entityList, pager );
             }
         }
-
-        List<Object> objects = WebUtils.filterFields( entityList, include, exclude );
-        Map<String, Object> output = Maps.newLinkedHashMap();
-
-        if ( hasPaging )
-        {
-            output.put( "pager", metaData.getPager() );
-        }
-
-        output.put( "objects", objects );
-
-        JacksonUtils.toJson( response.getOutputStream(), output );
-    }
-
-    @RequestMapping( method = RequestMethod.GET )
-    public String getObjectList( @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        WebMetaData metaData = new WebMetaData();
-        List<T> entityList = getEntityList( metaData, options );
-
-        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
         if ( options.getViewClass( "basic" ).equals( "basic" ) )
         {
@@ -160,37 +140,27 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
-    }
-
-    @RequestMapping( value = "/query/{query}", method = RequestMethod.GET )
-    public String query( @PathVariable String query, @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        WebMetaData metaData = new WebMetaData();
-        List<T> entityList = queryForEntityList( metaData, options, query );
-
-        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
-
-        String viewClass = options.getViewClass( "basic" );
-
-        if ( viewClass.equals( "basic" ) || viewClass.equals( "sharingBasic" ) )
+        // enable property filter
+        if ( include != null || exclude != null )
         {
-            handleLinksAndAccess( options, metaData, entityList, false );
+            List<Object> objects = filterService.filterProperties( entityList, include, exclude );
+            Map<String, Object> output = Maps.newLinkedHashMap();
+
+            if ( hasPaging )
+            {
+                output.put( "pager", metaData.getPager() );
+            }
+
+            output.put( "objects", objects );
+            JacksonUtils.toJson( response.getOutputStream(), output );
         }
         else
         {
-            handleLinksAndAccess( options, metaData, entityList, true );
+            ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
+
+            model.addAttribute( "model", metaData );
+            model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
         }
-
-        postProcessEntities( entityList );
-        postProcessEntities( entityList, options, parameters );
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", viewClass );
 
         return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
     }
@@ -212,7 +182,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             WebUtils.generateLinks( entity );
         }
 
-        if ( SharingUtils.isSupported( getEntityClass() ) )
+        if ( sharingService.isSupported( getEntityClass() ) )
         {
             addAccessProperties( entity );
         }
@@ -222,32 +192,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         model.addAttribute( "model", entity );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
-    }
-
-    @RequestMapping( value = "/search/{query}", method = RequestMethod.GET )
-    public String search( @PathVariable String query, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        T entity = searchForEntity( getEntityClass(), query );
-
-        if ( entity == null )
-        {
-            throw new NotFoundForQueryException( query );
-        }
-
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( entity );
-        }
-
-        postProcessEntity( entity );
-        postProcessEntity( entity, options, parameters );
-
-        model.addAttribute( "model", entity );
-        model.addAttribute( "viewClass", "detailed" );
 
         return StringUtils.uncapitalize( getEntitySimpleName() );
     }
@@ -267,7 +211,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
-
     //--------------------------------------------------------------------------
     // PUT
     //--------------------------------------------------------------------------
@@ -315,6 +258,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
+
     protected void postProcessEntities( List<T> entityList )
     {
 
@@ -340,22 +284,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // Helpers
     //--------------------------------------------------------------------------
 
-    protected T searchForEntity( Class<T> clazz, String query )
-    {
-        return manager.search( clazz, query );
-    }
-
     protected List<T> getEntityList( WebMetaData metaData, WebOptions options )
     {
         List<T> entityList;
 
-        Date lastUpdated = options.getLastUpdated();
-
-        if ( lastUpdated != null )
-        {
-            entityList = new ArrayList<T>( manager.getByLastUpdatedSorted( getEntityClass(), lastUpdated ) );
-        }
-        else if ( options.hasPaging() )
+        if ( options.hasPaging() )
         {
             int count = manager.getCount( getEntityClass() );
 
@@ -372,26 +305,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return entityList;
     }
 
-    protected List<T> queryForEntityList( WebMetaData metaData, WebOptions options, String query )
-    {
-        List<T> entityList = queryForList( getEntityClass(), query );
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
-            metaData.setPager( pager );
-
-            entityList = PagerUtils.pageCollection( entityList, pager );
-        }
-
-        return entityList;
-    }
-
-    protected List<T> queryForList( Class<T> clazz, String query )
-    {
-        return new ArrayList<T>( manager.filter( getEntityClass(), query ) );
-    }
-
     protected T getEntity( String uid )
     {
         return manager.getNoAcl( getEntityClass(), uid ); //TODO consider ACL
@@ -400,12 +313,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected void addAccessProperties( T object )
     {
         Access access = new Access();
-        access.setManage( SharingUtils.canManage( currentUserService.getCurrentUser(), object ) );
-        access.setExternalize( SharingUtils.canExternalize( currentUserService.getCurrentUser(), object ) );
-        access.setWrite( SharingUtils.canWrite( currentUserService.getCurrentUser(), object ) );
-        access.setRead( SharingUtils.canRead( currentUserService.getCurrentUser(), object ) );
-        access.setUpdate( SharingUtils.canUpdate( currentUserService.getCurrentUser(), object ) );
-        access.setDelete( SharingUtils.canDelete( currentUserService.getCurrentUser(), object ) );
+        access.setManage( sharingService.canManage( currentUserService.getCurrentUser(), object ) );
+        access.setExternalize( sharingService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
+        access.setWrite( sharingService.canWrite( currentUserService.getCurrentUser(), object ) );
+        access.setRead( sharingService.canRead( currentUserService.getCurrentUser(), object ) );
+        access.setUpdate( sharingService.canUpdate( currentUserService.getCurrentUser(), object ) );
+        access.setDelete( sharingService.canDelete( currentUserService.getCurrentUser(), object ) );
 
         ((BaseIdentifiableObject) object).setAccess( access );
     }
@@ -422,7 +335,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             return;
         }
 
-        if ( entityList != null && SharingUtils.isSupported( getEntityClass() ) )
+        if ( entityList != null && sharingService.isSupported( getEntityClass() ) )
         {
             for ( T object : entityList )
             {

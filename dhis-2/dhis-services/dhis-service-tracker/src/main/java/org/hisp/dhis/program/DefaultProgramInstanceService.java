@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -263,13 +263,7 @@ public class DefaultProgramInstanceService
         List<Grid> grids = new ArrayList<Grid>();
 
         // ---------------------------------------------------------------------
-        // Get registered personal entityInstance data
-        // ---------------------------------------------------------------------
-
-        Grid attrGrid = new ListGrid();
-
-        // ---------------------------------------------------------------------
-        // Add dynamic attribues
+        // Dynamic attributes
         // ---------------------------------------------------------------------
 
         Collection<Program> programs = programService
@@ -282,7 +276,7 @@ public class DefaultProgramInstanceService
 
         for ( Program program : programs )
         {
-            List<TrackedEntityAttribute> atttributes = program.getEntityAttributes();
+            List<TrackedEntityAttribute> atttributes = program.getTrackedEntityAttributes();
             while ( iterAttribute.hasNext() )
             {
                 TrackedEntityAttributeValue attributeValue = iterAttribute.next();
@@ -293,20 +287,28 @@ public class DefaultProgramInstanceService
             }
         }
 
-        for ( TrackedEntityAttributeValue attributeValue : attributeValues )
+        if ( attributeValues.size() > 0 )
         {
-            attrGrid.addRow();
-            attrGrid.addValue( attributeValue.getAttribute().getDisplayName() );
-            String value = attributeValue.getValue();
-            if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_BOOL ) )
+            Grid attrGrid = new ListGrid();
+
+            for ( TrackedEntityAttributeValue attributeValue : attributeValues )
             {
-                value = i18n.getString( value );
+                attrGrid.addRow();
+                attrGrid.addValue( attributeValue.getAttribute().getDisplayName() );
+                String value = attributeValue.getValue();
+
+                if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_AGE )
+                    && value != null )
+                {
+                    Date date = format.parseDate( value );
+                    value = TrackedEntityAttribute.getAgeFromDate( date ) + "";
+                }
+
+                attrGrid.addValue( value );
             }
 
-            attrGrid.addValue( value );
+            grids.add( attrGrid );
         }
-
-        grids.add( attrGrid );
 
         // ---------------------------------------------------------------------
         // Get all program data registered
@@ -360,7 +362,7 @@ public class DefaultProgramInstanceService
 
         TrackedEntityInstance instance = programInstance.getEntityInstance();
 
-        Collection<TrackedEntityAttribute> atttributes = programInstance.getProgram().getEntityAttributes();
+        Collection<TrackedEntityAttribute> atttributes = programInstance.getProgram().getTrackedEntityAttributes();
 
         for ( TrackedEntityAttribute attrtibute : atttributes )
         {
@@ -486,7 +488,7 @@ public class DefaultProgramInstanceService
                 && rm.getWhenToSend() != null
                 && rm.getWhenToSend() == status
                 && (rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_DHIS_MESSAGE || rm
-                .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
+                    .getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
             {
                 int id = messageService.sendMessage( programInstance.getProgram().getDisplayName(),
                     reminderService.getMessageFromTemplate( rm, programInstance, format ), null,

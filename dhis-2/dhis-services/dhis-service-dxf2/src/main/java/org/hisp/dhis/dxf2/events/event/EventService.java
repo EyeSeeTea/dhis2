@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 
-import org.hisp.dhis.dxf2.events.person.Person;
+import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
@@ -56,25 +56,25 @@ public interface EventService
 
     Events getEvents( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( Program program, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate );
+    Events getEvents( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
 
     Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit );
 
     Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate );
+    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
 
     Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
 
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Person person );
+    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance );
 
     Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
 
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Person person, Date startDate, Date endDate );
+    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
 
     Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
 
-    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Person person, Date startDate, Date endDate );
+    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
 
     Event getEvent( String uid );
 
@@ -84,29 +84,29 @@ public interface EventService
     // CREATE
     // -------------------------------------------------------------------------
 
-    ImportSummary saveEvent( Event event );
+    ImportSummary addEvent( Event event );
 
-    ImportSummary saveEvent( Event event, ImportOptions importOptions );
+    ImportSummary addEvent( Event event, ImportOptions importOptions );
 
-    ImportSummary saveEventXml( InputStream inputStream ) throws IOException;
+    ImportSummary addEventXml( InputStream inputStream ) throws IOException;
 
-    ImportSummary saveEventXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+    ImportSummary addEventXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries saveEventsXml( InputStream inputStream ) throws IOException;
+    ImportSummaries addEventsXml( InputStream inputStream ) throws IOException;
 
-    ImportSummaries saveEventsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+    ImportSummaries addEventsXml( InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries saveEventsXml( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
+    ImportSummaries addEventsXml( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
 
-    ImportSummary saveEventJson( InputStream inputStream ) throws IOException;
+    ImportSummary addEventJson( InputStream inputStream ) throws IOException;
 
-    ImportSummary saveEventJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+    ImportSummary addEventJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries saveEventsJson( InputStream inputStream ) throws IOException;
+    ImportSummaries addEventsJson( InputStream inputStream ) throws IOException;
 
-    ImportSummaries saveEventsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
+    ImportSummaries addEventsJson( InputStream inputStream, ImportOptions importOptions ) throws IOException;
 
-    ImportSummaries saveEventsJson( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
+    ImportSummaries addEventsJson( InputStream inputStream, TaskId taskId, ImportOptions importOptions ) throws IOException;
 
     // -------------------------------------------------------------------------
     // UPDATE

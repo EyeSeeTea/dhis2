@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics.data;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -57,6 +57,7 @@ import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.MeasureFilter;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -270,7 +271,7 @@ public class JdbcAnalyticsManager
         {
             List<DimensionalObject> filters = filterMap.get( dimension );
             
-            if ( DataQueryParams.anyDimensionHasItems( filters ) )
+            if ( DimensionalObjectUtils.anyDimensionHasItems( filters ) )
             {
                 sql += sqlHelper.whereAnd() + " (";
                 

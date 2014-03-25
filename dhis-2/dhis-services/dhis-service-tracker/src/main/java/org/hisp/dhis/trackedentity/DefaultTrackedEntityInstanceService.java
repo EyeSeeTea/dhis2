@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,31 +28,43 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.CREATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.LAST_UPDATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_UNIT_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.*;
+
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.system.grid.ListGrid;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceStore;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.validation.ValidationCriteria;
@@ -60,21 +72,22 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 @Transactional
 public class DefaultTrackedEntityInstanceService
     implements TrackedEntityInstanceService
 {
+    private static final Log log = LogFactory.getLog( DefaultTrackedEntityInstanceService.class );
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private TrackedEntityInstanceStore entityInstanceStore;
+    private TrackedEntityInstanceStore trackedEntityInstanceStore;
 
-    public void setEntityInstanceStore( TrackedEntityInstanceStore entityInstanceStore )
+    public void setTrackedEntityInstanceStore( TrackedEntityInstanceStore trackedEntityInstanceStore )
     {
-        this.entityInstanceStore = entityInstanceStore;
+        this.trackedEntityInstanceStore = trackedEntityInstanceStore;
     }
 
     private TrackedEntityAttributeValueService attributeValueService;
@@ -90,6 +103,13 @@ public class DefaultTrackedEntityInstanceService
     {
         this.attributeService = attributeService;
     }
+    
+    private TrackedEntityService trackedEntityService;
+
+    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
+    {
+        this.trackedEntityService = trackedEntityService;
+    }
 
     private RelationshipService relationshipService;
 
@@ -104,26 +124,255 @@ public class DefaultTrackedEntityInstanceService
     {
         this.relationshipTypeService = relationshipTypeService;
     }
+    
+    private ProgramService programService;
 
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+    
+    private OrganisationUnitService organisationUnitService;
+
+    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
+    {
+        this.organisationUnitService = organisationUnitService;
+    }
+        
     // -------------------------------------------------------------------------
     // Implementation methods
     // -------------------------------------------------------------------------
+    
+    //TODO queries with multiple words
+    //TODO lower index on attribute value?
+    
+    @Override
+    public Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
+    {
+        validate( params );
+
+        // ---------------------------------------------------------------------
+        // Verify params
+        // ---------------------------------------------------------------------
+
+        for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
+        {
+            if ( !organisationUnit.hasLevel() )
+            {
+                organisationUnit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
+            }
+        }
+        
+        // ---------------------------------------------------------------------
+        // If params of type query and no attributes or filters defined, use
+        // attributes from program if exists, if not, use all attributes.
+        // ---------------------------------------------------------------------
+
+        if ( !params.hasAttributesOrFilters() )
+        {
+            if ( params.hasProgram() )
+            {
+                params.getAttributes().addAll( QueryItem.getQueryItems( params.getProgram().getTrackedEntityAttributes() ) );
+            }
+            else 
+            {
+                Collection<TrackedEntityAttribute> filters = attributeService.getAllTrackedEntityAttributes();
+                Collection<TrackedEntityAttribute> attributes = attributeService.getTrackedEntityAttributesDisplayInList( true );
+                filters.removeAll( attributes );
+                
+                params.getAttributes().addAll( QueryItem.getQueryItems( attributes ) );
+                params.getFilters().addAll( QueryItem.getQueryItems( filters ) );
+            }
+        }
+
+        Grid grid = new ListGrid();
+
+        // ---------------------------------------------------------------------
+        // Grid headers
+        // ---------------------------------------------------------------------
+
+        grid.addHeader( new GridHeader( TRACKED_ENTITY_INSTANCE_ID, "Instance" ) );
+        grid.addHeader( new GridHeader( CREATED_ID, "Created" ) );
+        grid.addHeader( new GridHeader( LAST_UPDATED_ID, "Last updated" ) );
+        grid.addHeader( new GridHeader( ORG_UNIT_ID, "Org unit" ) );
+        grid.addHeader( new GridHeader( TRACKED_ENTITY_ID, "Tracked entity" ) );
+        
+        for ( QueryItem item : params.getAttributes() )
+        {
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName() ) );
+        }
+        
+        List<Map<String, String>> entities = trackedEntityInstanceStore.getTrackedEntityInstances( params );
+
+        // ---------------------------------------------------------------------
+        // Grid rows
+        // ---------------------------------------------------------------------
+
+        for ( Map<String, String> entity : entities )
+        {
+            grid.addRow();
+            grid.addValue( entity.get( TRACKED_ENTITY_INSTANCE_ID ) );
+            grid.addValue( entity.get( CREATED_ID ) );
+            grid.addValue( entity.get( LAST_UPDATED_ID ) );
+            grid.addValue( entity.get( ORG_UNIT_ID ) );
+            grid.addValue( entity.get( TRACKED_ENTITY_ID ) );
+            
+            for ( QueryItem item : params.getAttributes() )
+            {
+                grid.addValue( entity.get( item.getItemId() ) );
+            }
+        }
+        
+        return grid;
+    }
 
     @Override
-    public int saveTrackedEntityInstance( TrackedEntityInstance instance )
+    public void validate( TrackedEntityInstanceQueryParams params )
+        throws IllegalQueryException
     {
-        return entityInstanceStore.save( instance );
+        String violation = null;
+        
+        if ( params == null )
+        {
+            throw new IllegalQueryException( "Params cannot be null" );
+        }
+
+        if ( !params.hasOrganisationUnits() && !params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        {
+            violation = "At least one organisation unit must be specified";
+        }
+        
+        if ( params.hasProgram() && params.hasTrackedEntity() )
+        {
+            violation = "Program and tracked entity cannot be specified simultaneously";
+        }
+        
+        if ( violation != null )
+        {
+            log.warn( "Validation failed: " + violation );
+            
+            throw new IllegalQueryException( violation );
+        }
+    }
+    
+    @Override
+    public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, Set<String> ou, 
+        OrganisationUnitSelectionMode ouMode, String program, String trackedEntity, Integer page, Integer pageSize )
+    {
+        TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
+
+        if ( attribute != null )
+        {
+            for ( String attr : attribute )
+            {
+                QueryItem it = getQueryItem( attr );
+                
+                params.getAttributes().add( it );
+            }
+        }
+        
+        if ( filter != null )
+        {
+            for ( String filt : filter )
+            {
+                QueryItem it = getQueryItem( filt );
+                
+                params.getFilters().add( it );
+            }
+        }
+
+        if ( ou != null )
+        {
+            for ( String orgUnit : ou )
+            {
+                OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( orgUnit );
+                
+                if ( organisationUnit == null )
+                {
+                    throw new IllegalQueryException( "Organisation unit does not exist: " + orgUnit );
+                }
+                
+                params.getOrganisationUnits().add( organisationUnit );
+            }
+        }
+        
+        Program pr = program != null ? programService.getProgram( program ) : null;
+        
+        if ( program != null && pr == null )
+        {
+            throw new IllegalQueryException( "Program does not exist: " + program );
+        }
+        
+        TrackedEntity te = trackedEntity != null ? trackedEntityService.getTrackedEntity( trackedEntity ) : null;
+        
+        if ( trackedEntity != null && te == null )
+        {
+            throw new IllegalQueryException( "Tracked entity does not exist: " + program );
+        }
+
+        List<OrganisationUnitSelectionMode> VALID_OU_MODES = new ArrayList<OrganisationUnitSelectionMode>( Arrays.asList( SELECTED, CHILDREN, DESCENDANTS ) );
+        
+        if ( ouMode != null && !VALID_OU_MODES.contains( ouMode ) )
+        {
+            throw new IllegalQueryException( "Invalid organisation unit selection mode: " + ouMode );
+        }
+
+        params.setQuery( query );
+        params.setProgram( pr );
+        params.setTrackedEntity( te );
+        params.setOrganisationUnitMode( ouMode );
+        params.setPage( page );
+        params.setPageSize( pageSize );
+        
+        return params;
+    }
+
+    private QueryItem getQueryItem( String item )
+    {
+        if ( !item.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
+        {
+            return getItem( item, null, null );
+        }
+        else // Filter
+        {
+            String[] split = item.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
+
+            if ( split == null || split.length != 3 )
+            {
+                throw new IllegalQueryException( "Item filter has invalid format: " + item );
+            }
+
+            return getItem( split[0], split[1], split[2] );
+        }
+    }
+
+    private QueryItem getItem( String item, String operator, String filter )
+    {
+        TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
+
+        if ( at == null )
+        {
+            throw new IllegalQueryException( "Attribute does not exist: " + item );
+        }
+        
+        return new QueryItem( at, operator, filter, at.isNumericType() );
+    }
+    
+    @Override
+    public int addTrackedEntityInstance( TrackedEntityInstance instance )
+    {
+        return trackedEntityInstanceStore.save( instance );
     }
 
     @Override
     public int createTrackedEntityInstance( TrackedEntityInstance instance, Integer representativeId,
         Integer relationshipTypeId, Set<TrackedEntityAttributeValue> attributeValues )
     {
-        int id = saveTrackedEntityInstance( instance );
+        int id = addTrackedEntityInstance( instance );
 
         for ( TrackedEntityAttributeValue pav : attributeValues )
         {
-            attributeValueService.saveTrackedEntityAttributeValue( pav );
+            attributeValueService.addTrackedEntityAttributeValue( pav );
             instance.getAttributeValues().add( pav );
         }
 
@@ -133,7 +382,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( representativeId != null )
         {
-            TrackedEntityInstance representative = entityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
             if ( representative != null )
             {
                 instance.setRepresentative( representative );
@@ -148,7 +397,7 @@ public class DefaultTrackedEntityInstanceService
                     if ( relType != null )
                     {
                         rel.setRelationshipType( relType );
-                        relationshipService.saveRelationship( rel );
+                        relationshipService.addRelationship( rel );
                     }
                 }
             }
@@ -163,31 +412,31 @@ public class DefaultTrackedEntityInstanceService
     @Override
     public void updateTrackedEntityInstance( TrackedEntityInstance instance )
     {
-        entityInstanceStore.update( instance );
+        trackedEntityInstanceStore.update( instance );
     }
 
     @Override
     public void deleteTrackedEntityInstance( TrackedEntityInstance instance )
     {
-        entityInstanceStore.delete( instance );
+        trackedEntityInstanceStore.delete( instance );
     }
 
     @Override
     public TrackedEntityInstance getTrackedEntityInstance( int id )
     {
-        return entityInstanceStore.get( id );
+        return trackedEntityInstanceStore.get( id );
     }
 
     @Override
     public TrackedEntityInstance getTrackedEntityInstance( String uid )
     {
-        return entityInstanceStore.getByUid( uid );
+        return trackedEntityInstanceStore.getByUid( uid );
     }
 
     @Override
     public Collection<TrackedEntityInstance> getAllTrackedEntityInstances()
     {
-        return entityInstanceStore.getAll();
+        return trackedEntityInstanceStore.getAll();
     }
 
     @Override
@@ -196,9 +445,6 @@ public class DefaultTrackedEntityInstanceService
         Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
         entityInstances.addAll( getTrackedEntityInstancesByPhone( searchText, 0, Integer.MAX_VALUE ) );
 
-        // if an org-unit has been selected, filter out every instance that has
-        // a
-        // different org-unit
         if ( orgUnitId != 0 )
         {
             Set<TrackedEntityInstance> toRemoveList = new HashSet<TrackedEntityInstance>();
@@ -221,20 +467,20 @@ public class DefaultTrackedEntityInstanceService
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Integer min,
         Integer max )
     {
-        return entityInstanceStore.getByOrgUnit( organisationUnit, min, max );
+        return trackedEntityInstanceStore.getByOrgUnit( organisationUnit, min, max );
     }
 
     @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( Program program )
     {
-        return entityInstanceStore.getByProgram( program, 0, Integer.MAX_VALUE );
+        return trackedEntityInstanceStore.getByProgram( program, 0, Integer.MAX_VALUE );
     }
 
     @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit,
         Program program )
     {
-        return entityInstanceStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
+        return trackedEntityInstanceStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
     }
 
     @Override
@@ -288,7 +534,7 @@ public class DefaultTrackedEntityInstanceService
     @Override
     public int countGetTrackedEntityInstancesByOrgUnit( OrganisationUnit organisationUnit )
     {
-        return entityInstanceStore.countListTrackedEntityInstanceByOrgunit( organisationUnit );
+        return trackedEntityInstanceStore.countListTrackedEntityInstanceByOrgunit( organisationUnit );
     }
 
     @Override
@@ -296,11 +542,11 @@ public class DefaultTrackedEntityInstanceService
         Integer relationshipTypeId, List<TrackedEntityAttributeValue> valuesForSave,
         List<TrackedEntityAttributeValue> valuesForUpdate, Collection<TrackedEntityAttributeValue> valuesForDelete )
     {
-        entityInstanceStore.update( instance );
+        trackedEntityInstanceStore.update( instance );
 
         for ( TrackedEntityAttributeValue av : valuesForSave )
         {
-            attributeValueService.saveTrackedEntityAttributeValue( av );
+            attributeValueService.addTrackedEntityAttributeValue( av );
         }
 
         for ( TrackedEntityAttributeValue av : valuesForUpdate )
@@ -315,7 +561,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( shouldSaveRepresentativeInformation( instance, representativeId ) )
         {
-            TrackedEntityInstance representative = entityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
 
             if ( representative != null )
             {
@@ -331,7 +577,7 @@ public class DefaultTrackedEntityInstanceService
                     if ( relType != null )
                     {
                         rel.setRelationshipType( relType );
-                        relationshipService.saveRelationship( rel );
+                        relationshipService.addRelationship( rel );
                     }
                 }
             }
@@ -352,13 +598,13 @@ public class DefaultTrackedEntityInstanceService
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit,
         Program program, Integer min, Integer max )
     {
-        return entityInstanceStore.getByOrgUnitProgram( organisationUnit, program, min, max );
+        return trackedEntityInstanceStore.getByOrgUnitProgram( organisationUnit, program, min, max );
     }
 
     @Override
     public int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program )
     {
-        return entityInstanceStore.countGetTrackedEntityInstancesByOrgUnitProgram( organisationUnit, program );
+        return trackedEntityInstanceStore.countGetTrackedEntityInstancesByOrgUnitProgram( organisationUnit, program );
     }
 
     @Override
@@ -399,7 +645,7 @@ public class DefaultTrackedEntityInstanceService
     @Override
     public Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance instance )
     {
-        return entityInstanceStore.getRepresentatives( instance );
+        return trackedEntityInstanceStore.getRepresentatives( instance );
     }
 
     @Override
@@ -407,21 +653,21 @@ public class DefaultTrackedEntityInstanceService
         Collection<OrganisationUnit> orgunits, Boolean followup, Collection<TrackedEntityAttribute> attributes,
         Integer statusEnrollment, Integer min, Integer max )
     {
-        return entityInstanceStore.search( searchKeys, orgunits, followup, attributes, statusEnrollment, min, max );
+        return trackedEntityInstanceStore.search( searchKeys, orgunits, followup, attributes, statusEnrollment, min, max );
     }
 
     @Override
     public int countSearchTrackedEntityInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment )
     {
-        return entityInstanceStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
+        return trackedEntityInstanceStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
     }
 
     @Override
     public Collection<String> getTrackedEntityInstancePhoneNumbers( List<String> searchKeys,
         Collection<OrganisationUnit> orgunits, Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        Collection<TrackedEntityInstance> entityInstances = entityInstanceStore.search( searchKeys, orgunits, followup,
+        Collection<TrackedEntityInstance> entityInstances = trackedEntityInstanceStore.search( searchKeys, orgunits, followup,
             null, statusEnrollment, min, max );
         Set<String> phoneNumbers = new HashSet<String>();
 
@@ -447,7 +693,7 @@ public class DefaultTrackedEntityInstanceService
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
-        return entityInstanceStore.getProgramStageInstances( searchKeys, orgunits, followup, null, statusEnrollment,
+        return trackedEntityInstanceStore.getProgramStageInstances( searchKeys, orgunits, followup, null, statusEnrollment,
             min, max );
     }
 
@@ -455,7 +701,7 @@ public class DefaultTrackedEntityInstanceService
     public Collection<TrackedEntityInstance> getTrackedEntityInstancesByPhone( String phoneNumber, Integer min,
         Integer max )
     {
-        return entityInstanceStore.getByPhoneNumber( phoneNumber, min, max );
+        return trackedEntityInstanceStore.getByPhoneNumber( phoneNumber, min, max );
     }
 
     @Override
@@ -499,7 +745,7 @@ public class DefaultTrackedEntityInstanceService
         grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
 
-        return entityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
+        return trackedEntityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
             attributes, statusEnrollment, min, max );
     }
 
@@ -533,7 +779,7 @@ public class DefaultTrackedEntityInstanceService
         grid.addHeader( new GridHeader( i18n.getString( "gender" ), true, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
 
-        Collection<TrackedEntityAttribute> attributes = program.getEntityAttributes();
+        Collection<TrackedEntityAttribute> attributes = program.getTrackedEntityAttributes();
 
         for ( TrackedEntityAttribute attribute : attributes )
         {
@@ -545,20 +791,20 @@ public class DefaultTrackedEntityInstanceService
         grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
         grid.addHeader( new GridHeader( i18n.getString( "risk" ), false, true ) );
 
-        return entityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
+        return trackedEntityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
             attributes, statusEnrollment, null, null );
     }
 
     @Override
     public int validateTrackedEntityInstance( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
-        return entityInstanceStore.validate( instance, program, format );
+        return trackedEntityInstanceStore.validate( instance, program, format );
     }
 
     @Override
     public ValidationCriteria validateEnrollment( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
-        return entityInstanceStore.validateEnrollment( instance, program, format );
+        return trackedEntityInstanceStore.validateEnrollment( instance, program, format );
     }
 
     @Override
@@ -595,7 +841,6 @@ public class DefaultTrackedEntityInstanceService
     public Collection<TrackedEntityInstance> getTrackedEntityInstancesByAttributeValue( String searchText,
         int attributeId, Integer min, Integer max )
     {
-        return entityInstanceStore.getByAttributeValue( searchText, attributeId, min, max );
+        return trackedEntityInstanceStore.getByAttributeValue( searchText, attributeId, min, max );
     }
-
 }

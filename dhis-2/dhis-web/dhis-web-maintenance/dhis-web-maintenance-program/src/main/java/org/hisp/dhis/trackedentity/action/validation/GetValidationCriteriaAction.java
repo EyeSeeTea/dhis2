@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.validation;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -121,7 +121,7 @@ public class GetValidationCriteriaAction
 
         program = programService.getProgram( programId );
 
-        attribute = program.getEntityAttributes();
+        attribute = program.getTrackedEntityAttributes();
 
         Collections.sort( attribute, IdentifiableObjectNameComparator.INSTANCE );
 

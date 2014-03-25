@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics.event;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@ package org.hisp.dhis.analytics.event;
 
 import java.util.List;
 
-import org.hisp.dhis.analytics.IllegalQueryException;
+import org.hisp.dhis.common.IllegalQueryException;
 
 /**
  * @author Lars Helge Overland
@@ -46,8 +46,8 @@ public interface EventQueryPlanner
      * Plans the given params and returns a list of params.
      * 
      * @param params the query params.
-     * @param validPartitions the list of existing database partition names, only
-     *        required for aggregate queries.
      */
-    List<EventQueryParams> planQuery( EventQueryParams params, List<String> validPartitions );
+    List<EventQueryParams> planAggregateQuery( EventQueryParams params );
+    
+    EventQueryParams planEventQuery( EventQueryParams params );
 }

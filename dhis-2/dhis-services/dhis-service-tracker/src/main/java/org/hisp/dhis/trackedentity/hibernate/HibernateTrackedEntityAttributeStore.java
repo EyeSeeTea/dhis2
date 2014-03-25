@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.hibernate;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,23 +55,9 @@ public class HibernateTrackedEntityAttributeStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<TrackedEntityAttribute> getByMandatory( boolean mandatory )
-    {
-        return getCriteria( Restrictions.eq( "mandatory", mandatory ) ).list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup()
     {
-        return getCriteria( Restrictions.isNull( "attributeGroup" ) ).add( Restrictions.eq( "mandatory", false ) )
-            .list();
-    }
-
-    @Override
-    public TrackedEntityAttribute getByGroupBy()
-    {
-        return (TrackedEntityAttribute) getCriteria( Restrictions.eq( "groupBy", true ) ).uniqueResult();
+        return getCriteria( Restrictions.isNull( "attributeGroup" ) ).list();
     }
 
     @Override
@@ -90,8 +76,8 @@ public class HibernateTrackedEntityAttributeStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<TrackedEntityAttribute> getDisplayedInList( boolean displayInListNoProgram )
+    public Collection<TrackedEntityAttribute> getDisplayInList( boolean displayInList )
     {
-        return getCriteria( Restrictions.eq( "displayInListNoProgram", displayInListNoProgram ) ).list();
+        return getCriteria( Restrictions.eq( "displayInListNoProgram", displayInList ) ).list();
     }
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -47,7 +47,6 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -168,16 +167,6 @@ public class AddTrackedEntityInstanceAction
                     {
                         value = format.formatDate( TrackedEntityAttribute.getDateFromAge( Integer.parseInt( value ) ) );
                     }
-                    else if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( attribute.getValueType() ) )
-                    {
-                        TrackedEntityAttributeOption option = attributeService.getTrackedEntityAttributeOption( Integer
-                            .parseInt( value ) );
-                        if ( option != null )
-                        {
-                            attributeValue.setAttributeOption( option );
-                            attributeValue.setValue( option.getName() );
-                        }
-                    }
                     attributeValues.add( attributeValue );
                 }
                 else if ( attribute.getInherit() && relationship != null )
@@ -223,7 +212,7 @@ public class AddTrackedEntityInstanceAction
                 if ( relType != null )
                 {
                     rel.setRelationshipType( relType );
-                    relationshipService.saveRelationship( rel );
+                    relationshipService.addRelationship( rel );
                 }
             }
         }

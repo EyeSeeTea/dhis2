@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.caseentry;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,7 @@ import org.hisp.dhis.program.ProgramDataEntryService;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroupService;
@@ -146,6 +147,8 @@ public class ShowEventWithRegistrationFormAction
 
     private Map<Integer, Collection<TrackedEntityAttribute>> attributeGroupsMap = new HashMap<Integer, Collection<TrackedEntityAttribute>>();
 
+    private Program program;
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -156,14 +159,14 @@ public class ShowEventWithRegistrationFormAction
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
         healthWorkers = organisationUnit.getUsers();
 
-        Program program = programService.getProgram( programId );
+        program = programService.getProgram( programId );
         TrackedEntityForm trackedEntityForm = trackedEntityFormService.getTrackedEntityForm( program );
 
         if ( trackedEntityForm != null )
         {
             customRegistrationForm = trackedEntityFormService.prepareDataEntryFormForAdd( trackedEntityForm
-                .getDataEntryForm().getHtmlCode(), trackedEntityForm.getProgram(), healthWorkers, null, null,
-                i18n, format );
+                .getDataEntryForm().getHtmlCode(), trackedEntityForm.getProgram(), healthWorkers, null, null, i18n,
+                format );
         }
 
         if ( customRegistrationForm == null )
@@ -173,7 +176,10 @@ public class ShowEventWithRegistrationFormAction
             programs.remove( program );
             for ( Program p : programs )
             {
-                attributesInProgram.addAll( p.getEntityAttributes() );
+                for ( ProgramTrackedEntityAttribute programAttribute : p.getAttributes() )
+                {
+                    attributesInProgram.add( programAttribute.getAttribute() );
+                }
             }
 
             attributeGroups = new ArrayList<TrackedEntityAttributeGroup>(
@@ -214,6 +220,11 @@ public class ShowEventWithRegistrationFormAction
     // -------------------------------------------------------------------------
     // Getter/Setter
     // -------------------------------------------------------------------------
+    
+    public Program getProgram()
+    {
+        return program;
+    }
 
     public Collection<User> getHealthWorkers()
     {

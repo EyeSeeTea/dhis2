@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,12 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
@@ -36,9 +41,16 @@ import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.system.util.AttributeUtils;
 import org.hisp.dhis.system.util.LocaleUtils;
-import org.hisp.dhis.user.*;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSetting;
+import org.hisp.dhis.user.UserSettingService;
+import org.springframework.util.StringUtils;
 
-import java.util.*;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -146,7 +158,7 @@ public class UpdateUserAction
     }
 
     private String localeUi;
-    
+
     public void setLocaleUi( String localeUi )
     {
         this.localeUi = localeUi;
@@ -180,9 +192,6 @@ public class UpdateUserAction
     public String execute()
         throws Exception
     {
-        UserCredentials currentUserCredentials = currentUserService.getCurrentUser() != null ? currentUserService
-            .getCurrentUser().getUserCredentials() : null;
-
         // ---------------------------------------------------------------------
         // Prepare values
         // ---------------------------------------------------------------------
@@ -211,20 +220,25 @@ public class UpdateUserAction
         user.updateOrganisationUnits( new HashSet<OrganisationUnit>( units ) );
 
         UserCredentials userCredentials = userService.getUserCredentials( user );
-        userCredentials.setOpenId( openId );
+
+        if ( !StringUtils.isEmpty( openId ) )
+        {
+            userCredentials.setOpenId( openId );
+        }
+        else
+        {
+            userCredentials.setOpenId( null );
+        }
 
         Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
 
         for ( String id : selectedList )
         {
-            UserAuthorityGroup group = userService.getUserAuthorityGroup( Integer.parseInt( id ) );
-
-            if ( currentUserCredentials != null && currentUserCredentials.canIssue( group ) )
-            {
-                userAuthorityGroups.add( group );
-            }
+            userAuthorityGroups.add( userService.getUserAuthorityGroup( Integer.parseInt( id ) ) );
         }
 
+        userService.canIssueFilter( userAuthorityGroups );
+        
         userCredentials.setUserAuthorityGroups( userAuthorityGroups );
 
         if ( rawPassword != null )
@@ -257,7 +271,7 @@ public class UpdateUserAction
 
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
-        
+
         return SUCCESS;
     }
 }

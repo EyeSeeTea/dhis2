@@ -1,7 +1,7 @@
 package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
@@ -122,7 +121,7 @@ public class Program
     private Set<OrganisationUnitGroup> organisationUnitGroups = new HashSet<OrganisationUnitGroup>();
 
     /**
-     * Allow enrolling person to all orgunit no matter what the program is
+     * Allow enrolling trackedEntity to all orgunit no matter what the program is
      * assigned for the orgunit or not
      */
     private Boolean displayOnAllOrgunit = true;
@@ -162,6 +161,23 @@ public class Program
     // -------------------------------------------------------------------------
 
     /**
+     * Returns the ProgramTrackedEntityAttribute of this Program which contains
+     * the given TrackedEntityAttribute.
+     */
+    public ProgramTrackedEntityAttribute getAttribute( TrackedEntityAttribute attribute )
+    {
+        for ( ProgramTrackedEntityAttribute programAttribute : attributes )
+        {
+            if ( programAttribute != null && programAttribute.getAttribute().equals( attribute ) )
+            {
+                return programAttribute;
+            }
+        }
+        
+        return null;
+    }
+    
+    /**
      * Returns all data elements which are part of the stages of this program.
      */
     public Set<DataElement> getAllDataElements()
@@ -182,7 +198,7 @@ public class Program
     /**
      * Returns TrackedEntityAttributes from ProgramTrackedEntityAttributes.
      */
-    public List<TrackedEntityAttribute> getEntityAttributes()
+    public List<TrackedEntityAttribute> getTrackedEntityAttributes()
     {
         List<TrackedEntityAttribute> entityAttributes = new ArrayList<TrackedEntityAttribute>();
 
@@ -356,15 +372,6 @@ public class Program
     public void setDisplayIncidentDate( Boolean displayIncidentDate )
     {
         this.displayIncidentDate = displayIncidentDate;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    private Object getValueFromTrackedEntityInstance( String property, TrackedEntityInstance entityInstance )
-        throws Exception
-    {
-        return TrackedEntityInstance.class.getMethod( "get" + property ).invoke( entityInstance );
     }
 
     @JsonProperty
@@ -556,10 +563,10 @@ public class Program
         this.dataEntryMethod = dataEntryMethod;
     }
 
-    @JsonProperty( value = "programPersonAttributes" )
+    @JsonProperty( value = "programTrackedEntityAttributes" )
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
-    @JacksonXmlElementWrapper( localName = "programPersonAttributes", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "programPersonAttribute", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "programTrackedEntityAttributes", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
     public Set<ProgramTrackedEntityAttribute> getAttributes()
     {
         return attributes;
@@ -583,5 +590,4 @@ public class Program
     {
         this.trackedEntity = trackedEntity;
     }
-
 }

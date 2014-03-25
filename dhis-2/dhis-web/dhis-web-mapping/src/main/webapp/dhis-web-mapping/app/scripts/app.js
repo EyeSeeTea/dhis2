@@ -176,7 +176,7 @@ Ext.onReady( function() {
 						}
 					}
 
-					if (layout.opacity === 0.8) {
+					if (layout.opacity === gis.conf.layout.layer.opacity) {
 						delete layout.opacity;
 					}
 
@@ -692,7 +692,7 @@ Ext.onReady( function() {
 			text: null,
 			height: 22,
 			value: false,
-			opacity: 0.8,
+			opacity: gis.conf.layout.layer.opacity,
 			getValue: function() {
 				return this.checkbox.getValue();
 			},
@@ -2493,7 +2493,7 @@ Ext.onReady( function() {
 				text: GIS.i18n.create,
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						layers = gis.util.map.getVisibleVectorLayers(),
+						layers = gis.util.map.getRenderedVectorLayers(),
 						layer,
 						lonlat = gis.olmap.getCenter(),
 						views = [],
@@ -2512,8 +2512,10 @@ Ext.onReady( function() {
 
 					for (var i = 0; i < layers.length; i++) {
 						layer = layers[i];
-						//view = layer.widget.getView();
+
 						view = Ext.clone(layer.core.view);
+
+                        view.hidden = !layer.visibility;
 
 						// Operand
 						if (Ext.isArray(view.columns) && view.columns.length) {
@@ -2756,7 +2758,7 @@ Ext.onReady( function() {
 									message;
 
 								if (record.data.access.update) {
-									layers = gis.util.map.getVisibleVectorLayers();
+									layers = gis.util.map.getRenderedVectorLayers();
 									message = 'Overwrite favorite?\n\n' + record.data.name;
 
 									if (layers.length) {
@@ -2770,6 +2772,7 @@ Ext.onReady( function() {
 
 												// add
 												view.layer = layer.id;
+                                                view.hidden = !layer.visibility;
 
 												// remove
 												delete view.periodType;
@@ -3040,11 +3043,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/filtered.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'mapLegendSets'
-				}
+					root: 'objects'
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			listeners: {
 				load: function(store, records) {
@@ -4943,7 +4949,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -5058,7 +5064,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -5606,7 +5612,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -5758,7 +5764,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -6280,7 +6286,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -7040,7 +7046,7 @@ Ext.onReady( function() {
 			valueField: 'id',
 			displayField: 'name',
 			queryMode: 'local',
-			value: 2,
+			value: 3,
 			width: 135,
 			store: Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name'],
@@ -7081,7 +7087,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 300,
+			height: 200,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -7736,7 +7742,7 @@ Ext.onReady( function() {
 			setLayerGui = function() {
 
 				// Layer item
-				layer.item.setValue(true, view.opacity);
+				layer.item.setValue(!view.hidden, view.opacity);
 
 				// Layer menu
 				layer.menu.enableItems();
@@ -8577,19 +8583,35 @@ Ext.onReady( function() {
 									}
 								});
 
+								// organisation unit levels
+								requests.push({
+									url: init.contextPath + '/api/organisationUnitLevels/filtered.json?include=id,name,level&paging=false',
+									success: function(r) {
+										init.organisationUnitLevels = Ext.decode(r.responseText).objects || [];
+										fn();
+									}
+								});
+
 								// user orgunits and children
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&viewClass=detailed&links=false',
+									url: init.contextPath + '/api/organisationUnits/filtered.json?userOnly=true&include=id,name,children[id,name]&paging=false',
 									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [];
+										var organisationUnits = Ext.decode(r.responseText).objects || [],
+											ou = [],
+											ouc = [];
 
 										if (organisationUnits.length) {
-											var ou = organisationUnits[0];
+											for (var i = 0, org; i < organisationUnits.length; i++) {
+												org = organisationUnits[i];
 
-											if (ou.id) {
-												init.user.ou = ou.id;
-												init.user.ouc = ou.children ? Ext.Array.pluck(ou.children, 'id') : null;
-											};
+												ou.push(org.id);
+												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+											}
+
+											init.user = {
+												ou: ou,
+												ouc: ouc
+											}
 										}
 										else {
 											alert('User is not assigned to any organisation units');
@@ -8608,29 +8630,20 @@ Ext.onReady( function() {
 									}
 								});
 
-								// organisation unit levels
-								requests.push({
-									url: init.contextPath + '/api/organisationUnitLevels.json?paging=false&links=false',
-									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-										fn();
-									}
-								});
-
 								// indicator groups
 								requests.push({
-									url: init.contextPath + '/api/indicatorGroups.json?links=false&paging=false',
+									url: init.contextPath + '/api/indicatorGroups/filtered.json?include=id,name&paging=false',
 									success: function(r) {
-										init.indicatorGroups = Ext.decode(r.responseText).indicatorGroups || [];
+										init.indicatorGroups = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});
 
 								// data element groups
 								requests.push({
-									url: init.contextPath + '/api/dataElementGroups.json?links=false&paging=false',
+									url: init.contextPath + '/api/dataElementGroups/filtered.json?include=id,name&paging=false',
 									success: function(r) {
-										init.dataElementGroups = Ext.decode(r.responseText).dataElementGroups || [];
+										init.dataElementGroups = Ext.decode(r.responseText).objects || [];
 										fn();
 									}
 								});

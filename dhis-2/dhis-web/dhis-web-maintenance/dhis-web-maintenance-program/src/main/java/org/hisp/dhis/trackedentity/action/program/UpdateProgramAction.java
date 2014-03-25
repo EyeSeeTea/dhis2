@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.program;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -164,6 +164,13 @@ public class UpdateProgramAction
     public void setPersonDisplayNames( List<Boolean> personDisplayNames )
     {
         this.personDisplayNames = personDisplayNames;
+    }
+
+    private List<Boolean> mandatory = new ArrayList<Boolean>();
+
+    public void setMandatory( List<Boolean> mandatory )
+    {
+        this.mandatory = mandatory;
     }
 
     private Boolean generateBydEnrollmentDate;
@@ -346,7 +353,7 @@ public class UpdateProgramAction
                 TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( Integer
                     .parseInt( ids[1] ) );
                 ProgramTrackedEntityAttribute programAttribute = new ProgramTrackedEntityAttribute( attribute,
-                    index + 1, personDisplayNames.get( index ) );
+                    index + 1, personDisplayNames.get( index ), mandatory.get( index ) );
                 program.getAttributes().add( programAttribute );
             }
 

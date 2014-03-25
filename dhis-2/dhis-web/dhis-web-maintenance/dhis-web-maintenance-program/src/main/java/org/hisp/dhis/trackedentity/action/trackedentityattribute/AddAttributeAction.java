@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.trackedentityattribute;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,11 @@ package org.hisp.dhis.trackedentity.action.trackedentityattribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,6 +55,9 @@ public class AddAttributeAction
     {
         this.attributeService = attributeService;
     }
+
+    @Autowired
+    private OptionService optionService;
 
     @Autowired
     private PeriodService periodService;
@@ -93,20 +94,6 @@ public class AddAttributeAction
         this.valueType = valueType;
     }
 
-    private Boolean mandatory;
-
-    public void setMandatory( Boolean mandatory )
-    {
-        this.mandatory = mandatory;
-    }
-
-    private List<String> attrOptions;
-
-    public void setAttrOptions( List<String> attrOptions )
-    {
-        this.attrOptions = attrOptions;
-    }
-
     private Boolean inherit;
 
     public void setInherit( Boolean inherit )
@@ -126,6 +113,13 @@ public class AddAttributeAction
     public void setUnique( Boolean unique )
     {
         this.unique = unique;
+    }
+
+    private Integer optionSetId;
+
+    public void setOptionSetId( Integer optionSetId )
+    {
+        this.optionSetId = optionSetId;
     }
 
     // For Local ID type
@@ -161,21 +155,18 @@ public class AddAttributeAction
         TrackedEntityAttribute attribute = new TrackedEntityAttribute();
 
         attribute.setName( name );
-        attribute.setCode( StringUtils.isEmpty( code.trim() ) ? null : code  );
+        attribute.setCode( StringUtils.isEmpty( code.trim() ) ? null : code );
         attribute.setDescription( description );
         attribute.setValueType( valueType );
         attribute.setExpression( expression );
         attribute.setDisplayOnVisitSchedule( false );
-
-        mandatory = (mandatory == null) ? false : true;
-        attribute.setMandatory( mandatory );
-
+        
         unique = (unique == null) ? false : true;
         attribute.setUnique( unique );
 
         inherit = (inherit == null) ? false : true;
         attribute.setInherit( inherit );
-        
+
         if ( valueType.equals( TrackedEntityAttribute.VALUE_TYPE_LOCAL_ID ) )
         {
             orgunitScope = (orgunitScope == null) ? false : orgunitScope;
@@ -195,21 +186,12 @@ public class AddAttributeAction
             attribute.setOrgunitScope( orgunitScope );
             attribute.setProgramScope( programScope );
         }
-
-        attributeService.saveTrackedEntityAttribute( attribute );
-
-        if ( TrackedEntityAttribute.TYPE_COMBO.equalsIgnoreCase( valueType ) )
+        else if ( valueType.equals( TrackedEntityAttribute.TYPE_COMBO ) )
         {
-            TrackedEntityAttributeOption opt = null;
-            for ( String optionName : attrOptions )
-            {
-                opt = new TrackedEntityAttributeOption();
-                opt.setName( optionName );
-                opt.setAttribute( attribute );
-                attribute.addAttributeOptions( opt );
-                attributeService.addTrackedEntityAttributeOption( opt );
-            }
+            attribute.setOptionSet( optionService.getOptionSet( optionSetId ) );
         }
+
+        attributeService.addTrackedEntityAttribute( attribute );
 
         return SUCCESS;
     }

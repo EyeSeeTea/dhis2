@@ -1,7 +1,7 @@
 package org.hisp.dhis.caseentry.action.caseentry;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -86,8 +86,8 @@ public class GetSingleEventProgramListAction
         if ( orgunit != null )
         {
             programs = programService.getProgramsByCurrentUser( orgunit );
-            programs.removeAll( programService.getPrograms( Program.MULTIPLE_EVENTS_WITH_REGISTRATION, orgunit ) );
-            programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION, orgunit ) );
+            programs.removeAll( programService.getPrograms( Program.MULTIPLE_EVENTS_WITH_REGISTRATION) );
+            programs.removeAll( programService.getPrograms( Program.SINGLE_EVENT_WITHOUT_REGISTRATION) );
         }
 
         return SUCCESS;

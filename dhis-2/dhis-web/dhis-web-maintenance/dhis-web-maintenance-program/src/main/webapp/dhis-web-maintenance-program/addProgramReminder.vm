@@ -8,7 +8,7 @@
 		}, function(){
 			enable('messageType');
 		});
-		checkValueIsExist( "name", "validateProgramReminder.action" );
+		checkValueIsExist( "name", "validateReminder.action" );
 	});
 
 </script>

@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity.action.trackedentityattribute;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,19 +28,12 @@ package org.hisp.dhis.trackedentity.action.trackedentityattribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang.StringUtils;
-import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
-import org.hisp.dhis.trackedentity.TrackedEntityAttributeOption;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -65,12 +58,8 @@ public class UpdateAttributeAction
         this.attributeService = attributeService;
     }
 
-    private TrackedEntityAttributeValueService attributeValueService;
-
-    public void setAttributeValueService( TrackedEntityAttributeValueService attributeValueService )
-    {
-        this.attributeValueService = attributeValueService;
-    }
+    @Autowired
+    private OptionService optionService;
 
     @Autowired
     private PeriodService periodService;
@@ -114,13 +103,6 @@ public class UpdateAttributeAction
         this.valueType = valueType;
     }
 
-    private Boolean mandatory;
-
-    public void setMandatory( Boolean mandatory )
-    {
-        this.mandatory = mandatory;
-    }
-
     private Boolean unique;
 
     public void setUnique( Boolean unique )
@@ -128,11 +110,11 @@ public class UpdateAttributeAction
         this.unique = unique;
     }
 
-    private List<String> attrOptions;
+    private Integer optionSetId;
 
-    public void setAttrOptions( List<String> attrOptions )
+    public void setOptionSetId( Integer optionSetId )
     {
-        this.attrOptions = attrOptions;
+        this.optionSetId = optionSetId;
     }
 
     private Boolean inherit;
@@ -182,56 +164,17 @@ public class UpdateAttributeAction
         TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( id );
 
         attribute.setName( name );
-        attribute.setCode( StringUtils.isEmpty( code.trim() ) ? null : code  );
+        attribute.setCode( StringUtils.isEmpty( code.trim() ) ? null : code );
         attribute.setDescription( description );
         attribute.setValueType( valueType );
         attribute.setExpression( expression );
         attribute.setDisplayOnVisitSchedule( false );
-
-        mandatory = (mandatory == null) ? false : true;
-        attribute.setMandatory( mandatory );
 
         unique = (unique == null) ? false : true;
         attribute.setUnique( unique );
 
         inherit = (inherit == null) ? false : true;
         attribute.setInherit( inherit );
-
-        HttpServletRequest request = ServletActionContext.getRequest();
-
-        Collection<TrackedEntityAttributeOption> attributeOptions = attributeService.getTrackedEntityAttributeOption( attribute );
-
-        if ( attributeOptions != null && attributeOptions.size() > 0 )
-        {
-            String value = null;
-            for ( TrackedEntityAttributeOption option : attributeOptions )
-            {
-                value = request.getParameter( PREFIX_ATTRIBUTE_OPTION + option.getId() );
-                if ( StringUtils.isNotBlank( value ) )
-                {
-                    option.setName( value.trim() );
-                    attributeService.updateTrackedEntityAttributeOption( option );
-                    attributeValueService.updateTrackedEntityAttributeValues( option );
-                }
-            }
-        }
-
-        if ( attrOptions != null )
-        {
-            TrackedEntityAttributeOption opt = null;
-            for ( String optionName : attrOptions )
-            {
-                opt = attributeService.getTrackedEntityAttributeOption( attribute, optionName );
-                if ( opt == null )
-                {
-                    opt = new TrackedEntityAttributeOption();
-                    opt.setName( optionName );
-                    opt.setAttribute( attribute );
-                    attribute.addAttributeOptions( opt );
-                    attributeService.addTrackedEntityAttributeOption( opt );
-                }
-            }
-        }
 
         if ( valueType.equals( TrackedEntityAttribute.VALUE_TYPE_LOCAL_ID ) )
         {
@@ -251,6 +194,10 @@ public class UpdateAttributeAction
 
             attribute.setOrgunitScope( orgunitScope );
             attribute.setProgramScope( programScope );
+        }
+        else if ( valueType.equals( TrackedEntityAttribute.TYPE_COMBO ) )
+        {
+            attribute.setOptionSet( optionService.getOptionSet( optionSetId ) );
         }
 
         attributeService.updateTrackedEntityAttribute( attribute );

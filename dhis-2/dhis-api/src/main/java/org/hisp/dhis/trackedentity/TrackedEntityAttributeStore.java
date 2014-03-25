@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,20 +50,11 @@ public interface TrackedEntityAttributeStore
     Collection<TrackedEntityAttribute> getByValueType( String valueType );
 
     /**
-     * Get mandatory attributes without groups
+     * Get attributes without groups
      * 
      * @return List of attributes
      */
     Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup();
-
-    /**
-     * Get attributes by mandatory option
-     * 
-     * @param mandatory True/False value
-     * 
-     * @return List of attributes
-     */
-    Collection<TrackedEntityAttribute> getByMandatory( boolean mandatory );
 
     /**
      * Get {@link TrackedEntityAttribute} without any group
@@ -71,13 +62,6 @@ public interface TrackedEntityAttributeStore
      * @return TrackedEntityAttribute without group.
      */
     Collection<TrackedEntityAttribute> getWithoutGroup();
-
-    /**
-     * Get attributes by groupBy option
-     * 
-     * @return TrackedEntityAttribute with groupby as true
-     */
-    TrackedEntityAttribute getByGroupBy();
 
     /**
      * Get attributes which are displayed in visit schedule
@@ -91,10 +75,10 @@ public interface TrackedEntityAttributeStore
     /**
      * Get attributes which are displayed in visit schedule
      * 
-     * @param displayInListNoProgram True/False value
+     * @param displayInList True/False value
      * 
      * @return List of attributes
      */
-    Collection<TrackedEntityAttribute> getDisplayedInList( boolean displayInListNoProgram );
+    Collection<TrackedEntityAttribute> getDisplayInList( boolean displayInList );
 
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataset;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -358,6 +358,11 @@ public class DefaultDataSetService
     public List<DataSet> getDataSetsByUid( Collection<String> uids )
     {
         return dataSetStore.getByUid( uids );
+    }
+    
+    public List<DataSet> getDataSetsByUidNoAcl( Collection<String> uids )
+    {
+        return dataSetStore.getByUidNoAcl( uids );
     }
 
     public Collection<DataElement> getDataElements( DataSet dataSet )

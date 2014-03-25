@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -195,7 +195,7 @@ public class DefaultTrackedEntityFormService
                         }
                     }
 
-                    inputHtml = getAttributeField( inputHtml, attribute, value, i18n, index, hidden, style );
+                    inputHtml = getAttributeField( inputHtml, attribute, program, value, i18n, index, hidden, style );
 
                 }
 
@@ -272,13 +272,15 @@ public class DefaultTrackedEntityFormService
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private String getAttributeField( String inputHtml, TrackedEntityAttribute attribute, String value, I18n i18n,
+    private String getAttributeField( String inputHtml, TrackedEntityAttribute attribute, Program program, String value, I18n i18n,
         int index, String hidden, String style )
     {
+        boolean mandatory = program.getAttribute(attribute).isMandatory(); //TODO fix
+                
         inputHtml = TAG_OPEN + "input id=\"attr" + attribute.getId() + "\" name=\"attr" + attribute.getId()
             + "\" tabindex=\"" + index + "\" style=\"" + style + "\"";
 
-        inputHtml += "\" class=\"" + hidden + " {validate:{required:" + attribute.isMandatory();
+        inputHtml += "\" class=\"" + hidden + " {validate:{required:" + mandatory;
         if ( TrackedEntityAttribute.TYPE_INT.equals( attribute.getValueType() ) )
         {
             inputHtml += ",number:true";
@@ -322,14 +324,14 @@ public class DefaultTrackedEntityFormService
         {
             inputHtml = inputHtml.replaceFirst( "input", "select" ) + ">";
             inputHtml += "<option value=\"\" selected>" + i18n.getString( "no_value" ) + "</option>";
-            for ( TrackedEntityAttributeOption option : attribute.getAttributeOptions() )
+            for ( String option : attribute.getOptionSet().getOptions() )
             {
-                inputHtml += "<option value=\"" + option.getId() + "\" ";
-                if ( option.getName().equals( value ) )
+                inputHtml += "<option value=\"" + option + "\" ";
+                if ( option.equals( value ) )
                 {
                     inputHtml += " selected ";
                 }
-                inputHtml += ">" + option.getName() + "</option>";
+                inputHtml += ">" + option + "</option>";
             }
             inputHtml += "</select>";
         }

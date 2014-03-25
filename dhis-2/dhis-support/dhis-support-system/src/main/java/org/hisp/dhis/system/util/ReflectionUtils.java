@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -407,6 +407,11 @@ public class ReflectionUtils
     @SuppressWarnings( "unchecked" )
     public static <T> T invokeMethod( Object target, Method method, Object... args )
     {
+        if ( Modifier.isProtected( method.getModifiers() ) || Modifier.isPrivate( method.getModifiers() ) )
+        {
+            return null;
+        }
+
         try
         {
             return (T) method.invoke( target, args );
@@ -651,7 +656,8 @@ public class ReflectionUtils
             this.identifiableObject = identifiableObject;
         }
 
-        @Override public String toString()
+        @Override
+        public String toString()
         {
             return "PropertyDescriptor{" +
                 "name='" + name + '\'' +
@@ -745,6 +751,8 @@ public class ReflectionUtils
                 }
                 else if ( Collection.class.isAssignableFrom( returnType ) )
                 {
+                    descriptor.setCollection( true );
+
                     Type type = method.getGenericReturnType();
 
                     if ( ParameterizedType.class.isInstance( type ) )
@@ -754,7 +762,6 @@ public class ReflectionUtils
 
                         if ( IdentifiableObject.class.isAssignableFrom( klass ) )
                         {
-                            descriptor.setCollection( true );
                             descriptor.setIdentifiableObject( true );
                         }
                     }

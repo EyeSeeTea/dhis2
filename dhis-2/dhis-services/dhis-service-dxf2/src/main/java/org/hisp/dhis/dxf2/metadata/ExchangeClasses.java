@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,12 +27,6 @@ package org.hisp.dhis.dxf2.metadata;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
@@ -77,6 +71,7 @@ import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.sqlview.SqlView;
+import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.user.User;
@@ -84,6 +79,12 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -111,7 +112,7 @@ final public class ExchangeClasses
         allExportClasses.put( Constant.class, "constants" );
         allExportClasses.put( Document.class, "documents" );
         allExportClasses.put( OptionSet.class, "optionSets" );
-        allExportClasses.put( Attribute.class, "attributeTypes" );
+        allExportClasses.put( Attribute.class, "attributes" );
 
         allExportClasses.put( MapLegend.class, "mapLegends" );
         allExportClasses.put( MapLegendSet.class, "mapLegendSets" );
@@ -168,8 +169,9 @@ final public class ExchangeClasses
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
         allExportClasses.put( RelationshipType.class, "relationshipTypes" );
-        allExportClasses.put( TrackedEntityAttribute.class, "personAttributeTypes" );
-        allExportClasses.put( TrackedEntityAttributeGroup.class, "personAttributeGroups" );
+        allExportClasses.put( TrackedEntity.class, "trackedEntities" );
+        allExportClasses.put( TrackedEntityAttribute.class, "trackedEntityAttributes" );
+        allExportClasses.put( TrackedEntityAttributeGroup.class, "trackedEntityAttributeGroups" );
 
         allExportClasses.put( BaseDimensionalObject.class, "dimensions" );
 
@@ -190,11 +192,13 @@ final public class ExchangeClasses
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );
         exportClasses.remove( RelationshipType.class );
+        exportClasses.remove( TrackedEntity.class );
         exportClasses.remove( TrackedEntityAttribute.class );
         exportClasses.remove( TrackedEntityAttributeGroup.class );
         importClasses.remove( Program.class );
         importClasses.remove( ProgramStage.class );
         importClasses.remove( RelationshipType.class );
+        importClasses.remove( TrackedEntity.class );
         importClasses.remove( TrackedEntityAttribute.class );
         importClasses.remove( TrackedEntityAttributeGroup.class );
 

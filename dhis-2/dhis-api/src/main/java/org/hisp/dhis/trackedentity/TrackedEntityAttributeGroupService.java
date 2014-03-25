@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ public interface TrackedEntityAttributeGroupService
      * 
      * @return A generated unique id of the added {@link TrackedEntityAttributeGroup}.
      */
-    int saveTrackedEntityAttributeGroup( TrackedEntityAttributeGroup TrackedEntityAttributeGroup );
+    int addTrackedEntityAttributeGroup( TrackedEntityAttributeGroup TrackedEntityAttributeGroup );
 
     /**
      * Deletes a {@link TrackedEntityAttributeGroup}.
@@ -70,6 +70,15 @@ public interface TrackedEntityAttributeGroupService
      * @return the TrackedEntityAttributeGroup with the given id
      */
     TrackedEntityAttributeGroup getTrackedEntityAttributeGroup( int id );
+
+    /**
+     * Returns a {@link TrackedEntityAttributeGroup}.
+     *
+     * @param uid the id of the TrackedEntityAttributeGroup to return.
+     *
+     * @return the TrackedEntityAttributeGroup with the given id
+     */
+    TrackedEntityAttributeGroup getTrackedEntityAttributeGroup( String uid );
 
     /**
      * Returns a {@link TrackedEntityAttributeGroup} with a given name.

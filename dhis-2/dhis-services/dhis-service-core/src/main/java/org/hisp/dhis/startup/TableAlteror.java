@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,13 +28,6 @@ package org.hisp.dhis.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.quick.StatementHolder;
@@ -48,6 +41,13 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -174,6 +174,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE maplegend DROP CONSTRAINT maplegend_name_key" );
 
         executeSql( "UPDATE mapview SET layer = 'thematic1' WHERE layer IS NULL" );
+        executeSql( "UPDATE mapview SET hidden = false WHERE hidden IS NULL" );
 
         executeSql( "DELETE FROM systemsetting WHERE name = 'longitude'" );
         executeSql( "DELETE FROM systemsetting WHERE name = 'latitude'" );
@@ -552,15 +553,22 @@ public class TableAlteror
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENTGROUPSET_PUBLIC_ADD' WHERE authority='F_DATAELEMENTGROUPSET_ADD'" );
 
         executeSql( "UPDATE userroleauthorities SET authority='F_ORGUNITGROUP_PUBLIC_ADD' WHERE authority='F_ORGUNITGROUP_ADD'" );
+        executeSql( "UPDATE userroleauthorities SET authority='F_ORGUNITGROUPSET_PUBLIC_ADD' WHERE authority='F_ORGUNITGROUPSET_ADD'" );
 
         executeSql( "UPDATE userroleauthorities SET authority='F_INDICATOR_PUBLIC_ADD' WHERE authority='F_INDICATOR_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_INDICATORGROUP_PUBLIC_ADD' WHERE authority='F_INDICATORGROUP_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_INDICATORGROUPSET_PUBLIC_ADD' WHERE authority='F_INDICATORGROUPSET_ADD'" );
 
+        executeSql( "UPDATE userroleauthorities SET authority='F_USERROLE_PUBLIC_ADD' WHERE authority='F_USERROLE_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_PUBLIC_ADD' WHERE authority='F_USER_GRUP_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_UPDATE' WHERE authority='F_USER_GRUP_UPDATE'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_DELETE' WHERE authority='F_USER_GRUP_DELETE'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_USERGROUP_LIST' WHERE authority='F_USER_GRUP_LIST'" );
+
+        executeSql( "UPDATE userroleauthorities SET authority='F_SQLVIEW_PUBLIC_ADD' WHERE authority='F_SQLVIEW_ADD'" );
+        executeSql( "UPDATE userroleauthorities SET authority='F_OPTIONSET_PUBLIC_ADD' WHERE authority='F_OPTIONSET_ADD'" );
+        executeSql( "UPDATE userroleauthorities SET authority='F_VALIDATIONRULEGROUP_PUBLIC_ADD' WHERE authority='F_VALIDATIONRULEGROUP_ADD'" );
+        executeSql( "UPDATE userroleauthorities SET authority='F_TRACKED_ENTITY_ATTRIBUTE_PUBLIC_ADD' WHERE authority='F_TRACKED_ENTITY_ATTRIBUTE_ADD'" );
 
         // remove unused authorities
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_CONCEPT_UPDATE'" );
@@ -634,7 +642,7 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE dataelementcategory DROP COLUMN conceptid" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN conceptid" );
-        
+
         // upgrade system charts/maps to public read-only sharing
         executeSql( "UPDATE chart SET publicaccess='r-------' WHERE user IS NULL AND publicaccess IS NULL;" );
         executeSql( "UPDATE map SET publicaccess='r-------' WHERE user IS NULL AND publicaccess IS NULL;" );
@@ -703,9 +711,9 @@ public class TableAlteror
     private void upgradeDataValuesWithAttributeOptionCombo()
     {
         final String sql = statementBuilder.getNumberOfColumnsInPrimaryKey( "datavalue" );
-        
+
         Integer no = statementManager.getHolder().queryForInteger( sql );
-        
+
         if ( no >= 5 )
         {
             return; // attributeoptioncomboid already part of datavalue primary key

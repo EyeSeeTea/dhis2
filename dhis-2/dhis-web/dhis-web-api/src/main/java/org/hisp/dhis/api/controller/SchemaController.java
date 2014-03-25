@@ -1,7 +1,7 @@
 package org.hisp.dhis.api.controller;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,56 +28,62 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Maps;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.hisp.dhis.system.util.ReflectionUtils;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.client.HttpClientErrorException;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = "", method = RequestMethod.GET )
+@RequestMapping( value = "/schemas", method = RequestMethod.GET )
 public class SchemaController
 {
-    @RequestMapping( value = { "/schemas", "/schemas.json" }, method = RequestMethod.GET )
-    public void getTypesJson( OutputStream outputStream ) throws IOException
+    @Autowired
+    private SchemaService schemaService;
+
+    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "*/*" } )
+    public void getSchemasJson( HttpServletResponse response ) throws IOException
     {
-        Map<String, Map<String, ReflectionUtils.PropertyDescriptor>> output = Maps.newHashMap();
+        List<Schema> schemas = schemaService.getSchemas();
+        MetaData metaData = new MetaData();
+        metaData.setSchemas( schemas );
 
-        for ( Class<? extends IdentifiableObject> key : ExchangeClasses.getAllExportMap().keySet() )
-        {
-            Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( key );
-            output.put( ExchangeClasses.getAllExportMap().get( key ), classMap );
-        }
-
-        JacksonUtils.toJson( outputStream, output );
+        JacksonUtils.toJson( response.getOutputStream(), schemas );
     }
 
-    @RequestMapping( value = { "/schemas/{type}", "/schemas/{type}.json" }, method = RequestMethod.GET )
-    public void getTypeJson( @PathVariable String type, OutputStream outputStream ) throws IOException
+    @RequestMapping( value = "/{type}", method = RequestMethod.GET, produces = { "*/*" } )
+    public void getSchemaJson( @PathVariable String type, HttpServletResponse response ) throws IOException
     {
-        for ( Class<? extends IdentifiableObject> key : ExchangeClasses.getAllExportMap().keySet() )
-        {
-            if ( ExchangeClasses.getAllExportMap().get( key ).equals( type ) )
-            {
-                Map<String, ReflectionUtils.PropertyDescriptor> classMap = ReflectionUtils.getJacksonClassMap( key );
-                JacksonUtils.toJson( outputStream, classMap );
-                return;
-            }
-        }
+        Schema schema = schemaService.getSchemaBySingularName( type );
+        JacksonUtils.toJson( response.getOutputStream(), schema );
+    }
 
-        throw new HttpClientErrorException( HttpStatus.NOT_FOUND );
+    @RequestMapping( value = "", method = RequestMethod.GET, produces = { MediaType.APPLICATION_XML_VALUE } )
+    public void getSchemasXml( HttpServletResponse response ) throws IOException
+    {
+        List<Schema> schemas = schemaService.getSchemas();
+        MetaData metaData = new MetaData();
+        metaData.setSchemas( schemas );
+
+        JacksonUtils.toXml( response.getOutputStream(), metaData );
+    }
+
+    @RequestMapping( value = "/{type}", method = RequestMethod.GET, produces = { MediaType.APPLICATION_XML_VALUE } )
+    public void getSchemaXml( @PathVariable String type, HttpServletResponse response ) throws IOException
+    {
+        Schema schema = schemaService.getSchemaBySingularName( type );
+        JacksonUtils.toXml( response.getOutputStream(), schema );
     }
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.action;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.system.filter.UserCredentialsCanUpdateFilter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
@@ -61,13 +58,6 @@ public class GetUserListAction
         this.userService = userService;
     }
 
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -77,13 +67,6 @@ public class GetUserListAction
     public List<UserCredentials> getUserCredentialsList()
     {
         return userCredentialsList;
-    }
-
-    private String currentUserName;
-
-    public String getCurrentUserName()
-    {
-        return currentUserName;
     }
 
     private String key;
@@ -133,8 +116,8 @@ public class GetUserListAction
         {
             this.paging = createPaging( userService.getUserCountByName( key ) );
 
-            userCredentialsList = new ArrayList<UserCredentials>( userService.getUsersBetweenByName( key, paging
-                .getStartPos(), paging.getPageSize() ) );
+            userCredentialsList = new ArrayList<UserCredentials>( userService.searchUsersByName( key, paging.getStartPos(),
+                paging.getPageSize() ) );
 
             Collections.sort( userCredentialsList, new UsernameComparator() );
         }
@@ -148,7 +131,7 @@ public class GetUserListAction
         else if ( Boolean.TRUE.equals( selfRegistered ) )
         {
             this.paging = createPaging( userService.getSelfRegisteredUserCredentialsCount() );
-            
+
             userCredentialsList = new ArrayList<UserCredentials>( userService.getSelfRegisteredUserCredentials( paging.
                 getStartPos(), paging.getPageSize() ) );
         }
@@ -162,10 +145,7 @@ public class GetUserListAction
             Collections.sort( userCredentialsList, new UsernameComparator() );
         }
 
-        FilterUtils.filter( userCredentialsList, new UserCredentialsCanUpdateFilter( currentUserService
-            .getCurrentUser() ) );
-
-        currentUserName = currentUserService.getCurrentUsername();
+        userService.canUpdateFilter( userCredentialsList );
 
         return SUCCESS;
     }

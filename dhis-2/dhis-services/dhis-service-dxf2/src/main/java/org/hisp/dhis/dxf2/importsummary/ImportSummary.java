@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.importsummary;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,7 +40,7 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "importSummary", namespace = DxfNamespaces.DXF_2_0 )
 public class ImportSummary
 {
-    private ImportStatus status;
+    private ImportStatus status = ImportStatus.SUCCESS;
 
     private String description;
 

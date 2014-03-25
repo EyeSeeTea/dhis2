@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataset;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -242,6 +242,14 @@ public interface DataSetService
      * @return a list of data sets.
      */
     List<DataSet> getDataSetsByUid( Collection<String> uids );
+
+    /**
+     * Returns a list of data sets with the given uids. Bypasses the ACL system.
+     *
+     * @param uids the collection of uids.
+     * @return a list of data sets.
+     */
+    List<DataSet> getDataSetsByUidNoAcl( Collection<String> uids );
 
     /**
      * Returns a collection of data elements associated with the given

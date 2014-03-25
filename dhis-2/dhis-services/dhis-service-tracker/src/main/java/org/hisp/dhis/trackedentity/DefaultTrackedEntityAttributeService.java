@@ -1,7 +1,7 @@
 package org.hisp.dhis.trackedentity;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,13 +53,6 @@ public class DefaultTrackedEntityAttributeService
         this.attributeStore = attributeStore;
     }
 
-    private TrackedEntityAttributeOptionStore attributeOptionStore;
-
-    public void setAttributeOptionStore( TrackedEntityAttributeOptionStore attributeOptionStore )
-    {
-        this.attributeOptionStore = attributeOptionStore;
-    }
-
     private ProgramService programService;
 
     public void setProgramService( ProgramService programService )
@@ -86,7 +79,7 @@ public class DefaultTrackedEntityAttributeService
         return attributeStore.get( id );
     }
 
-    public int saveTrackedEntityAttribute( TrackedEntityAttribute attribute )
+    public int addTrackedEntityAttribute( TrackedEntityAttribute attribute )
     {
         return attributeStore.save( attribute );
     }
@@ -106,19 +99,9 @@ public class DefaultTrackedEntityAttributeService
         return attributeStore.getByName( name );
     }
 
-    public TrackedEntityAttribute getTrackedEntityAttributeByGroupBy()
-    {
-        return attributeStore.getByGroupBy();
-    }
-
     public Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup()
     {
         return attributeStore.getOptionalAttributesWithoutGroup();
-    }
-
-    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesByMandatory( boolean mandatory )
-    {
-        return attributeStore.getByMandatory( mandatory );
     }
 
     public Collection<TrackedEntityAttribute> getTrackedEntityAttributesWithoutGroup()
@@ -142,7 +125,7 @@ public class DefaultTrackedEntityAttributeService
         Collection<TrackedEntityAttribute> result = attributeStore.getAll();
 
         Collection<Program> programs = programService.getAllPrograms();
-        
+
         if ( result != null )
         {
             for ( Program program : programs )
@@ -156,9 +139,9 @@ public class DefaultTrackedEntityAttributeService
         return new HashSet<TrackedEntityAttribute>();
     }
 
-    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayedInList( boolean displayInListNoProgram )
+    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayInList( boolean displayInList )
     {
-        return attributeStore.getDisplayedInList( displayInListNoProgram );
+        return attributeStore.getDisplayInList( displayInList );
     }
 
     public Collection<TrackedEntityAttribute> getTrackedEntityAttributesBetweenByName( String name, int min, int max )
@@ -181,37 +164,5 @@ public class DefaultTrackedEntityAttributeService
         return attributeStore.getCountLikeName( name );
     }
 
-    // -------------------------------------------------------------------------
-    // TrackedEntityAttributeOption
-    // -------------------------------------------------------------------------
-
-    public int addTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
-    {
-        return attributeOptionStore.save( option );
-    }
-
-    public void deleteTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
-    {
-        attributeOptionStore.delete( option );
-    }
-
-    public void updateTrackedEntityAttributeOption( TrackedEntityAttributeOption option )
-    {
-        attributeOptionStore.update( option );
-    }
-
-    public TrackedEntityAttributeOption getTrackedEntityAttributeOption( TrackedEntityAttribute attribute, String name )
-    {
-        return attributeOptionStore.get( attribute, name );
-    }
-
-    public TrackedEntityAttributeOption getTrackedEntityAttributeOption( int id )
-    {
-        return attributeOptionStore.get( id );
-    }
-
-    public Collection<TrackedEntityAttributeOption> getTrackedEntityAttributeOption( TrackedEntityAttribute attribute )
-    {
-        return attributeOptionStore.get( attribute );
-    }
+  
 }
