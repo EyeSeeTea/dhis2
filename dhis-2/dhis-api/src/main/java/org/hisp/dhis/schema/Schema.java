@@ -33,11 +33,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -56,6 +58,8 @@ public class Schema
     private String plural;
 
     private boolean shareable;
+
+    private List<Authority> authorities = Lists.newArrayList();
 
     private List<String> publicAuthorities = Lists.newArrayList();
 
@@ -137,6 +141,19 @@ public class Schema
     }
 
     @JsonProperty
+    @JacksonXmlElementWrapper( localName = "authorities", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Authority> getAuthorities()
+    {
+        return authorities;
+    }
+
+    public void setAuthorities( List<Authority> authorities )
+    {
+        this.authorities = authorities;
+    }
+
+    @JsonProperty
     @JacksonXmlElementWrapper( localName = "publicAuthorities", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "publicAuthority", namespace = DxfNamespaces.DXF_2_0 )
     public List<String> getPublicAuthorities()
@@ -187,6 +204,8 @@ public class Schema
     {
         this.properties = properties;
     }
+
+    private Map<String, Property> propertyMap = Maps.newHashMap();
 
     @Override
     public String toString()
