@@ -29,9 +29,11 @@ package org.hisp.dhis.schema.descriptors;
  */
 
 import com.google.common.collect.Lists;
+import org.hisp.dhis.report.Report;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaDescriptor;
-import org.hisp.dhis.report.Report;
 import org.springframework.stereotype.Component;
 
 /**
@@ -43,12 +45,14 @@ public class ReportSchemaDescriptor implements SchemaDescriptor
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Report.class, "report", "reports", true, true, true );
+        Schema schema = new Schema( Report.class, "report", "reports" );
 
         schema.setShareable( true );
-        schema.setPublicAuthorities( Lists.newArrayList( "F_REPORT_PUBLIC_ADD" ) );
-        schema.setPrivateAuthorities( Lists.newArrayList( "F_REPORT_PRIVATE_ADD" ) );
-        schema.setExternalAuthorities( Lists.newArrayList( "F_REPORT_EXTERNAL" ) );
+
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_REPORT_PUBLIC_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_REPORT_PRIVATE_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.EXTERNALIZE, Lists.newArrayList( "F_REPORT_EXTERNAL" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_REPORT_DELETE" ) ) );
 
         return schema;
     }

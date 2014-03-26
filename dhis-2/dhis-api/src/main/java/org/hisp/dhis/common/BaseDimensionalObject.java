@@ -48,7 +48,7 @@ public class BaseDimensionalObject
     /**
      * The type of this dimension.
      */
-    private DimensionType type;
+    private DimensionType dimensionType;
 
     /**
      * The name of this dimension. For the dynamic dimensions this will be equal
@@ -61,6 +61,16 @@ public class BaseDimensionalObject
      * The dimensional items for this dimension.
      */
     private List<NameableObject> items = new ArrayList<NameableObject>();
+    
+    /**
+     * Operator. Applicable for events only.
+     */
+    private String operator;
+    
+    /**
+     * Filter. Applicable for events only.
+     */
+    private String filter;
     
     //--------------------------------------------------------------------------
     // Constructors
@@ -81,28 +91,38 @@ public class BaseDimensionalObject
         this.items = new ArrayList<NameableObject>( items );
     }
     
-    public BaseDimensionalObject( String dimension, DimensionType type, List<? extends NameableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType dimensionType, List<? extends NameableObject> items )
     {
         this.uid = dimension;
-        this.type = type;
+        this.dimensionType = dimensionType;
         this.items = new ArrayList<NameableObject>( items );
     }
 
-    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, List<? extends NameableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, List<? extends NameableObject> items )
     {
         this.uid = dimension;
-        this.type = type;
+        this.dimensionType = dimensionType;
         this.dimensionName = dimensionName;
         this.items = new ArrayList<NameableObject>( items );
     }
 
-    public BaseDimensionalObject( String dimension, DimensionType type, String dimensionName, String displayName, List<? extends NameableObject> items )
+    public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, String displayName, List<? extends NameableObject> items )
     {
         this.uid = dimension;
-        this.type = type;
+        this.dimensionType = dimensionType;
         this.dimensionName = dimensionName;
         this.displayName = displayName;
         this.items = new ArrayList<NameableObject>( items );
+    }
+
+    public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, String displayName, String operator, String filter )
+    {
+        this.uid = dimension;
+        this.dimensionType = dimensionType;
+        this.dimensionName = dimensionName;
+        this.displayName = displayName;
+        this.operator = operator;
+        this.filter = filter;
     }
 
     // -------------------------------------------------------------------------
@@ -154,14 +174,14 @@ public class BaseDimensionalObject
     @JsonProperty
     @JsonView( {DimensionalView.class} )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public DimensionType getType()
+    public DimensionType getDimensionType()
     {
-        return type;
+        return dimensionType;
     }
 
-    public void setType( DimensionType type )
+    public void setDimensionType( DimensionType dimensionType )
     {
-        this.type = type;
+        this.dimensionType = dimensionType;
     }
 
     @Override
@@ -181,6 +201,32 @@ public class BaseDimensionalObject
         this.items = items;
     }
 
+    @JsonProperty
+    @JsonView( {DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getOperator()
+    {
+        return operator;
+    }
+
+    public void setOperator( String operator )
+    {
+        this.operator = operator;
+    }
+
+    @JsonProperty
+    @JsonView( {DimensionalView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getFilter()
+    {
+        return filter;
+    }
+
+    public void setFilter( String filter )
+    {
+        this.filter = filter;
+    }
+
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -188,6 +234,6 @@ public class BaseDimensionalObject
     @Override
     public String toString()
     {
-        return "[" + uid + ", type: " + type  + ", " + items + "]";
+        return "[" + uid + ", type: " + dimensionType  + ", " + items + "]";
     }
 }

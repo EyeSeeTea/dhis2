@@ -28,7 +28,16 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -38,13 +47,17 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
+import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.sharing.Access;
 import org.hisp.dhis.sharing.SharingService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -54,15 +67,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -85,19 +91,56 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     @Autowired
     protected SharingService sharingService;
 
+    @Autowired
+    protected SchemaService schemaService;
+
+    @Autowired
+    protected RenderService renderService;
+
     //--------------------------------------------------------------------------
     // GET
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.GET )
+    @RequestMapping(method = RequestMethod.GET)
     public String getObjectList(
-        @RequestParam( required = false ) String include,
-        @RequestParam( required = false ) String exclude,
-        @RequestParam( value = "filter", required = false ) List<String> filters,
-        @RequestParam Map<String, String> parameters, HttpServletResponse response, Model model ) throws IOException
+        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
     {
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
+        List<T> entityList = getEntityList( metaData, options );
+        String viewClass = options.getViewClass( "basic" );
+
+        postProcessEntities( entityList );
+        postProcessEntities( entityList, options, parameters );
+
+        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
+
+        if ( viewClass.equals( "basic" ) )
+        {
+            handleLinksAndAccess( options, metaData, entityList, false );
+        }
+        else
+        {
+            handleLinksAndAccess( options, metaData, entityList, true );
+        }
+
+        model.addAttribute( "model", metaData );
+        model.addAttribute( "viewClass", viewClass );
+
+        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
+    }
+
+    @RequestMapping(method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE })
+    public void getObjectListJson(
+        @RequestParam(required = false) String include,
+        @RequestParam(required = false) String exclude,
+        @RequestParam(value = "filter", required = false) List<String> filters,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        WebOptions options = new WebOptions( parameters );
+        WebMetaData metaData = new WebMetaData();
+
+        Schema schema = schemaService.getSchema( getEntityClass() );
 
         boolean hasPaging = options.hasPaging();
 
@@ -128,15 +171,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
         }
 
-        if ( options.getViewClass( "basic" ).equals( "basic" ) )
-        {
-            handleLinksAndAccess( options, metaData, entityList, false );
-        }
-        else
-        {
-            handleLinksAndAccess( options, metaData, entityList, true );
-        }
-
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
@@ -151,22 +185,39 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                 output.put( "pager", metaData.getPager() );
             }
 
-            output.put( "objects", objects );
-            JacksonUtils.toJson( response.getOutputStream(), output );
+            if ( schema != null )
+            {
+                output.put( schema.getPlural(), objects );
+            }
+            else
+            {
+                output.put( "objects", objects );
+            }
+
+            renderService.toJson( response.getOutputStream(), output );
         }
         else
         {
             ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
 
-            model.addAttribute( "model", metaData );
-            model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-        }
+            String viewClass = options.getViewClass( "basic" );
 
-        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
+            if ( viewClass.equals( "basic" ) )
+            {
+                handleLinksAndAccess( options, metaData, entityList, false );
+            }
+            else
+            {
+                handleLinksAndAccess( options, metaData, entityList, true );
+            }
+
+            renderService.toJson( response.getOutputStream(), metaData, JacksonUtils.getViewClass( viewClass ) );
+        }
     }
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+
+    @RequestMapping(value = "/{uid}", method = RequestMethod.GET)
+    public String getObject( @PathVariable("uid") String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
@@ -200,13 +251,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // POST
     //--------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
+    @RequestMapping(method = RequestMethod.POST, consumes = { "application/xml", "text/xml" })
     public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
     }
 
-    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
+    @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
     public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.POST.toString() );
@@ -215,16 +266,18 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // PUT
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    @RequestMapping(value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" })
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid, InputStream
+        input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
     }
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    @RequestMapping(value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid, InputStream
+        input ) throws Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.PUT.toString() );
     }
@@ -233,9 +286,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // DELETE
     //--------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    @RequestMapping(value = "/{uid}", method = RequestMethod.DELETE)
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid ) throws
+        Exception
     {
         throw new HttpRequestMethodNotSupportedException( RequestMethod.DELETE.toString() );
     }
@@ -249,6 +303,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
+
     protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters )
     {
 
@@ -288,18 +343,22 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
         List<T> entityList;
 
-        if ( options.hasPaging() )
+        if ( options.getOptions().containsKey( "query" ) )
+        {
+            entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
+        }
+        else if ( options.hasPaging() )
         {
             int count = manager.getCount( getEntityClass() );
 
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<T>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+            entityList = Lists.newArrayList( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
-            entityList = new ArrayList<T>( manager.getAllSorted( getEntityClass() ) );
+            entityList = Lists.newArrayList( manager.getAllSorted( getEntityClass() ) );
         }
 
         return entityList;
@@ -354,7 +413,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     private String entitySimpleName;
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected Class<T> getEntityClass()
     {
         if ( entityClass == null )
@@ -386,7 +445,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return entitySimpleName;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected T getEntityInstance()
     {
         try

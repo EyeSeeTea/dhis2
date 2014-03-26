@@ -33,10 +33,13 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.NameableObject;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -48,11 +51,15 @@ public class Schema
 
     private boolean identifiableObject;
 
+    private boolean nameableObject;
+
     private String singular;
 
     private String plural;
 
     private boolean shareable;
+
+    private List<Authority> authorities = Lists.newArrayList();
 
     private List<String> publicAuthorities = Lists.newArrayList();
 
@@ -60,28 +67,15 @@ public class Schema
 
     private List<String> externalAuthorities = Lists.newArrayList();
 
-    private boolean importable;
-
-    private boolean exportable;
-
-    private boolean deletable;
-
     private List<Property> properties = Lists.newArrayList();
 
     public Schema( Class<?> klass, String singular, String plural )
     {
         this.klass = klass;
         this.identifiableObject = IdentifiableObject.class.isAssignableFrom( klass );
+        this.nameableObject = NameableObject.class.isAssignableFrom( klass );
         this.singular = singular;
         this.plural = plural;
-    }
-
-    public Schema( Class<?> klass, String singular, String plural, boolean importable, boolean exportable, boolean deletable )
-    {
-        this( klass, singular, plural );
-        this.importable = importable;
-        this.exportable = exportable;
-        this.deletable = deletable;
     }
 
     @JsonProperty
@@ -101,6 +95,13 @@ public class Schema
     public boolean isIdentifiableObject()
     {
         return identifiableObject;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isNameableObject()
+    {
+        return nameableObject;
     }
 
     @JsonProperty
@@ -137,6 +138,19 @@ public class Schema
     public void setShareable( boolean shareable )
     {
         this.shareable = shareable;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "authorities", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Authority> getAuthorities()
+    {
+        return authorities;
+    }
+
+    public void setAuthorities( List<Authority> authorities )
+    {
+        this.authorities = authorities;
     }
 
     @JsonProperty
@@ -179,42 +193,6 @@ public class Schema
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isImportable()
-    {
-        return importable;
-    }
-
-    public void setImportable( boolean importable )
-    {
-        this.importable = importable;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isExportable()
-    {
-        return exportable;
-    }
-
-    public void setExportable( boolean exportable )
-    {
-        this.exportable = exportable;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isDeletable()
-    {
-        return deletable;
-    }
-
-    public void setDeletable( boolean deletable )
-    {
-        this.deletable = deletable;
-    }
-
-    @JsonProperty
     @JacksonXmlElementWrapper( localName = "properties", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "property", namespace = DxfNamespaces.DXF_2_0 )
     public List<Property> getProperties()
@@ -227,16 +205,21 @@ public class Schema
         this.properties = properties;
     }
 
+    private Map<String, Property> propertyMap = Maps.newHashMap();
+
     @Override
     public String toString()
     {
         return "Schema{" +
             "klass=" + klass +
+            ", identifiableObject=" + identifiableObject +
+            ", nameableObject=" + nameableObject +
             ", singular='" + singular + '\'' +
             ", plural='" + plural + '\'' +
-            ", importable=" + importable +
-            ", exportable=" + exportable +
-            ", deletable=" + deletable +
+            ", shareable=" + shareable +
+            ", publicAuthorities=" + publicAuthorities +
+            ", privateAuthorities=" + privateAuthorities +
+            ", externalAuthorities=" + externalAuthorities +
             ", properties=" + properties +
             '}';
     }

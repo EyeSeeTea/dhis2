@@ -189,6 +189,8 @@ public class DefaultEventAnalyticsService
     {
         queryPlanner.validate( params );
 
+        params.replacePeriodsWithStartEndDates();
+        
         Grid grid = new ListGrid();
 
         // ---------------------------------------------------------------------
@@ -459,7 +461,7 @@ public class DefaultEventAnalyticsService
 
         for ( DimensionalObject dimension : dimensions )
         {
-            boolean hierarchy = hierarchyMeta && DimensionType.ORGANISATIONUNIT.equals( dimension.getType() );
+            boolean hierarchy = hierarchyMeta && DimensionType.ORGANISATIONUNIT.equals( dimension.getDimensionType() );
 
             for ( IdentifiableObject idObject : dimension.getItems() )
             {

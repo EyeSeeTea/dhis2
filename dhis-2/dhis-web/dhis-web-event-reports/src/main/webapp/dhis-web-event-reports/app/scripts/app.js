@@ -549,12 +549,12 @@ Ext.onReady( function() {
 	// constructors
 
 	AggregateLayoutWindow = function() {
-		var dimension,
-			dimensionStore,
-			row,
+		var row,
 			rowStore,
 			col,
 			colStore,
+            fixedFilter,
+            fixedFilterStore,
 			filter,
 			filterStore,
 			value,
@@ -562,7 +562,6 @@ Ext.onReady( function() {
 			getData,
 			getStore,
 			getStoreKeys,
-			getCmpHeight,
 			getSetup,
             addDimension,
             removeDimension,
@@ -574,9 +573,9 @@ Ext.onReady( function() {
 			selectPanel,
 			window,
 
-			margin = 2,
+			margin = 1,
 			defaultWidth = 160,
-			defaultHeight = 158,
+			defaultHeight = 220,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2;
 
 		getData = function(all) {
@@ -627,71 +626,25 @@ Ext.onReady( function() {
 			return keys;
 		};
 
-		dimensionStore = getStore();
-		dimensionStore.reset = function(all) {
-			dimensionStore.removeAll();
-			dimensionStore.add(getData(all));
-		};
-		ns.app.stores.dimension = dimensionStore;
-
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
         colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		rowStore = getStore();
 
+        fixedFilterStore = getStore();
+        fixedFilterStore.setListHeight = function() {
+            var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
+            fixedFilter.setHeight(fixedFilterHeight);
+            filter.setHeight(defaultHeight - fixedFilterHeight);
+        };
+
 		filterStore = getStore();
-
-		getCmpHeight = function() {
-			var size = dimensionStore.totalCount,
-				expansion = 10,
-				height = defaultHeight,
-				diff;
-
-			if (size > 10) {
-				diff = size - 10;
-				height += (diff * expansion);
-			}
-
-			height = height > maxHeight ? maxHeight : height;
-
-			return height;
-		};
-
-		dimension = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-leftright',
-			width: defaultWidth,
-			height: (getCmpHeight() * 2) + margin,
-			style: 'margin-right:' + margin + 'px; margin-bottom:0px',
-			valueField: 'id',
-			displayField: 'name',
-			dragGroup: 'layoutDD',
-			dropGroup: 'layoutDD',
-			ddReorder: false,
-			store: dimensionStore,
-			tbar: {
-				height: 25,
-				items: {
-					xtype: 'label',
-					text: NS.i18n.dimensions,
-					cls: 'ns-toolbar-multiselect-leftright-label'
-				}
-			},
-			listeners: {
-				afterrender: function(ms) {
-					ms.store.on('add', function() {
-						Ext.defer( function() {
-							ms.boundList.getSelectionModel().deselectAll();
-						}, 10);
-					});
-				}
-			}
-		});
 
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
-			height: getCmpHeight(),
+			height: defaultHeight,
 			style: 'margin-bottom:' + margin + 'px',
 			valueField: 'id',
 			displayField: 'name',
@@ -710,7 +663,7 @@ Ext.onReady( function() {
 				afterrender: function(ms) {
 					ms.boundList.on('itemdblclick', function(view, record) {
 						ms.store.remove(record);
-						dimensionStore.add(record);
+						filterStore.add(record);
 					});
 
 					ms.store.on('add', function() {
@@ -725,7 +678,7 @@ Ext.onReady( function() {
 		row = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
-			height: getCmpHeight(),
+			height: defaultHeight,
 			style: 'margin-bottom:0px',
 			valueField: 'id',
 			displayField: 'name',
@@ -744,7 +697,7 @@ Ext.onReady( function() {
 				afterrender: function(ms) {
 					ms.boundList.on('itemdblclick', function(view, record) {
 						ms.store.remove(record);
-						dimensionStore.add(record);
+						filterStore.add(record);
 					});
 
 					ms.store.on('add', function() {
@@ -756,16 +709,14 @@ Ext.onReady( function() {
 			}
 		});
 
-		filter = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-leftright',
+        fixedFilter = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-leftright ns-multiselect-fixed',
 			width: defaultWidth,
-			height: getCmpHeight(),
-			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
+			height: 26,
+			style: 'margin-right:' + margin + 'px; margin-bottom:0',
 			valueField: 'id',
 			displayField: 'name',
-			dragGroup: 'layoutDD',
-			dropGroup: 'layoutDD',
-			store: filterStore,
+			store: fixedFilterStore,
 			tbar: {
 				height: 25,
 				items: {
@@ -776,10 +727,26 @@ Ext.onReady( function() {
 			},
 			listeners: {
 				afterrender: function(ms) {
-					ms.boundList.on('itemdblclick', function(view, record) {
-						ms.store.remove(record);
-						dimensionStore.add(record);
-					});
+                    ms.on('change', function() {
+                        ms.boundList.getSelectionModel().deselectAll();
+                    });
+				}
+			}
+		});
+
+		filter = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-leftright ns-multiselect-dynamic',
+			width: defaultWidth,
+			height: defaultHeight - 26,
+			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
+            bodyStyle: 'border-top:0 none',
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'layoutDD',
+			dropGroup: 'layoutDD',
+			store: filterStore,
+			listeners: {
+				afterrender: function(ms) {
 
 					ms.store.on('add', function() {
 						Ext.defer( function() {
@@ -794,10 +761,18 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			items: [
 				{
+                    xtype: 'container',
 					layout: 'column',
 					bodyStyle: 'border:0 none',
 					items: [
-						filter,
+                        {
+                            xtype: 'container',
+                            bodyStyle: 'border:0 none',
+                            items: [
+                                fixedFilter,
+                                filter
+                            ]
+                        },
 						col
 					]
 				},
@@ -811,16 +786,8 @@ Ext.onReady( function() {
 			]
 		});
 
-		getSetup = function() {
-			return {
-				col: getStoreKeys(colStore),
-				row: getStoreKeys(rowStore),
-				filter: getStoreKeys(filterStore)
-			};
-		};
-
         addDimension = function(record, store) {
-            var store = dimensionStoreMap[record.id] || store || dimensionStore;
+            var store = dimensionStoreMap[record.id] || store || filterStore;
 
             if (!hasDimension(record.id)) {
                 store.add(record);
@@ -828,7 +795,7 @@ Ext.onReady( function() {
         };
 
         removeDimension = function(dataElementId) {
-            var stores = [dimensionStore, colStore, rowStore, filterStore];
+            var stores = [colStore, rowStore, filterStore, fixedFilterStore];
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
@@ -842,7 +809,7 @@ Ext.onReady( function() {
         };
 
         hasDimension = function(id) {
-            var stores = [dimensionStore, colStore, rowStore, filterStore];
+            var stores = [colStore, rowStore, filterStore, fixedFilterStore];
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
@@ -869,36 +836,29 @@ Ext.onReady( function() {
                 dimensionStoreMap[record.data.id] = filterStore;
             });
 
-            dimensionStore.each(function(record) {
-                dimensionStoreMap[record.data.id] = dimensionStore;
+            fixedFilterStore.each(function(record) {
+                dimensionStoreMap[record.data.id] = fixedFilterStore;
             });
         };
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
-			bodyStyle: 'background-color:#fff; padding:2px',
+			bodyStyle: 'background-color:#fff; padding:' + margin + 'px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
 			resizable: false,
 			getSetup: getSetup,
-			dimensionStore: dimensionStore,
 			colStore: colStore,
 			rowStore: rowStore,
+            fixedFilterStore: fixedFilterStore,
 			filterStore: filterStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
             hasDimension: hasDimension,
             saveState: saveState,
 			hideOnBlur: true,
-			items: {
-				layout: 'column',
-				bodyStyle: 'border:0 none',
-				items: [
-					dimension,
-					selectPanel
-				]
-			},
+			items: selectPanel,
 			bbar: [
 				'->',
 				{
@@ -939,7 +899,15 @@ Ext.onReady( function() {
 							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
-				}
+				},
+                render: function() {
+                    fixedFilterStore.on('add', function() {
+                        this.setListHeight();
+                    });
+                    fixedFilterStore.on('remove', function() {
+                        this.setListHeight();
+                    });
+                }
 			}
 		});
 
@@ -963,7 +931,7 @@ Ext.onReady( function() {
 			dimensionPanel,
 			window,
 
-			margin = 2,
+			margin = 1,
 			defaultWidth = 160,
 			defaultHeight = 158,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2;
@@ -1127,7 +1095,7 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
             layout: 'column',
-			bodyStyle: 'background-color:#fff; padding:2px',
+			bodyStyle: 'background-color:#fff; padding:' + margin + 'px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -2640,10 +2608,10 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/programs/filtered.json?include=id,name&paging=false',
+				url: ns.core.init.contextPath + '/api/programs.json?include=id,name&paging=false',
 				reader: {
 					type: 'json',
-					root: 'objects'
+					root: 'programs'
 				},
 				pageParam: false,
 				startParam: false,
@@ -2777,9 +2745,9 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs/filtered.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
                     success: function(r) {
-                        var objects = Ext.decode(r.responseText).objects,
+                        var objects = Ext.decode(r.responseText).programs,
                             stages,
                             attributes,
                             stageId;
@@ -2866,9 +2834,9 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages/filtered.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&include=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
                     success: function(r) {
-                        var objects = Ext.decode(r.responseText).objects,
+                        var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
 
                         if (!objects.length) {
@@ -3025,7 +2993,9 @@ Ext.onReady( function() {
 		};
 
         selectDataElements = function(items) {
-            var dataElements = [];
+            var dataElements = [],
+                aggWindow = ns.app.aggregateLayoutWindow,
+                queryWindow = ns.app.queryLayoutWindow;
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
@@ -3045,13 +3015,15 @@ Ext.onReady( function() {
             }
 
 			// panel, store
-            for (var i = 0, element, ux; i < dataElements.length; i++) {
+            for (var i = 0, element, ux, store; i < dataElements.length; i++) {
 				element = dataElements[i];
 
 				addUxFromDataElement(element);
 
-                ns.app.aggregateLayoutWindow.addDimension(element, ns.app.aggregateLayoutWindow.rowStore);
-                ns.app.queryLayoutWindow.colStore.add(element);
+                store = (element.type === 'int' || element.type === 'boolean' || element.optionSet) ? aggWindow.rowStore : aggWindow.fixedFilterStore;
+
+                aggWindow.addDimension(element, store);
+                queryWindow.colStore.add(element);
 			}
         };
 
@@ -3108,6 +3080,7 @@ Ext.onReady( function() {
                 startEndDate.show();
                 periods.hide();
 
+                ns.app.aggregateLayoutWindow.addDimension({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name}, ns.app.aggregateLayoutWindow.fixedFilterStore);
                 ns.app.aggregateLayoutWindow.removeDimension(dimConf.period.dimensionName);
             }
             else if (mode === 'periods') {
@@ -3115,6 +3088,7 @@ Ext.onReady( function() {
                 periods.show();
 
                 ns.app.aggregateLayoutWindow.addDimension({id: dimConf.period.dimensionName, name: dimConf.period.name}, ns.app.aggregateLayoutWindow.colStore);
+                ns.app.aggregateLayoutWindow.removeDimension(dimConf.startEndDate.value);
             }
         };
 
@@ -6014,27 +5988,27 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits/filtered.json?userDataViewFallback=true&include=id,name,children[id,name]',
+									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&include=id,name,children[id,name]',
 									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).objects || [];
+										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();
 									}
 								});
 
 								// organisation unit levels
 								requests.push({
-									url: init.contextPath + '/api/organisationUnitLevels/filtered.json?include=id,name,level&paging=false',
+									url: init.contextPath + '/api/organisationUnitLevels.json?include=id,name,level&paging=false',
 									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).objects || [];
+										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
 										fn();
 									}
 								});
 
 								// user orgunits and children
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits/filtered.json?userOnly=true&include=id,name,children[id,name]&paging=false',
+									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&include=id,name,children[id,name]&paging=false',
 									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).objects || [],
+										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
 											ou = [],
 											ouc = [];
 
