@@ -555,6 +555,8 @@ Ext.onReady( function() {
 			rowStore,
 			col,
 			colStore,
+            fixedFilter,
+            fixedFilterStore,
 			filter,
 			filterStore,
 			value,
@@ -576,7 +578,7 @@ Ext.onReady( function() {
 
 			margin = 1,
 			defaultWidth = 160,
-			defaultHeight = 158,
+			defaultHeight = 200,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2;
 
 		getData = function(all) {
@@ -636,11 +638,19 @@ Ext.onReady( function() {
 
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
-        colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+        //colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		rowStore = getStore();
 
+        fixedFilterStore = getStore();
+        fixedFilterStore.setListHeight = function() {
+            var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
+            fixedFilter.setHeight(fixedFilterHeight);
+            filter.setHeight(defaultHeight - fixedFilterHeight);
+        };
+
 		filterStore = getStore();
+nissa = fixedFilterStore;
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -718,14 +728,7 @@ Ext.onReady( function() {
 							ms.boundList.getSelectionModel().deselectAll();
 						}, 10);
 					});
-				},
-                added: function(n1, n2, n3, n4) {
-                    console.log(arguments);
-                    nissa1 = n1;
-                    nissa2 = n2;
-                    nissa3 = n3;
-                    nissa4 = n4;
-                }
+				}
 			}
 		});
 
@@ -763,16 +766,14 @@ Ext.onReady( function() {
 			}
 		});
 
-		filter = Ext.create('Ext.ux.form.MultiSelect', {
-			cls: 'ns-toolbar-multiselect-leftright',
+        fixedFilter = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-leftright ns-multiselect-fixed',
 			width: defaultWidth,
-			height: getCmpHeight(),
-			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
+			height: 26,
+			style: 'margin-right:' + margin + 'px; margin-bottom:0',
 			valueField: 'id',
 			displayField: 'name',
-			dragGroup: 'layoutDD',
-			dropGroup: 'layoutDD',
-			store: filterStore,
+			store: fixedFilterStore,
 			tbar: {
 				height: 25,
 				items: {
@@ -781,6 +782,39 @@ Ext.onReady( function() {
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
+			listeners: {
+				afterrender: function(ms) {
+                    var store = ms.store;
+
+					ms.boundList.on('itemdblclick', function(view, record) {
+						store.remove(record);
+						dimensionStore.add(record);
+					});
+
+                    ms.on('change', function() {
+                        ms.boundList.getSelectionModel().deselectAll();
+                    });
+
+					store.on('add', function() {
+						Ext.defer( function() {
+							ms.boundList.getSelectionModel().deselectAll();
+						}, 10);
+					});
+				}
+			}
+		});
+
+		filter = Ext.create('Ext.ux.form.MultiSelect', {
+			cls: 'ns-toolbar-multiselect-leftright ns-multiselect-dynamic',
+			width: defaultWidth,
+			height: getCmpHeight() - 26,
+			style: 'margin-right:' + margin + 'px; margin-bottom:' + margin + 'px',
+            bodyStyle: 'border-top:0 none',
+			valueField: 'id',
+			displayField: 'name',
+			dragGroup: 'layoutDD',
+			dropGroup: 'layoutDD',
+			store: filterStore,
 			listeners: {
 				afterrender: function(ms) {
 					ms.boundList.on('itemdblclick', function(view, record) {
@@ -804,7 +838,14 @@ Ext.onReady( function() {
 					layout: 'column',
 					bodyStyle: 'border:0 none',
 					items: [
-						filter,
+                        {
+                            xtype: 'container',
+                            bodyStyle: 'border:0 none',
+                            items: [
+                                fixedFilter,
+                                filter
+                            ]
+                        },
 						col
 					]
 				},
@@ -946,7 +987,17 @@ Ext.onReady( function() {
 							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
-				}
+				},
+                render: function() {
+                    fixedFilterStore.on('add', function() {
+                        this.setListHeight();
+                    });
+                    fixedFilterStore.on('remove', function() {
+                        this.setListHeight();
+                    });
+
+                    fixedFilterStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+                }
 			}
 		});
 
