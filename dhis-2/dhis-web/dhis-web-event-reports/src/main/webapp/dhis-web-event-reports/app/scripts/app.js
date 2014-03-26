@@ -638,7 +638,7 @@ Ext.onReady( function() {
 
 		colStore = getStore();
 		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
-        //colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+        colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 
 		rowStore = getStore();
 
@@ -650,7 +650,6 @@ Ext.onReady( function() {
         };
 
 		filterStore = getStore();
-nissa = fixedFilterStore;
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -933,6 +932,7 @@ nissa = fixedFilterStore;
 			dimensionStore: dimensionStore,
 			colStore: colStore,
 			rowStore: rowStore,
+            fixedFilterStore: fixedFilterStore,
 			filterStore: filterStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
@@ -995,8 +995,6 @@ nissa = fixedFilterStore;
                     fixedFilterStore.on('remove', function() {
                         this.setListHeight();
                     });
-
-                    fixedFilterStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
                 }
 			}
 		});
@@ -3083,7 +3081,9 @@ nissa = fixedFilterStore;
 		};
 
         selectDataElements = function(items) {
-            var dataElements = [];
+            var dataElements = [],
+                aggWindow = ns.app.aggregateLayoutWindow,
+                queryWindow = ns.app.queryLayoutWindow;
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
@@ -3103,13 +3103,15 @@ nissa = fixedFilterStore;
             }
 
 			// panel, store
-            for (var i = 0, element, ux; i < dataElements.length; i++) {
+            for (var i = 0, element, ux, store; i < dataElements.length; i++) {
 				element = dataElements[i];
 
 				addUxFromDataElement(element);
 
-                ns.app.aggregateLayoutWindow.addDimension(element, ns.app.aggregateLayoutWindow.rowStore);
-                ns.app.queryLayoutWindow.colStore.add(element);
+                store = (element.type === 'int' || element.type === 'boolean' || element.optionSet) ? aggWindow.rowStore : aggWindow.fixedFilterStore;
+
+                aggWindow.addDimension(element, store);
+                queryWindow.colStore.add(element);
 			}
         };
 
