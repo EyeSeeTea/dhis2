@@ -4783,6 +4783,9 @@ Ext.onReady( function() {
 				// show mask
 				web.mask.show(ns.app.centerRegion);
 
+                // timing
+                ns.app.dateData = new Date();
+
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + '/api/analytics/events/' + view.type + '/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
@@ -4795,6 +4798,8 @@ Ext.onReady( function() {
                         alert(r.responseText);
 					},
 					success: function(r) {
+                        ns.app.dateCreate = new Date();
+
                         var response = api.response.Response(Ext.decode(r.responseText));
 
                         if (!response) {
@@ -4841,9 +4846,9 @@ Ext.onReady( function() {
 
 					table = getHtml(xLayout, xResponse);
 
-console.log("cells: " + table.tdCount);
-                    if (table.tdCount > 20000) {
-                        alert('Table has ' + table.tdCount + ' cells. Maximum allowed is 20000.');
+                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000) {
+                        alert('Table has too many cells. Please reduce the table and try again.');
+                        web.mask.hide(ns.app.centerRegion);
                         return;
                     }
 
@@ -4851,7 +4856,6 @@ console.log("cells: " + table.tdCount);
 					console.log("response", response);
 					console.log("xResponse", xResponse);
 					console.log("xLayout", xLayout);
-					console.log("table", table);
 
 					if (layout.sorting) {
 						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
@@ -4861,8 +4865,20 @@ console.log("cells: " + table.tdCount);
 
                     web.mask.show(ns.app.centerRegion, 'Rendering table..');
 
+                    // timing
+                    ns.app.dateRender = new Date();
+
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);
+
+                    // timing
+                    ns.app.dateTotal = new Date();
+
+                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+
 
 					// after render
 					ns.app.layout = layout;
