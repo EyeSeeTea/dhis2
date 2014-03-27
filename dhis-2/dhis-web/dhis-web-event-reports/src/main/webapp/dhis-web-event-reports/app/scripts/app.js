@@ -4852,11 +4852,6 @@ Ext.onReady( function() {
                         return;
                     }
 
-					console.log("layout", layout);
-					console.log("response", response);
-					console.log("xResponse", xResponse);
-					console.log("xLayout", xLayout);
-
 					if (layout.sorting) {
 						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
 						xLayout = getSXLayout(xLayout, xResponse);
@@ -4873,12 +4868,6 @@ Ext.onReady( function() {
 
                     // timing
                     ns.app.dateTotal = new Date();
-
-                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-
 
 					// after render
 					ns.app.layout = layout;
@@ -4901,6 +4890,15 @@ Ext.onReady( function() {
 					web.mask.hide(ns.app.centerRegion);
 
 					if (NS.isDebug) {
+                        console.log("Number of cells", table.tdCount);
+                        console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                        console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                        console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                        console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
 						console.log("core", ns.core);
 						console.log("app", ns.app);
 					}
