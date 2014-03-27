@@ -1618,6 +1618,9 @@ Ext.onReady( function() {
 		// web
 		(function() {
 
+            web.count1 = 0;
+            web.count2 = 0;
+
 			// mask
 			web.mask = {};
 
@@ -1830,6 +1833,7 @@ Ext.onReady( function() {
 					totalColObjects = [],
 					uuidDimUuidsMap = {},
 					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
+                    tdCount = 0,
 					htmlArray;
 
 				xResponse.sortableIdObjects = [];
@@ -1856,7 +1860,14 @@ Ext.onReady( function() {
 						return '';
 					}
 
-					// Background color from legend set
+					if (config.hidden || config.collapsed) {
+						return '';
+					}
+
+                    // number of cells
+                    tdCount = tdCount + 1;
+
+					// background color from legend set
 					if (isNumeric && xLayout.legendSet) {
 						var value = parseFloat(config.value);
 						mapLegends = xLayout.legendSet.mapLegends;
@@ -2510,7 +2521,8 @@ Ext.onReady( function() {
 						html: getHtml(htmlArray),
 						uuidDimUuidsMap: uuidDimUuidsMap,
 						xColAxis: xColAxis,
-						xRowAxis: xRowAxis
+						xRowAxis: xRowAxis,
+                        tdCount: tdCount
 					};
 				}();
 			};

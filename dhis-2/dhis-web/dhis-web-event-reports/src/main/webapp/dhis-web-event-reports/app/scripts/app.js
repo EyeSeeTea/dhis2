@@ -1191,29 +1191,9 @@ Ext.onReady( function() {
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:4px'
+			style: 'margin-bottom:4px',
+            checked: true
 		});
-
-		//aggregationType = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:3px',
-			//width: comboboxWidth,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.aggregation_type,
-			//labelStyle: 'color:#333',
-			//queryMode: 'local',
-			//valueField: 'id',
-			//editable: false,
-			//value: 'default',
-			//store: Ext.create('Ext.data.Store', {
-				//fields: ['id', 'text'],
-				//data: [
-					//{id: 'default', text: NS.i18n.by_data_element},
-					//{id: 'count', text: NS.i18n.count},
-					//{id: 'sum', text: NS.i18n.sum}
-				//]
-			//})
-		//});
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_hierarchy,
@@ -4918,6 +4898,13 @@ Ext.onReady( function() {
 					url: ns.core.init.contextPath + '/api/analytics/events/' + view.type + '/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
 					scope: this,
+					failure: function(r) {
+						//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+
+						web.mask.hide(ns.app.centerRegion);
+
+                        alert(r.responseText);
+					},
 					success: function(r) {
                         var response = api.response.Response(Ext.decode(r.responseText));
 
