@@ -55,15 +55,13 @@ public class DefaultAclService implements AclService
     @Override
     public boolean isSupported( String type )
     {
-        Schema schema = schemaService.getSchemaBySingularName( type );
-        return schema != null && schema.isShareable();
+        return schemaService.getSchemaBySingularName( type ) != null;
     }
 
     @Override
     public boolean isSupported( Class<?> klass )
     {
-        Schema schema = schemaService.getSchema( klass );
-        return schema != null && schema.isShareable();
+        return schemaService.getSchema( klass ) != null;
     }
 
     @Override
@@ -134,6 +132,10 @@ public class DefaultAclService implements AclService
                 return true;
             }
         }
+        else
+        {
+            return false;
+        }
 
         if ( haveOverrideAuthority( user )
             || UserGroup.class.isAssignableFrom( object.getClass() )
@@ -200,6 +202,19 @@ public class DefaultAclService implements AclService
         }
 
         return false;
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean canCreate( User user, Class<T> klass )
+    {
+        Schema schema = schemaService.getSchema( klass );
+
+        if ( !schema.isShareable() )
+        {
+            return canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE ) );
+        }
+
+        return canCreatePublic( user, klass ) || canCreatePrivate( user, klass );
     }
 
     @Override

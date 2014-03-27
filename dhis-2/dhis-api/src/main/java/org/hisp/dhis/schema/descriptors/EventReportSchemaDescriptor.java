@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,47 +28,28 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
-* @author Lars Helge Overland
-*/
-public class QueryFilter
-    extends BaseNameableObject
+import org.hisp.dhis.eventreport.EventReport;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Lists;
+
+@Component
+public class EventReportSchemaDescriptor implements SchemaDescriptor
 {
-    private String operator;
-    
-    private String filter;
-
-    // -------------------------------------------------------------------------
-    // Constructor
-    // -------------------------------------------------------------------------
-
-    public QueryFilter( String operator, String filter )
+    @Override
+    public Schema getSchema()
     {
-        this.operator = operator;
-        this.filter = filter;
-    }
+        Schema schema = new Schema( EventReport.class, "eventReport", "eventReports" );
+        
+        schema.setShareable( true );
 
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_EVENTREPORT_PUBLIC_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.EXTERNALIZE, Lists.newArrayList( "F_EVENTREPORT_EXTERNAL" ) ) );
 
-    public String getOperator()
-    {
-        return operator;
-    }
-
-    public void setOperator( String operator )
-    {
-        this.operator = operator;
-    }
-
-    public String getFilter()
-    {
-        return filter;
-    }
-
-    public void setFilter( String filter )
-    {
-        this.filter = filter;
+        return schema;
     }
 }

@@ -28,11 +28,13 @@ package org.hisp.dhis.eventreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.junit.Assert.*;
+
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Lars Helge Overland
@@ -43,12 +45,30 @@ public class EventReportServiceTest
     @Autowired
     private EventReportService eventReportService;
     
+    @Autowired
+    private ProgramService programService;
+    
+    private Program prA;
+    
+    @Override
+    public void setUpTest()
+    {
+        prA = createProgram( 'A', null, null );
+        programService.addProgram( prA );
+    }
+    
     @Test
     public void testSaveGet()
     {
         EventReport erA = new EventReport( "erA" );
+        erA.setProgram( prA );
+        erA.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
         EventReport erB = new EventReport( "erB" );
+        erB.setProgram( prA );
+        erB.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
         EventReport erC = new EventReport( "erC" );
+        erC.setProgram( prA );
+        erC.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
         
         int idA = eventReportService.saveEventReport( erA );
         int idB = eventReportService.saveEventReport( erB );
@@ -57,5 +77,45 @@ public class EventReportServiceTest
         assertEquals( "erA", eventReportService.getEventReport( idA ).getName() );
         assertEquals( "erB", eventReportService.getEventReport( idB ).getName() );
         assertEquals( "erC", eventReportService.getEventReport( idC ).getName() );
+    }
+    
+    @Test
+    public void testDelete()
+    {
+        EventReport erA = new EventReport( "erA" );
+        erA.setProgram( prA );
+        erA.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
+        EventReport erB = new EventReport( "erB" );
+        erB.setProgram( prA );
+        erB.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
+        EventReport erC = new EventReport( "erC" );
+        erC.setProgram( prA );
+        erC.setDataType( EventReport.DATA_TYPE_AGGREGATED_VALUES );
+        
+        int idA = eventReportService.saveEventReport( erA );
+        int idB = eventReportService.saveEventReport( erB );
+        int idC = eventReportService.saveEventReport( erC );
+        
+        assertNotNull( eventReportService.getEventReport( idA ) );
+        assertNotNull( eventReportService.getEventReport( idB ) );
+        assertNotNull( eventReportService.getEventReport( idC ) );
+        
+        eventReportService.deleteEventReport( erA );
+
+        assertNull( eventReportService.getEventReport( idA ) );
+        assertNotNull( eventReportService.getEventReport( idB ) );
+        assertNotNull( eventReportService.getEventReport( idC ) );
+
+        eventReportService.deleteEventReport( erB );
+
+        assertNull( eventReportService.getEventReport( idA ) );
+        assertNull( eventReportService.getEventReport( idB ) );
+        assertNotNull( eventReportService.getEventReport( idC ) );
+
+        eventReportService.deleteEventReport( erC );
+
+        assertNull( eventReportService.getEventReport( idA ) );
+        assertNull( eventReportService.getEventReport( idB ) );
+        assertNull( eventReportService.getEventReport( idC ) );        
     }
 }
