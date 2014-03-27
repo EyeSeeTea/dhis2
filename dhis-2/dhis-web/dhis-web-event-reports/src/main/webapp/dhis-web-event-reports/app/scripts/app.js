@@ -1276,76 +1276,6 @@ Ext.onReady( function() {
 			//store: ns.app.stores.legendSet
 		//});
 
-		//reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.reporting_period,
-			//style: 'margin-bottom:4px',
-		//});
-
-		//organisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.organisation_unit,
-			//style: 'margin-bottom:4px',
-		//});
-
-		//parentOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.parent_organisation_unit,
-			//style: 'margin-bottom:4px',
-		//});
-
-		//regression = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.include_regression,
-			//style: 'margin-bottom:4px',
-		//});
-
-		//cumulative = Ext.create('Ext.form.field.Checkbox', {
-			//boxLabel: NS.i18n.include_cumulative,
-			//style: 'margin-bottom:6px',
-		//});
-
-		//sortOrder = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:3px',
-			//width: 250,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.sort_order,
-			//labelStyle: 'color:#333',
-			//queryMode: 'local',
-			//valueField: 'id',
-			//editable: false,
-			//value: 0,
-			//store: Ext.create('Ext.data.Store', {
-				//fields: ['id', 'text'],
-				//data: [
-					//{id: 0, text: NS.i18n.none},
-					//{id: 1, text: NS.i18n.low_to_high},
-					//{id: 2, text: NS.i18n.high_to_low}
-				//]
-			//})
-		//});
-
-		//topLimit = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:0',
-			//width: 250,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.top_limit,
-			//labelStyle: 'color:#333',
-			//queryMode: 'local',
-			//valueField: 'id',
-			//editable: false,
-			//value: 0,
-			//store: Ext.create('Ext.data.Store', {
-				//fields: ['id', 'text'],
-				//data: [
-					//{id: 0, text: NS.i18n.none},
-					//{id: 5, text: 5},
-					//{id: 10, text: 10},
-					//{id: 20, text: 20},
-					//{id: 50, text: 50},
-					//{id: 100, text: 100}
-				//]
-			//})
-		//});
-
 		data = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
@@ -1376,20 +1306,6 @@ Ext.onReady( function() {
 			]
 		};
 
-		//parameters = {
-			//bodyStyle: 'border:0 none; background:transparent',
-			//style: 'margin-left:14px',
-			//items: [
-				//reportingPeriod,
-				//organisationUnit,
-				//parentOrganisationUnit,
-				//regression,
-				//cumulative,
-				//sortOrder,
-				//topLimit
-			//]
-		//};
-
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_options,
 			bodyStyle: 'background-color:#fff; padding:5px',
@@ -1403,19 +1319,11 @@ Ext.onReady( function() {
 					showTotals: showTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
-                    //aggregationType: aggregationType.getValue(),
 					showHierarchy: showHierarchy.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue()
-					//legendSet: {id: legendSet.getValue()},
-					//reportingPeriod: reportingPeriod.getValue(),
-					//organisationUnit: organisationUnit.getValue(),
-					//parentOrganisationUnit: parentOrganisationUnit.getValue(),
-					//regression: regression.getValue(),
-					//cumulative: cumulative.getValue(),
-					//sortOrder: sortOrder.getValue(),
-					//topLimit: topLimit.getValue()
+					//legendSet: {id: legendSet.getValue()}
 				};
 			},
 			setOptions: function(layout) {
@@ -1461,19 +1369,6 @@ Ext.onReady( function() {
 					html: NS.i18n.style
 				},
 				style
-				//{
-					//bodyStyle: 'border:0 none; padding:4px'
-				//},
-				//{
-					//bodyStyle: 'border:1px solid #d5d5d5; padding:5px; background-color:#f0f0f0',
-					//items: [
-						//{
-							//bodyStyle: 'border:0 none; padding:0 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
-							//html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>'
-						//},
-						//parameters
-					//]
-				//}
 			],
 			bbar: [
 				'->',
@@ -1517,19 +1412,10 @@ Ext.onReady( function() {
 					w.showTotals = showTotals;
 					w.showSubTotals = showSubTotals;
 					w.hideEmptyRows = hideEmptyRows;
-                    //w.aggregationType = aggregationType;
 					w.showHierarchy = showHierarchy;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
-					//w.legendSet = legendSet;
-					//w.reportingPeriod = reportingPeriod;
-					//w.organisationUnit = organisationUnit;
-					//w.parentOrganisationUnit = parentOrganisationUnit;
-					//w.regression = regression;
-					//w.cumulative = cumulative;
-					//w.sortOrder = sortOrder;
-					//w.topLimit = topLimit;
 				}
 			}
 		});
