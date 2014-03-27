@@ -514,8 +514,7 @@ table.small td {
     border-bottom: 0 none;
 }
 .ns-multiselect-fixed .x-boundlist-item {
-    font-style: italic;
-    color: #666;
+    color: #777;
     cursor: auto;
 }
 .ns-multiselect-fixed .x-boundlist-item-over {
