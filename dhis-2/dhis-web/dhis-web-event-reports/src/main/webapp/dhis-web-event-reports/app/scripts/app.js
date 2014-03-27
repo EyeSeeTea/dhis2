@@ -4846,7 +4846,7 @@ Ext.onReady( function() {
 
 					table = getHtml(xLayout, xResponse);
 
-                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000) {
+                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
                         alert('Table has too many cells. Please reduce the table and try again.');
                         web.mask.hide(ns.app.centerRegion);
                         return;
