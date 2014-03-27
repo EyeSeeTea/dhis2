@@ -4780,6 +4780,9 @@ Ext.onReady( function() {
 				// hierarchy
 				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
 
+				// show mask
+				web.mask.show(ns.app.centerRegion);
+
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + '/api/analytics/events/' + view.type + '/' + view.program.id + '.json' + paramString,
 					disableCaching: false,
@@ -4799,6 +4802,8 @@ Ext.onReady( function() {
 							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
+
+                        web.mask.show(ns.app.centerRegion, 'Creating table..');
 
                         ns.app.paramString = paramString;
 
@@ -4836,6 +4841,12 @@ Ext.onReady( function() {
 
 					table = getHtml(xLayout, xResponse);
 
+console.log("cells: " + table.tdCount);
+                    if (table.tdCount > 20000) {
+                        alert('Table has ' + table.tdCount + ' cells. Maximum allowed is 20000.');
+                        return;
+                    }
+
 					console.log("layout", layout);
 					console.log("response", response);
 					console.log("xResponse", xResponse);
@@ -4847,6 +4858,8 @@ Ext.onReady( function() {
 						xLayout = getSXLayout(xLayout, xResponse);
 						table = getHtml(xLayout, xResponse);
 					}
+
+                    web.mask.show(ns.app.centerRegion, 'Rendering table..');
 
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);

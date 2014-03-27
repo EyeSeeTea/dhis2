@@ -1618,15 +1618,12 @@ Ext.onReady( function() {
 		// web
 		(function() {
 
-            web.count1 = 0;
-            web.count2 = 0;
-
 			// mask
 			web.mask = {};
 
 			web.mask.show = function(component, message) {
 				if (!Ext.isObject(component)) {
-					console.log('support.gui.mask.show: component not an object');
+					console.log('web.mask.show: component not an object');
 					return null;
 				}
 
@@ -1639,7 +1636,7 @@ Ext.onReady( function() {
 
 				component.mask = new Ext.create('Ext.LoadMask', component, {
 					shadow: false,
-					message: message,
+					msg: message,
 					style: 'box-shadow:0',
 					bodyStyle: 'box-shadow:0'
 				});
