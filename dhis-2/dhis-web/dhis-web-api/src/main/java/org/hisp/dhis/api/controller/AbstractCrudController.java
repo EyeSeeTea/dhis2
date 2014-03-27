@@ -28,8 +28,17 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -43,8 +52,7 @@ import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
-import org.hisp.dhis.sharing.Access;
-import org.hisp.dhis.sharing.SharingService;
+import org.hisp.dhis.acl.Access;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,15 +67,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -88,7 +89,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected FilterService filterService;
 
     @Autowired
-    protected SharingService sharingService;
+    protected AclService aclService;
 
     @Autowired
     protected SchemaService schemaService;
@@ -232,7 +233,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             WebUtils.generateLinks( entity );
         }
 
-        if ( sharingService.isSupported( getEntityClass() ) )
+        if ( aclService.isSupported( getEntityClass() ) )
         {
             addAccessProperties( entity );
         }
@@ -371,12 +372,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected void addAccessProperties( T object )
     {
         Access access = new Access();
-        access.setManage( sharingService.canManage( currentUserService.getCurrentUser(), object ) );
-        access.setExternalize( sharingService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
-        access.setWrite( sharingService.canWrite( currentUserService.getCurrentUser(), object ) );
-        access.setRead( sharingService.canRead( currentUserService.getCurrentUser(), object ) );
-        access.setUpdate( sharingService.canUpdate( currentUserService.getCurrentUser(), object ) );
-        access.setDelete( sharingService.canDelete( currentUserService.getCurrentUser(), object ) );
+        access.setManage( aclService.canManage( currentUserService.getCurrentUser(), object ) );
+        access.setExternalize( aclService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
+        access.setWrite( aclService.canWrite( currentUserService.getCurrentUser(), object ) );
+        access.setRead( aclService.canRead( currentUserService.getCurrentUser(), object ) );
+        access.setUpdate( aclService.canUpdate( currentUserService.getCurrentUser(), object ) );
+        access.setDelete( aclService.canDelete( currentUserService.getCurrentUser(), object ) );
 
         ((BaseIdentifiableObject) object).setAccess( access );
     }
@@ -393,7 +394,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             return;
         }
 
-        if ( entityList != null && sharingService.isSupported( getEntityClass() ) )
+        if ( entityList != null && aclService.isSupported( getEntityClass() ) )
         {
             for ( T object : entityList )
             {
