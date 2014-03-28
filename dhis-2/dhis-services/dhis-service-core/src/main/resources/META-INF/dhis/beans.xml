@@ -11,7 +11,7 @@
 
   <bean id="org.hisp.dhis.schema.PropertyIntrospectorService" class="org.hisp.dhis.schema.DefaultPropertyIntrospectorService" />
 
-  <bean id="org.hisp.dhis.sharing.SharingService" class="org.hisp.dhis.sharing.DefaultSharingService" />
+  <bean id="org.hisp.dhis.acl.AclService" class="org.hisp.dhis.acl.DefaultAclService" />
 
   <!-- Store definitions -->
 
@@ -414,10 +414,12 @@
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalLevelService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalLevelService">
     <property name="dataApprovalLevelStore" ref="org.hisp.dhis.dataapproval.DataApprovalLevelStore" />
+    <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
   </bean>
 
     <bean id="org.hisp.dhis.dataelement.DataElementService" class="org.hisp.dhis.dataelement.DefaultDataElementService">

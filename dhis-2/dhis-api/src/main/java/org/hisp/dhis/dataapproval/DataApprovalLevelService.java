@@ -111,4 +111,19 @@ public interface DataApprovalLevelService
      * @param index index of the level to move up.
      */
     void deleteDataApprovalLevel( int index );
+
+    /**
+     * Gets the lowest data approval level that the current user may view.
+     * (Note that the "lowest" approval level means the "highest" approval
+     * level number.)
+     * <p>
+     * Look at all the levels, starting from the lowest level (highest level
+     * number.) If the level has no category option group, or if it has a
+     * category option group where the user can see at least one category
+     * option within the group, then the user may see the level and all
+     * higher levels.
+     *
+     * @return level number of the lowest level the user can view.
+     */
+    int getLowestUserDataApprovalLevel();
 }

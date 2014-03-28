@@ -153,10 +153,10 @@ public class DataApprovalStoreTest
     public void testAddAndGetDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, categoryOptionGroup, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, categoryOptionGroup, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, categoryOptionGroup, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, false, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceB, categoryOptionGroup, false, date, userA );
+        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, sourceA, categoryOptionGroup, false, date, userA );
+        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, sourceA, categoryOptionGroup, false, date, userA );
         DataApproval dataApprovalE;
 
         dataApprovalStore.addDataApproval( dataApprovalA );
@@ -204,8 +204,8 @@ public class DataApprovalStoreTest
     public void testAddDuplicateDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, date, userA );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, false, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, false, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalA );
 
@@ -224,8 +224,8 @@ public class DataApprovalStoreTest
     public void testDeleteDataApproval() throws Exception
     {
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetB, periodB, sourceB, categoryOptionGroup, date, userB );
+        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, sourceA, categoryOptionGroup, false, date, userA );
+        DataApproval dataApprovalB = new DataApproval( dataSetB, periodB, sourceB, categoryOptionGroup, false, date, userB );
 
         dataApprovalStore.addDataApproval( dataApprovalA );
         dataApprovalStore.addDataApproval( dataApprovalB );

@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapgeneration;
+package org.hisp.dhis.dataapproval;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,53 +28,78 @@ package org.hisp.dhis.mapgeneration;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+/**
+ * Current status of data approval for a given selection of data from a
+ * data set. Also shows what approval-type actions (if any) the current user
+ * is permitted to perform on this data selection.
+ *
+ * @author Jim Grace
+ * @version $Id$
+ */
 
-public class InternalMap
+public class DataApprovalPermissions
 {
-    private List<InternalMapLayer> layers = new ArrayList<InternalMapLayer>();
+    private DataApprovalStatus dataApprovalStatus;
 
-    // -------------------------------------------------------------------------
-    // Constructors
-    // -------------------------------------------------------------------------
+    private boolean mayApprove;
 
-    public InternalMap()
-    {
-    }
+    private boolean mayUnapprove;
 
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
+    private boolean mayAccept;
 
-    /**
-     * Returns the first data layer of the list of layers for this map. Returns
-     * null of none of the layers are data layers.
-     */
-    public InternalMapLayer getFirstDataLayer()
-    {
-        for ( InternalMapLayer layer : layers )
-        {
-            if ( layer != null && layer.isDataLayer() )
-            {
-                return layer;
-            }
-        }
-        
-        return null;
-    }
-    
+    private boolean mayUnaccept;
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public List<InternalMapLayer> getLayers()
+    public DataApprovalStatus getDataApprovalStatus()
     {
-        return layers;
+        return dataApprovalStatus;
     }
 
-    public void setLayers( List<InternalMapLayer> layers )
+    public void setDataApprovalStatus( DataApprovalStatus dataApprovalStatus )
     {
-        this.layers = layers;
+        this.dataApprovalStatus = dataApprovalStatus;
+    }
+
+    public boolean isMayApprove()
+    {
+        return mayApprove;
+    }
+
+    public void setMayApprove( boolean mayApprove )
+    {
+        this.mayApprove = mayApprove;
+    }
+
+    public boolean isMayUnapprove()
+    {
+        return mayUnapprove;
+    }
+
+    public void setMayUnapprove( boolean mayUnapprove )
+    {
+        this.mayUnapprove = mayUnapprove;
+    }
+
+    public boolean isMayAccept()
+    {
+        return mayAccept;
+    }
+
+    public void setMayAccept( boolean mayAccept )
+    {
+        this.mayAccept = mayAccept;
+    }
+
+    public boolean isMayUnaccept()
+    {
+        return mayUnaccept;
+    }
+
+    public void setMayUnaccept( boolean mayUnaccept )
+    {
+        this.mayUnaccept = mayUnaccept;
     }
 }

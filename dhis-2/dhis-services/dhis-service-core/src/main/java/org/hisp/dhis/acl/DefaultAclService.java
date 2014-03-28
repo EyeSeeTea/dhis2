@@ -1,4 +1,4 @@
-package org.hisp.dhis.sharing;
+package org.hisp.dhis.acl;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -30,6 +30,7 @@ package org.hisp.dhis.sharing;
 
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.user.User;
@@ -37,17 +38,16 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Collection;
 
 import static org.springframework.util.CollectionUtils.containsAny;
 
 /**
+ * Default ACL implementation that uses SchemaDescriptors to get authorities / sharing flags.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DefaultSharingService implements SharingService
+public class DefaultAclService implements AclService
 {
     @Autowired
     private SchemaService schemaService;
@@ -55,12 +55,24 @@ public class DefaultSharingService implements SharingService
     @Override
     public boolean isSupported( String type )
     {
+        return schemaService.getSchemaBySingularName( type ) != null;
+    }
+
+    @Override
+    public boolean isSupported( Class<?> klass )
+    {
+        return schemaService.getSchema( klass ) != null;
+    }
+
+    @Override
+    public boolean isShareable( String type )
+    {
         Schema schema = schemaService.getSchemaBySingularName( type );
         return schema != null && schema.isShareable();
     }
 
     @Override
-    public boolean isSupported( Class<?> klass )
+    public boolean isShareable( Class<?> klass )
     {
         Schema schema = schemaService.getSchema( klass );
         return schema != null && schema.isShareable();
@@ -71,16 +83,19 @@ public class DefaultSharingService implements SharingService
     {
         Schema schema = schemaService.getSchema( object.getClass() );
 
-        if ( schema == null || !schema.isShareable() )
+        if ( schema == null )
         {
             return false;
         }
 
-        //TODO ( (object instanceof User) && canCreatePrivate( user, object ) ): review possible security breaches and best way to give update access upon user import
+        if ( !schema.isShareable() )
+        {
+            return canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE ) );
+        }
+
         if ( haveOverrideAuthority( user )
-            || (object.getUser() == null && canCreatePublic( user, object.getClass() ) && !schema.getPrivateAuthorities().isEmpty())
+            || (object.getUser() == null && canCreatePublic( user, object.getClass() ) && !schema.getAuthorityByType( AuthorityType.CREATE_PRIVATE ).isEmpty())
             || (user != null && user.equals( object.getUser() ))
-            //|| authorities.contains( PRIVATE_AUTHORITIES.get( object.getClass() ) )
             || ((object instanceof User) && canCreatePrivate( user, object.getClass() ))
             || AccessStringHelper.canWrite( object.getPublicAccess() ) )
         {
@@ -89,6 +104,7 @@ public class DefaultSharingService implements SharingService
 
         for ( UserGroupAccess userGroupAccess : object.getUserGroupAccesses() )
         {
+            /* Is the user allowed to write to this object through group access? */
             if ( AccessStringHelper.canWrite( userGroupAccess.getAccess() )
                 && userGroupAccess.getUserGroup().getMembers().contains( user ) )
             {
@@ -104,7 +120,19 @@ public class DefaultSharingService implements SharingService
     {
         Schema schema = schemaService.getSchema( object.getClass() );
 
-        if ( schema == null || !schema.isShareable() )
+        if ( schema == null )
+        {
+            return false;
+        }
+
+        if ( canAccess( user, schema.getAuthorityByType( AuthorityType.READ ) ) )
+        {
+            if ( !schema.isShareable() )
+            {
+                return true;
+            }
+        }
+        else
         {
             return false;
         }
@@ -120,6 +148,7 @@ public class DefaultSharingService implements SharingService
 
         for ( UserGroupAccess userGroupAccess : object.getUserGroupAccesses() )
         {
+            /* Is the user allowed to read this object through group access? */
             if ( AccessStringHelper.canRead( userGroupAccess.getAccess() )
                 && userGroupAccess.getUserGroup().getMembers().contains( user ) )
             {
@@ -133,13 +162,15 @@ public class DefaultSharingService implements SharingService
     @Override
     public boolean canUpdate( User user, IdentifiableObject object )
     {
-        return canWrite( user, object );
+        Schema schema = schemaService.getSchema( object.getClass() );
+        return schema != null && canAccess( user, schema.getAuthorityByType( AuthorityType.UPDATE ) ) && (!schema.isShareable() || canWrite( user, object ));
     }
 
     @Override
     public boolean canDelete( User user, IdentifiableObject object )
     {
-        return canWrite( user, object );
+        Schema schema = schemaService.getSchema( object.getClass() );
+        return schema != null && canAccess( user, schema.getAuthorityByType( AuthorityType.DELETE ) ) && (!schema.isShareable() || canWrite( user, object ));
     }
 
     @Override
@@ -153,8 +184,8 @@ public class DefaultSharingService implements SharingService
         }
 
         if ( haveOverrideAuthority( user )
-            || (object.getUser() == null && canCreatePublic( user, object.getClass() ) && !schema.getPrivateAuthorities().isEmpty())
             || user.equals( object.getUser() )
+            || (object.getUser() == null && canCreatePublic( user, object.getClass() ) && !schema.getAuthorityByType( AuthorityType.CREATE_PRIVATE ).isEmpty())
             || AccessStringHelper.canWrite( object.getPublicAccess() ) )
         {
             return true;
@@ -162,6 +193,7 @@ public class DefaultSharingService implements SharingService
 
         for ( UserGroupAccess userGroupAccess : object.getUserGroupAccesses() )
         {
+            /* Is the user allowed to write to this object through group access? */
             if ( AccessStringHelper.canWrite( userGroupAccess.getAccess() )
                 && userGroupAccess.getUserGroup().getMembers().contains( user ) )
             {
@@ -173,48 +205,37 @@ public class DefaultSharingService implements SharingService
     }
 
     @Override
-    public <T extends IdentifiableObject> boolean canCreatePublic( User user, Class<T> klass )
+    public <T extends IdentifiableObject> boolean canCreate( User user, Class<T> klass )
     {
-        Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
-
         Schema schema = schemaService.getSchema( klass );
 
-        if ( schema == null || !schema.isShareable() )
+        if ( !schema.isShareable() )
         {
-            return false;
+            return canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE ) );
         }
 
-        return containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES ) || containsAny( authorities, schema.getPublicAuthorities() );
+        return canCreatePublic( user, klass ) || canCreatePrivate( user, klass );
+    }
+
+    @Override
+    public <T extends IdentifiableObject> boolean canCreatePublic( User user, Class<T> klass )
+    {
+        Schema schema = schemaService.getSchema( klass );
+        return !(schema == null || !schema.isShareable()) && canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE_PUBLIC ) );
     }
 
     @Override
     public <T extends IdentifiableObject> boolean canCreatePrivate( User user, Class<T> klass )
     {
-        Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
-
         Schema schema = schemaService.getSchema( klass );
-
-        if ( schema == null || !schema.isShareable() )
-        {
-            return false;
-        }
-
-        return containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES ) || containsAny( authorities, schema.getPrivateAuthorities() );
+        return !(schema == null || !schema.isShareable()) && canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE_PRIVATE ) );
     }
 
     @Override
     public <T extends IdentifiableObject> boolean canExternalize( User user, Class<T> klass )
     {
-        Set<String> authorities = user != null ? user.getUserCredentials().getAllAuthorities() : new HashSet<String>();
-
         Schema schema = schemaService.getSchema( klass );
-
-        if ( schema == null || !schema.isShareable() )
-        {
-            return false;
-        }
-
-        return containsAny( authorities, SHARING_OVERRIDE_AUTHORITIES ) || containsAny( authorities, schema.getExternalAuthorities() );
+        return !(schema == null || !schema.isShareable()) && canAccess( user, schema.getAuthorityByType( AuthorityType.EXTERNALIZE ) );
     }
 
     @Override
@@ -230,7 +251,7 @@ public class DefaultSharingService implements SharingService
     {
         Schema schema = schemaService.getSchemaBySingularName( type );
 
-        if ( schema != null && schema.isShareable() && schema.isIdentifiableObject() )
+        if ( schema != null && schema.isIdentifiableObject() )
         {
             return (Class<? extends IdentifiableObject>) schema.getKlass();
         }
@@ -240,6 +261,11 @@ public class DefaultSharingService implements SharingService
 
     private boolean haveOverrideAuthority( User user )
     {
-        return user == null || containsAny( user.getUserCredentials().getAllAuthorities(), SHARING_OVERRIDE_AUTHORITIES );
+        return user == null || containsAny( user.getUserCredentials().getAllAuthorities(), ACL_OVERRIDE_AUTHORITIES );
+    }
+
+    private boolean canAccess( User user, Collection<String> requiredAuthorities )
+    {
+        return haveOverrideAuthority( user ) || requiredAuthorities.isEmpty() || containsAny( user.getUserCredentials().getAllAuthorities(), requiredAuthorities );
     }
 }

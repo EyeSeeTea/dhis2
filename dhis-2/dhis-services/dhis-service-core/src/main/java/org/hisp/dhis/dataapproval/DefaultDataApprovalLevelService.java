@@ -28,6 +28,8 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.security.SecurityService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -49,6 +51,13 @@ public class DefaultDataApprovalLevelService
     public void setDataApprovalLevelStore( DataApprovalLevelStore dataApprovalLevelStore )
     {
         this.dataApprovalLevelStore = dataApprovalLevelStore;
+    }
+
+    private SecurityService securityService;
+
+    public void setSecurityService( SecurityService securityService )
+    {
+        this.securityService = securityService;
     }
 
     // -------------------------------------------------------------------------
@@ -196,6 +205,31 @@ public class DefaultDataApprovalLevelService
                 update( dataApprovalLevels.get( i ), i );
             }
         }
+    }
+
+    public int getLowestUserDataApprovalLevel()
+    {
+        List<DataApprovalLevel> levels = getAllDataApprovalLevels();
+
+        for ( int i = levels.size() - 1; i <= 0; i-- )
+        {
+            DataApprovalLevel level = levels.get( i );
+
+            if ( level.getCategoryOptionGroupSet() == null || level.getCategoryOptionGroupSet().getMembers() != null )
+            {
+                return level.getLevel();
+            }
+
+            for ( CategoryOptionGroup group : level.getCategoryOptionGroupSet().getMembers() )
+            {
+                if ( securityService.canRead( group ) )
+                {
+                    return level.getLevel();
+                }
+            }
+        }
+
+        return 0;
     }
 
     // -------------------------------------------------------------------------

@@ -48,7 +48,8 @@ public class DataApproval
 {
     public static final String AUTH_APPROVE = "F_APPROVE_DATA";
     public static final String AUTH_APPROVE_LOWER_LEVELS = "F_APPROVE_DATA_LOWER_LEVELS";
-    
+    public static final String AUTH_ACCEPT_LOWER_LEVELS = "F_ACCEPT_DATA_LOWER_LEVELS";
+
     private static final long serialVersionUID = -4034531921928532366L;
 
     /**
@@ -77,6 +78,12 @@ public class DataApproval
     private CategoryOptionGroup categoryOptionGroup;
 
     /**
+     * Whether the approval has been accepted (optional, usually by another
+     * user.)
+     */
+    private boolean accepted;
+
+    /**
      * The Date (including time) when the DataSet values were approved
      * (required).
      */
@@ -96,12 +103,14 @@ public class DataApproval
     }
 
     public DataApproval( DataSet dataSet, Period period, OrganisationUnit organisationUnit,
-                         CategoryOptionGroup categoryOptionGroup, Date created, User creator )
+                         CategoryOptionGroup categoryOptionGroup, boolean accepted,
+                         Date created, User creator )
     {
         this.dataSet = dataSet;
         this.period = period;
         this.organisationUnit = organisationUnit;
         this.categoryOptionGroup = categoryOptionGroup;
+        this.accepted = accepted;
         this.created = created;
         this.creator = creator;
     }
@@ -158,6 +167,16 @@ public class DataApproval
     public void setCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
     {
         this.categoryOptionGroup = categoryOptionGroup;
+    }
+
+    public boolean isAccepted()
+    {
+        return accepted;
+    }
+
+    public void setAccepted( boolean accepted )
+    {
+        this.accepted = accepted;
     }
 
     public Date getCreated()

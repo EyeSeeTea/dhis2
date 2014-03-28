@@ -82,7 +82,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
-{
+{    
     private static final String ITEM_EVENT = "psi";
     private static final String ITEM_PROGRAM_STAGE = "ps";
     private static final String ITEM_EXECUTION_DATE = "eventdate";
@@ -159,6 +159,11 @@ public class DefaultEventAnalyticsService
             analyticsManager.getAggregatedEventData( query, grid );
         }
 
+        if ( grid.getHeight() > MAX_ROWS_LIMIT )
+        {
+            throw new IllegalQueryException( "Number of rows produced by query is larger than the max limit: " + MAX_ROWS_LIMIT );
+        }
+        
         // ---------------------------------------------------------------------
         // Meta-data
         // ---------------------------------------------------------------------

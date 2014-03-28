@@ -140,6 +140,10 @@ class DataApprovalSelection
         this.periodService = periodService;
     }
 
+    // -------------------------------------------------------------------------
+    // Package-private method
+    // -------------------------------------------------------------------------
+
     DataApprovalStatus getDataApprovalStatus()
     {
         log.error( "\n" + logSelection() + " starting." );
@@ -227,12 +231,31 @@ class DataApprovalSelection
      * set type periods. The approval status of the selected period is
      * constructed by logic that combines the approval statuses of the
      * constituent periods.
+     * <p>
+     * If the data is unapproved for any time segment, returns
+     * UNAPPROVED_ELSEWHERE.
+     * <p>
+     * If the data is accepted for all time segments, returns
+     * ACCEPTED_ELSEWHERE.
+     * <p>
+     * If the data is approved for all time segments (and maybe accepted for
+     * some but not all), returns APPROVED_ELSEWHERE.
+     * <p>
+     * Note that the dataApproval object always returns null.
+     * <p>
+     * If data is accepted and/or approved in all time periods, the
+     * dataApprovalLevel object reference points to the lowest level of
+     * approval among the time periods. (For each time period, we find the
+     * highest level of approval, so this is effectively the "lowest of the
+     * highest" level of approval among all the time periods.)
      *
      * @return status status of the longer period
      */
     private void findStatusForLongerPeriodType()
     {
         Collection<Period> testPeriods = periodService.getPeriodsBetweenDates( dataSet.getPeriodType(), period.getStartDate(), period.getEndDate() );
+
+        DataApprovalLevel lowestApprovalLevel = null;
 
         for ( Period testPeriod : testPeriods )
         {
@@ -249,11 +272,37 @@ class DataApprovalSelection
 
                     dataApproval = null;
 
+                    if ( lowestApprovalLevel == null || dataApprovalLevel.getLevel() > lowestApprovalLevel.getLevel() )
+                    {
+                        lowestApprovalLevel = dataApprovalLevel;
+                    }
+
+                    break;
+
+                case ACCEPTED_HERE:
+                case ACCEPTED_ELSEWHERE:
+
+                    if ( state == null )
+                    {
+                        state = DataApprovalState.ACCEPTED_ELSEWHERE;
+                    }
+
+                    dataApproval = null;
+
+                    if ( lowestApprovalLevel == null || dataApprovalLevel.getLevel() > lowestApprovalLevel.getLevel() )
+                    {
+                        lowestApprovalLevel = dataApprovalLevel;
+                    }
+
+
                     break;
 
                 case UNAPPROVED_READY:
                 case UNAPPROVED_WAITING:
                 case UNAPPROVED_ELSEWHERE:
+
+                    dataApproval = null;
+                    dataApprovalLevel = null;
 
                     state = DataApprovalState.UNAPPROVED_ELSEWHERE;
 
@@ -264,9 +313,14 @@ class DataApprovalSelection
 
                     state = s;
 
+                    dataApproval = null;
+                    dataApprovalLevel = null;
+
                     return;
             }
         }
+
+        dataApprovalLevel = lowestApprovalLevel;
     }
 
     /**
@@ -285,15 +339,33 @@ class DataApprovalSelection
             {
                 if ( dataElementCategoryOptions == null || dataElementCategoryOptions.size() == 0 )
                 {
-                    log.error( "getState() - approved here." );
+                    if ( dataApproval.isAccepted() )
+                    {
+                        log.error( "getState() - accepted here." );
 
-                    return DataApprovalState.APPROVED_HERE;
+                        return DataApprovalState.ACCEPTED_HERE;
+                    }
+                    else
+                    {
+                        log.error( "getState() - approved here." );
+
+                        return DataApprovalState.APPROVED_HERE;
+                    }
                 }
             }
 
-            log.error( "getState() - approved for a wider selection of category options, or at higher level." );
+            if ( dataApproval.isAccepted() )
+            {
+                log.error( "getState() - accepted for a wider selection of category options, or at higher level." );
 
-            return DataApprovalState.APPROVED_ELSEWHERE;
+                return DataApprovalState.ACCEPTED_ELSEWHERE;
+            }
+            else
+            {
+                log.error( "getState() - approved for a wider selection of category options, or at higher level." );
+
+                return DataApprovalState.APPROVED_ELSEWHERE;
+            }
         }
 
         boolean unapprovedBelow = isUnapprovedBelow( organisationUnit );
@@ -427,7 +499,7 @@ class DataApprovalSelection
     }
 
     /**
-     * Finds the category option groups referenced by the category options.
+     * Finds the category option groups (and their group sets) referenced by the category options.
      */
     private void addDataGroups()
     {

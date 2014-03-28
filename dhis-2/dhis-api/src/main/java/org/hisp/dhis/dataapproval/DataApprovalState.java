@@ -42,28 +42,28 @@ public enum DataApprovalState
      * Data approval does not apply to this selection. (Data is neither
      * "approved" nor "unapproved".)
      */
-    UNAPPROVABLE ( false, false, false, false ),
+    UNAPPROVABLE ( false, false, false, false, false ),
 
     /**
      * Data is unapproved, and is ready to be approved for this selection.
      */
-    UNAPPROVED_READY ( false, true, true, true ),
+    UNAPPROVED_READY ( false, true, true, false, true ),
 
     /**
      * Data is unapproved, and is waiting for some lower-level approval.
      */
-    UNAPPROVED_WAITING ( false, true, true, false ),
+    UNAPPROVED_WAITING ( false, true, true, false, false ),
 
     /**
      * Data is unapproved, and is waiting for approval somewhere else
      * (not approvable here.)
      */
-    UNAPPROVED_ELSEWHERE ( false, true, false, false ),
+    UNAPPROVED_ELSEWHERE ( false, true, false, false, false ),
 
     /**
      * Data is approved, and was approved here (so could be unapproved here.)
      */
-    APPROVED_HERE ( true, false, true, false ),
+    APPROVED_HERE ( true, false, true, false, false ),
 
     /**
      * Data is approved, but was not approved here (so cannot be unapproved here.)
@@ -76,7 +76,17 @@ public enum DataApprovalState
      * In the first two cases, there is a single data approval object
      * that covers the selection. In the third case there is not.
      */
-    APPROVED_ELSEWHERE( true, false, false, false );
+    APPROVED_ELSEWHERE( true, false, false, false, false ),
+
+    /**
+     * Data is approved and accepted here (so could be unapproved here.)
+     */
+    ACCEPTED_HERE ( true, false, true, true, false ),
+
+    /**
+     * Data is approved and accepted, but elsewhere.
+     */
+    ACCEPTED_ELSEWHERE ( true, false, false, true, false );
 
     /**
      * Is this data approved (and therefore locked)?
@@ -94,6 +104,11 @@ public enum DataApprovalState
     private boolean approvable;
 
     /**
+     * Is this data (approved and) accepted?
+     */
+    private boolean accepted;
+
+    /**
      * Is this data ready to be approved in this combination of data set, etc.?
      */
     private boolean ready;
@@ -102,11 +117,12 @@ public enum DataApprovalState
     // Constructor
     // -------------------------------------------------------------------------
 
-    DataApprovalState( boolean approved, boolean unapproved, boolean approvable, boolean ready )
+    DataApprovalState( boolean approved, boolean unapproved, boolean approvable, boolean accepted, boolean ready )
     {
         this.approved = approved;
         this.unapproved = unapproved;
         this.approvable = approvable;
+        this.accepted = accepted;
         this.ready = ready;
     }
 
@@ -127,6 +143,11 @@ public enum DataApprovalState
     public boolean isApprovable()
     {
         return approvable;
+    }
+
+    public boolean isAccepted()
+    {
+        return accepted;
     }
 
     public boolean isReady()

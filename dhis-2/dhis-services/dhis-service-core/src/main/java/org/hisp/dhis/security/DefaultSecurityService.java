@@ -30,12 +30,12 @@ package org.hisp.dhis.security;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.setting.SystemSettingManager;
-import org.hisp.dhis.sharing.SharingService;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
 import org.hisp.dhis.user.CurrentUserService;
@@ -104,7 +104,7 @@ public class DefaultSecurityService
     private CurrentUserService currentUserService;
 
     @Autowired
-    private SharingService sharingService;
+    private AclService aclService;
 
     // -------------------------------------------------------------------------
     // SecurityService implementation
@@ -289,67 +289,67 @@ public class DefaultSecurityService
     @Override
     public boolean canCreatePublic( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canCreatePublic( currentUserService.getCurrentUser(), identifiableObject.getClass() );
+        return !aclService.isShareable( identifiableObject.getClass() )
+            || aclService.canCreatePublic( currentUserService.getCurrentUser(), identifiableObject.getClass() );
     }
 
     @Override
     public boolean canCreatePublic( String type )
     {
-        Class<? extends IdentifiableObject> klass = sharingService.classForType( type );
+        Class<? extends IdentifiableObject> klass = aclService.classForType( type );
 
-        return !sharingService.isSupported( klass )
-            || sharingService.canCreatePublic( currentUserService.getCurrentUser(), klass );
+        return !aclService.isShareable( klass )
+            || aclService.canCreatePublic( currentUserService.getCurrentUser(), klass );
     }
 
     @Override
     public boolean canCreatePrivate( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject.getClass() );
+        return !aclService.isShareable( identifiableObject.getClass() )
+            || aclService.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject.getClass() );
     }
 
     @Override
     public boolean canCreatePrivate( String type )
     {
-        Class<? extends IdentifiableObject> klass = sharingService.classForType( type );
+        Class<? extends IdentifiableObject> klass = aclService.classForType( type );
 
-        return !sharingService.isSupported( klass )
-            || sharingService.canCreatePrivate( currentUserService.getCurrentUser(), klass );
+        return !aclService.isShareable( klass )
+            || aclService.canCreatePrivate( currentUserService.getCurrentUser(), klass );
     }
 
     @Override
     public boolean canRead( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canRead( currentUserService.getCurrentUser(), identifiableObject );
+        return !aclService.isSupported( identifiableObject.getClass() )
+            || aclService.canRead( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canWrite( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canWrite( currentUserService.getCurrentUser(), identifiableObject );
+        return !aclService.isSupported( identifiableObject.getClass() )
+            || aclService.canWrite( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canUpdate( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canUpdate( currentUserService.getCurrentUser(), identifiableObject );
+        return !aclService.isSupported( identifiableObject.getClass() )
+            || aclService.canUpdate( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canDelete( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canDelete( currentUserService.getCurrentUser(), identifiableObject );
+        return !aclService.isSupported( identifiableObject.getClass() )
+            || aclService.canDelete( currentUserService.getCurrentUser(), identifiableObject );
     }
 
     @Override
     public boolean canManage( IdentifiableObject identifiableObject )
     {
-        return !sharingService.isSupported( identifiableObject.getClass() )
-            || sharingService.canManage( currentUserService.getCurrentUser(), identifiableObject );
+        return !aclService.isShareable( identifiableObject.getClass() )
+            || aclService.canManage( currentUserService.getCurrentUser(), identifiableObject );
     }
 }

@@ -18,6 +18,8 @@
       <many-to-one name="categoryOptionGroup" class="org.hisp.dhis.dataelement.CategoryOptionGroup" column="categoryoptiongroupid" foreign-key="fk_dataapproval_categoryoptiongroupid" />
     </properties>
 
+    <property name="accepted" type="boolean" />
+
     <property name="created" column="created" not-null="true" type="timestamp" />
 
     <many-to-one name="creator" class="org.hisp.dhis.user.User" column="creator" not-null="true" foreign-key="fk_dataapproval_creator" />

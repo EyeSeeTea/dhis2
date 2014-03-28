@@ -34,6 +34,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,6 +87,13 @@ public class DefaultDataApprovalService
         this.periodService = periodService;
     }
 
+    private SecurityService securityService;
+
+    public void setSecurityService( SecurityService securityService )
+    {
+        this.securityService = securityService;
+    }
+
     // -------------------------------------------------------------------------
     // DataApproval
     // -------------------------------------------------------------------------
@@ -110,11 +118,6 @@ public class DefaultDataApprovalService
         }
     }
 
-    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup )
-    {
-        return getDataApprovalStatus( dataSet, period, organisationUnit, categoryOptionGroup, null );
-    }
-
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         return getDataApprovalStatus( dataSet, period, organisationUnit, null,
@@ -134,53 +137,209 @@ public class DefaultDataApprovalService
         return dataApprovalSelection.getDataApprovalStatus();
     }
 
-    public boolean mayApprove( OrganisationUnit organisationUnit )
+    public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        User user = currentUserService.getCurrentUser();
-        
-        boolean mayApprove = ( user != null && user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE ) );
-        
-        if ( mayApprove && user.getOrganisationUnits().contains( organisationUnit ) )
-        {
-            return true;
-        }
-
-        boolean mayApproveAtLowerLevels = ( user != null && user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS ) );
-        
-        if ( mayApproveAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(), organisationUnit.getAncestors() ) )
-        {
-            return true;
-        }
-
-        return false;
+        return getDataApprovalPermissions( dataSet, period, organisationUnit, null,
+                attributeOptionCombo == null ? null : attributeOptionCombo.getCategoryOptions() );
     }
 
-    public boolean mayUnapprove( DataApproval dataApproval )
+    public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period,
+                                                     OrganisationUnit organisationUnit,
+                                                     CategoryOptionGroup categoryOptionGroup,
+                                                     Set<DataElementCategoryOption> dataElementCategoryOptions )
     {
-        if ( isAuthorizedToUnapprove( dataApproval.getOrganisationUnit() ) )
+        DataApprovalStatus status = getDataApprovalStatus( dataSet, period,
+                organisationUnit, categoryOptionGroup, dataElementCategoryOptions );
+
+        DataApprovalPermissions permissions = new DataApprovalPermissions();
+
+        permissions.setDataApprovalStatus( status );
+
+        if ( canReadCategoryOptionGroups( categoryOptionGroup, dataElementCategoryOptions ) )
         {
-            // Check approvals at higher levels that may block this unapproval:
-
-            for ( OrganisationUnit ancestor : dataApproval.getOrganisationUnit().getAncestors() )
+            switch ( status.getDataApprovalState() )
             {
-                DataApproval ancestorDataApproval = dataApprovalStore.getDataApproval(
-                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
-                
-                if ( ancestorDataApproval != null && !isAuthorizedToUnapprove( ancestor ) )
-                {
-                    return false; // Could unapprove at that level, but higher-level approval is blocking.
-                }
+                case UNAPPROVED_READY:
+                    permissions.setMayApprove( mayApprove( organisationUnit ) );
+                    break;
+
+                case APPROVED_HERE:
+                    permissions.setMayUnapprove( mayUnapprove( status ) );
+                    permissions.setMayAccept( mayAcceptOrUnaccept( status ) );
+                    break;
+
+                case ACCEPTED_HERE:
+                    permissions.setMayUnapprove( mayUnapprove( status ) );
+                    permissions.setMayUnaccept( mayAcceptOrUnaccept( status ) );
+                    break;
             }
-
-            return true; // May unapprove at that level, and no higher-level approval is blocking.
         }
+        return permissions;
+    }
 
-        return false; // May not unapprove at that level.
+    public void accept( DataApproval dataApproval )
+    {
+        if ( !dataApproval.isAccepted() )
+        {
+            dataApproval.setAccepted( true );
+
+            dataApprovalStore.updateDataApproval( dataApproval );
+        }
+    }
+
+    public void unaccept( DataApproval dataApproval )
+    {
+        if ( dataApproval.isAccepted() )
+        {
+            dataApproval.setAccepted( false );
+
+            dataApprovalStore.updateDataApproval( dataApproval );
+        }
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    /**
+     * Return whether the user can read the category option groups (if any)
+     * in this data selection. Note that if the user cannot read these groups,
+     * they should not have been able to see the data in the first place through
+     * the normal webapp, so this test would never fail. So the purpose of this
+     * test is to make sure that the web API is not being used to attempt an
+     * operation for which the user does not have the security clearance.
+     * <p>
+     * If category options are specified, then the user must be able to view
+     * EVERY category option. The user may view a category option if they
+     * have permission to view ANY category option group to which it belongs.
+     *
+     * @param categoryOptionGroup option groups (if any) for data selection
+     * @param dataElementCategoryOptions category options (if any) for data selection
+     * @return true if user can read the option groups, else false
+     */
+    boolean canReadCategoryOptionGroups( CategoryOptionGroup categoryOptionGroup, Set<DataElementCategoryOption> dataElementCategoryOptions)
+    {
+        if ( categoryOptionGroup != null && !securityService.canRead( categoryOptionGroup ) )
+        {
+            return false;
+        }
+
+        if ( dataElementCategoryOptions != null )
+        {
+            for ( DataElementCategoryOption option : dataElementCategoryOptions )
+            {
+                boolean canReadGroup = false;
+
+                for ( CategoryOptionGroup group : option.getGroups() )
+                {
+                    if ( securityService.canRead( group ) )
+                    {
+                        canReadGroup = true;
+
+                        break;
+                    }
+
+                }
+
+                if ( !canReadGroup )
+                {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Checks to see whether a user may approve data for a given
+     * organisation unit.
+     *
+     * @param organisationUnit The organisation unit to check for permission.
+     * @return true if the user may approve, otherwise false
+     */
+    private boolean mayApprove( OrganisationUnit organisationUnit )
+    {
+        User user = currentUserService.getCurrentUser();
+
+        if ( user != null )
+        {
+            boolean mayApprove = user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE );
+
+            if ( mayApprove && user.getOrganisationUnits().contains( organisationUnit ) )
+            {
+                return true;
+            }
+
+            boolean mayApproveAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+
+            if ( mayApproveAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(),
+                    organisationUnit.getAncestors() ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks to see whether a user may unapprove a given data approval.
+     * <p>
+     * A user may unapprove data for organisation unit A if they have the
+     * authority to approve data for organisation unit B, and B is an
+     * ancestor of A.
+     * <p>
+     * A user may also unapprove data for organisation unit A if they have
+     * the authority to approve data for organisation unit A, and A has no
+     * ancestors.
+     * <p>
+     * But a user may not unapprove data for an organisation unit if the data
+     * has been approved already at a higher level for the same period and
+     * data set, and the user is not authorized to remove that approval as well.
+     *
+     * @param status The data approval status to check for permission.
+     */
+    private boolean mayUnapprove( DataApprovalStatus status )
+    {
+        DataApproval dataApproval = status.getDataApproval();
+
+        if ( dataApproval != null && isAuthorizedToUnapprove( dataApproval.getOrganisationUnit() ) )
+        {
+            if ( !dataApproval.isAccepted() || mayAcceptOrUnaccept( status ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks to see whether a user may accept or unaccept a given data approval.
+     *
+     * @param status The data approval status to check for permission.
+     * @return true if the user may accept or unaccept it, otherwise false.
+     */
+    private boolean mayAcceptOrUnaccept ( DataApprovalStatus status )
+    {
+        User user = currentUserService.getCurrentUser();
+
+        DataApproval dataApproval = status.getDataApproval();
+
+        if ( user != null && dataApproval != null )
+        {
+            boolean mayAcceptAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_ACCEPT_LOWER_LEVELS );
+
+            if ( mayAcceptAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(),
+                    dataApproval.getOrganisationUnit().getAncestors() ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /**
      * Tests whether the user is authorized to unapprove for this organisation

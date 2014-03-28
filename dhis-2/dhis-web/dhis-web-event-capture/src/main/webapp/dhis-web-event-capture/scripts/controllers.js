@@ -7,6 +7,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 .controller('MainController',
         function($scope,
                 $filter,
+                $modal,
                 Paginator,
                 TranslationService,
                 storage,
@@ -14,7 +15,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 orderByFilter,
                 ContextMenuSelectedItem,
                 ModalService,
-                ColumnsDialogService,
                 DialogService) {   
    
     //selected org unit
@@ -35,13 +35,13 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.editingEventInGrid = false;   
     $scope.currentGridColumnId = '';    
     
-    $scope.programStageDataElements = [];
+    /*$scope.programStageDataElements = [];
                 
     $scope.dhis2Events = [];
     $scope.eventGridColumns = [];
     $scope.hiddenGridColumns = 0;
     $scope.newDhis2Event = {dataValues: []};
-    $scope.currentEvent = {dataValues: []};
+    $scope.currentEvent = {dataValues: []};*/    
     $scope.currentEventOrginialValue = '';   
     
     //watch for selection of org unit from tree
@@ -103,7 +103,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
             $scope.programStageDataElements = [];  
             $scope.eventGridColumns = [];
-            $scope.hiddenGridColumns = 0;
+
             $scope.newDhis2Event = {dataValues: []};
             $scope.currentEvent = {dataValues: []};
 
@@ -116,7 +116,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 var dataElement = prStDe.dataElement;
                 var name = dataElement.formName || dataElement.name;
                 $scope.newDhis2Event.dataValues.push({id: dataElement.id, value: ''});                       
-                $scope.eventGridColumns.push({name: name, id: dataElement.id, type: dataElement.type, compulsory: prStDe.compulsory, showFilter: false, hide: false});
+                $scope.eventGridColumns.push({name: name, id: dataElement.id, type: dataElement.type, compulsory: prStDe.compulsory, showFilter: false, show: prStDe.displayInReports});
 
                 if(dataElement.type === 'date'){
                      $scope.filterText[dataElement.id]= {start: '', end: ''};
@@ -206,29 +206,33 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.reverse = false;    
     };
     
-    $scope.showHideColumns = function(gridColumn, showAllColumns){
-        if(showAllColumns){
-            angular.forEach($scope.eventGridColumns, function(gridHeader){
-                gridHeader.hide = false;                
-            });
-            $scope.hiddenGridColumns = 0;
-        }
-        if(!showAllColumns){            
-            if(gridColumn.hide){
+    $scope.showHideColumns = function(){
+        
+        $scope.hiddenGridColumns = 0;
+        
+        angular.forEach($scope.eventGridColumns, function(eventGridColumn){
+            if(!eventGridColumn.show){
                 $scope.hiddenGridColumns++;
             }
-            else{
-                $scope.hiddenGridColumns--;
+        })
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'views/column-modal.html',
+            controller: 'ColumnDisplayController',
+            resolve: {
+                eventGridColumns: function () {
+                    return $scope.eventGridColumns;
+                },
+                hiddenGridColumns: function(){
+                    return $scope.hiddenGridColumns;
+                }
             }
-        }       
-        
-        /*var dialogOptions = {
-            headerText: 'show_hide_columns',
-            bodyText: $scope.eventGridColumns
-        };
-        
-        ColumnsDialogService.showDialog({}, dialogOptions);*/
-        
+        });
+
+        modalInstance.result.then(function (eventGridColumns) {
+            $scope.eventGridColumns = eventGridColumns;
+        }, function () {
+        });
     };
     
     $scope.searchInGrid = function(gridColumn){           
@@ -461,4 +465,29 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         window.location = DHIS2URL;
     };
     
+})
+
+//Controller for column show/hide
+.controller('ColumnDisplayController', 
+    function($scope, 
+            $modalInstance, 
+            hiddenGridColumns,
+            eventGridColumns){
+    
+    $scope.eventGridColumns = eventGridColumns;
+    $scope.hiddenGridColumns = hiddenGridColumns;
+    
+    $scope.close = function () {
+      $modalInstance.close($scope.eventGridColumns);
+    };
+    
+    $scope.showHideColumns = function(gridColumn){
+       
+        if(gridColumn.show){                
+            $scope.hiddenGridColumns--;            
+        }
+        else{
+            $scope.hiddenGridColumns++;            
+        }      
+    };    
 });

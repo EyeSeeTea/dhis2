@@ -55,6 +55,13 @@ public interface DataApprovalStore
     void addDataApproval( DataApproval dataApproval );
 
     /**
+     * Updates a DataApproval.
+     *
+     * @param dataApproval the DataApproval to update.
+     */
+    void updateDataApproval( DataApproval dataApproval );
+
+    /**
      * Deletes a DataApproval in order to un-approve data.
      *
      * @param dataApproval the DataApproval to delete.
