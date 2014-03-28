@@ -502,11 +502,18 @@
         <version>1.0.2.RELEASE</version>
       </dependency>
 
-      <!--Other -->
+      <!-- Other -->
+      <!-- Javassist from hibernate-core -->
       <dependency>
         <groupId>org.apache.struts</groupId>
         <artifactId>struts2-core</artifactId>
         <version>2.3.16</version>
+        <exclusions>
+          <exclusion>
+            <groupId>javassist</groupId>
+            <artifactId>javassist</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.struts</groupId>
@@ -754,6 +761,10 @@
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
           </exclusion>
+          <exclusion>
+            <groupId>jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+          </exclusion>
         </exclusions>
       </dependency>
       <dependency>
@@ -764,7 +775,7 @@
       <dependency>
         <groupId>org.jfree</groupId>
         <artifactId>jfreechart</artifactId>
-        <version>1.0.15</version>
+        <version>1.0.17</version>
         <exclusions>
           <exclusion>
             <groupId>gnujaxp</groupId>
