@@ -28,7 +28,7 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -55,6 +55,13 @@ public interface DataApprovalStore
     void addDataApproval( DataApproval dataApproval );
 
     /**
+     * Updates a DataApproval.
+     *
+     * @param dataApproval the DataApproval to update.
+     */
+    void updateDataApproval( DataApproval dataApproval );
+
+    /**
      * Deletes a DataApproval in order to un-approve data.
      *
      * @param dataApproval the DataApproval to delete.
@@ -68,9 +75,9 @@ public interface DataApprovalStore
      * @param dataSet DataSet for approval
      * @param period Period for approval
      * @param organisationUnit OrganisationUnit for approval
-     * @param attributeOptionCombo DataElementCategoryOptionCombo for approval.
+     * @param categoryOptionGroup CategoryOptionGroup (if any) for approval.
      * @return matching DataApproval object, if any
      */
     DataApproval getDataApproval( DataSet dataSet, Period period, 
-        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+        OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup );
 }

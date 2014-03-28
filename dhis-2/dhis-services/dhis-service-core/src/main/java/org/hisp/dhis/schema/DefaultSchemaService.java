@@ -30,7 +30,6 @@ package org.hisp.dhis.schema;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import javassist.util.proxy.ProxyFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
@@ -77,14 +76,21 @@ public class DefaultSchemaService implements SchemaService
             return null;
         }
 
+        /*
         if ( ProxyFactory.isProxyClass( klass ) )
         {
             klass = klass.getSuperclass();
         }
+        */
 
         if ( classSchemaMap.containsKey( klass ) )
         {
             return classSchemaMap.get( klass );
+        }
+
+        if ( classSchemaMap.containsKey( klass.getSuperclass() ) )
+        {
+            return classSchemaMap.get( klass.getSuperclass() );
         }
 
         return null;
