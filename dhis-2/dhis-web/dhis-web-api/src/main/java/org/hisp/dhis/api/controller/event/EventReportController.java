@@ -41,10 +41,15 @@ import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.eventreport.EventReportService;
+import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStageService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
  * @author Lars Helge Overland
@@ -62,6 +67,12 @@ public class EventReportController
     @Autowired
     private DimensionService dimensionService;
     
+    @Autowired
+    private ProgramService programService;
+    
+    @Autowired
+    private ProgramStageService programStageService;
+    
     //--------------------------------------------------------------------------
     // CRUD
     //--------------------------------------------------------------------------
@@ -77,6 +88,55 @@ public class EventReportController
         eventReportService.saveEventReport( report );
         
         ContextUtils.createdResponse( response, "Event report created", RESOURCE_PATH + "/" + report.getUid() );
+    }
+
+    @Override
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        EventReport report = eventReportService.getEventReport( uid );
+
+        if ( report == null )
+        {
+            ContextUtils.notFoundResponse( response, "Event report does not exist: " + uid );
+            return;
+        }
+
+        EventReport newReport = JacksonUtils.fromJson( input, EventReport.class );
+        
+        mergeEventReport( newReport );
+        
+        report.mergeWith( newReport );
+        
+        eventReportService.updateEventReport( report );
+    }
+
+    @Override
+    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    {
+        EventReport report = eventReportService.getEventReport( uid );
+
+        if ( report == null )
+        {
+            ContextUtils.notFoundResponse( response, "Event report does not exist: " + uid );
+            return;
+        }
+
+        eventReportService.deleteEventReport( report );
+    }        
+        
+    //--------------------------------------------------------------------------
+    // Hooks
+    //--------------------------------------------------------------------------
+
+    @Override
+    protected void postProcessEntity( EventReport report ) 
+        throws Exception
+    {
+        report.populateAnalyticalProperties();
     }
     
     //--------------------------------------------------------------------------
@@ -94,5 +154,15 @@ public class EventReportController
         report.getColumnDimensions().addAll( getUniqueDimensions( report.getColumns() ) );
         report.getRowDimensions().addAll( getUniqueDimensions( report.getRows() ) );
         report.getFilterDimensions().addAll( getUniqueDimensions( report.getFilters() ) );
+        
+        if ( report.getProgram() != null )
+        {
+            report.setProgram( programService.getProgram( report.getProgram().getUid() ) );
+        }
+        
+        if ( report.getProgramStage() != null )
+        {
+            report.setProgramStage( programStageService.getProgramStage( report.getProgramStage().getUid() ) );
+        }
     }
 }

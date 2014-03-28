@@ -900,7 +900,7 @@ Ext.onReady( function() {
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
 							failure: function(r) {
-								ns.core.web.mask.show();
+								ns.core.web.mask.hide(ns.app.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -934,7 +934,7 @@ Ext.onReady( function() {
 							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
-								ns.core.web.mask.show();
+								ns.core.web.mask.hide(ns.app.centerRegion);
 								alert(r.responseText);
 							},
 							success: function(r) {
@@ -947,7 +947,7 @@ Ext.onReady( function() {
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(reportTable),
 									failure: function(r) {
-										ns.core.web.mask.show();
+										ns.core.web.mask.hide(ns.app.centerRegion);
 										alert(r.responseText);
 									},
 									success: function(r) {
@@ -1994,7 +1994,7 @@ Ext.onReady( function() {
 					if (uuidDimUuidsMap.hasOwnProperty(key)) {
 						valueEl = Ext.get(key);
 
-						if (parseFloat(valueEl.dom.textContent)) {
+						if (valueEl && parseFloat(valueEl.dom.textContent)) {
 							valueEl.dom.onValueMouseClick = web.events.onValueMouseClick;
 							valueEl.dom.onValueMouseOver = web.events.onValueMouseOver;
 							valueEl.dom.onValueMouseOut = web.events.onValueMouseOut;
