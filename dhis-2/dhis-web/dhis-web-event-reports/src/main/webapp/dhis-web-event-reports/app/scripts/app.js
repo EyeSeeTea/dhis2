@@ -5239,7 +5239,7 @@ Ext.onReady( function() {
 
 		downloadButton = Ext.create('Ext.button.Button', {
 			text: 'Download',
-			//disabled: true,
+			disabled: true,
 			menu: {
 				cls: 'ns-menu',
 				shadow: false,
@@ -5503,23 +5503,25 @@ Ext.onReady( function() {
 		});
 
 		setGui = function(layout, xLayout, updateGui) {
-			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
-				dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
-				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
-				graphMap = layout.parentGraphMap,
-				objectName,
-				periodRecords,
-				fixedPeriodRecords = [],
-				dimNames = [],
-				isOu = false,
-				isOuc = false,
-				isOugc = false,
-				levels = [],
-				groups = [],
-				orgunits = [];
+			//var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
+				//recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
+				//graphMap = layout.parentGraphMap,
+				//objectName,
+				//periodRecords,
+				//fixedPeriodRecords = [],
+				//dimNames = [],
+				//isOu = false,
+				//isOuc = false,
+				//isOugc = false,
+				//levels = [],
+				//groups = [],
+				//orgunits = [];
 
 			// State
-			//downloadButton.enable();
+			downloadButton.enable();
+
+            return;
 
 			if (layout.id) {
 				//shareButton.enable();
