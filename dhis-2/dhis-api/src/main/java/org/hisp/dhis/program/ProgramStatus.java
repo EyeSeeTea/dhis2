@@ -1,7 +1,7 @@
-package org.hisp.dhis.dataapproval.hibernate;
+package org.hisp.dhis.program;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,42 +28,10 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hibernate.criterion.Order;
-import org.hisp.dhis.dataapproval.DataApprovalLevel;
-import org.hisp.dhis.dataapproval.DataApprovalLevelStore;
-import org.hisp.dhis.hibernate.HibernateGenericStore;
-
 /**
- * @author Jim Grace
+ * @author Lars Helge Overland
  */
-public class HibernateDataApprovalLevelStore
-    extends HibernateGenericStore<DataApprovalLevel>
-    implements DataApprovalLevelStore
+public enum ProgramStatus
 {
-    // -------------------------------------------------------------------------
-    // DataApprovalLevelStore implementation
-    // -------------------------------------------------------------------------
-
-    @SuppressWarnings("unchecked")
-    public List<DataApprovalLevel> getAllDataApprovalLevels()
-    {
-        return getCriteria().addOrder( Order.asc( "level" ) ).list();
-    }
-
-    public void addDataApproval( DataApprovalLevel dataApprovalLevel )
-    {
-        save( dataApprovalLevel );
-    }
-
-    public void updateDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
-    {
-        update( dataApprovalLevel );
-    }
-
-    public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
-    {
-        delete( dataApprovalLevel );
-    }
+    ACTIVE, COMPLETED, CANCELLED
 }
