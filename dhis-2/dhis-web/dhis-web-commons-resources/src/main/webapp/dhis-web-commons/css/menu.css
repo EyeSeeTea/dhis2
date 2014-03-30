@@ -182,6 +182,13 @@ a.menuLink:hover
     margin: 0;
 }
 
+.app-menu-item .app-menu-item-description p {
+    height: 35px;
+    margin: 0;
+    overflow: hidden;
+    padding: 0;
+}
+
 .app-menu li:hover a .fa.fa-bookmark {
     display: none;
 }
