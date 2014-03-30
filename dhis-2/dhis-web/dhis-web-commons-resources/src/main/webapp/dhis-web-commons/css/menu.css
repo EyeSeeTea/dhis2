@@ -188,6 +188,7 @@ a.menuLink:hover
 }
 
 .app-menu a.app-menu-item .fa.fa-bookmark {
+    color: #276696;
     font-size: 2em;
     position: absolute;
     right: 15px;
