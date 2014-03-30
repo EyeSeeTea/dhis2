@@ -89,7 +89,7 @@
                 if (element.id && translations[element.id]) {
                     items[index].name = translations.get(element.id);
                 }
-                if (element.description === '' && translations.get('intro_' + element.id) !== element.id){
+                if (element.description === '' && translations.get('intro_' + element.id) !== 'intro_' + element.id){
                     element.description = translations['intro_' + element.id];
                 }
             });
