@@ -75,6 +75,8 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
+import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
 import org.hisp.dhis.user.User;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -134,6 +136,12 @@ public abstract class BaseAnalyticalObject
     @Scanned
     protected List<CategoryOptionGroup> categoryOptionGroups = new ArrayList<CategoryOptionGroup>();
 
+    @Scanned
+    protected List<TrackedEntityAttributeDimension> attributeDimensions = new ArrayList<TrackedEntityAttributeDimension>();
+
+    @Scanned
+    protected List<TrackedEntityDataElementDimension> dataElementDimensions = new ArrayList<TrackedEntityDataElementDimension>();
+    
     protected boolean userOrganisationUnit;
 
     protected boolean userOrganisationUnitChildren;
@@ -374,6 +382,38 @@ public abstract class BaseAnalyticalObject
                 
                 type = DimensionType.CATEGORYOPTION_GROUPSET;
             }
+            
+            // Tracked entity attribute
+            
+            Map<String, TrackedEntityAttributeDimension> attributes = new HashMap<String, TrackedEntityAttributeDimension>();
+            
+            for ( TrackedEntityAttributeDimension attribute : attributeDimensions )
+            {
+                attributes.put( attribute.getUid(), attribute );
+            }
+            
+            if ( attributes.containsKey( dimension ) )
+            {
+                TrackedEntityAttributeDimension tead = attributes.get( dimension );
+                
+                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, null, tead.getOperator(), tead.getFilter() );
+            }
+            
+            // Tracked entity data element
+            
+            Map<String, TrackedEntityDataElementDimension> dataElements = new HashMap<String, TrackedEntityDataElementDimension>();
+            
+            for ( TrackedEntityDataElementDimension dataElement : dataElementDimensions )
+            {
+                dataElements.put( dataElement.getUid(), dataElement );
+            }
+            
+            if ( dataElements.containsKey( dimension ) )
+            {
+                TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
+                
+                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, tedd.getOperator(), tedd.getFilter() );
+            }
         }
         
         IdentifiableObjectUtils.removeDuplicates( items );
@@ -499,7 +539,7 @@ public abstract class BaseAnalyticalObject
         {
             // Data element group set
             
-            ListMap<String, BaseNameableObject> deGroupMap = new ListMap<String, BaseNameableObject>();
+            ListMap<String, NameableObject> deGroupMap = new ListMap<String, NameableObject>();
             
             for ( DataElementGroup group : dataElementGroups )
             {
@@ -516,7 +556,7 @@ public abstract class BaseAnalyticalObject
             
             // Organisation unit group set
             
-            ListMap<String, BaseNameableObject> ouGroupMap = new ListMap<String, BaseNameableObject>();
+            ListMap<String, NameableObject> ouGroupMap = new ListMap<String, NameableObject>();
             
             for ( OrganisationUnitGroup group : organisationUnitGroups )
             {
@@ -533,7 +573,7 @@ public abstract class BaseAnalyticalObject
             
             // Category option group set
             
-            ListMap<String, BaseNameableObject> coGroupMap = new ListMap<String, BaseNameableObject>();
+            ListMap<String, NameableObject> coGroupMap = new ListMap<String, NameableObject>();
             
             for ( CategoryOptionGroup group : categoryOptionGroups )
             {
@@ -547,6 +587,38 @@ public abstract class BaseAnalyticalObject
             {
                 objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, coGroupMap.get( dimension ) ) );
             }
+
+            // Tracked entity attribute
+            
+            Map<String, TrackedEntityAttributeDimension> attributes = new HashMap<String, TrackedEntityAttributeDimension>();
+            
+            for ( TrackedEntityAttributeDimension attribute : attributeDimensions )
+            {
+                attributes.put( attribute.getUid(), attribute );
+            }
+            
+            if ( attributes.containsKey( dimension ) )
+            {
+                TrackedEntityAttributeDimension tead = attributes.get( dimension );
+                
+                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, null, tead.getOperator(), tead.getFilter() ) );
+            }
+            
+            // Tracked entity data element
+
+            Map<String, TrackedEntityDataElementDimension> dataElements = new HashMap<String, TrackedEntityDataElementDimension>();
+            
+            for ( TrackedEntityDataElementDimension dataElement : dataElementDimensions )
+            {
+                dataElements.put( dataElement.getUid(), dataElement );
+            }
+            
+            if ( dataElements.containsKey( dimension ) )
+            {
+                TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
+                
+                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, tedd.getOperator(), tedd.getFilter() ) );
+            }            
         }
         
         return objects;
@@ -865,6 +937,26 @@ public abstract class BaseAnalyticalObject
     public void setCategoryOptionGroups( List<CategoryOptionGroup> categoryOptionGroups )
     {
         this.categoryOptionGroups = categoryOptionGroups;
+    }
+
+    public List<TrackedEntityAttributeDimension> getAttributeDimensions()
+    {
+        return attributeDimensions;
+    }
+
+    public void setAttributeDimensions( List<TrackedEntityAttributeDimension> attributeDimensions )
+    {
+        this.attributeDimensions = attributeDimensions;
+    }
+
+    public List<TrackedEntityDataElementDimension> getDataElementDimensions()
+    {
+        return dataElementDimensions;
+    }
+
+    public void setDataElementDimensions( List<TrackedEntityDataElementDimension> dataElementDimensions )
+    {
+        this.dataElementDimensions = dataElementDimensions;
     }
 
     @JsonProperty

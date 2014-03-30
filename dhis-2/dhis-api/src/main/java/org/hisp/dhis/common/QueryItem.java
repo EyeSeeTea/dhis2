@@ -57,7 +57,7 @@ public class QueryItem
     private String operator;
 
     private String filter;
-    
+
     private boolean numeric;
 
     // -------------------------------------------------------------------------

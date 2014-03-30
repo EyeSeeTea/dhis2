@@ -28,13 +28,11 @@ package org.hisp.dhis.webportal.menu.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.webportal.module.Module;
 import org.hisp.dhis.webportal.module.ModuleManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,50 +58,29 @@ public class GetModulesAction
         return modules;
     }
 
-    private static final List<String> DEFAULT_APP_LIST = new ArrayList<String>() {{
-        add("dhis-web-dashboard-integration");
-        add("dhis-web-dataentry");
-        add("dhis-web-reporting");
-        add("dhis-web-maintenance-user");
-        add("dhis-web-maintenance-appmanager");
-    }};
-
     @Override
     public String execute()
         throws Exception
     {
         modules = manager.getAccessibleMenuModulesAndApps();
 
-        final List<String> userApps = getMenuOrder();
-        final List<String> allApps = new ArrayList<String>();
+        final List<String> userApps = currentUserService.getCurrentUser().getApps();
         
-        for ( Module module : modules )
+        if ( userApps != null && !userApps.isEmpty() )
         {
-            allApps.add( module.getName() );
-        }        
-
-        Collections.sort( modules, new Comparator<Module>()
-        {
-            @Override
-            public int compare( Module m1, Module m2 )
+            Collections.sort( modules, new Comparator<Module>()
             {
-                Integer i1 = userApps.indexOf( m1.getName() );
-                Integer i2 = userApps.indexOf( m2.getName() );
-                
-                return i1 != -1 ? ( i2 != -1 ? i1.compareTo( i2 ) : -1 ) : 1;
-            }
-        } );
+                @Override
+                public int compare( Module m1, Module m2 )
+                {
+                    Integer i1 = userApps.indexOf( m1.getName() );
+                    Integer i2 = userApps.indexOf( m2.getName() );
+                    
+                    return i1 != -1 ? ( i2 != -1 ? i1.compareTo( i2 ) : -1 ) : 1;
+                }
+            } );
+        }
         
         return SUCCESS;
-    }
-
-    private List<String> getMenuOrder() {
-        final User user = currentUserService.getCurrentUser();
-        final List <String> userApps = user.getApps();
-
-        if (userApps.isEmpty()) {
-            return this.DEFAULT_APP_LIST;
-        }
-        return userApps;
     }
 }

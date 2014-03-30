@@ -30,6 +30,8 @@ package org.hisp.dhis.schema.descriptors;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaDescriptor;
 import org.springframework.stereotype.Component;
@@ -43,11 +45,13 @@ public class OrganisationUnitGroupSetSchemaDescriptor implements SchemaDescripto
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( OrganisationUnitGroupSet.class, "organisationUnitGroupSet", "organisationUnitGroupSets", true, true, true );
+        Schema schema = new Schema( OrganisationUnitGroupSet.class, "organisationUnitGroupSet", "organisationUnitGroupSets" );
 
         schema.setShareable( true );
-        schema.setPublicAuthorities( Lists.newArrayList( "F_ORGUNITGROUPSET_PUBLIC_ADD" ) );
-        schema.setPrivateAuthorities( Lists.newArrayList( "F_ORGUNITGROUPSET_PRIVATE_ADD" ) );
+
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_ORGUNITGROUPSET_PUBLIC_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_ORGUNITGROUPSET_PRIVATE_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_ORGUNITGROUPSET_DELETE" ) ) );
 
         return schema;
     }

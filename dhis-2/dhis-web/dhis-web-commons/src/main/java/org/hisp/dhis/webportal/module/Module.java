@@ -86,12 +86,8 @@ public class Module
         
         String defaultAction = app.getLaunchUrl();
 
-        String icon = null;
-        if (hasIcon)
-        {
-            icon = app.getBaseUrl() + File.separator + app.getFolderName() +
-                   File.separator + app.getIcons().getIcon48();
-        }
+        String icon = hasIcon ? icon = app.getBaseUrl() + File.separator + app.getFolderName() +
+            File.separator + app.getIcons().getIcon48() : null;
 
         String description = TextUtils.subString( app.getDescription(), 0, 80 );
         

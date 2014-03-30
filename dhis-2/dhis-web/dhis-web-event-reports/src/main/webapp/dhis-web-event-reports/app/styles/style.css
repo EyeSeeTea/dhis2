@@ -509,6 +509,24 @@ table.small td {
 	border-right: 0 none;
 }
 
+    /* Multiselect dynamic/fixed */
+.ns-multiselect-fixed .x-panel-body {
+    border-bottom: 0 none;
+}
+.ns-multiselect-fixed .x-boundlist-item {
+    color: #777;
+    cursor: auto;
+}
+.ns-multiselect-fixed .x-boundlist-item-over {
+    background-color: transparent;
+    border-color: transparent;
+}
+
+.ns-multiselect-dynamic .x-panel-body {
+    border-top: 0 none;
+}
+
+
 
 /*----------------------------------------------------------------------------
  * Checkbox
@@ -786,7 +804,7 @@ table.small td {
 	background-color: #000;
 	color: #fff;
 	border-radius: 2px;
-	padding: 12px 14px 12px 30px;
+	padding: 12px 14px 12px 31px;
 	opacity: 0.65;
 }
 

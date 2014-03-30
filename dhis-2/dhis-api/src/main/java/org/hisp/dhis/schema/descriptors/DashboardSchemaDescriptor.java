@@ -30,6 +30,8 @@ package org.hisp.dhis.schema.descriptors;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaDescriptor;
 import org.springframework.stereotype.Component;
@@ -43,10 +45,10 @@ public class DashboardSchemaDescriptor implements SchemaDescriptor
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Dashboard.class, "dashboard", "dashboards", false, false, true );
+        Schema schema = new Schema( Dashboard.class, "dashboard", "dashboards" );
 
         schema.setShareable( true );
-        schema.setPublicAuthorities( Lists.newArrayList( "F_DASHBOARD_PUBLIC_ADD" ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DASHBOARD_PUBLIC_ADD" ) ) );
 
         return schema;
     }

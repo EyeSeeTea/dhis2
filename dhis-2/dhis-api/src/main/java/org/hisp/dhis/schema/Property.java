@@ -47,6 +47,8 @@ public class Property
 
     private String xmlName;
 
+    private String xmlNamespace;
+
     private boolean xmlAttribute;
 
     private String xmlCollectionName;
@@ -58,6 +60,8 @@ public class Property
     private boolean collection;
 
     private boolean identifiableObject;
+
+    private boolean nameableObject;
 
     public Property( Method method )
     {
@@ -98,6 +102,18 @@ public class Property
     public void setXmlName( String xmlName )
     {
         this.xmlName = xmlName;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getXmlNamespace()
+    {
+        return xmlNamespace;
+    }
+
+    public void setXmlNamespace( String xmlNamespace )
+    {
+        this.xmlNamespace = xmlNamespace;
     }
 
     @JsonProperty
@@ -168,6 +184,18 @@ public class Property
     public void setIdentifiableObject( boolean identifiableObject )
     {
         this.identifiableObject = identifiableObject;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isNameableObject()
+    {
+        return nameableObject;
+    }
+
+    public void setNameableObject( boolean nameableObject )
+    {
+        this.nameableObject = nameableObject;
     }
 
     @Override

@@ -38,6 +38,7 @@ import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStatus;
 
 /**
  * @author Lars Helge Overland
@@ -51,6 +52,8 @@ public class TrackedEntityInstanceQueryParams
     public static final String TRACKED_ENTITY_ID = "te";
     public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
     public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";
+    
+    public static final String META_DATA_NAMES_KEY = "names";
     
     /**
      * Query value, will apply to all relevant attributes.
@@ -79,6 +82,11 @@ public class TrackedEntityInstanceQueryParams
     private Program program;
     
     /**
+     * Status of the tracked entity instance in the given program.
+     */
+    private ProgramStatus programStatus;
+    
+    /**
      * Tracked entity of the instances in the response.
      */
     private TrackedEntity trackedEntity;
@@ -89,6 +97,11 @@ public class TrackedEntityInstanceQueryParams
     private OrganisationUnitSelectionMode organisationUnitMode;
 
     /**
+     * Indicates whether not to include meta data in the response.
+     */
+    private boolean skipMeta;
+
+    /**
      * Page number.
      */
     private Integer page;
@@ -97,7 +110,7 @@ public class TrackedEntityInstanceQueryParams
      * Page size.
      */
     private Integer pageSize;
-
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -193,6 +206,14 @@ public class TrackedEntityInstanceQueryParams
     public boolean hasProgram()
     {
         return program != null;
+    }
+    
+    /**
+     * Indicates whether this params specifies a program status.
+     */
+    public boolean hasProgramStatus()
+    {
+        return programStatus != null;
     }
     
     /**
@@ -297,6 +318,16 @@ public class TrackedEntityInstanceQueryParams
         this.program = program;
     }
 
+    public ProgramStatus getProgramStatus()
+    {
+        return programStatus;
+    }
+
+    public void setProgramStatus( ProgramStatus programStatus )
+    {
+        this.programStatus = programStatus;
+    }
+
     public TrackedEntity getTrackedEntity()
     {
         return trackedEntity;
@@ -317,6 +348,16 @@ public class TrackedEntityInstanceQueryParams
         this.organisationUnits = organisationUnits;
     }
 
+    public boolean isSkipMeta()
+    {
+        return skipMeta;
+    }
+
+    public void setSkipMeta( boolean skipMeta )
+    {
+        this.skipMeta = skipMeta;
+    }
+    
     public Integer getPage()
     {
         return page;

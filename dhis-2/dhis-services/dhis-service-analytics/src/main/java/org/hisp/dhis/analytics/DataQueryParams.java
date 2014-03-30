@@ -314,7 +314,7 @@ public class DataQueryParams
         
         for ( int i = 0; i < dimensions.size(); i++ )
         {
-            if ( COMPLETENESS_DIMENSION_TYPES.contains( dimensions.get( i ).getType() ) )
+            if ( COMPLETENESS_DIMENSION_TYPES.contains( dimensions.get( i ).getDimensionType() ) )
             {
                 indexes.add( i );
             }
@@ -332,7 +332,7 @@ public class DataQueryParams
         
         for ( int i = 0; i < filters.size(); i++ )
         {
-            if ( COMPLETENESS_DIMENSION_TYPES.contains( filters.get( i ).getType() ) )
+            if ( COMPLETENESS_DIMENSION_TYPES.contains( filters.get( i ).getDimensionType() ) )
             {
                 indexes.add( i );
             }
@@ -351,7 +351,7 @@ public class DataQueryParams
         
         while ( dimensionIter.hasNext() )
         {
-            if ( !dimensionIter.next().getType().equals( type ) )
+            if ( !dimensionIter.next().getDimensionType().equals( type ) )
             {
                 dimensionIter.remove();
             }
@@ -361,7 +361,7 @@ public class DataQueryParams
         
         while ( filterIter.hasNext() )
         {
-            if ( !filterIter.next().getType().equals( type ) )
+            if ( !filterIter.next().getDimensionType().equals( type ) )
             {
                 filterIter.remove();
             }
@@ -379,6 +379,17 @@ public class DataQueryParams
         
         return this;
     }
+
+    /**
+     * Removes the dimension or filter with the given identifier.
+     */
+    public DataQueryParams removeDimensionOrFilter( String dimension )
+    {
+        removeDimension( dimension );
+        removeFilter( dimension );
+        
+        return this;
+    }
     
     /**
      * Removes dimensions of the given type.
@@ -391,7 +402,7 @@ public class DataQueryParams
         {
             DimensionalObject dimension = iterator.next();
             
-            if ( DimensionType.CATEGORY.equals( dimension.getType() ) )
+            if ( DimensionType.CATEGORY.equals( dimension.getDimensionType() ) )
             {
                 iterator.remove();
             }
@@ -827,7 +838,7 @@ public class DataQueryParams
         {
             DimensionalObject existing = filters.get( index );
             
-            filters.set( index, new BaseDimensionalObject( existing.getDimension(), existing.getType(), existing.getDimensionName(), options ) );
+            filters.set( index, new BaseDimensionalObject( existing.getDimension(), existing.getDimensionType(), existing.getDimensionName(), options ) );
         }
         
         return this;
@@ -1285,7 +1296,7 @@ public class DataQueryParams
         
         for ( DimensionalObject dimension : dimensions )
         {
-            if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getType() ) )
+            if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getDimensionType() ) )
             {
                 list.add( dimension );
             }
@@ -1293,7 +1304,7 @@ public class DataQueryParams
         
         for ( DimensionalObject filter : filters )
         {
-            if ( DimensionType.DATAELEMENT_GROUPSET.equals( filter.getType() ) )
+            if ( DimensionType.DATAELEMENT_GROUPSET.equals( filter.getDimensionType() ) )
             {
                 list.add( filter );
             }

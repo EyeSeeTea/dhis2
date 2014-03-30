@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
@@ -208,8 +210,10 @@ public class DefaultTrackedEntityInstanceService
         // Grid rows
         // ---------------------------------------------------------------------
 
+        Set<String> tes = new HashSet<String>();
+                
         for ( Map<String, String> entity : entities )
-        {
+        {            
             grid.addRow();
             grid.addValue( entity.get( TRACKED_ENTITY_INSTANCE_ID ) );
             grid.addValue( entity.get( CREATED_ID ) );
@@ -217,10 +221,27 @@ public class DefaultTrackedEntityInstanceService
             grid.addValue( entity.get( ORG_UNIT_ID ) );
             grid.addValue( entity.get( TRACKED_ENTITY_ID ) );
             
+            tes.add( entity.get( TRACKED_ENTITY_ID ) );
+            
             for ( QueryItem item : params.getAttributes() )
             {
                 grid.addValue( entity.get( item.getItemId() ) );
             }
+        }
+        
+        if ( !params.isSkipMeta() )
+        {
+            Map<Object, Object> metaData = new HashMap<Object, Object>();            
+            Map<String, String> names = new HashMap<String, String>();
+            
+            for ( String te : tes )
+            {
+                TrackedEntity entity = trackedEntityService.getTrackedEntity( te );
+                names.put( te, entity != null ? entity.getDisplayName() : null );
+            }
+            
+            metaData.put( TrackedEntityInstanceQueryParams.META_DATA_NAMES_KEY, names );
+            grid.setMetaData( metaData );
         }
         
         return grid;
@@ -247,6 +268,11 @@ public class DefaultTrackedEntityInstanceService
             violation = "Program and tracked entity cannot be specified simultaneously";
         }
         
+        if ( params.hasProgramStatus() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program status is defined";
+        }
+        
         if ( violation != null )
         {
             log.warn( "Validation failed: " + violation );
@@ -257,7 +283,7 @@ public class DefaultTrackedEntityInstanceService
     
     @Override
     public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, Set<String> ou, 
-        OrganisationUnitSelectionMode ouMode, String program, String trackedEntity, Integer page, Integer pageSize )
+        OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, String trackedEntity, boolean skipMeta, Integer page, Integer pageSize )
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
@@ -319,8 +345,10 @@ public class DefaultTrackedEntityInstanceService
 
         params.setQuery( query );
         params.setProgram( pr );
+        params.setProgramStatus( programStatus );
         params.setTrackedEntity( te );
         params.setOrganisationUnitMode( ouMode );
+        params.setSkipMeta( skipMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
         
@@ -808,20 +836,14 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityInstancesForMobile( String searchText,
-
-    int orgUnitId, int attributeId )
+    public Collection<TrackedEntityInstance> searchTrackedEntityInstancesForMobile( String searchText, int orgUnitId, int attributeId )
     {
-
         Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
 
-        entityInstances.addAll( getTrackedEntityInstancesByAttributeValue( searchText,
-
-        attributeId, 0, Integer.MAX_VALUE ) );
+        entityInstances.addAll( getTrackedEntityInstancesByAttributeValue( searchText, attributeId, 0, Integer.MAX_VALUE ) );
 
         if ( orgUnitId != 0 )
         {
-
             Set<TrackedEntityInstance> toRemoveList = new HashSet<TrackedEntityInstance>();
 
             for ( TrackedEntityInstance instance : entityInstances )
@@ -834,6 +856,7 @@ public class DefaultTrackedEntityInstanceService
             }
             entityInstances.removeAll( toRemoveList );
         }
+        
         return entityInstances;
     }
 

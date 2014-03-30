@@ -49,6 +49,7 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
+import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.filter.MetaDataFilter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -154,6 +155,7 @@ final public class ExchangeClasses
         allExportClasses.put( ReportTable.class, "reportTables" );
         allExportClasses.put( Report.class, "reports" );
         allExportClasses.put( Chart.class, "charts" );
+        allExportClasses.put( EventReport.class, "eventReports" );
 
         allExportClasses.put( Dashboard.class, "dashboards" );
 
@@ -187,7 +189,7 @@ final public class ExchangeClasses
         importClasses.remove( Interpretation.class );
         importClasses.remove( Dashboard.class );
         importClasses.remove( BaseDimensionalObject.class );
-
+        
         // tracker types are not enabled for meta-data import-export yet
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );

@@ -31,6 +31,7 @@ package org.hisp.dhis.trackedentity;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -51,7 +52,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 @JacksonXmlRootElement( localName = "trackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class TrackedEntityAttribute
-    extends BaseIdentifiableObject
+    extends BaseDimensionalObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

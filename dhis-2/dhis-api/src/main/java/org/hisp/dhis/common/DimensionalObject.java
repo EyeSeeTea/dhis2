@@ -72,7 +72,7 @@ public interface DimensionalObject
     /**
      * Gets the dimension type.
      */
-    DimensionType getType();
+    DimensionType getDimensionType();
     
     /**
      * Gets the dimension name, which corresponds to a column in the analytics
@@ -86,9 +86,28 @@ public interface DimensionalObject
      */
     String getDisplayName();
         
+    /**
+     * Dimension items.
+     */
     List<NameableObject> getItems();
     
+    /**
+     * Indicates whether all items for this dimension should be used.
+     */
     boolean isAllItems();
     
+    /**
+     * Indicates whether this dimension has any items.
+     */
     boolean hasItems();
+    
+    /**
+     * Gets the operator. Applicable for events only.
+     */
+    String getOperator();
+
+    /**
+     * Gets the filter. Applicable for events only.
+     */
+    String getFilter();
 }

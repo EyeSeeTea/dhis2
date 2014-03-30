@@ -1,5 +1,9 @@
 <script type="text/javascript" src="javascript/addAttributeForm.js"></script>
+
 <h3>$i18n.getString( "create_new_tracked_entity_attribute" )</h3>
+
+#sharingCreateNotification( "trackedEntityAttribute" )
+
 <form id="addAttributeForm" action="addAttribute.action" method="post" class="inputForm">
 
 <table id="attrTable"> 
@@ -13,6 +17,12 @@
         <td><input type="text" id="name" name="name" class="{validate:{required:true,rangelength:[2,160]}}"/></td>
         <td></td>
     </tr>   
+    
+    <tr>
+        <td><label>$i18n.getString( "short_name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+        <td><input type="text" id="shortName" name="shortName" class="{validate:{required:true,rangelength:[2,50]}}"/></td>
+        <td></td>
+    </tr>
     
     <tr>
         <td><label>$i18n.getString( "code" )</label></td>

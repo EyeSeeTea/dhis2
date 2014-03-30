@@ -7,13 +7,14 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 .controller('MainController',
         function($scope,
                 $filter,
+                $modal,
                 Paginator,
                 TranslationService,
                 storage,
                 DHIS2EventFactory,                
                 orderByFilter,
                 ContextMenuSelectedItem,
-                ModalService,                
+                ModalService,
                 DialogService) {   
    
     //selected org unit
@@ -21,7 +22,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     //Paging
     $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};
-    
     
     //Filtering
     $scope.reverse = false;
@@ -32,15 +32,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.editGridColumns = false;
     $scope.editingEventInFull = false;
     $scope.editingEventInGrid = false;   
-    $scope.currentGridColumnId = '';    
+    $scope.currentGridColumnId = '';       
     
-    $scope.programStageDataElements = [];
+    /*$scope.programStageDataElements = [];
                 
     $scope.dhis2Events = [];
     $scope.eventGridColumns = [];
     $scope.hiddenGridColumns = 0;
     $scope.newDhis2Event = {dataValues: []};
-    $scope.currentEvent = {dataValues: []};
+    $scope.currentEvent = {dataValues: []};*/    
     $scope.currentEventOrginialValue = '';   
     
     //watch for selection of org unit from tree
@@ -51,7 +51,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             //apply translation - by now user's profile is fetched from server.
             TranslationService.translate();
             
-            var programs = storage.get('PROGRAMS');            
+            var programs = storage.get('EVENT_PROGRAMS');            
             if( programs ){                
                 $scope.loadPrograms($scope.selectedOrgUnit);     
             }            
@@ -69,14 +69,16 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
             $scope.programs = [];
             
-            var programs = storage.get('PROGRAMS');
+            var programs = storage.get('EVENT_PROGRAMS');
             
-            if( programs ){
+            if( programs && programs != 'undefined' ){
                 for(var i=0; i<programs.length; i++){
                     var program = storage.get(programs[i].id);   
-                    if(program.organisationUnits.hasOwnProperty(orgUnit.id)){
-                        $scope.programs.push(program);
-                    }
+                    if(angular.isObject(program)){
+                        if(program.organisationUnits.hasOwnProperty(orgUnit.id)){
+                            $scope.programs.push(program);
+                        }
+                    }                    
                 }
                 
                 if( !angular.isUndefined($scope.programs)){                    
@@ -94,6 +96,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.loadEvents = function(program, pager){   
         
         $scope.dhis2Events = [];
+        $scope.eventLength = 0;
+
+        $scope.eventFetched = false;
                
         if( program ){
             
@@ -102,7 +107,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
             $scope.programStageDataElements = [];  
             $scope.eventGridColumns = [];
-            $scope.hiddenGridColumns = 0;
+            $scope.filterTypes = {};
+
             $scope.newDhis2Event = {dataValues: []};
             $scope.currentEvent = {dataValues: []};
 
@@ -115,15 +121,22 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 var dataElement = prStDe.dataElement;
                 var name = dataElement.formName || dataElement.name;
                 $scope.newDhis2Event.dataValues.push({id: dataElement.id, value: ''});                       
-                $scope.eventGridColumns.push({name: name, id: dataElement.id, type: dataElement.type, compulsory: prStDe.compulsory, showFilter: false, hide: false});
-
+                $scope.eventGridColumns.push({name: name, id: dataElement.id, type: dataElement.type, compulsory: prStDe.compulsory, showFilter: false, show: prStDe.displayInReports});
+                
+                $scope.filterTypes[dataElement.id] = dataElement.type;
+                
                 if(dataElement.type === 'date'){
                      $scope.filterText[dataElement.id]= {start: '', end: ''};
-                }
+                }               
+                
             });           
 
             //Load events for the selected program stage and orgunit
             DHIS2EventFactory.getByStage($scope.selectedOrgUnit.id, $scope.selectedProgramStage.id, pager ).then(function(data){
+                
+                if(data.events){
+                    $scope.eventLength = data.events.length;
+                }                
                 
                 $scope.dhis2Events = data.events; 
                 
@@ -144,13 +157,16 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
                     for(var i=0; i < $scope.dhis2Events.length; i++){  
                         //check if event is empty
-                        if(!angular.isUndefined($scope.dhis2Events[i].dataValues[0].dataElement)){
+                        if(!angular.isUndefined($scope.dhis2Events[i].dataValues)){
                             $scope.dhis2Events[i].dataValues = orderByFilter($scope.dhis2Events[i].dataValues, '-dataElement');
                             angular.forEach($scope.dhis2Events[i].dataValues, function(dataValue){
 
-                                //converting int value to integer for proper sorting.
+                                //converting event.datavalues[i].datavalue.dataelement = value to
+                                //event[dataElement] = value for easier grid display.
                                 var dataElement = $scope.programStageDataElements[dataValue.dataElement].dataElement;
                                 if(angular.isObject(dataElement)){                               
+                                    
+                                    //converting int string value to integer for proper sorting.
                                     if(dataElement.type == 'int'){
                                         if( !isNaN(parseInt(dataValue.value)) ){
                                             dataValue.value = parseInt(dataValue.value);
@@ -160,11 +176,12 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                         }
                                         
                                     }
+                                    
                                     $scope.dhis2Events[i][dataValue.dataElement] = dataValue.value; 
                                 }                                
-                             });  
+                            });  
 
-                             delete $scope.dhis2Events[i].dataValues;
+                            delete $scope.dhis2Events[i].dataValues;
                         }
                         else{//event is empty, remove from grid
                             var index = $scope.dhis2Events.indexOf($scope.dhis2Events[i]);                           
@@ -172,7 +189,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             i--;                           
                         }
                     }                                  
-                }                                            
+                }
+                
+                $scope.eventFetched = true;
             });            
         }        
     };
@@ -201,25 +220,39 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.reverse = false;    
     };
     
-    $scope.showHideColumns = function(gridColumn, showAllColumns){
-        if(showAllColumns){
-            angular.forEach($scope.eventGridColumns, function(gridHeader){
-                gridHeader.hide = false;                
-            });
-            $scope.hiddenGridColumns = 0;
-        }
-        if(!showAllColumns){            
-            if(gridColumn.hide){
+    $scope.showHideColumns = function(){
+        
+        $scope.hiddenGridColumns = 0;
+        
+        angular.forEach($scope.eventGridColumns, function(eventGridColumn){
+            if(!eventGridColumn.show){
                 $scope.hiddenGridColumns++;
             }
-            else{
-                $scope.hiddenGridColumns--;
+        });
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'views/column-modal.html',
+            controller: 'ColumnDisplayController',
+            resolve: {
+                eventGridColumns: function () {
+                    return $scope.eventGridColumns;
+                },
+                hiddenGridColumns: function(){
+                    return $scope.hiddenGridColumns;
+                }
             }
-        }      
+        });
+
+        modalInstance.result.then(function (eventGridColumns) {
+            $scope.eventGridColumns = eventGridColumns;
+        }, function () {
+        });
     };
     
-    $scope.searchInGrid = function(gridColumn){           
+    $scope.searchInGrid = function(gridColumn){
         
+        $scope.currentFilter = gridColumn;
+       
         for(var i=0; i<$scope.eventGridColumns.length; i++){
             
             //toggle the selected grid column's filter
@@ -230,7 +263,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $scope.eventGridColumns[i].showFilter = false;
             }
         }
-    };
+    };    
     
     $scope.removeStartFilterText = function(gridColumnId){
         $scope.filterText[gridColumnId].start = '';
@@ -325,15 +358,19 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 }
                 $scope.dhis2Events.splice(0,0,newEvent);
                 
+                $scope.eventLength++;
+                
                 //decide whether to stay in the current screen or not.
                 if(!addingAnotherEvent){
                     $scope.eventRegistration = false;
                     $scope.editingEventInFull = false;
-                    $scope.editingEventInGrid = false;                    
+                    $scope.editingEventInGrid = false;  
+                    $scope.outerForm.submitted = false;
                 }
                 $scope.currentEvent = {};
+                $scope.outerForm.submitted = false;
             }
-        });        
+        }); 
     }; 
        
     $scope.updateEventDataValue = function(currentEvent, dataElement){
@@ -448,4 +485,29 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         window.location = DHIS2URL;
     };
     
+})
+
+//Controller for column show/hide
+.controller('ColumnDisplayController', 
+    function($scope, 
+            $modalInstance, 
+            hiddenGridColumns,
+            eventGridColumns){
+    
+    $scope.eventGridColumns = eventGridColumns;
+    $scope.hiddenGridColumns = hiddenGridColumns;
+    
+    $scope.close = function () {
+      $modalInstance.close($scope.eventGridColumns);
+    };
+    
+    $scope.showHideColumns = function(gridColumn){
+       
+        if(gridColumn.show){                
+            $scope.hiddenGridColumns--;            
+        }
+        else{
+            $scope.hiddenGridColumns++;            
+        }      
+    };    
 });

@@ -3195,7 +3195,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
           //it might happen that several async queries were in progress if a user were typing fast
           //but we are interested only in responses that correspond to the current view value
           if (inputValue === modelCtrl.$viewValue ) {
-            if (matches.length > 0) {
+            if (matches && matches.length > 0) {
 
               typeaheadCtrl.active = 0;
               typeaheadCtrl.matches.length = 0;
@@ -3528,7 +3528,7 @@ angular.module("template/modal/backdrop.html", []).run(["$templateCache", functi
 angular.module("template/modal/window.html", []).run(["$templateCache", function($templateCache) {
   $templateCache.put("template/modal/window.html",
     "<div tabindex=\"-1\" class=\"modal fade {{ windowClass }}\" ng-class=\"{in: animate}\" ng-style=\"{'z-index': 1050 + index*10, display: 'block'}\" ng-click=\"close($event)\">\n" +
-    "    <div class=\"modal-dialog\"><div class=\"modal-content\" ng-transclude></div></div>\n" +
+    "    <div class=\"modal-dialog\"><div draggable-modal class=\"modal-content\" ng-transclude></div></div>\n" +
     "</div>");
 }]);
 

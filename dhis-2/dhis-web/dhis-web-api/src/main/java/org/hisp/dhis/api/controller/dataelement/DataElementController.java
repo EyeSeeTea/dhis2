@@ -28,6 +28,10 @@ package org.hisp.dhis.api.controller.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.hisp.dhis.api.controller.AbstractCrudController;
 import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.api.controller.WebOptions;
@@ -39,10 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -61,11 +62,13 @@ public class DataElementController
     {
         List<DataElement> entityList;
 
-        Date lastUpdated = options.getLastUpdated();
-
         String KEY_DOMAIN_TYPE = "domainType";
 
-        if ( DataElement.DOMAIN_TYPE_AGGREGATE.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) )
+        if ( options.getOptions().containsKey( "query" ) )
+        {
+            entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
+        }
+        else if ( DataElement.DOMAIN_TYPE_AGGREGATE.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) )
             || DataElement.DOMAIN_TYPE_PATIENT.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) ) )
         {
             String domainType = options.getOptions().get( KEY_DOMAIN_TYPE );
@@ -84,10 +87,6 @@ public class DataElementController
                 entityList = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( domainType ) );
                 Collections.sort( entityList, IdentifiableObjectNameComparator.INSTANCE );
             }
-        }
-        else if ( lastUpdated != null )
-        {
-            entityList = new ArrayList<DataElement>( manager.getByLastUpdatedSorted( getEntityClass(), lastUpdated ) );
         }
         else if ( options.hasPaging() )
         {

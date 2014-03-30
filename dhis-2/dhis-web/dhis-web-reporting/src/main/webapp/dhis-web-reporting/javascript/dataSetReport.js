@@ -4,6 +4,7 @@ dhis2.util.namespace( 'dhis2.dsr' );
 dhis2.dsr.currentPeriodOffset = 0;
 dhis2.dsr.periodTypeFactory = new PeriodType();
 dhis2.dsr.currentDataSetReport = null;
+dhis2.dsr.permissions = null;
 
 //------------------------------------------------------------------------------
 // Get and set methods
@@ -258,23 +259,47 @@ dhis2.dsr.getDataSetReportUrl = function( dataSetReport )
  */
 dhis2.dsr.getDataApprovalUrl = function( dataSetReport )
 {
-	var url = "../api/dataApprovals" +
-		"?ds=" + dataSetReport.ds + 
-		"&pe=" + dataSetReport.pe + 
-		"&ou=" + dataSetReport.ou;
-	
-	if ( dataSetReport.cc && dataSetReport.cp && dataSetReport.cp.length > 0 ) {
-		url += "&cc=" + dataSetReport.cc;
-		url += "&cp=";
-		
-		$.each( dataSetReport.cp, function( idx, item ) {
-			url += item + ";";
-		} );
-		
-		url = url.slice( 0, -1 );
-	}
-	
-	return url;
+    var url = "../api/dataApprovals" +
+        "?ds=" + dataSetReport.ds +
+        "&pe=" + dataSetReport.pe +
+        "&ou=" + dataSetReport.ou;
+
+    if ( dataSetReport.cc && dataSetReport.cp && dataSetReport.cp.length > 0 ) {
+        url += "&cc=" + dataSetReport.cc;
+        url += "&cp=";
+
+        $.each( dataSetReport.cp, function( idx, item ) {
+            url += item + ";";
+        } );
+
+        url = url.slice( 0, -1 );
+    }
+
+    return url;
+}
+
+/**
+ * Generates the URL for the acceptance of the given data set report approval.
+ */
+dhis2.dsr.getDataApprovalAcceptanceUrl = function( dataSetReport )
+{
+    var url = "../api/dataApprovals/acceptances" +
+        "?ds=" + dataSetReport.ds +
+        "&pe=" + dataSetReport.pe +
+        "&ou=" + dataSetReport.ou;
+
+    if ( dataSetReport.cc && dataSetReport.cp && dataSetReport.cp.length > 0 ) {
+        url += "&cc=" + dataSetReport.cc;
+        url += "&cp=";
+
+        $.each( dataSetReport.cp, function( idx, item ) {
+            url += item + ";";
+        } );
+
+        url = url.slice( 0, -1 );
+    }
+
+    return url;
 }
 
 function exportDataSetReport( type )
@@ -332,12 +357,12 @@ dhis2.dsr.showApproval = function()
 	var dataSetReport = dhis2.dsr.currentDataSetReport;
 	
 	var approval = $( "#dataSetId :selected" ).data( "approval" );
-	var attributesSelected = dhis2.dsr.attributesSelected( dataSetReport );
+	// var attributesSelected = dhis2.dsr.attributesSelected( dataSetReport );
 
 	$( "#approvalNotification" ).hide();
     $( "#approvalDiv" ).hide();
 
-	if ( !approval || !attributesSelected ) {
+	if ( !approval /* || !attributesSelected */ ) {
 		return;
 	}
 	
@@ -347,29 +372,54 @@ dhis2.dsr.showApproval = function()
 		if ( !json || !json.state ) {
 			return;
 		}
+
+        dhis2.dsr.permissions = json;
 		
 		var state = json.state;
-		if ( "READY_FOR_APPROVAL" == state ) {
-			$( "#approvalNotification" ).show().html( i18n_ready_for_approval );
-			
-			if ( json.mayApprove ) {
-				$( "#approvalDiv" ).show();
-				$( "#approveButton" ).prop( "disabled", false );
-				$( "#unapproveButton" ).prop( "disabled", true );
-			}
-		}
-		else if ( "APPROVED" == state ) {
-			$( "#approvalNotification" ).show().html( i18n_approved );
-			
-			if ( json.mayUnapprove ) {
-				$( "#approvalDiv" ).show();
-				$( "#approveButton" ).prop( "disabled", true );
-				$( "#unapproveButton" ).prop( "disabled", false );
-			}
-		}
-		else if ( "WAITING_FOR_LOWER_LEVEL_APPROVAL" == state ) {
-			$( "#approvalNotification" ).show().html( i18n_waiting_for_lower_level_approval );	
-		}
+
+        $( "#approveButton" ).hide();
+        $( "#unapproveButton" ).hide();
+        $( "#acceptButton" ).hide();
+        $( "#unacceptButton" ).hide();
+
+        switch (state)
+        {
+            case "UNAPPROVED_WAITING":
+                $( "#approvalNotification" ).show().html( i18n_waiting_for_lower_level_approval );
+                break;
+
+            case "UNAPPROVED_READY":
+                $( "#approvalNotification" ).show().html( i18n_ready_for_approval );
+                if ( json.mayApprove ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#approveButton" ).show();
+                }
+                break;
+
+            case "APPROVED_HERE":
+                $( "#approvalNotification" ).show().html( i18n_approved );
+                if ( json.mayUnapprove ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#unapproveButton" ).show();
+                }
+                if ( json.mayAccept ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#acceptButton" ).show();
+                }
+                break;
+
+            case "ACCEPTED_HERE":
+                $( "#approvalNotification" ).show().html( i18n_approved );
+                if ( json.mayUnapprove ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#unapproveButton" ).show();
+                }
+                if ( json.mayUnccept ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#unacceptButton" ).show();
+                }
+                break;
+        }
 	} );
 }
 
@@ -390,9 +440,17 @@ dhis2.dsr.approveData = function()
 		url: url,
 		type: "post",
 		success: function() {
-			$( "#approveButton" ).prop( "disabled", true );
-			$( "#unapproveButton" ).prop( "disabled", false );
-			$( "#approvalNotification" ).show().html( i18n_approved );
+            $( "#approvalNotification" ).show().html( i18n_approved );
+            $( "#approvalDiv" ).hide();
+			$( "#approveButton" ).hide();
+            if ( dhis2.dsr.permissions.mayUnapprove ) {
+                $( "#approvalDiv" ).show();
+                $( "#unapproveButton" ).show();
+            }
+            if ( dhis2.dsr.permissions.mayAccept ) {
+                $( "#approvalDiv" ).show();
+                $( "#acceptButton" ).show();
+            }
 		},
 		error: function( xhr, status, error ) {
 			alert( xhr.responseText );
@@ -413,14 +471,82 @@ dhis2.dsr.unapproveData = function()
 		url: url,
 		type: "delete",
 		success: function() {
-			$( "#approveButton" ).prop( "disabled", false );
-			$( "#unapproveButton" ).prop( "disabled", true );
-			$( "#approvalNotification" ).show().html( i18n_ready_for_approval );
+            $( "#approvalNotification" ).show().html( i18n_ready_for_approval );
+            $( "#approvalDiv" ).hide();
+            $( "#unapproveButton" ).hide();
+            $( "#acceptButton" ).hide();
+            $( "#unacceptButton" ).hide();
+            if ( dhis2.dsr.permissions.mayApprove ) {
+                $( "#approvalDiv" ).show();
+                $( "#approveButton" ).show();
+            }
 		},
 		error: function( xhr, status, error ) {
 			alert( xhr.responseText );
 		}
 	} );
+}
+
+dhis2.dsr.acceptData = function()
+{
+    if ( !confirm( i18n_confirm_accept ) ) {
+        return false;
+    }
+
+    var dataSetReport = dhis2.dsr.currentDataSetReport;
+    var url = dhis2.dsr.getDataApprovalAcceptanceUrl( dataSetReport );
+
+    $.ajax( {
+        url: url,
+        type: "post",
+        success: function() {
+            $( "#approvalNotification" ).show().html( i18n_approved_and_accepted );
+            $( "#approvalDiv" ).hide();
+            $( "#acceptButton" ).hide();
+            if ( dhis2.dsr.permissions.mayUnapprove ) {
+                $( "#approvalDiv" ).show();
+                $( "#unapproveButton" ).show();
+            }
+            if ( dhis2.dsr.permissions.mayUnaccept ) {
+                $( "#approvalDiv" ).show();
+                $( "#unacceptButton" ).show();
+            }
+        },
+        error: function( xhr, status, error ) {
+            alert( xhr.responseText );
+        }
+    } );
+}
+
+dhis2.dsr.unacceptData = function()
+{
+    if ( !confirm( i18n_confirm_unaccept ) ) {
+        return false;
+    }
+
+    var dataSetReport = dhis2.dsr.currentDataSetReport;
+    var url = dhis2.dsr.getDataApprovalAcceptanceUrl( dataSetReport );
+
+    $.ajax( {
+        url: url,
+        type: "delete",
+        success: function() {
+            $( "#approvalNotification" ).show().html( i18n_approved );
+            $( "#approvalDiv" ).hide();
+            $( "#unacceptButton" ).hide();
+            if ( dhis2.dsr.permissions.mayUnapprove ) {
+                $( "#approvalDiv" ).show();
+                $( "#unapproveButton" ).show();
+            }
+            if ( dhis2.dsr.permissions.mayAccept ) {
+                $( "#approvalDiv" ).show();
+                $( "#acceptButton" ).show();
+            }
+        },
+        error: function( xhr, status, error ) {
+            alert( xhr.responseText );
+        }
+    } );
 }
 
 //------------------------------------------------------------------------------

@@ -28,6 +28,13 @@ package org.hisp.dhis.startup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.quick.StatementHolder;
@@ -41,13 +48,6 @@ import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Lars Helge Overland
@@ -122,6 +122,7 @@ public class TableAlteror
         executeSql( "DROP TABLE loginfailure" );
         executeSql( "DROP TABLE dashboarditem_trackedentitytabularreports" );
         executeSql( "DROP TABLE categoryoptioncombousergroupaccesses" );
+        executeSql( "DROP TABLE validationrulegroupuserrolestoalert" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
@@ -260,7 +261,8 @@ public class TableAlteror
         // orgunit shortname uniqueness
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
 
-        // update dataset-dataentryform association and programstage-cde association
+        // update dataset-dataentryform association and programstage-cde
+        // association
         if ( updateDataSetAssociation() && updateProgramStageAssociation() )
         {
             // delete table dataentryformassociation
@@ -412,6 +414,7 @@ public class TableAlteror
         executeSql( "update chart set regression = false where regression is null" );
         executeSql( "update chart set hidesubtitle = false where hidesubtitle is null" );
         executeSql( "update chart set userorganisationunit = false where userorganisationunit is null" );
+        executeSql( "update chart set hideemptyrows = false where hideemptyrows is null" );
         executeSql( "update indicator set annualized = false where annualized is null" );
         executeSql( "update indicatortype set indicatornumber = false where indicatornumber is null" );
         executeSql( "update dataset set mobile = false where mobile is null" );
@@ -677,8 +680,10 @@ public class TableAlteror
         executeSql( "ALTER TABLE dataset DROP COLUMN symbol" );
         executeSql( "ALTER TABLE users ALTER COLUMN password DROP NOT NULL" );
 
-        executeSql( "update categorycombo set dimensiontype = '" + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
-        executeSql( "update dataelementcategory set dimensiontype = '" + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
+        executeSql( "update categorycombo set dimensiontype = '"
+            + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
+        executeSql( "update dataelementcategory set dimensiontype = '"
+            + DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION + "' where dimensiontype is null" );
         executeSql( "update dataset set categorycomboid = " + defaultCategoryComboId + " where categorycomboid is null" );
 
         // set default dataDimension on orgUnitGroupSet and deGroupSet
@@ -702,11 +707,19 @@ public class TableAlteror
         // update attribute.code, set to null if code=''
         executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
 
+        // data approval, new column accepted
+        executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
+
+        // validation rule group, new column alertbyorgunits
+        executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
+
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
-
+        
         log.info( "Tables updated" );
     }
+
+  
 
     private void upgradeDataValuesWithAttributeOptionCombo()
     {
@@ -716,7 +729,8 @@ public class TableAlteror
 
         if ( no >= 5 )
         {
-            return; // attributeoptioncomboid already part of datavalue primary key
+            return; // attributeoptioncomboid already part of datavalue primary
+                    // key
         }
 
         int optionComboId = getDefaultOptionCombo();
@@ -726,13 +740,14 @@ public class TableAlteror
         executeSql( "alter table datavalue drop constraint datavalue_pkey;" );
 
         executeSql( "alter table datavalue add column attributeoptioncomboid integer;" );
-        executeSql( "update datavalue set attributeoptioncomboid = " + optionComboId + " where attributeoptioncomboid is null;" );
+        executeSql( "update datavalue set attributeoptioncomboid = " + optionComboId
+            + " where attributeoptioncomboid is null;" );
         executeSql( "alter table datavalue alter column attributeoptioncomboid set not null;" );
         executeSql( "alter table datavalue add constraint fk_datavalue_attributeoptioncomboid foreign key (attributeoptioncomboid) references categoryoptioncombo (categoryoptioncomboid) match simple;" );
         executeSql( "alter table datavalue add constraint datavalue_pkey primary key(dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid);" );
 
-        executeSql( "alter table datavalue_audit add constraint fk_datavalueaudit_datavalue foreign key (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) " +
-            "references datavalue (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) match simple;" );
+        executeSql( "alter table datavalue_audit add constraint fk_datavalueaudit_datavalue foreign key (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) "
+            + "references datavalue (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) match simple;" );
 
         log.info( "Data value table upgraded with attributeoptioncomboid column" );
     }
@@ -754,8 +769,8 @@ public class TableAlteror
         executeSql( "insert into mapview_periods ( mapviewid, sort_order, periodid ) select mapviewid, 0, periodid from mapview where periodid is not null" );
         executeSql( "alter table mapview drop column periodid" );
 
-        executeSql( "insert into mapview_orgunitlevels ( mapviewid, sort_order, orgunitlevel ) select m.mapviewid, 0, o.level " +
-            "from mapview m join orgunitlevel o on (m.organisationunitlevelid=o.orgunitlevelid) where m.organisationunitlevelid is not null" );
+        executeSql( "insert into mapview_orgunitlevels ( mapviewid, sort_order, orgunitlevel ) select m.mapviewid, 0, o.level "
+            + "from mapview m join orgunitlevel o on (m.organisationunitlevelid=o.orgunitlevelid) where m.organisationunitlevelid is not null" );
         executeSql( "alter table mapview drop column organisationunitlevelid" );
 
         executeSql( "alter table mapview drop column dataelementgroupid" );
@@ -768,7 +783,8 @@ public class TableAlteror
 
     private void upgradeChartRelativePeriods()
     {
-        BatchHandler<RelativePeriods> batchHandler = batchHandlerFactory.createBatchHandler( RelativePeriodsBatchHandler.class ).init();
+        BatchHandler<RelativePeriods> batchHandler = batchHandlerFactory.createBatchHandler(
+            RelativePeriodsBatchHandler.class ).init();
 
         try
         {
@@ -778,23 +794,12 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods(
-                    rs.getBoolean( "reportingmonth" ),
-                    false,
-                    rs.getBoolean( "reportingquarter" ),
-                    rs.getBoolean( "lastsixmonth" ),
-                    rs.getBoolean( "monthsthisyear" ),
-                    rs.getBoolean( "quartersthisyear" ),
-                    rs.getBoolean( "thisyear" ),
-                    false, false,
-                    rs.getBoolean( "lastyear" ),
-                    rs.getBoolean( "last5years" ),
-                    rs.getBoolean( "last12months" ),
-                    rs.getBoolean( "last3months" ),
-                    false,
-                    rs.getBoolean( "last4quarters" ),
-                    rs.getBoolean( "last2sixmonths" ),
-                    false, false, false,
+                RelativePeriods r = new RelativePeriods( rs.getBoolean( "reportingmonth" ), false,
+                    rs.getBoolean( "reportingquarter" ), rs.getBoolean( "lastsixmonth" ),
+                    rs.getBoolean( "monthsthisyear" ), rs.getBoolean( "quartersthisyear" ),
+                    rs.getBoolean( "thisyear" ), false, false, rs.getBoolean( "lastyear" ),
+                    rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ), rs.getBoolean( "last3months" ),
+                    false, rs.getBoolean( "last4quarters" ), rs.getBoolean( "last2sixmonths" ), false, false, false,
                     false, false, false, false );
 
                 int chartId = rs.getInt( "chartid" );
@@ -803,7 +808,8 @@ public class TableAlteror
                 {
                     int relativePeriodsId = batchHandler.insertObject( r, true );
 
-                    String update = "update chart set relativeperiodsid=" + relativePeriodsId + " where chartid=" + chartId;
+                    String update = "update chart set relativeperiodsid=" + relativePeriodsId + " where chartid="
+                        + chartId;
 
                     executeSql( update );
 
@@ -836,7 +842,8 @@ public class TableAlteror
 
     private void upgradeReportTableRelativePeriods()
     {
-        BatchHandler<RelativePeriods> batchHandler = batchHandlerFactory.createBatchHandler( RelativePeriodsBatchHandler.class ).init();
+        BatchHandler<RelativePeriods> batchHandler = batchHandlerFactory.createBatchHandler(
+            RelativePeriodsBatchHandler.class ).init();
 
         try
         {
@@ -846,27 +853,16 @@ public class TableAlteror
 
             while ( rs.next() )
             {
-                RelativePeriods r = new RelativePeriods(
-                    rs.getBoolean( "reportingmonth" ),
-                    rs.getBoolean( "reportingbimonth" ),
-                    rs.getBoolean( "reportingquarter" ),
-                    rs.getBoolean( "lastsixmonth" ),
-                    rs.getBoolean( "monthsthisyear" ),
-                    rs.getBoolean( "quartersthisyear" ),
-                    rs.getBoolean( "thisyear" ),
-                    rs.getBoolean( "monthslastyear" ),
-                    rs.getBoolean( "quarterslastyear" ),
-                    rs.getBoolean( "lastyear" ),
-                    rs.getBoolean( "last5years" ),
-                    rs.getBoolean( "last12months" ),
-                    rs.getBoolean( "last3months" ),
-                    false,
-                    rs.getBoolean( "last4quarters" ),
-                    rs.getBoolean( "last2sixmonths" ),
-                    rs.getBoolean( "thisfinancialyear" ),
-                    rs.getBoolean( "lastfinancialyear" ),
-                    rs.getBoolean( "last5financialyears" ),
-                    false, false, false, false );
+                RelativePeriods r = new RelativePeriods( rs.getBoolean( "reportingmonth" ),
+                    rs.getBoolean( "reportingbimonth" ), rs.getBoolean( "reportingquarter" ),
+                    rs.getBoolean( "lastsixmonth" ), rs.getBoolean( "monthsthisyear" ),
+                    rs.getBoolean( "quartersthisyear" ), rs.getBoolean( "thisyear" ),
+                    rs.getBoolean( "monthslastyear" ), rs.getBoolean( "quarterslastyear" ),
+                    rs.getBoolean( "lastyear" ), rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ),
+                    rs.getBoolean( "last3months" ), false, rs.getBoolean( "last4quarters" ),
+                    rs.getBoolean( "last2sixmonths" ), rs.getBoolean( "thisfinancialyear" ),
+                    rs.getBoolean( "lastfinancialyear" ), rs.getBoolean( "last5financialyears" ), false, false, false,
+                    false );
 
                 int reportTableId = rs.getInt( "reporttableid" );
 
@@ -874,7 +870,8 @@ public class TableAlteror
                 {
                     int relativePeriodsId = batchHandler.insertObject( r, true );
 
-                    String update = "update reporttable set relativeperiodsid=" + relativePeriodsId + " where reporttableid=" + reportTableId;
+                    String update = "update reporttable set relativeperiodsid=" + relativePeriodsId
+                        + " where reporttableid=" + reportTableId;
 
                     executeSql( update );
 
@@ -932,40 +929,47 @@ public class TableAlteror
 
                 if ( doIndicators )
                 {
-                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id + ",'dx'," + columnSortOrder + ");" );
+                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id
+                        + ",'dx'," + columnSortOrder + ");" );
                     columnSortOrder++;
                 }
                 else
                 {
-                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id + ",'dx'," + rowSortOrder + ");" );
+                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id
+                        + ",'dx'," + rowSortOrder + ");" );
                     rowSortOrder++;
                 }
 
                 if ( doPeriods )
                 {
-                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id + ",'pe'," + columnSortOrder + ");" );
+                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id
+                        + ",'pe'," + columnSortOrder + ");" );
                     columnSortOrder++;
                 }
                 else
                 {
-                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id + ",'pe'," + rowSortOrder + ");" );
+                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id
+                        + ",'pe'," + rowSortOrder + ");" );
                     rowSortOrder++;
                 }
 
                 if ( doUnits )
                 {
-                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id + ",'ou'," + columnSortOrder + ");" );
+                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id
+                        + ",'ou'," + columnSortOrder + ");" );
                     columnSortOrder++;
                 }
                 else
                 {
-                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id + ",'ou'," + rowSortOrder + ");" );
+                    executeSql( "insert into reporttable_rows (reporttableid, dimension, sort_order) values (" + id
+                        + ",'ou'," + rowSortOrder + ");" );
                     rowSortOrder++;
                 }
 
                 if ( categoryComboId > 0 )
                 {
-                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id + ",'co'," + columnSortOrder + ");" );
+                    executeSql( "insert into reporttable_columns (reporttableid, dimension, sort_order) values (" + id
+                        + ",'co'," + columnSortOrder + ");" );
                 }
             }
 
@@ -1078,7 +1082,7 @@ public class TableAlteror
     {
         try
         {
-            //TODO use jdbcTemplate
+            // TODO use jdbcTemplate
 
             return statementManager.getHolder().executeUpdate( sql );
         }
@@ -1092,11 +1096,9 @@ public class TableAlteror
 
     private Integer getDefaultOptionCombo()
     {
-        String sql =
-            "select coc.categoryoptioncomboid from categoryoptioncombo coc " +
-                "inner join categorycombos_optioncombos cco on coc.categoryoptioncomboid=cco.categoryoptioncomboid " +
-                "inner join categorycombo cc on cco.categorycomboid=cc.categorycomboid " +
-                "where cc.name='default';";
+        String sql = "select coc.categoryoptioncomboid from categoryoptioncombo coc "
+            + "inner join categorycombos_optioncombos cco on coc.categoryoptioncomboid=cco.categoryoptioncomboid "
+            + "inner join categorycombo cc on cco.categorycomboid=cc.categorycomboid " + "where cc.name='default';";
 
         return statementManager.getHolder().queryForInteger( sql );
     }

@@ -32,7 +32,7 @@ styles/style.css
 ../dhis-web-commons/javascripts/angular/angular-route.js
 ../dhis-web-commons/javascripts/angular/angular-cookies.js
 ../dhis-web-commons/javascripts/angular/angular-animate.js        
-../dhis-web-commons/javascripts/angular/ui-bootstrap-tpls-0.10.0.js
+../dhis-web-commons/javascripts/angular/ui-bootstrap-tpls-0.10.0-draggable-modal.js
 
 ../dhis-web-commons/javascripts/angular/plugins/angularLocalStorage.js
 ../dhis-web-commons/javascripts/angular/plugins/angular-translate.min.js
@@ -83,6 +83,7 @@ scripts/filters.js
 views/serverside-pagination.html
 views/modal.html
 views/dialog.html
+views/column-modal.html
 
 i18n/en.json
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.sharing;
+package org.hisp.dhis.acl;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -37,13 +37,17 @@ import java.util.List;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface SharingService
+public interface AclService
 {
-    public static final List<String> SHARING_OVERRIDE_AUTHORITIES = Arrays.asList( "ALL", "F_METADATA_IMPORT" );
+    public static final List<String> ACL_OVERRIDE_AUTHORITIES = Arrays.asList( "ALL", "F_METADATA_IMPORT" );
 
     boolean isSupported( String type );
 
     boolean isSupported( Class<?> klass );
+
+    boolean isShareable( String type );
+
+    boolean isShareable( Class<?> klass );
 
     /**
      * Can user write to this object (create)
@@ -112,6 +116,15 @@ public interface SharingService
     boolean canManage( User user, IdentifiableObject object );
 
     /**
+     * Can create
+     * @param user
+     * @param klass
+     * @param <T>
+     * @return
+     */
+    <T extends IdentifiableObject> boolean canCreate( User user, Class<T> klass );
+
+    /**
      * Checks if a user can create a public instance of a certain object.
      * <p/>
      * 1. Does user have SHARING_OVERRIDE_AUTHORITY authority?
@@ -138,7 +151,7 @@ public interface SharingService
     /**
      * Can user make this object external? (read with no login)
      *
-     * @param user   User to check against
+     * @param user  User to check against
      * @param klass Type to check
      * @return Result of test
      */

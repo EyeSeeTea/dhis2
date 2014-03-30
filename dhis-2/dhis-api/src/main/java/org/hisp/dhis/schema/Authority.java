@@ -1,4 +1,4 @@
-package org.hisp.dhis.sharing;
+package org.hisp.dhis.schema;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -29,101 +29,65 @@ package org.hisp.dhis.sharing;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
+import java.util.List;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "access", namespace = DxfNamespaces.DXF_2_0 )
-public class Access
+@JacksonXmlRootElement( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+public class Authority
 {
-    private boolean manage;
+    private AuthorityType type;
 
-    private boolean externalize;
+    private List<String> authorities;
 
-    private boolean write;
-
-    private boolean read;
-
-    private boolean update;
-
-    private boolean delete;
-
-    public Access()
+    public Authority( AuthorityType type )
     {
+        this.type = type;
+    }
+
+    public Authority( AuthorityType type, List<String> authorities )
+    {
+        this( type );
+        this.authorities = authorities;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( localName = "manage", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isManage()
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public AuthorityType getType()
     {
-        return manage;
+        return type;
     }
 
-    public void setManage( boolean manage )
+    public void setType( AuthorityType type )
     {
-        this.manage = manage;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( localName = "externalize", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isExternalize()
-    {
-        return externalize;
-    }
-
-    public void setExternalize( boolean externalize )
-    {
-        this.externalize = externalize;
+        this.type = type;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( localName = "write", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isWrite()
+    @JacksonXmlElementWrapper( localName = "authorities", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getAuthorities()
     {
-        return write;
+        return authorities;
     }
 
-    public void setWrite( boolean write )
+    public void setAuthorities( List<String> authorities )
     {
-        this.write = write;
+        this.authorities = authorities;
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( localName = "read", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isRead()
+    @Override
+    public String toString()
     {
-        return read;
-    }
-
-    public void setRead( boolean read )
-    {
-        this.read = read;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( localName = "update", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isUpdate()
-    {
-        return update;
-    }
-
-    public void setUpdate( boolean update )
-    {
-        this.update = update;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( localName = "delete", namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isDelete()
-    {
-        return delete;
-    }
-
-    public void setDelete( boolean delete )
-    {
-        this.delete = delete;
+        return "Authority{" +
+            "type=" + type +
+            ", authorities=" + authorities +
+            '}';
     }
 }

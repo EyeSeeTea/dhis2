@@ -46,7 +46,7 @@ public class DefaultSchemaService implements SchemaService
     private Map<String, Schema> singularSchemaMap = Maps.newHashMap();
 
     @Autowired
-    private PropertyScannerService propertyScannerService;
+    private PropertyIntrospectorService propertyIntrospectorService;
 
     @Autowired
     private List<SchemaDescriptor> descriptors = Lists.newArrayList();
@@ -60,7 +60,7 @@ public class DefaultSchemaService implements SchemaService
 
             if ( schema.getProperties().isEmpty() )
             {
-                schema.setProperties( propertyScannerService.getProperties( schema.getKlass() ) );
+                schema.setProperties( propertyIntrospectorService.getProperties( schema.getKlass() ) );
             }
 
             classSchemaMap.put( schema.getKlass(), schema );
@@ -71,12 +71,26 @@ public class DefaultSchemaService implements SchemaService
     @Override
     public Schema getSchema( Class<?> klass )
     {
-        try
+        if ( klass == null )
+        {
+            return null;
+        }
+
+        /*
+        if ( ProxyFactory.isProxyClass( klass ) )
+        {
+            klass = klass.getSuperclass();
+        }
+        */
+
+        if ( classSchemaMap.containsKey( klass ) )
         {
             return classSchemaMap.get( klass );
         }
-        catch ( NullPointerException ignored )
+
+        if ( classSchemaMap.containsKey( klass.getSuperclass() ) )
         {
+            return classSchemaMap.get( klass.getSuperclass() );
         }
 
         return null;

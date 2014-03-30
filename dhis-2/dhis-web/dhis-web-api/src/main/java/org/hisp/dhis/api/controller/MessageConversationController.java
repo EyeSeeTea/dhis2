@@ -30,7 +30,6 @@ package org.hisp.dhis.api.controller;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +56,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -100,11 +101,9 @@ public class MessageConversationController
     {
         List<MessageConversation> entityList;
 
-        Date lastUpdated = options.getLastUpdated();
-
-        if ( lastUpdated != null )
+        if ( options.getOptions().containsKey( "query" ) )
         {
-            entityList = new ArrayList<MessageConversation>( manager.getByLastUpdated( getEntityClass(), lastUpdated ) );
+            entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
         }
         else if ( options.hasPaging() )
         {

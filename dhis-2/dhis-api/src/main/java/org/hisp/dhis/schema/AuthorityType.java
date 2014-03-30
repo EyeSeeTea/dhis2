@@ -28,14 +28,16 @@ package org.hisp.dhis.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Property;
-
-import java.util.List;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface PropertyScannerService
+public enum AuthorityType
 {
-    List<Property> getProperties( Class<?> klass );
+    CREATE,
+    CREATE_PUBLIC,
+    CREATE_PRIVATE,
+    EXTERNALIZE,
+    READ,
+    UPDATE,
+    DELETE
 }

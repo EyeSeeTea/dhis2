@@ -56,15 +56,19 @@ public class MenuController
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void saveMenuOrder(InputStream input) throws Exception
+    public void saveMenuOrder( InputStream input )
+        throws Exception
     {
-        List<String> apps = JacksonUtils.fromJson(input, List.class);
+        List<String> apps = JacksonUtils.fromJson( input, List.class );
 
         User user = currentUserService.getCurrentUser();
 
-        user.getApps().clear();
-        user.getApps().addAll(apps);
+        if ( apps != null && !apps.isEmpty() && user != null )
+        {        
+            user.getApps().clear();
+            user.getApps().addAll( apps );
 
-        userService.updateUser(user);
+            userService.updateUser( user );
+        }
     }
 }

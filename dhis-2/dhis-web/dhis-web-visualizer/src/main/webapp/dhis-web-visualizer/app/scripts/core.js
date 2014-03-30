@@ -315,6 +315,8 @@ Ext.onReady( function() {
 
                 // showValues: boolean (true)
 
+                // hideEmptyRows: boolean (false)
+
                 // hideLegend: boolean (false)
 
                 // hideTitle: boolean (false)
@@ -541,6 +543,7 @@ Ext.onReady( function() {
                     // properties
                     layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
                     layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+                    layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
 
                     layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
                     layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
@@ -1697,22 +1700,32 @@ Ext.onReady( function() {
                         baseLineFields = [],
                         store;
 
-                    // Data
-                    for (var i = 0, obj, category; i < rowIds.length; i++) {
+                    // data
+                    for (var i = 0, obj, category, rowValues, isEmpty; i < rowIds.length; i++) {
                         obj = {};
                         category = rowIds[i];
+                        rowValues = [];
+                        isEmpty = false;
+                        
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
-                        for (var j = 0, id; j < columnIds.length; j++) {
+                        
+                        for (var j = 0, id, value; j < columnIds.length; j++) {
                             id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
+                            value = xResponse.idValueMap[id];
+                            rowValues.push(value);
 
-                            obj[columnIds[j]] = parseFloat(xResponse.idValueMap[id]) || 0;
+                            obj[columnIds[j]] = value ? parseFloat(value) : '0.0';
                         }
 
-                        data.push(obj);
+                        isEmpty = !(Ext.Array.clean(rowValues).length);
+
+                        if (!(isEmpty && xLayout.hideEmptyRows)) {
+                            data.push(obj);
+                        }
                     }
 
-                    // Trend lines
+                    // trend lines
                     if (xLayout.showTrendLine) {
                         for (var i = 0, regression, key; i < columnIds.length; i++) {
                             regression = new SimpleRegression();
@@ -1731,7 +1744,7 @@ Ext.onReady( function() {
                         }
                     }
 
-                    // Target line
+                    // target line
                     if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
                         for (var i = 0; i < data.length; i++) {
                             data[i][conf.finals.data.targetLine] = parseFloat(xLayout.targetLineValue);
@@ -1740,7 +1753,7 @@ Ext.onReady( function() {
                         targetLineFields.push(conf.finals.data.targetLine);
                     }
 
-                    // Base line
+                    // base line
                     if (Ext.isNumber(xLayout.baseLineValue) || Ext.isNumber(parseFloat(xLayout.baseLineValue))) {
                         for (var i = 0; i < data.length; i++) {
                             data[i][conf.finals.data.baseLine] = parseFloat(xLayout.baseLineValue);
@@ -1804,6 +1817,41 @@ Ext.onReady( function() {
                         return Ext.Array.max(sums);
                     };
 
+                    store.hasDecimals = function() {
+                        var records = store.getRange();
+                        
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+                                
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    };
+
+                    store.getNumberOfDecimals = function() {
+                        var records = store.getRange(),
+                            values = [];
+                        
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+                                
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    value = value.toString();
+
+                                    values.push(value.length - value.indexOf('.') - 1);
+                                }
+                            }
+                        }
+
+                        return Ext.Array.max(values);
+                    };
+
                     if (DV.isDebug) {
                         console.log("data", data);
                         console.log("rangeFields", store.rangeFields);
@@ -1820,9 +1868,20 @@ Ext.onReady( function() {
                     var typeConf = conf.finals.chart,
                         minimum = store.getMinimum(),
                         maximum,
+                        numberOfDecimals,
                         axis;
 
-                    // Set maximum if stacked + extra line
+                    getRenderer = function(numberOfDecimals) {
+                        var renderer = '0.';
+
+                        for (var i = 0; i < numberOfDecimals; i++) {
+                            renderer += '0';
+                        }
+
+                        return renderer;
+                    };
+
+                    // set maximum if stacked + extra line
                     if ((xLayout.type === typeConf.stackedcolumn || xLayout.type === typeConf.stackedbar) &&
                         (xLayout.showTrendLine || xLayout.targetLineValue || xLayout.baseLineValue)) {
                         var a = [store.getMaximum(), store.getMaximumSum()];
@@ -1830,13 +1889,17 @@ Ext.onReady( function() {
                         maximum = Math.floor(maximum / 10) * 10;
                     }
 
+                    // renderer
+                    numberOfDecimals = store.getNumberOfDecimals();
+                    renderer = !!numberOfDecimals && (store.getMaximum() < 20) ? getRenderer(numberOfDecimals) : '0,0';
+
                     axis = {
                         type: 'Numeric',
                         position: 'left',
                         fields: store.numericFields,
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer('0,0')
+                            renderer: Ext.util.Format.numberRenderer(renderer)
                         },
                         grid: {
                             odd: {
@@ -1923,7 +1986,10 @@ Ext.onReady( function() {
                             display: 'outside',
                             'text-anchor': 'middle',
                             field: store.rangeFields,
-                            font: conf.chart.style.fontFamily
+                            font: conf.chart.style.fontFamily,
+                            renderer: function(n) {
+                                return n === '0.0' ? '-' : n;                                    
+                            }
                         };
                     }
 
@@ -1994,7 +2060,8 @@ Ext.onReady( function() {
                         trackMouse: true,
                         cls: 'dv-chart-tips',
                         renderer: function(si, item) {
-                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.value[1] + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                            var value = item.value[1] === '0.0' ? '-' : item.value[1];
+                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
                         }
                     };
                 };
