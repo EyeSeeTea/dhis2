@@ -82,8 +82,7 @@
          **********************************************************************/
 
         function processTranslations(translations) {
-            var itemIndex,
-                items = dhis2.menu.getApps();
+            var items = dhis2.menu.getApps();
 
             items.forEach(function (element, index, items) {
                 if (element.id && translations[element.id]) {
@@ -425,9 +424,7 @@
 
                     //Render the dropdown menu
                     renderDropDownFavorites();
-                },
-                //Constrict the draggable elements to the parent element
-                containment: 'parent'
+                }
             };
 
         renderAppManager(selector);
