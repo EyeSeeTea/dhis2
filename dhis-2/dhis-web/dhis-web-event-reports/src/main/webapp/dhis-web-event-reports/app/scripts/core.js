@@ -1783,7 +1783,7 @@ Ext.onReady( function() {
 						value: Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1)
 					});
 				}
-console.log("objects", objects);
+
 				support.prototype.array.sort(objects, direction, 'value');
 
 				// new id order
@@ -2527,7 +2527,6 @@ console.log("objects", objects);
 					index = xResponse.nameHeaderMap[id].index,
 					rows = xResponse.rows;
 
-console.log("objects", rows);
 				support.prototype.array.sort(rows, direction, index);
 
 				return xResponse;
