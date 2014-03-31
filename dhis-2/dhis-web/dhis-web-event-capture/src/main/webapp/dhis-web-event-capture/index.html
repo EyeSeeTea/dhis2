@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html manifest="event-capture.appcache" ng-app="eventCapture">
+<!--<html manifest="event-capture.appcache" ng-app="eventCapture">-->
+<html ng-app="eventCapture">
     <head>
         <title>Event Capture</title>
 
@@ -44,7 +45,7 @@
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.storage.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.contextmenu.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.appcache.js"></script>
+        <!--<script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.appcache.js"></script>-->
         <script type="text/javascript" src="../dhis-web-commons/ouwt/ouwt.js"></script>
         
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angularLocalStorage.js"></script>
@@ -61,7 +62,7 @@
 
         <link type="text/css" rel="stylesheet" href="../dhis-web-commons/font-awesome/css/font-awesome.min.css"/>
         <link type="text/css" rel="stylesheet" media="screen,print" href="../dhis-web-commons/css/light_blue/light_blue.css"/>
-        <link type="text/css" rel="stylesheet" media="screen,print" href="../dhis-web-commons/css/widgets.css"/>
+        <link type="text/css" rel="stylesheet" media="screen,print" href="../dhis-web-commons/css/widgets.css"/>       
         
         <link type="text/css" rel="stylesheet" href="styles/style.css">
 
@@ -164,11 +165,11 @@
                             <!-- grid begins -->
                             <form name="outerForm" novalidate>                              
 
-                                <table class="listTable dhis2-table-striped-border dhis2-table-hover">                                       
+                                <table class="listTable dhis2-table-striped-border dhis2-table-hover">
                                     <thead>                        
                                         <tr>
                                             <th ng-show="eventGridColumn.show" 
-                                                class="max-column-width"                                                
+                                                                                        
                                                 ng-repeat="eventGridColumn in eventGridColumns">
                                                 
                                                 <!-- sort icon begins -->
@@ -193,14 +194,14 @@
                                                 <!-- filter input field begins -->
                                                 <span ng-show="eventGridColumn.showFilter">
                                                     <span ng-show="eventGridColumn.type !=='date'">
-                                                        <input type="text" ng-model="filterText[eventGridColumn.id]" ng-blur="searchInGrid(eventGridColumn)">
+                                                        <input type="text" style="width: 90%;" ng-model="filterText[eventGridColumn.id]" ng-blur="searchInGrid(eventGridColumn)">
                                                     </span>                                                    
                                                     <span ng-show="eventGridColumn.type ==='date'">
-                                                        <input placeholder="{{'start_date' | translate}}" type="text" ng-model="filterText[eventGridColumn.id].start" data-ng-date readonly="readonly">
+                                                        <input style="width: 90%;" placeholder="{{'start_date' | translate}}" type="text" ng-model="filterText[eventGridColumn.id].start" data-ng-date readonly="readonly">
                                                         <span ng-hide="filterText[eventGridColumn.id].start == 'undefined' || filterText[eventGridColumn.id].start == ''">
                                                             <a href ng-click='removeStartFilterText(eventGridColumn.id)'><span class='black'><i class="fa fa-trash-o"></i></span></a>                                                        
                                                         </span>
-                                                        <input placeholder="{{'end_date' | translate}}" type="text" ng-model="filterText[eventGridColumn.id].end" data-ng-date readonly="readonly">
+                                                        <input style="width: 90%;" placeholder="{{'end_date' | translate}}" type="text" ng-model="filterText[eventGridColumn.id].end" data-ng-date readonly="readonly">
                                                         <span ng-hide="filterText[eventGridColumn.id].end == 'undefined' || filterText[eventGridColumn.id].end == ''">
                                                             <a href ng-click='removeEndFilterText(eventGridColumn.id)'><span class='black'><i class="fa fa-trash-o"></i></span></a>                                                        
                                                         </span>
@@ -209,32 +210,30 @@
                                                 <!-- filter input field ends -->
                                                 
                                             </th>
-                                            <th></th>
+                                            <th style="width: 20px;"></th>
                                         </tr>                        
                                     </thead>
-                                    <tbody id="list">
+                                    <tbody id="list">                                        
                                         <tr ng-repeat="dhis2Event in dhis2Events | orderBy:sortHeader:reverse | gridFilter:filterText:programStageDataElements"                                        
                                             ng-click="showContextMenu(dhis2Event)">
 
                                             <!-- Visible when event is not under editing -->
                                             <td dhis-context-menu 
                                                 selected-item={{dhis2Event}} 
-                                                class="max-column-width" 
+                                                
                                                 ng-hide="(currentEvent.event == dhis2Event.event) || !eventGridColumn.show" 
                                                 ng-repeat="eventGridColumn in eventGridColumns">                                                
                                                 {{dhis2Event[eventGridColumn.id]}}                                                
                                             </td>
 
                                             <!-- Visible when event is under editing - in grid -->
-                                            <td class="max-column-width"
-                                                style="cursor:default;"                                                
+                                            <td style="cursor:default;"                                                
                                                 ng-if="(currentEvent.event == dhis2Event.event) && eventGridColumn.show" 
                                                 ng-repeat="eventGridColumn in eventGridColumns">
                                                 <ng-form name="innerFormGrid">
                                                     <div ng-switch="eventGridColumn.type">
                                                         <div ng-switch-when="int">
                                                             <input type="number" 
-                                                                   input-validator
                                                                    program-stage-data-element={{programStageDataElements[eventGridColumn.id]}}
                                                                    ng-model="dhis2Event[eventGridColumn.id]" 
                                                                    ng-blur="updateEventDataValue(dhis2Event, eventGridColumn.id)" 
@@ -243,9 +242,8 @@
                                                                    style="width:98%;"
                                                                    ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
                                                                    ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
-                                                                   />
-                                                                   
-                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                            />                                                                   
+                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red"><em title="{{'required'| translate}}" class="required">*</em></span>
                                                         </div>
                                                         <div ng-switch-when="string">                                        
                                                             <div class="container-fluid">
@@ -260,7 +258,7 @@
                                                                        ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
                                                                        ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
                                                                        />
-                                                                <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                                <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red"><em title="{{'required'| translate}}" class="required">*</em></span>
                                                             </div>
                                                         </div>
                                                         <div ng-switch-when="bool">
@@ -276,7 +274,7 @@
                                                                 <option value="0">{{'no'| translate}}</option>
                                                                 <option value="1">{{'yes'| translate}}</option>
                                                             </select>
-                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red"><em title="{{'required'| translate}}" class="required">*</em></span>
                                                         </div>
                                                         <div ng-switch-when="date">
                                                             <input type="text" 
@@ -290,7 +288,18 @@
                                                                    ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
                                                                    ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
                                                                    />
-                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid" class="red"><em title="{{'required'| translate}}" class="required">*</em></span>
+                                                        </div>
+                                                        <div ng-switch-when="trueOnly">
+                                                            <input type="checkbox"
+                                                                   ng-model="currentEvent[eventGridColumn.id]"
+                                                                   ng-change="updateEventDataValue(currentEvent, eventGridColumn.id)"
+                                                                   ng-required={{eventGridColumn.compulsory}}
+                                                                   name="foo" 
+                                                                   ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                                   ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                                   />
+                                                            <span ng-show="outerForm.submitted && innerFormGrid.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>
                                                         </div>
                                                     </div>
                                                 </ng-form>                                                
@@ -331,38 +340,36 @@
                                 </thead>
                                 <tbody id="list">
                                     <tr ng-repeat="eventGridColumn in eventGridColumns">
-                                        <td class="max-column-width">
+                                        <td >
                                             {{eventGridColumn.name}}                                              
                                         </td>
-                                        <td class="max-column-width">
+                                        <td >
                                             <ng-form name="innerFormUpdate">
                                                 <div ng-switch="eventGridColumn.type">
                                                     <div ng-switch-when="int">
-                                                        <input type="number" 
+                                                        <input type="number"
                                                                ng-model="currentEvent[eventGridColumn.id]" 
                                                                ng-blur="updateEventDataValue(currentEvent, eventGridColumn.id)" 
                                                                ng-required={{eventGridColumn.compulsory}}
                                                                name="foo" 
-                                                               style="width:98%;"
-                                                               ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
-                                                               ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                               style="width:99%;" 
+                                                               ng-class="{true: 'update-success'} [updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                               ng-class="{true: 'update-error'} [!updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
                                                                />
-                                                        <span ng-show="outerForm.submitted && innerFormUpdate.foo.$invalid" class="red">{{'required'| translate}}</span>
                                                     </div>
                                                     <div ng-switch-when="string">                                        
                                                         <div class="container-fluid">
-                                                            <input type="text" 
+                                                            <input type="text"
                                                                    ng-model="currentEvent[eventGridColumn.id]" 
                                                                    ng-blur="updateEventDataValue(currentEvent, eventGridColumn.id)" 
                                                                    typeahead="option for option in programStageDataElements[eventGridColumn.id].dataElement.optionSet.options | filter:$viewValue | limitTo:20" 
                                                                    typeahead-open-on-focus
                                                                    ng-required={{eventGridColumn.compulsory}}
                                                                    name="foo" 
-                                                                   style="width:98%;"
-                                                                   ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
-                                                                   ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                                   style="width:99%;"
+                                                                   ng-class="{true: 'update-success'} [updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                                   ng-class="{true: 'update-error'} [!updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
                                                                    />
-                                                            <span ng-show="outerForm.submitted && innerFormUpdate.foo.$invalid" class="red">{{'required'| translate}}</span>
                                                         </div>
                                                     </div>
                                                     <div ng-switch-when="bool">
@@ -370,29 +377,37 @@
                                                                 ng-change="updateEventDataValue(currentEvent, eventGridColumn.id)"
                                                                 ng-required={{eventGridColumn.compulsory}}
                                                                 name="foo" 
-                                                                style="width:98%;"
-                                                                ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
-                                                                ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                                style="width:99%;"
+                                                                ng-class="{true: 'update-success'} [updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                                ng-class="{true: 'update-error'} [!updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
                                                                 />
                                                             <option value="">{{'please_select'| translate}}</option>                        
                                                             <option value="0">{{'no'| translate}}</option>
                                                             <option value="1">{{'yes'| translate}}</option>
-                                                        </select>
-                                                        <span ng-show="outerForm.submitted && innerFormUpdate.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                        </select>                                                        
                                                     </div>
                                                     <div ng-switch-when="date">
-                                                        <input type="text" 
+                                                        <input type="text"                                                                
                                                                placeholder="yyyy-mm-dd" 
                                                                ng-date 
                                                                ng-model="currentEvent[eventGridColumn.id]"
                                                                blur-or-change="updateEventDataValue(currentEvent, eventGridColumn.id)"
                                                                ng-required={{eventGridColumn.compulsory}}
                                                                name="foo" 
-                                                               style="width:98%;"
-                                                               ng-class="{true: 'update-success'} [updateSuccess && currentGridColumnId == eventGridColumn.id]"
-                                                               ng-class="{true: 'update-error'} [!updateSuccess && currentGridColumnId == eventGridColumn.id]"
+                                                               style="width:99%;"
+                                                               ng-class="{true: 'update-success'} [updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                               ng-class="{true: 'update-error'} [!updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
                                                                />
-                                                        <span ng-show="outerForm.submitted && innerFormUpdate.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                    </div>
+                                                    <div ng-switch-when="trueOnly">
+                                                        <input type="checkbox"                                                                      
+                                                               ng-model="currentEvent[eventGridColumn.id]"
+                                                               ng-change="updateEventDataValue(currentEvent, eventGridColumn.id)"
+                                                               ng-required={{eventGridColumn.compulsory}}
+                                                               name="foo" 
+                                                               ng-class="{true: 'update-success'} [updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                               ng-class="{true: 'update-error'} [!updateSuccess && (currentGridColumnId == eventGridColumn.id)]"
+                                                               />
                                                     </div>
                                                 </div>
                                             </ng-form>
@@ -400,7 +415,7 @@
                                 </tr>
                                 </tbody>        
                             </table>                            
-                            <button ng-click="showEventList()" class="button">{{'back'| translate}}</button> 
+                            <button ng-click="showEventList()" class="button">{{'go_back'| translate}}</button> 
                         </div>
                     </div>
                 </form>    
@@ -430,53 +445,56 @@
                                              {{selectedProgram.dateOfIncidentDescription}}
                                         </td>
                                         <td>
-                                            <input type="text" 
-                                                    placeholder="yyyy-mm-dd" 
-                                                    ng-date 
-                                                    ng-model="currentEvent.eventDate" 
-                                                    ng-required="true" 
-                                                    name="eventDate" 
-                                                    style="width:98%;">
-                                            <span ng-show="outerForm.submitted && outerForm.eventDate.$invalid" class="red">{{'required'| translate}}</span>
+                                            <input type="text"                                                   
+                                                   placeholder="yyyy-mm-dd" 
+                                                   ng-date 
+                                                   ng-model="currentEvent.eventDate" 
+                                                   ng-required="true" 
+                                                   name="eventDate" 
+                                                   ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                   style="width:99%;">
                                         </td>
                                     </tr> 
                                     <tr ng-repeat="eventGridColumn in eventGridColumns">
-                                        <td class="max-column-width">
+                                        <td >
                                             {{eventGridColumn.name}}                                              
                                         </td>
-                                        <td class="max-column-width">
+                                        <td>
                                             <ng-form name="innerFormAdd">
                                                 <div ng-switch="eventGridColumn.type">
                                                     <div ng-switch-when="int">
-                                                        <input type="number" 
+                                                        <input type="number"                                                                
                                                                ng-model="currentEvent[eventGridColumn.id]" 
                                                                ng-required={{eventGridColumn.compulsory}}
                                                                name="foo" 
-                                                               style="width:98%;"/>
-                                                        <span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                               ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                               style="width:99%;"/>
+                                                        <!--<span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>-->
                                                     </div>
                                                     <div ng-switch-when="string">                                        
                                                         <div class="container-fluid">
-                                                            <input type="text" 
+                                                            <input type="text"                                                                    
                                                                    ng-model="currentEvent[eventGridColumn.id]" 
                                                                    typeahead="option for option in programStageDataElements[eventGridColumn.id].dataElement.optionSet.options | filter:$viewValue | limitTo:20" 
                                                                    typeahead-open-on-focus
                                                                    ng-required={{eventGridColumn.compulsory}} 
                                                                    name="foo" 
-                                                                   style="width:98%;">                                            
-                                                            <span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                                   ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                                   style="width:99%;">                                            
+                                                            <!--<span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>-->
                                                         </div>
                                                     </div>
                                                     <div ng-switch-when="bool">
                                                         <select ng-model="currentEvent[eventGridColumn.id]" 
-                                                                ng-required={{eventGridColumn.compulsory}}
+                                                                ng-required={{eventGridColumn.compulsory}}                                                                
                                                                 name="foo" 
-                                                                style="width:98%;">
+                                                                ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                                style="width:99%;">
                                                             <option value="">{{'please_select'| translate}}</option>                        
                                                             <option value="0">{{'no'| translate}}</option>
                                                             <option value="1">{{'yes'| translate}}</option>
                                                         </select>
-                                                        <span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                        <!--<span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>-->
                                                     </div>
                                                     <div ng-switch-when="date">
                                                         <input type="text" 
@@ -485,8 +503,17 @@
                                                                ng-model="currentEvent[eventGridColumn.id]" 
                                                                ng-required={{eventGridColumn.compulsory}}
                                                                name="foo" 
-                                                               style="width:98%;">
-                                                        <span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid" class="red">{{'required'| translate}}</span>
+                                                               ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                               style="width:99%;">
+                                                        <!--<span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>-->
+                                                    </div>
+                                                    <div ng-switch-when="trueOnly">
+                                                        <input type="checkbox"       
+                                                               ng-model="currentEvent[eventGridColumn.id]"
+                                                               ng-required={{eventGridColumn.compulsory}}
+                                                               ng-class="{true: 'update-error'} [outerForm.submitted && outerForm.eventDate.$invalid]"
+                                                               name="foo"/>
+                                                        <!--<span ng-show="outerForm.submitted && innerFormAdd.foo.$invalid"><em title="{{'required'| translate}}" class="required">*</em></span>-->
                                                     </div>
                                                 </div>
                                             </ng-form>
@@ -496,9 +523,9 @@
                             </table>
                             <button ng-click="addEvent(true)" class="button">{{'save_and_add_new'| translate}}</button>
                             &nbsp;&nbsp;&nbsp;&nbsp;
-                            <button ng-click="addEvent()" class="button">{{'save_and_close'| translate}}</button>
+                            <button ng-click="addEvent()" class="button">{{'save_and_back'| translate}}</button>
                             &nbsp;&nbsp;&nbsp;&nbsp;
-                            <button ng-click="showEventList(null)" class="button">{{'discard'| translate}}</button>                        
+                            <button ng-click="showEventList(null)" class="button">{{'go_back'| translate}}</button>                        
                         </div>
                     </div> 
                 </form>
