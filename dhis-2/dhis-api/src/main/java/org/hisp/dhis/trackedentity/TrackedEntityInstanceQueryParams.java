@@ -53,6 +53,8 @@ public class TrackedEntityInstanceQueryParams
     public static final String TRACKED_ENTITY_ATTRIBUTE_ID = "teattribute";
     public static final String TRACKED_ENTITY_ATTRIBUTE_VALUE_ID = "tevalue";
     
+    public static final String META_DATA_NAMES_KEY = "names";
+    
     /**
      * Query value, will apply to all relevant attributes.
      */
@@ -95,6 +97,11 @@ public class TrackedEntityInstanceQueryParams
     private OrganisationUnitSelectionMode organisationUnitMode;
 
     /**
+     * Indicates whether not to include meta data in the response.
+     */
+    private boolean skipMeta;
+
+    /**
      * Page number.
      */
     private Integer page;
@@ -103,7 +110,7 @@ public class TrackedEntityInstanceQueryParams
      * Page size.
      */
     private Integer pageSize;
-
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -341,6 +348,16 @@ public class TrackedEntityInstanceQueryParams
         this.organisationUnits = organisationUnits;
     }
 
+    public boolean isSkipMeta()
+    {
+        return skipMeta;
+    }
+
+    public void setSkipMeta( boolean skipMeta )
+    {
+        this.skipMeta = skipMeta;
+    }
+    
     public Integer getPage()
     {
         return page;
