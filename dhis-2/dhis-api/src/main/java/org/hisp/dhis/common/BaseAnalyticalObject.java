@@ -99,7 +99,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  */
 public abstract class BaseAnalyticalObject
     extends BaseIdentifiableObject
-{    
+{
+    public static final String NUMBER_FORMATTING_COMMA = "comma";
+    public static final String NUMBER_FORMATTING_SPACE = "space";
+    public static final String NUMBER_FORMATTING_NONE = "none";
+    
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
@@ -155,6 +159,8 @@ public abstract class BaseAnalyticalObject
     protected List<OrganisationUnitGroup> itemOrganisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
     
     protected boolean rewindRelativePeriods;
+    
+    protected String digitGroupSeparator;
 
     // -------------------------------------------------------------------------
     // Analytical properties
@@ -749,6 +755,7 @@ public abstract class BaseAnalyticalObject
         organisationUnitLevels.clear();
         itemOrganisationUnitGroups.clear();
         rewindRelativePeriods = false;
+        digitGroupSeparator = NUMBER_FORMATTING_SPACE;
     }
     
     @Override
@@ -779,6 +786,7 @@ public abstract class BaseAnalyticalObject
             organisationUnitLevels.addAll( object.getOrganisationUnitLevels() );
             itemOrganisationUnitGroups = object.getItemOrganisationUnitGroups();
             rewindRelativePeriods = object.isRewindRelativePeriods();
+            digitGroupSeparator = object.getDigitGroupSeparator();
         }
     }
 
@@ -1039,11 +1047,22 @@ public abstract class BaseAnalyticalObject
         this.rewindRelativePeriods = rewindRelativePeriods;
     }
 
+    @JsonProperty
+    @JsonView( {DetailedView.class, ExportView.class} )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getDigitGroupSeparator() {
+		return digitGroupSeparator;
+	}
+
+	public void setDigitGroupSeparator(String digitGroupSeparator) {
+		this.digitGroupSeparator = digitGroupSeparator;
+	}
+
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
 
-    @JsonIgnore
+	@JsonIgnore
     public List<OrganisationUnit> getTransientOrganisationUnits()
     {
         return transientOrganisationUnits;

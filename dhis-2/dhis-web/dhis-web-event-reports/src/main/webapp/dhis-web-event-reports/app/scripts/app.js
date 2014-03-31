@@ -55,7 +55,7 @@ Ext.onReady( function() {
                     id: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getValue()
+                    filter: this.valueCmp.getValue()
                 };
             },
             initComponent: function() {
@@ -199,7 +199,7 @@ Ext.onReady( function() {
                     id: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getSubmitValue()
+                    filter: this.valueCmp.getSubmitValue()
                 };
             },
             initComponent: function() {
@@ -273,7 +273,8 @@ Ext.onReady( function() {
                 return {
                     id: this.dataElement.id,
                     name: this.dataElement.name,
-                    value: this.valueCmp.getValue()
+                    operator: 'EQ',
+                    filter: this.valueCmp.getValue()
                 };
             },
             initComponent: function() {
@@ -344,7 +345,7 @@ Ext.onReady( function() {
                     id: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
-                    value: valueArray.join(';')
+                    filter: valueArray.join(';')
                 };
             },
             initComponent: function() {
@@ -575,7 +576,9 @@ Ext.onReady( function() {
 			margin = 1,
 			defaultWidth = 160,
 			defaultHeight = 220,
-			maxHeight = (ns.app.viewport.getHeight() - 100) / 2;
+			maxHeight = (ns.app.viewport.getHeight() - 100) / 2,
+
+			dataType = 'aggregated_values';
 
 		getStore = function(data) {
 			var config = {};
@@ -849,6 +852,7 @@ Ext.onReady( function() {
 			autoShow: true,
 			modal: true,
 			resizable: false,
+			dataType: dataType,
 			colStore: colStore,
 			rowStore: rowStore,
             fixedFilterStore: fixedFilterStore,
@@ -937,7 +941,9 @@ Ext.onReady( function() {
 			margin = 1,
 			defaultWidth = 160,
 			defaultHeight = 158,
-			maxHeight = (ns.app.viewport.getHeight() - 100) / 2;
+			maxHeight = (ns.app.viewport.getHeight() - 100) / 2,
+
+			dataType = 'individual_cases';
 
 		getStore = function(data) {
 			var config = {};
@@ -1128,6 +1134,7 @@ Ext.onReady( function() {
 			resizable: false,
 			getSetup: getSetup,
 			dimensionStore: dimensionStore,
+			dataType: dataType,
 			colStore: colStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
@@ -1480,7 +1487,7 @@ Ext.onReady( function() {
 			windowWidth = 500,
 			windowCmpWidth = windowWidth - 22;
 
-		ns.app.stores.reportTable.on('load', function(store, records) {
+		ns.app.stores.eventReport.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
@@ -1503,7 +1510,7 @@ Ext.onReady( function() {
 
 			if (ns.app.layout) {
 				favorite = Ext.clone(ns.app.layout);
-				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
+				//dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
 				// Server sync
 				favorite.totals = favorite.showTotals;
@@ -1512,14 +1519,7 @@ Ext.onReady( function() {
 				favorite.subtotals = favorite.showSubTotals;
 				delete favorite.showSubTotals;
 
-				favorite.reportParams = {
-					paramReportingPeriod: favorite.reportingPeriod,
-					paramOrganisationUnit: favorite.organisationUnit,
-					paramParentOrganisationUnit: favorite.parentOrganisationUnit
-				};
-				delete favorite.reportingPeriod;
-				delete favorite.organisationUnit;
-				delete favorite.parentOrganisationUnit;
+				delete favorite.type;
 
 				delete favorite.parentGraphMap;
 
@@ -1540,7 +1540,7 @@ Ext.onReady( function() {
 
 		NameWindow = function(id) {
 			var window,
-				record = ns.app.stores.reportTable.getById(id);
+				record = ns.app.stores.eventReport.getById(id);
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
@@ -1567,7 +1567,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/reportTables/',
+							url: ns.core.init.contextPath + '/api/eventReport/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
@@ -1584,7 +1584,7 @@ Ext.onReady( function() {
 								ns.app.layout.name = name;
 								ns.app.xLayout.name = name;
 
-								ns.app.stores.reportTable.loadStore();
+								ns.app.stores.eventReport.loadStore();
 
 								ns.app.shareButton.enable();
 
@@ -1599,25 +1599,25 @@ Ext.onReady( function() {
 				text: NS.i18n.update,
 				handler: function() {
 					var name = nameTextfield.getValue(),
-						reportTable;
+						eventReport;
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/eventReports/' + id + '.json?viewClass=dimensional&links=false',
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();
 								alert(r.responseText);
 							},
 							success: function(r) {
-								reportTable = Ext.decode(r.responseText);
-								reportTable.name = name;
+								eventReport = Ext.decode(r.responseText);
+								eventReport.name = name;
 
 								Ext.Ajax.request({
-									url: ns.core.init.contextPath + '/api/reportTables/' + reportTable.id,
+									url: ns.core.init.contextPath + '/api/eventReports/' + reportTable.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
-									params: Ext.encode(reportTable),
+									params: Ext.encode(eventReport),
 									failure: function(r) {
 										ns.core.web.mask.show();
 										alert(r.responseText);
@@ -1628,7 +1628,7 @@ Ext.onReady( function() {
 											ns.app.xLayout.name = name;
 										}
 
-										ns.app.stores.reportTable.loadStore();
+										ns.app.stores.eventReport.loadStore();
 										window.destroy();
 									}
 								});
@@ -1706,8 +1706,8 @@ Ext.onReady( function() {
 							this.currentValue = this.getValue();
 
 							var value = this.getValue(),
-								url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-								store = ns.app.stores.reportTable;
+								url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+								store = ns.app.stores.eventReport;
 
 							store.page = 1;
 							store.loadStore(url);
@@ -1722,8 +1722,8 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = ns.app.stores.reportTable;
+					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.app.stores.eventReport;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
 				store.loadStore(url);
@@ -1734,8 +1734,8 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = ns.app.stores.reportTable;
+					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.app.stores.eventReport;
 
 				store.page = store.page + 1;
 				store.loadStore(url);
@@ -1815,7 +1815,7 @@ Ext.onReady( function() {
 
 										if (confirm(message)) {
 											Ext.Ajax.request({
-												url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
+												url: ns.core.init.contextPath + '/api/eventReports/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(favorite),
@@ -1826,7 +1826,7 @@ Ext.onReady( function() {
 													ns.app.layout.name = true;
 													ns.app.xLayout.name = true;
 
-													ns.app.stores.reportTable.loadStore();
+													ns.app.stores.eventReport.loadStore();
 
 													ns.app.shareButton.enable();
 												}
@@ -1849,7 +1849,7 @@ Ext.onReady( function() {
 
 								if (record.data.access.manage) {
 									Ext.Ajax.request({
-										url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + record.data.id,
+										url: ns.core.init.contextPath + '/api/sharing?type=eventReport&id=' + record.data.id,
 										method: 'GET',
 										failure: function(r) {
 											ns.app.viewport.mask.hide();
@@ -1878,10 +1878,10 @@ Ext.onReady( function() {
 
 									if (confirm(message)) {
 										Ext.Ajax.request({
-											url: ns.core.init.contextPath + '/api/reportTables/' + record.data.id,
+											url: ns.core.init.contextPath + '/api/eventReports/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												ns.app.stores.reportTable.loadStore();
+												ns.app.stores.eventReport.loadStore();
 											}
 										});
 									}
@@ -1895,7 +1895,7 @@ Ext.onReady( function() {
 					width: 6
 				}
 			],
-			store: ns.app.stores.reportTable,
+			store: ns.app.stores.eventReport,
 			bbar: [
 				info,
 				'->',
@@ -1909,7 +1909,7 @@ Ext.onReady( function() {
 					this.store.page = 1;
 					this.store.loadStore();
 
-					ns.app.stores.reportTable.on('load', function() {
+					ns.app.stores.eventReport.on('load', function() {
 						if (this.isVisible()) {
 							this.fireEvent('afterrender');
 						}
@@ -2269,7 +2269,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=eventReport&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -2323,11 +2323,11 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var reportTableUrl = ns.core.init.contextPath + '/dhis-web-event-report/app/index.html?id=' + ns.app.layout.id,
-						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html',
+					var eventReportUrl = ns.core.init.contextPath + '/dhis-web-event-report/app/index.html?id=' + ns.app.layout.id,
+						apiUrl = ns.core.init.contextPath + '/api/eventReports/' + ns.app.layout.id + '/data.html',
 						html = '';
 
-					html += '<div><b>Pivot link: </b><span class="user-select"><a href="' + reportTableUrl + '" target="_blank">' + reportTableUrl + '</a></span></div>';
+					html += '<div><b>Report link: </b><span class="user-select"><a href="' + eventReportUrl + '" target="_blank">' + eventReportUrl + '</a></span></div>';
 					html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
 					return html;
 				}(),
@@ -2344,7 +2344,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/interpretations/reportTable/' + ns.app.layout.id,
+							url: ns.core.init.contextPath + '/api/interpretations/eventReport/' + ns.app.layout.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
@@ -3491,17 +3491,23 @@ Ext.onReady( function() {
 					records = [];
 
                 for (var i = 0; i < selectedPeriods.length; i++) {
-                    records.push({id: selectedPeriods[i]});
+                    records.push({code: selectedPeriods[i]});
                 }
 
 				for (var rp in map) {
 					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
-						records.push({id: map[rp].relativePeriodId});
+						records.push({code: map[rp].relativePeriodId});
 					}
 				}
 
 				return records.length ? records : null;
             },
+            getDimension: function() {
+				return {
+					id: 'pe',
+					items: this.getRecords()
+				};
+			},
             items: [
                 fixedPeriodSettings,
                 fixedPeriodAvailableSelected,
@@ -3719,7 +3725,7 @@ Ext.onReady( function() {
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						dimension: ns.core.conf.finals.dimension.organisationUnit.objectName,
+						id: ns.core.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -4160,14 +4166,23 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var view = {};
+			var view = {},
+				type = ns.app.typeToolbar.getType(),
+				layoutWindow = type === 'aggregate' ? ns.app.aggregateLayoutWindow : (type === 'query' ? ns.app.queryLayoutWindow : null),
+				map = {},
+				columns = [],
+				rows = [],
+				filters = [];
 
+			view.dataType = layoutWindow.dataType;
             view.program = program.getRecord();
             view.stage = stage.getRecord();
 
-            if (!view.stage) {
+            if (!(view.dataType && view.program && view.stage)) {
                 return;
             }
+
+			// pe
 
             if (periodMode.getValue() === 'dates') {
                 view.startDate = startDate.getSubmitValue();
@@ -4178,22 +4193,54 @@ Ext.onReady( function() {
                 }
             }
             else if (periodMode.getValue() === 'periods') {
-                view.periods = periods.getRecords();
+				map['pe'] = periods.getDimension();
+			}
 
-                if (!view.periods) {
-                    return;
-                }
+			// ou
+
+			map['ou'] = treePanel.getDimension();
+
+            // data items
+
+            for (var i = 0, record; i < dataElementSelected.items.items.length; i++) {
+                record = dataElementSelected.items.items[i].getRecord();
+
+                map[record.id] = record;
             }
 
-            view.dataElements = [];
+            if (layoutWindow.colStore) {
+				layoutWindow.colStore.each(function(item) {
+					columns.push(map[item.data.id]);
+				});
+			}
 
-            for (var i = 0, panel; i < dataElementSelected.items.items.length; i++) {
-                panel = dataElementSelected.items.items[i];
+            if (layoutWindow.rowStore) {
+				layoutWindow.rowStore.each(function(item) {
+					rows.push(map[item.data.id]);
+				});
+			}
 
-                view.dataElements.push(panel.getRecord());
-            }
+            if (layoutWindow.filterStore) {
+				layoutWindow.filterStore.each(function(item) {
+					filters.push(map[item.data.id]);
+				});
+			}
 
-            view.organisationUnits = treePanel.getDimension().items;
+            if (layoutWindow.fixedFilterStore) {
+				layoutWindow.fixedFilterStore.each(function(item) {
+					filters.push(map[item.data.id]);
+				});
+			}
+
+			if (columns.length) {
+				view.columns = columns;
+			}
+			if (rows.length) {
+				view.rows = rows;
+			}
+			if (filters.length) {
+				view.filters = filters;
+			}
 
 			return view;
 		};
@@ -4741,7 +4788,8 @@ Ext.onReady( function() {
                 Ext.applyIf(view, options);
                 view.type = type;
 
-                return map[type]();
+                //return map[type]();
+                return view;
             };
 
 			web.report.loadReport = function(id) {
@@ -4945,19 +4993,19 @@ Ext.onReady( function() {
 
 		ns.app.stores = ns.app.stores || {};
 
-		reportTableStore = Ext.create('Ext.data.Store', {
+		eventReportStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name', 'lastUpdated', 'access'],
 			proxy: {
 				type: 'ajax',
 				reader: {
 					type: 'json',
-					root: 'reportTables'
+					root: 'eventReports'
 				}
 			},
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&links=false',
+			defaultUrl: ns.core.init.contextPath + '/api/eventReports.json?include=id,name,lastUpdated,access',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 
@@ -4986,7 +5034,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-		ns.app.stores.reportTable = reportTableStore;
+		ns.app.stores.eventReport = eventReportStore;
 
 		// viewport
 
@@ -5112,6 +5160,7 @@ Ext.onReady( function() {
 				return;
 			}
 
+			// state
             if (typeToolbar.getType() === 'aggregate') {
                 ns.app.aggregateLayoutWindow.saveState();
             }
@@ -5194,7 +5243,6 @@ Ext.onReady( function() {
 		favoriteButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.favorites,
 			menu: {},
-			disabled: true,
 			handler: function() {
 				if (ns.app.favoriteWindow) {
 					ns.app.favoriteWindow.destroy();
