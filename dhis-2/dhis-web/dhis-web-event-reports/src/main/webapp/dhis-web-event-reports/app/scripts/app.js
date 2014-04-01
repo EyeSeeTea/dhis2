@@ -4067,16 +4067,6 @@ Ext.onReady( function() {
 
 		reset = function(skipTree) {
 
-			// item
-			if (layer) {
-				layer.item.setValue(false);
-
-				if (!layer.window.isRendered) {
-					layer.core.view = null;
-					return;
-				}
-			}
-
 			// components
             program.clearValue();
             stage.clearValue();
@@ -4107,7 +4097,7 @@ Ext.onReady( function() {
 			//}
 		};
 
-		setGui = function(view) { //todo
+		setGui = function(view) {
 			var ouDim = view.rows[0],
 				isOu = false,
 				isOuc = false,
@@ -4117,11 +4107,6 @@ Ext.onReady( function() {
 
 			// widget gui
 			(function() {
-
-				// components
-				if (layer && !layer.window.isRendered) {
-					return;
-				}
 
 				reset(true);
 
