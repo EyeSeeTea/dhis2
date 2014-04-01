@@ -383,6 +383,7 @@ hr.app-separator
 
 @media only screen and (min-width: 840px)
 {
+    .app-manager-header,
     .app-menu
     {
         width: 808px;
