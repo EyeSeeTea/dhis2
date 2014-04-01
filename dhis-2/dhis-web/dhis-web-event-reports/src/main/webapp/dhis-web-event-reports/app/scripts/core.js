@@ -1687,7 +1687,7 @@ Ext.onReady( function() {
                 for (var i = 0, dim, con; i < dimensions.length; i++) {
                     dim = dimensions[i];
 
-                    paramString += '&dimension=' + dim.id;
+                    paramString += '&dimension=' + dim.dimension;
 
                     if (dim.items && dim.items.length) {
                         paramString += ':';

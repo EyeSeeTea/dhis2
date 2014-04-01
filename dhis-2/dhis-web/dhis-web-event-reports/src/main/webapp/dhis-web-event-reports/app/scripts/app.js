@@ -3491,12 +3491,12 @@ Ext.onReady( function() {
 					records = [];
 
                 for (var i = 0; i < selectedPeriods.length; i++) {
-                    records.push({code: selectedPeriods[i]});
+                    records.push({id: selectedPeriods[i]});
                 }
 
 				for (var rp in map) {
 					if (map.hasOwnProperty(rp) && map[rp].getValue()) {
-						records.push({code: map[rp].relativePeriodId});
+						records.push({id: map[rp].relativePeriodId});
 					}
 				}
 
@@ -4205,12 +4205,11 @@ Ext.onReady( function() {
             for (var i = 0, record; i < dataElementSelected.items.items.length; i++) {
                 record = dataElementSelected.items.items[i].getRecord();
 
-                map[record.id] = record;
+                map[record.dimension] = record;
             }
 
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
-console.log("item.data.id", item.data.id);
 					columns.push(map[item.data.id]);
 				});
 			}
