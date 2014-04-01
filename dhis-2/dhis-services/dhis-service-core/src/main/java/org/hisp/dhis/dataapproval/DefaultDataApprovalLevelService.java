@@ -166,14 +166,14 @@ public class DefaultDataApprovalLevelService
         }
     }
 
-    public boolean dataApprovalLevelExists( DataApprovalLevel testLevel )
+    public boolean dataApprovalLevelExists( DataApprovalLevel level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
         for ( DataApprovalLevel dataApprovalLevel : dataApprovalLevels )
         {
-            if ( testLevel.getOrgUnitLevel() == dataApprovalLevel.getOrgUnitLevel()
-                    && testLevel.getCategoryOptionGroupSet() == dataApprovalLevel.getCategoryOptionGroupSet() )
+            if ( level.getOrgUnitLevel() == dataApprovalLevel.getOrgUnitLevel()
+                    && level.getCategoryOptionGroupSet() == dataApprovalLevel.getCategoryOptionGroupSet() )
             {
                 return true;
             }
@@ -210,11 +210,11 @@ public class DefaultDataApprovalLevelService
         newLevel.setLevel( index + 1 );
         newLevel.setCreated( new Date() );
 
-        dataApprovalLevelStore.addDataApproval( newLevel );
+        dataApprovalLevelStore.save( newLevel );
 
         return true;
     }
-
+    
     public void deleteDataApprovalLevel( int level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
@@ -223,7 +223,7 @@ public class DefaultDataApprovalLevelService
 
         if ( index >= 0 & index < dataApprovalLevels.size() )
         {
-            dataApprovalLevelStore.deleteDataApprovalLevel( dataApprovalLevels.get( index ) );
+            dataApprovalLevelStore.delete( dataApprovalLevels.get( index ) );
 
             dataApprovalLevels.remove( index );
 
@@ -300,7 +300,7 @@ public class DefaultDataApprovalLevelService
 
         dataApprovalLevel.setCreated( new Date() );
 
-        dataApprovalLevelStore.updateDataApprovalLevel( dataApprovalLevel );
+        dataApprovalLevelStore.update( dataApprovalLevel );
     }
 
     /**

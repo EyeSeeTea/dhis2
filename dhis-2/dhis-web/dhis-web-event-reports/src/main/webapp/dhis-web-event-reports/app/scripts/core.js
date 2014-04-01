@@ -1590,7 +1590,7 @@ Ext.onReady( function() {
 
 			service.response.query.getExtendedResponse = function(layout, response) {
 				var xResponse = Ext.clone(response),
-                    dimensionNames = Ext.Array.pluck(layout.columns, 'dimension'),
+                    dimensionNames = Ext.Array.pluck(layout.columns, 'id'),
                     dimensionHeaders = [],
 					headers = xResponse.headers,
 					nameHeaderMap = {};
@@ -1673,7 +1673,8 @@ Ext.onReady( function() {
 			web.analytics = {};
 
 			web.analytics.getParamString = function(view, format) {
-                var paramString;
+                var paramString,
+                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || []));
 
                 format = format || 'json';
 
@@ -1682,47 +1683,72 @@ Ext.onReady( function() {
 				// stage
 				paramString += 'stage=' + view.stage.id;
 
-				// ou
-				if (Ext.isArray(view.organisationUnits)) {
-                    paramString += '&dimension=ou:';
+                // dimensions
+                for (var i = 0, dim, con; i < dimensions.length; i++) {
+                    dim = dimensions[i];
 
-					for (var i = 0; i < view.organisationUnits.length; i++) {
-						paramString += view.organisationUnits[i].id;
-                        paramString += i < (view.organisationUnits.length - 1) ? ';' : '';
-					}
-				}
+                    paramString += '&dimension=' + dim.id;
+
+                    if (dim.items && dim.items.length) {
+                        paramString += ':';
+
+                        for (var j = 0, item; j < dim.items.length; j++) {
+                            item = dim.items[j];
+
+                            paramString += item.id + ((j < (dim.items.length - 1)) ? ';' : '');
+                        }
+                    }
+                    else if (dim.operator && !Ext.isEmpty(dim.filter)) {
+                        paramString += ':' + dim.operator + ':' + dim.filter;
+                    }
+                }
+
+                // dates
+                if (view.startDate && view.endDate) {
+                    paramString += '&startDate=' + view.startDate + '&endDate=' + view.endDate;
+                }
+
+				// ou
+				//if (Ext.isArray(view.organisationUnits)) {
+                    //paramString += '&dimension=ou:';
+
+					//for (var i = 0; i < view.organisationUnits.length; i++) {
+						//paramString += view.organisationUnits[i].id;
+                        //paramString += i < (view.organisationUnits.length - 1) ? ';' : '';
+					//}
+				//}
 
 				// de
-				for (var i = 0, element; i < view.dataElements.length; i++) {
-					element = view.dataElements[i];
+				//for (var i = 0, element; i < view.dataElements.length; i++) {
+					//element = view.dataElements[i];
 
-					paramString += '&dimension=' + element.id;
+					//paramString += '&dimension=' + element.id;
 
-					if (element.value) {
-						if (element.operator) {
-							paramString += ':' + element.operator;
-						}
+					//if (element.value) {
+						//if (element.operator) {
+							//paramString += ':' + element.operator;
+						//}
 
-						paramString += ':' + element.value;
-					}
-				}
+						//paramString += ':' + element.value;
+					//}
+				//}
 
 				// pe
-				if (Ext.isArray(view.periods)) {
-					paramString += '&dimension=pe:';
+				//if (Ext.isArray(view.periods)) {
+					//paramString += '&dimension=pe:';
 
-					for (var i = 0; i < view.periods.length; i++) {
-						paramString += view.periods[i].id + (i < view.periods.length - 1 ?  ';' : '');
-					}
-				}
-				else {
-					paramString += '&startDate=' + view.startDate;
-					paramString += '&endDate=' + view.endDate;
-				}
+					//for (var i = 0; i < view.periods.length; i++) {
+						//paramString += view.periods[i].id + (i < view.periods.length - 1 ?  ';' : '');
+					//}
+				//}
+				//else {
+					//paramString += '&startDate=' + view.startDate;
+					//paramString += '&endDate=' + view.endDate;
+				//}
 
 				// hierarchy
 				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
-
+console.log(paramString);
                 return paramString;
             };
 

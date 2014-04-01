@@ -152,35 +152,34 @@ public class DefaultDataApprovalService
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         return getDataApprovalStatus( dataSet, period, organisationUnit, null,
-                attributeOptionCombo == null ? null : attributeOptionCombo.getCategoryOptions() );
+                ( attributeOptionCombo == null || attributeOptionCombo.getId() == categoryService.getDefaultDataElementCategoryOptionCombo().getId() )
+                        ? null : attributeOptionCombo.getCategoryOptions() );
     }
 
-    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
-                                                     OrganisationUnit organisationUnit,
-                                                     CategoryOptionGroup categoryOptionGroup,
-                                                     Set<DataElementCategoryOption> dataElementCategoryOptions )
+    public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit,
+        Set<CategoryOptionGroup> categoryOptionGroups, Set<DataElementCategoryOption> dataElementCategoryOptions )
     {
         DataApprovalSelection dataApprovalSelection = new DataApprovalSelection( dataSet, period, organisationUnit,
-                categoryOptionGroup, dataElementCategoryOptions,
+                categoryOptionGroups, dataElementCategoryOptions,
                 dataApprovalStore, dataApprovalLevelService,
                 organisationUnitService, categoryService, periodService);
 
         return dataApprovalSelection.getDataApprovalStatus();
     }
 
-    public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         return getDataApprovalPermissions( dataSet, period, organisationUnit, null,
-                attributeOptionCombo == null ? null : attributeOptionCombo.getCategoryOptions() );
+                ( attributeOptionCombo == null || attributeOptionCombo.getId() == categoryService.getDefaultDataElementCategoryOptionCombo().getId() )
+                ? null : attributeOptionCombo.getCategoryOptions() );
     }
 
     public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period,
-                                                     OrganisationUnit organisationUnit,
-                                                     CategoryOptionGroup categoryOptionGroup,
-                                                     Set<DataElementCategoryOption> dataElementCategoryOptions )
+        OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups, Set<DataElementCategoryOption> dataElementCategoryOptions )
     {
         DataApprovalStatus status = getDataApprovalStatus( dataSet, period,
-                organisationUnit, categoryOptionGroup, dataElementCategoryOptions );
+                organisationUnit, categoryOptionGroups, dataElementCategoryOptions );
 
         DataApprovalPermissions permissions = new DataApprovalPermissions();
 
@@ -188,7 +187,7 @@ public class DefaultDataApprovalService
 
         permissions.setDataApprovalStatus( status );
 
-        if ( canReadCategoryOptionGroups( categoryOptionGroup, dataElementCategoryOptions ) )
+        if ( canReadCategoryOptionGroups( categoryOptionGroups, dataElementCategoryOptions ) )
         {
             boolean accepted = false;
 
@@ -268,17 +267,23 @@ public class DefaultDataApprovalService
      * EVERY category option. The user may view a category option if they
      * have permission to view ANY category option group to which it belongs.
      *
-     * @param categoryOptionGroup option groups (if any) for data selection
+     * @param categoryOptionGroups option groups (if any) for data selection
      * @param dataElementCategoryOptions category options (if any) for data selection
      * @return true if user can read the option groups, else false
      */
-    boolean canReadCategoryOptionGroups( CategoryOptionGroup categoryOptionGroup, Set<DataElementCategoryOption> dataElementCategoryOptions)
+    boolean canReadCategoryOptionGroups( Set<CategoryOptionGroup> categoryOptionGroups, Set<DataElementCategoryOption> dataElementCategoryOptions)
     {
-        if ( categoryOptionGroup != null && !securityService.canRead( categoryOptionGroup ) )
+        if ( categoryOptionGroups != null )
         {
-            log.info( "User cannot read categoryOptionGroup " + categoryOptionGroup.getName() + " for approval." );
+            for ( CategoryOptionGroup group : categoryOptionGroups )
+            {
+                if ( !securityService.canRead( group ) )
+                {
+                    log.info( "User cannot read categoryOptionGroup " + group.getName() + " for approval." );
 
-            return false;
+                    return false;
+                }
+            }
         }
 
         if ( dataElementCategoryOptions != null )

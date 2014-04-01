@@ -36,6 +36,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
@@ -183,11 +184,18 @@ public class GetDataSetReportOptionsAction
         return categoryCombos;
     }
 
-    private List<OrganisationUnitGroupSet> groupSets;
-
-    public List<OrganisationUnitGroupSet> getGroupSets()
+    private List<CategoryOptionGroupSet> categoryOptionGroupSets;
+    
+    public List<CategoryOptionGroupSet> getCategoryOptionGroupSets()
     {
-        return groupSets;
+        return categoryOptionGroupSets;
+    }
+
+    private List<OrganisationUnitGroupSet> organisationUnitGroupSets;
+
+    public List<OrganisationUnitGroupSet> getOrganisationUnitGroupSets()
+    {
+        return organisationUnitGroupSets;
     }
 
     // -------------------------------------------------------------------------
@@ -195,11 +203,7 @@ public class GetDataSetReportOptionsAction
     // -------------------------------------------------------------------------
 
     public String execute()
-    {
-        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
-        
-        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
-        
+    {        
         periodTypes = getAvailablePeriodTypes();
         
         render = ( ds != null && pe != null && ou != null );
@@ -216,13 +220,16 @@ public class GetDataSetReportOptionsAction
         }
 
         defaultCategoryCombo = categoryService.getDefaultDataElementCategoryCombo();
-        
-        categoryCombos = new ArrayList<DataElementCategoryCombo>( categoryService.getAttributeCategoryCombos() );
-        
-        groupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
 
+        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() ); 
+        categoryCombos = new ArrayList<DataElementCategoryCombo>( categoryService.getAttributeCategoryCombos() );
+        categoryOptionGroupSets = new ArrayList<CategoryOptionGroupSet>( categoryService.getAllCategoryOptionGroupSets() );
+        organisationUnitGroupSets = new ArrayList<OrganisationUnitGroupSet>( organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
+
+        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );   
         Collections.sort( categoryCombos, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( categoryOptionGroupSets, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( organisationUnitGroupSets, IdentifiableObjectNameComparator.INSTANCE );
         
         return SUCCESS;
     }

@@ -52,7 +52,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             getRecord: function() {
                 return {
-                    id: this.dataElement.id,
+                    dimension: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
                     filter: this.valueCmp.getValue()
@@ -126,7 +126,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             getRecord: function() {
                 return {
-                    id: this.dataElement.id,
+                    dimension: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
                     value: this.valueCmp.getValue()
@@ -196,7 +196,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             getRecord: function() {
                 return {
-                    id: this.dataElement.id,
+                    dimension: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
                     filter: this.valueCmp.getSubmitValue()
@@ -271,7 +271,7 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             getRecord: function() {
                 return {
-                    id: this.dataElement.id,
+                    dimension: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: 'EQ',
                     filter: this.valueCmp.getValue()
@@ -342,7 +342,7 @@ Ext.onReady( function() {
 				}
 
                 return {
-                    id: this.dataElement.id,
+                    dimension: this.dataElement.id,
                     name: this.dataElement.name,
                     operator: this.operatorCmp.getValue(),
                     filter: valueArray.join(';')
@@ -986,10 +986,10 @@ Ext.onReady( function() {
 		};
 
 		colStore = getStore();
-		colStore.add({id: 'eventdate', name: 'Event date'});
+		colStore.add({id: 'pe', name: 'Event date'});
         colStore.add({id: 'longitude', name: 'Longitude'});
         colStore.add({id: 'latitude', name: 'Latitude'});
-        colStore.add({id: 'ouname', name: 'Organisation unit'});
+        colStore.add({id: 'ou', name: 'Organisation unit'});
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -1115,7 +1115,7 @@ Ext.onReady( function() {
 
 		resetData = function() {
 			var map = saveState({}),
-				keys = ['eventdate', 'latitude', 'longitude', 'ouname'];
+				keys = ['pe', 'latitude', 'longitude', 'ou'];
 
 			for (var key in map) {
 				if (map.hasOwnProperty(key) && !Ext.Array.contains(keys, key)) {
@@ -3504,7 +3504,7 @@ Ext.onReady( function() {
             },
             getDimension: function() {
 				return {
-					id: 'pe',
+					dimension: 'pe',
 					items: this.getRecords()
 				};
 			},
@@ -3725,7 +3725,7 @@ Ext.onReady( function() {
 			getDimension: function() {
 				var r = treePanel.getSelectionModel().getSelection(),
 					config = {
-						id: ns.core.conf.finals.dimension.organisationUnit.objectName,
+						dimension: ns.core.conf.finals.dimension.organisationUnit.objectName,
 						items: []
 					};
 
@@ -4210,6 +4210,7 @@ Ext.onReady( function() {
 
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
+console.log("item.data.id", item.data.id);
 					columns.push(map[item.data.id]);
 				});
 			}
@@ -5161,7 +5162,7 @@ Ext.onReady( function() {
 			}
 
 			// state
-            if (typeToolbar.getType() === 'aggregate') {
+            if (config.type === 'aggregate') {
                 ns.app.aggregateLayoutWindow.saveState();
             }
 
@@ -5259,10 +5260,6 @@ Ext.onReady( function() {
 			}
 		});
 
-		getParamString = function(format) {
-			return ns.core.init.contextPath + ns.core.web.analytics.getParamString(ns.app.layout, format);
-		};
-
 		openTableLayoutTab = function(type, isNewTab) {
 			if (ns.core.init.contextPath && ns.app.paramString) {
 				var colDimNames = Ext.clone(ns.app.xLayout.columnDimensionNames),
@@ -5303,7 +5300,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(getParamString('html'), '_blank');
+								window.open(ns.core.web.analytics.getParamString(ns.app.layout, 'html'), '_blank');
 							}
 						}
 					},
@@ -5312,7 +5309,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(getParamString('json'), '_blank');
+								window.open(ns.core.web.analytics.getParamString(ns.app.layout, 'json'), '_blank');
 							}
 						}
 					},
@@ -5321,7 +5318,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(getParamString('xml'), '_blank');
+								window.open(ns.core.web.analytics.getParamString(ns.app.layout, 'xml'), '_blank');
 							}
 						}
 					},
@@ -5330,7 +5327,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(getParamString('xls'), '_blank');
+								window.open(ns.core.web.analytics.getParamString(ns.app.layout, 'xls'), '_blank');
 							}
 						}
 					},
@@ -5339,7 +5336,7 @@ Ext.onReady( function() {
 						iconCls: 'ns-menu-item-datasource',
 						handler: function() {
 							if (ns.core.init.contextPath && ns.app.paramString) {
-								window.open(getParamString('csv'), '_blank');
+								window.open(ns.core.web.analytics.getParamString(ns.app.layout, 'csv'), '_blank');
 							}
 						}
 					}
