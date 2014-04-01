@@ -1590,10 +1590,14 @@ Ext.onReady( function() {
 
 			service.response.query.getExtendedResponse = function(layout, response) {
 				var xResponse = Ext.clone(response),
-                    dimensionNames = Ext.Array.pluck(layout.columns, 'id'),
+                    dimensionNames = Ext.Array.pluck(layout.columns, 'dimension'),
                     dimensionHeaders = [],
 					headers = xResponse.headers,
-					nameHeaderMap = {};
+					nameHeaderMap = {},
+                    nameMap = {};
+
+                nameMap['pe'] = 'eventdate';
+                nameMap['ou'] = 'ouname';
 
 				for (var i = 0, header; i < headers.length; i++) {
 					header = headers[i];
@@ -1609,7 +1613,7 @@ Ext.onReady( function() {
 				}
 
                 for (var i = 0, name; i < dimensionNames.length; i++) {
-                    name = dimensionNames[i];
+                    name = nameMap[dimensionNames[i]] || dimensionNames[i];
 
                     dimensionHeaders.push(nameHeaderMap[name]);
                 }
