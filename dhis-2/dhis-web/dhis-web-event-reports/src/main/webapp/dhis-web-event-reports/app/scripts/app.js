@@ -2477,7 +2477,7 @@ Ext.onReady( function() {
 			toolPanel,
             organisationUnit,
 
-            accordionBody,
+            body,
 			accordionPanels = [],
 
 		// functions
@@ -4043,7 +4043,7 @@ Ext.onReady( function() {
         });
 
             // accordion
-        accordionBody = Ext.create('Ext.panel.Panel', {
+        body = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
 			cls: 'ns-accordion',
@@ -4250,7 +4250,7 @@ Ext.onReady( function() {
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
 
-			accordionBody: accordionBody,
+			body: body,
 			accordionPanels: accordionPanels,
 
 			reset: reset,
@@ -4263,8 +4263,13 @@ Ext.onReady( function() {
 			cls: 'ns-form-widget',
 			border: false,
 			items: [
-                accordionBody
-			]
+                body
+			],
+            listeners: {
+                added: function() {
+					ns.app.widget = this;
+				}
+            }
 		});
 
 		return panel;
@@ -4730,7 +4735,7 @@ Ext.onReady( function() {
 			web.report.getLayoutConfig = function() {
                 var map = {},
                     type = ns.app.typeToolbar.getType(),
-                    view = ns.app.viewport.accordionBody.getView(),
+                    view = ns.app.widget.getView(),
                     options = ns.app.optionsWindow.getOptions();
 
                 map.aggregate = function() {
@@ -4967,7 +4972,7 @@ Ext.onReady( function() {
 			paramButtonMap = {},
 			typeToolbar,
             onTypeClick,
-			accordionBody,
+			widget,
 			accordion,
 			westRegion,
             layoutButton,
@@ -5102,11 +5107,11 @@ Ext.onReady( function() {
 			update();
 		};
 
-		accordionBody = LayerWidgetEvent();
+		widget = LayerWidgetEvent();
 
 		accordion = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
-			panels: accordionBody.accordionPanels,
+			panels: widget.accordionPanels,
 			setThisHeight: function(mx) {
 				var panelHeight = this.panels.length * 28,
 					height;
@@ -5114,13 +5119,13 @@ Ext.onReady( function() {
 				if (westRegion.hasScrollbar) {
 					height = panelHeight + mx;
 					this.setHeight(viewport.getHeight() - 2);
-					accordionBody.setHeight(height - 2);
+					widget.setHeight(height - 2);
 				}
 				else {
 					height = westRegion.getHeight() - ns.core.conf.layout.west_fill;
 					mx += panelHeight;
 					accordion.setHeight((height > mx ? mx : height) - 2);
-					accordionBody.setHeight((height > mx ? mx : height) - 2);
+					widget.setHeight((height > mx ? mx : height) - 2);
 				}
 			},
 			getExpandedPanel: function() {
@@ -5136,7 +5141,7 @@ Ext.onReady( function() {
 				return this.panels[0];
 			},
 			items: [
-				accordionBody
+				widget
 			],
 			listeners: {
 				added: function() {
@@ -5756,7 +5761,6 @@ Ext.onReady( function() {
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
 			setGui: setGui,
-			accordionBody: accordionBody,
 			items: [
 				westRegion,
 				centerRegion
