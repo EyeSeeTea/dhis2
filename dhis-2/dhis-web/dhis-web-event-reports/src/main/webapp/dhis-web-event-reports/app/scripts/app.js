@@ -1567,7 +1567,7 @@ Ext.onReady( function() {
 
 					if (favorite && favorite.name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/eventReport/',
+							url: ns.core.init.contextPath + '/api/eventReports/',
 							method: 'POST',
 							headers: {'Content-Type': 'application/json'},
 							params: Ext.encode(favorite),
