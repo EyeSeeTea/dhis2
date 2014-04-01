@@ -4208,6 +4208,11 @@ Ext.onReady( function() {
                 map[record.dimension] = record;
             }
 
+            // other
+
+            map['longitude'] = {dimension: 'longitude'};
+            map['latitude'] = {dimension: 'latitude'};
+
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
 					columns.push(map[item.data.id]);

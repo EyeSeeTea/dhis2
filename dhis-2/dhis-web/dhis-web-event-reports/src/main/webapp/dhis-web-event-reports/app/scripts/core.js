@@ -1674,7 +1674,8 @@ Ext.onReady( function() {
 
 			web.analytics.getParamString = function(view, format) {
                 var paramString,
-                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || []));
+                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || [])),
+                    ignoreKeys = ['longitude', 'latitude'];
 
                 format = format || 'json';
 
@@ -1686,6 +1687,10 @@ Ext.onReady( function() {
                 // dimensions
                 for (var i = 0, dim, con; i < dimensions.length; i++) {
                     dim = dimensions[i];
+
+                    if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+                        continue;
+                    }
 
                     paramString += '&dimension=' + dim.dimension;
 
