@@ -82,14 +82,13 @@
          **********************************************************************/
 
         function processTranslations(translations) {
-            var itemIndex,
-                items = dhis2.menu.getApps();
+            var items = dhis2.menu.getApps();
 
             items.forEach(function (element, index, items) {
                 if (element.id && translations[element.id]) {
                     items[index].name = translations.get(element.id);
                 }
-                if (element.description === '' && translations.get('intro_' + element.id) !== element.id){
+                if (element.description === '' && translations.get('intro_' + element.id) !== 'intro_' + element.id){
                     element.description = translations['intro_' + element.id];
                 }
             });
@@ -354,10 +353,10 @@
         selector = 'appsMenu';
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
-    markup += '  <a href="${defaultAction}" class="app-menu-item" title="${name}">';
+    markup += '  <a href="${defaultAction}" class="app-menu-item">';
     markup += '    <img src="${icon}" onError="javascript: this.onerror=null; this.src = \'../icons/program.png\';">';
     markup += '    <span>${name}</span>';
-    markup += '    <div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i>${description}</div>';
+    markup += '    <div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i><p>${description}</p></div>';
     markup += '  </a>';
     markup += '</li>';
 
@@ -369,7 +368,9 @@
 
         $(selector).parent().addClass('app-menu-dropdown ui-helper-clearfix');
         $(selector).html('');
-        return $.tmpl( "appMenuItemTemplate", favorites).appendTo(selector);
+        $.tmpl( "appMenuItemTemplate", favorites).appendTo(selector);
+
+        twoColumnRowFix();
     }
 
     function renderAppManager(selector) {
@@ -410,7 +411,32 @@
     }
 
     /**
-     * Render the menumanager and the dropdown meny and attach the update handler
+     * Resets the app blocks margin in case of a resize or a sort update.
+     * This function adds a margin to the 9th element when the screen is using two columns to have a clear separation
+     * between the favorites and the other apps
+     *
+     * @param event
+     * @param ui
+     */
+    function twoColumnRowFix(event, ui) {
+        var self = $('.app-menu ul'),
+            elements = $(self).find('li:not(.ui-sortable-helper)');
+
+        elements.each(function (index, element) {
+            $(element).css('margin-right', '0px');
+            if ($(element).hasClass('app-menu-placeholder')) {
+                $(element).css('margin-right', '10px');
+            }
+            //Only fix the 9th element when we have a small enough screen
+            if (index === 8 && (self.width() < 808)) {
+                $(element).css('margin-right', '255px');
+            }
+        });
+
+    }
+
+    /**
+     * Render the menumanager and the dropdown menu and attach the update handler
      */
     //TODO: Rename this as the name is not very clear to what it does
     function renderMenu() {
@@ -426,8 +452,9 @@
                     //Render the dropdown menu
                     renderDropDownFavorites();
                 },
-                //Constrict the draggable elements to the parent element
-                containment: 'parent'
+                sort: twoColumnRowFix,
+                tolerance: "pointer",
+                cursorAt: { left: 55, top: 30 }
             };
 
         renderAppManager(selector);
@@ -462,6 +489,8 @@
 
             renderMenu();
         });
+
+        $(window).resize(twoColumnRowFix);
     });
 
 })(jQuery, dhis2.menu);
