@@ -4965,7 +4965,7 @@ Ext.onReady( function() {
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
-					ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+					ns.app.viewport.setGui(layout, null, isUpdateGui);
 
 					web.mask.hide(ns.app.centerRegion);
 				};
