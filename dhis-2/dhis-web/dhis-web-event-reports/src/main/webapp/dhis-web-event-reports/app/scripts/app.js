@@ -4961,6 +4961,8 @@ console.log("item.data.id", item.data.id);
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
+					ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+
 					web.mask.hide(ns.app.centerRegion);
 				};
 
