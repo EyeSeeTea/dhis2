@@ -48,7 +48,7 @@
 {
     margin: 0 auto;
     position: relative;
-    width: 808px;
+    width: 535px;
 }
 
 .app-menu li
@@ -342,7 +342,7 @@ hr.app-separator
     border-top: 1px solid #bbb;
     height: 1px;
     position: absolute;
-    top: 288px;
+    top: 484px;
     width: 100%;
 }
 
@@ -377,5 +377,18 @@ hr.app-separator
     #headerText
     {
         display: none;
+    }
+}
+
+@media only screen and (min-width: 840px)
+{
+    .app-menu
+    {
+        width: 808px;
+    }
+
+    hr.app-separator
+    {
+        top: 288px;
     }
 }
