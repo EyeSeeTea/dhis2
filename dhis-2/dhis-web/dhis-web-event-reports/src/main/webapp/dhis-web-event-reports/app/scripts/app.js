@@ -2587,8 +2587,16 @@ Ext.onReady( function() {
 
             // data element
         setLayout = function(layout) {
+            reset();
+
+            programStore.add(layout.program);
             program.setValue(layout.program.id);
-            onProgramSelect(null, layout);
+
+            stagesByProgramStore.add(layout.programStage);
+            stage.setValue(layout.programStage.id);
+            stage.enable();
+
+            onStageSelect(null, layout);
         };
 
 		program = Ext.create('Ext.form.field.ComboBox', {
@@ -2725,18 +2733,27 @@ Ext.onReady( function() {
 			var programId = program.getValue() || null,
                 load;
 
+            stageId = stageId || layout.programStage.id;
+
 			load = function(dataElements) {
                 var attributes = attributeStorage[programId],
-                    data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
+                    data = Ext.Array.clean([].concat(attributes || [], dataElements || [])),
+                    dataDimensions;
 
 				dataElementsByStageStore.loadData(data);
+
+                if (layout) {
+                    dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout);
+console.log(dataDimensions);
+                    selectDataElements(dataDimensions);
+                }
 			};
 
             // favorite
-            if (layout) {
-                dataElementsByStageStore.loadData(layout.data); //todo
-                return;
-            }
+            //if (layout) {
+                //dataElementsByStageStore.loadData(layout.data); //todo
+                //return;
+            //}
 
             // data elements
             if (dataElementStorage.hasOwnProperty(stageId)) {
