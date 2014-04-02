@@ -365,7 +365,7 @@ Ext.onReady( function() {
             },
             setRecord: function(record) {
                 this.operatorCmp.setValue(record.operator);
-                this.valueCmp.setValue(record.filter);
+                this.valueCmp.setOptionValues(record.filter.split(';'));
             },
             initComponent: function() {
                 var container = this;
@@ -531,7 +531,16 @@ Ext.onReady( function() {
 						}
 
 						this.setValue(value += option);
-					}
+					},
+                    setOptionValues: function(optionArray) {
+                        var value = '';
+
+                        for (var i = 0; i < optionArray.length; i++) {
+                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                        }
+
+                        this.setValue(value);
+                    }
 				});
 
                 this.addCmp = Ext.create('Ext.button.Button', {
@@ -2766,7 +2775,7 @@ Ext.onReady( function() {
 
                         records.push(Ext.applyIf(dim, record));
                     }
-console.log(records);
+
                     selectDataElements(records, layout);
                 }
 			};
