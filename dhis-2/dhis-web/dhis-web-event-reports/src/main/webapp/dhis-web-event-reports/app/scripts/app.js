@@ -1102,6 +1102,8 @@ Ext.onReady( function() {
         };
 
 		saveState = function(map) {
+            map = map || dimensionStoreMap;
+
             dimensionStore.each(function(record) {
                 map[record.data.id] = dimensionStore;
             });
@@ -1138,6 +1140,7 @@ Ext.onReady( function() {
 			colStore: colStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
+            saveState: saveState,
             resetData: resetData,
 			hideOnBlur: true,
 			items: [
@@ -4152,8 +4155,8 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var view = {},
-				type = ns.app.typeToolbar.getType(),
-				layoutWindow = type === 'aggregate' ? ns.app.aggregateLayoutWindow : (type === 'query' ? ns.app.queryLayoutWindow : null),
+				dataType = ns.app.typeToolbar.getType(),
+				layoutWindow = ns.app.viewport.getLayoutWindow(dataType),
 				map = {},
 				columns = [],
 				rows = [],
@@ -4198,6 +4201,8 @@ Ext.onReady( function() {
             map['longitude'] = {dimension: 'longitude'};
             map['latitude'] = {dimension: 'latitude'};
 
+            // dimensions
+
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
 					columns.push(map[item.data.id]);
@@ -4221,6 +4226,8 @@ Ext.onReady( function() {
 					filters.push(map[item.data.id]);
 				});
 			}
+
+            // view
 
 			if (columns.length) {
 				view.columns = columns;
@@ -4986,6 +4993,7 @@ Ext.onReady( function() {
             shareButton,
             centerRegion,
             setGui,
+            getLayoutWindow,
             viewport;
 
 		ns.app.stores = ns.app.stores || {};
@@ -5038,7 +5046,7 @@ Ext.onReady( function() {
         aggregateButton = Ext.create('Ext.button.Button', {
 			//flex: 1,
             width: 223,
-			param: 'aggregate',
+			param: 'aggregated_values',
             text: '<b>Aggregated values</b><br/>Show aggregated event report',
             style: 'margin-right:1px',
             pressed: true,
@@ -5053,7 +5061,7 @@ Ext.onReady( function() {
 		caseButton = Ext.create('Ext.button.Button', {
 			//flex: 1,'
             width: 224,
-			param: 'query',
+			param: 'individual_cases',
             text: '<b>Individual cases</b><br/>Show case-based event report',
             style: 'margin-right:1px',
 			listeners: {
@@ -5068,7 +5076,7 @@ Ext.onReady( function() {
 			style: 'padding:1px; background:#f5f5f5; border:0 none',
             height: 41,
             getType: function() {
-				return aggregateButton.pressed ? 'aggregate' : 'query';
+				return aggregateButton.pressed ? aggregateButton.param : caseButton.param;
 			},
             defaults: {
                 height: 40,
@@ -5094,14 +5102,6 @@ Ext.onReady( function() {
 
 			if (!button.pressed) {
 				button.toggle();
-			}
-
-			if (param === 'aggregate') {
-				//layoutButton.enable();
-			}
-
-			if (param === 'query') {
-				//layoutButton.disable();
 			}
 
 			update();
@@ -5158,9 +5158,7 @@ Ext.onReady( function() {
 			}
 
 			// state
-            if (config.type === 'aggregate') {
-                ns.app.aggregateLayoutWindow.saveState();
-            }
+            ns.app.viewport.getLayoutWindow(config.dataType).saveState();
 
 			ns.core.web.report.getData(config, false);
 		};
@@ -5196,22 +5194,7 @@ Ext.onReady( function() {
 			text: 'Layout',
 			menu: {},
 			handler: function() {
-                var type = typeToolbar.getType();
-
-                if (type === 'aggregate') {
-                    if (!ns.app.aggregateLayoutWindow) {
-                        ns.app.aggregateLayoutWindow = AggregateLayoutWindow();
-                    }
-
-                    ns.app.aggregateLayoutWindow.show();
-                }
-                else if (type === 'query') {
-                    if (!ns.app.queryLayoutWindow) {
-                        ns.app.queryLayoutWindow = QueryLayoutWindow();
-                    }
-
-                    ns.app.queryLayoutWindow.show();
-                }
+                getLayoutWindow(typeToolbar.getType()).show();
 			},
 			listeners: {
 				added: function() {
@@ -5758,8 +5741,21 @@ Ext.onReady( function() {
 			}
 		};
 
+        getLayoutWindow = function(dataType) {
+            if (dataType === 'aggregated_values') {
+                return ns.app.aggregateLayoutWindow;
+            }
+
+            if (dataType === 'individual_cases') {
+                return ns.app.queryLayoutWindow;
+            }
+
+            return null;
+        };
+
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
+            getLayoutWindow: getLayoutWindow,
 			setGui: setGui,
 			items: [
 				westRegion,
