@@ -1679,11 +1679,15 @@ Ext.onReady( function() {
 			web.analytics.getParamString = function(view, format) {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || [])),
-                    ignoreKeys = ['longitude', 'latitude'];
+                    ignoreKeys = ['longitude', 'latitude'],
+                    dataTypeMap = {
+                        'aggregated_values': 'aggregate',
+                        'individual_cases': 'query'
+                    };
 
                 format = format || 'json';
 
-                paramString = '/api/analytics/events/' + view.type + '/' + view.program.id + '.' + format + '?';
+                paramString = '/api/analytics/events/' + dataTypeMap[view.dataType] + '/' + view.program.id + '.' + format + '?';
 
 				// stage
 				paramString += 'stage=' + view.programStage.id;

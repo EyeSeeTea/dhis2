@@ -1582,10 +1582,7 @@ Ext.onReady( function() {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
 
 								ns.app.layout.id = id;
-								ns.app.xLayout.id = id;
-
 								ns.app.layout.name = name;
-								ns.app.xLayout.name = name;
 
 								ns.app.stores.eventReport.loadStore();
 
@@ -1688,7 +1685,7 @@ Ext.onReady( function() {
 			height: 26,
 			style: 'border-radius: 1px;',
 			menu: {},
-			disabled: !Ext.isObject(ns.app.xLayout),
+			disabled: !Ext.isObject(ns.app.layout),
 			handler: function() {
 				nameWindow = new NameWindow(null, 'create');
 				nameWindow.show();
@@ -4857,7 +4854,7 @@ Ext.onReady( function() {
 			web.report.createReport = function(layout, response, isUpdateGui) {
 				var map = {};
 
-				map.aggregate = function() {
+				map['aggregated_values'] = function() {
 					var xLayout,
 						xColAxis,
 						xRowAxis,
@@ -4941,7 +4938,7 @@ Ext.onReady( function() {
 					}
 				};
 
-				map.query = function() {
+				map['individual_cases'] = function() {
 					var xResponse = service.response.query.getExtendedResponse(layout, response),
                         table = web.report.query.getHtml(layout, xResponse);
 
@@ -4967,7 +4964,7 @@ Ext.onReady( function() {
 					web.mask.hide(ns.app.centerRegion);
 				};
 
-				map[layout.type]();
+				map[layout.dataType]();
 			};
 		}());
 	};
