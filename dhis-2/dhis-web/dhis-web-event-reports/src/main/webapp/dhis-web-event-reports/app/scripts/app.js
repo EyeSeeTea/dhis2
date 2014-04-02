@@ -4236,16 +4236,17 @@ Ext.onReady( function() {
 			ns.app.downloadButton.enable();
 
 			if (layout.id) {
-                setLayout(layout);
-				//shareButton.enable();
+				ns.app.shareButton.enable();
 			}
-
-            return;
 
 			// set gui
 			if (!updateGui) {
 				return;
 			}
+
+            setLayout(layout);
+
+            return;
 
 			// data
 			indicatorSelectedStore.removeAll();
