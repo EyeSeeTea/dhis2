@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity;
+package org.hisp.dhis.reporting.dataapproval.action;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,83 +28,74 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
-* @author Lars Helge Overland
-*/
-public class TrackedEntityAttributeDimension
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
+
+public class GetDataApprovalOptionsAction
+    implements Action
 {
-    private int id;
-    
-    private TrackedEntityAttribute attribute;
-    
-    private String operator;
-    
-    private String filter;
+    @Autowired
+    private DataElementCategoryService categoryService;
 
+    @Autowired
+    private DataSetService dataSetService;
+    
     // -------------------------------------------------------------------------
-    // Constructors
+    // Output
     // -------------------------------------------------------------------------
 
-    public TrackedEntityAttributeDimension()
+    private List<CategoryOptionGroup> categoryOptionGroups;
+    
+    public List<CategoryOptionGroup> getCategoryOptionGroups()
     {
+        return categoryOptionGroups;
     }
 
-    // -------------------------------------------------------------------------
-    // Logic
-    // -------------------------------------------------------------------------
+    private List<DataSet> dataSets;
 
-    public String getUid()
+    public List<DataSet> getDataSets()
     {
-        return attribute != null ? attribute.getUid() : null;
+        return dataSets;
     }
     
-    public String getDisplayName()
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+        throws Exception
     {
-        return attribute != null ? attribute.getDisplayName() : null;
-    }
+        categoryOptionGroups = new ArrayList<CategoryOptionGroup>( categoryService.getAllCategoryOptionGroups() );
+        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );        
         
-    // -------------------------------------------------------------------------
-    // Getters and setters
-    // -------------------------------------------------------------------------
-
-    public int getId()
-    {
-        return id;
+        FilterUtils.filter( dataSets, new DataSetApproveDataFilter() );
+        
+        Collections.sort( categoryOptionGroups, IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
+        
+        return SUCCESS;
     }
 
-    public void setId( int id )
+    class DataSetApproveDataFilter
+        implements Filter<DataSet>
     {
-        this.id = id;
+        @Override
+        public boolean retain( DataSet dataSet )
+        {
+            return dataSet != null && dataSet.isApproveData();
+        }        
     }
-
-    public TrackedEntityAttribute getAttribute()
-    {
-        return attribute;
-    }
-
-    public void setAttribute( TrackedEntityAttribute attribute )
-    {
-        this.attribute = attribute;
-    }
-
-    public String getOperator()
-    {
-        return operator;
-    }
-
-    public void setOperator( String operator )
-    {
-        this.operator = operator;
-    }
-
-    public String getFilter()
-    {
-        return filter;
-    }
-
-    public void setFilter( String filter )
-    {
-        this.filter = filter;
-    }
-
 }

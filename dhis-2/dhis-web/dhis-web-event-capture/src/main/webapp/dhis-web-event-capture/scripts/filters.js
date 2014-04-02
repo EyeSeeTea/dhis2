@@ -6,36 +6,67 @@ var eventCaptureFilters = angular.module('eventCaptureFilters', [])
 
 .filter('gridFilter', function($filter){    
     
-    return function(data, filterText, filterTypes){
+    return function(data, filters, filterTypes){
         
         if(!data ){
             return;
         }
         
-        if(!filterText){
+        if(!filters){
             return data;
         }        
         else{            
             
-            var dateFilter = {}, nonDateFilter = {}, filteredData = data;
+            var dateFilter = {}, 
+                textFilter = {}, 
+                numberFilter = {},
+                filteredData = data;
             
-            for(var key in filterText){
+            for(var key in filters){
                 
                 if(filterTypes[key] === 'date'){
-                    if( filterText[key].start || filterText[key].end){
-                        dateFilter[key] = filterText[key];
+                    if(filters[key].start || filters[key].end){
+                        dateFilter[key] = filters[key];
+                    }
+                }
+                else if(filterTypes[key] === 'int'){
+                    if(filters[key].start || filters[key].end){
+                        numberFilter[key] = filters[key];
                     }
                 }
                 else{
-                    nonDateFilter[key] = filterText[key];
+                    textFilter[key] = filters[key];
                 }
-            }           
-                      
-            filteredData = $filter('filter')(filteredData, nonDateFilter);             
+            }
+            
+            filteredData = $filter('filter')(filteredData, textFilter); 
+            filteredData = $filter('filter')(filteredData, dateFilter, dateComparator);            
+            filteredData = $filter('filter')(filteredData, numberFilter, numberComparator);
                         
             return filteredData;
         } 
-    };   
+    }; 
+    
+    function dateComparator(data,filter){
+        var start = moment(filter.start, 'YYYY-MM-DD');
+        var end = moment(filter.end, 'YYYY-MM-DD');  
+        var date = moment(data, 'YYYY-MM-DD'); 
+        
+        if(filter.start && filter.end){
+            return ( Date.parse(date) <= Date.parse(end) ) && (Date.parse(date) >= Date.parse(start));
+        }        
+        return ( Date.parse(date) <= Date.parse(end) ) || (Date.parse(date) >= Date.parse(start));
+    }
+    
+    function numberComparator(data,filter){
+        var start = filter.start;
+        var end = filter.end;
+        
+        if(filter.start && filter.end){
+            return ( data <= end ) && ( data >= start );
+        }        
+        return ( data <= end ) || ( data >= start );
+    }
 })
 
 .filter('paginate', function(Paginator) {
