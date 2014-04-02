@@ -59,7 +59,7 @@ Ext.onReady( function() {
                 };
             },
             setRecord: function(record) {
-                this.opereratorCmp.setValue(record.operator);
+                this.operatorCmp.setValue(record.operator);
                 this.valueCmp.setValue(record.filter);
             },
             initComponent: function() {
@@ -136,6 +136,10 @@ Ext.onReady( function() {
                     value: this.valueCmp.getValue()
                 };
             },
+            setRecord: function(record) {
+                this.operatorCmp.setValue(record.operator);
+                this.valueCmp.setValue(record.filter);
+            },
             initComponent: function() {
                 var container = this;
 
@@ -205,6 +209,10 @@ Ext.onReady( function() {
                     operator: this.operatorCmp.getValue(),
                     filter: this.valueCmp.getSubmitValue()
                 };
+            },
+            setRecord: function(record) {
+                this.operatorCmp.setValue(record.operator);
+                this.valueCmp.setValue(record.filter);
             },
             initComponent: function() {
                 var container = this;
@@ -281,6 +289,9 @@ Ext.onReady( function() {
                     filter: this.valueCmp.getValue()
                 };
             },
+            setRecord: function(record) {
+                this.valueCmp.setValue(record.filter);
+            },
             initComponent: function() {
                 var container = this;
 
@@ -351,6 +362,10 @@ Ext.onReady( function() {
                     operator: this.operatorCmp.getValue(),
                     filter: valueArray.join(';')
                 };
+            },
+            setRecord: function(record) {
+                this.operatorCmp.setValue(record.operator);
+                this.valueCmp.setValue(record.filter);
             },
             initComponent: function() {
                 var container = this;
@@ -2414,7 +2429,7 @@ Ext.onReady( function() {
 		// stores
 		var programStore,
 			stagesByProgramStore,
-            dataElementsByStageStore,
+            //dataElementsByStageStore,
             organisationUnitGroupStore,
             periodTypeStore,
             fixedPeriodAvailableStore,
@@ -2737,15 +2752,19 @@ Ext.onReady( function() {
 
 			load = function(dataElements) {
                 var attributes = attributeStorage[programId],
-                    data = Ext.Array.clean([].concat(attributes || [], dataElements || [])),
-                    dataDimensions;
+                    data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 
 				dataElementsByStageStore.loadData(data);
 
                 if (layout) {
-                    dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout);
-console.log(dataDimensions);
-                    selectDataElements(dataDimensions);
+                    var dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout),
+                        records = [];
+
+                    for (var i = 0; i < dataDimensions.length; i++) {
+                        records.push(dataElementsByStageStore.getById(dataDimensions[i].dimension));
+                    }
+console.log(records);
+                    selectDataElements(records, layout);
                 }
 			};
 
@@ -2917,9 +2936,11 @@ console.log(dataDimensions);
 			};
 
 			dataElementsByStageStore.removeAt(dataElementsByStageStore.findExact('id', element.id));
+
+            return ux;
 		};
 
-        selectDataElements = function(items) {
+        selectDataElements = function(items, layout) {
             var dataElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 queryWindow = ns.app.queryLayoutWindow;
@@ -2929,7 +2950,7 @@ console.log(dataDimensions);
 				item = items[i];
 
                 if (Ext.isString(item)) {
-                    dataElements.push(dataElementsByStageStore.getAt(dataElementsByStageStore.findExact('id', item)).data);
+                    dataElements.push(dataElementsByStageStore.getById(item).data);
                 }
                 else if (Ext.isObject(item)) {
                     if (item.data) {
@@ -2945,7 +2966,11 @@ console.log(dataDimensions);
             for (var i = 0, element, ux, store; i < dataElements.length; i++) {
 				element = dataElements[i];
 
-				addUxFromDataElement(element);
+				ux = addUxFromDataElement(element);
+
+                if (layout) {
+                    ux.setRecord(element);
+                }
 
                 store = (element.type === 'int' || element.type === 'boolean' || element.optionSet) ? aggWindow.rowStore : aggWindow.fixedFilterStore;
 
