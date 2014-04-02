@@ -2760,8 +2760,11 @@ Ext.onReady( function() {
                     var dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout),
                         records = [];
 
-                    for (var i = 0; i < dataDimensions.length; i++) {
-                        records.push(dataElementsByStageStore.getById(dataDimensions[i].dimension));
+                    for (var i = 0, dim, record; i < dataDimensions.length; i++) {
+                        dim = dataDimensions[i];
+                        record = dataElementsByStageStore.getById(dataDimensions[i].dimension).data;
+
+                        records.push(Ext.applyIf(dim, record));
                     }
 console.log(records);
                     selectDataElements(records, layout);
