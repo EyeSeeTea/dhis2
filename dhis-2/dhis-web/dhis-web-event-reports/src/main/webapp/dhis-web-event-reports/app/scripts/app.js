@@ -2477,7 +2477,7 @@ Ext.onReady( function() {
 			toolPanel,
             organisationUnit,
 
-            body,
+            accordionBody,
 			accordionPanels = [],
 
 		// functions
@@ -4043,7 +4043,7 @@ Ext.onReady( function() {
         });
 
             // accordion
-        body = Ext.create('Ext.panel.Panel', {
+        accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
 			activeOnTop: true,
 			cls: 'ns-accordion',
@@ -4250,7 +4250,7 @@ Ext.onReady( function() {
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
 
-			body: body,
+			accordionBody: accordionBody,
 			accordionPanels: accordionPanels,
 
 			reset: reset,
@@ -4263,7 +4263,7 @@ Ext.onReady( function() {
 			cls: 'ns-form-widget',
 			border: false,
 			items: [
-                body
+                accordionBody
 			],
             listeners: {
                 added: function() {
