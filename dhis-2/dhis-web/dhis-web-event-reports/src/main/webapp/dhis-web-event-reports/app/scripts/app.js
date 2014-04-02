@@ -58,6 +58,10 @@ Ext.onReady( function() {
                     filter: this.valueCmp.getValue()
                 };
             },
+            setRecord: function(record) {
+                this.opereratorCmp.setValue(record.operator);
+                this.valueCmp.setValue(record.filter);
+            },
             initComponent: function() {
                 var container = this;
 
@@ -2421,7 +2425,8 @@ Ext.onReady( function() {
             attributeStorage = {},
             dataElementStorage = {},
 
-		// components
+		// gui
+            setLayout,
 			program,
             onProgramSelect,
 			stage,
@@ -2581,6 +2586,11 @@ Ext.onReady( function() {
         // components
 
             // data element
+        setLayout = function(layout) {
+            program.setValue(layout.program.id);
+            onProgramSelect(null, layout);
+        };
+
 		program = Ext.create('Ext.form.field.ComboBox', {
 			editable: false,
 			valueField: 'id',
@@ -2609,10 +2619,10 @@ Ext.onReady( function() {
 			}
 		});
 
-		onProgramSelect = function(programId, favorite) {
+		onProgramSelect = function(programId, layout) {
             var load;
 
-            programId = favorite ? favorite.program.id : programId;
+            programId = layout ? layout.program.id : programId;
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
@@ -2628,11 +2638,11 @@ Ext.onReady( function() {
                 ns.app.aggregateLayoutWindow.resetData();
 				ns.app.queryLayoutWindow.resetData();
 
-                stageId = (favorite ? favorite.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
+                stageId = (layout ? layout.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
 
                 if (stageId) {
                     stage.setValue(stageId);
-                    onStageSelect(stageId, favorite);
+                    onStageSelect(stageId, layout);
                 }
             };
 
@@ -2701,15 +2711,17 @@ Ext.onReady( function() {
 			}
 		});
 
-		onStageSelect = function(stageId, favorite) {
-			dataElementSelected.removeAll();
-            ns.app.aggregateLayoutWindow.resetData();
-            ns.app.queryLayoutWindow.resetData();
+		onStageSelect = function(stageId, layout) {
+            if (!layout) {
+                dataElementSelected.removeAll();
+                ns.app.aggregateLayoutWindow.resetData();
+                ns.app.queryLayoutWindow.resetData();
+            }
 
-			loadDataElements(stageId, favorite);
+			loadDataElements(stageId, layout);
 		};
 
-		loadDataElements = function(stageId, favorite) {
+		loadDataElements = function(stageId, layout) {
 			var programId = program.getValue() || null,
                 load;
 
@@ -2721,8 +2733,8 @@ Ext.onReady( function() {
 			};
 
             // favorite
-            if (favorite) {
-                dataElementsByStageStore.loadData(favorite.data); //todo
+            if (layout) {
+                dataElementsByStageStore.loadData(layout.data); //todo
                 return;
             }
 
@@ -4098,12 +4110,12 @@ Ext.onReady( function() {
 		};
 
 		setGui = function(view) {
-			var ouDim = view.rows[0],
-				isOu = false,
-				isOuc = false,
-				isOugc = false,
-				levels = [],
-				groups = [];
+			//var ouDim = view.rows[0],
+				//isOu = false,
+				//isOuc = false,
+				//isOugc = false,
+				//levels = [],
+				//groups = [];
 
 			// widget gui
 			(function() {
@@ -4148,6 +4160,222 @@ Ext.onReady( function() {
 
 				treePanel.selectGraphMap(view.parentGraphMap);
 			}());
+		};
+
+        setGui = function(layout, xLayout, updateGui) {
+			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
+				//recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
+				//graphMap = layout.parentGraphMap,
+				//objectName,
+				//periodRecords,
+				//fixedPeriodRecords = [],
+				//dimNames = [],
+				//isOu = false,
+				//isOuc = false,
+				//isOugc = false,
+				//levels = [],
+				//groups = [],
+				//orgunits = [];
+
+			// state
+			ns.app.downloadButton.enable();
+
+			if (layout.id) {
+                setLayout(layout);
+				//shareButton.enable();
+			}
+
+            return;
+
+			// set gui
+			if (!updateGui) {
+				return;
+			}
+
+			// data
+			indicatorSelectedStore.removeAll();
+			objectName = dimConf.indicator.objectName;
+			if (dimMap[objectName]) {
+				indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
+			}
+
+			// Data elements
+			dataElementSelectedStore.removeAll();
+			objectName = dimConf.dataElement.objectName;
+			if (dimMap[objectName]) {
+				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+				dataElementDetailLevel.setValue(objectName);
+			}
+
+			// Operands
+			objectName = dimConf.operand.objectName;
+			if (dimMap[objectName]) {
+				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+				dataElementDetailLevel.setValue(objectName);
+			}
+
+			// Data sets
+			dataSetSelectedStore.removeAll();
+			objectName = dimConf.dataSet.objectName;
+			if (dimMap[objectName]) {
+				dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
+				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+			}
+
+			// Periods
+			fixedPeriodSelectedStore.removeAll();
+			period.resetRelativePeriods();
+			periodRecords = recMap[dimConf.period.objectName] || [];
+			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
+				periodRecord = periodRecords[i];
+				checkbox = ns.app.relativePeriodCmpMap[periodRecord.id];
+				if (checkbox) {
+					checkbox.setValue(true);
+				}
+				else {
+					fixedPeriodRecords.push(periodRecord);
+				}
+			}
+			fixedPeriodSelectedStore.add(fixedPeriodRecords);
+			ns.core.web.multiSelect.filterAvailable({store: fixedPeriodAvailableStore}, {store: fixedPeriodSelectedStore});
+
+			// Group sets
+			for (var key in dimensionIdSelectedStoreMap) {
+				if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
+					var a = dimensionIdAvailableStoreMap[key],
+						s = dimensionIdSelectedStoreMap[key];
+
+					if (s.getCount() > 0) {
+						a.reset();
+						s.removeAll();
+					}
+
+					if (recMap[key]) {
+						s.add(recMap[key]);
+						ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
+					}
+				}
+			}
+
+			// Layout
+			ns.app.stores.dimension.reset(true);
+			ns.app.aggregateLayoutWindow.colStore.removeAll();
+			ns.app.layoutWiaggregateLayoutWindowndow.rowStore.removeAll();
+			ns.app.aggregateLayoutWindow.filterStore.removeAll();
+
+			if (layout.columns) {
+				dimNames = [];
+
+				for (var i = 0, dim; i < layout.columns.length; i++) {
+					dim = dimConf.objectNameMap[layout.columns[i].dimension];
+
+					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
+						ns.app.aggregateLayoutWindow.colStore.add({
+							id: dim.dimensionName,
+							name: dimConf.objectNameMap[dim.dimensionName].name
+						});
+
+						dimNames.push(dim.dimensionName);
+					}
+
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
+				}
+			}
+
+			if (layout.rows) {
+				dimNames = [];
+
+				for (var i = 0, dim; i < layout.rows.length; i++) {
+					dim = dimConf.objectNameMap[layout.rows[i].dimension];
+
+					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
+						ns.app.stores.row.add({
+							id: dim.dimensionName,
+							name: dimConf.objectNameMap[dim.dimensionName].name
+						});
+
+						dimNames.push(dim.dimensionName);
+					}
+
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
+				}
+			}
+
+			if (layout.filters) {
+				dimNames = [];
+
+				for (var i = 0, dim; i < layout.filters.length; i++) {
+					dim = dimConf.objectNameMap[layout.filters[i].dimension];
+
+					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
+						ns.app.stores.filter.add({
+							id: dim.dimensionName,
+							name: dimConf.objectNameMap[dim.dimensionName].name
+						});
+
+						dimNames.push(dim.dimensionName);
+					}
+
+					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
+				}
+			}
+
+			// Options
+			if (ns.app.optionsWindow) {
+				ns.app.optionsWindow.setOptions(layout);
+			}
+
+			// Organisation units
+			if (recMap[dimConf.organisationUnit.objectName]) {
+				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
+					if (ouRecords[i].id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+						isOugc = true;
+					}
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+						groups.push(ouRecords[i].id.split('-')[1]);
+					}
+					else {
+						orgunits.push(ouRecords[i].id);
+					}
+				}
+
+				if (levels.length) {
+					toolMenu.clickHandler('level');
+					organisationUnitLevel.setValue(levels);
+				}
+				else if (groups.length) {
+					toolMenu.clickHandler('group');
+					organisationUnitGroup.setValue(groups);
+				}
+				else {
+					toolMenu.clickHandler('orgunit');
+					userOrganisationUnit.setValue(isOu);
+					userOrganisationUnitChildren.setValue(isOuc);
+					userOrganisationUnitGrandChildren.setValue(isOugc);
+				}
+
+				if (!(isOu || isOuc || isOugc)) {
+					if (Ext.isObject(graphMap)) {
+						treePanel.selectGraphMap(graphMap);
+					}
+				}
+			}
+			else {
+				treePanel.reset();
+			}
 		};
 
 		getView = function(config) {
@@ -4919,7 +5147,7 @@ Ext.onReady( function() {
 						web.storage.session.set(layout, 'table');
 					}
 
-					ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+					ns.app.widget.setGui(layout, xLayout, isUpdateGui);
 
 					web.mask.hide(ns.app.centerRegion);
 
@@ -4959,7 +5187,7 @@ Ext.onReady( function() {
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
-					ns.app.viewport.setGui(layout, null, isUpdateGui);
+					ns.app.widget.setGui(layout, null, isUpdateGui);
 
 					web.mask.hide(ns.app.centerRegion);
 				};
@@ -5325,6 +5553,11 @@ Ext.onReady( function() {
 						this.getEl().addCls('ns-toolbar-btn-menu');
 					}
 				}
+			},
+			listeners: {
+				added: function() {
+					ns.app.downloadButton = this;
+				}
 			}
 		});
 
@@ -5524,7 +5757,7 @@ Ext.onReady( function() {
 		});
 
 		setGui = function(layout, xLayout, updateGui) {
-			//var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
 				//recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
 				//graphMap = layout.parentGraphMap,
@@ -5539,21 +5772,21 @@ Ext.onReady( function() {
 				//groups = [],
 				//orgunits = [];
 
-			// State
+			// state
 			downloadButton.enable();
 
 			if (layout.id) {
-				shareButton.enable();
+				//shareButton.enable();
 			}
 
             return;
 
-			// Set gui
+			// set gui
 			if (!updateGui) {
 				return;
 			}
 
-			// Indicators
+			// data
 			indicatorSelectedStore.removeAll();
 			objectName = dimConf.indicator.objectName;
 			if (dimMap[objectName]) {
