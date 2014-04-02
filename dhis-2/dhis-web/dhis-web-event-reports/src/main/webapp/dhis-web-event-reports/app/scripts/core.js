@@ -1686,7 +1686,7 @@ Ext.onReady( function() {
                 paramString = '/api/analytics/events/' + view.type + '/' + view.program.id + '.' + format + '?';
 
 				// stage
-				paramString += 'stage=' + view.stage.id;
+				paramString += 'stage=' + view.programStage.id;
 
                 // dimensions
                 for (var i = 0, dim, con; i < dimensions.length; i++) {
@@ -1717,47 +1717,9 @@ Ext.onReady( function() {
                     paramString += '&startDate=' + view.startDate + '&endDate=' + view.endDate;
                 }
 
-				// ou
-				//if (Ext.isArray(view.organisationUnits)) {
-                    //paramString += '&dimension=ou:';
-
-					//for (var i = 0; i < view.organisationUnits.length; i++) {
-						//paramString += view.organisationUnits[i].id;
-                        //paramString += i < (view.organisationUnits.length - 1) ? ';' : '';
-					//}
-				//}
-
-				// de
-				//for (var i = 0, element; i < view.dataElements.length; i++) {
-					//element = view.dataElements[i];
-
-					//paramString += '&dimension=' + element.id;
-
-					//if (element.value) {
-						//if (element.operator) {
-							//paramString += ':' + element.operator;
-						//}
-
-						//paramString += ':' + element.value;
-					//}
-				//}
-
-				// pe
-				//if (Ext.isArray(view.periods)) {
-					//paramString += '&dimension=pe:';
-
-					//for (var i = 0; i < view.periods.length; i++) {
-						//paramString += view.periods[i].id + (i < view.periods.length - 1 ?  ';' : '');
-					//}
-				//}
-				//else {
-					//paramString += '&startDate=' + view.startDate;
-					//paramString += '&endDate=' + view.endDate;
-				//}
-
 				// hierarchy
 				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
-console.log(paramString);
+
                 return paramString;
             };
 

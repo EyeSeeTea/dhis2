@@ -4161,9 +4161,9 @@ Ext.onReady( function() {
 
 			view.dataType = layoutWindow.dataType;
             view.program = program.getRecord();
-            view.stage = stage.getRecord();
+            view.programStage = stage.getRecord();
 
-            if (!(view.dataType && view.program && view.stage)) {
+            if (!(view.dataType && view.program && view.programStage)) {
                 return;
             }
 
@@ -5562,11 +5562,11 @@ Ext.onReady( function() {
 			// State
 			downloadButton.enable();
 
-            return;
-
 			if (layout.id) {
-				//shareButton.enable();
+				shareButton.enable();
 			}
+
+            return;
 
 			// Set gui
 			if (!updateGui) {
