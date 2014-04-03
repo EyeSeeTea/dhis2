@@ -173,6 +173,15 @@
 	</action>
 		
 	<!-- Payment Adjustment Screen -->
+		
+	 <action name="loadPaymentPeriods" class="org.hisp.dhis.pbf.payment.action.LoadPaymentPeriodsAction">
+        <result name="success" type="velocity-json">/dhis-web-maintenance-pbf/jsonPeriods.vm</result>
+    </action>
+	
+	<action name="getPaymentAvailableNextPrePeriods" class="org.hisp.dhis.pbf.payment.action.LoadPaymentNextPrePeriodsAction">
+        <result name="success" type="velocity-json">/dhis-web-maintenance-pbf/jsonPeriods.vm</result>
+    </action>
+		
 	<action name="getOrganisationUnitForPayment" class="org.hisp.dhis.pbf.payment.action.GetOrganisationUnitForPaymentAction">
         <result name="success" type="velocity-json">/dhis-web-maintenance-pbf/jsonResponseSuccess.vm</result>
         <result name="input" type="velocity-json">/dhis-web-maintenance-pbf/jsonResponseInput.vm</result>

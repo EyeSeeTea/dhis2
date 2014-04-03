@@ -33,6 +33,7 @@ import com.google.common.collect.Maps;
 import org.hisp.dhis.acl.Access;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
+import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.api.utils.WebUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -41,11 +42,14 @@ import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
+import org.hisp.dhis.dxf2.metadata.ImportService;
+import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
@@ -96,6 +100,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @Autowired
     protected RenderService renderService;
+
+    @Autowired
+    protected ImportService importService;
 
     //--------------------------------------------------------------------------
     // GET
@@ -265,7 +272,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
-        manager.save( parsed );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
+        renderService.toJson( response.getOutputStream(), summary );
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
@@ -277,7 +285,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
-        manager.save( parsed );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
+        renderService.toJson( response.getOutputStream(), summary );
     }
 
     //--------------------------------------------------------------------------
@@ -291,6 +300,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
         T object = getEntity( uid );
 
+        if ( object == null )
+        {
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            return;
+        }
+
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
@@ -299,8 +314,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
-        object.mergeWith( parsed );
-        manager.update( object );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        renderService.toJson( response.getOutputStream(), summary );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
@@ -310,6 +325,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
         T object = getEntity( uid );
 
+        if ( object == null )
+        {
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            return;
+        }
+
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
@@ -318,8 +339,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
-        object.mergeWith( parsed );
-        manager.update( object );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        renderService.toJson( response.getOutputStream(), summary );
     }
 
     //--------------------------------------------------------------------------

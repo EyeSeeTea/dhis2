@@ -1,7 +1,7 @@
-package org.hisp.dhis.chart;
+package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,16 +28,36 @@ package org.hisp.dhis.chart;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AnalyticalObjectStore;
-import org.hisp.dhis.user.User;
-
-import java.util.Collection;
-
 /**
- * @author Lars Helge Overland
+ * "Base", or simplified, state of data approval for a given data selection.
+ *
+ * @author Jim Grace
  */
-public interface ChartStore
-    extends AnalyticalObjectStore<Chart>
+public enum DataApprovalBaseState
 {
-    Collection<Chart> getSystemAndUserCharts( User user );
+    /**
+     * Data approval does not apply to this selection. (Data is neither
+     * "approved" nor "unapproved".)
+     */
+    UNAPPROVABLE,
+
+    /**
+     * Data is unapproved, and is not ready to be approved for this selection.
+     */
+    UNAPPROVED_NOT_READY,
+
+    /**
+     * Data is unapproved, and is ready to be approved for this selection.
+     */
+    UNAPPROVED_READY,
+
+    /**
+     * Data is approved (either here or elsewhere).
+     */
+    APPROVED,
+
+    /**
+     * Data is approved and accepted (either here or elsewhere).
+     */
+    ACCEPTED;
 }

@@ -126,7 +126,7 @@
     bottom: 0;
     left: 0;
     background: #fff;
-    border: 1px solid #d0d0d0;
+    border: 1px solid #b0b0b0;
     display: block;
     margin: 10px;
     padding: 10px 10px;
@@ -149,7 +149,7 @@
 {
     color: #444;
     display: block;
-    font-size: 1em;
+    font-size: 1.1em;
     padding: 0;
     padding-bottom: 5px;
     margin: 0;
@@ -302,10 +302,11 @@ a.menu-link:hover
 .apps-menu-more
 {
     display: table;
-    height: 30px;
-    padding-top: 10px;
+    height: 34px;
+    padding-top: 12px;
     text-align: center;
-    width: 100%;
+    width: 360px;
+	margin-top: 5px;
 }
 
 .apps-menu-more a
@@ -347,6 +348,24 @@ hr.app-separator
     width: 100%;
 }
 
+.menu-drop-down-wrap
+{
+    overflow: hidden;
+    height: 330px;
+}
+
+.menu-drop-down-scroll
+{
+    height: 330px;
+    width: 384px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#menuDropDown1 ul {
+    height: 330px;
+}
+
 #menuDropDown1 .caret-up-background,
 #menuDropDown1 .caret-up-border
 {
@@ -368,6 +387,62 @@ hr.app-separator
 .show-menu
 {
     display: block;
+}
+
+.app-menu-help
+{
+    color: #444;
+    line-height: 1.75em;
+}
+
+.app-menu-help .fa
+{
+    font-size: 1.2em;
+}
+
+.app-menu-help .fa-bookmark
+{
+    color: #276696;
+    font-size: 1.5em;
+    padding-right: 5px;
+    position: relative;
+    top: 2px;
+}
+
+.app-menu-help .fa-arrows
+{
+    padding-right: 4px;
+}
+
+.app-menu-error
+{
+    background: darkred;
+    background: rgba(160, 0, 0, .70);
+    border: 1px solid darkred;
+    border-radius: 5px;
+    display: block;
+    padding: .5em 0;
+    text-align: center;
+    width: 358px;
+}
+
+.app-menu-error:hover
+{
+    background: rgba(160, 0, 0, .80);
+    cursor: pointer;
+}
+
+.app-menu-error a
+{
+    background-color: transparent;
+    color: white;
+}
+
+.app-menu-error a:hover
+{
+    background-color: transparent;
+    color: white;
+    text-decoration: none;
 }
 
 /*

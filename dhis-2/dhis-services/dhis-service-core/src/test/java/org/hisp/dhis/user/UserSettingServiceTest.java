@@ -1,7 +1,7 @@
-package org.hisp.dhis.chart.hibernate;
+package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2013, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,25 +28,45 @@ package org.hisp.dhis.chart.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.chart.Chart;
-import org.hisp.dhis.chart.ChartStore;
-import org.hisp.dhis.common.hibernate.HibernateAnalyticalObjectStore;
-import org.hisp.dhis.user.User;
+import static org.junit.Assert.assertEquals;
 
-import java.util.Collection;
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
 
 /**
- * @author Lars Helge Overland
+ * @author Kiran Prakash
  */
-public class HibernateChartStore
-    extends HibernateAnalyticalObjectStore<Chart> implements ChartStore
+public class UserSettingServiceTest
+    extends DhisSpringTest
 {
-    @SuppressWarnings( "unchecked" )
-    public Collection<Chart> getSystemAndUserCharts( User user )
+    private UserSettingService userSettingService;
+
+    private UserStore userStore;
+
+    private UserCredentialsStore userCredentialStore;
+
+    @Override
+    protected void setUpTest()
+        throws Exception
     {
-        return getCriteria(
-            Restrictions.or( Restrictions.isNull( "user" ),
-                Restrictions.eq( "user", user ) ) ).list();
+        userStore = (UserStore) getBean( UserStore.ID );
+        userService = (UserService) getBean( UserService.ID );
+        userSettingService = (UserSettingService) getBean( UserSettingService.ID );
+        userCredentialStore = (UserCredentialsStore) getBean( UserCredentialsStore.ID );
+    }
+
+    @Test
+    public void testSaveUserPreferences()
+        throws Exception
+    {
+        User testUser = createUser( 'D' );
+        userStore.save( testUser );
+        UserCredentials userCredentials = testUser.getUserCredentials();
+        userCredentials.setUser( testUser );
+        userCredentialStore.addUserCredentials( userCredentials );
+        userSettingService.saveUserSetting( "mykey", "myvalue", "username" );
+        UserSetting setting = userCredentialStore.getUserSetting( testUser, "mykey" );
+        assertEquals( "myvalue", setting.getValue() );
+        assertEquals( "mykey", setting.getName() );
     }
 }

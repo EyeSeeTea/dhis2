@@ -37,6 +37,7 @@ import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.STATIC_DIMS;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
@@ -324,6 +325,10 @@ public abstract class BaseAnalyticalObject
             
             type = DimensionType.CATEGORY;
         }
+        else if ( STATIC_DIMS.contains( dimension ) )
+        {            
+            type = DimensionType.STATIC;
+        }
         else // Group set
         {
             // Data element group set
@@ -396,7 +401,7 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityAttributeDimension tead = attributes.get( dimension );
                 
-                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, null, tead.getOperator(), tead.getFilter() );
+                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, tead.getDisplayName(), tead.getOperator(), tead.getFilter() );
             }
             
             // Tracked entity data element
@@ -412,7 +417,7 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
                 
-                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, tedd.getOperator(), tedd.getFilter() );
+                return new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, tedd.getDisplayName(), tedd.getOperator(), tedd.getFilter() );
             }
         }
         
@@ -535,6 +540,10 @@ public abstract class BaseAnalyticalObject
             
             objects.add( new BaseDimensionalObject( dimension, DimensionType.CATEGORY, categoryDimension.getItems() ) );
         }
+        else if ( STATIC_DIMS.contains( dimension ) )
+        {
+            objects.add( new BaseDimensionalObject( dimension, DimensionType.STATIC, new ArrayList<NameableObject>() ) );
+        }
         else // Group set
         {
             // Data element group set
@@ -601,7 +610,7 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityAttributeDimension tead = attributes.get( dimension );
                 
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, null, tead.getOperator(), tead.getFilter() ) );
+                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_ATTRIBUTE, null, tead.getDisplayName(), tead.getOperator(), tead.getFilter() ) );
             }
             
             // Tracked entity data element
@@ -617,7 +626,7 @@ public abstract class BaseAnalyticalObject
             {
                 TrackedEntityDataElementDimension tedd = dataElements.get( dimension );
                 
-                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, tedd.getOperator(), tedd.getFilter() ) );
+                objects.add( new BaseDimensionalObject( dimension, DimensionType.TRACKED_ENTITY_DATAELEMENT, null, tedd.getDisplayName(), tedd.getOperator(), tedd.getFilter() ) );
             }            
         }
         

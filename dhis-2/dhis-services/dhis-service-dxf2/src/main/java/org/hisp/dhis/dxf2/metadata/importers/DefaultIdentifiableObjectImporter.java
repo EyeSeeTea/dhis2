@@ -112,7 +112,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private AclService aclService;
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -452,7 +452,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
      */
     protected boolean newObject( User user, T object )
     {
-        if ( !aclService.canCreatePublic( user, object.getClass() ) && !aclService.canCreatePrivate( user, object.getClass() ) )
+        if ( !aclService.canCreate( user, object.getClass() ) )
         {
             summaryType.getImportConflicts().add(
                 new ImportConflict( ImportUtils.getDisplayName( object ), "You do not have create access to class type." ) );
@@ -645,6 +645,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
         this.summaryType.setDataValueCount( null );
+
+        if ( object == null )
+        {
+            summaryType.getImportCount().incrementIgnored();
+            return summaryType;
+        }
 
         ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
         importObjectLocal( user, object );

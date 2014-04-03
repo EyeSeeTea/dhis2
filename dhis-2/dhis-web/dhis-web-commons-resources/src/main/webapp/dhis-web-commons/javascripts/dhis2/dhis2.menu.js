@@ -27,13 +27,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// Make sure that dhis2 object exists
+var dhis2 = dhis2 || {};
+
 /**
  * Created by Mark Polak on 28/01/14.
- *
- * @see Underscore.js (http://underscorejs.org)
  */
-(function (dhis2, _, undefined) {
+(function (dhis2, undefined) {
     var MAX_FAVORITES = 9,
+        du = {
+            isFunction: function(obj) {
+                return Object.prototype.toString.call(obj) == '[object Function]';
+            }
+        },
         /**
          * Object that represents the list of menu items
          * and managers the order of the items to be saved.
@@ -68,7 +74,7 @@
             }
         })();
 
-    dhis2.util.namespace( 'dhis2.menu' );
+    dhis2.menu = {};
 
     dhis2.menu = function () {
         var that = {},
@@ -253,7 +259,7 @@
         that.subscribe = function (callback, onlyOnce) {
             var once = onlyOnce ? true : false;
 
-            if ( ! _.isFunction(callback)) {
+            if ( ! du.isFunction(callback)) {
                 return false;
             }
 
@@ -330,7 +336,7 @@
         }
 
         that.save = function (saveMethod) {
-            if ( ! _.isFunction(saveMethod)) {
+            if ( ! du.isFunction(saveMethod)) {
                 return false;
             }
 
@@ -339,7 +345,7 @@
 
         return that;
     }();
-})(dhis2, _);
+})(dhis2);
 
 /**
  * Created by Mark Polak on 28/01/14.
@@ -364,13 +370,13 @@
 
     function renderDropDownFavorites() {
         var selector = '#menuDropDown1 .menuDropDownBox',
-            favorites = dhis2.menu.getFavorites();
+            apps = dhis2.menu.getOrderedAppList();
 
-        $(selector).parent().addClass('app-menu-dropdown ui-helper-clearfix');
+        $('#menuDropDown1').addClass('app-menu-dropdown ui-helper-clearfix');
         $(selector).html('');
-        $.tmpl( "appMenuItemTemplate", favorites).appendTo(selector);
-
-        twoColumnRowFix();
+        $.tmpl( "appMenuItemTemplate", apps).appendTo(selector);
+        $('#menuDropDown1 .menu-drop-down-scroll .apps-menu-more').remove();
+        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#menuDropDown1 .menu-drop-down-scroll'));
     }
 
     function renderAppManager(selector) {
@@ -384,6 +390,8 @@
         $('#' + selector + ' ul li').each(function (index, item) {
             $(item).children('a').append($('<i class="fa fa-bookmark"></i>'));
         });
+
+        twoColumnRowFix();
     }
 
     /**
@@ -404,8 +412,6 @@
                 //TODO: Give user feedback for successful save
             }).error(function () {
                 //TODO: Give user feedback for failure to save
-                //TODO: Translate this error message
-                alert('Unable to save your app order to the server.');
             });
         }
     }
@@ -475,8 +481,11 @@
                 menu.addMenuItems(data.modules);
             }
         }).error(function () {
+            //TODO: Give user feedback for failure to load items
             //TODO: Translate this error message
-            alert('Can not load apps from server.');
+            var error_template = '<li class="app-menu-error"><a href="' + window.location.href +'">Unable to load your apps, click to refresh</a></li>';
+            $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
+            $('#menuDropDown1 .menuDropDownBox').html(error_template);
         });
 
         /**
@@ -490,7 +499,33 @@
             renderMenu();
         });
 
+        /**
+         * Check if we need to fix columns when the window resizes
+         */
         $(window).resize(twoColumnRowFix);
+
+        /**
+         * Adds a scrolling mechanism that modifies the height of the menu box to show only two rows
+         * Additionally it makes space for the scrollbar and shows/hides the more apps button
+         */
+        $('.menu-drop-down-scroll').scroll(function (event) {
+            var self = $(this),
+                moreAppsElement = $('#menuDropDown1 > .apps-menu-more');
+
+            if (self.scrollTop() < 10) {
+                moreAppsElement.show();
+                self.parent().css('width', '360px');
+                self.parent().parent().css('width', '360px');
+            } else {
+                if (self.innerHeight() === 330 ) {
+                    moreAppsElement.hide();
+                    self.parent().css('width', '384px');
+                    self.parent().parent().css('width', '384px');
+                }
+            }
+
+        });
+
     });
 
 })(jQuery, dhis2.menu);
