@@ -595,6 +595,7 @@ Ext.onReady( function() {
             hasDimension,
             saveState,
             resetData,
+            reset,
             dimensionStoreMap = {},
 
 			dimensionPanel,
@@ -644,19 +645,17 @@ Ext.onReady( function() {
 		};
 
 		colStore = getStore();
-		colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
-        colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
-
 		rowStore = getStore();
-
         fixedFilterStore = getStore();
+        filterStore = getStore();
+
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
             fixedFilter.setHeight(fixedFilterHeight);
             filter.setHeight(defaultHeight - fixedFilterHeight);
         };
 
-		filterStore = getStore();
+        reset();
 
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
@@ -873,6 +872,18 @@ Ext.onReady( function() {
 			}
 		};
 
+		reset = function() {
+			colStore.removeAll();
+			rowStore.removeAll();
+			fixedFilterStore.removeAll();
+			filterStore.removeAll();
+
+			colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+			colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+
+			fixedFilterStore.setListHeight();
+		};
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
 			bodyStyle: 'background-color:#fff; padding:' + margin + 'px',
@@ -890,6 +901,7 @@ Ext.onReady( function() {
             hasDimension: hasDimension,
             saveState: saveState,
             resetData: resetData,
+            reset: reset,
 			hideOnBlur: true,
 			items: selectPanel,
 			bbar: [
@@ -2624,6 +2636,7 @@ Ext.onReady( function() {
 				groups = [];
 
             reset();
+
 
 			// data
             programStore.add(layout.program);
