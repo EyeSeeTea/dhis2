@@ -655,8 +655,6 @@ Ext.onReady( function() {
             filter.setHeight(defaultHeight - fixedFilterHeight);
         };
 
-        reset();
-
 		col = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
@@ -946,6 +944,8 @@ Ext.onReady( function() {
 					}
 				},
                 render: function() {
+					reset();
+
                     fixedFilterStore.on('add', function() {
                         this.setListHeight();
                     });
@@ -973,6 +973,7 @@ Ext.onReady( function() {
             removeDimension,
             saveState,
             resetData,
+            reset,
             dimensionStoreMap = {},
 
 			dimensionPanel,
@@ -1026,10 +1027,6 @@ Ext.onReady( function() {
 		};
 
 		colStore = getStore();
-		colStore.add({id: 'pe', name: 'Event date'});
-        colStore.add({id: 'longitude', name: 'Longitude'});
-        colStore.add({id: 'latitude', name: 'Latitude'});
-        colStore.add({id: 'ou', name: 'Organisation unit'});
 
 		getCmpHeight = function() {
 			var size = dimensionStore.totalCount,
@@ -1166,6 +1163,17 @@ Ext.onReady( function() {
 			}
 		};
 
+		reset = function() {
+			colStore.removeAll();
+			dimensionStore.removeAll();
+
+			colStore.add({id: 'pe', name: 'Event date'});
+			colStore.add({id: 'ou', name: 'Organisation unit'});
+
+			dimensionStore.add({id: 'longitude', name: 'Longitude'});
+			dimensionStore.add({id: 'latitude', name: 'Latitude'});
+		};
+
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_layout,
             layout: 'column',
@@ -1182,6 +1190,7 @@ Ext.onReady( function() {
             removeDimension: removeDimension,
             saveState: saveState,
             resetData: resetData,
+            reset: reset,
 			hideOnBlur: true,
 			items: [
                 dimension,
@@ -1227,6 +1236,9 @@ Ext.onReady( function() {
 							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
+				},
+				render: function() {
+					reset();
 				}
 			}
 		});
@@ -2636,7 +2648,8 @@ Ext.onReady( function() {
 				groups = [];
 
             reset();
-
+            ns.app.aggregateLayoutWindow.reset();
+            ns.app.queryLayoutWindow.reset();
 
 			// data
             programStore.add(layout.program);
