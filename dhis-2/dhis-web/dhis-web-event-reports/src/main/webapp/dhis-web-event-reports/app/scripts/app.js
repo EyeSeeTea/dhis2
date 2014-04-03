@@ -1540,7 +1540,7 @@ Ext.onReady( function() {
 
 		// Vars
 			windowWidth = 500,
-			windowCmpWidth = windowWidth - 22;
+			windowCmpWidth = windowWidth - 14;
 
 		ns.app.stores.eventReport.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
@@ -1565,9 +1565,8 @@ Ext.onReady( function() {
 
 			if (ns.app.layout) {
 				favorite = Ext.clone(ns.app.layout);
-				//dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
-				// Server sync
+				// sync
 				favorite.totals = favorite.showTotals;
 				delete favorite.showTotals;
 
@@ -1579,15 +1578,6 @@ Ext.onReady( function() {
 				delete favorite.parentGraphMap;
 
                 delete favorite.id;
-
-				// Replace operand id characters
-				//for (var i = 0; i < dimensions.length; i++) {
-					//if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
-						//for (var j = 0; j < dimensions[i].items.length; j++) {
-							//dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
-						//}
-					//}
-				//}
 			}
 
 			return favorite;
@@ -1599,10 +1589,10 @@ Ext.onReady( function() {
 
 			nameTextfield = Ext.create('Ext.form.field.Text', {
 				height: 26,
-				width: 371,
-				fieldStyle: 'padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
+				width: 350,
+				fieldStyle: 'padding-left: 4px; border-color: #bbb; font-size:11px',
 				style: 'margin-bottom:0',
-				emptyText: 'Favorite name',
+				emptyText: 'Name of favorite',
 				value: id ? record.data.name : '',
 				listeners: {
 					afterrender: function() {
@@ -1700,7 +1690,7 @@ Ext.onReady( function() {
 			window = Ext.create('Ext.window.Window', {
 				title: id ? 'Rename favorite' : 'Create new favorite',
 				//iconCls: 'ns-window-title-icon-favorite',
-				bodyStyle: 'padding:2px; background:#fff',
+				bodyStyle: 'padding:1px; background:#fff',
 				resizable: false,
 				modal: true,
 				items: nameTextfield,
@@ -1735,7 +1725,6 @@ Ext.onReady( function() {
 			text: NS.i18n.add_new,
 			width: 67,
 			height: 26,
-			style: 'border-radius: 1px;',
 			menu: {},
 			disabled: !Ext.isObject(ns.app.layout),
 			handler: function() {
@@ -1745,9 +1734,9 @@ Ext.onReady( function() {
 		});
 
 		searchTextfield = Ext.create('Ext.form.field.Text', {
-			width: windowCmpWidth - addButton.width - 11,
+			width: windowCmpWidth - addButton.width - 3,
 			height: 26,
-			fieldStyle: 'padding-right: 0; padding-left: 5px; border-radius: 1px; border-color: #bbb; font-size:11px',
+			fieldStyle: 'padding-right: 0; padding-left: 4px; border-color: #bbb; font-size:11px',
 			emptyText: NS.i18n.search_for_favorites,
 			enableKeyEvents: true,
 			currentValue: '',
@@ -2038,8 +2027,7 @@ Ext.onReady( function() {
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
 			title: NS.i18n.manage_favorites,
-			//iconCls: 'ns-window-title-icon-favorite',
-			bodyStyle: 'padding:5px; background-color:#fff',
+			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			width: windowWidth,
@@ -2049,12 +2037,13 @@ Ext.onReady( function() {
 					xtype: 'panel',
 					layout: 'hbox',
 					bodyStyle: 'border:0 none',
+					height: 27,
 					items: [
 						addButton,
 						{
-							height: 24,
+							height: 26,
 							width: 1,
-							style: 'width:1px; margin-left:5px; margin-right:5px; margin-top:1px',
+							style: 'width:1px; margin-left:1px; margin-right:1px; margin-top:0',
 							bodyStyle: 'border-left: 1px solid #aaa'
 						},
 						searchTextfield
