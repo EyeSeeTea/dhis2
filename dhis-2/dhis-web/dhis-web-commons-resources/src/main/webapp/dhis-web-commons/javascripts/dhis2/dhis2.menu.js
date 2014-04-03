@@ -27,13 +27,19 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+// Make sure that dhis2 object exists
+var dhis2 = dhis2 || {};
+
 /**
  * Created by Mark Polak on 28/01/14.
- *
- * @see Underscore.js (http://underscorejs.org)
  */
-(function (dhis2, _, undefined) {
+(function (dhis2, undefined) {
     var MAX_FAVORITES = 9,
+        du = {
+            isFunction: function(obj) {
+                return Object.prototype.toString.call(obj) == '[object Function]';
+            }
+        },
         /**
          * Object that represents the list of menu items
          * and managers the order of the items to be saved.
@@ -68,7 +74,7 @@
             }
         })();
 
-    dhis2.util.namespace( 'dhis2.menu' );
+    dhis2.menu = {};
 
     dhis2.menu = function () {
         var that = {},
@@ -253,7 +259,7 @@
         that.subscribe = function (callback, onlyOnce) {
             var once = onlyOnce ? true : false;
 
-            if ( ! _.isFunction(callback)) {
+            if ( ! du.isFunction(callback)) {
                 return false;
             }
 
@@ -330,7 +336,7 @@
         }
 
         that.save = function (saveMethod) {
-            if ( ! _.isFunction(saveMethod)) {
+            if ( ! du.isFunction(saveMethod)) {
                 return false;
             }
 
@@ -339,7 +345,7 @@
 
         return that;
     }();
-})(dhis2, _);
+})(dhis2);
 
 /**
  * Created by Mark Polak on 28/01/14.
@@ -369,7 +375,8 @@
         $('#menuDropDown1').addClass('app-menu-dropdown ui-helper-clearfix');
         $(selector).html('');
         $.tmpl( "appMenuItemTemplate", apps).appendTo(selector);
-        $('.apps-menu-more').clone().addClass('ui-helper-clearfix').appendTo($('#menuDropDown1 .menu-drop-down-scroll'));
+        $('#menuDropDown1 .menu-drop-down-scroll .apps-menu-more').remove();
+        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#menuDropDown1 .menu-drop-down-scroll'));
     }
 
     function renderAppManager(selector) {
@@ -505,25 +512,95 @@
             var self = $(this),
                 moreAppsElement = $('#menuDropDown1 > .apps-menu-more');
 
-            if (self.parent(':animated').length !== 0)
-                return;
-
-            if (self.scrollTop() < 10 && self.innerHeight() === 220) {
+            if (self.scrollTop() < 10) {
                 moreAppsElement.show();
                 self.parent().css('width', '360px');
                 self.parent().parent().css('width', '360px');
-                self.css('height', '330px');
-                self.parent().clearQueue().animate( {'height': '330px'} );
             } else {
                 if (self.innerHeight() === 330 ) {
                     moreAppsElement.hide();
                     self.parent().css('width', '384px');
                     self.parent().parent().css('width', '384px');
-                    self.css('height', '220px');
-                    self.parent().clearQueue().animate( {'height': '220px'} );
                 }
             }
 
+        });
+
+        // Set show and hide drop down events on top menu
+
+        $( "#menuLink1" ).hover( function()
+            {
+                showDropDown( "menuDropDown1" );
+            },
+            function()
+            {
+                hideDropDownTimeout();
+            } );
+
+        $( "#menuLink2" ).hover( function()
+            {
+                showDropDown( "menuDropDown2" );
+            },
+            function()
+            {
+                hideDropDownTimeout();
+            } );
+
+        $( "#menuLink3" ).hover( function()
+            {
+                showDropDown( "menuDropDown3" );
+            },
+            function()
+            {
+                hideDropDownTimeout();
+            } );
+
+        $( "#menuDropDown1, #menuDropDown2, #menuDropDown3" ).hover( function()
+            {
+                cancelHideDropDownTimeout();
+            },
+            function()
+            {
+                hideDropDownTimeout();
+            } );
+
+
+        $('.drop-down-menu-link').get().forEach(function (element, index, elements) {
+            var id = $(element).parent().attr('id'),
+                dropdown_menu = $('div#' + id.split('_')[0]);
+
+            function closeAllDropdowns() {
+                $('.app-menu-dropdown').each(function () {
+                    $(this).attr('data-clicked-open', 'false');
+                    $(this).hide();
+                });
+                hideDropDown();
+            }
+
+            $(element).click(function () {
+                return function () {
+                    var thisDropDownStatus = $(dropdown_menu).attr('data-clicked-open');
+                    closeAllDropdowns();
+
+                    if (thisDropDownStatus === 'true') {
+                        $(dropdown_menu).attr('data-clicked-open', 'false');
+                    } else {
+                        $(dropdown_menu).attr('data-clicked-open', 'true');
+                        showDropDown(dropdown_menu.attr('id'));
+                    }
+                }
+            }());
+        });
+
+        $(window).resize(function () {
+            $('.app-menu-dropdown').get().forEach(function (element, index, elements) {
+                var newDropDownId = '#' + $(element).attr('id'),
+                    position = $(newDropDownId + '_button').position();
+
+                $(newDropDownId).css('position', 'absolute');
+                $(newDropDownId).css('top', '55px');
+                $(newDropDownId).css('left', Math.ceil(position.left - Math.ceil(parseInt($(newDropDownId).innerWidth(), 10) - 108)) + 'px');
+            });
         });
 
     });

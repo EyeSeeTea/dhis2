@@ -28,36 +28,36 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-
 /**
- * Defines the functionality for persisting DataApproval objects.
+ * "Base", or simplified, state of data approval for a given data selection.
  *
  * @author Jim Grace
  */
-public interface DataApprovalLevelStore
-    extends GenericIdentifiableObjectStore<DataApprovalLevel>
+public enum DataApprovalBaseState
 {
-    String ID = DataApprovalLevelStore.class.getName();
-
-    // -------------------------------------------------------------------------
-    // Basic DataApprovalLevel
-    // -------------------------------------------------------------------------
+    /**
+     * Data approval does not apply to this selection. (Data is neither
+     * "approved" nor "unapproved".)
+     */
+    UNAPPROVABLE,
 
     /**
-     * Gets a list of all data approval levels.
-     *
-     * @return List of all data approval levels, ordered from 1 to n.
+     * Data is unapproved, and is not ready to be approved for this selection.
      */
-    List<DataApprovalLevel> getAllDataApprovalLevels();
+    UNAPPROVED_NOT_READY,
 
     /**
-     * Gets data approval levels by org unit level.
-     * 
-     * @param orgUnitLevel the org unit level.
-     * @return a list of data approval levels.
+     * Data is unapproved, and is ready to be approved for this selection.
      */
-    List<DataApprovalLevel> getDataApprovalLevelsByOrgUnitLevel( int orgUnitLevel );
+    UNAPPROVED_READY,
+
+    /**
+     * Data is approved (either here or elsewhere).
+     */
+    APPROVED,
+
+    /**
+     * Data is approved and accepted (either here or elsewhere).
+     */
+    ACCEPTED;
 }

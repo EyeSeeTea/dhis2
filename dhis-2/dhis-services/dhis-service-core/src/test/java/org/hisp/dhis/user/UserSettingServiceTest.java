@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.user;
 
 /*
  * Copyright (c) 2004-2013, University of Oslo
@@ -28,36 +28,45 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import static org.junit.Assert.assertEquals;
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
 
 /**
- * Defines the functionality for persisting DataApproval objects.
- *
- * @author Jim Grace
+ * @author Kiran Prakash
  */
-public interface DataApprovalLevelStore
-    extends GenericIdentifiableObjectStore<DataApprovalLevel>
+public class UserSettingServiceTest
+    extends DhisSpringTest
 {
-    String ID = DataApprovalLevelStore.class.getName();
+    private UserSettingService userSettingService;
 
-    // -------------------------------------------------------------------------
-    // Basic DataApprovalLevel
-    // -------------------------------------------------------------------------
+    private UserStore userStore;
 
-    /**
-     * Gets a list of all data approval levels.
-     *
-     * @return List of all data approval levels, ordered from 1 to n.
-     */
-    List<DataApprovalLevel> getAllDataApprovalLevels();
+    private UserCredentialsStore userCredentialStore;
 
-    /**
-     * Gets data approval levels by org unit level.
-     * 
-     * @param orgUnitLevel the org unit level.
-     * @return a list of data approval levels.
-     */
-    List<DataApprovalLevel> getDataApprovalLevelsByOrgUnitLevel( int orgUnitLevel );
+    @Override
+    protected void setUpTest()
+        throws Exception
+    {
+        userStore = (UserStore) getBean( UserStore.ID );
+        userService = (UserService) getBean( UserService.ID );
+        userSettingService = (UserSettingService) getBean( UserSettingService.ID );
+        userCredentialStore = (UserCredentialsStore) getBean( UserCredentialsStore.ID );
+    }
+
+    @Test
+    public void testSaveUserPreferences()
+        throws Exception
+    {
+        User testUser = createUser( 'D' );
+        userStore.save( testUser );
+        UserCredentials userCredentials = testUser.getUserCredentials();
+        userCredentials.setUser( testUser );
+        userCredentialStore.addUserCredentials( userCredentials );
+        userSettingService.saveUserSetting( "mykey", "myvalue", "username" );
+        UserSetting setting = userCredentialStore.getUserSetting( testUser, "mykey" );
+        assertEquals( "myvalue", setting.getValue() );
+        assertEquals( "mykey", setting.getName() );
+    }
 }
