@@ -59,36 +59,39 @@ public class DefaultUserSettingService
     {
         this.userService = userService;
     }
-    
+
     // -------------------------------------------------------------------------
     // UserSettingService implementation
     // -------------------------------------------------------------------------
 
-    public void saveUserSetting( String name, Serializable value )
-    {
+    public void saveUserSetting(String name, Serializable value) {
         User currentUser = currentUserService.getCurrentUser();
+        save(name, value, currentUser);
+    }
 
-        if ( currentUser == null )
-        {
+    public void saveUserSetting(String name, Serializable value, String username) {
+        User user = userService.getUserByUsername(username);
+        save(name, value, user);
+    }
+
+    private void save(String name, Serializable value, User user) {
+        if (user == null) {
             return;
         }
 
-        UserSetting userSetting = userService.getUserSetting( currentUser, name );
+        UserSetting userSetting = userService.getUserSetting(user, name);
 
-        if ( userSetting == null )
-        {
+        if (userSetting == null) {
             userSetting = new UserSetting();
-            userSetting.setUser( currentUser );
-            userSetting.setName( name );
-            userSetting.setValue( value );
+            userSetting.setUser(user);
+            userSetting.setName(name);
+            userSetting.setValue(value);
 
-            userService.addUserSetting( userSetting );
-        }
-        else
-        {
-            userSetting.setValue( value );
+            userService.addUserSetting(userSetting);
+        } else {
+            userSetting.setValue(value);
 
-            userService.updateUserSetting( userSetting );
+            userService.updateUserSetting(userSetting);
         }
     }
 
@@ -149,6 +152,6 @@ public class DefaultUserSettingService
         if ( currentUser != null )
         {
             userService.deleteUserSetting( userService.getUserSetting( currentUser, name ) );
-        }        
+        }
     }
 }

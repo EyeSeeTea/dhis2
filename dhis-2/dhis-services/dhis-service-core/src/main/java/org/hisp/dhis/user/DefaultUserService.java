@@ -436,6 +436,17 @@ public class DefaultUserService
         return userCredentialsStore.getUserCredentials( user );
     }
 
+    public User getUserByUsername(String username) {
+        UserCredentials userCredentials = getUserCredentialsByUsername(username);
+
+        if ( userCredentials == null )
+        {
+            return null;
+        }
+
+        return getUser(userCredentials.getId());
+    }
+
     public UserCredentials getUserCredentialsByUsername( String username )
     {
         return userCredentialsStore.getUserCredentialsByUsername( username );

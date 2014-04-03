@@ -52,11 +52,13 @@ public class UserSettingController
     private UserSettingService userSettingService;
 
     @RequestMapping( value = "/{key}", method = RequestMethod.POST, consumes = { ContextUtils.CONTENT_TYPE_TEXT, ContextUtils.CONTENT_TYPE_HTML } )
-    public void setUserSetting( 
-        @PathVariable String key, 
-        @RequestParam(required = false) String value, 
+    public void setUserSetting(
+        @PathVariable String key,
+        @RequestParam(value = "value",required = false) String value,
+        @RequestParam(value = "user", required = false) String username,
         @RequestBody(required=false) String valuePayload, HttpServletResponse response )
     {
+
         if ( key == null )
         {
             ContextUtils.conflictResponse( response, "Key must be specified" );
@@ -69,18 +71,25 @@ public class UserSettingController
         }
 
         value = value != null ? value : valuePayload;
-        
-        userSettingService.saveUserSetting( key, value );
-        
+
+        if (username == null)
+        {
+            userSettingService.saveUserSetting( key, value );
+        }
+        else
+        {
+            userSettingService.saveUserSetting(key,value,username);
+        }
+
         ContextUtils.okResponse( response, "User setting saved" );
     }
-    
+
     @RequestMapping( value = "/{key}", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_TEXT )
     public @ResponseBody String getSystemSetting( @PathVariable( "key" ) String key )
     {
         return (String) userSettingService.getUserSetting( key );
     }
-    
+
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
     public void removeSystemSetting( @PathVariable( "key" ) String key )
     {

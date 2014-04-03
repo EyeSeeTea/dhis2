@@ -186,6 +186,8 @@ public interface UserService
      */
     UserCredentials getUserCredentialsByUsername( String username );
 
+    User getUserByUsername(String username);
+
     /**
      * Retrieves the UserCredentials associated with the User with the given
      * OpenID.
