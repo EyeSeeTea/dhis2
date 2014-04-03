@@ -2522,8 +2522,6 @@ Ext.onReady( function() {
 
             accBaseWidth = baseWidth - 2;
 
-        ns.app.relativePeriodCmpMap = relativePeriodCmpMap;
-
 		// stores
 
 		programStore = Ext.create('Ext.data.Store', {
@@ -2611,8 +2609,23 @@ Ext.onReady( function() {
 
             // data element
         setLayout = function(layout) {
+			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
+
+				periodRecords = recMap[dimConf.period.objectName] || [],
+				fixedPeriodRecords = [],
+
+				ouRecords = recMap[dimConf.organisationUnit.objectName],
+				graphMap = layout.parentGraphMap,
+				isOu = false,
+				isOuc = false,
+				isOugc = false,
+				levels = [],
+				groups = [];
+
             reset();
 
+			// data
             programStore.add(layout.program);
             program.setValue(layout.program.id);
 
@@ -2621,6 +2634,78 @@ Ext.onReady( function() {
             stage.enable();
 
             onStageSelect(null, layout);
+
+            // periods
+			period.reset();
+
+			if (layout.startDate && layout.endDate) {
+				onPeriodModeSelect('dates');
+				startDate.setValue(layout.startDate);
+				endDate.setValue(layout.endDate);
+			}
+
+			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
+				periodRecord = periodRecords[i];
+				checkbox = relativePeriodCmpMap[periodRecord.id];
+				if (checkbox) {
+					checkbox.setValue(true);
+				}
+				else {
+					fixedPeriodRecords.push(periodRecord);
+				}
+			}
+
+			fixedPeriodSelectedStore.add(fixedPeriodRecords);
+
+			// organisation units
+			if (ouRecords) {
+				for (var i = 0; i < ouRecords.length; i++) {
+					if (ouRecords[i].id === 'USER_ORGUNIT') {
+						isOu = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
+						isOuc = true;
+					}
+					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+						isOugc = true;
+					}
+					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
+						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
+					}
+					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
+						groups.push(ouRecords[i].id.split('-')[1]);
+					}
+				}
+
+				if (levels.length) {
+					toolMenu.clickHandler('level');
+					organisationUnitLevel.setValue(levels);
+				}
+				else if (groups.length) {
+					toolMenu.clickHandler('group');
+					organisationUnitGroup.setValue(groups);
+				}
+				else {
+					toolMenu.clickHandler('orgunit');
+					userOrganisationUnit.setValue(isOu);
+					userOrganisationUnitChildren.setValue(isOuc);
+					userOrganisationUnitGrandChildren.setValue(isOugc);
+				}
+
+				if (!(isOu || isOuc || isOugc)) {
+					if (Ext.isObject(graphMap)) {
+						treePanel.selectGraphMap(graphMap);
+					}
+				}
+			}
+			else {
+				treePanel.reset();
+			}
+
+			// options
+			if (ns.app.optionsWindow) {
+				ns.app.optionsWindow.setOptions(layout);
+			}
         };
 
 		program = Ext.create('Ext.form.field.ComboBox', {
@@ -3032,6 +3117,9 @@ Ext.onReady( function() {
                     {id: 'dates', name: 'Select start/end dates'}
                 ]
             },
+            reset: function() {
+				this.setValue('periods');
+			},
             listeners: {
                 select: function(cmp) {
                     onPeriodModeSelect(cmp.getValue());
@@ -3586,6 +3674,13 @@ Ext.onReady( function() {
             bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             width: accBaseWidth,
+            reset: function() {
+				this.resetRelativePeriods();
+				this.resetFixedPeriods();
+				this.resetStartEndDates();
+
+				periodMode.reset();
+			},
             isRelativePeriods: function() {
 				var a = checkboxes;
 				for (var i = 0; i < a.length; i++) {
@@ -3624,6 +3719,15 @@ Ext.onReady( function() {
 				for (var i = 0; i < a.length; i++) {
 					a[i].setValue(false);
 				}
+			},
+			resetFixedPeriods: function() {
+				fixedPeriodAvailableStore.removeAll();
+				fixedPeriodSelectedStore.removeAll();
+				periodType.clearValue();
+			},
+			resetStartEndDates: function() {
+				startDate.reset();
+				endDate.reset();
 			},
 			isNoRelativePeriods: function() {
 				var a = checkboxes;
@@ -4217,9 +4321,9 @@ Ext.onReady( function() {
 		};
 
         setGui = function(layout, xLayout, updateGui) {
-			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
 				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
-				//recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions),
+				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions);
 				//graphMap = layout.parentGraphMap,
 				//objectName,
 				//periodRecords,
