@@ -1656,7 +1656,7 @@ Ext.onReady( function() {
 								eventReport.name = name;
 
 								Ext.Ajax.request({
-									url: ns.core.init.contextPath + '/api/eventReports/' + reportTable.id,
+									url: ns.core.init.contextPath + '/api/eventReports/' + eventReport.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(eventReport),
@@ -1665,9 +1665,12 @@ Ext.onReady( function() {
 										alert(r.responseText);
 									},
 									success: function(r) {
-										if (ns.app.layout && ns.app.layout.id && ns.app.layout.id === id) {
+										if (ns.app.layout && ns.app.layout.id === id) {
 											ns.app.layout.name = name;
-											ns.app.xLayout.name = name;
+
+											if (ns.app.xLayout) {
+												ns.app.xLayout.name = name;
+											}
 										}
 
 										ns.app.stores.eventReport.loadStore();
