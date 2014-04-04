@@ -4304,59 +4304,6 @@ Ext.onReady( function() {
 			//}
 		};
 
-		setGui = function(view) {
-			//var ouDim = view.rows[0],
-				//isOu = false,
-				//isOuc = false,
-				//isOugc = false,
-				//levels = [],
-				//groups = [];
-
-			// widget gui
-			(function() {
-
-				reset(true);
-
-				// organisation units
-				for (var i = 0, item; i < ouDim.items.length; i++) {
-					item = ouDim.items[i];
-
-					if (item.id === 'USER_ORGUNIT') {
-						isOu = true;
-					}
-					else if (item.id === 'USER_ORGUNIT_CHILDREN') {
-						isOuc = true;
-					}
-					else if (item.id === 'USER_ORGUNIT_GRANDCHILDREN') {
-						isOugc = true;
-					}
-					else if (item.id.substr(0,5) === 'LEVEL') {
-						levels.push(parseInt(item.id.split('-')[1]));
-					}
-					else if (item.id.substr(0,8) === 'OU_GROUP') {
-						groups.push(parseInt(item.id.split('-')[1]));
-					}
-				}
-
-				if (levels.length) {
-					toolMenu.clickHandler('level');
-					organisationUnitLevel.setValue(levels);
-				}
-				else if (groups.length) {
-					toolMenu.clickHandler('group');
-					organisationUnitGroup.setValue(groups);
-				}
-				else {
-					toolMenu.clickHandler('orgunit');
-					userOrganisationUnit.setValue(isOu);
-					userOrganisationUnitChildren.setValue(isOuc);
-					userOrganisationUnitGrandChildren.setValue(isOugc);
-				}
-
-				treePanel.selectGraphMap(view.parentGraphMap);
-			}());
-		};
-
         setGui = function(layout, xLayout, updateGui) {
 			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
 				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
@@ -4626,25 +4573,33 @@ Ext.onReady( function() {
 
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
-					columns.push(map[item.data.id]);
+					if (map[item.data.id]) {
+						columns.push(map[item.data.id]);
+					}
 				});
 			}
 
             if (layoutWindow.rowStore) {
 				layoutWindow.rowStore.each(function(item) {
-					rows.push(map[item.data.id]);
+					if (map[item.data.id]) {
+						rows.push(map[item.data.id]);
+					}
 				});
 			}
 
             if (layoutWindow.filterStore) {
 				layoutWindow.filterStore.each(function(item) {
-					filters.push(map[item.data.id]);
+					if (map[item.data.id]) {
+						filters.push(map[item.data.id]);
+					}
 				});
 			}
 
             if (layoutWindow.fixedFilterStore) {
 				layoutWindow.fixedFilterStore.each(function(item) {
-					filters.push(map[item.data.id]);
+					if (map[item.data.id]) {
+						filters.push(map[item.data.id]);
+					}
 				});
 			}
 
