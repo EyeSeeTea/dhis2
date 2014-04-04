@@ -1,5 +1,8 @@
 package org.hisp.dhis.common;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -28,97 +31,110 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 /**
- * Class which encapsulates a query parameter and value. Operator and filter 
- * are inherited from QueryFilter.
- * 
  * @author Lars Helge Overland
  */
-public class QueryItem
-    extends QueryFilter
+public class QueryFilter
 {
-    private IdentifiableObject item;
+    public static final String OPTION_SEP = ";";
+    
+    public static final Map<String, String> OPERATOR_MAP = new HashMap<String, String>() { {
+        put( "eq", "=" );
+        put( "gt", ">" );
+        put( "ge", ">=" );
+        put( "lt", "<" );
+        put( "le", "<=" );
+        put( "ne", "!=" );
+        put( "like", "like" );
+        put( "in", "in" );
+    } };
+    
+    protected String operator;
 
-    private boolean numeric;
+    protected String filter;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public QueryItem( IdentifiableObject item )
+    public QueryFilter()
     {
-        this.item = item;
     }
     
-    public QueryItem( IdentifiableObject item, String operator, String filter, boolean numeric )
+    public QueryFilter( String operator, String filter )
     {
-        this.item = item;
         this.operator = operator;
         this.filter = filter;
-        this.numeric = numeric;
     }
 
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
     
-    public String getItemId()
+    public boolean hasFilter()
     {
-        return item.getUid();
+        return operator != null && !operator.isEmpty() && filter != null && !filter.isEmpty();
     }
     
-    public String getTypeAsString()
+    public String getSqlOperator()
     {
-        return isNumeric() ? Double.class.getName() : String.class.getName();
-    }
-
-    public static List<QueryItem> getQueryItems( Collection<? extends IdentifiableObject> objects )
-    {
-        List<QueryItem> queryItems = new ArrayList<QueryItem>();
-        
-        for ( IdentifiableObject object : objects )
+        if ( operator == null )
         {
-            queryItems.add( new QueryItem( object, null, null, false ) );
+            return null;
         }
         
-        return queryItems;
+        return OPERATOR_MAP.get( operator.toLowerCase() );
     }
     
-    // -------------------------------------------------------------------------
-    // toString
-    // -------------------------------------------------------------------------
-
-    @Override
-    public String toString()
+    public String getSqlFilter( String encodedFilter )
     {
-        return "[Item: " + item + ", operator: " + operator + ", filter: " + filter + "]";
+        if ( operator == null || encodedFilter == null )
+        {
+            return null;
+        }
+                
+        if ( operator.equalsIgnoreCase( "like" ) )
+        {
+            return "'%" + encodedFilter + "%'";
+        }
+        else if ( operator.equalsIgnoreCase( "in" ) )
+        {
+            String[] split = encodedFilter.split( OPTION_SEP );
+            
+            final StringBuffer buffer = new StringBuffer( "(" );        
+            
+            for ( String el : split )
+            {
+                buffer.append( "'" ).append( el ).append( "'," );
+            }
+            
+            return buffer.deleteCharAt( buffer.length() - 1 ).append( ")" ).toString();
+        }
+        
+        return "'" + encodedFilter + "'";
     }
     
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-    public IdentifiableObject getItem()
+    
+    public String getOperator()
     {
-        return item;
+        return operator;
     }
 
-    public void setItem( IdentifiableObject item )
+    public void setOperator( String operator )
     {
-        this.item = item;
+        this.operator = operator;
     }
 
-    public boolean isNumeric()
+    public String getFilter()
     {
-        return numeric;
+        return filter;
     }
 
-    public void setNumeric( boolean numeric )
+    public void setFilter( String filter )
     {
-        this.numeric = numeric;
+        this.filter = filter;
     }
 }

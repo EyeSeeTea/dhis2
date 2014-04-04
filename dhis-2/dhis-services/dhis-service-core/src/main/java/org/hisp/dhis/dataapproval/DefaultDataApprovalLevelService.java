@@ -133,8 +133,6 @@ public class DefaultDataApprovalLevelService
                         orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getUid() );
 
                 userOrgUnitLevels.add( orgUnitLevel );
-
-                System.out.println("User assigned to org unit level " + orgUnitLevel );
             }
 
             boolean assignedAtLevel = false;
@@ -167,8 +165,6 @@ public class DefaultDataApprovalLevelService
                 assignedAtLevel = canReadThisLevel && userOrgUnitLevels.contains( approvalLevel.getOrgUnitLevel() );
 
                 approvableAtLevel = canReadThisLevel && ( ( mayApprove && assignedAtLevel ) || approvableAtAllLowerLevels );
-
-                System.out.println( approvalLevel.getName() + " read " + canReadThisLevel + " assigned " + assignedAtLevel + " approvable " + approvableAtLevel );
 
                 //
                 // Test using assignedAtLevel and approvableAtLevel values from the current level:
@@ -291,7 +287,7 @@ public class DefaultDataApprovalLevelService
 
         // Move down from end to here, to avoid duplicate level in database.
 
-        for (int i = dataApprovalLevels.size() - 1; i > index; i-- )
+        for ( int i = dataApprovalLevels.size() - 1; i > index; i-- )
         {
             update( dataApprovalLevels.get( i ), i );
         }
