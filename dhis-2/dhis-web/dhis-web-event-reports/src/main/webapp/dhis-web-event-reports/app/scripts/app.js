@@ -2474,7 +2474,7 @@ Ext.onReady( function() {
 			stage,
             onStageSelect,
             loadDataElements,
-            dataElementAvailable,
+            //dataElementAvailable,
             dataElementSelected,
             addUxFromDataElement,
             selectDataElements,
@@ -2502,7 +2502,7 @@ Ext.onReady( function() {
             checkboxes = [],
 
             fixedPeriodAvailable,
-            fixedPeriodSelected,
+            //fixedPeriodSelected,
             onPeriodTypeSelect,
             periodType,
             prevYear,
@@ -3648,7 +3648,7 @@ Ext.onReady( function() {
             height: 24,
             handler: function() {
                 if (periodType.getValue()) {
-                    periodType.periodOffset--;
+                    periodType.periodOffset++;
                     onPeriodTypeSelect(periodType.getValue());
                 }
             }
@@ -3678,8 +3678,12 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none',
             getRecords: function() {
                 var map = relativePeriodCmpMap,
-                    selectedPeriods = fixedPeriodSelected.getValue(),
+                    selectedPeriods = [],
 					records = [];
+
+				fixedPeriodSelectedStore.each( function(r) {
+					selectedPeriods.push(r.data.id);
+				});
 
                 for (var i = 0; i < selectedPeriods.length; i++) {
                     records.push({id: selectedPeriods[i]});
