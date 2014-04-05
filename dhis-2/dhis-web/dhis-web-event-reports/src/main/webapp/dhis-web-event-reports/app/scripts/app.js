@@ -2369,7 +2369,7 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var eventReportUrl = ns.core.init.contextPath + '/dhis-web-event-report/app/index.html?id=' + ns.app.layout.id,
+					var eventReportUrl = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?id=' + ns.app.layout.id,
 						apiUrl = ns.core.init.contextPath + '/api/eventReports/' + ns.app.layout.id + '/data.html',
 						html = '';
 
@@ -2409,6 +2409,109 @@ Ext.onReady( function() {
 				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
 				bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
+				resizable: false,
+				destroyOnBlur: true,
+				modal: true,
+				items: [
+					textArea,
+					linkPanel
+				],
+				bbar: {
+					cls: 'ns-toolbar-bbar',
+					defaults: {
+						height: 24
+					},
+					items: [
+						'->',
+						shareButton
+					]
+				},
+				listeners: {
+					show: function(w) {
+						ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+						document.body.oncontextmenu = true;
+
+						if (!w.hasDestroyOnBlurHandler) {
+							ns.core.web.window.addDestroyOnBlurHandler(w);
+						}
+					},
+					hide: function() {
+						document.body.oncontextmenu = function(){return false;};
+					},
+					destroy: function() {
+						ns.app.interpretationWindow = null;
+					}
+				}
+			});
+
+			return window;
+		}
+
+		return;
+	};
+
+	InterpretationWindow = function() {
+		var textArea,
+			linkPanel,
+			shareButton,
+			window;
+
+		if (Ext.isString(ns.app.layout.id)) {
+			textArea = Ext.create('Ext.form.field.TextArea', {
+				cls: 'ns-textarea',
+				height: 130,
+				fieldStyle: 'padding-left: 3px; padding-top: 3px',
+				emptyText: NS.i18n.write_your_interpretation,
+				enableKeyEvents: true,
+				listeners: {
+					keyup: function() {
+						shareButton.xable();
+					}
+				}
+			});
+
+			linkPanel = Ext.create('Ext.panel.Panel', {
+				html: function() {
+					var url = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?id=' + ns.app.layout.id,
+						apiUrl = ns.core.init.contextPath + '/api/eventReports/' + ns.app.layout.id + '/data.html',
+						html = '';
+
+					html += '<div><b>Report link: </b><span class="user-select"><a href="' + url + '" target="_blank">' + url + '</a></span></div>';
+					html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
+					return html;
+				}(),
+				style: 'padding:3px',
+				bodyStyle: 'border: 0 none'
+			});
+
+			shareButton = Ext.create('Ext.button.Button', {
+				text: NS.i18n.share,
+				disabled: true,
+				xable: function() {
+					this.setDisabled(!textArea.getValue());
+				},
+				handler: function() {
+					if (textArea.getValue()) {
+						Ext.Ajax.request({
+							url: ns.core.init.contextPath + '/api/interpretations/eventReports/' + ns.app.layout.id,
+							method: 'POST',
+							params: textArea.getValue(),
+							headers: {'Content-Type': 'text/html'},
+							success: function() {
+								textArea.reset();
+								window.hide();
+							}
+						});
+					}
+				}
+			});
+
+			window = Ext.create('Ext.window.Window', {
+				title: ns.app.layout.name,
+				layout: 'fit',
+				width: 500,
+				bodyStyle: 'padding:1px; background-color:#fff',
 				resizable: false,
 				destroyOnBlur: true,
 				modal: true,
