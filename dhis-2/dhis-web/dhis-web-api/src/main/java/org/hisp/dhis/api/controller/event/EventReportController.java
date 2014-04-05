@@ -28,7 +28,7 @@ package org.hisp.dhis.api.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObjectUtils.getUniqueDimensions;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensions;
 
 import java.io.InputStream;
 
@@ -41,6 +41,10 @@ import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.eventreport.EventReportService;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,7 +76,10 @@ public class EventReportController
     
     @Autowired
     private ProgramStageService programStageService;
-    
+
+    @Autowired
+    private I18nManager i18nManager;
+
     //--------------------------------------------------------------------------
     // CRUD
     //--------------------------------------------------------------------------
@@ -137,6 +144,21 @@ public class EventReportController
         throws Exception
     {
         report.populateAnalyticalProperties();
+
+        for ( OrganisationUnit organisationUnit : report.getOrganisationUnits() )
+        {
+            report.getParentGraphMap().put( organisationUnit.getUid(), organisationUnit.getParentGraph() );
+        }
+
+        I18nFormat format = i18nManager.getI18nFormat();
+
+        if ( report.getPeriods() != null && !report.getPeriods().isEmpty() )
+        {
+            for ( Period period : report.getPeriods() )
+            {
+                period.setName( format.formatPeriod( period ) );
+            }
+        }
     }
     
     //--------------------------------------------------------------------------
@@ -151,9 +173,9 @@ public class EventReportController
         report.getRowDimensions().clear();
         report.getFilterDimensions().clear();
         
-        report.getColumnDimensions().addAll( getUniqueDimensions( report.getColumns() ) );
-        report.getRowDimensions().addAll( getUniqueDimensions( report.getRows() ) );
-        report.getFilterDimensions().addAll( getUniqueDimensions( report.getFilters() ) );
+        report.getColumnDimensions().addAll( getDimensions( report.getColumns() ) );
+        report.getRowDimensions().addAll( getDimensions( report.getRows() ) );
+        report.getFilterDimensions().addAll( getDimensions( report.getFilters() ) );
         
         if ( report.getProgram() != null )
         {

@@ -54,6 +54,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.junit.Test;
@@ -61,11 +62,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Jim Grace
- * @version $Id$
  */
 public class DataApprovalServiceTest
     extends DhisSpringTest
 {
+    private static final String AUTH_APPR_LEVEL = "F_SYSTEM_SETTING";
+
     @Autowired
     private DataApprovalService dataApprovalService;
 
@@ -404,14 +406,14 @@ public class DataApprovalServiceTest
     @Test
     public void testAddAndGetDataApproval() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
@@ -492,14 +494,14 @@ public class DataApprovalServiceTest
     @Test
     public void testAddDuplicateDataApproval() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
@@ -521,14 +523,14 @@ public class DataApprovalServiceTest
     @Test
     public void testDeleteDataApproval() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
@@ -568,14 +570,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalState() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         // Not enabled.
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -658,14 +660,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateWithMultipleChildren() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         dataSetA.setApproveData( true );
 
@@ -716,14 +718,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateOtherPeriodTypes() throws Exception
     {
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
-        units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
         dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+
+        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        units.add( organisationUnitA );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
         dataSetA.setApproveData( true );
 
@@ -755,7 +757,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -789,7 +791,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -823,7 +825,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -857,7 +859,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false );
+        createUserAndInjectSecurityContext( units, false, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -886,7 +888,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -934,7 +936,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -982,7 +984,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -1030,7 +1032,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false );
+        createUserAndInjectSecurityContext( units, false, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
@@ -1077,7 +1079,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Set<CategoryOptionGroup> groupASet = new HashSet<CategoryOptionGroup>();
         groupASet.add ( groupA );

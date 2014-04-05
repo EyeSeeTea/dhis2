@@ -72,6 +72,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.RelativePeriods;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
@@ -628,7 +629,16 @@ public abstract class DeletionHandler
     public void deleteProgramValidation( ProgramValidation programValidation )
     {
     }
-
+    
+    public void deleteProgramIndicator( ProgramIndicator programIndicator )
+    {
+    }
+    
+    public String allowDeleteProgramIndicator( ProgramIndicator programIndicator )
+    {
+        return null;
+    }
+    
     public String allowDeleteValidationCriteria( ValidationCriteria validationCriteria )
     {
         return null;

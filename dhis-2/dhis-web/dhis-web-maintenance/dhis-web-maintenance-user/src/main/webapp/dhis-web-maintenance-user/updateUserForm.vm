@@ -1,3 +1,4 @@
+<script src="javascript/jqSelected.js"></script>
 <script type="text/javascript">
 	jQuery(function() {
 	    var rules = getValidationRules( "user" );
@@ -7,7 +8,8 @@
 
 	    validation2( 'updateUserForm', function( form )
 	    {
-	        jQuery( "#selectedList" ).children().attr( "selected", true );
+            jQuery( "#selectedList" ).children().attr( "selected", "selected" );
+ 	        jQuery( "#ugSelected" ).children().attr( "selected", "selected" );
 
             if( $('#selectionTree').find('.selected').size() == 0 ) {
                 setHeaderDelayMessage('$i18n.getString( "organisation_unit_required_for_user" )');
@@ -48,10 +50,10 @@
 <h3>$i18n.getString( "edit_user" )</h3>
 
 <form id="updateUserForm" action="updateUser.action" method="post" class="inputForm">
-	
-  <div>
-	<input type="hidden" id="id" name="id" value="$userCredentials.id"/>
-  </div>
+
+<div>
+    <input type="hidden" id="id" name="id" value="$userCredentials.id"/>
+</div>
 
 <table>
     <col style="width: 120px"/>
@@ -131,41 +133,83 @@
 #tblDynamicAttributes( { "attributes": $attributes, "attributeValues": $attributeValues } )
 
 <table>
-    <colgroup>
-      <col style="width: 500px;"/>
-      <col/>
-      <col style="width: 500px;"/>
-    </colgroup>
+  <colgroup>
+    <col style="width: 500px;"/>
+    <col/>
+    <col style="width: 500px;"/>
+  </colgroup>
 
-	<tr>
-		<th>$i18n.getString( "available" )</th>
-		<th></th>
-		<th>$i18n.getString( "selected" )
-			<select id="roleValidator" style="display:none"/>
-		</th>
-	</tr>
+<tr>
+    <th>$i18n.getString( "available" )</th>
+    <th></th>
+    <th>$i18n.getString( "selected" )
+        <select id="roleValidator" style="display:none"/>
+    </th>
+</tr>
 
-	<tr>
-        <td>
-            <select id="availableList" name="availableList" multiple="multiple" style="height: 200px; width: 100%;"></select>
-        </td>
+<tr>
+      <td>
+          <select id="availableList" name="availableList" multiple="multiple" style="height: 200px; width: 100%;"></select>
+      </td>
 
-        <td style="text-align:center">
-        	<input type="button" value="&gt;" title="$i18n.getString( 'move_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'availableList' );"/><br/>
-            <input type="button" value="&lt;" title="$i18n.getString( 'remove_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'selectedList' );"/><br/>
-			<input type="button" value="&gt;&gt;" title="$i18n.getString('move_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'availableList' );"/><br/>
-			<input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'selectedList' );"/>
-        </td>
+      <td style="text-align:center">
+        <input type="button" value="&gt;" title="$i18n.getString( 'move_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'availableList' );"/><br/>
+          <input type="button" value="&lt;" title="$i18n.getString( 'remove_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'selectedList' );"/><br/>
+        <input type="button" value="&gt;&gt;" title="$i18n.getString('move_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'availableList' );"/><br/>
+        <input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'selectedList' );"/>
+      </td>
 
-		<td>
-        	<select id="selectedList" name="selectedList" multiple="multiple" style="height: 200px; width: 100%; margin-top: 22px;">
-            #foreach ( $selectedRole in $userCredentials.userAuthorityGroups )
-            	<option value="$selectedRole.id">$encoder.htmlEncode( $selectedRole.name )</option>
-            #end
-        	</select>
-        </td>
-	</tr>  
+    <td>
+        <select id="selectedList" name="selectedList" multiple="multiple" style="height: 200px; width: 100%; margin-top: 22px;">
+          #foreach ( $selectedRole in $userCredentials.userAuthorityGroups )
+            <option value="$selectedRole.id">$encoder.htmlEncode( $selectedRole.name )</option>
+          #end
+        </select>
+      </td>
+</tr>
+</table>
 
+<table>
+<colgroup>
+<col style="width: 500px;"/>
+<col/>
+<col style="width: 500px;"/>
+</colgroup>
+<thead>
+<tr>
+<th>$i18n.getString( "available_user_groups" )</th>
+<th></th>
+<th>$i18n.getString( "selected_user_groups" )</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input id="ugAvailableSearch" type="text" placeholder=" Search.." style="width: 100%; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" /></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>
+  <select id="ugAvailable" name="ugAvailable" multiple="multiple" style="height: 200px; width: 100%;"/>
+</td>
+<td>
+  <button type="button" style="width: 25px; text-align: center;" onclick="$.fn.selected.defaults.defaultMoveSelected('#ugAvailable');"><span class="fa fa-angle-right"> </span></button><br />
+  <button type="button" style="width: 25px; text-align: center;" onclick="$.fn.selected.defaults.defaultMoveSelected('#ugSelected');"><span class="fa fa-angle-left"> </span></button><br />
+  <button type="button" style="width: 25px; text-align: center;" onclick="$.fn.selected.defaults.defaultMoveAll('#ugAvailable');"><span class="fa fa-angle-double-right"> </span></button><br />
+  <button type="button" style="width: 25px; text-align: center;" onclick="$.fn.selected.defaults.defaultMoveAll('#ugSelected');"><span class="fa fa-angle-double-left"> </span></button><br />
+</td>
+<td>
+  <select id="ugSelected" name="ugSelected" multiple="multiple" style="height: 200px; width: 100%;">
+  #foreach ( $group in $user.groups )
+  <option value="$group.uid">$encoder.htmlEncode( $group.name )</option>
+  #end
+  </select>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table>
 	<tr>
 		<td colspan="3">
 			#organisationUnitSelectionTree( false, true, false )
