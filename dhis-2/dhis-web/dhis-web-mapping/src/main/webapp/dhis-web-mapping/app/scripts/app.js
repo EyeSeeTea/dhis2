@@ -3695,7 +3695,7 @@ Ext.onReady( function() {
 		format = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
 			width: 60,
-			style: 'margin-bottom:0; margin-left:2px',
+			style: 'margin-bottom:0; margin-left:1px',
 			valueField: 'id',
 			displayField: 'text',
 			editable: false,
@@ -3747,7 +3747,7 @@ Ext.onReady( function() {
 			layout: 'column',
 			iconCls: 'gis-window-title-icon-download',
 			cls: 'gis-container-default',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
 			resizable: true,
 			modal: true,
 			items: [
