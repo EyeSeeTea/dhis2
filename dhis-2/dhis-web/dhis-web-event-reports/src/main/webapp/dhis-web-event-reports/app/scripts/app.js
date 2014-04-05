@@ -5397,7 +5397,7 @@ Ext.onReady( function() {
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: ns.core.init.contextPath + '/api/eventReports.json?include=id,name,lastUpdated,access',
+			defaultUrl: ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 
