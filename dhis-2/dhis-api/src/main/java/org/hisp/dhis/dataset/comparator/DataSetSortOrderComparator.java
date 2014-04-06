@@ -34,7 +34,6 @@ import org.hisp.dhis.dataset.DataSet;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class DataSetSortOrderComparator
     implements Comparator<DataSet>
