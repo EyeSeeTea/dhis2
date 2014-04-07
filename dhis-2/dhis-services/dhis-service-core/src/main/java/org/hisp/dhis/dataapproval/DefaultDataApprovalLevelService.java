@@ -129,8 +129,8 @@ public class DefaultDataApprovalLevelService
 
             for ( OrganisationUnit orgUnit : user.getOrganisationUnits() )
             {
-                int orgUnitLevel = orgUnit.getLevel() != 0 ?
-                        orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getUid() );
+                int orgUnitLevel = orgUnit.hasLevel() ?
+                    orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getUid() );
 
                 userOrgUnitLevels.add( orgUnitLevel );
             }
@@ -142,15 +142,15 @@ public class DefaultDataApprovalLevelService
             for ( DataApprovalLevel approvalLevel : getAllDataApprovalLevels() )
             {
                 Boolean canReadThisLevel = ( securityService.canRead( approvalLevel ) &&
-                        ( approvalLevel.getCategoryOptionGroupSet() == null || securityService.canRead( approvalLevel.getCategoryOptionGroupSet() ) ) );
+                    ( !approvalLevel.hasCategoryOptionGroupSet() || securityService.canRead( approvalLevel.getCategoryOptionGroupSet() ) ) );
 
                 //
-                // Test using assignedAtLevel and approvableAtLevel values from the previous (higher) level:
+                // Test using assignedAtLevel and approvableAtLevel values from the previous (higher) level.
                 //
                 Boolean addBecauseOfPreviousLevel = false;
 
                 if ( canReadThisLevel && ( approvableAtLevel // Approve at previous higher level implies unapprove at current level.
-                        || ( assignedAtLevel && mayAcceptAtLowerLevels ) ) ) // Assigned at previous level and mayAcceptAtLowerLevels means may accept here.
+                    || ( assignedAtLevel && mayAcceptAtLowerLevels ) ) ) // Assigned at previous level and mayAcceptAtLowerLevels means may accept here.
                 {
                     addBecauseOfPreviousLevel = true;
                 }
@@ -168,13 +168,12 @@ public class DefaultDataApprovalLevelService
                 approvableAtLevel = canReadThisLevel && ( ( mayApprove && assignedAtLevel ) || approvableAtAllLowerLevels );
 
                 //
-                // Test using assignedAtLevel and approvableAtLevel values from the current level:
+                // Test using assignedAtLevel and approvableAtLevel values from the current level.
                 //
                 if ( approvableAtLevel || addBecauseOfPreviousLevel )
                 {
                     userDataApprovalLevels.add( approvalLevel );
                 }
-
             }
         }
 
@@ -201,7 +200,7 @@ public class DefaultDataApprovalLevelService
         DataApprovalLevel next = dataApprovalLevels.get( index + 1 );
 
         if ( test.getOrgUnitLevel() == next.getOrgUnitLevel()
-                && test.getCategoryOptionGroupSet() != null )
+            && test.getCategoryOptionGroupSet() != null )
         {
             return true;
         }
@@ -226,7 +225,7 @@ public class DefaultDataApprovalLevelService
         DataApprovalLevel previous = dataApprovalLevels.get( index - 1 );
 
         if ( test.getOrgUnitLevel() == previous.getOrgUnitLevel()
-                && previous.getCategoryOptionGroupSet() != null )
+            && previous.getCategoryOptionGroupSet() != null )
         {
             return true;
         }
@@ -259,7 +258,7 @@ public class DefaultDataApprovalLevelService
         for ( DataApprovalLevel dataApprovalLevel : dataApprovalLevels )
         {
             if ( level.getOrgUnitLevel() == dataApprovalLevel.getOrgUnitLevel()
-                    && level.getCategoryOptionGroupSet() == dataApprovalLevel.getCategoryOptionGroupSet() )
+                && level.getCategoryOptionGroupSet() == dataApprovalLevel.getCategoryOptionGroupSet() )
             {
                 return true;
             }

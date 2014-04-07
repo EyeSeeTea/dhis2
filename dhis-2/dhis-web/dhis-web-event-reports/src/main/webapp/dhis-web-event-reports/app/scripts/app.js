@@ -2641,6 +2641,8 @@ Ext.onReady( function() {
 				groups = [];
 
             reset();
+
+            ns.app.typeToolbar.setType(layout.dataType);
             ns.app.aggregateLayoutWindow.reset();
             ns.app.queryLayoutWindow.reset();
 
@@ -2858,7 +2860,7 @@ Ext.onReady( function() {
 		};
 
 		loadDataElements = function(stageId, layout) {
-			var programId = program.getValue() || null,
+			var programId = layout ? layout.program.id : (program.getValue() || null),
                 load;
 
             stageId = stageId || layout.programStage.id;
@@ -2873,22 +2875,18 @@ Ext.onReady( function() {
                     var dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout),
                         records = [];
 
-                    for (var i = 0, dim, record; i < dataDimensions.length; i++) {
+                    for (var i = 0, dim, row; i < dataDimensions.length; i++) {
                         dim = dataDimensions[i];
-                        record = dataElementsByStageStore.getById(dataDimensions[i].dimension).data;
+                        row = dataElementsByStageStore.getById(dim.dimension);
 
-                        records.push(Ext.applyIf(dim, record));
+                        if (row) {
+                            records.push(Ext.applyIf(dim, row.data));
+                        }
                     }
 
                     selectDataElements(records, layout);
                 }
 			};
-
-            // favorite
-            //if (layout) {
-                //dataElementsByStageStore.loadData(layout.data); //todo
-                //return;
-            //}
 
             // data elements
             if (dataElementStorage.hasOwnProperty(stageId)) {
@@ -5464,6 +5462,13 @@ Ext.onReady( function() {
             getType: function() {
 				return aggregateButton.pressed ? aggregateButton.param : caseButton.param;
 			},
+            setType: function(dataType) {
+                var button = paramButtonMap[dataType];
+
+                if (button) {
+                    button.toggle(true);
+                }
+            },
             defaults: {
                 height: 40,
                 toggleGroup: 'mode',

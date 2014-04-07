@@ -29,7 +29,6 @@ package org.hisp.dhis.user.action;
  */
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -50,8 +49,6 @@ import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -178,11 +175,11 @@ public class UpdateUserAction
         this.localeDb = localeDb;
     }
 
-    private Collection<String> selectedList = new ArrayList<String>();
+    private List<String> urSelected = Lists.newArrayList();
 
-    public void setSelectedList( Collection<String> selectedList )
+    public void setUrSelected( List<String> urSelected )
     {
-        this.selectedList = selectedList;
+        this.urSelected = urSelected;
     }
 
     private List<String> ugSelected = Lists.newArrayList();
@@ -206,10 +203,6 @@ public class UpdateUserAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Prepare values
-        // ---------------------------------------------------------------------
-
         if ( email != null && email.trim().length() == 0 )
         {
             email = null;
@@ -221,17 +214,14 @@ public class UpdateUserAction
         }
 
         // ---------------------------------------------------------------------
-        // Update userCredentials and user
+        // User credentials and user
         // ---------------------------------------------------------------------
-
-        Collection<OrganisationUnit> units = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         User user = userService.getUser( id );
         user.setSurname( surname );
         user.setFirstName( firstName );
         user.setEmail( email );
         user.setPhoneNumber( phoneNumber );
-        user.updateOrganisationUnits( new HashSet<OrganisationUnit>( units ) );
 
         UserCredentials userCredentials = userService.getUserCredentials( user );
 
@@ -244,17 +234,6 @@ public class UpdateUserAction
             userCredentials.setOpenId( null );
         }
 
-        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
-
-        for ( String id : selectedList )
-        {
-            userAuthorityGroups.add( userService.getUserAuthorityGroup( Integer.parseInt( id ) ) );
-        }
-
-        userService.canIssueFilter( userAuthorityGroups );
-
-        userCredentials.setUserAuthorityGroups( userAuthorityGroups );
-
         if ( rawPassword != null )
         {
             userCredentials.setPassword( passwordManager.encodePassword( userCredentials.getUsername(), rawPassword ) );
@@ -266,39 +245,66 @@ public class UpdateUserAction
                 attributeService );
         }
 
+        // ---------------------------------------------------------------------
+        // Organisation units
+        // ---------------------------------------------------------------------
+
+        Set<OrganisationUnit> dataCaptureOrgUnits = new HashSet<OrganisationUnit>( selectionManager.getSelectedOrganisationUnits() );
+        user.updateOrganisationUnits( dataCaptureOrgUnits );
+
+        Set<OrganisationUnit> dataViewOrgUnits = new HashSet<OrganisationUnit>( selectionTreeManager.getReloadedSelectedOrganisationUnits() );
+        user.setDataViewOrganisationUnits( dataViewOrgUnits );
+
+        // ---------------------------------------------------------------------
+        // User roles
+        // ---------------------------------------------------------------------
+
+        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
+
+        for ( String id : urSelected )
+        {
+            userAuthorityGroups.add( userService.getUserAuthorityGroup( id ) );
+        }
+
+        userService.canIssueFilter( userAuthorityGroups );
+
+        userCredentials.setUserAuthorityGroups( userAuthorityGroups );
+
         userService.updateUserCredentials( userCredentials );
         userService.updateUser( user );
 
-        if ( currentUserService.getCurrentUser() == user )
-        {
-            selectionManager.setRootOrganisationUnits( units );
-            selectionManager.setSelectedOrganisationUnits( units );
+        // ---------------------------------------------------------------------
+        // Organisation unit trees
+        // ---------------------------------------------------------------------
 
-            selectionTreeManager.setRootOrganisationUnits( units );
-            selectionTreeManager.setSelectedOrganisationUnits( units );
+        if ( user.equals( currentUserService.getCurrentUser() ) )
+        {
+            selectionManager.setRootOrganisationUnits( dataCaptureOrgUnits );
+            selectionManager.setSelectedOrganisationUnits( dataCaptureOrgUnits );
+
+            selectionTreeManager.setRootOrganisationUnits( dataViewOrgUnits );
+            selectionTreeManager.setSelectedOrganisationUnits( dataViewOrgUnits );
         }
 
-        if ( units.size() > 0 )
-        {
-            selectionManager.setSelectedOrganisationUnits( units );
-        }
+        // ---------------------------------------------------------------------
+        // User settings
+        // ---------------------------------------------------------------------
 
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
 
-        Set<UserGroup> userGroups = Sets.newHashSet();
+        // ---------------------------------------------------------------------
+        // User groups
+        // ---------------------------------------------------------------------
+
+        Set<UserGroup> userGroups = new HashSet<UserGroup>();
 
         for ( String id : ugSelected )
         {
-            UserGroup userGroup = userGroupService.getUserGroup( id );
-
-            if ( userGroup != null )
-            {
-                userGroups.add( userGroup );
-            }
+            userGroups.add( userGroupService.getUserGroup( id ) );
         }
 
-        for ( UserGroup userGroup : Sets.newHashSet( user.getGroups() ) )
+        for ( UserGroup userGroup : new HashSet<UserGroup>( user.getGroups() ) )
         {
             if ( !userGroups.contains( userGroup ) )
             {

@@ -42,7 +42,6 @@ import java.util.Set;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: DefaultSelectionTreeManager.java 5652 2008-09-06 13:24:34Z larshelg $
  */
 public class DefaultSelectionTreeManager
     implements SelectionTreeManager
@@ -203,19 +202,6 @@ public class DefaultSelectionTreeManager
         Set<OrganisationUnit> set = new HashSet<OrganisationUnit>( 1 );
         set.add( selectedUnit );
         setSelectedOrganisationUnits( set );
-    }
-
-    public boolean setCurrentUserOrganisationUnitAsSelected()
-    {
-        User user = currentUserService.getCurrentUser();
-
-        if ( user != null && user.getOrganisationUnit() != null )
-        {
-            setSelectedOrganisationUnit( user.getOrganisationUnit() );
-            return true;
-        }
-
-        return false;
     }
 
     // -------------------------------------------------------------------------

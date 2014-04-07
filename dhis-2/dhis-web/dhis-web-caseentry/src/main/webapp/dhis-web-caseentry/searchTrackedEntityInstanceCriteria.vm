@@ -19,16 +19,7 @@
 		<td>$i18n.getString('program')</td>
 		<td>
 			<select id='program' name='program' onchange='enableBtn();'>
-				#if($programs.size()==0)
-					<option value="">[$i18n.getString( "none_program" )]</option>
-					<script>disable('listEntityInstanceBtn')</script>
-				#elseif($programs.size()>1)
-					<option value='' type='2' id='emptyProgramOption'>[$i18n.getString("please_select")]</option>
-					<script>disable('listEntityInstanceBtn')</script>
-				#else
-					<script>enable('listEntityInstanceBtn')</script>
-				#end
-				
+				<option value="">[$i18n.getString( "view_all" )]</option>
 				#foreach($program in $programs)
 					<option value="$program.uid" type='$program.type'>$program.displayName</option>
 				#end
@@ -83,6 +74,7 @@
 			<td>$i18n.getString('select_orgunit_for_search')</td>
 			<td><span id='orgunitForSearch'>$!organisationUnit.name</span></td>
 		</tr>
+		
 		<tr>
 			<td>$i18n.getString('orgunit_search_type')</td>
 			<td>
@@ -94,10 +86,10 @@
 			</td>
 		</tr>
 		
-		<tr id='trackedEntityTR' class='hidden'>
+		<tr id='trackedEntityTR'>
 			<td>$i18n.getString('tracked_entity')</td>
 			<td>
-				<select id='trackedEntity' name='trackedEntity'>
+				<select id='trackedEntity' name='trackedEntity' onchange='trackedEntityOnChange()'>
 					<option value="">[$i18n.getString('please_select')]</option>
 					#foreach($trackedEntity in $trackedEntities)
 						<option value="$trackedEntity.uid">$trackedEntity.name</option>

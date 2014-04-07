@@ -56,6 +56,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.indicator.IndicatorGroupSet;
@@ -172,6 +173,7 @@ public class DefaultResourceTableService
                 List<Object> values = new ArrayList<Object>();
 
                 values.add( unit.getId() );
+                values.add( unit.getUid() );
                 values.add( level );
 
                 Map<Integer, Integer> identifiers = new HashMap<Integer, Integer>();
@@ -195,7 +197,7 @@ public class DefaultResourceTableService
             }
         }
 
-        resourceTableStore.batchUpdate( ( maxLevel * 2 ) + 2, TABLE_NAME_ORGANISATION_UNIT_STRUCTURE, batchArgs );
+        resourceTableStore.batchUpdate( ( maxLevel * 2 ) + 3, TABLE_NAME_ORGANISATION_UNIT_STRUCTURE, batchArgs );
         
         log.info( "Organisation unit structure table generated" );
     }
@@ -501,17 +503,22 @@ public class DefaultResourceTableService
         {
             List<Object> values = new ArrayList<Object>();
 
+            final DataSet dataSet = dataElement.getDataSet();
             final PeriodType periodType = dataElement.getPeriodType();
             
             values.add( dataElement.getId() );
+            values.add( dataElement.getUid() );
             values.add( dataElement.getName() );
+            values.add( dataSet != null ? dataSet.getId() : null );
+            values.add( dataSet != null ? dataSet.getUid() : null );
+            values.add( dataSet != null ? dataSet.getName() : null );
             values.add( periodType != null ? periodType.getId() : null );
             values.add( periodType != null ? periodType.getName() : null );
             
             batchArgs.add( values.toArray() );
         }
         
-        resourceTableStore.batchUpdate( 4, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
+        resourceTableStore.batchUpdate( 8, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
         
         log.info( "Data element table generated" );
     }

@@ -39,11 +39,13 @@ import java.util.Map;
 
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.program.comparator.ProgramStageInstanceVisitDateComparator;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
@@ -85,7 +87,7 @@ public class ProgramEnrollmentAction
 
     private Boolean hasDataEntry;
 
-    private List<TrackedEntityAttribute> attributes;
+    private List<ProgramTrackedEntityAttribute> attributes;
 
     private ProgramInstance programInstance;
 
@@ -143,7 +145,7 @@ public class ProgramEnrollmentAction
         return hasDataEntry;
     }
 
-    public List<TrackedEntityAttribute> getAttributes()
+    public List<ProgramTrackedEntityAttribute> getAttributes()
     {
         return attributes;
     }
@@ -189,7 +191,7 @@ public class ProgramEnrollmentAction
         // Load attributes of the selected program
         // ---------------------------------------------------------------------
 
-        attributes = new ArrayList<TrackedEntityAttribute>( programInstance.getProgram().getTrackedEntityAttributes() );
+        attributes = new ArrayList<ProgramTrackedEntityAttribute>( programInstance.getProgram().getAttributes() );
 
         if ( attributes != null )
         {
@@ -198,8 +200,7 @@ public class ProgramEnrollmentAction
 
             for ( TrackedEntityAttributeValue attributeValue : attributeValues )
             {
-                if ( attributes.contains( attributeValue.getAttribute() ) )
-                {
+                
                     String value = attributeValue.getValue();
                     if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
                     {
@@ -208,23 +209,33 @@ public class ProgramEnrollmentAction
                     }
 
                     attributeValueMap.put( attributeValue.getAttribute().getId(), value );
-                }
             }
         }
     }
 
     private boolean showDataEntry( OrganisationUnit orgunit, Program program, ProgramInstance programInstance )
     {
-        if ( !program.getOrganisationUnits().contains( orgunit ) )
+        Collection<OrganisationUnit> orgunits = new HashSet<OrganisationUnit>();
+        
+        if ( program.getOrganisationUnitGroups().size() > 0 )
+        {
+            for ( OrganisationUnitGroup orgunitGroup : program.getOrganisationUnitGroups() )
+            {
+                orgunits.addAll( orgunitGroup.getMembers() );
+            }
+
+        }
+
+        if ( !orgunits.contains( orgunit ) && !program.getOrganisationUnits().contains( orgunit ) )
         {
             return false;
         }
-        else if ( !program.isSingleEvent() && programInstance == null )
+
+        if ( !program.isSingleEvent() && programInstance == null )
         {
             return false;
         }
 
         return true;
     }
-
 }
