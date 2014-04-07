@@ -111,16 +111,16 @@ public interface DataApprovalLevelService
      * approval levels from low to high.)
      *
      * @param newLevel the new level to add.
-     * @return true if level was added, false if not well formed or duplicate.
+     * @return the identifier of the added level, or -1 if not well formed or duplicate.
      */
-    boolean addDataApprovalLevel( DataApprovalLevel newLevel );
+    int addDataApprovalLevel( DataApprovalLevel newLevel );
 
     /**
      * Removes a data approval level.
      *
-     * @param index index of the level to move up.
+     * @param dataApprovalLevel the data approval level to delete.
      */
-    void deleteDataApprovalLevel( int index );
+    void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
 
     /**
      * Gets the lowest data approval level that the current user may view.
@@ -136,6 +136,14 @@ public interface DataApprovalLevelService
      * @return level number of the lowest level the user can view.
      */
     int getLowestUserDataApprovalLevel();
+    
+    /**
+     * Gets the data approval level with the given id.
+     * 
+     * @param id the id.
+     * @return a data approval level.
+     */
+    DataApprovalLevel getDataApprovalLevel( int id );
     
     /**
      * Gets the data approval level with the given name.

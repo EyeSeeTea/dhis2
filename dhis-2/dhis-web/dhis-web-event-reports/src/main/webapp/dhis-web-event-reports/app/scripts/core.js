@@ -2521,6 +2521,7 @@ Ext.onReady( function() {
 
 				// get html
 				return function() {
+                    var rows = xResponse.rows;
 					htmlArray = Ext.Array.clean([].concat(getColAxisHtmlArray() || [], getRowHtmlArray() || [], getTotalHtmlArray() || []));
 
 					return {
@@ -2529,7 +2530,8 @@ Ext.onReady( function() {
 						xColAxis: xColAxis,
 						xRowAxis: xRowAxis,
                         tdCount: tdCount,
-                        numberOfRows: xResponse.rows.length
+                        numberOfRows: rows.length,
+                        status: rows.length + ' value' + (rows.length === 1 ? '' : 's') + ' found'
 					};
 				}();
 			};
@@ -2608,7 +2610,8 @@ Ext.onReady( function() {
 
 				return {
 					html: html,
-                    numberOfRows: xResponse.rows.length
+                    numberOfRows: rows.length,
+                    status: rows.length + ' case' + (rows.length === 1 ? '' : 's') + ' found'
 				};
 			};
 

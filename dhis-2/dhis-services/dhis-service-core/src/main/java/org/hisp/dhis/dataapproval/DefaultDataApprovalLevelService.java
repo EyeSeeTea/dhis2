@@ -267,20 +267,20 @@ public class DefaultDataApprovalLevelService
         return false;
     }
 
-    public boolean addDataApprovalLevel( DataApprovalLevel newLevel )
+    public int addDataApprovalLevel( DataApprovalLevel newLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
         if ( newLevel.getOrgUnitLevel() <= 0 )
         {
-            return false;
+            return -1;
         }
 
         int index = getInsertIndex( dataApprovalLevels, newLevel );
 
         if ( index < 0 )
         {
-            return false;
+            return -1;
         }
 
         dataApprovalLevels.add( index, newLevel );
@@ -295,20 +295,18 @@ public class DefaultDataApprovalLevelService
         newLevel.setLevel( index + 1 );
         newLevel.setCreated( new Date() );
 
-        dataApprovalLevelStore.save( newLevel );
-
-        return true;
+        return dataApprovalLevelStore.save( newLevel );
     }
     
-    public void deleteDataApprovalLevel( int level )
+    public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
-        int index = level - 1;
-
+        int index = dataApprovalLevel.getLevel() - 1;
+        
         if ( index >= 0 & index < dataApprovalLevels.size() )
         {
-            dataApprovalLevelStore.delete( dataApprovalLevels.get( index ) );
+            dataApprovalLevelStore.delete( dataApprovalLevel );
 
             dataApprovalLevels.remove( index );
 
@@ -344,6 +342,11 @@ public class DefaultDataApprovalLevelService
         }
 
         return 0;
+    }
+    
+    public DataApprovalLevel getDataApprovalLevel( int id )
+    {
+        return dataApprovalLevelStore.get( id );
     }
     
     public DataApprovalLevel getDataApprovalLevelByName( String name )

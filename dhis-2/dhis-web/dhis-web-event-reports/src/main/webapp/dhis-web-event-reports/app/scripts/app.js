@@ -125,7 +125,7 @@ Ext.onReady( function() {
 
         Ext.define('Ext.ux.panel.DataElementStringContainer', {
 			extend: 'Ext.container.Container',
-			alias: 'widget.dataelementintegerpanel',
+			alias: 'widget.dataelementstringpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
             getRecord: function() {
@@ -1768,7 +1768,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access&filter=name:like:' + value : null;
 					store = ns.app.stores.eventReport;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1780,7 +1780,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access&filter=name:like:' + value : null;
 					store = ns.app.stores.eventReport;
 
 				store.page = store.page + 1;
@@ -2789,7 +2789,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&include=programStages[id,name],programTrackedEntityAttributes&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&include=programStages[id,name],programTrackedEntityAttributes[attribute[id,name,valueType,optionSet[id,name]]]&paging=false',
                     success: function(r) {
                         var program = Ext.decode(r.responseText).programs[0],
                             stages,
@@ -3022,6 +3022,8 @@ Ext.onReady( function() {
 			var getUxType,
 				ux;
 
+            element.type = element.type || element.valueType;
+
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
@@ -3029,7 +3031,7 @@ Ext.onReady( function() {
 					return 'Ext.ux.panel.DataElementOptionContainer';
 				}
 
-				if (element.type === 'int') {
+				if (element.type === 'int' || element.type === 'number') {
 					return 'Ext.ux.panel.DataElementIntegerContainer';
 				}
 
@@ -3074,7 +3076,8 @@ Ext.onReady( function() {
         selectDataElements = function(items, layout) {
             var dataElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
-                queryWindow = ns.app.queryLayoutWindow;
+                queryWindow = ns.app.queryLayoutWindow,
+                includeKeys = ['int', 'number', 'boolean', 'bool'];
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
@@ -3096,6 +3099,7 @@ Ext.onReady( function() {
 			// panel, store
             for (var i = 0, element, ux, store; i < dataElements.length; i++) {
 				element = dataElements[i];
+                element.type = element.type || element.valueType;
 
 				ux = addUxFromDataElement(element);
 
@@ -3103,7 +3107,7 @@ Ext.onReady( function() {
                     ux.setRecord(element);
                 }
 
-                store = (element.type === 'int' || element.type === 'boolean' || element.optionSet) ? aggWindow.rowStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
 
                 aggWindow.addDimension(element, store);
                 queryWindow.colStore.add(element);
@@ -4307,19 +4311,7 @@ Ext.onReady( function() {
 
         setGui = function(layout, xLayout, updateGui, table) {
 			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
-				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
 				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions);
-				//graphMap = layout.parentGraphMap,
-				//objectName,
-				//periodRecords,
-				//fixedPeriodRecords = [],
-				//dimNames = [],
-				//isOu = false,
-				//isOuc = false,
-				//isOugc = false,
-				//levels = [],
-				//groups = [],
-				//orgunits = [];
 
 			// state
 			ns.app.downloadButton.enable();
@@ -4328,7 +4320,7 @@ Ext.onReady( function() {
 				ns.app.shareButton.enable();
 			}
 
-            ns.app.statusBar.setStatus(table.numberOfRows);
+            ns.app.statusBar.setStatus(table.status);
 
 			// set gui
 			if (!updateGui) {
