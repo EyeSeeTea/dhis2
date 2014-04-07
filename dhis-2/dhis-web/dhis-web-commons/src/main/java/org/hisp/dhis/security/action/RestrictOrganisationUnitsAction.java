@@ -85,26 +85,28 @@ public class RestrictOrganisationUnitsAction
             // Initialize ouwt and selection tree
             // -----------------------------------------------------------------
 
-            Set<OrganisationUnit> orgUnits = user.getOrganisationUnits();
+            Set<OrganisationUnit> dataCaptureOrgUnits = user.getOrganisationUnits();
+            Set<OrganisationUnit> dataViewOrgUnits = user.getDataViewOrganisationUnits();
 
-            if ( orgUnits.size() > 0 )
+            if ( !dataCaptureOrgUnits.isEmpty() )
             {
-                selectionManager.setRootOrganisationUnits( orgUnits );
-
-                selectionManager.setSelectedOrganisationUnits( orgUnits );
-                
-                selectionTreeManager.setRootOrganisationUnits( orgUnits );
-                
-                selectionTreeManager.setSelectedOrganisationUnits( orgUnits );
+                selectionManager.setRootOrganisationUnits( dataCaptureOrgUnits );
+                selectionManager.setSelectedOrganisationUnits( dataCaptureOrgUnits );
             }
             else
             {
                 selectionManager.resetRootOrganisationUnits();
-
                 selectionManager.clearSelectedOrganisationUnits();
-                
-                selectionTreeManager.resetRootOrganisationUnits();
-                
+            }
+            
+            if ( !dataViewOrgUnits.isEmpty() )
+            {                
+                selectionTreeManager.setRootOrganisationUnits( dataViewOrgUnits );                
+                selectionTreeManager.setSelectedOrganisationUnits( dataViewOrgUnits );
+            }
+            else
+            {                
+                selectionTreeManager.resetRootOrganisationUnits();                
                 selectionTreeManager.clearSelectedOrganisationUnits();
             }
         }

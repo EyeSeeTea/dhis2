@@ -118,7 +118,7 @@ public class JdbcResourceTableStore
         StringBuilder sql = new StringBuilder();
         
         sql.append( "CREATE TABLE " ).append( TABLE_NAME_ORGANISATION_UNIT_STRUCTURE ).
-            append( " ( organisationunitid INTEGER NOT NULL PRIMARY KEY, level INTEGER" );
+            append( " ( organisationunitid INTEGER NOT NULL PRIMARY KEY, organisationunituid CHARACTER(11), level INTEGER" );
         
         for ( int k = 1 ; k <= maxLevel; k++ )
         {
@@ -271,8 +271,15 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        final String sql = "CREATE TABLE " + TABLE_NAME_DATA_ELEMENT_STRUCTURE + 
-            " ( dataelementid INTEGER NOT NULL PRIMARY KEY, dataelementname VARCHAR(250), periodtypeid INTEGER, periodtypename VARCHAR(250) )";
+        final String sql = "CREATE TABLE " + TABLE_NAME_DATA_ELEMENT_STRUCTURE + " ( " + 
+            "dataelementid INTEGER NOT NULL PRIMARY KEY, " +
+            "dataelementuid CHARACTER(11), " +
+            "dataelementname VARCHAR(250), " +
+            "datasetid INTEGER, " +
+            "datasetuid CHARACTER(11), " +
+            "datasetname VARCHAR(250), " +
+            "periodtypeid INTEGER, " + 
+            "periodtypename VARCHAR(250) )";
         
         log.info( "Create data element structure SQL: " + sql );
         

@@ -126,6 +126,13 @@ public class SetupTreeAction
         return userCredentials;
     }
 
+    private User user;
+
+    public User getUser()
+    {
+        return user;
+    }
+
     private List<UserAuthorityGroup> userAuthorityGroups;
 
     public List<UserAuthorityGroup> getUserAuthorityGroups()
@@ -199,13 +206,26 @@ public class SetupTreeAction
         
         if ( id != null )
         {
-            User user = userService.getUser( id );
+            user = userService.getUser( id );
 
-            if ( user.getOrganisationUnits().size() > 0 )
+            if ( user.hasOrganisationUnit() )
             {
-                selectionTreeManager.setSelectedOrganisationUnits( user.getOrganisationUnits() );
+                selectionManager.setSelectedOrganisationUnits( user.getOrganisationUnits() );
             }
-
+            else
+            {
+                selectionManager.clearSelectedOrganisationUnits();
+            }
+            
+            if ( user.hasDataViewOrganisationUnit() )
+            {
+                selectionTreeManager.setSelectedOrganisationUnits( user.getDataViewOrganisationUnits() );
+            }
+            else
+            {
+                selectionTreeManager.clearSelectedOrganisationUnits();
+            }
+            
             userCredentials = userService.getUserCredentials( userService.getUser( id ) );
 
             userAuthorityGroups.removeAll( userCredentials.getUserAuthorityGroups() );
@@ -217,12 +237,7 @@ public class SetupTreeAction
             currentLocaleDb = (Locale) userService.getUserSettingValue( user, KEY_DB_LOCALE, null );
         }
         else
-        {
-            if ( selectionManager.getSelectedOrganisationUnits().size() > 0 )
-            {
-                selectionTreeManager.setSelectedOrganisationUnits( selectionManager.getSelectedOrganisationUnits() );
-            }
-            
+        {            
             currentLocale = LocaleManager.DHIS_STANDARD_LOCALE;
         }
 

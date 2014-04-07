@@ -369,14 +369,14 @@ var dhis2 = dhis2 || {};
     $.template('appMenuItemTemplate', markup);
 
     function renderDropDownFavorites() {
-        var selector = '#menuDropDown1 .menuDropDownBox',
+        var selector = '#appsDropDown .menuDropDownBox',
             apps = dhis2.menu.getOrderedAppList();
 
-        $('#menuDropDown1').addClass('app-menu-dropdown ui-helper-clearfix');
+        $('#appsDropDown').addClass('app-menu-dropdown ui-helper-clearfix');
         $(selector).html('');
         $.tmpl( "appMenuItemTemplate", apps).appendTo(selector);
-        $('#menuDropDown1 .menu-drop-down-scroll .apps-menu-more').remove();
-        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#menuDropDown1 .menu-drop-down-scroll'));
+        $('#appsDropDown .menu-drop-down-scroll .apps-menu-more').remove();
+        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#appsDropDown .menu-drop-down-scroll'));
     }
 
     function renderAppManager(selector) {
@@ -476,6 +476,10 @@ var dhis2 = dhis2 || {};
      * TODO: Check the urls (they seem to be specific to the dev location atm)
      */
     $(function () {
+        var menuTimeout = 500,
+            closeTimer = null,
+            dropDownId = null;
+
         $.ajax('../dhis-web-commons/menu/getModules.action').success(function (data) {
             if (typeof data.modules === 'object') {
                 menu.addMenuItems(data.modules);
@@ -485,7 +489,7 @@ var dhis2 = dhis2 || {};
             //TODO: Translate this error message
             var error_template = '<li class="app-menu-error"><a href="' + window.location.href +'">Unable to load your apps, click to refresh</a></li>';
             $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
-            $('#menuDropDown1 .menuDropDownBox').html(error_template);
+            $('#appsDropDown .menuDropDownBox').html(error_template);
         });
 
         /**
@@ -505,12 +509,11 @@ var dhis2 = dhis2 || {};
         $(window).resize(twoColumnRowFix);
 
         /**
-         * Adds a scrolling mechanism that modifies the height of the menu box to show only two rows
-         * Additionally it makes space for the scrollbar and shows/hides the more apps button
+         * Adds a scrolling mechanism that makes space for the scrollbar and shows/hides the more apps button
          */
         $('.menu-drop-down-scroll').scroll(function (event) {
             var self = $(this),
-                moreAppsElement = $('#menuDropDown1 > .apps-menu-more');
+                moreAppsElement = $('#appsDropDown > .apps-menu-more');
 
             if (self.scrollTop() < 10) {
                 moreAppsElement.show();
@@ -524,6 +527,108 @@ var dhis2 = dhis2 || {};
                 }
             }
 
+        });
+
+        function showDropDown( id )
+        {
+            var newDropDownId = "#" + id,
+                position = $(newDropDownId + '_button').position();
+
+            cancelHideDropDownTimeout();
+
+            $(newDropDownId).css('position', 'absolute');
+            $(newDropDownId).css('top', '55px');
+            $(newDropDownId).css('left', Math.ceil(position.left - Math.ceil(parseInt($(newDropDownId).innerWidth(), 10) - 108)) + 'px');
+
+
+            if ( dropDownId != newDropDownId ) {
+                hideDropDown();
+
+                dropDownId = newDropDownId;
+
+                $( dropDownId ).show();
+            }
+        }
+
+        function hideDropDown() {
+            if ( dropDownId ) {
+                if ($( dropDownId ).attr( 'data-clicked-open' ) === 'true') {
+                    return;
+                }
+                $( dropDownId ).hide();
+
+                dropDownId = null;
+            }
+        }
+
+        function hideDropDownTimeout() {
+            closeTimer = window.setTimeout( hideDropDown, menuTimeout );
+        }
+
+        function cancelHideDropDownTimeout() {
+            if ( closeTimer ) {
+                window.clearTimeout( closeTimer );
+
+                closeTimer = null;
+            }
+        }
+
+        // Set show and hide drop down events on top menu
+        $( "#appsMenuLink" ).hover(function() {
+            showDropDown( "appsDropDown" );
+        }, function() {
+            hideDropDownTimeout();
+        });
+
+        $( "#profileMenuLink" ).hover(function() {
+            showDropDown( "profileDropDown" );
+        }, function() {
+            hideDropDownTimeout();
+        });
+
+        $( "#appsDropDown, #profileDropDown" ).hover(function() {
+            cancelHideDropDownTimeout();
+        }, function() {
+            hideDropDownTimeout();
+        });
+
+
+        $('.drop-down-menu-link').get().forEach(function (element, index, elements) {
+            var id = $(element).parent().attr('id'),
+                dropdown_menu = $('div#' + id.split('_')[0]);
+
+            function closeAllDropdowns() {
+                $('.app-menu-dropdown').each(function () {
+                    $(this).attr('data-clicked-open', 'false');
+                    $(this).hide();
+                });
+                hideDropDown();
+            }
+
+            $(element).click(function () {
+                return function () {
+                    var thisDropDownStatus = $(dropdown_menu).attr('data-clicked-open');
+                    closeAllDropdowns();
+
+                    if (thisDropDownStatus === 'true') {
+                        $(dropdown_menu).attr('data-clicked-open', 'false');
+                    } else {
+                        $(dropdown_menu).attr('data-clicked-open', 'true');
+                        showDropDown(dropdown_menu.attr('id'));
+                    }
+                }
+            }());
+        });
+
+        $(window).resize(function () {
+            $('.app-menu-dropdown').get().forEach(function (element, index, elements) {
+                var newDropDownId = '#' + $(element).attr('id'),
+                    position = $(newDropDownId + '_button').position();
+
+                $(newDropDownId).css('position', 'absolute');
+                $(newDropDownId).css('top', '55px');
+                $(newDropDownId).css('left', Math.ceil(position.left - Math.ceil(parseInt($(newDropDownId).innerWidth(), 10) - 108)) + 'px');
+            });
         });
 
     });

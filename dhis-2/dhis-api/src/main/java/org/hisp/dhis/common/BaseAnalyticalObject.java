@@ -100,7 +100,11 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  */
 public abstract class BaseAnalyticalObject
     extends BaseIdentifiableObject
-{    
+{
+    public static final String NUMBER_FORMATTING_COMMA = "comma";
+    public static final String NUMBER_FORMATTING_SPACE = "space";
+    public static final String NUMBER_FORMATTING_NONE = "none";
+    
     // -------------------------------------------------------------------------
     // Persisted properties
     // -------------------------------------------------------------------------
@@ -156,6 +160,8 @@ public abstract class BaseAnalyticalObject
     protected List<OrganisationUnitGroup> itemOrganisationUnitGroups = new ArrayList<OrganisationUnitGroup>();
     
     protected boolean rewindRelativePeriods;
+    
+    protected String digitGroupSeparator;
 
     // -------------------------------------------------------------------------
     // Analytical properties
@@ -758,6 +764,7 @@ public abstract class BaseAnalyticalObject
         organisationUnitLevels.clear();
         itemOrganisationUnitGroups.clear();
         rewindRelativePeriods = false;
+        digitGroupSeparator = NUMBER_FORMATTING_SPACE;
     }
     
     @Override
@@ -782,12 +789,15 @@ public abstract class BaseAnalyticalObject
             dataElementGroups.addAll( object.getDataElementGroups() );
             organisationUnitGroups.addAll( object.getOrganisationUnitGroups() );
             categoryOptionGroups.addAll( object.getCategoryOptionGroups() );
+            attributeDimensions.addAll( object.getAttributeDimensions() );
+            dataElementDimensions.addAll( object.getDataElementDimensions() );
             userOrganisationUnit = object.isUserOrganisationUnit();
             userOrganisationUnitChildren = object.isUserOrganisationUnitChildren();
             userOrganisationUnitGrandChildren = object.isUserOrganisationUnitGrandChildren();
             organisationUnitLevels.addAll( object.getOrganisationUnitLevels() );
             itemOrganisationUnitGroups = object.getItemOrganisationUnitGroups();
             rewindRelativePeriods = object.isRewindRelativePeriods();
+            digitGroupSeparator = object.getDigitGroupSeparator();
         }
     }
 
@@ -1046,6 +1056,19 @@ public abstract class BaseAnalyticalObject
     public void setRewindRelativePeriods( boolean rewindRelativePeriods )
     {
         this.rewindRelativePeriods = rewindRelativePeriods;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getDigitGroupSeparator()
+    {
+        return digitGroupSeparator;
+    }
+
+    public void setDigitGroupSeparator( String digitGroupSeparator )
+    {
+        this.digitGroupSeparator = digitGroupSeparator;
     }
 
     // -------------------------------------------------------------------------

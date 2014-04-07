@@ -75,6 +75,7 @@
   <bean id="org.hisp.dhis.dataapproval.DataApprovalLevelStore" class="org.hisp.dhis.dataapproval.hibernate.HibernateDataApprovalLevelStore">
     <property name="clazz" value="org.hisp.dhis.dataapproval.DataApprovalLevel" />
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
   </bean>
 
     <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.metadatafilter.hibernate.HibernateMetaDataFilterStore">
@@ -421,6 +422,7 @@
   <bean id="org.hisp.dhis.dataapproval.DataApprovalLevelService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalLevelService">
     <property name="dataApprovalLevelStore" ref="org.hisp.dhis.dataapproval.DataApprovalLevelStore" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
   </bean>
 
@@ -1011,6 +1013,10 @@
 
   <!-- DeletionHandlers -->
 
+  <bean id="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler" class="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler">
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+  </bean>
+
   <bean id="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler" class="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler">
     <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
   </bean>
@@ -1180,6 +1186,7 @@
     <property name="arguments">
       <list>
         <list>
+          <ref local="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler" />
           <ref local="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupDeletionHandler" />
@@ -1227,6 +1234,7 @@
   <aop:config>
 
     <aop:aspect ref="deletionInterceptor">
+      <aop:before pointcut="execution( * org.hisp.dhis.dataapproval.DataApprovalLevelService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.datadictionary.DataDictionaryService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.dataelement.DataElementCategoryService.delete*(..) )" method="intercept" />

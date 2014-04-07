@@ -33,8 +33,9 @@ import java.util.Collection;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
+ * The selection tree is used for data output and analysis.
+ * 
  * @author Torgeir Lorange Ostby
- * @version $Id: SelectionTreeManager.java 5549 2008-08-20 05:23:35Z abyot $
  */
 public interface SelectionTreeManager
 {
@@ -149,14 +150,4 @@ public interface SelectionTreeManager
      *             if the argument is null
      */
     void setSelectedOrganisationUnit( OrganisationUnit unit );
-    
-    /**
-     * Sets the current user's organisation unit as selected. If the user is
-     * associated with more than one organisation unit, it is undefined which one
-     * is selected.
-     * 
-     * @return true if the operation was successful, ie. if a current users exists
-     * and if the current user is associated with one or more organisation units.
-     */
-    boolean setCurrentUserOrganisationUnitAsSelected();
 }

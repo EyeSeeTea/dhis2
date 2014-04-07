@@ -1,0 +1,181 @@
+package org.hisp.dhis.pbf.payment.action;
+
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.datavalue.DataValueService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.pbf.api.Lookup;
+import org.hisp.dhis.pbf.api.LookupService;
+import org.hisp.dhis.pbf.api.PBFDataValueService;
+import org.hisp.dhis.pbf.api.QualityMaxValueService;
+import org.hisp.dhis.pbf.api.TariffDataValueService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.opensymphony.xwork2.Action;
+
+public class LoadPaymentAdjustmentAction implements Action
+{
+
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+    @Autowired
+    private DataSetService dataSetService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private DataElementCategoryService categoryService;
+
+    @Autowired
+    private DataValueService dataValueService;
+
+    @Autowired
+    private PBFDataValueService pbfDataValueService;
+    
+    @Autowired
+    private TariffDataValueService tariffDataValueService;
+
+    @Autowired
+    private DataElementService dataElementService;
+
+    @Autowired
+    private ConstantService constantService;
+
+    @Autowired
+    private PeriodService periodService;
+
+    @Autowired
+    private LookupService lookupService;
+
+    @Autowired
+    private QualityMaxValueService qualityMaxValueService;
+
+    // -------------------------------------------------------------------------
+    // Input / Output
+    // -------------------------------------------------------------------------
+    private Map<Integer, Double> pbfQtyMap = new HashMap<Integer, Double>();
+
+    public Map<Integer, Double> getPbfQtyMap()
+    {
+        return pbfQtyMap;
+    }
+
+    private Map<Integer, Double> pbfTariffMap = new HashMap<Integer, Double>();
+
+    public Map<Integer, Double> getPbfTariffMap()
+    {
+        return pbfTariffMap;
+    }
+
+    private String orgUnitId;
+
+    public void setOrgUnitId( String orgUnitId )
+    {
+        this.orgUnitId = orgUnitId;
+    }
+
+    private String dataSetId;
+
+    public void setDataSetId( String dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    private String periodIso;
+
+    public void setPeriodIso( String periodIso )
+    {
+        this.periodIso = periodIso;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+        throws Exception
+    {
+        OrganisationUnit selOrgUnit = organisationUnitService.getOrganisationUnit( orgUnitId );
+        
+        DataSet selDataSet = dataSetService.getDataSet( Integer.parseInt( dataSetId ) );
+        
+        Period period = PeriodType.getPeriodFromIsoString( periodIso );
+        
+        period = periodService.reloadPeriod( period );
+        
+        Set<Period> periods = new HashSet<Period>( periodService.getIntersectingPeriods( period.getStartDate(), period.getEndDate() ) );
+        Collection<Integer> periodIds = new ArrayList<Integer>( getIdentifiers( Period.class, periods ) );
+        String periodIdsByComma = getCommaDelimitedString( periodIds );
+        
+        Set<DataElement> dataElements = new HashSet<DataElement>( selDataSet.getDataElements() );
+        
+        Set<OrganisationUnit> pbfQtyOrgUnits = new HashSet<OrganisationUnit>();
+        pbfQtyOrgUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( selOrgUnit.getId() ) );
+        pbfQtyOrgUnits.retainAll( selDataSet.getSources() );
+        Collection<Integer> orgUnitIds = new ArrayList<Integer>( getIdentifiers( OrganisationUnit.class, pbfQtyOrgUnits ) );
+        String orgUnitIdsByComma = getCommaDelimitedString( orgUnitIds );
+        
+        //--------------------------------------------------------
+        // Quantity Calculation
+        //--------------------------------------------------------
+        
+        pbfQtyMap.putAll( pbfDataValueService.getPBFDataValues( orgUnitIdsByComma, selDataSet, periodIdsByComma ) );
+        
+        //--------------------------------------------------------
+        // Quantity Tariff Calculation
+        //--------------------------------------------------------
+        Constant tariff_authority = constantService.getConstantByName( Lookup.TARIFF_SETTING_AUTHORITY );
+        int tariff_setting_authority = 1;
+        if ( tariff_authority != null )
+        {
+            tariff_setting_authority = (int) tariff_authority.getValue();
+        }
+
+        OrganisationUnit tariffOrgUnit = findParentOrgunitforTariff( selOrgUnit, tariff_setting_authority );
+        
+        if( tariffOrgUnit != null ) 
+        {
+            pbfTariffMap.putAll( tariffDataValueService.getTariffDataValues( tariffOrgUnit, selDataSet, period ) );
+        }
+        
+        //-----------------------------------------------------------
+        // QualityScore
+        //-----------------------------------------------------------
+        
+        return SUCCESS;
+    }
+    
+    public OrganisationUnit findParentOrgunitforTariff( OrganisationUnit organisationUnit, Integer tariffOULevel )
+    {
+        Integer ouLevel = organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() );
+        if ( tariffOULevel == ouLevel )
+        {
+            return organisationUnit;
+        }
+        else
+        {
+            return findParentOrgunitforTariff( organisationUnit.getParent(), tariffOULevel );
+        }
+    }
+}

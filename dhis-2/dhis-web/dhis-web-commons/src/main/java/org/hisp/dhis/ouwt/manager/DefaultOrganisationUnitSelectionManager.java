@@ -41,8 +41,6 @@ import com.opensymphony.xwork2.ActionContext;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: DefaultOrganisationUnitSelectionManager.java 5652 2008-09-06
- *          13:24:34Z larshelg $
  */
 public class DefaultOrganisationUnitSelectionManager
     implements OrganisationUnitSelectionManager
