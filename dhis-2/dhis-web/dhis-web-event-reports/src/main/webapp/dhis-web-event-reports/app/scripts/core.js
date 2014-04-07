@@ -1740,7 +1740,15 @@ Ext.onReady( function() {
 
                 // sorting
                 if (view.dataType === 'individual_cases' && view.sorting) {
-                    paramString += '&' + view.sorting.direction.toLowerCase() + '=' + view.sorting.id;
+                    if (view.sorting.id && view.sorting.direction) {
+                        paramString += '&' + view.sorting.direction.toLowerCase() + '=' + view.sorting.id;
+                    }
+                }
+
+                // paging
+                if (view.dataType === 'individual_cases' && view.paging) {
+                    paramString += view.paging.pageSize ? '&pageSize=' + view.paging.pageSize : '';
+                    paramString += view.paging.page ? '&page=' + view.paging.page : '';
                 }
 
                 return paramString;
@@ -2534,9 +2542,7 @@ Ext.onReady( function() {
 						uuidDimUuidsMap: uuidDimUuidsMap,
 						xColAxis: xColAxis,
 						xRowAxis: xRowAxis,
-                        tdCount: tdCount,
-                        numberOfRows: rows.length,
-                        status: rows.length + ' value' + (rows.length === 1 ? '' : 's') + ' found'
+                        tdCount: tdCount
 					};
 				}();
 			};
@@ -2614,9 +2620,7 @@ Ext.onReady( function() {
 				html += '</table>';
 
 				return {
-					html: html,
-                    numberOfRows: rows.length,
-                    status: rows.length + ' case' + (rows.length === 1 ? '' : 's') + ' found'
+					html: html
 				};
 			};
 

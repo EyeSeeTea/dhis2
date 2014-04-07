@@ -575,6 +575,98 @@ Ext.onReady( function() {
         });
 	}());
 
+    (function() {
+        Ext.define('Ext.ux.toolbar.StatusBar', {
+			extend: 'Ext.toolbar.Toolbar',
+			alias: 'widget.statusbar',
+            pageSize: 100,
+            setStatus: function(layout, response) {
+                var pager = response.metaData.pager;
+
+                this.reset(layout.dataType);
+
+                if (layout.dataType === 'aggregated_values') {
+                    this.statusCmp.setText(response.rows.length + ' values found');
+                    return;
+                }
+
+                if (layout.dataType === 'individual_cases') {
+                    var visible = pager.page * pager.pageSize;
+
+                    this.statusCmp.setText(pager.total + ' cases found, showing ' + (visible - pager.pageSize + 1) + '-' + (visible) + ', page ');
+                    this.pageCmp.setValueIf(pager.page);
+                    this.pageCmp.setMaxValue(pager.pageCount);
+                    this.totalPageCmp.setText(' of ' + pager.pageCount);
+                    return;
+                }
+            },
+            reset: function(dataType) {
+                if (!dataType || dataType === 'aggregated_values') {
+                    this.statusCmp.setText('');
+                    this.pageCmp.hide();
+                    this.totalPageCmp.hide();
+                    return;
+                }
+
+                if (dataType === 'individual_cases') {
+                    this.statusCmp.setText('Page ');
+                    this.pageCmp.show();
+                    this.pageCmp.suspend = true;
+                    this.pageCmp.setValue(1);
+                    this.pageCmp.suspend = false;
+                    this.totalPageCmp.show();
+                    this.totalPageCmp.setText('');
+                }
+            },
+            getPage: function() {
+                return this.pageCmp.getValue();
+            },
+            onPageChange: function(cmp, newValue, oldValue) {
+                if (newValue != oldValue) {
+                    ns.app.layout.paging.page = newValue;
+                    ns.core.web.report.getData(ns.app.layout);
+                }
+            },
+            initComponent: function() {
+                var container = this,
+                    size = this.pageSize;
+
+                this.statusCmp = Ext.create('Ext.toolbar.TextItem', {
+                    text: 'Page ',
+                    style: 'line-height:21px',
+                });
+
+                this.pageCmp = Ext.create('Ext.form.field.Number', {
+                    width: 50,
+                    height: 21,
+                    minValue: 1,
+                    value: 1,
+                    setValueIf: function(page) {
+                        if (page != this.getValue() && !this.suspend) {
+                            this.setValue(page);
+                        }
+                    }
+                    //listeners: {
+                        //change: this.onPageChange
+                    //}
+                });
+
+                this.totalPageCmp = Ext.create('Ext.toolbar.TextItem', {
+                    text: '',
+                    style: 'line-height:21px'
+                });
+
+                this.items = [
+                    this.statusCmp,
+                    this.pageCmp,
+                    this.totalPageCmp
+                ];
+
+                this.callParent();
+            }
+        });
+    }());
+
 	// constructors
 
 	AggregateLayoutWindow = function() {
@@ -4309,7 +4401,7 @@ Ext.onReady( function() {
 			//}
 		};
 
-        setGui = function(layout, xLayout, updateGui, table) {
+        setGui = function(layout, xLayout, response, updateGui, table) {
 			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
 				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions);
 
@@ -4320,7 +4412,7 @@ Ext.onReady( function() {
 				ns.app.shareButton.enable();
 			}
 
-            ns.app.statusBar.setStatus(table.status);
+            ns.app.statusBar.setStatus(layout, response);
 
 			// set gui
 			if (!updateGui) {
@@ -4423,6 +4515,12 @@ Ext.onReady( function() {
 			if (filters.length) {
 				view.filters = filters;
 			}
+
+            // paging
+            view.paging = {
+                page: ns.app.statusBar.getPage(),
+                pageSize: 100
+            };
 
 			return view;
 		};
@@ -5119,7 +5217,7 @@ Ext.onReady( function() {
 						web.storage.session.set(layout, 'table');
 					}
 
-					ns.app.widget.setGui(layout, xLayout, isUpdateGui, table);
+					ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 
@@ -5159,7 +5257,7 @@ Ext.onReady( function() {
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
-					ns.app.widget.setGui(layout, null, isUpdateGui, table);
+					ns.app.widget.setGui(layout, null, response, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 				};
@@ -5667,49 +5765,13 @@ Ext.onReady( function() {
 			}
 		});
 
-		prevButton = Ext.create('Ext.button.Button', {
-			text: NS.i18n.prev,
-			handler: function() {
-				var url = value ? ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access&filter=name:like:' + value : null;
-					store = ns.app.stores.eventReport;
-
-				store.page = store.page <= 1 ? 1 : store.page - 1;
-				store.loadStore(url);
-			}
-		});
-
-		nextButton = Ext.create('Ext.button.Button', {
-			text: NS.i18n.next,
-			handler: function() {
-				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
-					store = ns.app.stores.eventReport;
-
-				store.page = store.page + 1;
-				store.loadStore(url);
-			}
-		});
-
-        statusBar = Ext.create('Ext.toolbar.Toolbar', {
-            height: 26,
-            items: [
-                {
-                    xtype: 'label',
-                    height: 26,
-                    style: 'line-height:21px; padding-left:3px',
-                    listeners: {
-                        added: function(cmp) {
-                            this.up('toolbar').label = this;
-                        }
-                    }
-                }
-            ],
-            setStatus: function(status) {
-                this.label.setText(status);
-            },
+        statusBar = Ext.create('Ext.ux.toolbar.StatusBar', {
+            height: 27,
             listeners: {
                 added: function() {
                     ns.app.statusBar = this;
+
+                    this.reset();
                 }
             }
         });
