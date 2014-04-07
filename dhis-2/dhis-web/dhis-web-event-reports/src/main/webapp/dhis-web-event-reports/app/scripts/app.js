@@ -1780,7 +1780,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access&filter=name:like:' + value : null;
+					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
 					store = ns.app.stores.eventReport;
 
 				store.page = store.page + 1;
@@ -4910,7 +4910,12 @@ Ext.onReady( function() {
 					};
 				}
 
-				web.report.createReport(layout, response);
+                if (layout.dataType === 'aggregated_values') {
+                    web.report.createReport(layout, response);
+                }
+                else if (layout.dataType === 'individual_cases') {
+                    web.report.getData(layout);
+                }
 			};
 
 			web.events.onColumnHeaderMouseOver = function(el) {
@@ -5659,6 +5664,29 @@ Ext.onReady( function() {
 				added: function() {
 					ns.app.shareButton = this;
 				}
+			}
+		});
+
+		prevButton = Ext.create('Ext.button.Button', {
+			text: NS.i18n.prev,
+			handler: function() {
+				var url = value ? ns.core.init.contextPath + '/api/eventReports.json?include=id,name,access&filter=name:like:' + value : null;
+					store = ns.app.stores.eventReport;
+
+				store.page = store.page <= 1 ? 1 : store.page - 1;
+				store.loadStore(url);
+			}
+		});
+
+		nextButton = Ext.create('Ext.button.Button', {
+			text: NS.i18n.next,
+			handler: function() {
+				var value = searchTextfield.getValue(),
+					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					store = ns.app.stores.eventReport;
+
+				store.page = store.page + 1;
+				store.loadStore(url);
 			}
 		});
 
