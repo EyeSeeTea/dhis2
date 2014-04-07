@@ -2473,7 +2473,7 @@ Ext.onReady( function() {
 			stage,
             onStageSelect,
             loadDataElements,
-            //dataElementAvailable,
+            dataElementAvailable,
             dataElementSelected,
             addUxFromDataElement,
             selectDataElements,
@@ -2501,7 +2501,7 @@ Ext.onReady( function() {
             checkboxes = [],
 
             fixedPeriodAvailable,
-            //fixedPeriodSelected,
+            fixedPeriodSelected,
             onPeriodTypeSelect,
             periodType,
             prevYear,
@@ -2789,19 +2789,19 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&include=programStages[id,name],attributes&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&include=programStages[id,name],programTrackedEntityAttributes&paging=false',
                     success: function(r) {
-                        var objects = Ext.decode(r.responseText).programs,
+                        var program = Ext.decode(r.responseText).programs[0],
                             stages,
                             attributes,
                             stageId;
 
-                        if (!objects.length) {
+                        if (!program) {
                             return;
                         }
 
-                        stages = objects[0].programStages;
-                        attributes = objects[0].attributes;
+                        stages = program.programStages;
+                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'attribute');
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -4305,7 +4305,7 @@ Ext.onReady( function() {
 			//}
 		};
 
-        setGui = function(layout, xLayout, updateGui) {
+        setGui = function(layout, xLayout, updateGui, table) {
 			var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
 				//dimMap = ns.core.service.layout.getObjectNameDimensionMapFromDimensionArray(dimensions),
 				recMap = ns.core.service.layout.getObjectNameDimensionItemsMapFromDimensionArray(dimensions);
@@ -4328,198 +4328,14 @@ Ext.onReady( function() {
 				ns.app.shareButton.enable();
 			}
 
+            ns.app.statusBar.setStatus(table.numberOfRows);
+
 			// set gui
 			if (!updateGui) {
 				return;
 			}
 
             setLayout(layout);
-
-            return;
-
-			// data
-			indicatorSelectedStore.removeAll();
-			objectName = dimConf.indicator.objectName;
-			if (dimMap[objectName]) {
-				indicatorSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
-			}
-
-			// Data elements
-			dataElementSelectedStore.removeAll();
-			objectName = dimConf.dataElement.objectName;
-			if (dimMap[objectName]) {
-				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				dataElementDetailLevel.setValue(objectName);
-			}
-
-			// Operands
-			objectName = dimConf.operand.objectName;
-			if (dimMap[objectName]) {
-				dataElementSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
-				dataElementDetailLevel.setValue(objectName);
-			}
-
-			// Data sets
-			dataSetSelectedStore.removeAll();
-			objectName = dimConf.dataSet.objectName;
-			if (dimMap[objectName]) {
-				dataSetSelectedStore.add(Ext.clone(recMap[objectName]));
-				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
-			}
-
-			// Periods
-			fixedPeriodSelectedStore.removeAll();
-			period.resetRelativePeriods();
-			periodRecords = recMap[dimConf.period.objectName] || [];
-			for (var i = 0, periodRecord, checkbox; i < periodRecords.length; i++) {
-				periodRecord = periodRecords[i];
-				checkbox = ns.app.relativePeriodCmpMap[periodRecord.id];
-				if (checkbox) {
-					checkbox.setValue(true);
-				}
-				else {
-					fixedPeriodRecords.push(periodRecord);
-				}
-			}
-			fixedPeriodSelectedStore.add(fixedPeriodRecords);
-			ns.core.web.multiSelect.filterAvailable({store: fixedPeriodAvailableStore}, {store: fixedPeriodSelectedStore});
-
-			// Group sets
-			for (var key in dimensionIdSelectedStoreMap) {
-				if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
-					var a = dimensionIdAvailableStoreMap[key],
-						s = dimensionIdSelectedStoreMap[key];
-
-					if (s.getCount() > 0) {
-						a.reset();
-						s.removeAll();
-					}
-
-					if (recMap[key]) {
-						s.add(recMap[key]);
-						ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
-					}
-				}
-			}
-
-			// Layout
-			ns.app.stores.dimension.reset(true);
-			ns.app.aggregateLayoutWindow.colStore.removeAll();
-			ns.app.layoutWiaggregateLayoutWindowndow.rowStore.removeAll();
-			ns.app.aggregateLayoutWindow.filterStore.removeAll();
-
-			if (layout.columns) {
-				dimNames = [];
-
-				for (var i = 0, dim; i < layout.columns.length; i++) {
-					dim = dimConf.objectNameMap[layout.columns[i].dimension];
-
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.aggregateLayoutWindow.colStore.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
-
-			if (layout.rows) {
-				dimNames = [];
-
-				for (var i = 0, dim; i < layout.rows.length; i++) {
-					dim = dimConf.objectNameMap[layout.rows[i].dimension];
-
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.stores.row.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
-
-			if (layout.filters) {
-				dimNames = [];
-
-				for (var i = 0, dim; i < layout.filters.length; i++) {
-					dim = dimConf.objectNameMap[layout.filters[i].dimension];
-
-					if (!Ext.Array.contains(dimNames, dim.dimensionName)) {
-						ns.app.stores.filter.add({
-							id: dim.dimensionName,
-							name: dimConf.objectNameMap[dim.dimensionName].name
-						});
-
-						dimNames.push(dim.dimensionName);
-					}
-
-					ns.app.stores.dimension.remove(ns.app.stores.dimension.getById(dim.dimensionName));
-				}
-			}
-
-			// Options
-			if (ns.app.optionsWindow) {
-				ns.app.optionsWindow.setOptions(layout);
-			}
-
-			// Organisation units
-			if (recMap[dimConf.organisationUnit.objectName]) {
-				for (var i = 0, ouRecords = recMap[dimConf.organisationUnit.objectName]; i < ouRecords.length; i++) {
-					if (ouRecords[i].id === 'USER_ORGUNIT') {
-						isOu = true;
-					}
-					else if (ouRecords[i].id === 'USER_ORGUNIT_CHILDREN') {
-						isOuc = true;
-					}
-					else if (ouRecords[i].id === 'USER_ORGUNIT_GRANDCHILDREN') {
-						isOugc = true;
-					}
-					else if (ouRecords[i].id.substr(0,5) === 'LEVEL') {
-						levels.push(parseInt(ouRecords[i].id.split('-')[1]));
-					}
-					else if (ouRecords[i].id.substr(0,8) === 'OU_GROUP') {
-						groups.push(ouRecords[i].id.split('-')[1]);
-					}
-					else {
-						orgunits.push(ouRecords[i].id);
-					}
-				}
-
-				if (levels.length) {
-					toolMenu.clickHandler('level');
-					organisationUnitLevel.setValue(levels);
-				}
-				else if (groups.length) {
-					toolMenu.clickHandler('group');
-					organisationUnitGroup.setValue(groups);
-				}
-				else {
-					toolMenu.clickHandler('orgunit');
-					userOrganisationUnit.setValue(isOu);
-					userOrganisationUnitChildren.setValue(isOuc);
-					userOrganisationUnitGrandChildren.setValue(isOugc);
-				}
-
-				if (!(isOu || isOuc || isOugc)) {
-					if (Ext.isObject(graphMap)) {
-						treePanel.selectGraphMap(graphMap);
-					}
-				}
-			}
-			else {
-				treePanel.reset();
-			}
 		};
 
 		getView = function(config) {
@@ -5306,7 +5122,7 @@ Ext.onReady( function() {
 						web.storage.session.set(layout, 'table');
 					}
 
-					ns.app.widget.setGui(layout, xLayout, isUpdateGui);
+					ns.app.widget.setGui(layout, xLayout, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 
@@ -5346,7 +5162,7 @@ Ext.onReady( function() {
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
-					ns.app.widget.setGui(layout, null, isUpdateGui);
+					ns.app.widget.setGui(layout, null, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 				};
@@ -5375,6 +5191,7 @@ Ext.onReady( function() {
             interpretationItem,
             pluginItem,
             shareButton,
+            statusBar,
             centerRegion,
             setGui,
             getLayoutWindow,
@@ -5853,6 +5670,30 @@ Ext.onReady( function() {
 			}
 		});
 
+        statusBar = Ext.create('Ext.toolbar.Toolbar', {
+            height: 26,
+            items: [
+                {
+                    xtype: 'label',
+                    height: 26,
+                    style: 'line-height:21px; padding-left:3px',
+                    listeners: {
+                        added: function(cmp) {
+                            this.up('toolbar').label = this;
+                        }
+                    }
+                }
+            ],
+            setStatus: function(status) {
+                this.label.setText(status);
+            },
+            listeners: {
+                added: function() {
+                    ns.app.statusBar = this;
+                }
+            }
+        });
+
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
@@ -5898,6 +5739,7 @@ Ext.onReady( function() {
 					}
 				]
 			},
+            bbar: statusBar,
 			listeners: {
 				added: function() {
 					ns.app.centerRegion = this;

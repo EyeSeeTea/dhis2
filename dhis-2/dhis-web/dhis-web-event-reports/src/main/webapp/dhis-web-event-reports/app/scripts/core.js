@@ -2528,7 +2528,8 @@ Ext.onReady( function() {
 						uuidDimUuidsMap: uuidDimUuidsMap,
 						xColAxis: xColAxis,
 						xRowAxis: xRowAxis,
-                        tdCount: tdCount
+                        tdCount: tdCount,
+                        numberOfRows: xResponse.rows.length
 					};
 				}();
 			};
@@ -2606,7 +2607,8 @@ Ext.onReady( function() {
 				html += '</table>';
 
 				return {
-					html: html
+					html: html,
+                    numberOfRows: xResponse.rows.length
 				};
 			};
 
