@@ -38,6 +38,7 @@ Ext.onReady( function() {
 
 	// extensions
 
+		// data items
 	(function() {
         var operatorCmpWidth = 70,
             valueCmpWidth = 304,
@@ -575,91 +576,160 @@ Ext.onReady( function() {
         });
 	}());
 
+		// toolbar
     (function() {
         Ext.define('Ext.ux.toolbar.StatusBar', {
 			extend: 'Ext.toolbar.Toolbar',
 			alias: 'widget.statusbar',
-            pageSize: 100,
+            queryCmps: [],
+            showHideQueryCmps: function(fnName) {
+				Ext.Array.each(this.queryCmps, function(cmp) {
+					cmp[fnName]();
+				});
+			},
             setStatus: function(layout, response) {
-                var pager = response.metaData.pager;
+                this.pager = response.metaData.pager;
 
                 this.reset(layout.dataType);
 
                 if (layout.dataType === 'aggregated_values') {
-                    this.statusCmp.setText(response.rows.length + ' values found');
+                    this.statusCmp.setText(response.rows.length + ' values');
                     return;
                 }
 
                 if (layout.dataType === 'individual_cases') {
-                    var visible = pager.page * pager.pageSize;
+                    var maxVal = this.pager.page * this.pager.pageSize,
+						from = maxVal - this.pager.pageSize + 1,
+						to = Ext.Array.min([maxVal, this.pager.total]);
 
-                    this.statusCmp.setText(pager.total + ' cases found, showing ' + (visible - pager.pageSize + 1) + '-' + (visible) + ', page ');
-                    this.pageCmp.setValueIf(pager.page);
-                    this.pageCmp.setMaxValue(pager.pageCount);
-                    this.totalPageCmp.setText(' of ' + pager.pageCount);
+                    this.pageCmp.setValue(this.pager.page);
+                    this.pageCmp.setMaxValue(this.pager.pageCount);
+                    this.totalPageCmp.setText(' of ' + this.pager.pageCount);
+                    this.statusCmp.setText(from + '-' + to + ' of ' + this.pager.total + ' cases');
                     return;
                 }
             },
             reset: function(dataType) {
                 if (!dataType || dataType === 'aggregated_values') {
+					this.showHideQueryCmps('hide');
+                    this.pageCmp.setValue(1);
+                    this.totalPageCmp.setText('');
                     this.statusCmp.setText('');
-                    this.pageCmp.hide();
-                    this.totalPageCmp.hide();
                     return;
                 }
 
                 if (dataType === 'individual_cases') {
-                    this.statusCmp.setText('Page ');
-                    this.pageCmp.show();
-                    this.pageCmp.suspend = true;
+					this.showHideQueryCmps('show');
                     this.pageCmp.setValue(1);
-                    this.pageCmp.suspend = false;
-                    this.totalPageCmp.show();
-                    this.totalPageCmp.setText('');
+                    this.totalPageCmp.setText(' of 1');
+                    this.statusCmp.setText('');
                 }
             },
-            getPage: function() {
+            getCurrentPage: function() {
                 return this.pageCmp.getValue();
             },
-            onPageChange: function(cmp, newValue, oldValue) {
-                if (newValue != oldValue) {
-                    ns.app.layout.paging.page = newValue;
-                    ns.core.web.report.getData(ns.app.layout);
-                }
+            getPageCount: function() {
+				return this.pageCount;
+			},
+            onPageChange: function(page, currentPage) {
+				currentPage = currentPage || this.getCurrentPage();
+
+				if (page && page >= 1 && page <= this.pager.pageCount && page != currentPage) {
+					ns.app.layout.paging.page = page;
+					this.pageCmp.setValue(page);
+					ns.core.web.report.getData(ns.app.layout);
+				}
             },
             initComponent: function() {
                 var container = this,
                     size = this.pageSize;
 
-                this.statusCmp = Ext.create('Ext.toolbar.TextItem', {
+                this.firstCmp = Ext.create('Ext.button.Button', {
+					text: '<<',
+					handler: function() {
+						container.onPageChange(1);
+					}
+				});
+				this.queryCmps.push(this.firstCmp);
+
+                this.prevCmp = Ext.create('Ext.button.Button', {
+					text: '<',
+					handler: function() {
+						container.onPageChange(container.getCurrentPage() - 1);
+					}
+				});
+				this.queryCmps.push(this.prevCmp);
+
+                this.pageTextCmp = Ext.create('Ext.toolbar.TextItem', {
                     text: 'Page ',
                     style: 'line-height:21px',
                 });
+				this.queryCmps.push(this.pageTextCmp);
 
                 this.pageCmp = Ext.create('Ext.form.field.Number', {
-                    width: 50,
+                    width: 34,
                     height: 21,
                     minValue: 1,
                     value: 1,
-                    setValueIf: function(page) {
-                        if (page != this.getValue() && !this.suspend) {
-                            this.setValue(page);
-                        }
-                    }
-                    //listeners: {
-                        //change: this.onPageChange
-                    //}
+                    hideTrigger: true,
+                    enableKeyEvents: true,
+                    currentPage: 1,
+                    listeners: {
+						render: function() {
+							Ext.get(this.getInputId()).setStyle('padding-top', '2px');
+						},
+						keyup: {
+							fn: function(cmp) {
+								var currentPage = cmp.currentPage;
+
+								cmp.currentPage = cmp.getValue();
+
+								container.onPageChange(cmp.getValue(), currentPage);
+							},
+							buffer: 200
+						}
+					}
                 });
+				this.queryCmps.push(this.pageCmp);
 
                 this.totalPageCmp = Ext.create('Ext.toolbar.TextItem', {
                     text: '',
                     style: 'line-height:21px'
                 });
+				this.queryCmps.push(this.totalPageCmp);
+
+                this.nextCmp = Ext.create('Ext.button.Button', {
+					text: '>',
+					handler: function() {
+						container.onPageChange(container.getCurrentPage() + 1);
+					}
+				});
+				this.queryCmps.push(this.nextCmp);
+
+                this.lastCmp = Ext.create('Ext.button.Button', {
+					text: '>>',
+					handler: function() {
+						container.onPageChange(container.pager.pageCount);
+					}
+				});
+				this.queryCmps.push(this.lastCmp);
+
+                this.statusCmp = Ext.create('Ext.toolbar.TextItem', {
+                    text: '',
+                    style: 'line-height:21px',
+                });
 
                 this.items = [
                     this.statusCmp,
+					this.firstCmp,
+					this.prevCmp,
+					this.pageTextCmp,
                     this.pageCmp,
-                    this.totalPageCmp
+                    this.totalPageCmp,
+                    this.nextCmp,
+                    this.lastCmp,
+                    '->',
+                    this.statusCmp
                 ];
 
                 this.callParent();
@@ -4518,7 +4588,7 @@ Ext.onReady( function() {
 
             // paging
             view.paging = {
-                page: ns.app.statusBar.getPage(),
+                page: ns.app.statusBar.getCurrentPage(),
                 pageSize: 100
             };
 
@@ -5768,7 +5838,7 @@ Ext.onReady( function() {
         statusBar = Ext.create('Ext.ux.toolbar.StatusBar', {
             height: 27,
             listeners: {
-                added: function() {
+                render: function() {
                     ns.app.statusBar = this;
 
                     this.reset();

@@ -319,7 +319,7 @@ public class DefaultDataApprovalLevelService
         }
     }
 
-    public int getLowestUserDataApprovalLevel()
+    public int getLowestUserViewDataApprovalLevel()
     {
         List<DataApprovalLevel> levels = getAllDataApprovalLevels();
 
@@ -327,7 +327,7 @@ public class DefaultDataApprovalLevelService
         {
             DataApprovalLevel level = levels.get( i );
 
-            if ( level.getCategoryOptionGroupSet() == null || level.getCategoryOptionGroupSet().getMembers() != null )
+            if ( level.getCategoryOptionGroupSet() == null || level.getCategoryOptionGroupSet().getMembers() == null )
             {
                 return level.getLevel();
             }
