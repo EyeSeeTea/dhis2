@@ -147,12 +147,16 @@ public class DefaultTrackedEntityInstanceService
     // Implementation methods
     // -------------------------------------------------------------------------
     
-    //TODO queries with multiple words
     //TODO lower index on attribute value?
     
     @Override
     public Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
+        if ( params != null )
+        {
+            params.conform();
+        }
+        
         validate( params );
 
         // ---------------------------------------------------------------------
@@ -169,7 +173,8 @@ public class DefaultTrackedEntityInstanceService
         
         // ---------------------------------------------------------------------
         // If params of type query and no attributes or filters defined, use
-        // attributes from program if exists, if not, use all attributes.
+        // attributes from program if exists, if not, use display-in-list 
+        // attributes.
         // ---------------------------------------------------------------------
 
         if ( !params.hasAttributesOrFilters() )
@@ -289,12 +294,22 @@ public class DefaultTrackedEntityInstanceService
         {
             violation = "Program must be defined when program dates are specified";
         }
-        
-        if ( !params.getDuplicateAttributesAndFilters().isEmpty() )
+
+        if ( params.isOrQuery() && params.hasFilters() )
         {
-            violation = "Attributes and filters cannot be specified more than once: " + params.getDuplicateAttributesAndFilters();
+            violation = "Query cannot be specified together with filters";
         }
         
+        if ( !params.getDuplicateAttributes().isEmpty() )
+        {
+            violation = "Attributes cannot be specified more than once: " + params.getDuplicateAttributes();
+        }
+        
+        if ( !params.getDuplicateFilters().isEmpty() )
+        {
+            violation = "Filters cannot be specified more than once: " + params.getDuplicateFilters();
+        }
+                
         if ( violation != null )
         {
             log.warn( "Validation failed: " + violation );
