@@ -197,12 +197,14 @@ public class DefaultAnalyticsService
     }
 
     // -------------------------------------------------------------------------
-    // Implementation
+    // Methods for retrieving aggregated data
     // -------------------------------------------------------------------------
 
     @Override
     public Grid getAggregatedDataValues( DataQueryParams params )
     {
+        queryPlanner.applyDimensionConstraints( params );
+        
         queryPlanner.validate( params );
         
         params.conform();
@@ -493,6 +495,27 @@ public class DefaultAnalyticsService
         return getAggregatedDataValueMapping( grid );
     }
     
+    @Override
+    public Map<String, Double> getAggregatedDataValueMapping( BaseAnalyticalObject object, I18nFormat format )
+    {
+        DataQueryParams params = getFromAnalyticalObject( object, format );
+        
+        return getAggregatedDataValueMapping( params );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Generates a mapping of permutations keys (org unit id or null) and mappings
+     * of org unit group and counts.
+     * 
+     * @param params the data query params.
+     * @param indicators the indicators for which formulas to scan for org unit 
+     *        groups.
+     * @return a map of maps.
+     */
     private Map<String, Map<String, Integer>> getOrgUnitTargetMap( DataQueryParams params, Collection<Indicator> indicators )
     {
         Set<OrganisationUnitGroup> orgUnitGroups = expressionService.getOrganisationUnitGroupsInIndicators( indicators );
@@ -543,14 +566,6 @@ public class DefaultAnalyticsService
         }
         
         return map;
-    }
-
-    @Override
-    public Map<String, Double> getAggregatedDataValueMapping( BaseAnalyticalObject object, I18nFormat format )
-    {
-        DataQueryParams params = getFromAnalyticalObject( object, format );
-        
-        return getAggregatedDataValueMapping( params );
     }
 
     /**
@@ -659,7 +674,11 @@ public class DefaultAnalyticsService
         
         return map;
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Methods for assembling DataQueryParams
+    // -------------------------------------------------------------------------
+
     @Override
     public DataQueryParams getFromUrl( Set<String> dimensionParams, Set<String> filterParams, AggregationType aggregationType, 
         String measureCriteria, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, boolean ignoreLimit, boolean hideEmptyRows, boolean showHierarchy, I18nFormat format )
@@ -740,6 +759,8 @@ public class DefaultAnalyticsService
         
         return params;
     }
+    
+    // TODO verify that current user can read each dimension and dimension item
     
     public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format )
     {        
