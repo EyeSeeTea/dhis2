@@ -1722,11 +1722,11 @@ Ext.onReady( function() {
                         for (var j = 0, item; j < dim.items.length; j++) {
                             item = dim.items[j];
 
-                            paramString += item.id + ((j < (dim.items.length - 1)) ? ';' : '');
+                            paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
                         }
                     }
                     else if (dim.operator && !Ext.isEmpty(dim.filter)) {
-                        paramString += ':' + dim.operator + ':' + dim.filter;
+                        paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
                     }
                 }
 
