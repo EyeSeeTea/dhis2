@@ -1489,9 +1489,14 @@ Ext.onReady( function() {
 									return;
 								}
 
-								ns.core.web.report.getData(config, false);
+								// keep sorting
+								if (ns.app.layout && ns.app.layout.sorting) {
+									config.sorting = Ext.clone(ns.app.layout.sorting);
+								}
 
 								window.hide();
+
+								ns.core.web.report.getData(config, false);
 							});
 						}
 					}
@@ -1973,9 +1978,14 @@ Ext.onReady( function() {
 							return;
 						}
 
-						ns.core.web.report.getData(config, false);
+						// keep sorting
+						if (ns.app.layout && ns.app.layout.sorting) {
+							config.sorting = Ext.clone(ns.app.layout.sorting);
+						}
 
 						window.hide();
+
+						ns.core.web.report.getData(config, false);
 					}
 				}
 			],
