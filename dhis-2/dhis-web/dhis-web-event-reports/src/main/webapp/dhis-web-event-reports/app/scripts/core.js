@@ -1649,10 +1649,17 @@ Ext.onReady( function() {
 					nameHeaderMap[header.name] = header;
 
 					if (header.type === 'java.lang.Double') {
-						for (var j = 0, value; j < xResponse.rows.length; j++) {
+						for (var j = 0; j < xResponse.rows.length; j++) {
 							xResponse.rows[j][i] = parseFloat(xResponse.rows[j][i]);
 						}
 					}
+
+					if (header.name === 'eventdate') {
+						for (var j = 0; j < xResponse.rows.length; j++) {
+							xResponse.rows[j][i] = xResponse.rows[j][i].substr(0,10);
+						}
+					}
+
 				}
 
                 for (var i = 0, name; i < dimensionNames.length; i++) {
