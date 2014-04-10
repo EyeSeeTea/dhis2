@@ -1406,6 +1406,22 @@ Ext.onReady( function() {
 				return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
 			};
 
+            service.layout.getHierarchyName = function(ouHierarchy, names, id) {
+                var graph = ouHierarchy[id],
+                    ids = Ext.Array.clean(graph.split('/')),
+                    hierarchyName = '';
+
+                if (ids.length < 2) {
+                    return names[id];
+                }
+
+                for (var i = 0; i < ids.length; i++) {
+                    hierarchyName += names[ids[i]] + (i < (ids.length - 1) ? ' / ' : '');
+                }
+
+                return hierarchyName;
+            };
+
 			service.layout.layout2plugin = function(layout, el) {
 				var layout = Ext.clone(layout),
 					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
@@ -1511,11 +1527,13 @@ Ext.onReady( function() {
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
 				var emptyId = 'N/A',
                     meta = ['ou', 'pe'],
+                    ouHierarchy,
                     names,
 					headers;
 
 				response = Ext.clone(response);
 				headers = response.headers;
+                ouHierarchy = response.metaData.ouHierarchy,
                 names = response.metaData.names;
                 names[emptyId] = emptyId;
 
@@ -1552,11 +1570,18 @@ Ext.onReady( function() {
                             header.ids = Ext.Array.pluck(objects, 'id');
                         }
                         else {
-                            for (var j = 0, id, fullId; j < response.rows.length; j++) {
+                            for (var j = 0, id, fullId, name, isHierarchy; j < response.rows.length; j++) {
                                 id = response.rows[j][i] || emptyId;
                                 fullId = header.name + id;
+                                isHierarchy = service.layout.isHierarchy(xLayout, response, id);
 
-                                names[fullId] = (isMeta ? '' : header.column + ' ') + (names[id] || id);
+                                // add dimension name prefix if not pe/ou
+                                name = isMeta ? '' : header.column + ' ';
+
+                                // add hierarchy if ou and showHierarchy
+                                name = isHierarchy ? service.layout.getHierarchyName(ouHierarchy, names, id) : (names[id] || id);
+
+                                names[fullId] = name;
                                 response.rows[j][i] = fullId;
                                 header.ids.push(fullId);
                             }
