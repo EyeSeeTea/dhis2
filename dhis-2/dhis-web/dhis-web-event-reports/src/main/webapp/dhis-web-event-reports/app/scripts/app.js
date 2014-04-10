@@ -5460,8 +5460,8 @@ Ext.onReady( function() {
                 }
 
                 if (view.dataType === 'individual_cases') {
-                    //options = ns.app.queryOptionsWindow.getOptions();
-                    //Ext.applyIf(view, options);
+                    options = ns.app.queryOptionsWindow.getOptions();
+                    Ext.applyIf(view, options);
 
                     view.paging = {
                         page: ns.app.statusBar.getCurrentPage(),
