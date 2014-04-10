@@ -28,10 +28,12 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
+
+import java.io.Serializable;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Kiran Prakash
@@ -69,4 +71,18 @@ public class UserSettingServiceTest
         assertEquals( "myvalue", setting.getValue() );
         assertEquals( "mykey", setting.getName() );
     }
+
+   @Test
+   public void testShouldGetUserSettings() {
+       User testUser = createUser( 'D' );
+       userStore.save( testUser );
+       UserCredentials userCredentials = testUser.getUserCredentials();
+       userCredentials.setUser( testUser );
+       userCredentialStore.addUserCredentials( userCredentials );
+       userSettingService.saveUserSetting("mykey", "value", "username");
+
+       Serializable preference = userSettingService.getUserSetting("mykey", "username");
+
+       assertEquals(preference, "value");
+   }
 }
