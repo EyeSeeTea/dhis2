@@ -1082,18 +1082,20 @@ Ext.onReady( function() {
 				return function() {
 
 					// items
-					for (var i = 0, dim, ids; i < dimensions.length; i++) {
+					for (var i = 0, dim, header; i < dimensions.length; i++) {
 						dim = dimensions[i];
 						dim.items = [];
-						ids = xResponse.nameHeaderMap[dim.dimension].ids;
+						header = xResponse.nameHeaderMap[dim.dimension];
 
-						for (var j = 0, id; j < ids.length; j++) {
-							id = ids[j];
+						if (header) {
+							for (var j = 0, id; j < header.ids.length; j++) {
+								id = header.ids[j];
 
-							dim.items.push({
-								id: id,
-								name: xResponse.metaData.names[id] || id
-							});
+								dim.items.push({
+									id: id,
+									name: xResponse.metaData.names[id] || id
+								});
+							}
 						}
 					}
 
@@ -1416,8 +1418,10 @@ Ext.onReady( function() {
                 }
 
                 for (var i = 0; i < ids.length; i++) {
-                    hierarchyName += names[ids[i]] + (i < (ids.length - 1) ? ' / ' : '');
+                    hierarchyName += names[ids[i]] + ' / ';
                 }
+
+                hierarchyName += names[id];
 
                 return hierarchyName;
             };
@@ -1717,7 +1721,7 @@ Ext.onReady( function() {
 
 			web.analytics.getParamString = function(view, format) {
                 var paramString,
-                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || [])),
+                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
                     ignoreKeys = ['longitude', 'latitude'],
                     dataTypeMap = {
                         'aggregated_values': 'aggregate',
@@ -1732,28 +1736,56 @@ Ext.onReady( function() {
 				paramString += 'stage=' + view.programStage.id;
 
                 // dimensions
-                for (var i = 0, dim, con; i < dimensions.length; i++) {
-                    dim = dimensions[i];
+                if (dimensions) {
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
 
-                    if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
-                        continue;
-                    }
+						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+							continue;
+						}
 
-                    paramString += '&dimension=' + dim.dimension;
+						paramString += '&dimension=' + dim.dimension;
 
-                    if (dim.items && dim.items.length) {
-                        paramString += ':';
+						if (dim.items && dim.items.length) {
+							paramString += ':';
 
-                        for (var j = 0, item; j < dim.items.length; j++) {
-                            item = dim.items[j];
+							for (var j = 0, item; j < dim.items.length; j++) {
+								item = dim.items[j];
 
-                            paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
-                        }
-                    }
-                    else if (dim.operator && !Ext.isEmpty(dim.filter)) {
-                        paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
-                    }
-                }
+								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
+							}
+						}
+						else if (dim.operator && !Ext.isEmpty(dim.filter)) {
+							paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
+						}
+					}
+				}
+
+                // filters
+                if (view.filters) {
+					for (var i = 0, dim; i < view.filters.length; i++) {
+						dim = view.filters[i];
+
+						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+							continue;
+						}
+
+						paramString += '&filter=' + dim.dimension;
+
+						if (dim.items && dim.items.length) {
+							paramString += ':';
+
+							for (var j = 0, item; j < dim.items.length; j++) {
+								item = dim.items[j];
+
+								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
+							}
+						}
+						else if (dim.operator && !Ext.isEmpty(dim.filter)) {
+							paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
+						}
+					}
+				}
 
                 // dates
                 if (view.startDate && view.endDate) {
