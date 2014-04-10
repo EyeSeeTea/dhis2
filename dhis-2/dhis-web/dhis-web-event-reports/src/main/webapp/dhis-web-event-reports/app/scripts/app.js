@@ -5438,7 +5438,9 @@ Ext.onReady( function() {
 
                 if (view.dataType === 'aggregated_values') {
                     options = ns.app.aggregateOptionsWindow.getOptions();
+                    Ext.applyIf(view, options);
 
+                    // if order and limit -> sort
                     if (view.sortOrder && view.topLimit) {
                         view.sorting = {
                             id: 1,
@@ -5449,14 +5451,13 @@ Ext.onReady( function() {
 
                 if (view.dataType === 'individual_cases') {
                     //options = ns.app.queryOptionsWindow.getOptions();
+                    //Ext.applyIf(view, options);
 
                     view.paging = {
                         page: ns.app.statusBar.getCurrentPage(),
                         pageSize: 100
                     };
                 }
-
-                Ext.applyIf(view, options);
 
                 return view;
             };
