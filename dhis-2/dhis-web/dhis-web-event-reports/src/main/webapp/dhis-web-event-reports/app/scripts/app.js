@@ -3141,7 +3141,13 @@ Ext.onReady( function() {
 				isOuc = false,
 				isOugc = false,
 				levels = [],
-				groups = [];
+				groups = [],
+
+				winMap = {
+					'aggregated_values': ns.app.aggregateOptionsWindow,
+					'individual_cases': ns.app.queryOptionsWindow
+				},
+				optionsWindow = winMap[layout.dataType];
 
             reset();
 
@@ -3230,8 +3236,8 @@ Ext.onReady( function() {
 			}
 
 			// options
-			if (ns.app.aggregateOptionsWindow) {
-				ns.app.aggregateOptionsWindow.setOptions(layout);
+			if (optionsWindow) {
+				optionsWindow.setOptions(layout);
 			}
         };
 
@@ -3584,7 +3590,8 @@ Ext.onReady( function() {
             var dataElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 queryWindow = ns.app.queryLayoutWindow,
-                includeKeys = ['int', 'number', 'boolean', 'bool'];
+                includeKeys = ['int', 'number', 'boolean', 'bool'],
+                dimensionStoreMap = {};
 
 			// data element objects
             for (var i = 0, item; i < items.length; i++) {
@@ -3612,6 +3619,11 @@ Ext.onReady( function() {
 
                 if (layout) {
                     ux.setRecord(element);
+
+                    if (layout.dataType === 'aggregated_values') {
+						aggWindow.addDimensionFromLayout(element, layout);
+
+
                 }
 
                 store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
@@ -5501,6 +5513,11 @@ Ext.onReady( function() {
 						if (config.endDate) {
 							config.endDate = config.endDate.substr(0,10);
 						}
+
+						config.paging = {
+							page: 1,
+							pageSize: 100
+						};
 
 						web.report.getData(config, true);
 					}
