@@ -13,7 +13,7 @@
 	<tr>
 		<td class='text-column'><label>$i18n.getString('tracked_entity')<em title="$i18n.getString( 'required' )" class="required">*</em> </label></td>
 		<td class="input-column">
-			<select type='hidden' id='trackedEntityId' name='trackedEntityId' value='$trackedEntityId'>
+			<select type='hidden' id='trackedEntityId' name='trackedEntityId' value='$trackedEntityId' class="{validate:{required:true }}">
 				<option value=''>[$i18n.getString('please_select')]</option>
 				#foreach($trackedEntity in $trackedEntities)
 				<option value='$trackedEntity.id' #if($entityInstance.trackedEntity.id==$trackedEntity.id) selected #end >$trackedEntity.displayName</option>
@@ -69,8 +69,11 @@
 																	 <option value="$option" #if("$value"=="$option") selected #end>$option</option>
 															 #end
 													 </select>
-											 #elseif( $attribute.valueType == "phoneNumber" ) 
-													 <input type='text' value='$value' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true,required:$mandatory }}"/>
+											 #elseif( $attribute.valueType == "phoneNumber" )
+													#if($value=='')
+														#set($value=$!phoneNumberAreaCode)
+													#end
+													 <input type='text' value='$!value' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true,required:$mandatory }}"/>
 											 #elseif( $attribute.valueType == "trackerAssociate" ) 
 													 <input type="checkbox" value='true' id="attr$attribute.id" name="attr$attribute.id" 
 															 inherit="$!attribute.inherit" #if($value=='true') checked #end
@@ -128,7 +131,10 @@
 							#end
 						</select>
 					#elseif( $attribute.valueType == "phoneNumber" ) 
-						<input type='text' value='$value' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true}}"/>
+						#if($attributeValue=='')
+							#set($attributeValue=$!phoneNumberAreaCode)
+						#end
+						<input type='text' value='$attributeValue' id="attr$attribute.id" name="attr$attribute.id" inherit="$!attribute.inherit" class="{validate:{phone:true}}"/>
 					#elseif( $attribute.valueType == "trackerAssociate" ) 
 						<input type="checkbox" value='true' id="attr$attribute.id" name="attr$attribute.id" 
 							inherit="$!attribute.inherit" #if($value=='true') checked #end

@@ -27,7 +27,7 @@
 			<span id="programLoader" style="display:none;" ><img src="../images/ajax-loader-bar.gif" /></span>
 		</td>
 		<td id='listEntityInstanceBtnTD'>
-			<input type="button" id='listEntityInstanceBtn' value="$i18n.getString( 'list_all_tracked_entity_instances' )" onclick="listAllTrackedEntityInstance(1);">
+			<input type="button" id='listEntityInstanceBtn' value="$i18n.getString( 'list_all_tracked_entity_instances' )" onclick="isAdvancedSearch=false;listAllTrackedEntityInstance(1);">
 			<input type="button" id='advancedSearchBtn' value='$i18n.getString( "advanced_search" )' onclick="advancedSearchOnclick();">
 		</td>
 	</tr>
@@ -47,6 +47,7 @@
 		<td>$i18n.getString('status')</td>
 		<td>
 			<select id="status" name="status">
+				<option value=''>$i18n.getString("all")</option>
 				<option value='LATE_VISIT'>$i18n.getString("overdue")</option>
 				<option value='ACTIVE'>$i18n.getString("active")</option>
 				<option value='VISITED'>$i18n.getString("incomplete")</option>
@@ -79,23 +80,13 @@
 			<td>$i18n.getString('orgunit_search_type')</td>
 			<td>
 				<select id='ouMode' name='ouMode'>
-					<option value='SELECTED ' />$i18n.getString('selected')</option>
+					#if( $auth.hasAccess( "dhis-web-caseentry", "searchAllFacilities" ) )
+					<option value='ALL' />$i18n.getString('all')</option>
+					#end
+					<option value='SELECTED' selected />$i18n.getString('selected')</option>
 					<option value='CHILDREN' />$i18n.getString('children')</option>
 					<option value='DESCENDANTS' />$i18n.getString('selected_and_all_below')</option>
 				</select>
-			</td>
-		</tr>
-		
-		<tr id='trackedEntityTR'>
-			<td>$i18n.getString('tracked_entity')</td>
-			<td>
-				<select id='trackedEntity' name='trackedEntity' onchange='trackedEntityOnChange()'>
-					<option value="">[$i18n.getString('please_select')]</option>
-					#foreach($trackedEntity in $trackedEntities)
-						<option value="$trackedEntity.uid">$trackedEntity.name</option>
-					#end
-				</select>
-				<span id="programLoader" style="display:none;" ><img src="../images/ajax-loader-bar.gif" /></span>
 			</td>
 		</tr>
 		
@@ -113,8 +104,8 @@
 		<tr id='dueDateTR' class='hidden'>
 			<td>$i18n.getString('due_date_from_to')</td>
 			<td>
-				<input type='text' id='startDueDate' name='startDueDate' style='width:127px;'>
-				<input type='text' id='endDueDate' name='endDueDate' style='width:127px;'>
+				<input type='text' id='startDate' name='startDate' style='width:127px;'>
+				<input type='text' id='endDate' name='endDate' style='width:127px;'>
 			</td>
 		</tr>
 		<tr>
@@ -150,7 +141,7 @@
 	</table>
 	<div style="padding: 10px 0 15px 3px">
 		<input type="button" class='large-button' value='$i18n.getString( "add_filter" )' onclick='addAttributeOption();'>
-        <input type="button" class='large-button' value='$i18n.getString( "search" )' onclick='validateAdvancedSearch();' id='searchEntityInstanceBtn'>
+        <input type="button" class='large-button' value='$i18n.getString( "search" )' onclick='isAdvancedSearch=true;validateAdvancedSearch(1);' id='searchEntityInstanceBtn'>
         <input type="button" class='large-button hidden' id='sendSmsToListBtn' value="$i18n.getString('sms')" onclick="setFieldValue('sendToList', true);showSendSmsForm();">
     </div>
 </div>
@@ -169,5 +160,6 @@
 	datePicker( 'startDueDate', true );
 	datePicker( 'endDueDate', true );
 	
+	var isAdvancedSearch = false;
 	var searchTextBox = '<input type="text" id="searchText" name="searchText" class="searchInput" onkeyup="searchTrackedEntityInstancesOnKeyUp( event );">';
 </script>

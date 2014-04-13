@@ -28,9 +28,6 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Calendar;
-import java.util.Date;
-
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -39,7 +36,6 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.common.view.WithoutOrganisationUnitsView;
 import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.period.PeriodType;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -79,8 +75,6 @@ public class TrackedEntityAttribute
 
     public static final String TYPE_USERS = "users";
 
-    public static final String TYPE_AGE = "age";
-
     public static final String VALUE_TYPE_LOCAL_ID = "localId";
 
     private String description;
@@ -110,8 +104,6 @@ public class TrackedEntityAttribute
     private Boolean orgunitScope = false;
 
     private Boolean programScope = false;
-
-    private PeriodType periodType;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -308,16 +300,6 @@ public class TrackedEntityAttribute
         this.programScope = programScope;
     }
 
-    public PeriodType getPeriodType()
-    {
-        return periodType;
-    }
-
-    public void setPeriodType( PeriodType periodType )
-    {
-        this.periodType = periodType;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -334,47 +316,7 @@ public class TrackedEntityAttribute
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
-
-    public static Date getDateFromAge( int age )
-    {
-        Calendar todayCalendar = Calendar.getInstance();
-        todayCalendar.clear( Calendar.MILLISECOND );
-        todayCalendar.clear( Calendar.SECOND );
-        todayCalendar.clear( Calendar.MINUTE );
-        todayCalendar.set( Calendar.HOUR_OF_DAY, 0 );
-
-        todayCalendar.add( Calendar.YEAR, -1 * age );
-
-        return todayCalendar.getTime();
-    }
-
-    public static int getAgeFromDate( Date date )
-    {
-        if ( date == null )
-        {
-            return -1;
-        }
-
-        Calendar birthCalendar = Calendar.getInstance();
-        birthCalendar.setTime( date );
-
-        Calendar todayCalendar = Calendar.getInstance();
-
-        int age = todayCalendar.get( Calendar.YEAR ) - birthCalendar.get( Calendar.YEAR );
-
-        if ( todayCalendar.get( Calendar.MONTH ) < birthCalendar.get( Calendar.MONTH ) )
-        {
-            age--;
-        }
-        else if ( todayCalendar.get( Calendar.MONTH ) == birthCalendar.get( Calendar.MONTH )
-            && todayCalendar.get( Calendar.DAY_OF_MONTH ) < birthCalendar.get( Calendar.DAY_OF_MONTH ) )
-        {
-            age--;
-        }
-
-        return age;
-    }
-
+    
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -397,7 +339,6 @@ public class TrackedEntityAttribute
             unique = trackedEntityAttribute.isUnique();
             orgunitScope = trackedEntityAttribute.getOrgunitScope();
             programScope = trackedEntityAttribute.getProgramScope();
-            periodType = trackedEntityAttribute.getPeriodType();
         }
     }
 }

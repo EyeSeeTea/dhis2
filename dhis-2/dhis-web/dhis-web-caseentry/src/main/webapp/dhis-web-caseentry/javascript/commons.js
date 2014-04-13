@@ -90,7 +90,7 @@ function searchTrackedEntityInstancesOnKeyUp(event) {
 	var key = getKeyCode(event);
 	if (key == 13)// Enter
 	{
-		validateAdvancedSearch();
+		validateAdvancedSearch( 1 );
 	}
 }
 
@@ -101,11 +101,11 @@ function getKeyCode(e) {
 	return (e) ? e.which : null;
 }
 
-function validateAdvancedSearch() {
+function validateAdvancedSearch( page ) {
 	hideById('listEntityInstanceDiv');
 	var flag = true;
-	if (getFieldValue('startDueDate') == ''
-			&& getFieldValue('endDueDate') == '') {
+	if (getFieldValue('startDate') == ''
+			&& getFieldValue('endDate') == '') {
 		if (getFieldValue('searchByProgramStage') == "false"
 				|| (getFieldValue('searchByProgramStage') == "true" && jQuery('#advancedSearchTB tr').length > 1)) {
 			jQuery("#searchDiv :input").each(function(i, item) {
@@ -121,7 +121,7 @@ function validateAdvancedSearch() {
 	if (flag) {
 		contentDiv = 'listEntityInstanceDiv';
 		jQuery("#loaderDiv").show();
-		advancedSearch(getSearchParams(1), 1);
+		advancedSearch(getSearchParams(page), page);
 	}
 }
 
@@ -129,20 +129,30 @@ var followup = false;
 function getSearchParams(page) {
 	var params = "ou=" + getFieldValue("orgunitId");
 	params += "&page=" + page;
-	if( getFieldValue('trackedEntity')!=''){
-		params += '&trackedEntity=' + getFieldValue('trackedEntity');
-	}
-	else if (getFieldValue('program') != '') {
+	if (getFieldValue('program') != '') {
 		params += "&program=" + getFieldValue('program');
+		if( getFieldValue('programStatus')!=""){
+			params += "&programStatus=" + getFieldValue('programStatus');
+		}
 	}
 	
 	if(getFieldValue('programStatus') != ''){
 		params += "&programStatus=" + getFieldValue('programStatus');
 	}
 	
+	if( getFieldValue('startDate') != ''){
+		params += "&startDate=" + getFieldValue('startDate');
+		params += "&endDate=" + getFieldValue('endDate');
+	}
+	
+	if( getFieldValue('status')!= '' ){
+		params += "&status=" + getFieldValue('status');
+	}
+	
 	var flag = false;
 	$('#advancedSearchTB tr').each(
 		function(i, row) {
+			var isProgramDate = false;
 			var dateOperator = "";
 			var p = "";
 			jQuery(this).find(':input').each(
@@ -150,15 +160,18 @@ function getSearchParams(page) {
 					if (item.type != "button") {
 						if (idx == 0) {
 							if (item.value == 'programDate') {
-								p += "&programDate=";
+								isProgramDate = true;
 							} else {
-								p += "&filter=" + item.value;
+								p += "&attribute=" + item.value;
 							}
 						} else if (item.name == 'dateOperator') {
 							dateOperator = item.value;
 						} else if (item.name == 'searchText') {
 							if (item.value != '') {
-								if (dateOperator.length > 0) {
+								if( isProgramDate ){
+									p += "&programDate=EQ:" + item.value;
+								}
+								else if (dateOperator.length > 0) {
 									p += dateOperator + ":" + item.value.toLowerCase();
 								} else {
 									var key = item.value.toLowerCase()
@@ -174,8 +187,19 @@ function getSearchParams(page) {
 				});
 			params += p;
 		});
-			
-	params += '&ouMode=' + getFieldValue('ouMode');
+	
+	var p = params;
+	$('#searchingAttributeIdTD [id=searchObjectId] option').each(
+		function(i, item) {
+			if ($(item).attr('displayed')=="true" 
+				&& p.indexOf(item.value) < 0 ) {
+					params += "&attribute=" + item.value;
+		}
+	}); 
+		
+	if( getFieldValue('ouMode') != '' ){
+		params += '&ouMode=' + getFieldValue('ouMode');
+	}
 	
 	return params;
 }
@@ -313,7 +337,7 @@ function enableBtn() {
 	var program = getFieldValue('program');
 	if (registration == undefined || !registration) {
 		if (program != '') {
-			enable('statusEvent');
+			enable('status');
 			enable('listEntityInstanceBtn');
 			enable('addEntityInstanceBtn');
 			enable('advancedSearchBtn');
@@ -322,7 +346,7 @@ function enableBtn() {
 				enable(this.id);
 			});
 		} else {
-			disable('statusEvent');
+			disable('status');
 			disable('listEntityInstanceBtn');
 			disable('addEntityInstanceBtn');
 			disable('advancedSearchBtn');
@@ -348,17 +372,18 @@ function enableBtn() {
 		});
 
 		clearListById('searchObjectId');
-		if (getFieldValue('program') != '') {
-			jQuery('#searchObjectId').append(
-				'<option value="programDate" displayed="true">' + i18n_enrollment_date
-					+ '</option>');
-		}
-
+		
 		for ( var i in json.attributes) {
 			jQuery('#searchObjectId').append(
 				'<option value="' + json.attributes[i].id 
 					+ '" displayed="' + json.attributes[i].displayed  + '">'
 					+ json.attributes[i].name + '</option>');
+		}
+		
+		if (getFieldValue('program') != '') {
+			jQuery('#searchObjectId').append(
+				'<option value="programDate" >' + i18n_enrollment_date
+					+ '</option>');
 		}
 
 		addAttributeOption();
@@ -916,10 +941,14 @@ function showUpdateTrackedEntityInstanceForm(entityInstanceId) {
 	hideById('migrationEntityInstanceDiv');
 	setInnerHTML('entityInstanceDashboard', '');
 	$('#loaderDiv').show();
+	var params = "";
+	if( getFieldValue('program')!='' ){
+		params += "?programId=" + getFieldValue('program');
+	}
+	
 	$('#editEntityInstanceDiv').load(
-			'showUpdateTrackedEntityInstanceForm.action', {
-				id : entityInstanceId,
-				programId : getFieldValue('program')
+			'showUpdateTrackedEntityInstanceForm.action' + params, {
+				id : entityInstanceId
 			}, function() {
 				$('#loaderDiv').hide();
 				showById('editEntityInstanceDiv');
@@ -1434,20 +1463,20 @@ function loadActiveProgramStageRecords(programInstanceId,
 						var type = $('#tb_' + programInstanceId).attr(
 								'programType');
 						var program = $('#tr1_' + programInstanceId);
+						var selectedProgram = program.attr('programId');
 						var relationshipText = program.attr('relationshipText');
 						var relatedProgramId = program.attr('relatedProgram');
 						var entityInstanceId = getFieldValue('entityInstanceId');
-						var selectedProgram = program.attr('programId');
 						if (relationshipText != "") {
 							setInnerHTML(
 									'entityInstanceRelatedStageSpan',
 									"&#8226; <a href='javascript:showAddTrackedEntityInstanceForm( "
 											+ entityInstanceId
-											+ ","
+											+ ",\""
 											+ relatedProgramId
-											+ ","
+											+ "\",\""
 											+ selectedProgram
-											+ " , false );' id='relatedEntityInstance_$!programStageInstance.id' >"
+											+ "\" , false );' id='relatedEntityInstance_$!programStageInstance.id' >"
 											+ relationshipText
 											+ "</a><br>&nbsp;");
 						} else {
@@ -1938,12 +1967,3 @@ function showSearchCriteria() {
 	hideById('showSearchCriteriaDiv');
 }
 
-function trackedEntityOnChange()
-{
-	if( getFieldValue('trackedEntity')!=''){
-		disable('program');
-	}
-	else{
-		enable('program');
-	}
-}

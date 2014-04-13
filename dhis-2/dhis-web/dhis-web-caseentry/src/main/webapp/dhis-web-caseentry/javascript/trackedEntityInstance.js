@@ -100,15 +100,9 @@ function TrackedEntityInstance() {
 			if (message == 0) {
 				return true;
 			} else {
-				if (message == 1) {
-					setMessage(i18n_adding_tracked_entity_instance_failed + ':'
-							+ '\n' + i18n_duplicate_identifier);
-				} else if (message == 2) {
-					setMessage(i18n_adding_tracked_entity_instance_failed
-							+ ':'
-							+ '\n'
-							+ i18n_this_tracked_entity_instance_could_not_be_enrolled_please_check_validation_criteria);
-				}
+				if (message != "") {
+					setMessage(message);
+				} 
 				$("#entityInstanceForm :input").attr("disabled", false);
 				$("#entityInstanceForm").find("select").attr("disabled", false);
 				return false;
@@ -281,7 +275,10 @@ function displayTEIList(json, page) {
 	table += "<table class='listTable' width='100%'>";
 	
 	var idx = 4;
-	if (getFieldValue('program') != '') {
+	if(getFieldValue('ouMode') != 'SELECTED'){
+		var idx = 3;
+	}	
+	else if(getFieldValue('program') != '') {
 		idx = 5;
 	}
 	table += "<col width='30' />";
@@ -369,6 +366,11 @@ function displayTEIList(json, page) {
 // Paging
 
 function paging(json, page) {
+	var searchMethod = "listAllTrackedEntityInstance";
+	if( isAdvancedSearch ){
+		searchMethod = "validateAdvancedSearch";
+	}
+	
 	var table = "<table width='100%' style='background-color: #ebf0f6;'><tr><td colspan='"
 			+ json.width + "'>";
 	table += "<div class='paging'>";
@@ -380,7 +382,7 @@ function paging(json, page) {
 					+ i + "</span>";
 		} else {
 			table += "<a class='page' title='" + i18n_page + " " + i
-					+ "' href='javascript:listAllTrackedEntityInstance( " + i
+					+ "' href='javascript:" + searchMethod + "( " + i
 					+ ");'>" + i + "</a>";
 		}
 		table += "<span class='seperator'>|</span>";
