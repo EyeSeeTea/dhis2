@@ -1814,10 +1814,10 @@ Ext.onReady( function() {
 			comboboxWidth = 262,
 			window;
 
-		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_hierarchy,
-			style: 'margin-bottom:4px'
-		});
+		//showHierarchy = Ext.create('Ext.form.field.Checkbox', {
+			//boxLabel: NS.i18n.show_hierarchy,
+			//style: 'margin-bottom:4px'
+		//});
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
@@ -1895,13 +1895,13 @@ Ext.onReady( function() {
 			//store: ns.app.stores.legendSet
 		//});
 
-		organisationUnits = {
-			bodyStyle: 'border:0 none',
-			style: 'margin-left:14px',
-			items: [
-				showHierarchy
-			]
-		};
+		//organisationUnits = {
+			//bodyStyle: 'border:0 none',
+			//style: 'margin-left:14px',
+			//items: [
+				//showHierarchy
+			//]
+		//};
 
 		style = {
 			bodyStyle: 'border:0 none',
@@ -1929,7 +1929,7 @@ Ext.onReady( function() {
 					hideEmptyRows: false,
                     sortOrder: 0,
                     topLimit: 0,
-					showHierarchy: showHierarchy.getValue(),
+					showHierarchy: false,
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue()
@@ -1937,22 +1937,22 @@ Ext.onReady( function() {
 				};
 			},
 			setOptions: function(layout) {
-				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
+				//showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
 				//legendSet.setValue(Ext.isObject(layout.legendSet) && Ext.isString(layout.legendSet.id) ? layout.legendSet.id : 0);
 			},
 			items: [
-				{
-					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:2px',
-					html: NS.i18n.organisation_units
-				},
-				organisationUnits,
-				{
-					bodyStyle: 'border:0 none; padding:5px'
-				},
+				//{
+					//bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
+					//style: 'margin-bottom:6px; margin-left:2px',
+					//html: NS.i18n.organisation_units
+				//},
+				//organisationUnits,
+				//{
+					//bodyStyle: 'border:0 none; padding:5px'
+				//},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
@@ -2004,7 +2004,7 @@ Ext.onReady( function() {
 					//}
 
 					// cmp
-					w.showHierarchy = showHierarchy;
+					//w.showHierarchy = showHierarchy;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
