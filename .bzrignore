@@ -26,3 +26,4 @@ overlays/
 ./.gitignore
 ./.travis.yml
 .DS_Store
+dhis-2/projectFilesBackup
