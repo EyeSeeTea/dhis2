@@ -141,7 +141,7 @@
         }
 
         if( data[context.iterator] === undefined ) {
-          $.error('selected: Invalid iterator for source url: ' + context.iterator);
+          return;
         }
 
         $.each(data[context.iterator], function( idx ) {

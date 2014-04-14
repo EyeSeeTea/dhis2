@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller;
+package org.hisp.dhis.analytics;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,47 +28,38 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.hisp.dhis.common.IllegalQueryException;
 
-import java.io.InputStream;
-import java.util.List;
-
-@Controller
-@RequestMapping( value = MenuController.RESOURCE_PATH )
-public class MenuController
-{
-    public static final String RESOURCE_PATH = "/menu";
-
-    @Autowired
-    private CurrentUserService currentUserService;
-
-    @Autowired
-    private UserService userService;
-
-    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void saveMenuOrder( InputStream input )
-        throws Exception
-    {
-        List<String> apps = JacksonUtils.fromJson( input, List.class );
-
-        User user = currentUserService.getCurrentUser();
-
-        if ( apps != null && !apps.isEmpty() && user != null )
-        {        
-            user.getApps().clear();
-            user.getApps().addAll( apps );
-
-            userService.updateUser( user );
-        }
-    }
+/**
+ * @author Lars Helge Overland
+ */
+public interface AnalyticsSecurityManager
+{    
+    /**
+     * Decides whether the current user has privileges to execute the given query.
+     * 
+     * @param params the data query params.
+     * @throws IllegalQueryException if the current user does not have privileges
+     *         to execute the given query.
+     */
+    void decideAccess( DataQueryParams params );
+    
+    /**
+     * Adds relevant data approval levels to the given query if system is configured
+     * to hide unapproved data from analytics and if there are relevant approval
+     * levels for current user.
+     * 
+     * @param params the data query params.
+     */
+    void applyDataApprovalConstraints( DataQueryParams params );
+    
+    /**
+     * Applies dimension constraints to the given params. Dimension constraints
+     * with all accessible dimension items will be added as filters to this query.
+     * If current user has no dimension constraints, no action is taken. If the 
+     * constraint dimensions are already specified with accessible items in the 
+     * query, no action is taken. If the current user does not have accessible 
+     * items in any dimension constraint, an IllegalQueryException is thrown.
+     */
+    void applyDimensionConstraints( DataQueryParams params );
 }
