@@ -188,7 +188,8 @@ public class UserController
 
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
-        if (parsed.getUserCredentials().getPassword() != null) {
+        if (parsed.getUserCredentials().getPassword() != null)
+        {
             String encodePassword = passwordManager.encodePassword( parsed.getUsername(),
                 parsed.getUserCredentials().getPassword() );
             parsed.getUserCredentials().setPassword( encodePassword );
@@ -219,7 +220,8 @@ public class UserController
         User parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
 
-        if (parsed.getUserCredentials().getPassword() != null) {
+        if (parsed.getUserCredentials().getPassword() != null)
+        {
             String encodePassword = passwordManager.encodePassword( parsed.getUsername(),
                 parsed.getUserCredentials().getPassword() );
             parsed.getUserCredentials().setPassword( encodePassword );
