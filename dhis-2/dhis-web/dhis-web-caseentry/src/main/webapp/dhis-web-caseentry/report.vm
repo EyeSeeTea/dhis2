@@ -24,15 +24,17 @@
                 <tr #alternate( $mark )>                
 					<td>
 						#set( $value="")
+						#set( $entityInstance = $programInstance.entityInstance )
 						#foreach( $programAttribute in $program.attributes)
 							#foreach( $attributeValue in $entityInstance.attributeValues)
-								#if($!attributeValue.attribute.id==$programAttribute.attribute.id)
+								#if($attributeValue.attribute.id==$programAttribute.attribute.id 
+									&& $programAttribute.displayInList=='true' )
 									#set( $value= $value + $attributeValue.value + '&#13;&#10;' )
 								#end
 							#end 
 						#end
 						<input type='button' class='entity-instance-object' value="$value"
-							onclick='javascript:showTrackedEntityInstanceHistory( $programInstance.entityInstance.id )' title='$i18n.getString( "entity-instance_details_and_history" )'>
+							onclick='javascript:showTrackedEntityInstanceHistory( $programInstance.entityInstance.uid )' title='$i18n.getString( "entity-instance_details_and_history" )'>
 					</td>	
 					<td>
 						#set( $programStageInstances = $programInstance.programStageInstances )

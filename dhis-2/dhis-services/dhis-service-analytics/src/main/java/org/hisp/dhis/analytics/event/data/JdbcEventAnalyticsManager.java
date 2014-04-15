@@ -33,11 +33,14 @@ import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
-import static org.hisp.dhis.system.util.TextUtils.removeLast;
+import static org.hisp.dhis.system.util.TextUtils.removeLastComma;
+import static org.hisp.dhis.system.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
 
+import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
@@ -52,7 +55,6 @@ import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -91,7 +93,7 @@ public class JdbcEventAnalyticsManager
 
         if ( params.spansMultiplePartitions() )
         {
-            sql += getFromWhereMultiplePartitionsClause( params );
+            sql += getFromWhereMultiplePartitionsClause( params, Arrays.asList( "psi" ) );
         }
         else
         {
@@ -174,13 +176,22 @@ public class JdbcEventAnalyticsManager
     
     public Grid getEvents( EventQueryParams params, Grid grid )
     {
-        String sql = "select psi,ps,executiondate,longitude,latitude,ouname,oucode," + getSelectColumns( params ) + " ";
+        List<String> fixedCols = Arrays.asList( "psi", "ps", "executiondate", "longitude", "latitude", "ouname", "oucode" );
+        
+        String sql = "select " + getSelectString( fixedCols ) + getSelectColumns( params ) + " ";
 
         // ---------------------------------------------------------------------
         // Criteria
         // ---------------------------------------------------------------------
 
-        sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
+        if ( params.spansMultiplePartitions() )
+        {
+            sql += getFromWhereMultiplePartitionsClause( params, fixedCols );
+        }
+        else
+        {
+            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
+        }
         
         // ---------------------------------------------------------------------
         // Sorting
@@ -200,7 +211,7 @@ public class JdbcEventAnalyticsManager
                 sql += statementBuilder.columnQuote( item ) + " desc,";
             }
             
-            sql = removeLast( sql, 1 ) + " ";
+            sql = removeLastComma( sql ) + " ";
         }
         
         // ---------------------------------------------------------------------
@@ -322,16 +333,18 @@ public class JdbcEventAnalyticsManager
             sql += statementBuilder.columnQuote( item.getUid() ) + ",";
         }
         
-        return removeLast( sql, 1 );
+        return removeLastComma( sql );
     }
 
-    private String getFromWhereMultiplePartitionsClause( EventQueryParams params )
+    private String getFromWhereMultiplePartitionsClause( EventQueryParams params, List<String> fixedColumns )
     {
+        String fixedCols = getSelectString( fixedColumns );
+        
         String sql = "from (";
         
         for ( String partition : params.getPartitions().getPartitions() )
         {
-            sql += "select psi, " + getSelectColumns( params );
+            sql += "select " + fixedCols + getSelectColumns( params );
             
             sql += " " + getFromWhereClause( params, partition );
             
@@ -375,7 +388,7 @@ public class JdbcEventAnalyticsManager
                 sql += "uidlevel" + unit.getLevel() + " = '" + unit.getUid() + "' or ";
             }
             
-            sql = TextUtils.removeLast( sql, 3 ) + ") ";
+            sql = removeLastOr( sql ) + ") ";
         }
         
         if ( params.getProgramStage() != null )
@@ -427,5 +440,16 @@ public class JdbcEventAnalyticsManager
         String sqlFilter = item.getSqlFilter( encodedFilter );
         
         return item.isNumeric() ? sqlFilter : sqlFilter.toLowerCase();
+    }
+
+    /**
+     * Creates a comma separated string based on the items in the given lists.
+     * Appends a comma at the end of the string if not empty.
+     */
+    private String getSelectString( List<String> columns )
+    {
+        String fixedCols = StringUtils.join( columns, ", " );
+        
+        return StringUtils.defaultIfEmpty( fixedCols + ", ", fixedCols );
     }
 }

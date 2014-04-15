@@ -5,7 +5,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
 
 //Controller for settings page
 .controller('SelectionController',
-        function($scope,
+        function($rootScope,
+                $scope,
                 $location,
                 Paginator,
                 TranslationService, 
@@ -17,6 +18,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     //Selection
     $scope.selectedOrgUnit = '';
     $scope.selectedProgram = '';
+    $scope.ouMode = 'SELECTED';
     
     //Filtering
     $scope.reverse = false;
@@ -40,45 +42,16 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             
             //apply translation - by now user's profile is fetched from server.
             TranslationService.translate();
-            $scope.attributes = storage.get('ATTRIBUTES');
-            
-            var programs = storage.get('TRACKER_PROGRAMS');            
-            if( programs ){                
-                $scope.loadPrograms($scope.selectedOrgUnit);     
-            }
+            $scope.attributes = storage.get('ATTRIBUTES');            
         }
     });
-    
-    //load programs associated with the selected org unit.
-    $scope.loadPrograms = function(orgUnit) {      
-                                
-        $scope.selectedOrgUnit = orgUnit;
-        $scope.selectedProgram = null;
-        $scope.trackedEntityList = [];
-        
-        if (angular.isObject($scope.selectedOrgUnit)) {   
-
-            $scope.programs = [];
-            
-            var programs = storage.get('TRACKER_PROGRAMS');
-            
-            if( programs && programs != 'undefined'){
-                for(var i=0; i<programs.length; i++){
-                    var program = storage.get(programs[i].id);   
-                    if(program.organisationUnits.hasOwnProperty(orgUnit.id)){
-                        $scope.programs.push(program);
-                    }
-                }               
-            }
-        }        
-    };   
     
     //get events for the selected program (and org unit)
     $scope.loadTrackedEntities = function(){
         
-        $scope.searchField.isOpen = false;
+        $scope.showSearchDiv = false;
         
-        $scope.trackedEntityList = [];
+        $scope.trackedEntityList = null;
         
         $scope.gridColumns = AttributesFactory.getForListing();
 
@@ -91,33 +64,27 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             }
         });
             
-        if( angular.isObject($scope.selectedProgram)){  
-            
-            //Load entities for the selected program and orgunit
-            TrackedEntityInstanceService.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(data){
-                $scope.trackedEntityList = data;                
-            });            
-        }
-        else{
-            
-            //Load entities for the selected orgunit
-            TrackedEntityInstanceService.getByOrgUnit($scope.selectedOrgUnit.id).then(function(data){
-                $scope.trackedEntityList = data;                
-            });
-        }
+        //Load entities for the selected orgunit
+        TrackedEntityInstanceService.getByOrgUnit($scope.selectedOrgUnit.id).then(function(data){
+            $scope.trackedEntityList = data;                
+        });
     };
     
     $scope.clearEntities = function(){
-        $scope.trackedEntityList = [];
+        $scope.trackedEntityList = null;
     };
     
     $scope.showRegistration = function(){
         
     };  
     
-    $scope.showSearch = function(){
+    $scope.showSearch = function(){        
         $scope.showSearchDiv = !$scope.showSearchDiv;
-        $scope.searchField.isOpen = true;
+    };
+    
+    $scope.hideSearch = function(){        
+        $scope.showSearchDiv = false;
+        $rootScope.showAdvancedSearchDiv = false;
     };
     
     $scope.closeSearch = function(){
@@ -153,16 +120,160 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.showDashboard = function(currentEntity){       
         SelectedEntity.setSelectedEntity(currentEntity);
         storage.set('SELECTED_OU', $scope.selectedOrgUnit);        
-        $location.path('/dashboard').search({selectedEntityId: currentEntity.id, selectedProgramId: $scope.selectedProgram ? $scope.selectedProgram.id : null});                                    
+        $location.path('/dashboard').search({selectedEntityId: currentEntity.id});                                    
     };   
     
     $scope.search = function(){       
         console.log('the search is:  ', $scope.attributes);
+        console.log('the mode is:  ', $scope.ouMode);
     };
        
     $scope.getHelpContent = function(){
         console.log('I will get help content');
     };    
+})
+
+//Controller for the search section
+.controller('SearchController',
+        function($rootScope,
+                $scope,                
+                storage,
+                TranslationService) {
+
+    TranslationService.translate();
+    
+    //search attibutes
+    $scope.attributes = storage.get('ATTRIBUTES');     
+    $scope.availableAttributes = [];
+    $scope.selectedAttributes = [];
+    $rootScope.showAdvancedSearchDiv = false;
+    $scope.ouMode = 'SELECTED';
+    
+    angular.forEach($scope.attributes, function(attribute){
+        $scope.availableAttributes.push(attribute);
+    });
+    
+    $scope.moveToSelected = function(attribute, fromView){  
+        
+        if(attribute){
+            
+            if(fromView){
+                attribute = attribute[0];
+            }
+
+            if(angular.isObject(attribute)) {            
+                if($scope.selectedAttributes.indexOf(attribute) === -1){       
+
+                    var filter = {operands: [], operand: '', values: [], value: ''};
+
+                    if(attribute.valueType === 'number' || attribute.valueType === 'date'){
+                        filter.operands = ['=', '>','>=', '<', '<=', '!=' ];
+                        filter.operand = filter.operands[0];
+                    }
+
+                    else if(attribute.valueType === 'bool'){
+                        filter.operands = ['One of'];
+                        filter.operand = filter.operands[0];
+                        filter.values = ['No', 'Yes'];
+                        filter.value = filter.values[0];
+                    }
+
+                    else if(attribute.valueType === 'combo'){
+                        filter.operands = ['One of'];
+                        filter.operand = filter.operands[0];
+                        filter.values = attribute.optionSet.options;
+                        filter.value = filter.values[0];
+                    }
+                    else{
+                        filter.operands = ['like', 'not_like' ];
+                        filter.operand = filter.operands[0];
+                    }
+
+                    attribute.filters = [filter];
+                    $scope.selectedAttributes.push(attribute);
+                    var index = $scope.availableAttributes.indexOf(attribute);
+                    $scope.availableAttributes.splice(index, 1);
+                }
+            }            
+        }         
+    };
+    
+    $scope.moveAllToSelected = function(){     
+        for(var i=0; i<$scope.availableAttributes.length;)
+        angular.forEach($scope.availableAttributes, function(attribute){
+            //$scope.selectedAttributes.push(attribute);            
+            $scope.moveToSelected(attribute, false);
+        });        
+        
+        $scope.availableAttributes = [];
+    };
+    
+    $scope.addFilter = function(attribute){
+        
+        var filter = {operands: [], operand: '', values: [], value: ''};
+                    
+        if(attribute.valueType === 'number' || attribute.valueType === 'date'){
+            filter.operands = ['=', '>','>=', '<', '<=', '!=' ];
+            filter.operand = filter.operands[0];
+        }
+
+        else if(attribute.valueType === 'bool'){
+            filter.operands = ['One of'];
+            filter.operand = filter.operands[0];
+            filter.values = ['No', 'Yes'];
+            filter.value = filter.values[0];
+        }
+
+        else if(attribute.valueType === 'combo'){
+            filter.operands = ['One of'];
+            filter.operand = filter.operands[0];
+            filter.values = attribute.optionSet.options;
+            filter.value = filter.values[0];
+        }
+        else{
+            filter.operands = ['like', 'not_like' ];
+            filter.operand = filter.operands[0];
+        }
+
+        attribute.filters.push(filter);
+
+        //console.log('I am going to add filter for dataElement:  ', dataElement);  
+    };
+    
+    $scope.removeFilter = function(filter, attribute){
+        
+        var index = attribute.filters.indexOf(filter);        
+        attribute.filters.splice(index, 1);
+
+        if(attribute.filters.length === 0 || angular.isUndefined(attribute.filters.length)){
+            index = $scope.selectedAttributes.indexOf(attribute);
+            $scope.selectedAttributes.splice(index, 1);
+            $scope.availableAttributes.push(attribute);
+        }
+        
+    };
+    
+    $scope.showAdvancedSearch = function(){        
+        $rootScope.showAdvancedSearchDiv = !$rootScope.showAdvancedSearchDiv;
+    };
+    
+    $scope.hideAdvancedSearch = function(){        
+        $rootScope.showAdvancedSearchDiv = false;
+    };
+    
+    $scope.closeAdvancedSearch = function(){
+        $rootScope.showAdvancedSearchDiv = !$rootScope.showAdvancedSearchDiv;
+    }; 
+    
+    $scope.search = function(){
+        console.log($scope.attributes);
+        console.log($scope.ouMode);
+    };
+    
+    $scope.test = function(){
+        console.log('the mode is:  ', $scope.ouMode);
+    };                
+    
 })
 
 //Controller for dashboard
@@ -172,29 +283,29 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $location,
                 $modal,
                 storage,
-                TrackedEntityInstanceService,                
+                TrackedEntityInstanceService,      
+                SelectedEntity,
                 TranslationService) {
 
     //do translation of the dashboard page
     TranslationService.translate();    
     
     //dashboard items   
-    $rootScope.dashboardWidgets = {bigger: [], smaller: []};   
-    $rootScope.profileWidget = {title: 'profile', view: "views/profile.html", show: true};
-    $rootScope.dataentryWidget = {title: 'dataentry', view: "views/dataentry.html", show: true};
-    //$rootScope.selectedWidget = {title: 'current_selections', view: "views/selected.html", show: true};
+    $rootScope.dashboardWidgets = {bigger: [], smaller: []};       
     $rootScope.enrollmentWidget = {title: 'enrollment', view: "views/enrollment.html", show: true};
+    $rootScope.dataentryWidget = {title: 'dataentry', view: "views/dataentry.html", show: true};
+    $rootScope.selectedWidget = {title: 'current_selections', view: "views/selected.html", show: false};
+    $rootScope.profileWidget = {title: 'profile', view: "views/profile.html", show: true};
     $rootScope.notesWidget = {title: 'notes', view: "views/notes.html", show: true};    
    
-    $rootScope.dashboardWidgets.bigger.push($rootScope.profileWidget);
+    $rootScope.dashboardWidgets.bigger.push($rootScope.enrollmentWidget);
     $rootScope.dashboardWidgets.bigger.push($rootScope.dataentryWidget);
-    //$rootScope.dashboardWidgets.smaller.push($rootScope.selectedWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.enrollmentWidget);
+    $rootScope.dashboardWidgets.smaller.push($rootScope.selectedWidget);
+    $rootScope.dashboardWidgets.smaller.push($rootScope.profileWidget);
     $rootScope.dashboardWidgets.smaller.push($rootScope.notesWidget);
     
     //selections
-    $scope.selectedEntityId = ($location.search()).selectedEntityId;
-    $scope.selectedProgramId = ($location.search()).selectedProgramId;    
+    $scope.selectedEntityId = ($location.search()).selectedEntityId;       
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');     
         
     if( $scope.selectedEntityId ){
@@ -202,11 +313,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         //Fetch the selected entity
         TrackedEntityInstanceService.get($scope.selectedEntityId).then(function(data){
             $scope.selectedEntity = data;    
-            
-            //broadcast selections for dashboard controllers
-            $rootScope.$broadcast('selectedItems', {selectedEntity: $scope.selectedEntity, 
-                                                    selectedProgramId: $scope.selectedProgramId, 
-                                                    selectedOrgUnitId: $scope.selectedOrgUnit.id});            
+            SelectedEntity.setSelectedEntity($scope.selectedEntity);
+            //broadcast selected entity for dashboard controllers
+            $rootScope.$broadcast('selectedEntity', {});    
+
         });       
     }   
     
@@ -232,12 +342,14 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         modalInstance.result.then(function () {
         });
     };   
+
 })
 
 //Controller for the profile section
 .controller('ProfileController',
         function($scope,                
                 storage,
+                SelectedEntity,
                 TranslationService) {
 
     TranslationService.translate();
@@ -248,94 +360,79 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.attributes[attribute.id] = attribute;
     }); 
     
-    //listen for the selected items
-    $scope.$on('selectedItems', function(event, args) {        
-        $scope.selectedEntity = args.selectedEntity;        
-        $scope.trackedEntity = storage.get($scope.selectedEntity.trackedEntity);
+    //listen for the selected entity
+    $scope.$on('selectedEntity', function(event, args) {        
+        
+        $scope.selectedEntity = SelectedEntity.getSelectedEntity();        
+
+        $scope.trackedEntity = storage.get($scope.selectedEntity.trackedEntity);       
     });
 })
 
 //Controller for the enrollment section
 .controller('EnrollmentController',
         function($rootScope,
-                $scope,                
+                $scope,  
+                $filter,
                 storage,
+                SelectedEntity,
                 EnrollmentService,
                 TranslationService) {
 
     TranslationService.translate();
     
+    //selected org unit
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU');  
+    
     //programs for enrollment
     $scope.enrollments = [];
-    $scope.programs = [];
-    var programs = storage.get('TRACKER_PROGRAMS'); 
+    $scope.programs = []; 
     
     //listen for the selected items
-    $scope.$on('selectedItems', function(event, args) {
+    $scope.$on('selectedEntity', function(event, args) {     
         
-        $scope.selectedEntity = args.selectedEntity;
-        $scope.selectedProgramId = args.selectedProgramId;        
-        $scope.selectedOrgUnitId = args.selectedOrgUnitId;        
-                   
-        for(var i=0; i<programs.length; i++){                
-            var program = storage.get(programs[i].id);
-            if($scope.selectedProgramId == program.id){                
-                $scope.selectedProgram = program;
-            }
-
-            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnitId) && 
-                    program.trackedEntity.id == $scope.selectedEntity.trackedEntity){
+        $scope.selectedEntity = SelectedEntity.getSelectedEntity();      
+        
+        angular.forEach(storage.get('TRACKER_PROGRAMS'), function(program){
+            program = storage.get(program.id);
+            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
+               program.trackedEntity.id === $scope.selectedEntity.trackedEntity){
                 $scope.programs.push(program);
             }
-        } 
-        
-        EnrollmentService.get($scope.selectedEntity.trackedEntityInstance).then(function(data){
-            $scope.enrollments = data.enrollmentList;
-            
-            if($scope.enrollments && $scope.enrollments.length == 1){
-                
-                $scope.selectedProgramId = $scope.enrollments[0].program;
-                
-                angular.forEach($scope.programs, function(program){
-                    if(program.id == $scope.selectedProgramId ){
-                        $scope.selectedProgram = program;
-                    }
-                });                
-                
-                $scope.loadEvents($scope.selectedProgramId);
-            }
-        });
+        });        
     }); 
     
-    $scope.loadEvents = function(prId) {
+    $scope.loadEvents = function() {
+        
+        if($scope.selectedProgram){
+            
+            $scope.selectedEnrollment = '';           
+            
+            EnrollmentService.get($scope.selectedEntity.trackedEntityInstance).then(function(data){
+                $scope.enrollments = data.enrollmentList;                
+                
+                angular.forEach($scope.enrollments, function(enrollment){
+                    if(enrollment.program === $scope.selectedProgram.id ){
+                        $scope.selectedEnrollment = enrollment;
+                    }
+                }); 
+            
+                $scope.programStages = [];
 
-        var isEnrolled = false;
-        var selectedEnrollment = ''
-        angular.forEach($scope.enrollments, function(enrollment){
-            if(enrollment.program == prId ){                
-                isEnrolled = true;
-                selectedEnrollment = enrollment;
-            }
-        });
-        
-        //if( isEnrolled && selectedEnrollment ){
-           
-            //broadcast current selections for data entry
-            $rootScope.$broadcast('dataentry', {selectedEntity: $scope.selectedEntity, 
-                                                selectedProgramId: prId,
-                                                selectedOrgUnitId: $scope.selectedOrgUnitId,
-                                                selectedEnrollment: selectedEnrollment});
-        //}     
-        
+                angular.forEach($scope.selectedProgram.programStages, function(stage){
+                   $scope.programStages.push(storage.get(stage.id)); 
+                });
+
+                if($scope.selectedEnrollment){
+                    $scope.selectedEnrollment.dateOfIncident = $filter('date')($scope.selectedEnrollment.dateOfIncident, 'yyyy-MM-dd');
+                }
+                
+                $rootScope.$broadcast('dataentry', {selectedEntity: $scope.selectedEntity,
+                                                    selectedProgramId: $scope.selectedProgram.id,
+                                                    selectedEnrollment: $scope.selectedEnrollment});
+            });            
+        }        
     };
-    
-    /*$scope.removeWidget = function(){        
-        angular.forEach($rootScope.dashboardWidgets.bigger, function(widget){
-            if(widget.title == 'enrollment'){
-                widget.show = false;
-            }
-        });
-    };*/
 })
 
 //Controller for the data entry section
@@ -352,21 +449,23 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.attributes = storage.get('ATTRIBUTES');
     
+    //selected org unit
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU'); 
+    
     //listen for the selected items
     $scope.$on('dataentry', function(event, args) {  
-        
+
         $scope.currentEvent = null;
         
-        $scope.dhis2Events = '';       
+        $scope.dhis2Events = [];       
     
         $scope.selectedEntity = args.selectedEntity;
         $scope.selectedProgramId = args.selectedProgramId;        
-        $scope.selectedOrgUnitId = args.selectedOrgUnitId;  
         $scope.selectedEnrollment = args.selectedEnrollment;
         
-        if($scope.selectedOrgUnitId && $scope.selectedProgramId && $scope.selectedEntity ){
+        if($scope.selectedOrgUnit && $scope.selectedProgramId && $scope.selectedEntity ){
             
-            DHIS2EventFactory.getByEntity($scope.selectedEntity.trackedEntityInstance, $scope.selectedOrgUnitId, $scope.selectedProgramId).then(function(data){
+            DHIS2EventFactory.getByEntity($scope.selectedEntity.trackedEntityInstance, $scope.selectedOrgUnit.id, $scope.selectedProgramId).then(function(data){
                 $scope.dhis2Events = data;
                 
                 if(angular.isUndefined($scope.dhis2Events)){
@@ -408,21 +507,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 angular.forEach($scope.dhis2Events, function(dhis2Event){
                         
                     dhis2Event.name = storage.get(dhis2Event.programStage).name;
-
                     dhis2Event.eventDate = moment(dhis2Event.eventDate, 'YYYY-MM-DD')._d;
                     dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
                     dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');
-
-
-
-                    OrgUnitService.open().then(function(){
-                        OrgUnitService.get(dhis2Event.orgUnit).then(function(ou){
-                            if(ou){
-                                dhis2Event.orgUnitName = ou.n;
-                            }                                                       
-                        });                            
-                    }); 
-
+                    
                     if(dhis2Event.status == 'COMPLETED'){
                         dhis2Event.statusColor = 'stage-completed';
                     }
@@ -434,7 +522,17 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                         else{
                             dhis2Event.statusColor = 'stage-on-time';
                         }
-                    }                        
+                    } 
+                    
+                    if(dhis2Event.orgUnit){
+                        OrgUnitService.open().then(function(){
+                            OrgUnitService.get(dhis2Event.orgUnit).then(function(ou){
+                                if(ou){
+                                    dhis2Event.orgUnitName = ou.n;
+                                }                                                       
+                            });                            
+                        }); 
+                    }                                                             
                 });
 
                 $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
@@ -505,7 +603,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     TranslationService.translate();
     
     //listen for the selected items
-    $scope.$on('selectedItems', function(event, args) {
+    $scope.$on('selectedEntity', function(event, args) {
         
         $scope.selectedEntity = args.selectedEntity;
         $scope.selectedProgramId = args.selectedProgramId;        
@@ -516,9 +614,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         }
         
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+        $scope.selections = [];
         
-        $scope.selected.selections.push({title: 'registering_unit', value: $scope.selectedOrgUnit ? $scope.selectedOrgUnit.name : 'not_selected'});
-        $scope.selected.selections.push({title: 'program', value: $scope.selectedProgram ? $scope.selectedProgram.name : 'not_selected'});               
+        $scope.selections.push({title: 'registering_unit', value: $scope.selectedOrgUnit ? $scope.selectedOrgUnit.name : 'not_selected'});
+        $scope.selections.push({title: 'program', value: $scope.selectedProgram ? $scope.selectedProgram.name : 'not_selected'});               
         
     });     
 })

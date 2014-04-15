@@ -36,7 +36,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntity;
@@ -74,8 +73,6 @@ public class UpdateTrackedEntityInstanceAction
     @Autowired
     private ProgramService programService;
 
-    private I18nFormat format;
-
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -88,7 +85,7 @@ public class UpdateTrackedEntityInstanceAction
 
     private Integer trackedEntityId;
 
-    private Integer programId;
+    private String programId;
 
     // -------------------------------------------------------------------------
     // Output
@@ -106,7 +103,7 @@ public class UpdateTrackedEntityInstanceAction
         TrackedEntityInstance entityInstance = entityInstanceService.getTrackedEntityInstance( id );
         TrackedEntity trackedEntity = null;
 
-        if ( programId != null )
+        if ( programId != null && !programId.isEmpty() )
         {
             Program program = programService.getProgram( programId );
             trackedEntity = program.getTrackedEntity();
@@ -143,11 +140,6 @@ public class UpdateTrackedEntityInstanceAction
 
                 if ( StringUtils.isNotBlank( value ) )
                 {
-                    if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
-                    {
-                       value = format.formatDate( TrackedEntityAttribute.getDateFromAge( Integer.parseInt( value ) ) );
-                    }
-
                     attributeValue = attributeValueService.getTrackedEntityAttributeValue( entityInstance, attribute );
 
                     if ( attributeValue == null )
@@ -179,11 +171,6 @@ public class UpdateTrackedEntityInstanceAction
     // -------------------------------------------------------------------------
     // Getter/Setter
     // -------------------------------------------------------------------------
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
 
     public void setTrackedEntityId( Integer trackedEntityId )
     {
@@ -228,6 +215,11 @@ public class UpdateTrackedEntityInstanceAction
     public void setRelationshipTypeId( Integer relationshipTypeId )
     {
         this.relationshipTypeId = relationshipTypeId;
+    }
+
+    public void setProgramId( String programId )
+    {
+        this.programId = programId;
     }
 
 }

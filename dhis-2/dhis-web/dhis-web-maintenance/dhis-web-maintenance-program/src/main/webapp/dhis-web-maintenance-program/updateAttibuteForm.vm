@@ -60,9 +60,9 @@
 				<option value="date" #if( $attribute.valueType == 'date' ) selected="selected" #end>$i18n.getString( "date" )</option>
                 <option value="phoneNumber" #if( $attribute.valueType == 'phoneNumber' ) selected="selected" #end>$i18n.getString( "phone_number" )</option>
 				<option value="trackerAssociate" #if( $attribute.valueType == 'trackerAssociate' ) selected="selected" #end>$i18n.getString( "tracker_associate" )</option>
-				<option value="age" #if( $attribute.valueType == 'age' ) selected="selected" #end>$i18n.getString( "age" )</option>
 				<option value="users" #if( $attribute.valueType == 'users' ) selected="selected" #end>$i18n.getString( "users" )</option>
 				<option value="combo" #if( $attribute.valueType == 'combo' ) selected="selected" #end>$i18n.getString( "attribute_combo_type" )</option>
+				<option value="localId" #if( $attribute.valueType == 'localId' ) selected="selected" #end>$i18n.getString( "local_identifier" )</option>
             </select>
         </td>
     </tr>
@@ -77,9 +77,6 @@
 		</td>
 	</tr>
 
-programScope: $attribute.programScope
-orgunitScope: $attribute.orgunitScope
-
 	<tr name='localIdField' #if($attribute.valueType!='localId' ) style='display:none;' #end >
 		<th colspan='2'><label for="type">$i18n.getString( "scope" )</label></th>
 	</tr>
@@ -91,7 +88,7 @@ orgunitScope: $attribute.orgunitScope
 		</td>
 		<td></td>
 	</tr>
-
+	
 	<tr name='localIdField' #if($attribute.valueType!='localId' ) style='display:none;' #end>
 		<td><label for="type">$i18n.getString( "program" )</label></td>
 		<td>
@@ -99,14 +96,14 @@ orgunitScope: $attribute.orgunitScope
 		</td>
 		<td></td>
 	</tr>
-
+	
     </tbody>
 	
 	<tr>
 		<td></td>
 		<td>
-			 <input type="submit" value="$i18n.getString( 'update' )">
-			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='attribute.action'">
+			<input type="submit" value="$i18n.getString( 'update' )" style="width:10em">
+			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='attribute.action'" style="width:10em">
 		</td>
 	</tr>
   </table>

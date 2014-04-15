@@ -805,12 +805,16 @@ Ext.onReady( function() {
 					name = '';
 
 				if (service.layout.isHierarchy(layout, response, id)) {
-					var a = Ext.Array.clean(metaData.ouHierarchy[id].split('/'));
+					var a = metaData.names[id].split('/');
 					a.shift();
 
-					for (var i = 0; i < a.length; i++) {
-						name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
+					for (var i = 0, isLast; i < a.length; i++) {
+						isLast = !!(i === a.length - 1);
+
+						name += (isHtml && !isLast ? '<span class="text-weak">' : '') + a[i] + (isHtml && !isLast ? '</span>' : '') + (!isLast ? ' / ' : '');
 					}
+
+					return name;
 				}
 
 				name += metaData.names[id];
@@ -1082,18 +1086,20 @@ Ext.onReady( function() {
 				return function() {
 
 					// items
-					for (var i = 0, dim, ids; i < dimensions.length; i++) {
+					for (var i = 0, dim, header; i < dimensions.length; i++) {
 						dim = dimensions[i];
 						dim.items = [];
-						ids = xResponse.nameHeaderMap[dim.dimension].ids;
+						header = xResponse.nameHeaderMap[dim.dimension];
 
-						for (var j = 0, id; j < ids.length; j++) {
-							id = ids[j];
+						if (header) {
+							for (var j = 0, id; j < header.ids.length; j++) {
+								id = header.ids[j];
 
-							dim.items.push({
-								id: id,
-								name: xResponse.metaData.names[id] || id
-							});
+								dim.items.push({
+									id: id,
+									name: xResponse.metaData.names[id] || id
+								});
+							}
 						}
 					}
 
@@ -1406,6 +1412,24 @@ Ext.onReady( function() {
 				return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
 			};
 
+            service.layout.getHierarchyName = function(ouHierarchy, names, id) {
+                var graph = ouHierarchy[id],
+                    ids = Ext.Array.clean(graph.split('/')),
+                    hierarchyName = '';
+
+                if (ids.length < 2) {
+                    return names[id];
+                }
+
+                for (var i = 0; i < ids.length; i++) {
+                    hierarchyName += names[ids[i]] + ' / ';
+                }
+
+                hierarchyName += names[id];
+
+                return hierarchyName;
+            };
+
 			service.layout.layout2plugin = function(layout, el) {
 				var layout = Ext.clone(layout),
 					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
@@ -1511,11 +1535,13 @@ Ext.onReady( function() {
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
 				var emptyId = 'N/A',
                     meta = ['ou', 'pe'],
+                    ouHierarchy,
                     names,
 					headers;
 
 				response = Ext.clone(response);
 				headers = response.headers;
+                ouHierarchy = response.metaData.ouHierarchy,
                 names = response.metaData.names;
                 names[emptyId] = emptyId;
 
@@ -1539,9 +1565,13 @@ Ext.onReady( function() {
                                 parsedId = parseFloat(id);
                                 displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
 
+								// update names
                                 names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
+
+								// update rows
                                 response.rows[j][i] = fullId;
 
+								// number sorting
                                 objects.push({
                                     id: fullId,
                                     sortingId: parsedId
@@ -1552,16 +1582,37 @@ Ext.onReady( function() {
                             header.ids = Ext.Array.pluck(objects, 'id');
                         }
                         else {
-                            for (var j = 0, id, fullId; j < response.rows.length; j++) {
+							var objects = [];
+
+                            for (var j = 0, id, fullId, name, isHierarchy; j < response.rows.length; j++) {
                                 id = response.rows[j][i] || emptyId;
                                 fullId = header.name + id;
+                                isHierarchy = service.layout.isHierarchy(xLayout, response, id);
 
-                                names[fullId] = (isMeta ? '' : header.column + ' ') + (names[id] || id);
+                                // add dimension name prefix if not pe/ou
+                                name = isMeta ? '' : header.column + ' ';
+
+                                // add hierarchy if ou and showHierarchy
+                                name = isHierarchy ? service.layout.getHierarchyName(ouHierarchy, names, id) : (names[id] || id);
+
+                                names[fullId] = name;
+
+                                // update rows
                                 response.rows[j][i] = fullId;
-                                header.ids.push(fullId);
+
+                                // update ou hierarchy
+                                if (isHierarchy) {
+									ouHierarchy[fullId] = ouHierarchy[id];
+								}
+
+								objects.push({
+									id: fullId,
+									sortingId: name
+								});
                             }
 
-                            header.ids.sort();
+                            support.prototype.array.sort(objects, 'ASC', 'sortingId');
+                            header.ids = Ext.Array.pluck(objects, 'id');
                         }
                     }
 
@@ -1604,15 +1655,26 @@ Ext.onReady( function() {
 
 			service.response.query.getExtendedResponse = function(layout, response) {
 				var xResponse = Ext.clone(response),
-                    dimensionNames = Ext.Array.pluck(layout.columns, 'dimension'),
+					metaData = xResponse.metaData,
+                    dimensionNames = Ext.Array.unique(Ext.Array.pluck(layout.columns, 'dimension')),
                     dimensionHeaders = [],
 					headers = xResponse.headers,
 					nameHeaderMap = {},
-                    nameMap = {};
+                    nameMap = {},
+                    ouIndex;
 
                 nameMap['pe'] = 'eventdate';
                 nameMap['ou'] = 'ouname';
 
+                // get ou index
+                for (var i = 0, header; i < headers.length; i++) {
+					if (headers[i].name === 'ou') {
+						ouIndex = i;
+						break;
+					}
+				}
+
+				// update rows
 				for (var i = 0, header; i < headers.length; i++) {
 					header = headers[i];
 					header.index = i;
@@ -1620,12 +1682,28 @@ Ext.onReady( function() {
 					nameHeaderMap[header.name] = header;
 
 					if (header.type === 'java.lang.Double') {
-						for (var j = 0, value; j < xResponse.rows.length; j++) {
+						for (var j = 0; j < xResponse.rows.length; j++) {
 							xResponse.rows[j][i] = parseFloat(xResponse.rows[j][i]);
 						}
 					}
+
+					if (header.name === 'eventdate') {
+						for (var j = 0; j < xResponse.rows.length; j++) {
+							xResponse.rows[j][i] = xResponse.rows[j][i].substr(0,10);
+						}
+					}
+
+					// TODO, using descendants -> missing orgunits in ouHierarchy
+
+					//else if (header.name === 'ouname' && layout.showHierarchy && metaData.ouHierarchy) {
+						//for (var j = 0, ouId; j < xResponse.rows.length; j++) {
+							//ouId = xResponse.rows[j][ouIndex];
+							//xResponse.rows[j][i] = service.layout.getHierarchyName(metaData.ouHierarchy, metaData.names, ouId);
+						//}
+					//}
 				}
 
+				// dimension headers
                 for (var i = 0, name; i < dimensionNames.length; i++) {
                     name = nameMap[dimensionNames[i]] || dimensionNames[i];
 
@@ -1692,7 +1770,7 @@ Ext.onReady( function() {
 
 			web.analytics.getParamString = function(view, format) {
                 var paramString,
-                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || [])),
+                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
                     ignoreKeys = ['longitude', 'latitude'],
                     dataTypeMap = {
                         'aggregated_values': 'aggregate',
@@ -1707,28 +1785,56 @@ Ext.onReady( function() {
 				paramString += 'stage=' + view.programStage.id;
 
                 // dimensions
-                for (var i = 0, dim, con; i < dimensions.length; i++) {
-                    dim = dimensions[i];
+                if (dimensions) {
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
 
-                    if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
-                        continue;
-                    }
+						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+							continue;
+						}
 
-                    paramString += '&dimension=' + dim.dimension;
+						paramString += '&dimension=' + dim.dimension;
 
-                    if (dim.items && dim.items.length) {
-                        paramString += ':';
+						if (dim.items && dim.items.length) {
+							paramString += ':';
 
-                        for (var j = 0, item; j < dim.items.length; j++) {
-                            item = dim.items[j];
+							for (var j = 0, item; j < dim.items.length; j++) {
+								item = dim.items[j];
 
-                            paramString += item.id + ((j < (dim.items.length - 1)) ? ';' : '');
-                        }
-                    }
-                    else if (dim.operator && !Ext.isEmpty(dim.filter)) {
-                        paramString += ':' + dim.operator + ':' + dim.filter;
-                    }
-                }
+								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
+							}
+						}
+						else if (dim.operator && !Ext.isEmpty(dim.filter)) {
+							paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
+						}
+					}
+				}
+
+                // filters
+                if (view.filters) {
+					for (var i = 0, dim; i < view.filters.length; i++) {
+						dim = view.filters[i];
+
+						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+							continue;
+						}
+
+						paramString += '&filter=' + dim.dimension;
+
+						if (dim.items && dim.items.length) {
+							paramString += ':';
+
+							for (var j = 0, item; j < dim.items.length; j++) {
+								item = dim.items[j];
+
+								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
+							}
+						}
+						else if (dim.operator && !Ext.isEmpty(dim.filter)) {
+							paramString += ':' + dim.operator + ':' + encodeURIComponent(dim.filter);
+						}
+					}
+				}
 
                 // dates
                 if (view.startDate && view.endDate) {
@@ -1737,6 +1843,24 @@ Ext.onReady( function() {
 
 				// hierarchy
 				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
+
+                // limit
+                if (view.dataType === 'aggregated_values' && (view.sortOrder && view.topLimit)) {
+                    paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
+                }
+
+                // sorting
+                if (view.dataType === 'individual_cases' && view.sorting) {
+                    if (view.sorting.id && view.sorting.direction) {
+                        paramString += '&' + view.sorting.direction.toLowerCase() + '=' + view.sorting.id;
+                    }
+                }
+
+                // paging
+                if (view.dataType === 'individual_cases' && view.paging) {
+                    paramString += view.paging.pageSize ? '&pageSize=' + view.paging.pageSize : '';
+                    paramString += view.paging.page ? '&page=' + view.paging.page : '';
+                }
 
                 return paramString;
             };
@@ -2070,21 +2194,42 @@ Ext.onReady( function() {
 
 					// dimension
 					if (xRowAxis) {
+						var aLineBreak = new Array(xRowAxis.dims);
+
 						for (var i = 0, row; i < xRowAxis.size; i++) {
 							row = [];
 
 							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
-								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
+								obj.cls = 'pivot-dim ' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
 								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
 								obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
 								row.push(obj);
+
+								// allow line break for this dim?
+								if (obj.htmlValue.length > 50) {
+									aLineBreak[j] = true;
+								}
 							}
 
 							axisAllObjects.push(row);
+						}
+
+						// add nowrap line break cls
+						for (var i = 0, dim; i < aLineBreak.length; i++) {
+							dim = aLineBreak[i];
+
+							if (!dim) {
+								for (var j = 0, obj; j < xRowAxis.size; j++) {
+									obj = axisAllObjects[j][i];
+
+									obj.cls += ' td-nobreak';
+									obj.noBreak = true;
+								}
+							}
 						}
 					}
 	//axisAllObjects = [ [ dim, dim ]
@@ -2521,6 +2666,7 @@ Ext.onReady( function() {
 
 				// get html
 				return function() {
+                    var rows = xResponse.rows;
 					htmlArray = Ext.Array.clean([].concat(getColAxisHtmlArray() || [], getRowHtmlArray() || [], getTotalHtmlArray() || []));
 
 					return {
@@ -2594,10 +2740,23 @@ Ext.onReady( function() {
 					row = rows[i];
 					html += '<tr>';
 
-					for (var j = 0, str, value; j < dimensionHeaders.length; j++) {
-						str = row[dimensionHeaders[j].index];
-						value = web.report.query.format(str);
-						html += '<td class="pivot-value align-left">' + value + '</td>';
+					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
+						header = dimensionHeaders[j];
+						str = row[header.index];
+						name = web.report.query.format(str);
+
+						//if (header.name === 'ouname' && layout.showHierarchy) {
+							//var a = Ext.Array.clean(name.split('/'));
+							//name = '';
+
+							//for (var k = 0, isLast; k < a.length; k++) {
+								//isLast = !!(i === a.length - 1);
+
+								//name += (!isLast ? '<span class="text-weak">' : '') + a[i] + (!isLast ? '</span>' : '') + (!isLast ? ' / ' : '');
+							//}
+						//}
+
+						html += '<td class="pivot-value align-left">' + name + '</td>';
 					}
 
 					html += '</tr>';

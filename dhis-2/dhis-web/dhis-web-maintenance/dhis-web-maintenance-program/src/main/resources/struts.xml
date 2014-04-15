@@ -156,7 +156,7 @@
 
     <action name="saveAttributeVisitSchedule"
       class="org.hisp.dhis.trackedentity.action.trackedentityattribute.SaveAttributeVisitScheduleAction">
-      <result name="success" type="redirect">index.action</result>
+      <result name="success" type="redirect">attribute.action</result>
       <param name="anyAuthorities">F_TRACKED_ENTITY_ATTRIBUTE_PUBLIC_ADD, F_TRACKED_ENTITY_ATTRIBUTE_PRIVATE_ADD</param>
     </action>
 
@@ -172,7 +172,7 @@
 
     <action name="saveAttributeInListNoProgram"
       class="org.hisp.dhis.trackedentity.action.trackedentityattribute.SaveAttributeInListNoProgramAction">
-      <result name="success" type="redirect">index.action</result>
+      <result name="success" type="redirect">attribute.action</result>
       <param name="anyAuthorities">F_TRACKED_ENTITY_ATTRIBUTE_PUBLIC_ADD, F_TRACKED_ENTITY_ATTRIBUTE_PRIVATE_ADD</param>
     </action>
 
@@ -1207,7 +1207,7 @@
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-program/updateTrackedEntity.vm</param>
       <param name="javascripts">javascript/trackedEntity.js</param>
-      <param name="requiredAuthorities">F_TRACKED_ENTITY_UPDATE</param>
+      <param name="requiredAuthorities">F_TRACKED_ENTITY_ADD</param>
     </action>
 
     <action name="updateTrackedEntity"

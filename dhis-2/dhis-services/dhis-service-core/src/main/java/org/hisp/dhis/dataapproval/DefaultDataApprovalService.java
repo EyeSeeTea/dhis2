@@ -116,7 +116,7 @@ public class DefaultDataApprovalService
     public void addDataApproval( DataApproval dataApproval )
     {
         if ( ( dataApproval.getCategoryOptionGroup() == null || securityService.canRead( dataApproval.getCategoryOptionGroup() ) )
-                && mayApprove( dataApproval.getOrganisationUnit() ) )
+            && mayApprove( dataApproval.getOrganisationUnit() ) )
         {
             dataApprovalStore.addDataApproval( dataApproval );
         }
@@ -129,16 +129,17 @@ public class DefaultDataApprovalService
     public void deleteDataApproval( DataApproval dataApproval )
     {
         if ( ( dataApproval.getCategoryOptionGroup() == null || securityService.canRead( dataApproval.getCategoryOptionGroup() ) )
-                && mayUnapprove( dataApproval.getOrganisationUnit(), dataApproval.isAccepted() ))
+            && mayUnapprove( dataApproval.getOrganisationUnit(), dataApproval.isAccepted() ))
         {
             dataApprovalStore.deleteDataApproval( dataApproval );
 
             for ( OrganisationUnit ancestor : dataApproval.getOrganisationUnit().getAncestors() )
             {
                 DataApproval ancestorApproval = dataApprovalStore.getDataApproval(
-                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
+                    dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
 
-                if ( ancestorApproval != null ) {
+                if ( ancestorApproval != null ) 
+                {
                     dataApprovalStore.deleteDataApproval ( ancestorApproval );
                 }
             }
@@ -151,9 +152,11 @@ public class DefaultDataApprovalService
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        return getDataApprovalStatus( dataSet, period, organisationUnit, null,
-                ( attributeOptionCombo == null || attributeOptionCombo.getId() == categoryService.getDefaultDataElementCategoryOptionCombo().getId() )
-                        ? null : attributeOptionCombo.getCategoryOptions() );
+        Set<DataElementCategoryOption> categoryOptions = 
+            attributeOptionCombo == null || attributeOptionCombo.equals( categoryService.getDefaultDataElementCategoryOptionCombo() ) ? 
+                null : attributeOptionCombo.getCategoryOptions();
+        
+        return getDataApprovalStatus( dataSet, period, organisationUnit, null, categoryOptions );
     }
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit,
@@ -170,16 +173,18 @@ public class DefaultDataApprovalService
     public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period, 
         OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        return getDataApprovalPermissions( dataSet, period, organisationUnit, null,
-                ( attributeOptionCombo == null || attributeOptionCombo.getId() == categoryService.getDefaultDataElementCategoryOptionCombo().getId() )
-                ? null : attributeOptionCombo.getCategoryOptions() );
+        Set<DataElementCategoryOption> categoryOptions = 
+            attributeOptionCombo == null || attributeOptionCombo.equals( categoryService.getDefaultDataElementCategoryOptionCombo() ) ?
+                null : attributeOptionCombo.getCategoryOptions();
+        
+        return getDataApprovalPermissions( dataSet, period, organisationUnit, null, categoryOptions );
     }
 
     public DataApprovalPermissions getDataApprovalPermissions( DataSet dataSet, Period period,
         OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups, Set<DataElementCategoryOption> dataElementCategoryOptions )
     {
         DataApprovalStatus status = getDataApprovalStatus( dataSet, period,
-                organisationUnit, categoryOptionGroups, dataElementCategoryOptions );
+            organisationUnit, categoryOptionGroups, dataElementCategoryOptions );
 
         DataApprovalPermissions permissions = new DataApprovalPermissions();
 
@@ -187,7 +192,11 @@ public class DefaultDataApprovalService
 
         permissions.setDataApprovalStatus( status );
 
-        if ( canReadCategoryOptionGroups( categoryOptionGroups, dataElementCategoryOptions ) )
+        DataApprovalLevel dataApprovalLevel = status.getDataApprovalLevel();
+
+        if ( dataApprovalLevel != null && securityService.canRead( dataApprovalLevel )
+            && ( dataApprovalLevel.getCategoryOptionGroupSet() == null || securityService.canRead( dataApprovalLevel.getCategoryOptionGroupSet() ))
+            && canReadOneCategoryOptionGroup( categoryOptionGroups ) )
         {
             boolean accepted = false;
 
@@ -218,7 +227,7 @@ public class DefaultDataApprovalService
     public void accept( DataApproval dataApproval )
     {
         if ( ( dataApproval.getCategoryOptionGroup() == null || securityService.canRead( dataApproval.getCategoryOptionGroup() ) )
-                && mayAcceptOrUnaccept( dataApproval.getOrganisationUnit() ) )
+            && mayAcceptOrUnaccept( dataApproval.getOrganisationUnit() ) )
         {
             if ( !dataApproval.isAccepted() )
             {
@@ -236,7 +245,7 @@ public class DefaultDataApprovalService
     public void unaccept( DataApproval dataApproval )
     {
         if ( ( dataApproval.getCategoryOptionGroup() == null || securityService.canRead( dataApproval.getCategoryOptionGroup() ) )
-                && mayAcceptOrUnaccept( dataApproval.getOrganisationUnit() ) )
+            && mayAcceptOrUnaccept( dataApproval.getOrganisationUnit() ) )
         {
             if ( dataApproval.isAccepted() )
             {
@@ -250,77 +259,31 @@ public class DefaultDataApprovalService
             warnNotPermitted( dataApproval, "unaccept", mayAcceptOrUnaccept( dataApproval.getOrganisationUnit() ) );
         }
     }
-
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
     /**
-     * Return whether the user can read the category option groups (if any)
-     * in this data selection. Note that if the user cannot read these groups,
-     * they should not have been able to see the data in the first place through
-     * the normal webapp, so this test would never fail. So the purpose of this
-     * test is to make sure that the web API is not being used to attempt an
-     * operation for which the user does not have the security clearance.
-     * <p>
-     * If category options are specified, then the user must be able to view
-     * EVERY category option. The user may view a category option if they
-     * have permission to view ANY category option group to which it belongs.
+     * Return true if there are no category option groups, or if there is
+     * one and the user can read it.
      *
      * @param categoryOptionGroups option groups (if any) for data selection
-     * @param dataElementCategoryOptions category options (if any) for data selection
-     * @return true if user can read the option groups, else false
+     * @return true if at most 1 option group and user can read, else false
      */
-    boolean canReadCategoryOptionGroups( Set<CategoryOptionGroup> categoryOptionGroups, Set<DataElementCategoryOption> dataElementCategoryOptions)
+    boolean canReadOneCategoryOptionGroup( Set<CategoryOptionGroup> categoryOptionGroups )
     {
-        if ( categoryOptionGroups != null )
+        if ( categoryOptionGroups == null || categoryOptionGroups.size() == 0 )
         {
-            for ( CategoryOptionGroup group : categoryOptionGroups )
-            {
-                if ( !securityService.canRead( group ) )
-                {
-                    log.info( "User cannot read categoryOptionGroup " + group.getName() + " for approval." );
-
-                    return false;
-                }
-            }
+            return true;
         }
 
-        if ( dataElementCategoryOptions != null )
+        if ( categoryOptionGroups.size() != 1 )
         {
-            for ( DataElementCategoryOption option : dataElementCategoryOptions )
-            {
-                if ( !securityService.canRead( option ) )
-                {
-                    boolean canReadGroup = false;
-
-                    for ( CategoryOptionGroup group : option.getGroups() )
-                    {
-                        log.info( "User " + ( securityService.canRead( group ) ? "can" : "cannot" )
-                                + " read option group" + group.getName()
-                                + " for option " + option.getName() );
-
-                        if ( securityService.canRead( group ) )
-                        {
-                            canReadGroup = true;
-
-                            break;
-                        }
-                    }
-
-                    if ( !canReadGroup && option.getGroups().size() != 0 )
-                    {
-                        log.info( "User cannot read option " + option.getName() );
-
-                        return false;
-                    }
-                }
-            }
+            return false;
         }
 
-        log.info( "User can read categoryOptionGroup and/or dataElementCategoryOptions" );
-
-        return true;
+        return ( securityService.canRead( (CategoryOptionGroup) categoryOptionGroups.toArray()[0] ) );
     }
 
     /**
@@ -349,7 +312,7 @@ public class DefaultDataApprovalService
             boolean mayApproveAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
             if ( mayApproveAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(),
-                    organisationUnit.getAncestors() ) )
+                organisationUnit.getAncestors() ) )
             {
                 log.info( "mayApprove = true because organisation unit " + organisationUnit.getName()
                         + " is under user and user may approve at lower levels." );
@@ -415,7 +378,7 @@ public class DefaultDataApprovalService
             boolean mayAcceptAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_ACCEPT_LOWER_LEVELS );
 
             if ( mayAcceptAtLowerLevels && CollectionUtils.containsAny( user.getOrganisationUnits(),
-                    organisationUnit.getAncestors() ) )
+                organisationUnit.getAncestors() ) )
             {
                 log.info( "User may accept or unaccept for organisation unit " + organisationUnit.getName() );
 

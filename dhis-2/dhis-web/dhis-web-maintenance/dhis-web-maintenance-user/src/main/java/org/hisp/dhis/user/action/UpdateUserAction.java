@@ -29,12 +29,13 @@ package org.hisp.dhis.user.action;
  */
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -45,9 +46,12 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.user.UserSettingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import com.opensymphony.xwork2.Action;
@@ -104,6 +108,12 @@ public class UpdateUserAction
         this.attributeService = attributeService;
     }
 
+    @Autowired
+    private UserGroupService userGroupService;
+
+    @Autowired
+    private DataElementCategoryService categoryService;
+    
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
@@ -171,11 +181,25 @@ public class UpdateUserAction
         this.localeDb = localeDb;
     }
 
-    private Collection<String> selectedList = new ArrayList<String>();
+    private List<String> urSelected = new ArrayList<String>();
 
-    public void setSelectedList( Collection<String> selectedList )
+    public void setUrSelected( List<String> urSelected )
     {
-        this.selectedList = selectedList;
+        this.urSelected = urSelected;
+    }
+
+    private List<String> ugSelected = new ArrayList<String>();
+
+    public void setUgSelected( List<String> ugSelected )
+    {
+        this.ugSelected = ugSelected;
+    }
+
+    private List<String> dcSelected = new ArrayList<String>();
+
+    public void setDcSelected( List<String> dcSelected )
+    {
+        this.dcSelected = dcSelected;
     }
 
     private List<String> jsonAttributeValues;
@@ -192,10 +216,6 @@ public class UpdateUserAction
     public String execute()
         throws Exception
     {
-        // ---------------------------------------------------------------------
-        // Prepare values
-        // ---------------------------------------------------------------------
-
         if ( email != null && email.trim().length() == 0 )
         {
             email = null;
@@ -207,17 +227,14 @@ public class UpdateUserAction
         }
 
         // ---------------------------------------------------------------------
-        // Update userCredentials and user
+        // User credentials and user
         // ---------------------------------------------------------------------
-
-        Collection<OrganisationUnit> units = selectionTreeManager.getReloadedSelectedOrganisationUnits();
 
         User user = userService.getUser( id );
         user.setSurname( surname );
         user.setFirstName( firstName );
         user.setEmail( email );
         user.setPhoneNumber( phoneNumber );
-        user.updateOrganisationUnits( new HashSet<OrganisationUnit>( units ) );
 
         UserCredentials userCredentials = userService.getUserCredentials( user );
 
@@ -230,17 +247,6 @@ public class UpdateUserAction
             userCredentials.setOpenId( null );
         }
 
-        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
-
-        for ( String id : selectedList )
-        {
-            userAuthorityGroups.add( userService.getUserAuthorityGroup( Integer.parseInt( id ) ) );
-        }
-
-        userService.canIssueFilter( userAuthorityGroups );
-        
-        userCredentials.setUserAuthorityGroups( userAuthorityGroups );
-
         if ( rawPassword != null )
         {
             userCredentials.setPassword( passwordManager.encodePassword( userCredentials.getUsername(), rawPassword ) );
@@ -252,25 +258,94 @@ public class UpdateUserAction
                 attributeService );
         }
 
+        // ---------------------------------------------------------------------
+        // Organisation units
+        // ---------------------------------------------------------------------
+
+        Set<OrganisationUnit> dataCaptureOrgUnits = new HashSet<OrganisationUnit>( selectionManager.getSelectedOrganisationUnits() );
+        user.updateOrganisationUnits( dataCaptureOrgUnits );
+
+        Set<OrganisationUnit> dataViewOrgUnits = new HashSet<OrganisationUnit>( selectionTreeManager.getReloadedSelectedOrganisationUnits() );
+        user.setDataViewOrganisationUnits( dataViewOrgUnits );
+
+        // ---------------------------------------------------------------------
+        // User roles
+        // ---------------------------------------------------------------------
+
+        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<UserAuthorityGroup>();
+
+        for ( String id : urSelected )
+        {
+            userAuthorityGroups.add( userService.getUserAuthorityGroup( id ) );
+        }
+
+        userService.canIssueFilter( userAuthorityGroups );
+
+        userCredentials.setUserAuthorityGroups( userAuthorityGroups );
+
+        // ---------------------------------------------------------------------
+        // Dimension constraints
+        // ---------------------------------------------------------------------
+
+        userCredentials.getCogsDimensionConstraints().clear();
+        
+        for ( String id : dcSelected )
+        {
+            CategoryOptionGroupSet cogs = categoryService.getCategoryOptionGroupSet( id );
+            userCredentials.getCogsDimensionConstraints().add( cogs );
+        }
+        
         userService.updateUserCredentials( userCredentials );
         userService.updateUser( user );
 
-        if ( currentUserService.getCurrentUser() == user )
-        {
-            selectionManager.setRootOrganisationUnits( units );
-            selectionManager.setSelectedOrganisationUnits( units );
+        // ---------------------------------------------------------------------
+        // Update organisation unit trees if current user is being updated
+        // ---------------------------------------------------------------------
 
-            selectionTreeManager.setRootOrganisationUnits( units );
-            selectionTreeManager.setSelectedOrganisationUnits( units );
+        if ( user.equals( currentUserService.getCurrentUser() ) && !dataCaptureOrgUnits.isEmpty() )
+        {
+            selectionManager.setRootOrganisationUnits( dataCaptureOrgUnits );
+            selectionManager.setSelectedOrganisationUnits( dataCaptureOrgUnits );
+        }
+        
+        if ( user.equals( currentUserService.getCurrentUser() ) && !dataViewOrgUnits.isEmpty() )
+        {
+            selectionTreeManager.setRootOrganisationUnits( dataViewOrgUnits );
+            selectionTreeManager.setSelectedOrganisationUnits( dataViewOrgUnits );
         }
 
-        if ( units.size() > 0 )
-        {
-            selectionManager.setSelectedOrganisationUnits( units );
-        }
+        // ---------------------------------------------------------------------
+        // User settings
+        // ---------------------------------------------------------------------
 
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
         userService.addOrUpdateUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
+
+        // ---------------------------------------------------------------------
+        // User groups
+        // ---------------------------------------------------------------------
+
+        Set<UserGroup> userGroups = new HashSet<UserGroup>();
+
+        for ( String id : ugSelected )
+        {
+            userGroups.add( userGroupService.getUserGroup( id ) );
+        }
+
+        for ( UserGroup userGroup : new HashSet<UserGroup>( user.getGroups() ) )
+        {
+            if ( !userGroups.contains( userGroup ) )
+            {
+                userGroup.removeUser( user );
+                userGroupService.updateUserGroup( userGroup );
+            }
+        }
+
+        for ( UserGroup userGroup : userGroups )
+        {
+            userGroup.addUser( user );
+            userGroupService.updateUserGroup( userGroup );
+        }
 
         return SUCCESS;
     }

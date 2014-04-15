@@ -45,7 +45,6 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -223,9 +222,8 @@ public class JdbcEventAnalyticsTableManager
             columns.add( col );
         }
 
-        for ( ProgramTrackedEntityAttribute programAttribute : table.getProgram().getAttributes() )
+        for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributes() )
         {
-            TrackedEntityAttribute attribute = programAttribute.getAttribute();
             String dataType = attribute.isNumericType() ? dbl : text;
             String dataClause = attribute.isNumericType() ? numericClause : "";
             String select = attribute.isNumericType() ? doubleSelect : "value";

@@ -31,7 +31,6 @@ package org.hisp.dhis.caseentry.action.trackedentity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -77,15 +76,45 @@ public class GetTrackedEntityInstanceAction
 
     private TrackedEntityInstanceService entityInstanceService;
 
+    public void setEntityInstanceService( TrackedEntityInstanceService entityInstanceService )
+    {
+        this.entityInstanceService = entityInstanceService;
+    }
+
     private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
 
     private RelationshipTypeService relationshipTypeService;
 
+    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
+    {
+        this.relationshipTypeService = relationshipTypeService;
+    }
+
     private TrackedEntityFormService trackedEntityFormService;
+
+    public void setTrackedEntityFormService( TrackedEntityFormService trackedEntityFormService )
+    {
+        this.trackedEntityFormService = trackedEntityFormService;
+    }
 
     private TrackedEntityAttributeGroupService attributeGroupService;
 
+    public void setAttributeGroupService( TrackedEntityAttributeGroupService attributeGroupService )
+    {
+        this.attributeGroupService = attributeGroupService;
+    }
+
     private TrackedEntityAttributeService attributeService;
+
+    public void setAttributeService( TrackedEntityAttributeService attributeService )
+    {
+        this.attributeService = attributeService;
+    }
 
     @Autowired
     private TrackedEntityService trackedEntityService;
@@ -95,41 +124,116 @@ public class GetTrackedEntityInstanceAction
 
     private I18n i18n;
 
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     private I18nFormat format;
+
+    public void setFormat( I18nFormat format )
+    {
+        this.format = format;
+    }
 
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
+    private String id;
+
+    public void setId( String id )
+    {
+        this.id = id;
+    }
+
     private Collection<RelationshipType> relationshipTypes;
 
-    private String id;
+    public Collection<RelationshipType> getRelationshipTypes()
+    {
+        return relationshipTypes;
+    }
 
     private TrackedEntityInstance entityInstance;
 
+    public TrackedEntityInstance getEntityInstance()
+    {
+        return entityInstance;
+    }
+
     private Collection<Program> programs;
+
+    public Collection<Program> getPrograms()
+    {
+        return programs;
+    }
 
     private Map<Integer, String> attributeValueMap = new HashMap<Integer, String>();
 
+    public Map<Integer, String> getAttributeValueMap()
+    {
+        return attributeValueMap;
+    }
+
     private Collection<TrackedEntityAttribute> noGroupAttributes = new HashSet<TrackedEntityAttribute>();
+
+    public Collection<TrackedEntityAttribute> getNoGroupAttributes()
+    {
+        return noGroupAttributes;
+    }
 
     private List<TrackedEntityAttributeGroup> attributeGroups;
 
+    public List<TrackedEntityAttributeGroup> getAttributeGroups()
+    {
+        return attributeGroups;
+    }
+
     private Relationship relationship;
+
+    public Relationship getRelationship()
+    {
+        return relationship;
+    }
 
     private Map<Integer, Collection<TrackedEntityAttribute>> attributeGroupsMap = new HashMap<Integer, Collection<TrackedEntityAttribute>>();
 
+    public Map<Integer, Collection<TrackedEntityAttribute>> getAttributeGroupsMap()
+    {
+        return attributeGroupsMap;
+    }
+
     private Collection<User> healthWorkers;
 
-    private Integer programId;
+    public Collection<User> getHealthWorkers()
+    {
+        return healthWorkers;
+    }
+
+    public void setTrackedEntityForm( TrackedEntityForm trackedEntityForm )
+    {
+        this.trackedEntityForm = trackedEntityForm;
+    }
+
+    private String programId;
+
+    public void setProgramId( String programId )
+    {
+        this.programId = programId;
+    }
 
     private Map<String, List<TrackedEntityAttribute>> attributesMap = new HashMap<String, List<TrackedEntityAttribute>>();
 
+    public Map<String, List<TrackedEntityAttribute>> getAttributesMap()
+    {
+        return attributesMap;
+    }
+
     private TrackedEntityForm trackedEntityForm;
 
-    public void setProgramId( Integer programId )
+    public TrackedEntityForm getTrackedEntityForm()
     {
-        this.programId = programId;
+        return trackedEntityForm;
     }
 
     private String customRegistrationForm;
@@ -149,21 +253,6 @@ public class GetTrackedEntityInstanceAction
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
         this.programStageInstanceId = programStageInstanceId;
-    }
-
-    public void setAttributeService( TrackedEntityAttributeService attributeService )
-    {
-        this.attributeService = attributeService;
-    }
-
-    public Map<String, List<TrackedEntityAttribute>> getAttributesMap()
-    {
-        return attributesMap;
-    }
-
-    public TrackedEntityForm getTrackedEntityForm()
-    {
-        return trackedEntityForm;
     }
 
     private List<TrackedEntity> trackedEntities;
@@ -194,7 +283,7 @@ public class GetTrackedEntityInstanceAction
         healthWorkers = entityInstance.getOrganisationUnit().getUsers();
         Program program = null;
 
-        if ( programId == null )
+        if ( programId == null || programId.isEmpty() )
         {
             trackedEntityForm = trackedEntityFormService.getCommonTrackedEntityForm();
 
@@ -290,112 +379,11 @@ public class GetTrackedEntityInstanceAction
         for ( TrackedEntityAttributeValue attributeValue : attributeValues )
         {
             String value = attributeValue.getValue();
-
-            if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
-            {
-                Date date = format.parseDate( value );
-                value = TrackedEntityAttribute.getAgeFromDate( date ) + "";
-            }
-
             attributeValueMap.put( attributeValue.getAttribute().getId(), value );
         }
 
         return SUCCESS;
 
-    }
-
-    // -----------------------------------------------------------------------------
-    // Getter / Setter
-    // -----------------------------------------------------------------------------
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
-    public Collection<RelationshipType> getRelationshipTypes()
-    {
-        return relationshipTypes;
-    }
-
-    public Collection<User> getHealthWorkers()
-    {
-        return healthWorkers;
-    }
-
-    public Map<Integer, Collection<TrackedEntityAttribute>> getAttributeGroupsMap()
-    {
-        return attributeGroupsMap;
-    }
-
-    public Relationship getRelationship()
-    {
-        return relationship;
-    }
-
-    public void setId( String id )
-    {
-        this.id = id;
-    }
-
-    public TrackedEntityInstance getEntityInstance()
-    {
-        return entityInstance;
-    }
-
-    public Collection<Program> getPrograms()
-    {
-        return programs;
-    }
-
-    public Map<Integer, String> getAttributeValueMap()
-    {
-        return attributeValueMap;
-    }
-
-    public Collection<TrackedEntityAttribute> getNoGroupAttributes()
-    {
-        return noGroupAttributes;
-    }
-
-    public List<TrackedEntityAttributeGroup> getAttributeGroups()
-    {
-        return attributeGroups;
-    }
-
-    public void setEntityInstanceService( TrackedEntityInstanceService entityInstanceService )
-    {
-        this.entityInstanceService = entityInstanceService;
-    }
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
-    public void setRelationshipTypeService( RelationshipTypeService relationshipTypeService )
-    {
-        this.relationshipTypeService = relationshipTypeService;
-    }
-
-    public void setTrackedEntityFormService( TrackedEntityFormService trackedEntityFormService )
-    {
-        this.trackedEntityFormService = trackedEntityFormService;
-    }
-
-    public void setAttributeGroupService( TrackedEntityAttributeGroupService attributeGroupService )
-    {
-        this.attributeGroupService = attributeGroupService;
-    }
-
-    public void setTrackedEntityForm( TrackedEntityForm trackedEntityForm )
-    {
-        this.trackedEntityForm = trackedEntityForm;
     }
 
 }

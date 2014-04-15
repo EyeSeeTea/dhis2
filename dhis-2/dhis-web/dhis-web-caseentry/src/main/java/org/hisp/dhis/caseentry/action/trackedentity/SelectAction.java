@@ -38,8 +38,11 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
+import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentity.TrackedEntityService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -75,6 +78,9 @@ public class SelectAction
         this.programService = programService;
     }
 
+    @Autowired
+    private TrackedEntityService trackedEntityService;
+
     // -------------------------------------------------------------------------
     // Input/output
     // -------------------------------------------------------------------------
@@ -107,6 +113,13 @@ public class SelectAction
         return status;
     }
 
+    private List<TrackedEntity> trackedEntities = new ArrayList<TrackedEntity>();
+
+    public List<TrackedEntity> getTrackedEntities()
+    {
+        return trackedEntities;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -114,14 +127,16 @@ public class SelectAction
     public String execute()
         throws Exception
     {
+
         organisationUnit = selectionManager.getSelectedOrganisationUnit();
 
         Collection<TrackedEntityAttribute> _attributes = attributeService.getTrackedEntityAttributesWithoutProgram();
-        _attributes.addAll( attributeService.getTrackedEntityAttributesDisplayInList( true ));
-        
+        _attributes.addAll( attributeService.getTrackedEntityAttributesDisplayInList( true ) );
         attributes = new ArrayList<TrackedEntityAttribute>( _attributes );
-
         Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
+
+        trackedEntities = new ArrayList<TrackedEntity>( trackedEntityService.getAllTrackedEntity() );
+        Collections.sort( trackedEntities, IdentifiableObjectNameComparator.INSTANCE );
 
         if ( organisationUnit != null )
         {

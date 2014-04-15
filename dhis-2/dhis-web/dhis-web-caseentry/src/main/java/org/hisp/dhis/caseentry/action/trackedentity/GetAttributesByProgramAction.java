@@ -72,9 +72,9 @@ public class GetAttributesByProgramAction
     // Getter && Setter
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private String id;
 
-    public void setId( Integer id )
+    public void setId( String id )
     {
         this.id = id;
     }
@@ -100,6 +100,13 @@ public class GetAttributesByProgramAction
         return attributeValueMaps;
     }
 
+    private Program program;
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
     // -------------------------------------------------------------------------
     // Implementation Action
     // -------------------------------------------------------------------------
@@ -110,8 +117,7 @@ public class GetAttributesByProgramAction
     {
         if ( id != null )
         {
-            Program program = programService.getProgram( id );
-            attributes.addAll( program.getTrackedEntityAttributes() );
+            program = programService.getProgram( id );
         }
         else
         {

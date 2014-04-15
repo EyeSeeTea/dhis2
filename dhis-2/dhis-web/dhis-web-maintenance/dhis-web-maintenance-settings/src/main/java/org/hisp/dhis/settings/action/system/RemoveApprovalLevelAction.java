@@ -1,7 +1,7 @@
 package org.hisp.dhis.settings.action.system;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,10 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.DeleteNotAllowedException;
+import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
+import org.hisp.dhis.i18n.I18n;
 
 import com.opensymphony.xwork2.Action;
 
@@ -50,6 +53,13 @@ public class RemoveApprovalLevelAction
         this.dataApprovalLevelService = dataApprovalLevelService;
     }
 
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------
@@ -62,12 +72,37 @@ public class RemoveApprovalLevelAction
     }
 
     // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
-        dataApprovalLevelService.deleteDataApprovalLevel( id );
+        DataApprovalLevel approvalLevel = dataApprovalLevelService.getDataApprovalLevel( id );
+
+        try
+        {
+            dataApprovalLevelService.deleteDataApprovalLevel( approvalLevel );
+        }
+        catch ( DeleteNotAllowedException ex )
+        {
+            if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
+            {
+                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getMessage();
+                
+                return ERROR;
+            }
+        }
 
         return SUCCESS;
     }

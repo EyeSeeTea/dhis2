@@ -33,7 +33,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -61,11 +60,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Jim Grace
- * @version $Id$
  */
 public class DataApprovalServiceTest
     extends DhisSpringTest
 {
+    private static final String AUTH_APPR_LEVEL = "F_SYSTEM_SETTING";
+
     @Autowired
     private DataApprovalService dataApprovalService;
 
@@ -90,8 +90,6 @@ public class DataApprovalServiceTest
     // -------------------------------------------------------------------------
     // Supporting data
     // -------------------------------------------------------------------------
-
-    private final static boolean ACCEPTED = true;
 
     private final static boolean NOT_ACCEPTED = false;
 
@@ -125,29 +123,29 @@ public class DataApprovalServiceTest
 
     private OrganisationUnit organisationUnitF;
 
-    private DataApprovalLevel dataApprovalLevel1;
+    private DataApprovalLevel level1;
 
-    private DataApprovalLevel dataApprovalLevel2;
+    private DataApprovalLevel level2;
 
-    private DataApprovalLevel dataApprovalLevel3;
+    private DataApprovalLevel level3;
 
-    private DataApprovalLevel dataApprovalLevel4;
+    private DataApprovalLevel level4;
 
-    private DataApprovalLevel dataApprovalLevel1A;
+    private DataApprovalLevel level1A;
 
-    private DataApprovalLevel dataApprovalLevel2A;
+    private DataApprovalLevel level2A;
 
-    private DataApprovalLevel dataApprovalLevel3A;
+    private DataApprovalLevel level3A;
 
-    private DataApprovalLevel dataApprovalLevel4A;
+    private DataApprovalLevel level4A;
 
-    private DataApprovalLevel dataApprovalLevel1B;
+    private DataApprovalLevel level1B;
 
-    private DataApprovalLevel dataApprovalLevel2B;
+    private DataApprovalLevel level2B;
 
-    private DataApprovalLevel dataApprovalLevel3B;
+    private DataApprovalLevel level3B;
 
-    private DataApprovalLevel dataApprovalLevel4B;
+    private DataApprovalLevel level4B;
 
     private User userA;
 
@@ -284,10 +282,10 @@ public class DataApprovalServiceTest
         organisationUnitService.addOrganisationUnit( organisationUnitE );
         organisationUnitService.addOrganisationUnit( organisationUnitF );
 
-        dataApprovalLevel1 = new DataApprovalLevel( "1", 1, null );
-        dataApprovalLevel2 = new DataApprovalLevel( "2", 2, null );
-        dataApprovalLevel3 = new DataApprovalLevel( "3", 3, null );
-        dataApprovalLevel4 = new DataApprovalLevel( "4", 4, null );
+        level1 = new DataApprovalLevel( "1", 1, null );
+        level2 = new DataApprovalLevel( "2", 2, null );
+        level3 = new DataApprovalLevel( "3", 3, null );
+        level4 = new DataApprovalLevel( "4", 4, null );
 
         userA = createUser( 'A' );
         userB = createUser( 'B' );
@@ -302,8 +300,6 @@ public class DataApprovalServiceTest
 
     private void setUpCategories() throws Exception
     {
-        Collection<CategoryOptionGroup> allGroups;
-
         optionA = new DataElementCategoryOption( "CategoryOptionA" );
         optionB = new DataElementCategoryOption( "CategoryOptionB" );
         optionC = new DataElementCategoryOption( "CategoryOptionC" );
@@ -387,14 +383,14 @@ public class DataApprovalServiceTest
         groupSetB.addCategoryOptionGroup( groupC );
         groupSetB.addCategoryOptionGroup( groupD );
 
-        dataApprovalLevel1A = new DataApprovalLevel( "1A", 1, groupSetA );
-        dataApprovalLevel1B = new DataApprovalLevel( "1B",1, groupSetB );
-        dataApprovalLevel2A = new DataApprovalLevel( "2A", 2, groupSetA );
-        dataApprovalLevel2B = new DataApprovalLevel( "2B", 2, groupSetB );
-        dataApprovalLevel3A = new DataApprovalLevel( "3A", 3, groupSetA );
-        dataApprovalLevel3B = new DataApprovalLevel( "3B", 3, groupSetB );
-        dataApprovalLevel4A = new DataApprovalLevel( "4A", 4, groupSetA );
-        dataApprovalLevel4B = new DataApprovalLevel( "4B", 4, groupSetB );
+        level1A = new DataApprovalLevel( "1A", 1, groupSetA );
+        level1B = new DataApprovalLevel( "1B",1, groupSetB );
+        level2A = new DataApprovalLevel( "2A", 2, groupSetA );
+        level2B = new DataApprovalLevel( "2B", 2, groupSetB );
+        level3A = new DataApprovalLevel( "3A", 3, groupSetA );
+        level3B = new DataApprovalLevel( "3B", 3, groupSetB );
+        level4A = new DataApprovalLevel( "4A", 4, groupSetA );
+        level4B = new DataApprovalLevel( "4B", 4, groupSetB );
     }
 
     // -------------------------------------------------------------------------
@@ -404,20 +400,20 @@ public class DataApprovalServiceTest
     @Test
     public void testAddAndGetDataApproval() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
-
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodB, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetB, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level1, dataSetA, periodB, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level1, dataSetB, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalService.addDataApproval( dataApprovalA );
         dataApprovalService.addDataApproval( dataApprovalB );
@@ -442,7 +438,7 @@ public class DataApprovalServiceTest
         assertEquals( userA.getId(), da.getCreator().getId() );
         level = status.getDataApprovalLevel();
         assertNotNull( level );
-        assertEquals( dataApprovalLevel1, level );
+        assertEquals( level1, level );
 
         status = dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS );
         assertEquals( DataApprovalState.APPROVED_ELSEWHERE, status.getDataApprovalState() );
@@ -455,7 +451,7 @@ public class DataApprovalServiceTest
         assertEquals( userA.getId(), da.getCreator().getId() );
         level = status.getDataApprovalLevel();
         assertNotNull( level );
-        assertEquals( dataApprovalLevel1, level );
+        assertEquals( level1, level );
 
         status = dataApprovalService.getDataApprovalStatus( dataSetA, periodB, organisationUnitA, NO_GROUPS, NO_OPTIONS );
         assertEquals( DataApprovalState.APPROVED_HERE, status.getDataApprovalState() );
@@ -468,7 +464,7 @@ public class DataApprovalServiceTest
         assertEquals( userA.getId(), da.getCreator().getId() );
         level = status.getDataApprovalLevel();
         assertNotNull( level );
-        assertEquals( dataApprovalLevel1, level );
+        assertEquals( level1, level );
 
         status = dataApprovalService.getDataApprovalStatus( dataSetB, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS );
         assertEquals( DataApprovalState.APPROVED_HERE, status.getDataApprovalState() );
@@ -481,7 +477,7 @@ public class DataApprovalServiceTest
         assertEquals( userA.getId(), da.getCreator().getId() );
         level = status.getDataApprovalLevel();
         assertNotNull( level );
-        assertEquals( dataApprovalLevel1, level );
+        assertEquals( level1, level );
 
         status = dataApprovalService.getDataApprovalStatus( dataSetB, periodB, organisationUnitB, NO_GROUPS, NO_OPTIONS );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, status.getDataApprovalState() );
@@ -492,18 +488,18 @@ public class DataApprovalServiceTest
     @Test
     public void testAddDuplicateDataApproval() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
-
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalService.addDataApproval( dataApprovalA );
 
@@ -521,18 +517,18 @@ public class DataApprovalServiceTest
     @Test
     public void testDeleteDataApproval() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
-
         Date date = new Date();
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userB );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userB );
         DataApproval testA;
         DataApproval testB;
 
@@ -568,14 +564,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalState() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
 
         // Not enabled.
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -608,7 +604,7 @@ public class DataApprovalServiceTest
         Date date = new Date();
 
         // Approved for sourceD
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
         dataApprovalService.addDataApproval( dataApprovalD );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -618,7 +614,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
         // Also approved for sourceC
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
         dataApprovalService.addDataApproval( dataApprovalC );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -628,7 +624,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
         // Also approved for sourceF
-        DataApproval dataApprovalF = new DataApproval( dataSetA, periodA, organisationUnitF, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalF = new DataApproval( level4, dataSetA, periodA, organisationUnitF, NO_GROUP, NOT_ACCEPTED, date, userA );
         dataApprovalService.addDataApproval( dataApprovalF );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -638,7 +634,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
         // Also approved also for sourceE
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalE = new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
         dataApprovalService.addDataApproval( dataApprovalE );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -658,14 +654,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateWithMultipleChildren() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
 
         dataSetA.setApproveData( true );
 
@@ -680,7 +676,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitE, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitF, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitF, NO_GROUP, NOT_ACCEPTED, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -688,7 +684,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitE, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -696,7 +692,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitE, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_WAITING, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -704,7 +700,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitE, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitF, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).getDataApprovalState() );
@@ -716,14 +712,14 @@ public class DataApprovalServiceTest
     @Test
     public void testGetDataApprovalStateOtherPeriodTypes() throws Exception
     {
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
+
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
         createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
 
         dataSetA.setApproveData( true );
 
@@ -741,10 +737,10 @@ public class DataApprovalServiceTest
     @Test
     public void testMayApprove() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
@@ -755,30 +751,30 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitD, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalStore.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalStore.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
-        dataApprovalStore.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalStore.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalStore.addDataApproval( new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayApprove());
     }
 
     @Test
     public void testMayApproveLowerLevels() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
@@ -789,30 +785,30 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitD, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayApprove());
     }
 
     @Test
     public void testMayApproveSameAndLowerLevels() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
@@ -823,30 +819,30 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitD, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( true, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayApprove());
     }
 
     @Test
     public void testMayApproveNoAuthority() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
@@ -857,44 +853,44 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false );
+        createUserAndInjectSecurityContext( units, false, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitD, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitC, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitB, NO_GROUPS, NO_OPTIONS ).isMayApprove());
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA ) );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayApprove());
     }
 
     @Test
     public void testMayUnapprove() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalE = new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalD );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayUnapprove());
@@ -925,24 +921,24 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveLowerLevels() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalE = new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalD );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayUnapprove());
@@ -973,24 +969,24 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveSameAndLowerLevels() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalE = new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalD );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayUnapprove());
@@ -1021,24 +1017,24 @@ public class DataApprovalServiceTest
     @Test
     public void testMayUnapproveNoAuthority() throws Exception
     {
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel1 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel3 );
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel4 );
+        dataApprovalLevelService.addDataApprovalLevel( level1 );
+        dataApprovalLevelService.addDataApprovalLevel( level2 );
+        dataApprovalLevelService.addDataApprovalLevel( level3 );
+        dataApprovalLevelService.addDataApprovalLevel( level4 );
 
         dataSetA.setApproveData( true );
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitB );
-        createUserAndInjectSecurityContext( units, false );
+        createUserAndInjectSecurityContext( units, false, AUTH_APPR_LEVEL );
 
         Date date = new Date();
 
-        DataApproval dataApprovalA = new DataApproval( dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalC = new DataApproval( dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalD = new DataApproval( dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalE = new DataApproval( dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level2, dataSetA, periodA, organisationUnitB, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalC = new DataApproval( level3, dataSetA, periodA, organisationUnitC, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalD = new DataApproval( level4, dataSetA, periodA, organisationUnitD, NO_GROUP, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalE = new DataApproval( level3, dataSetA, periodA, organisationUnitE, NO_GROUP, NOT_ACCEPTED, date, userA );
 
         dataApprovalStore.addDataApproval( dataApprovalD );
         assertEquals( false, dataApprovalService.getDataApprovalPermissions( dataSetA, periodA, organisationUnitA, NO_GROUPS, NO_OPTIONS ).isMayUnapprove());
@@ -1077,7 +1073,7 @@ public class DataApprovalServiceTest
 
         Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
         units.add( organisationUnitA );
-        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
+        createUserAndInjectSecurityContext( units, false, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
 
         Set<CategoryOptionGroup> groupASet = new HashSet<CategoryOptionGroup>();
         groupASet.add ( groupA );
@@ -1122,7 +1118,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboA ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboA ).getDataApprovalState() );
 
-        dataApprovalLevelService.addDataApprovalLevel( dataApprovalLevel2A );
+        dataApprovalLevelService.addDataApprovalLevel( level2A );
 
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, groupASet, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, groupASet, NO_OPTIONS ).getDataApprovalState() );
@@ -1136,7 +1132,7 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, optionComboJ ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_ELSEWHERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitC, optionComboK ).getDataApprovalState() );
 
-        dataApprovalService.addDataApproval( new DataApproval( dataSetA, periodA, organisationUnitB, groupA, NOT_ACCEPTED, date, userA ) );
+        dataApprovalService.addDataApproval( new DataApproval( level2A, dataSetA, periodA, organisationUnitB, groupA, NOT_ACCEPTED, date, userA ) );
 
         assertEquals( DataApprovalState.UNAPPROVABLE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, groupASet, NO_OPTIONS ).getDataApprovalState() );
         assertEquals( DataApprovalState.APPROVED_HERE, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, groupASet, NO_OPTIONS ).getDataApprovalState() );

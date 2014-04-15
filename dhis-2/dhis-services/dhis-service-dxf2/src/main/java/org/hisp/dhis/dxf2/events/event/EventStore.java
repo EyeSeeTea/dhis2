@@ -32,6 +32,7 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStatus;
 
 import java.util.Date;
 import java.util.List;
@@ -41,32 +42,6 @@ import java.util.List;
  */
 public interface EventStore
 {
-    List<Event> getAll( Program program, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit );
-
-    List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    List<Event> getAll( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits,
-        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    List<Event> getAll( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
+    List<Event> getAll( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<OrganisationUnit> organisationUnits,
+        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status );
 }

@@ -1,6 +1,6 @@
 package org.hisp.dhis.settings.action.system;
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,6 +30,9 @@ package org.hisp.dhis.settings.action.system;
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
+import org.hisp.dhis.setting.SystemSettingManager;
+
+import static org.hisp.dhis.setting.SystemSettingManager.*;
 
 import java.util.List;
 
@@ -43,6 +46,13 @@ public class GetApprovalSettingsAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
+
     private DataApprovalLevelService dataApprovalLevelService;
 
     public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
@@ -53,6 +63,13 @@ public class GetApprovalSettingsAction
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
+
+    private boolean keyHideUnapprovedDataInAnalytics;
+
+    public boolean getKeyHideUnapprovedDataInAnalytics()
+    {
+        return keyHideUnapprovedDataInAnalytics;
+    }
 
     private List<DataApprovalLevel> dataApprovalLevels;
 
@@ -68,13 +85,33 @@ public class GetApprovalSettingsAction
         return approvalLevelService;
     }
 
+    private boolean categoryOptionGroupSetsPresent;
+
+    public boolean isCategoryOptionGroupSetsPresent()
+    {
+        return categoryOptionGroupSetsPresent;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
     public String execute()
     {
+        keyHideUnapprovedDataInAnalytics = (Boolean) systemSettingManager.getSystemSetting( KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, false );
+
         dataApprovalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
+
+        categoryOptionGroupSetsPresent = false;
+
+        for ( DataApprovalLevel level : dataApprovalLevels )
+        {
+            if ( level.getCategoryOptionGroupSet() != null )
+            {
+                categoryOptionGroupSetsPresent = true;
+                break;
+            }
+        }
 
         approvalLevelService = dataApprovalLevelService;
 

@@ -41,6 +41,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.scheduling.TaskId;
 
 /**
@@ -53,28 +54,9 @@ public interface EventService
     // -------------------------------------------------------------------------
 
     Events getEvents( Program program, OrganisationUnit organisationUnit );
-
-    Events getEvents( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Events getEvents( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Events getEvents( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit );
-
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance );
-
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate, Date endDate );
-
-    Events getEvents( Program program, ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
-
-    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate );
-
-    Events getEvents( List<Program> programs, List<ProgramStage> programStages, List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate );
+    
+    Events getEvents( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<OrganisationUnit> organisationUnit, 
+        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status );
 
     Event getEvent( String uid );
 

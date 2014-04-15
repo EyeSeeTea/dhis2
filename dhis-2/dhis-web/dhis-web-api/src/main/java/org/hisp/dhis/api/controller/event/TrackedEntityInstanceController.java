@@ -72,7 +72,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  */
 @Controller
 @RequestMapping( value = TrackedEntityInstanceController.RESOURCE_PATH )
-@PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_LIST')" )
+@PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_INSTANCE_SEARCH')" )
 public class TrackedEntityInstanceController
 {
     public static final String RESOURCE_PATH = "/trackedEntityInstances";
@@ -105,6 +105,7 @@ public class TrackedEntityInstanceController
         @RequestParam(required=false) OrganisationUnitSelectionMode ouMode,
         @RequestParam(required=false) String program,
         @RequestParam(required=false) ProgramStatus programStatus,
+        @RequestParam(required=false) Set<String> programDate,
         @RequestParam(required=false) String trackedEntity,
         @RequestParam(required=false) boolean skipMeta,
         @RequestParam(required=false) Integer page,
@@ -114,7 +115,7 @@ public class TrackedEntityInstanceController
     {
         Set<String> orgUnits = new HashSet<String>( ContextUtils.getQueryParamValues( ou ) );        
         TrackedEntityInstanceQueryParams params = instanceService.getFromUrl( query, attribute, filter, orgUnits, ouMode, 
-            program, programStatus, trackedEntity, skipMeta, page, pageSize );
+            program, programStatus, programDate, trackedEntity, skipMeta, page, pageSize );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_JSON, CacheStrategy.NO_CACHE );
         Grid grid = instanceService.getTrackedEntityInstances( params );
@@ -133,6 +134,7 @@ public class TrackedEntityInstanceController
         @RequestParam(required=false) OrganisationUnitSelectionMode ouMode,
         @RequestParam(required=false) String program,
         @RequestParam(required=false) ProgramStatus programStatus,
+        @RequestParam(required=false) Set<String> programDate,
         @RequestParam(required=false) String trackedEntity,
         @RequestParam(required=false) boolean skipMeta,
         @RequestParam(required=false) Integer page,
@@ -142,7 +144,7 @@ public class TrackedEntityInstanceController
     {
         Set<String> orgUnits = new HashSet<String>( ContextUtils.getQueryParamValues( ou ) );        
         TrackedEntityInstanceQueryParams params = instanceService.getFromUrl( query, attribute, filter, orgUnits, ouMode, 
-            program, programStatus, trackedEntity, skipMeta, page, pageSize );
+            program, programStatus, programDate, trackedEntity, skipMeta, page, pageSize );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_XML, CacheStrategy.NO_CACHE );
         Grid grid = instanceService.getTrackedEntityInstances( params );
@@ -158,6 +160,7 @@ public class TrackedEntityInstanceController
         @RequestParam(required=false) OrganisationUnitSelectionMode ouMode,
         @RequestParam(required=false) String program,
         @RequestParam(required=false) ProgramStatus programStatus,
+        @RequestParam(required=false) Set<String> programDate,
         @RequestParam(required=false) String trackedEntity,
         @RequestParam(required=false) boolean skipMeta,
         @RequestParam(required=false) Integer page,
@@ -167,7 +170,7 @@ public class TrackedEntityInstanceController
     {
         Set<String> orgUnits = new HashSet<String>( ContextUtils.getQueryParamValues( ou ) );        
         TrackedEntityInstanceQueryParams params = instanceService.getFromUrl( query, attribute, filter, orgUnits, ouMode, 
-            program, programStatus, trackedEntity, skipMeta, page, pageSize );
+            program, programStatus, programDate, trackedEntity, skipMeta, page, pageSize );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_EXCEL, CacheStrategy.NO_CACHE );
         Grid grid = instanceService.getTrackedEntityInstances( params );
@@ -183,6 +186,7 @@ public class TrackedEntityInstanceController
         @RequestParam(required=false) OrganisationUnitSelectionMode ouMode,
         @RequestParam(required=false) String program,
         @RequestParam(required=false) ProgramStatus programStatus,
+        @RequestParam(required=false) Set<String> programDate,
         @RequestParam(required=false) String trackedEntity,
         @RequestParam(required=false) boolean skipMeta,
         @RequestParam(required=false) Integer page,
@@ -192,7 +196,7 @@ public class TrackedEntityInstanceController
     {
         Set<String> orgUnits = new HashSet<String>( ContextUtils.getQueryParamValues( ou ) );        
         TrackedEntityInstanceQueryParams params = instanceService.getFromUrl( query, attribute, filter, orgUnits, ouMode, 
-            program, programStatus, trackedEntity, skipMeta, page, pageSize );
+            program, programStatus, programDate, trackedEntity, skipMeta, page, pageSize );
         
         contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_CSV, CacheStrategy.NO_CACHE );
         Grid grid = instanceService.getTrackedEntityInstances( params );

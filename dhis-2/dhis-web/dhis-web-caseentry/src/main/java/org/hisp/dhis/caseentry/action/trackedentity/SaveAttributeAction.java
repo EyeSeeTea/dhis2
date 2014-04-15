@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -66,13 +65,11 @@ public class SaveAttributeAction
 
     private ProgramService programService;
 
-    private I18nFormat format;
-
     // -------------------------------------------------------------------------
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private Integer programId;
+    private String programId;
 
     private Integer entityInstanceId;
 
@@ -102,12 +99,12 @@ public class SaveAttributeAction
         this.programService = programService;
     }
 
-    public void setProgramId( Integer programId )
+    public void setProgramId( String programId )
     {
         this.programId = programId;
     }
 
-    public Integer getProgramId()
+    public String getProgramId()
     {
         return programId;
     }
@@ -126,12 +123,7 @@ public class SaveAttributeAction
     {
         return statusCode;
     }
-
-    public void setFormat( I18nFormat format )
-    {
-        this.format = format;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -173,11 +165,6 @@ public class SaveAttributeAction
 
                 if ( StringUtils.isNotBlank( value ) )
                 {
-                    if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_AGE ) )
-                    {
-                        value = format.formatDate( TrackedEntityAttribute.getDateFromAge( Integer.parseInt( value ) ) );
-                    }
-
                     if ( attributeValue == null )
                     {
                         attributeValue = new TrackedEntityAttributeValue();

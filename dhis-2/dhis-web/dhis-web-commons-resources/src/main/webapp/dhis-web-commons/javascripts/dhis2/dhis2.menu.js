@@ -27,9 +27,6 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Make sure that dhis2 object exists
-var dhis2 = dhis2 || {};
-
 /**
  * Created by Mark Polak on 28/01/14.
  */
@@ -44,7 +41,7 @@ var dhis2 = dhis2 || {};
          * Object that represents the list of menu items
          * and managers the order of the items to be saved.
          */
-        menuItemsList = (function () {
+            menuItemsList = (function () {
             var menuOrder = [],
                 menuItems = {};
 
@@ -127,7 +124,7 @@ var dhis2 = dhis2 || {};
                 onceCallBack(menuItems);
             }
             callBacks.forEach(function (callback, index, callBacks) {
-               callback.apply(dhis2.menu, [menuItems]);
+                callback.apply(dhis2.menu, [menuItems]);
             });
         }
 
@@ -345,7 +342,7 @@ var dhis2 = dhis2 || {};
 
         return that;
     }();
-})(dhis2);
+})(dhis2 = dhis2 || {});
 
 /**
  * Created by Mark Polak on 28/01/14.
@@ -353,7 +350,30 @@ var dhis2 = dhis2 || {};
  * @description jQuery part of the menu
  *
  * @see jQuery (http://jquery.com)
+ * @see jQuery Template Plugin (http://github.com/jquery/jquery-tmpl)
  */
+
+/* Function used for checking dependencies for the menu
+(function (required_libs, undefined) {
+    var libraries = [
+        { name: "jQuery", variable: "jQuery", url: "http://jquery.com" },
+        { name: "jQuery Template Plugin", variable: "jQuery.template", url: "http://github.com/jquery/jquery-tmpl" }
+    ];
+
+    //In IE 8 we can not use console
+    if (typeof console === "undefined") {
+        return;
+    }
+
+    //Throw error for the required libraries
+    libraries.forEach(function (library, index, libraries) {
+        if (window[library] === undefined) {
+            console.error("Missing required library: " + library.name + ". Please see (" + library.url + ")");
+        }
+    });
+})();
+*/
+
 (function ($, menu, undefined) {
     var markup = '',
         selector = 'appsMenu';
@@ -369,14 +389,14 @@ var dhis2 = dhis2 || {};
     $.template('appMenuItemTemplate', markup);
 
     function renderDropDownFavorites() {
-        var selector = '#menuDropDown1 .menuDropDownBox',
+        var selector = '#appsDropDown .menuDropDownBox',
             apps = dhis2.menu.getOrderedAppList();
 
-        $('#menuDropDown1').addClass('app-menu-dropdown ui-helper-clearfix');
+        $('#appsDropDown').addClass('app-menu-dropdown ui-helper-clearfix');
         $(selector).html('');
         $.tmpl( "appMenuItemTemplate", apps).appendTo(selector);
-        $('#menuDropDown1 .menu-drop-down-scroll .apps-menu-more').remove();
-        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#menuDropDown1 .menu-drop-down-scroll'));
+        $('#appsDropDown .menu-drop-down-scroll .apps-menu-more').remove();
+        $('.apps-menu-more').clone().css('display', 'table').addClass('ui-helper-clearfix').appendTo($('#appsDropDown .menu-drop-down-scroll'));
     }
 
     function renderAppManager(selector) {
@@ -409,10 +429,10 @@ var dhis2 = dhis2 || {};
                 type:"POST",
                 url: "../api/menu/"
             }).success(function () {
-                //TODO: Give user feedback for successful save
-            }).error(function () {
-                //TODO: Give user feedback for failure to save
-            });
+                    //TODO: Give user feedback for successful save
+                }).error(function () {
+                    //TODO: Give user feedback for failure to save
+                });
         }
     }
 
@@ -444,24 +464,24 @@ var dhis2 = dhis2 || {};
     /**
      * Render the menumanager and the dropdown menu and attach the update handler
      */
-    //TODO: Rename this as the name is not very clear to what it does
+        //TODO: Rename this as the name is not very clear to what it does
     function renderMenu() {
         var options = {
-                placeholder: 'app-menu-placeholder',
-                connectWith: '.app-menu ul',
-                update: function (event, ui) {
-                    var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
+            placeholder: 'app-menu-placeholder',
+            connectWith: '.app-menu ul',
+            update: function (event, ui) {
+                var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
 
-                    dhis2.menu.updateOrder(reorderedApps);
-                    dhis2.menu.save(saveOrder);
+                dhis2.menu.updateOrder(reorderedApps);
+                dhis2.menu.save(saveOrder);
 
-                    //Render the dropdown menu
-                    renderDropDownFavorites();
-                },
-                sort: twoColumnRowFix,
-                tolerance: "pointer",
-                cursorAt: { left: 55, top: 30 }
-            };
+                //Render the dropdown menu
+                renderDropDownFavorites();
+            },
+            sort: twoColumnRowFix,
+            tolerance: "pointer",
+            cursorAt: { left: 55, top: 30 }
+        };
 
         renderAppManager(selector);
         renderDropDownFavorites();
@@ -476,17 +496,21 @@ var dhis2 = dhis2 || {};
      * TODO: Check the urls (they seem to be specific to the dev location atm)
      */
     $(function () {
+        var menuTimeout = 500,
+            closeTimer = null,
+            dropDownId = null;
+
         $.ajax('../dhis-web-commons/menu/getModules.action').success(function (data) {
             if (typeof data.modules === 'object') {
                 menu.addMenuItems(data.modules);
             }
         }).error(function () {
-            //TODO: Give user feedback for failure to load items
-            //TODO: Translate this error message
-            var error_template = '<li class="app-menu-error"><a href="' + window.location.href +'">Unable to load your apps, click to refresh</a></li>';
-            $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
-            $('#menuDropDown1 .menuDropDownBox').html(error_template);
-        });
+                //TODO: Give user feedback for failure to load items
+                //TODO: Translate this error message
+                var error_template = '<li class="app-menu-error"><a href="' + window.location.href +'">Unable to load your apps, click to refresh</a></li>';
+                $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
+                $('#appsDropDown .menuDropDownBox').html(error_template);
+            });
 
         /**
          * Event handler for the sort order box
@@ -505,12 +529,11 @@ var dhis2 = dhis2 || {};
         $(window).resize(twoColumnRowFix);
 
         /**
-         * Adds a scrolling mechanism that modifies the height of the menu box to show only two rows
-         * Additionally it makes space for the scrollbar and shows/hides the more apps button
+         * Adds a scrolling mechanism that makes space for the scrollbar and shows/hides the more apps button
          */
         $('.menu-drop-down-scroll').scroll(function (event) {
             var self = $(this),
-                moreAppsElement = $('#menuDropDown1 > .apps-menu-more');
+                moreAppsElement = $('#appsDropDown > .apps-menu-more');
 
             if (self.scrollTop() < 10) {
                 moreAppsElement.show();
@@ -526,43 +549,68 @@ var dhis2 = dhis2 || {};
 
         });
 
+        function showDropDown( id )
+        {
+            var newDropDownId = "#" + id,
+                position = $(newDropDownId + '_button').position();
+
+            cancelHideDropDownTimeout();
+
+            $(newDropDownId).css('position', 'absolute');
+            $(newDropDownId).css('top', '55px');
+            $(newDropDownId).css('left', Math.ceil(position.left - Math.ceil(parseInt($(newDropDownId).innerWidth(), 10) - 108)) + 'px');
+
+
+            if ( dropDownId != newDropDownId ) {
+                hideDropDown();
+
+                dropDownId = newDropDownId;
+
+                $( dropDownId ).show();
+            }
+        }
+
+        function hideDropDown() {
+            if ( dropDownId ) {
+                if ($( dropDownId ).attr( 'data-clicked-open' ) === 'true') {
+                    return;
+                }
+                $( dropDownId ).hide();
+
+                dropDownId = null;
+            }
+        }
+
+        function hideDropDownTimeout() {
+            closeTimer = window.setTimeout( hideDropDown, menuTimeout );
+        }
+
+        function cancelHideDropDownTimeout() {
+            if ( closeTimer ) {
+                window.clearTimeout( closeTimer );
+
+                closeTimer = null;
+            }
+        }
+
         // Set show and hide drop down events on top menu
+        $( "#appsMenuLink" ).hover(function() {
+            showDropDown( "appsDropDown" );
+        }, function() {
+            hideDropDownTimeout();
+        });
 
-        $( "#menuLink1" ).hover( function()
-            {
-                showDropDown( "menuDropDown1" );
-            },
-            function()
-            {
-                hideDropDownTimeout();
-            } );
+        $( "#profileMenuLink" ).hover(function() {
+            showDropDown( "profileDropDown" );
+        }, function() {
+            hideDropDownTimeout();
+        });
 
-        $( "#menuLink2" ).hover( function()
-            {
-                showDropDown( "menuDropDown2" );
-            },
-            function()
-            {
-                hideDropDownTimeout();
-            } );
-
-        $( "#menuLink3" ).hover( function()
-            {
-                showDropDown( "menuDropDown3" );
-            },
-            function()
-            {
-                hideDropDownTimeout();
-            } );
-
-        $( "#menuDropDown1, #menuDropDown2, #menuDropDown3" ).hover( function()
-            {
-                cancelHideDropDownTimeout();
-            },
-            function()
-            {
-                hideDropDownTimeout();
-            } );
+        $( "#appsDropDown, #profileDropDown" ).hover(function() {
+            cancelHideDropDownTimeout();
+        }, function() {
+            hideDropDownTimeout();
+        });
 
 
         $('.drop-down-menu-link').get().forEach(function (element, index, elements) {

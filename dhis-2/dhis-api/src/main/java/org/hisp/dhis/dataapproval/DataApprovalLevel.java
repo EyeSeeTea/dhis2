@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -102,19 +102,6 @@ public class DataApprovalLevel
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
-
-    /**
-     * Constructs a name that can refer to this data approval level.
-     *
-     * @return name of this data approval level.
-     */
-    public String getName()
-    {
-        String name = orgUnitLevel
-            + ( categoryOptionGroupSet == null ? "" : ( " - " + categoryOptionGroupSet.getName() ) );
-
-        return name;
-    }
 
     /**
      * Returns the name of the category option group set for this data approval

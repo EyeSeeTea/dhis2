@@ -75,6 +75,8 @@
   <cache name="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet" maxElementsInMemory="50" />
 
   <cache name="org.hisp.dhis.organisationunit.OrganisationUnitGroupSet.attributeValues" maxElementsInMemory="1000" />
+  
+  <cache name="org.hisp.dhis.organisationunit.OrganisationUnitLevel" maxElementsInMemory="20" />
 
   <cache name="org.hisp.dhis.user.User" maxElementsInMemory="200" />
 
@@ -123,6 +125,8 @@
   <cache name="org.hisp.dhis.option.OptionSet" maxElementsInMemory="50" />
 
   <cache name="org.hisp.dhis.dataset.LockException" maxElementsInMemory="1000" />
+  
+  <cache name="org.hisp.dhis.dataapproval.DataApprovalLevel" maxElementsInMemory="20" />
 
   <cache name="org.hisp.dhis.filter.MetaDataFilter" maxElementsInMemory="100" />
 
@@ -345,6 +349,8 @@
   <cache name="org.hisp.dhis.option.OptionSet.options" maxElementsInMemory="2000" />
 
   <cache name="org.hisp.dhis.option.OptionSet.userGroupAccesses" maxElementsInMemory="200" />
+  
+  <cache name="org.hisp.dhis.dataapproval.DataApprovalLevel.userGroupAccesses" maxElementsInMemory="500" />
 
   <cache name="org.hisp.dhis.interpretation.Interpretation.userGroupAccesses" maxElementsInMemory="200" />
 
@@ -362,7 +368,9 @@
 
   <cache name="org.hisp.dhis.user.UserGroup.userGroupAccesses" maxElementsInMemory="200" />
 
-  <cache name="org.hisp.dhis.user.UserCredentials.userAuthorityGroups" maxElementsInMemory="200" />
+  <cache name="org.hisp.dhis.user.UserCredentials.userAuthorityGroups" maxElementsInMemory="2000" />
+
+  <cache name="org.hisp.dhis.user.UserCredentials.cogsDimensionConstraints" maxElementsInMemory="2000" />
 
   <cache name="org.hisp.dhis.user.UserAuthorityGroup.authorities" maxElementsInMemory="500" />
 

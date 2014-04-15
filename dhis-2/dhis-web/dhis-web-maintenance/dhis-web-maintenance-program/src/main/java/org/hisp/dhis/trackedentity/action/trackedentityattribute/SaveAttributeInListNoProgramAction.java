@@ -28,7 +28,9 @@ package org.hisp.dhis.trackedentity.action.trackedentityattribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -41,8 +43,6 @@ import com.opensymphony.xwork2.Action;
 public class SaveAttributeInListNoProgramAction
     implements Action
 {
-    private final String PREFIX_ATTRIBUTE = "attr";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -58,9 +58,9 @@ public class SaveAttributeInListNoProgramAction
     // Input/Output
     // -------------------------------------------------------------------------
 
-    private String[] selectedAttributeIds;
+    private List<Integer> selectedAttributeIds = new ArrayList<Integer>();
 
-    public void setSelectedAttributeIds( String[] selectedAttributeIds )
+    public void setSelectedAttributeIds( List<Integer> selectedAttributeIds )
     {
         this.selectedAttributeIds = selectedAttributeIds;
     }
@@ -74,23 +74,18 @@ public class SaveAttributeInListNoProgramAction
     {
         Collection<TrackedEntityAttribute> attributes = attributeService.getAllTrackedEntityAttributes();
 
-        int indexAttr = 1;
+        int index = 1;
+        
         if ( selectedAttributeIds != null )
         {
-            for ( String objectId : selectedAttributeIds )
+            for ( Integer objectId : selectedAttributeIds )
             {
-                // Identifier type
-                String[] id = objectId.split( "_" );
-                if ( id[0].equals( PREFIX_ATTRIBUTE ) )
-                {
-                    TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( Integer
-                        .parseInt( id[1] ) );
-                    attribute.setDisplayInListNoProgram( true );
-                    attribute.setSortOrderInListNoProgram( indexAttr );
-                    attributeService.updateTrackedEntityAttribute( attribute );
-                    indexAttr++;
-                    attributes.remove( attribute );
-                }
+                TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( objectId );
+                attribute.setDisplayInListNoProgram( true );
+                attribute.setSortOrderInListNoProgram( index );
+                attributeService.updateTrackedEntityAttribute( attribute );
+                index++;
+                attributes.remove( attribute );
             }
         }
 

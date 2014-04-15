@@ -28,35 +28,40 @@ package org.hisp.dhis.dxf2.events.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.system.util.TextUtils;
+import org.hisp.dhis.program.ProgramStatus;
+import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdList;
-import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DefaultEventStore
+public class JdbcEventStore
     implements EventStore
 {
+    private static final Log log = LogFactory.getLog( JdbcEventStore.class );
+    
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -66,105 +71,8 @@ public class DefaultEventStore
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public List<Event> getAll( Program program, OrganisationUnit organisationUnit )
-    {
-        return getAll( Arrays.asList( program ), new ArrayList<ProgramStage>(), Arrays.asList( organisationUnit ),
-            null, null, null );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate )
-    {
-        return getAll( Arrays.asList( program ), new ArrayList<ProgramStage>(), Arrays.asList( organisationUnit ),
-            null, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate,
-        Date endDate )
-    {
-        return getAll( Arrays.asList( program ), new ArrayList<ProgramStage>(), Arrays.asList( organisationUnit ),
-            trackedEntityInstance, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit )
-    {
-        return getAll( new ArrayList<Program>(), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            null, null, null );
-    }
-
-    @Override
-    public List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, Date startDate,
-        Date endDate )
-    {
-        return getAll( new ArrayList<Program>(), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            null, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( ProgramStage programStage, OrganisationUnit organisationUnit, TrackedEntityInstance trackedEntityInstance,
-        Date startDate, Date endDate )
-    {
-        return getAll( new ArrayList<Program>(), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            trackedEntityInstance, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit )
-    {
-        return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            null, null, null );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        TrackedEntityInstance trackedEntityInstance )
-    {
-        return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            trackedEntityInstance, null, null );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        Date startDate, Date endDate )
-    {
-        return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            null, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, ProgramStage programStage, OrganisationUnit organisationUnit,
-        TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
-    {
-        return getAll( Arrays.asList( program ), Arrays.asList( programStage ), Arrays.asList( organisationUnit ),
-            trackedEntityInstance, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit )
-    {
-        return getAll( Arrays.asList( program ), programStages, Arrays.asList( organisationUnit ), null, null, null );
-    }
-
-    @Override
-    public List<Event> getAll( Program program, List<ProgramStage> programStages, OrganisationUnit organisationUnit,
-        Date startDate, Date endDate )
-    {
-        return getAll( Arrays.asList( program ), programStages, Arrays.asList( organisationUnit ), null, startDate,
-            endDate );
-    }
-
-    @Override
-    public List<Event> getAll( List<Program> programs, List<ProgramStage> programStages,
-        List<OrganisationUnit> organisationUnits, Date startDate, Date endDate )
-    {
-        return getAll( programs, programStages, organisationUnits, null, startDate, endDate );
-    }
-
-    @Override
-    public List<Event> getAll( List<Program> programs, List<ProgramStage> programStages,
-        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate )
+    public List<Event> getAll( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp,
+        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status )
     {
         List<Event> events = new ArrayList<Event>();
 
@@ -180,10 +88,12 @@ public class DefaultEventStore
             }
         }
 
-        String sql = buildSql( getIdList( programs ), getIdList( programStages ), getIdList( organisationUnits ),
-            trackedEntityInstanceId, startDate, endDate );
+        String sql = buildSql( program, programStage, programStatus, followUp, getIdList( organisationUnits ),
+            trackedEntityInstanceId, startDate, endDate, status );
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
+        
+        log.info( "Event query SQL: " + sql );
 
         Event event = new Event();
         event.setEvent( "not_valid" );
@@ -258,9 +168,11 @@ public class DefaultEventStore
         return events;
     }
 
-    private String buildSql( List<Integer> programIds, List<Integer> programStageIds, List<Integer> orgUnitIds,
-        Integer trackedEntityInstanceId, Date startDate, Date endDate )
+    private String buildSql( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp, List<Integer> orgUnitIds,
+        Integer trackedEntityInstanceId, Date startDate, Date endDate, EventStatus status )
     {
+        SqlHelper hlp = new SqlHelper();
+        
         String sql = "select p.uid as p_uid, ps.uid as ps_uid, ps.capturecoordinates as ps_capturecoordinates, pa.uid as pa_uid, psi.uid as psi_uid, psi.status as psi_status, ou.uid as ou_uid, "
             + "psi.executiondate as psi_executiondate, psi.completeduser as psi_completeduser, psi.longitude as psi_longitude, psi.latitude as psi_latitude,"
             + " pdv.value as pdv_value, pdv.storedby as pdv_storedby, pdv.providedelsewhere as pdv_providedelsewhere, de.uid as de_uid"
@@ -273,68 +185,49 @@ public class DefaultEventStore
             + " left join dataelement de on pdv.dataelementid=de.dataelementid "
             + " left join trackedentityinstance pa on pa.trackedentityinstanceid=pi.trackedentityinstanceid ";
 
-        boolean startedWhere = false;
-
         if ( trackedEntityInstanceId != null )
         {
-            if ( startedWhere )
-            {
-                sql += " and pa.trackedentityinstanceid=" + trackedEntityInstanceId;
-            }
-            else
-            {
-                sql += " where pa.trackedentityinstanceid=" + trackedEntityInstanceId;
-                startedWhere = true;
-            }
+            sql += hlp.whereAnd() + " pa.trackedentityinstanceid=" + trackedEntityInstanceId + " ";
         }
 
-        if ( !programIds.isEmpty() )
+        if ( program != null )
         {
-            if ( startedWhere )
-            {
-                sql += " and p.programid in (" + TextUtils.getCommaDelimitedString( programIds ) + ") ";
-            }
-            else
-            {
-                sql += " where p.programid in (" + TextUtils.getCommaDelimitedString( programIds ) + ") ";
-                startedWhere = true;
-            }
+            sql += hlp.whereAnd() + " p.programid = " + program.getId() + " ";
         }
 
-        if ( !programStageIds.isEmpty() )
+        if ( programStage != null )
         {
-            if ( startedWhere )
-            {
-                sql += " and ps.programstageid in (" + TextUtils.getCommaDelimitedString( programStageIds ) + ") ";
-            }
-            else
-            {
-                sql += " where ps.programstageid in (" + TextUtils.getCommaDelimitedString( programStageIds ) + ") ";
-                startedWhere = true;
-            }
+            sql += hlp.whereAnd() + " ps.programstageid = " + programStage.getId() + " ";
+        }
+        
+        if ( programStatus != null )
+        {
+            sql += hlp.whereAnd() + " pi.status = " + programStatus.getValue() + " ";
+        }
+        
+        if ( followUp != null )
+        {
+            sql += hlp.whereAnd() + " pi.followup is " + ( followUp ? "true" : "false" ) + " ";
         }
 
         if ( !orgUnitIds.isEmpty() )
         {
-            if ( startedWhere )
-            {
-                sql += " and ou.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgUnitIds ) + ") ";
-            }
-            else
-            {
-                sql += " where ou.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgUnitIds ) + ") ";
-                startedWhere = true;
-            }
+            sql += hlp.whereAnd() + " ou.organisationunitid in (" + getCommaDelimitedString( orgUnitIds ) + ") ";
         }
 
         if ( startDate != null )
         {
-            sql += " and psi.executiondate >= '" + getMediumDateString( startDate ) + "' ";
+            sql += hlp.whereAnd() + " psi.executiondate >= '" + getMediumDateString( startDate ) + "' ";
         }
 
         if ( endDate != null )
         {
-            sql += " and psi.executiondate <= '" + getMediumDateString( endDate ) + "' ";
+            sql += hlp.whereAnd() + " psi.executiondate <= '" + getMediumDateString( endDate ) + "' ";
+        }
+        
+        if ( status != null )
+        {
+            sql += hlp.whereAnd() + " psi.status = " + status.getValue() + " ";
         }
 
         sql += " order by psi_uid;";

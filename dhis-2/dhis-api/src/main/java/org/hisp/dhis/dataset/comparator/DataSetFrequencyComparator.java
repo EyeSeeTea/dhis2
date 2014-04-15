@@ -1,4 +1,4 @@
-package org.hisp.dhis.api.controller.user;
+package org.hisp.dhis.dataset.comparator;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,18 +28,35 @@ package org.hisp.dhis.api.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.api.controller.AbstractCrudController;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.Comparator;
+
+import org.hisp.dhis.dataset.DataSet;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * Sorts data sets according to the frequency order of their period type, ordered
+ * from high to low collection frequency. A higher frequency order value implies 
+ * lower data set collection frequency.
+ * 
+ * @author Lars Helge Overland
  */
-@Controller
-@RequestMapping( value = UserAuthorityGroupController.RESOURCE_PATH )
-public class UserAuthorityGroupController
-    extends AbstractCrudController<UserAuthorityGroup>
+public class DataSetFrequencyComparator
+    implements Comparator<DataSet>
 {
-    public static final String RESOURCE_PATH = "/userRoles";
+    public static final DataSetFrequencyComparator INSTANCE = new DataSetFrequencyComparator();
+    
+    @Override
+    public int compare( DataSet d1, DataSet d2 )
+    {
+        if ( d1 == null || d1.getPeriodType() == null )
+        {
+            return -1;
+        }
+        
+        if ( d2 == null || d2.getPeriodType() == null )
+        {
+            return 1;
+        }
+        
+        return Integer.valueOf( d2.getPeriodType().getFrequencyOrder() ).compareTo( Integer.valueOf( d1.getPeriodType().getFrequencyOrder() ) );
+    }
 }

@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataapproval;
 
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -322,7 +322,6 @@ class DataApprovalSelection
                         lowestApprovalLevel = dataApprovalLevel;
                     }
 
-
                     break;
 
                 case UNAPPROVED_READY:
@@ -399,7 +398,9 @@ class DataApprovalSelection
         {
             if ( !unapprovedBelow )
             {
-                log.info( "getState() - not unapproved below." );
+                log.info( "getState() - unapproved ready." );
+
+                dataApprovalLevel = matchingApprovalLevels.get( thisIndex );
 
                 return DataApprovalState.UNAPPROVED_READY;
             }

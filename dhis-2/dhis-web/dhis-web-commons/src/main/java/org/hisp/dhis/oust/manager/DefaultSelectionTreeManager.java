@@ -28,21 +28,19 @@ package org.hisp.dhis.oust.manager;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.ActionContext;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+
+import com.opensymphony.xwork2.ActionContext;
+
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: DefaultSelectionTreeManager.java 5652 2008-09-06 13:24:34Z larshelg $
  */
 public class DefaultSelectionTreeManager
     implements SelectionTreeManager
@@ -61,13 +59,6 @@ public class DefaultSelectionTreeManager
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
@@ -203,19 +194,6 @@ public class DefaultSelectionTreeManager
         Set<OrganisationUnit> set = new HashSet<OrganisationUnit>( 1 );
         set.add( selectedUnit );
         setSelectedOrganisationUnits( set );
-    }
-
-    public boolean setCurrentUserOrganisationUnitAsSelected()
-    {
-        User user = currentUserService.getCurrentUser();
-
-        if ( user != null && user.getOrganisationUnit() != null )
-        {
-            setSelectedOrganisationUnit( user.getOrganisationUnit() );
-            return true;
-        }
-
-        return false;
     }
 
     // -------------------------------------------------------------------------

@@ -60,7 +60,7 @@ public class DefaultFilterService implements FilterService
             return Lists.newArrayList();
         }
 
-        Filters parsed = parserService.parserObjectFilter( filters );
+        Filters parsed = parserService.parseObjectFilter( filters );
 
         List<T> list = Lists.newArrayList();
 
@@ -143,7 +143,7 @@ public class DefaultFilterService implements FilterService
             Map value = fieldMap.get( key );
             Property descriptor = propertiesMap.get( key );
 
-            Object returned = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
+            Object returned = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
 
             if ( returned == null )
             {
@@ -251,7 +251,7 @@ public class DefaultFilterService implements FilterService
                 continue;
             }
 
-            Object o = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
+            Object o = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
 
             if ( o != null )
             {
@@ -282,7 +282,7 @@ public class DefaultFilterService implements FilterService
                 continue;
             }
 
-            Object value = ReflectionUtils.invokeMethod( object, descriptor.getMethod() );
+            Object value = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
 
             Object filter = filters.getFilters().get( field );
 

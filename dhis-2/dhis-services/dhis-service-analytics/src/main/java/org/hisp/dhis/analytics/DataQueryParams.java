@@ -175,6 +175,11 @@ public class DataQueryParams
      * Organisation units which were explicitly part of the original request.
      */
     private List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
+
+    /**
+     * Mapping of organisation unit sub-hierarchy roots and lowest available data approval levels.
+     */
+    private Map<OrganisationUnit, Integer> dataApprovalLevels = new HashMap<OrganisationUnit, Integer>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -202,6 +207,7 @@ public class DataQueryParams
         params.dataPeriodType = this.dataPeriodType;
         params.skipPartitioning = this.skipPartitioning;
         params.organisationUnits = new ArrayList<OrganisationUnit>( this.organisationUnits );
+        params.dataApprovalLevels = new HashMap<OrganisationUnit, Integer>( this.dataApprovalLevels );
         
         return params;
     }
@@ -864,6 +870,22 @@ public class DataQueryParams
         return filterItems;
     }
     
+    /**
+     * Indicates whether this params specifies data approval levels.
+     */
+    public boolean isDataApproval()
+    {
+        return dataApprovalLevels != null && !dataApprovalLevels.isEmpty();
+    }
+    
+    /**
+     * Ignore data approval constraints for this query.
+     */
+    public void ignoreDataApproval()
+    {
+        this.dataApprovalLevels = new HashMap<OrganisationUnit, Integer>();
+    }
+    
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
@@ -1130,19 +1152,29 @@ public class DataQueryParams
         this.skipPartitioning = skipPartitioning;
     }
 
+    public Map<OrganisationUnit, Integer> getDataApprovalLevels()
+    {
+        return dataApprovalLevels;
+    }
+
+    public void setDataApprovalLevels( Map<OrganisationUnit, Integer> dataApprovalLevels )
+    {
+        this.dataApprovalLevels = dataApprovalLevels;
+    }
+
     // -------------------------------------------------------------------------
     // Get and set helpers for dimensions or filter
     // -------------------------------------------------------------------------
   
     /**
      * Retrieves the options for the the dimension or filter with the given 
-     * identifier. Returns null of the dimension of filter is not present.
+     * identifier. Returns null if the dimension or filter is not present.
      */
     public List<NameableObject> getDimensionOrFilter( String key )
     {
         return getDimensionOptions( key ) != null ? getDimensionOptions( key ) : getFilterOptions( key );
     }
-    
+        
     /**
      * Retrieves the options for the given dimension identifier. If the dx dimension
      * is specified, all concrete dimensions (in|de|dc|ds) are returned as a single
@@ -1195,6 +1227,16 @@ public class DataQueryParams
     public boolean hasDimensionOrFilter( String key )
     {
         return dimensions.indexOf( new BaseDimensionalObject( key ) ) != -1 || filters.indexOf( new BaseDimensionalObject( key ) ) != -1;
+    }
+
+    /**
+     * Indicates whether a dimension or filter which specifies dimension items 
+     * with the given identifier exists.
+     */
+    public boolean hasDimensionOrFilterWithItems( String key )
+    {
+        List<NameableObject> items = getDimensionOrFilter( key );
+        return items != null && !items.isEmpty();
     }
     
     /**

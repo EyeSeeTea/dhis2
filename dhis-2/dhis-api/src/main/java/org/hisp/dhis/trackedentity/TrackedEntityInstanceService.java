@@ -53,6 +53,7 @@ public interface TrackedEntityInstanceService
     public static final int ERROR_NONE = 0;
     public static final int ERROR_DUPLICATE_IDENTIFIER = 1;
     public static final int ERROR_ENROLLMENT = 2;
+    public static final String SAPERATOR = "_";
 
     /**
      * Returns a grid with tracked entity instance values based on the given
@@ -73,6 +74,7 @@ public interface TrackedEntityInstanceService
      * @param ouMode the OrganisationUnitSelectionMode.
      * @param program the Program uid.
      * @param programStatus the ProgramStatus of the given Program.
+     * @param programDate the set of filters for program enrollment dates.
      * @param trackedEntity the TrackedEntity uid.
      * @param skipMeta indicates whether to include meta data in the response.
      * @param page the page number.
@@ -80,7 +82,7 @@ public interface TrackedEntityInstanceService
      * @return a TrackedEntityInstanceQueryParams.
      */
     TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, 
-        Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, 
+        Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Set<String> programDate,
         String trackedEntity, boolean skipMeta, Integer page, Integer pageSize );
     
     /**
@@ -427,10 +429,11 @@ public interface TrackedEntityInstanceService
      *        null, the system check unique attribute values of the
      *        entityInstance
      * @param format I18nFormat
-     * @return Error code 0 : Validation is OK 1 : The attribute is duplicated 2
-     *         : Violate validation criteria of the program
+     * @return Error code 0 : Validation is OK 
+     *                    1_<duplicate-value> : The attribute value is duplicated 
+     *                    2_<validation-criteria-id> : Violate validation criteria of the program
      */
-    int validateTrackedEntityInstance( TrackedEntityInstance entityInstance, Program program, I18nFormat format );
+    String validateTrackedEntityInstance( TrackedEntityInstance entityInstance, Program program, I18nFormat format );
 
     /**
      * Validate patient enrollment

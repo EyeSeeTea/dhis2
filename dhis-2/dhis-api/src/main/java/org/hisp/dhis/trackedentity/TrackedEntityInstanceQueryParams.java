@@ -30,10 +30,12 @@ package org.hisp.dhis.trackedentity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -88,6 +90,11 @@ public class TrackedEntityInstanceQueryParams
     private ProgramStatus programStatus;
     
     /**
+     * Enrollment dates for the given program.
+     */
+    private List<QueryFilter> programDates = new ArrayList<QueryFilter>();
+    
+    /**
      * Tracked entity of the instances in the response.
      */
     private TrackedEntity trackedEntity;
@@ -123,6 +130,43 @@ public class TrackedEntityInstanceQueryParams
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
+    
+    /**
+     * Performs a set of operations on this params.
+     * 
+     * <ul>
+     * <li>
+     * If a query item is specified as an attribute item as well as a filter 
+     * item, the filter item will be removed. In that case, if the attribute 
+     * item does not have a filter value and the filter item has a filter value, 
+     * it will be applied to the attribute item.
+     * </li>
+     * </ul> 
+     */
+    public void conform()
+    {
+        Iterator<QueryItem> filterIter = filters.iterator();
+        
+        while ( filterIter.hasNext() )
+        {
+            QueryItem filter = filterIter.next();
+        
+            int index = attributes.indexOf( filter ); // Filter present as attr
+            
+            if ( index >= 0 )
+            {
+                QueryItem attribute = attributes.get( index );
+                
+                if ( !attribute.hasFilter() )
+                {
+                    attribute.setOperator( filter.getOperator() );
+                    attribute.setFilter( filter.getFilter() );
+                }
+                
+                filterIter.remove();
+            }
+        }
+    }
     
     /**
      * Returns a mapping between level and organisation units.
@@ -170,6 +214,72 @@ public class TrackedEntityInstanceQueryParams
     }
 
     /**
+     * Returns a list of attributes which appear more than once.
+     */
+    public List<QueryItem> getDuplicateAttributes()
+    {
+        Set<QueryItem> items = new HashSet<QueryItem>();
+        List<QueryItem> duplicates = new ArrayList<QueryItem>();
+        
+        for ( QueryItem item : getAttributes() )
+        {
+            if ( !items.add( item ) )
+            {
+                duplicates.add( item );
+            }
+        }
+        
+        return duplicates;
+    }
+
+    /**
+     * Returns a list of attributes which appear more than once.
+     */
+    public List<QueryItem> getDuplicateFilters()
+    {
+        Set<QueryItem> items = new HashSet<QueryItem>();
+        List<QueryItem> duplicates = new ArrayList<QueryItem>();
+        
+        for ( QueryItem item : getFilters() )
+        {
+            if ( !items.add( item ) )
+            {
+                duplicates.add( item );
+            }
+        }
+        
+        return duplicates;
+    }
+        
+    /**
+     * Add the given attributes to this params if they are not already present.
+     */
+    public void addAttributesIfNotExist( List<QueryItem> attrs )
+    {
+        for ( QueryItem attr : attrs )
+        {
+            if ( attributes != null && !attributes.contains( attr ) )
+            {
+                attributes.add( attr );            
+            }
+        }
+    }
+    
+    /**
+     * Adds the given filters to this params if they are not already present.
+     */
+    public void addFiltersIfNotExist( List<QueryItem> filtrs )
+    {
+        for ( QueryItem filter : filtrs )
+        {
+            if ( filters != null && !filters.contains( filter ) )
+            {
+                filters.add( filter );
+            }
+        }
+    }
+    
+    /**
      * Indicates whether this params specifies any attributes and/or filters.
      */
     public boolean hasAttributesOrFilters()
@@ -215,6 +325,15 @@ public class TrackedEntityInstanceQueryParams
     public boolean hasProgramStatus()
     {
         return programStatus != null;
+    }
+    
+    /**
+     * Indicates whether this params specifies any program dates.
+     * @return
+     */
+    public boolean hasProgramDates()
+    {
+        return programDates != null && !programDates.isEmpty();
     }
     
     /**
@@ -327,6 +446,16 @@ public class TrackedEntityInstanceQueryParams
     public void setProgramStatus( ProgramStatus programStatus )
     {
         this.programStatus = programStatus;
+    }
+
+    public List<QueryFilter> getProgramDates()
+    {
+        return programDates;
+    }
+
+    public void setProgramDates( List<QueryFilter> programDates )
+    {
+        this.programDates = programDates;
     }
 
     public TrackedEntity getTrackedEntity()

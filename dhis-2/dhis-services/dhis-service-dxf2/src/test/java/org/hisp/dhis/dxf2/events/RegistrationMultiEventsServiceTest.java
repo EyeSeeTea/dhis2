@@ -53,6 +53,7 @@ import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 import static org.junit.Assert.assertEquals;
@@ -233,7 +234,7 @@ public class RegistrationMultiEventsServiceTest
         importSummary = eventService.addEvent( event );
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
 
-        assertEquals( 1, eventService.getEvents( programA, programStageA, organisationUnitA ).getEvents().size() );
+        assertEquals( 1, eventService.getEvents( programA, programStageA, null, null, Arrays.asList( organisationUnitA ), null, null, null, null ).getEvents().size() );
     }
 
     @Test

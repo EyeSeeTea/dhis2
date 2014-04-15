@@ -197,7 +197,7 @@
     </action>
     
 	<!-- Load Payment Adjustment List -->
-	<action name="loadPaymentAdjustmentList" class="org.hisp.dhis.pbf.payment.action.LoadPaymentAdjustmentDetailsAction">
+	<action name="loadPaymentAdjustmentList" class="org.hisp.dhis.pbf.payment.action.LoadPaymentAdjustmentAction">
 		<result name="success" type="velocity">/content.vm</result>
 		<param name="page">/dhis-web-maintenance-pbf/loadPaymentAdjustment.vm</param>
 	</action>
@@ -324,6 +324,14 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
+
+    <!-- Reports -->
+    <action name="PBFInvoiceReportForm" class="org.hisp.dhis.pbf.report.action.PBFInvoiceReportFormAction">
+        <result name="success" type="velocity">/main.vm</result>
+        <param name="page">/dhis-web-maintenance-pbf/PBFInvoiceReportForm.vm</param>
+        <param name="javascripts">javascript/prevNextPeriods.js</param>
+        <param name="menu">/dhis-web-maintenance-pbf/menu.vm</param>
+   </action>
 	
 	</package>
 </struts>
