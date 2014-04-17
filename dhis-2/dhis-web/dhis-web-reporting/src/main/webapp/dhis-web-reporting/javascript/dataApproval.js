@@ -4,12 +4,6 @@ dhis2.util.namespace( 'dhis2.appr' );
 dhis2.appr.currentPeriodOffset = 0;
 dhis2.appr.permissions = null;
 
-$( document ).ready( function()
-{
-	$( "body" ).on( "oust.selected", dhis2.appr.orgUnitSelected );
-} );
-
-
 //------------------------------------------------------------------------------
 // Report
 //------------------------------------------------------------------------------
@@ -19,9 +13,9 @@ dhis2.appr.dataSetSelected = function()
 	dhis2.appr.displayPeriods();
 }
 
-dhis2.appr.orgUnitSelected = function( event, ou )
+dhis2.appr.orgUnitSelected = function( orgUnits, orgUnitNames, children )
 {
-	dhis2.appr.displayCategoryOptionGroups( ou );
+	dhis2.appr.displayCategoryOptionGroups( orgUnits[0] );
 }
 
 dhis2.appr.displayPeriods = function()
@@ -54,22 +48,27 @@ dhis2.appr.displayCategoryOptionGroups = function( ou )
 	var url = "getCategoryOptionGroups.action";
 	
 	$.getJSON( url, {ou:ou}, function( json ) {
-		var html = "";
-		$.each( json.categoryOptionGroups, function( index, group ) {
-			html += "<option value=\"" + group.uid + "\" data-dimension=\"" + group.groupSet + "\">" + group.name + "</option>";
-		} );
-
-		$( "#categoryOptionGroupSection" ).show();
-		$( "#categoryOptionGroupId" ).html( html );
+		if ( json.categoryOptionGroups && json.categoryOptionGroups.length ) {
+			var html = "";
+			$.each( json.categoryOptionGroups, function( index, group ) {
+				html += "<option value=\"" + group.uid + "\" data-dimension=\"" + group.groupSet + "\">" + group.name + "</option>";
+			} );
+	
+			$( "#categoryOptionGroupSection" ).show();
+			$( "#categoryOptionGroupId" ).html( html );
+		}
+		else {
+			$( "#categoryOptionGroupSection" ).hide();			
+		}
 	} );
 }
 
 dhis2.appr.getDataReport = function()
-{
+{	
     var dataReport = {
         ds: $( "#dataSetId" ).val(),
         pe: $( "#periodId" ).val(),
-        ou: selectionTreeSelection.getSelectedUid()[0]
+        ou: selection.getSelected()[0]
     };
     
     var cog = $( "#categoryOptionGroupId" ).val();
@@ -97,7 +96,7 @@ dhis2.appr.generateDataReport = function()
         setHeaderMessage( i18n_select_period );
         return false;
     }
-    if ( !selectionTreeSelection.isSelected() )
+    if ( !selection.isSelected() )
     {
         setHeaderMessage( i18n_select_organisation_unit );
         return false;
@@ -155,12 +154,12 @@ dhis2.appr.setApprovalState = function()
 		    case "APPROVED_HERE":
 		        $( "#approvalNotification" ).html( i18n_approved );
 		        
-		        if (json.mayUnapprove)  {
+		        if ( json.mayUnapprove )  {
 		            $( "#approvalDiv" ).show();
 		            $( "#unapproveButton" ).show();
 		        }
 		        
-		        if (json.mayAccept)  {
+		        if ( json.mayAccept )  {
 		            $( "#approvalDiv" ).show();
 		            $( "#acceptButton" ).show();
 		        }
@@ -168,14 +167,14 @@ dhis2.appr.setApprovalState = function()
 		        break;
 		
 		    case "ACCEPTED_HERE":
-		        $( "#approvalNotification" ).html( i18n_approved );
+		        $( "#approvalNotification" ).html( i18n_approved_and_accepted );
 		        
 		        if ( json.mayUnapprove )  {
 		            $( "#approvalDiv" ).show();
 		            $( "#unapproveButton" ).show();
 		        }
 		        
-		        if (json.mayUnccept)  {
+		        if ( json.mayUnccept )  {
 		            $( "#approvalDiv" ).show();
 		            $( "#unacceptButton" ).show();
 		        }

@@ -64,7 +64,6 @@
                 <option value="date">$i18n.getString( "date" )</option>
                 <option value="phoneNumber">$i18n.getString( "phone_number" )</option>
                 <option value="trackerAssociate">$i18n.getString( "tracker_associate" )</option>
-                <option value="age">$i18n.getString( "age" )</option>
                 <option value="users">$i18n.getString( "users" )</option>
                 <option value="combo">$i18n.getString( "attribute_combo_type" )</option>
 				<option value="localId">$i18n.getString( "local_identifier" )</option>
@@ -101,27 +100,14 @@
 			</td>
 			<td></td>
 		</tr>
-		
-		<tr name='localIdField' style='display:none;'>
-			<td><label for="type">$i18n.getString( "period_type" )</label></td>
-			<td>
-				<select type='checkbox' id="periodTypeName" name="periodTypeName" >
-					<option value="">[$i18n.getString( "please_select" )]</option>
-					#foreach ( $periodType in $periodTypes )
-					<option value="$periodType.name">$i18n.getString( $periodType.name )</option>
-					#end
-				</select>
-			</td>
-			<td></td>
-		</tr>
 
     </tbody>
 
 	<tr>
 		<td></td>
 		<td>
-			<input type="submit" value="$i18n.getString( 'add' )" />
-			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='attribute.action'" />
+			<input type="submit" value="$i18n.getString( 'add' )" style="width:10em" />
+			<input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href='attribute.action'" style="width:10em" />
 		</td>
 	</tr>
 </table>

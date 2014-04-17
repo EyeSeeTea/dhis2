@@ -28,23 +28,20 @@ package org.hisp.dhis.analytics.event.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.DataQueryParams;
-import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.QueryPlanner;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.analytics.table.PartitionUtils;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IllegalQueryException;
-import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -93,12 +90,9 @@ public class DefaultEventQueryPlanner
             violation = "Start and end date or at least one period must be specified";
         }
         
-        if ( params.getStartDate() != null && params.getEndDate() != null )
+        if ( params.getStartDate() != null && params.getEndDate() != null && params.getStartDate().after( params.getEndDate() ) )
         {
-            if ( params.getStartDate().after( params.getEndDate() ) )
-            {
-                violation = "Start date is after end date: " + params.getStartDate() + " - " + params.getEndDate();
-            }            
+            violation = "Start date is after end date: " + params.getStartDate() + " - " + params.getEndDate();
         }
 
         if ( params.getPage() != null && params.getPage() <= 0 )
@@ -161,29 +155,32 @@ public class DefaultEventQueryPlanner
             params.setPartitions( PartitionUtils.getPartitions( queryPeriod, TABLE_PREFIX, tableSuffix, validPartitions ) );
         }
         
-        for ( NameableObject object : params.getOrganisationUnits() )
+        if ( params.hasDimensionOrFilter( DimensionalObject.ORGUNIT_DIM_ID ) )
         {
-            OrganisationUnit unit = (OrganisationUnit) object; 
-            unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getUid() ) );
+            for ( NameableObject object : params.getDimensionOrFilter( DimensionalObject.ORGUNIT_DIM_ID ) )
+            {
+                OrganisationUnit unit = (OrganisationUnit) object; 
+                unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getUid() ) );
+            }
         }
         
         //TODO periods, convert to start/end dates
         
         return params;
     }
-
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
     private List<EventQueryParams> groupByPartition( EventQueryParams params, List<String> validPartitions )
     {
-        List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
-        
         String tableSuffix = "_" + params.getProgram().getUid();
         
         if ( params.hasStartEndDate() )
         {
+            List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
+            
             Period queryPeriod = new Period();
             queryPeriod.setStartDate( params.getStartDate() );
             queryPeriod.setEndDate( params.getEndDate() );
@@ -195,21 +192,13 @@ public class DefaultEventQueryPlanner
             {
                 queries.add( query );
             }
+            
+            return queries;
         }
         else // Aggregate only
         {
-            ListMap<Partitions, NameableObject> partitionPeriodMap = PartitionUtils.getPartitionPeriodMap( params.getDimensionOrFilter( PERIOD_DIM_ID ), TABLE_PREFIX, tableSuffix );
-            
-            for ( Partitions partitions : partitionPeriodMap.keySet() )
-            {
-                EventQueryParams query = params.instance();
-                query.setPeriods( partitionPeriodMap.get( partitions ) );
-                query.setPartitions( partitions );
-                queries.add( query );
-            }
+            return convert( queryPlanner.groupByPartition( params, TABLE_PREFIX, tableSuffix ) );
         }
-        
-        return queries;
     }
         
     private static List<EventQueryParams> convert( List<DataQueryParams> params )

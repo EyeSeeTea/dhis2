@@ -1,3 +1,16 @@
+<script type="text/javascript">
+    jQuery( document ).ready( function() {
+        jQuery( "input[type=button]" ).click( function() {
+            jQuery.postUTF8( "setSystemApprovalSettings.action", {
+                hideUnapprovedDataInAnalytics: jQuery( "#hideUnapprovedDataInAnalytics" ).is( ':checked' )
+            }, function( json ) {
+                if ( json.response == "success" ) {
+                    setHeaderDelayMessage( json.message );
+                }
+            } );
+        } );
+    } );
+</script>
 
 #sharingDialog()
 
@@ -13,6 +26,13 @@
 </script>
 
 <h3>$i18n.getString( "approval_settings" ) #openHelp( "systemApprovalSettings" )</h3>
+
+<div class="setting">
+    <input type="checkbox" id="hideUnapprovedDataInAnalytics" name="hideUnapprovedDataInAnalytics"#if( $keyHideUnapprovedDataInAnalytics ) checked="checked"#end>
+    <label for="hideUnapprovedDataInAnalytics">$i18n.getString( "hide_unapproved_data_in_analytics" )</label>
+</div>
+
+<div class="setting"><input type="button" value="$i18n.getString( 'save' )" style="width:10em"/></div>
 
 <div id="contextMenu" class="contextMenu">
     <ul id="contextMenuItems" class="contextMenuItems">
@@ -41,18 +61,24 @@
                 <col width="120px">
                 <thead>
                 <tr>
+                    <th class="{sorter: false}">$i18n.getString( "approval_level" )</th>
                     <th class="{sorter: false}">$i18n.getString( "organisation_unit_level" )</th>
-                    <th class="{sorter: false}">$i18n.getString( "category_option_group_set" )</th>
+                    #if( $categoryOptionGroupSetsPresent )
+                        <th class="{sorter: false}">$i18n.getString( "category_option_group_set" )</th>
+                    #end
                 </tr>
                 </thead>
                 <tbody id="list">
                     #foreach( $level in $dataApprovalLevels )
-                    <tr id="tr${level.id}" data-id="$!level.id" data-uid="$!level.uid" data-type="DataApprovalLevel" data-name="$encoder.htmlEncode( $!level.displayName )"
+                    <tr id="tr${level.id}" data-id="$!level.id" data-uid="$!level.uid" data-level="$level.level" data-type="DataApprovalLevel" data-name="$encoder.htmlEncode( $!level.displayName )"
                             data-can-move-up="$approvalLevelService.canDataApprovalLevelMoveUp( $level.level )"
                             data-can-move-down="$approvalLevelService.canDataApprovalLevelMoveDown( $level.level )"
                             data-can-manage="$security.canManage( $level )">
+                        <td class="levelNumber">$encoder.htmlEncode( $!level.level )</td>
                         <td>$encoder.htmlEncode( $!level.orgUnitLevelName )</td>
-                        <td>$encoder.htmlEncode( $!level.getCategoryOptionGroupSetName() )</td>
+                        #if( $categoryOptionGroupSetsPresent )
+                            <td>$encoder.htmlEncode( $!level.getCategoryOptionGroupSetName() )</td>
+                        #end
                     </tr>
                     #end
                 </tbody>
