@@ -77,7 +77,7 @@ function listAllTrackedEntityInstance( page )
 		data : params,
 		dataType : "json",
 		success : function(json) {
-			setInnerHTML('listEventDiv', displayEventList(json, page));
+			setInnerHTML('listEventDiv', displayevents(json, page));
 			showById('listEventDiv');
 			jQuery('#loaderDiv').hide();
 			setTableStyles();
@@ -86,7 +86,7 @@ function listAllTrackedEntityInstance( page )
 	
 }
 
-function displayEventList(json, page) {
+function displayevents(json, page) {
 	var table = "";
 	
 	// Header
@@ -101,35 +101,41 @@ function displayEventList(json, page) {
 		// Event list
 		table += "<table class='listTable' width='100%'>";
 		
-		table += "<col width='30' />";
-		table += "<col />"; // Ordered no.
+		table += "<col width='30' />";// Ordered no.
 		table += "<col />"; // Event-date
-		for(var i in json.events[0].dataValues.length ){
-			table += "<col />";
-		}
-		table += "<col width='200' />";
+		table += "<col />"; // Data values
+		table += "<col width='200' />"; // Operations
 		
 		table += "<thead><tr><th>#</th>";
 		table += "<th>" + i18n_event_date + "</th>";
-
-		for(var i in json.events[0].dataValues ){
-			table += "<th>" + json.events[0].dataValues[i].dataElement + "</th>";
-		}
+		table += "<th>" + i18n_data_values + "</th>";
 		table += "<th>" + i18n_operations + "</th>";
 		table += "</tr></thead>";
 		
 		table += "<tbody id='list'>";
 		for ( var i in json.events) {
-			var cols = json.events[i];
-			var uid = cols.event;
-			var teiUid = cols.trackedEntityInstance;
+			var row = json.events[i];
+			var uid = row.event;
+			var teiUid = row.trackedEntityInstance;
 			var no = eval(json.pager.page);
 			no = (no - 1) * json.pager.pageSize + eval(i) + 1;
 			table += "<tr id='tr" + uid + "'>";
-			table += "<td>" + no + "</td>";
-			table += "<td>" + json.events[i].eventDate + "</td>";
-			for (var j in cols.dataValues) {
-				table += "<td>" +  cols.dataValues[j].value + "</td>";
+			table += "<td>" + no + "</td>";// No.
+			table += "<td>" + row.eventDate + "</td>";// Event-date
+			
+			// Data values
+			table += "<td>";
+			if( row.dataValues!=undefined ){
+				table += "<table>";
+				for (var j in row.dataValues) {
+					var colVal = row.dataValues[j].dataElement;
+					table += "<tr><td>" +  json.metaData.de[colVal] + ": </td>";
+					table += "<td>" +  row.dataValues[j].value + "</td></tr>";
+				}
+				table += "</table>";
+			}
+			else{
+				table += "</td>";
 			}
 			
 			// Operations column
@@ -166,7 +172,7 @@ function paging(json, page) {
 		searchMethod = "validateAdvancedSearch";
 	}
 	
-	var table = "<table width='100%' style='background-color: #ebf0f6;'><tr><td colspan='"
+	var table = "<table width='100%' style='background-color: #ebf0f6;'><tr><td rowpan='"
 			+ json.width + "'>";
 	table += "<div class='paging'>";
 	table += "<span class='first' title='" + i18n_first + "'>««</span>";
@@ -208,7 +214,7 @@ function advancedSearch( params, page )
 		type : "GET",
 		data : params,
 		success : function(json) {
-			setInnerHTML('listEventDiv', displayEventList(json, page));
+			setInnerHTML('listEventDiv', displayevents(json, page));
 			showById('listEventDiv');
 			jQuery('#loaderDiv').hide();
 			setTableStyles();
@@ -375,10 +381,10 @@ function onClickBackBtn()
 	hideById('smsManagementDiv');
 	hideById('entityInstanceDashboard');
 	
-	if( eventList == 1){
+	if( events == 1){
 		listAllTrackedEntityInstance();
 	}
-	else if( eventList == 2){
+	else if( events == 2){
 		validateAdvancedSearch();
 	}
 }
