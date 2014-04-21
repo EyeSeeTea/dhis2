@@ -29,12 +29,14 @@ package org.hisp.dhis.trackedentity;
  */
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -70,20 +72,25 @@ public interface TrackedEntityInstanceService
      * @param query the query string.
      * @param attribute the set of attributes.
      * @param filter the set of filters.
-     * @param ou the organisation unit string.
+     * @param ou the set of organisatio unit identifiers.
      * @param ouMode the OrganisationUnitSelectionMode.
-     * @param program the Program uid.
-     * @param programStatus the ProgramStatus of the given Program.
-     * @param programDate the set of filters for program enrollment dates.
+     * @param program the Program identifier.
+     * @param programStatus the ProgramStatus in the given orogram.
+     * @param followUp indicates follow up status in the given Program.
+     * @param programStartDate the start date for enrollment in the given Program.
+     * @param programEndDate the end date for enrollment in the given Program.
      * @param trackedEntity the TrackedEntity uid.
+     * @param eventStatus the event status for the given Program.
+     * @param eventStartDate the event start date for the given Program.
+     * @param eventEndDate the event end date for the given Program.
      * @param skipMeta indicates whether to include meta data in the response.
      * @param page the page number.
      * @param pageSize the page size.
      * @return a TrackedEntityInstanceQueryParams.
      */
     TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, 
-        Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Set<String> programDate,
-        String trackedEntity, boolean skipMeta, Integer page, Integer pageSize );
+        Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Boolean followUp, Date programStartDate, Date programEndDate,
+        String trackedEntity, EventStatus eventStatus, Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize );
     
     /**
      * Validates the given TrackedEntityInstanceQueryParams. The params is

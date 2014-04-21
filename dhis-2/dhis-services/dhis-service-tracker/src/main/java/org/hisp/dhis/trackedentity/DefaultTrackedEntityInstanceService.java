@@ -55,8 +55,8 @@ import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -291,11 +291,26 @@ public class DefaultTrackedEntityInstanceService
             violation = "Program must be defined when program status is defined";
         }
         
-        if ( params.hasProgramDates() && !params.hasProgram() )
+        if ( params.hasFollowUp() && !params.hasProgram() )
         {
-            violation = "Program must be defined when program dates are specified";
+            violation = "Program must be defined when follow up status is defined";
+        }
+        
+        if ( params.hasProgramStartDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program start date is specified";
+        }
+        
+        if ( params.hasProgramEndDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program end date is specified";
         }
 
+        if ( params.hasEventStatus() && ( !params.hasEventStartDate() || !params.hasEventEndDate() ) )
+        {
+            violation = "Event start and end date must be specified when event status is specified";
+        }
+        
         if ( params.isOrQuery() && params.hasFilters() )
         {
             violation = "Query cannot be specified together with filters";
@@ -321,7 +336,8 @@ public class DefaultTrackedEntityInstanceService
     
     @Override
     public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, Set<String> ou, 
-        OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Set<String> programDate, String trackedEntity, boolean skipMeta, Integer page, Integer pageSize )
+        OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Boolean followUp, Date programStartDate, Date programEndDate,
+        String trackedEntity, EventStatus eventStatus, Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize )
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
@@ -366,17 +382,7 @@ public class DefaultTrackedEntityInstanceService
         {
             throw new IllegalQueryException( "Program does not exist: " + program );
         }
-        
-        if ( programDate != null )
-        {
-            for ( String date : programDate )
-            {
-                QueryFilter queryFilter = getQueryFilter( date );
                 
-                params.getProgramDates().add( queryFilter );
-            }
-        }
-        
         TrackedEntity te = trackedEntity != null ? trackedEntityService.getTrackedEntity( trackedEntity ) : null;
         
         if ( trackedEntity != null && te == null )
@@ -387,25 +393,19 @@ public class DefaultTrackedEntityInstanceService
         params.setQuery( query );
         params.setProgram( pr );
         params.setProgramStatus( programStatus );
+        params.setFollowUp( followUp );
+        params.setProgramStartDate( programStartDate );
+        params.setProgramEndDate( programEndDate );
         params.setTrackedEntity( te );
         params.setOrganisationUnitMode( ouMode );
+        params.setEventStatus( eventStatus );
+        params.setEventStartDate( eventStartDate );
+        params.setEventEndDate( eventEndDate );
         params.setSkipMeta( skipMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
         
         return params;
-    }
-
-    private QueryFilter getQueryFilter( String filter )
-    {
-        String[] split = filter.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
-        
-        if ( split == null || split.length != 2 )
-        {
-            throw new IllegalQueryException( "Program date filter has invalid format: " + filter );
-        }
-        
-        return new QueryFilter( split[0], split[1] );
     }
     
     private QueryItem getQueryItem( String item )
@@ -436,7 +436,14 @@ public class DefaultTrackedEntityInstanceService
             throw new IllegalQueryException( "Attribute does not exist: " + item );
         }
         
-        return new QueryItem( at, operator, filter, at.isNumericType() );
+        if ( operator != null && filter != null )
+        {
+            return new QueryItem( at, operator, filter, at.isNumericType() );
+        }
+        else
+        {
+            return new QueryItem( at, at.isNumericType() );
+        }        
     }
     
     @Override

@@ -141,12 +141,16 @@ function getSearchParams(page) {
 	}
 	
 	if( getFieldValue('startDate') != ''){
-		params += "&startDate=" + getFieldValue('startDate');
-		params += "&endDate=" + getFieldValue('endDate');
+		params += "&eventStartDate=" + getFieldValue('startDate');
+		params += "&eventEndDate=" + getFieldValue('endDate');
 	}
 	
 	if( getFieldValue('status')!= '' ){
 		params += "&status=" + getFieldValue('status');
+	}
+	
+	if( $('#followup').attr('checked')=='checked'){
+		params += "followUp=true";
 	}
 	
 	var flag = false;
@@ -372,12 +376,17 @@ function enableBtn() {
 		});
 
 		clearListById('searchObjectId');
-		
+		clearListById('attributeIds');
 		for ( var i in json.attributes) {
 			jQuery('#searchObjectId').append(
 				'<option value="' + json.attributes[i].id 
 					+ '" displayed="' + json.attributes[i].displayed  + '">'
 					+ json.attributes[i].name + '</option>');
+			
+			if(json.attributes[i].displayed=='true'){
+				jQuery('#attributeIds').append(
+				'<option value="' + json.attributes[i].id + '"></option>');
+			}
 		}
 		
 		if (getFieldValue('program') != '') {
@@ -1196,7 +1205,7 @@ function saveEnrollment() {
 	});
 }
 function unenrollmentForm(programInstanceId, status) {
-	var comfirmMessage = i18n_complete_confirm_message;
+	var comfirmMessage = i18n_complete_program_confirm_message;
 	if (status == 2)
 		comfirmMessage = i18n_quit_confirm_message;
 	if ( confirm(comfirmMessage) ) {
@@ -1331,12 +1340,14 @@ function saveIdentifierAndAttribute(entityInstanceId, programId, paramsDiv) {
 				var id = 'dashboard_' + input.attr('id');
 				setInnerHTML(id, input.val());
 			});
-			$('#identifierAndAttributeDiv :input').each(function() {
-				var input = $(this);
-				var id = 'dashboard_' + input.attr('id');
-				setInnerHTML(id, input.val());
+			$('#propertyForm :input').each(function() {
 				var input = $(this);
 				var id = input.attr('id');
+				if( input.val() != "" ){
+					setInnerHTML('value_' + id, input.val());
+					showById('row_' + id);
+				}
+				var input = $(this);
 				jQuery("#tab-2 [id=" + id + "]").val(input.val());
 			});
 			showSuccessMessage(i18n_save_success);
@@ -1861,6 +1872,7 @@ function saveCoordinatesEvent() {
 // ---------------------------------------------------------------------------------
 // Followup program-instance
 // ---------------------------------------------------------------------------------
+
 function markForFollowup(programInstanceId, followup) {
 	$.postJSON("markForFollowup.action", {
 		programInstanceId : programInstanceId,
@@ -1892,49 +1904,11 @@ function saveComment(programInstanceId) {
 		}
 	});
 }
+
 // --------------------------------------------------------------------------
 // Advanced-search person
 // --------------------------------------------------------------------------
-function searchByIdsOnclick() {
-	if (getFieldValue("searchTrackedEntityInstanceByIds") == '') {
-		hideById('listEntityInstanceDiv');
-		return;
-	}
-	var params = "searchTexts=iden_"
-			+ getFieldValue("searchEntityInstanceByIds").toLowerCase() + "_"
-			+ getFieldValue("orgunitId");
-	params += "&listAll=false";
-	params += "&facilityLB=";
-	if (getFieldValue('program') != "") {
-		params += "&programId=" + getFieldValue('program');
-		params += "&searchTexts=prg_"
-				+ getFieldValue('program');
-	}
-	hideById('listEntityInstanceDiv');
-	$("#loaderDiv").show();
-	$.ajax({
-		url : 'searchTrackedEntityInstance.action',
-		type : "POST",
-		data : params,
-		success : function(html) {
-			setTableStyles();
-			statusSearching = 1;
-			setInnerHTML('listEntityInstanceDiv', html);
-			showById('listEntityInstanceDiv');
-			setFieldValue('listAll', false);
-			var value = getFieldValue('searchEntityInstanceByIds');
-			var searchObject = $("[name=searchObjectId]")[1];
-			if (searchObject.value == 'iden') {
-				$("[name=searchText]")[0].value = value;
-			} else {
-				addAttributeOption();
-				$("input[id=searchText]").last().val(value);
-			}
-			showById('hideSearchCriteriaDiv');
-			$("#loaderDiv").hide();
-		}
-	});
-}
+
 function advancedSearchOnclick() {
 	$('#advanced-search').toggle();
 	if ($('#advanced-search').is(':visible')) {

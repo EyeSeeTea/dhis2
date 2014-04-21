@@ -1,4 +1,4 @@
-package org.hisp.dhis.analytics.event;
+package org.hisp.dhis.analytics.partition;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,29 +28,25 @@ package org.hisp.dhis.analytics.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.IllegalQueryException;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
  */
-public interface EventQueryPlanner
-{    
-    void validate( EventQueryParams params )
-        throws IllegalQueryException;
-    
+public interface PartitionManager
+{
     /**
-     * Plans the given params and returns a list of params.
-     * 
-     * @param params the query params.
+     * Returns a set of names of current analytics partitions.
      */
-    List<EventQueryParams> planAggregateQuery( EventQueryParams params );
+    Set<String> getAnalyticsPartitions();
 
     /**
-     * Plans the given params and returns a list of params.
-     * 
-     * @param params the query params.
+     * Returns a set of names of current event analytics partitions.
      */
-    EventQueryParams planEventQuery( EventQueryParams params );
+    Set<String> getEventAnalyticsPartitions();
+    
+    /**
+     * Clears the partition name caches.
+     */
+    void clearCaches();
 }
