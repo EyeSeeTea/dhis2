@@ -57,8 +57,7 @@ Ext.onReady( function() {
                 return {
                     dimension: this.dataElement.id,
                     name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    filter: this.valueCmp.getValue()
+                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
                 };
             },
             setRecord: function(record) {
@@ -138,8 +137,7 @@ Ext.onReady( function() {
                 return {
                     dimension: this.dataElement.id,
                     name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getValue()
+                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
                 };
             },
             setRecord: function(record) {
@@ -215,8 +213,7 @@ Ext.onReady( function() {
                 return {
                     dimension: this.dataElement.id,
                     name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    filter: this.valueCmp.getSubmitValue()
+                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
                 };
             },
             setRecord: function(record) {
@@ -297,8 +294,7 @@ Ext.onReady( function() {
                 return {
                     dimension: this.dataElement.id,
                     name: this.dataElement.name,
-                    operator: 'EQ',
-                    filter: this.valueCmp.getValue()
+                    filter: this.valueCmp.getValue() ? 'EQ:' + this.valueCmp.getValue() : ''
                 };
             },
             setRecord: function(record) {
@@ -373,8 +369,7 @@ Ext.onReady( function() {
                 return {
                     dimension: this.dataElement.id,
                     name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    filter: valueArray.join(';')
+                    filter: Ext.Array.clean(valueArray).length ? this.operatorCmp.getValue() + ':' + valueArray.join(';') : ''
                 };
             },
             setRecord: function(record) {
@@ -4951,8 +4946,24 @@ Ext.onReady( function() {
 				layoutWindow.colStore.each(function(item) {
 					a = map[item.data.id] || [];
 
-					for (var i = 0; i < a.length; i++) {
-						columns.push(a[i]);
+					if (a.length) {
+						if (a.length === 1) {
+							columns.push(a[0]);
+						}
+						else {
+							var dim;
+
+							for (var i = 0; i < a.length; i++) {
+								if (!dim) {
+									dim = a[i];
+								}
+								else {
+									dim.filter += ':' + a[i].filter;
+								}
+							}
+
+							columns.push(dim);
+						}
 					}
 				});
 			}
@@ -4961,8 +4972,24 @@ Ext.onReady( function() {
 				layoutWindow.rowStore.each(function(item) {
 					a = map[item.data.id] || [];
 
-					for (var i = 0; i < a.length; i++) {
-						rows.push(a[i]);
+					if (a.length) {
+						if (a.length === 1) {
+							rows.push(a[0]);
+						}
+						else {
+							var dim;
+
+							for (var i = 0; i < a.length; i++) {
+								if (!dim) {
+									dim = a[i];
+								}
+								else {
+									dim.filter += ':' + a[i].filter;
+								}
+							}
+
+							rows.push(dim);
+						}
 					}
 				});
 			}
@@ -4971,8 +4998,24 @@ Ext.onReady( function() {
 				layoutWindow.filterStore.each(function(item) {
 					a = map[item.data.id] || [];
 
-					for (var i = 0; i < a.length; i++) {
-						filters.push(a[i]);
+					if (a.length) {
+						if (a.length === 1) {
+							filters.push(a[0]);
+						}
+						else {
+							var dim;
+
+							for (var i = 0; i < a.length; i++) {
+								if (!dim) {
+									dim = a[i];
+								}
+								else {
+									dim.filter += ':' + a[i].filter;
+								}
+							}
+
+							filters.push(dim);
+						}
 					}
 				});
 			}
@@ -4981,8 +5024,24 @@ Ext.onReady( function() {
 				layoutWindow.fixedFilterStore.each(function(item) {
 					a = map[item.data.id] || [];
 
-					for (var i = 0; i < a.length; i++) {
-						filters.push(a[i]);
+					if (a.length) {
+						if (a.length === 1) {
+							filters.push(a[0]);
+						}
+						else {
+							var dim;
+
+							for (var i = 0; i < a.length; i++) {
+								if (!dim) {
+									dim = a[i];
+								}
+								else {
+									dim.filter += ':' + a[i].filter;
+								}
+							}
+
+							filters.push(dim);
+						}
 					}
 				});
 			}
