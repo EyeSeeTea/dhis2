@@ -1835,8 +1835,8 @@ Ext.onReady( function() {
 
                 // filters
                 if (view.filters) {
-					for (var i = 0, dim; i < dimensions.length; i++) {
-						dim = dimensions[i];
+					for (var i = 0, dim; i < view.filters.length; i++) {
+						dim = view.filters[i];
 
 						paramString += '&filter=' + dim.dimension;
 						paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';

@@ -143,11 +143,16 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    dimension: this.dataElement.id,
-                    name: this.dataElement.name,
-                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+				}
+
+				return record;
             },
             setRecord: function(record) {
                 this.operatorCmp.setValue(record.operator);
@@ -219,15 +224,24 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    dimension: this.dataElement.id,
-                    name: this.dataElement.name,
-                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getSubmitValue();
+				}
+
+				return record;
             },
             setRecord: function(record) {
-                this.operatorCmp.setValue(record.operator);
-                this.valueCmp.setValue(record.filter);
+				if (record.filter && Ext.isString(record.filter)) {
+					var a = record.filter.split(':');
+
+					this.operatorCmp.setValue(a[0]);
+					this.valueCmp.setValue(a[1]);
+				}
             },
             initComponent: function() {
                 var container = this;
@@ -300,11 +314,16 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    dimension: this.dataElement.id,
-                    name: this.dataElement.name,
-                    filter: this.valueCmp.getValue() ? 'EQ:' + this.valueCmp.getValue() : ''
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = 'EQ:' + this.valueCmp.getValue();
+				}
+
+				return record;
             },
             setRecord: function(record) {
                 this.valueCmp.setValue(record.filter);
@@ -369,17 +388,21 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';');
+				var valueArray = this.valueCmp.getValue().split(';'),
+					record = {};
 
 				for (var i = 0; i < valueArray.length; i++) {
 					valueArray[i] = Ext.String.trim(valueArray[i]);
 				}
 
-                return {
-                    dimension: this.dataElement.id,
-                    name: this.dataElement.name,
-                    filter: Ext.Array.clean(valueArray).length ? this.operatorCmp.getValue() + ':' + valueArray.join(';') : ''
-                };
+				record.dimension = this.dataElement.id;
+				record.name = this.dataElement.name;
+
+				if (Ext.Array.clean(valueArray).length) {
+					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
+				}
+
+				return record;
             },
             setRecord: function(record) {
 				if (Ext.isString(record.filter) && record.filter) {
