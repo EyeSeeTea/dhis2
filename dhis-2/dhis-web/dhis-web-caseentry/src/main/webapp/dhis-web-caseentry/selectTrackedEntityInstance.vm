@@ -24,6 +24,7 @@
 <div id='listRelationshipDiv'></div> <!-- List relationship -->
 <div id='addRelationshipDiv'></div> <!-- Add relationship -->
 <div id='migrationEntityInstanceDiv'></div> <!-- Migration EntityInstance -->
+<div id="detailsInfo"></div>
 
 #parse( "/dhis-web-commons/loader/loader.vm" )
 
@@ -134,7 +135,6 @@
 	
 	var canChangeLocation = $auth.hasAccess( "dhis-web-caseentry", "getTrackedEntityInstanceLocation" );
 	
-	var checkedDuplicate = false;
 	// -1: no search anything
 	//  0: show list all tracked_entity_instance
 	//  1: advanced-search
