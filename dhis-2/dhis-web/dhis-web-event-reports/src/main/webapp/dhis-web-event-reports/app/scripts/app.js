@@ -382,9 +382,10 @@ Ext.onReady( function() {
                 };
             },
             setRecord: function(record) {
-                //this.operatorCmp.reset();
-                var a = record.filter.split(':');
-                this.valueCmp.setOptionValues(a[1].split(';'));
+				if (Ext.isString(record.filter) && record.filter) {
+					var a = record.filter.split(':');
+					this.valueCmp.setOptionValues(a[1].split(';'));
+				}
             },
             initComponent: function() {
                 var container = this;
@@ -534,7 +535,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 224,
+					width: 226,
                     style: 'margin-bottom:0',
 					addOptionValue: function(option) {
 						var value = this.getValue();
