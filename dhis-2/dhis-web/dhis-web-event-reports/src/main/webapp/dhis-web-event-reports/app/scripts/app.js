@@ -54,16 +54,25 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    dimension: this.dataElement.id,
-                    name: this.dataElement.name,
-                    filter: this.valueCmp.getValue() ? this.operatorCmp.getValue() + ':' + this.valueCmp.getValue() : ''
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+				}
+
+				return record;
             },
             setRecord: function(record) {
-                this.operatorCmp.setValue(record.operator);
-                this.valueCmp.setValue(record.filter);
-            },
+				if (record.filter) {
+					var a = record.filter.split(':');
+
+					this.operatorCmp.setValue(a[0]);
+					this.valueCmp.setValue(a[1]);
+				}
+			},
             initComponent: function() {
                 var container = this;
 
@@ -373,8 +382,9 @@ Ext.onReady( function() {
                 };
             },
             setRecord: function(record) {
-                this.operatorCmp.setValue(record.operator);
-                this.valueCmp.setOptionValues(record.filter.split(';'));
+                //this.operatorCmp.reset();
+                var a = record.filter.split(':');
+                this.valueCmp.setOptionValues(a[1].split(';'));
             },
             initComponent: function() {
                 var container = this;
@@ -3590,6 +3600,7 @@ Ext.onReady( function() {
 
         selectDataElements = function(items, layout) {
             var dataElements = [],
+				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 queryWindow = ns.app.queryLayoutWindow,
                 includeKeys = ['int', 'number', 'boolean', 'bool'],
@@ -3618,9 +3629,33 @@ Ext.onReady( function() {
                 }
             }
 
-			// panel, store
-            for (var i = 0, element, ux, store; i < dataElements.length; i++) {
+            // expand if multiple filter
+            for (var i = 0, element, a, numberOfElements; i < dataElements.length; i++) {
 				element = dataElements[i];
+				allElements.push(element);
+
+				if (element.type === 'int' && element.filter) {
+					a = element.filter.split(':');
+					numberOfElements = a.length / 2;
+
+					if (numberOfElements > 1) {
+						a.shift();
+						a.shift();
+
+						for (var j = 1, newElement; j < numberOfElements; j++) {
+							newElement = Ext.clone(element);
+							newElement.filter = a.shift();
+							newElement.filter += ':' + a.shift();
+
+							allElements.push(newElement);
+						}
+					}
+				}
+			}
+
+			// panel, store
+            for (var i = 0, element, ux, store; i < allElements.length; i++) {
+				element = allElements[i];
                 element.type = element.type || element.valueType;
                 element.name = element.name || element.displayName;
                 recordMap[element.id] = element;

@@ -894,7 +894,7 @@ Ext.onReady( function() {
 
 				// columns, rows, filters
 				if (layout.columns) {
-                    layout.columns = support.prototype.array.uniqueByProperty(layout.columns, 'dimension');
+                    //layout.columns = support.prototype.array.uniqueByProperty(layout.columns, 'dimension');
 
 					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
 						dim = layout.columns[i];
@@ -932,7 +932,7 @@ Ext.onReady( function() {
 				}
 
 				if (layout.rows) {
-                    layout.rows = support.prototype.array.uniqueByProperty(layout.rows, 'dimension');
+                    //layout.rows = support.prototype.array.uniqueByProperty(layout.rows, 'dimension');
 
 					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
 						dim = Ext.clone(layout.rows[i]);
@@ -970,7 +970,7 @@ Ext.onReady( function() {
 				}
 
 				if (layout.filters) {
-                    layout.filters = support.prototype.array.uniqueByProperty(layout.filters, 'dimension');
+                    //layout.filters = support.prototype.array.uniqueByProperty(layout.filters, 'dimension');
 
 					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
 						dim = layout.filters[i];
