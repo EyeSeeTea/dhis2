@@ -30,6 +30,37 @@
 /**
  * Created by Mark Polak on 28/01/14.
  */
+var dhis2 = dhis2 || {};
+dhis2.settings = dhis2.settings || {};
+
+(function (undefined) {
+    var getBaseUrl = (function () {
+        var href = window.location.origin;
+        return function () {
+            var urlParts = href.split("/"),
+                baseUrl;
+
+            if (dhis2.settings.baseUrl === undefined) {
+                return "..";
+            }
+
+            if (typeof dhis2.settings.baseUrl !== "string") {
+                throw new TypeError("Dhis2 settings: baseUrl should be a string");
+            }
+
+            if (urlParts[urlParts.length - 1] !== "") {
+                baseUrl = href + '/' + dhis2.settings.baseUrl;
+            } else {
+                urlParts.pop();
+                urlParts.push(dhis2.settings.baseUrl);
+                baseUrl = urlParts.join('/');
+            }
+            console.log(baseUrl);
+            return baseUrl;
+        }
+    })();
+console.log(getBaseUrl());
+
 (function (dhis2, undefined) {
     var MAX_FAVORITES = 9,
         du = {
@@ -70,8 +101,6 @@
                 }
             }
         })();
-
-    dhis2.menu = {};
 
     dhis2.menu = function () {
         var that = {},
@@ -166,6 +195,13 @@
             return inverse ? result.reverse() : result;
         }
 
+        function fixUrlIfNeeded(iconUrl) {
+            if (iconUrl.substring(0, 2) === "..") {
+                return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
+            }
+            return iconUrl;
+        }
+
         /***********************************************************************
          * Public methods
          **********************************************************************/
@@ -226,7 +262,7 @@
             executeCallBacks();
 
             return that;
-        }
+        };
 
         /**
          * Adds the menu items given to the menu
@@ -240,6 +276,7 @@
                 if(item.description === "") {
                     keysToTranslate.push("intro_" + item.name);
                 }
+                item.icon = fixUrlIfNeeded(item.icon);
                 menuItems.setItem(item.id, item);
             });
 
@@ -344,20 +381,14 @@
     }();
 })(dhis2 = dhis2 || {});
 
-/**
- * Created by Mark Polak on 28/01/14.
- *
- * @description jQuery part of the menu
- *
- * @see jQuery (http://jquery.com)
- * @see jQuery Template Plugin (http://github.com/jquery/jquery-tmpl)
+/*
+ * Function used for checking dependencies for the menu
  */
-
-/* Function used for checking dependencies for the menu
-(function (required_libs, undefined) {
+(function (undefined) {
     var libraries = [
         { name: "jQuery", variable: "jQuery", url: "http://jquery.com" },
-        { name: "jQuery Template Plugin", variable: "jQuery.template", url: "http://github.com/jquery/jquery-tmpl" }
+        { name: "jQuery Template Plugin", variable: "jQuery.template", url: "http://github.com/jquery/jquery-tmpl" },
+        { name: "jQuery UI", variable: "jQuery.ui", url: "https://jqueryui.com" }
     ];
 
     //In IE 8 we can not use console
@@ -367,20 +398,44 @@
 
     //Throw error for the required libraries
     libraries.forEach(function (library, index, libraries) {
-        if (window[library] === undefined) {
-            console.error("Missing required library: " + library.name + ". Please see (" + library.url + ")");
+        var parts = library.variable.split('.'),
+        checkParts = function (checkOn, parts) {
+            var checkedOn = checkOn[parts[0]];
+
+            if (checkOn[parts[0]] === undefined) {
+                console.error("DHIS2 Menu: Missing required library: " + library.name + ". Please see (" + library.url + ")");
+                return;
+            }
+
+            if (parts.length > 1) {
+                checkParts(checkedOn, parts.slice(1));
+            }
         }
+        checkParts(window, parts);
     });
 })();
-*/
 
-(function ($, menu, undefined) {
-    var markup = '',
-        selector = 'appsMenu';
+/**
+ * Created by Mark Polak on 28/01/14.
+ *
+ * @description jQuery part of the menu
+ *
+ * @see jQuery (http://jquery.com)
+ * @see jQuery Template Plugin (http://github.com/jquery/jquery-tmpl)
+ * @see jQuery UI (https://jqueryui.com)
+ */
+(function ($, dhis2, undefined) {
+    var menu = dhis2.menu,
+        markup = '',
+        selector = 'appsMenu',
+        urls = {
+            getModules: "/dhis-web-commons/menu/getModules.action",
+            menu: "/api/menu/"
+        };
 
     markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
     markup += '  <a href="${defaultAction}" class="app-menu-item">';
-    markup += '    <img src="${icon}" onError="javascript: this.onerror=null; this.src = \'../icons/program.png\';">';
+    markup += '    <img src="${baseUrl}${icon}" onError="javascript: this.onerror=null; this.src = \'../icons/program.png\';">';
     markup += '    <span>${name}</span>';
     markup += '    <div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i><p>${description}</p></div>';
     markup += '  </a>';
@@ -427,7 +482,7 @@
                 data: JSON.stringify(menuOrder),
                 dataType: "json",
                 type:"POST",
-                url: "../api/menu/"
+                url: getBaseUrl() + urls["menu"]
             }).success(function () {
                     //TODO: Give user feedback for successful save
                 }).error(function () {
@@ -499,8 +554,8 @@
         var menuTimeout = 500,
             closeTimer = null,
             dropDownId = null;
-
-        $.ajax('../dhis-web-commons/menu/getModules.action').success(function (data) {
+        console.log(getBaseUrl() + urls["getModules"]);
+        $.ajax(getBaseUrl() + urls["getModules"]).success(function (data) {
             if (typeof data.modules === 'object') {
                 menu.addMenuItems(data.modules);
             }
@@ -653,4 +708,5 @@
 
     });
 
-})(jQuery, dhis2.menu);
+})(jQuery, dhis2);
+}());
