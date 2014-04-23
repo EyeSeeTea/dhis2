@@ -28,13 +28,14 @@ package org.hisp.dhis.dataadmin.action.cache;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.analytics.partition.PartitionManager;
 import org.hisp.dhis.cache.HibernateCacheManager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class ClearCacheAction
     implements Action
@@ -43,13 +44,12 @@ public class ClearCacheAction
     // Dependencies
     // -------------------------------------------------------------------------
     
+    @Autowired
     private HibernateCacheManager cacheManager;
 
-    public void setCacheManager( HibernateCacheManager cacheManager )
-    {
-        this.cacheManager = cacheManager;
-    }
-
+    @Autowired
+    private PartitionManager partitionManager;    
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -57,6 +57,7 @@ public class ClearCacheAction
     public String execute()
     {
         cacheManager.clearCache();
+        partitionManager.clearCaches();
         
         return SUCCESS;
     }

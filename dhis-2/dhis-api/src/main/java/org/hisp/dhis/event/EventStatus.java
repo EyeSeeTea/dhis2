@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.events.event;
+package org.hisp.dhis.event;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -62,6 +62,16 @@ public enum EventStatus
         }
 
         throw new IllegalArgumentException();
+    }
+    
+    public static boolean isExistingEvent( EventStatus status )
+    {
+        if ( status == null )
+        {
+            return false;
+        }
+        
+        return ACTIVE.equals( status ) || COMPLETED.equals( status ) || VISITED.equals( status );
     }
 }
 

@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.event.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +40,7 @@ import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
+import org.hisp.dhis.analytics.partition.PartitionManager;
 import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IllegalQueryException;
@@ -47,6 +49,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.hisp.dhis.analytics.AnalyticsTableManager.EVENT_ANALYTICS_TABLE_NAME;
 
 /**
  * @author Lars Helge Overland
@@ -64,6 +68,9 @@ public class DefaultEventQueryPlanner
     
     @Autowired
     private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private PartitionManager partitionManager;
 
     // -------------------------------------------------------------------------
     // EventQueryPlanner implementation
@@ -83,6 +90,16 @@ public class DefaultEventQueryPlanner
         if ( !params.hasOrganisationUnits() )
         {
             violation = "At least one organisation unit must be specified";
+        }
+
+        if ( !params.getDuplicateDimensions().isEmpty() )
+        {
+            violation = "Dimensions cannot be specified more than once: " + params.getDuplicateDimensions();
+        }
+        
+        if ( !params.getDuplicateQueryItems().isEmpty() )
+        {
+            violation = "Query items cannot be specified more than once: " + params.getDuplicateQueryItems();
         }
         
         if ( !params.hasPeriods() && ( params.getStartDate() == null || params.getEndDate() == null ) )
@@ -121,7 +138,7 @@ public class DefaultEventQueryPlanner
     @Override
     public List<EventQueryParams> planAggregateQuery( EventQueryParams params )
     {
-        List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
+        Set<String> validPartitions = partitionManager.getEventAnalyticsPartitions();
 
         List<EventQueryParams> queries = new ArrayList<EventQueryParams>();
         
@@ -143,7 +160,7 @@ public class DefaultEventQueryPlanner
     @Override
     public EventQueryParams planEventQuery( EventQueryParams params )
     {
-        List<String> validPartitions = analyticsManager.getAnalyticsTables( params.getProgram() );
+        Set<String> validPartitions = partitionManager.getEventAnalyticsPartitions();
 
         String tableSuffix = "_" + params.getProgram().getUid();
         
@@ -152,7 +169,7 @@ public class DefaultEventQueryPlanner
             Period queryPeriod = new Period();
             queryPeriod.setStartDate( params.getStartDate() );
             queryPeriod.setEndDate( params.getEndDate() );            
-            params.setPartitions( PartitionUtils.getPartitions( queryPeriod, TABLE_PREFIX, tableSuffix, validPartitions ) );
+            params.setPartitions( PartitionUtils.getPartitions( queryPeriod, EVENT_ANALYTICS_TABLE_NAME, tableSuffix, validPartitions ) );
         }
         
         if ( params.hasDimensionOrFilter( DimensionalObject.ORGUNIT_DIM_ID ) )
@@ -173,7 +190,7 @@ public class DefaultEventQueryPlanner
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private List<EventQueryParams> groupByPartition( EventQueryParams params, List<String> validPartitions )
+    private List<EventQueryParams> groupByPartition( EventQueryParams params, Set<String> validPartitions )
     {
         String tableSuffix = "_" + params.getProgram().getUid();
         
@@ -186,7 +203,7 @@ public class DefaultEventQueryPlanner
             queryPeriod.setEndDate( params.getEndDate() );
             
             EventQueryParams query = params.instance();
-            query.setPartitions( PartitionUtils.getPartitions( queryPeriod, TABLE_PREFIX, tableSuffix, validPartitions ) );
+            query.setPartitions( PartitionUtils.getPartitions( queryPeriod, EVENT_ANALYTICS_TABLE_NAME, tableSuffix, validPartitions ) );
             
             if ( query.getPartitions().hasAny() )
             {
@@ -197,7 +214,7 @@ public class DefaultEventQueryPlanner
         }
         else // Aggregate only
         {
-            return convert( queryPlanner.groupByPartition( params, TABLE_PREFIX, tableSuffix ) );
+            return convert( queryPlanner.groupByPartition( params, EVENT_ANALYTICS_TABLE_NAME, tableSuffix ) );
         }
     }
         

@@ -32,6 +32,9 @@ import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.SUM;
+import static org.hisp.dhis.analytics.AggregationType.COUNT;
+import static org.hisp.dhis.analytics.AggregationType.STDDEV;
+import static org.hisp.dhis.analytics.AggregationType.VARIANCE;
 import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 import static org.hisp.dhis.analytics.DataQueryParams.MAX_DIM_OPT_PERM;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
@@ -42,11 +45,15 @@ import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_SUM;
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_COUNT;
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_STDDEV;
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_VARIANCE;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +62,7 @@ import org.hisp.dhis.analytics.DataQueryGroups;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.QueryPlanner;
+import org.hisp.dhis.analytics.partition.PartitionManager;
 import org.hisp.dhis.analytics.table.PartitionUtils;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.DimensionType;
@@ -79,15 +87,18 @@ public class DefaultQueryPlanner
 {
     private static final Log log = LogFactory.getLog( DefaultQueryPlanner.class );
     
-    //TODO shortcut group by methods when only 1 option?
-    
     @Autowired
     private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
+    private PartitionManager partitionManager;
     
     // -------------------------------------------------------------------------
     // DefaultQueryPlanner implementation
     // -------------------------------------------------------------------------
 
+    //TODO shortcut group by methods when only 1 option?
+    
     public void validate( DataQueryParams params )
         throws IllegalQueryException
     {
@@ -334,6 +345,8 @@ public class DefaultQueryPlanner
     
     public List<DataQueryParams> groupByPartition( DataQueryParams params, String tableName, String tableSuffix )
     {
+        Set<String> validPartitions = partitionManager.getAnalyticsPartitions();
+        
         List<DataQueryParams> queries = new ArrayList<DataQueryParams>();
 
         if ( params.isSkipPartitioning() )
@@ -343,21 +356,29 @@ public class DefaultQueryPlanner
         }
         else if ( params.getPeriods() != null && !params.getPeriods().isEmpty() )
         {
-            ListMap<Partitions, NameableObject> partitionPeriodMap = PartitionUtils.getPartitionPeriodMap( params.getPeriods(), tableName, tableSuffix );
+            ListMap<Partitions, NameableObject> partitionPeriodMap = PartitionUtils.getPartitionPeriodMap( params.getPeriods(), tableName, tableSuffix, validPartitions );
             
             for ( Partitions partitions : partitionPeriodMap.keySet() )
             {
-                DataQueryParams query = params.instance();
-                query.setPeriods( partitionPeriodMap.get( partitions ) );
-                query.setPartitions( partitions );
-                queries.add( query );
+                if ( partitions.hasAny() )
+                {
+                    DataQueryParams query = params.instance();
+                    query.setPeriods( partitionPeriodMap.get( partitions ) );
+                    query.setPartitions( partitions );
+                    queries.add( query );
+                }
             }
         }
         else if ( params.getFilterPeriods() != null && !params.getFilterPeriods().isEmpty() )
         {
-            DataQueryParams query = params.instance();
-            query.setPartitions( PartitionUtils.getPartitions( params.getFilterPeriods(), tableName, tableSuffix ) );
-            queries.add( query );
+            Partitions partitions = PartitionUtils.getPartitions( params.getFilterPeriods(), tableName, tableSuffix, validPartitions );
+            
+            if ( partitions.hasAny() )
+            {
+                DataQueryParams query = params.instance();
+                query.setPartitions( partitions );
+                queries.add( query );
+            }
         }
         else
         {
@@ -656,6 +677,18 @@ public class DefaultQueryPlanner
                     aggregationType = AVERAGE_INT_DISAGGREGATION;
                 }
             }
+        }
+        else if ( AGGREGATION_OPERATOR_COUNT.equals( aggregationOperator ) )
+        {
+            aggregationType = COUNT;
+        }
+        else if ( AGGREGATION_OPERATOR_STDDEV.equals( aggregationOperator ) )
+        {
+            aggregationType = STDDEV;
+        }
+        else if ( AGGREGATION_OPERATOR_VARIANCE.equals( aggregationOperator ) )
+        {
+            aggregationType = VARIANCE;
         }
         
         return aggregationType;

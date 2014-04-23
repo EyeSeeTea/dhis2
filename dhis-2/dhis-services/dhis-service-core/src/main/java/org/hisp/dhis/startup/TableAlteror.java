@@ -488,6 +488,8 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
+        
+        executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
 
         // Move chart filters to chart_filters table
 
@@ -704,6 +706,9 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET userattribute=false WHERE userattribute IS NULL" );
         executeSql( "UPDATE attribute SET usergroupattribute=false WHERE usergroupattribute IS NULL" );
         executeSql( "UPDATE attribute SET datasetattribute=false WHERE datasetattribute IS NULL" );
+        
+        executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
+        executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
 
         // update attribute.code, set to null if code=''
         executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
@@ -719,8 +724,6 @@ public class TableAlteror
         
         log.info( "Tables updated" );
     }
-
-  
 
     private void upgradeDataValuesWithAttributeOptionCombo()
     {

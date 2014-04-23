@@ -148,36 +148,41 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 if( angular.isObject( $scope.dhis2Events ) ) {
 
                     for(var i=0; i < $scope.dhis2Events.length; i++){  
+                        
                         //check if event is empty
-                        if(!angular.isUndefined($scope.dhis2Events[i].dataValues)){
-                            $scope.dhis2Events[i].dataValues = orderByFilter($scope.dhis2Events[i].dataValues, '-dataElement');
+                        if(!angular.isUndefined($scope.dhis2Events[i].dataValues)){                            
+                            
                             angular.forEach($scope.dhis2Events[i].dataValues, function(dataValue){
 
                                 //converting event.datavalues[i].datavalue.dataelement = value to
-                                //event[dataElement] = value for easier grid display.
-                                var dataElement = $scope.programStageDataElements[dataValue.dataElement].dataElement;
-                                if(angular.isObject(dataElement)){                               
+                                //event[dataElement] = value for easier grid display.                                
+                                if($scope.programStageDataElements[dataValue.dataElement]){                                    
                                     
-                                    //converting int string value to integer for proper sorting.
-                                    if(dataElement.type == 'int'){
-                                        if( !isNaN(parseInt(dataValue.value)) ){
-                                            dataValue.value = parseInt(dataValue.value);
-                                        }
-                                        else{
-                                            dataValue.value = '';
-                                        }                                        
-                                    }
-                                    else if( dataElement.type == 'trueOnly'){
-                                        if(dataValue.value == 'true'){
-                                            dataValue.value = true;
-                                        }
-                                        else{
-                                            dataValue.value = false;
-                                        }
-                                    }
+                                    var dataElement = $scope.programStageDataElements[dataValue.dataElement].dataElement;
                                     
-                                    $scope.dhis2Events[i][dataValue.dataElement] = dataValue.value; 
-                                }                                
+                                    if(angular.isObject(dataElement)){                               
+
+                                        //converting int string value to integer for proper sorting.
+                                        if(dataElement.type == 'int'){
+                                            if( !isNaN(parseInt(dataValue.value)) ){
+                                                dataValue.value = parseInt(dataValue.value);
+                                            }
+                                            else{
+                                                dataValue.value = '';
+                                            }                                        
+                                        }
+                                        else if( dataElement.type == 'trueOnly'){
+                                            if(dataValue.value == 'true'){
+                                                dataValue.value = true;
+                                            }
+                                            else{
+                                                dataValue.value = false;
+                                            }
+                                        }                                    
+                                    }                                    
+                                }
+                                
+                                $scope.dhis2Events[i][dataValue.dataElement] = dataValue.value; 
                             });  
 
                             delete $scope.dhis2Events[i].dataValues;
@@ -371,6 +376,52 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             }
         }); 
     }; 
+    
+    $scope.updateEvent = function(){
+        
+        //check for form validity
+        $scope.outerFormUpdate.submitted = true;        
+        if( $scope.outerFormUpdate.$invalid ){
+            return false;
+        }
+        
+        //the form is valid, get the values
+        var dataValues = [];        
+        for(var dataElement in $scope.programStageDataElements){
+            dataValues.push({dataElement: dataElement, value: $scope.currentEvent[dataElement]});
+        }
+        
+        var updatedEvent = {
+                            program: $scope.currentEvent.program,
+                            programStage: $scope.currentEvent.programStage,
+                            orgUnit: $scope.currentEvent.orgUnit,
+                            status: 'ACTIVE',                                        
+                            eventDate: $scope.currentEvent.eventDate,
+                            event: $scope.currentEvent.event, 
+                            dataValues: dataValues
+                        };
+                        
+        updatedEvent.eventDate = moment(updatedEvent.eventDate, 'YYYY-MM-DD')._d;       
+        updatedEvent.eventDate = Date.parse(updatedEvent.eventDate);
+        updatedEvent.eventDate = $filter('date')(updatedEvent.eventDate, 'yyyy-MM-dd'); 
+        
+        DHIS2EventFactory.update(updatedEvent).then(function(data){            
+            
+            //update original value
+            var continueLoop = true;
+            for(var i=0; i< $scope.dhis2Events.length && continueLoop; i++){
+                if($scope.dhis2Events[i].event === $scope.currentEvent.event ){
+                    $scope.dhis2Events[i] = $scope.currentEvent;
+                    continueLoop = false;
+                }
+            }
+                
+            $scope.currentEventOrginialValue = angular.copy($scope.currentEvent); 
+            $scope.outerFormUpdate.submitted = false;            
+            $scope.editingEventInFull = false;
+            $scope.currentEvent = {};
+        });       
+    };
        
     $scope.updateEventDataValue = function(currentEvent, dataElement){
 

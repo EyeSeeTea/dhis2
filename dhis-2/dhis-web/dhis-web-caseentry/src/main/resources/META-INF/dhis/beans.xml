@@ -26,16 +26,6 @@
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.caseentry.action.caseentry.DataRecordingSelectAction"
-		class="org.hisp.dhis.caseentry.action.caseentry.DataRecordingSelectAction"
-		scope="prototype">
-		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
-		<property name="selectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-	</bean>
-
-	<bean
 		id="org.hisp.dhis.caseentry.action.caseentry.SaveExecutionDateAction"
 		class="org.hisp.dhis.caseentry.action.caseentry.SaveExecutionDateAction"
 		scope="prototype">
@@ -785,8 +775,6 @@
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="programIndicatorService"
 			ref="org.hisp.dhis.program.ProgramIndicatorService" />
-		<property name="attributeValueService"
-			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
 	</bean>
 
 	<bean

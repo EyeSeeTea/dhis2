@@ -28,13 +28,17 @@ package org.hisp.dhis.caseentry.action.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramIndicatorService;
@@ -43,13 +47,14 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.relationship.Relationship;
 import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityAudit;
 import org.hisp.dhis.trackedentity.TrackedEntityAuditService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -76,8 +81,9 @@ public class TrackedEntityInstanceDashboardAction
     private ProgramService programService;
 
     private ProgramIndicatorService programIndicatorService;
-
-    private TrackedEntityAttributeValueService attributeValueService;
+    
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
 
     // -------------------------------------------------------------------------
     // Input && Output
@@ -87,7 +93,7 @@ public class TrackedEntityInstanceDashboardAction
 
     private TrackedEntityInstance entityInstance;
 
-    private Collection<TrackedEntityAttributeValue> attributeValues;
+    private List<TrackedEntityAttribute> attributes;
 
     private Collection<ProgramInstance> activeProgramInstances;
 
@@ -95,7 +101,7 @@ public class TrackedEntityInstanceDashboardAction
 
     private Collection<TrackedEntityAudit> entityInstanceAudits;
 
-    private Map<TrackedEntityAttribute, String> attributeMap = new HashMap<TrackedEntityAttribute, String>();
+    private Map<Integer, String> attributeValueMap = new HashMap<Integer, String>();
 
     private Collection<Relationship> relationships = new HashSet<Relationship>();
 
@@ -110,10 +116,10 @@ public class TrackedEntityInstanceDashboardAction
         return programIndicatorsMap;
     }
 
-    public void setAttributeValueService( TrackedEntityAttributeValueService attributeValueService )
+    public Map<Integer, String> getAttributeValueMap()
     {
-        this.attributeValueService = attributeValueService;
-    }
+        return attributeValueMap;
+    }  
 
     public void setAuditService( TrackedEntityAuditService auditService )
     {
@@ -128,11 +134,6 @@ public class TrackedEntityInstanceDashboardAction
     public void setProgramService( ProgramService programService )
     {
         this.programService = programService;
-    }
-
-    public Map<TrackedEntityAttribute, String> getAttributeMap()
-    {
-        return attributeMap;
     }
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -170,9 +171,9 @@ public class TrackedEntityInstanceDashboardAction
         return entityInstance;
     }
 
-    public Collection<TrackedEntityAttributeValue> getAttributeValues()
+    public List<TrackedEntityAttribute> getAttributes()
     {
-        return attributeValues;
+        return attributes;
     }
 
     public void setEntityInstanceService( TrackedEntityInstanceService entityInstanceService )
@@ -211,13 +212,12 @@ public class TrackedEntityInstanceDashboardAction
         // Get entityInstance-attribute-values
         // ---------------------------------------------------------------------
 
-        Collection<TrackedEntityAttributeValue> _attributeValues = attributeValueService
-            .getTrackedEntityAttributeValues( entityInstance );
-        attributeValues = new HashSet<TrackedEntityAttributeValue>();
+        attributes = new ArrayList<TrackedEntityAttribute>( attributeService.getAllTrackedEntityAttributes() );
+        Collections.sort( attributes, IdentifiableObjectNameComparator.INSTANCE );
 
-        for ( TrackedEntityAttributeValue attributeValue : _attributeValues )
+        for ( TrackedEntityAttributeValue attributeValue : entityInstance.getAttributeValues() )
         {
-            attributeValues.add( attributeValue );
+            attributeValueMap.put( attributeValue.getAttribute().getId(), attributeValue.getValue() );
         }
 
         // ---------------------------------------------------------------------

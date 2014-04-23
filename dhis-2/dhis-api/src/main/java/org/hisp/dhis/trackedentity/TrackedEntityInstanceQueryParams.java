@@ -29,15 +29,16 @@ package org.hisp.dhis.trackedentity;
  */
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
-import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStatus;
@@ -90,9 +91,20 @@ public class TrackedEntityInstanceQueryParams
     private ProgramStatus programStatus;
     
     /**
-     * Enrollment dates for the given program.
+     * Indicates whether tracked entity instance is marked for follow up for the
+     * specified program.
      */
-    private List<QueryFilter> programDates = new ArrayList<QueryFilter>();
+    private Boolean followUp;
+    
+    /**
+     * Start date for enrollment in the given program.
+     */
+    private Date programStartDate;
+    
+    /**
+     * End date for enrollment in the given program.
+     */
+    private Date programEndDate;
     
     /**
      * Tracked entity of the instances in the response.
@@ -103,6 +115,21 @@ public class TrackedEntityInstanceQueryParams
      * Selection mode for the specified organisation units.
      */
     private OrganisationUnitSelectionMode organisationUnitMode;
+    
+    /**
+     * Status of any events in the specified program.
+     */
+    private EventStatus eventStatus;
+    
+    /**
+     * Start date for event for the given program.
+     */
+    private Date eventStartDate;
+    
+    /**
+     * End date for event for the given program.
+     */
+    private Date eventEndDate;
 
     /**
      * Indicates whether not to include meta data in the response.
@@ -132,6 +159,8 @@ public class TrackedEntityInstanceQueryParams
     // -------------------------------------------------------------------------
     
     /**
+     * //TODO allow attributes only once and allow multiple filters per item
+     * 
      * Performs a set of operations on this params.
      * 
      * <ul>
@@ -139,7 +168,7 @@ public class TrackedEntityInstanceQueryParams
      * If a query item is specified as an attribute item as well as a filter 
      * item, the filter item will be removed. In that case, if the attribute 
      * item does not have a filter value and the filter item has a filter value, 
-     * it will be applied to the attribute item.
+     * it will be applied to the attribute item. 
      * </li>
      * </ul> 
      */
@@ -157,10 +186,9 @@ public class TrackedEntityInstanceQueryParams
             {
                 QueryItem attribute = attributes.get( index );
                 
-                if ( !attribute.hasFilter() )
+                if ( !attribute.hasFilter() && filter.hasFilter() )
                 {
-                    attribute.setOperator( filter.getOperator() );
-                    attribute.setFilter( filter.getFilter() );
+                    attribute.getFilters().add( filter.getFilters().iterator().next() );
                 }
                 
                 filterIter.remove();
@@ -328,12 +356,28 @@ public class TrackedEntityInstanceQueryParams
     }
     
     /**
-     * Indicates whether this params specifies any program dates.
-     * @return
+     * Indicates whether this params specifies follow up for the given program.
+     * Follow up can be specified as true or false.
      */
-    public boolean hasProgramDates()
+    public boolean hasFollowUp()
     {
-        return programDates != null && !programDates.isEmpty();
+        return followUp != null;
+    }
+    
+    /**
+     * Indicates whether this params specifies a program start date.
+     */
+    public boolean hasProgramStartDate()
+    {
+        return programStartDate != null;
+    }
+    
+    /**
+     * Indicates whether this params specifies a program end date.
+     */
+    public boolean hasProgramEndDate()
+    {
+        return programEndDate != null;
     }
     
     /**
@@ -345,11 +389,44 @@ public class TrackedEntityInstanceQueryParams
     }
     
     /**
-     * Indicates whethert this params is of the given organisation unit mode.
+     * Indicates whether this params is of the given organisation unit mode.
      */
     public boolean isOrganisationUnitMode( OrganisationUnitSelectionMode mode )
     {
         return organisationUnitMode != null && organisationUnitMode.equals( mode );
+    }
+    
+    /**
+     * Indicates whether this params specifies an event status.
+     */
+    public boolean hasEventStatus()
+    {
+        return eventStatus != null;
+    }
+    
+    /**
+     * Indicates whether the event status specified for the params is equal to
+     * the given event status.
+     */
+    public boolean isEventStatus( EventStatus eventStatus )
+    {
+        return this.eventStatus != null && this.eventStatus.equals( eventStatus );
+    }
+    
+    /**
+     * Indicates whether this params specifies an event start date.
+     */
+    public boolean hasEventStartDate()
+    {
+        return eventStartDate != null;
+    }
+    
+    /**
+     * Indicates whether this params specifies an event end date.
+     */
+    public boolean hasEventEndDate()
+    {
+        return eventEndDate != null;
     }
     
     /**
@@ -418,14 +495,14 @@ public class TrackedEntityInstanceQueryParams
         this.filters = filters;
     }
 
-    public OrganisationUnitSelectionMode getOrganisationUnitMode()
+    public Set<OrganisationUnit> getOrganisationUnits()
     {
-        return organisationUnitMode;
+        return organisationUnits;
     }
 
-    public void setOrganisationUnitMode( OrganisationUnitSelectionMode organisationUnitMode )
+    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
     {
-        this.organisationUnitMode = organisationUnitMode;
+        this.organisationUnits = organisationUnits;
     }
 
     public Program getProgram()
@@ -448,14 +525,34 @@ public class TrackedEntityInstanceQueryParams
         this.programStatus = programStatus;
     }
 
-    public List<QueryFilter> getProgramDates()
+    public Boolean getFollowUp()
     {
-        return programDates;
+        return followUp;
     }
 
-    public void setProgramDates( List<QueryFilter> programDates )
+    public void setFollowUp( Boolean followUp )
     {
-        this.programDates = programDates;
+        this.followUp = followUp;
+    }
+
+    public Date getProgramStartDate()
+    {
+        return programStartDate;
+    }
+
+    public void setProgramStartDate( Date programStartDate )
+    {
+        this.programStartDate = programStartDate;
+    }
+
+    public Date getProgramEndDate()
+    {
+        return programEndDate;
+    }
+
+    public void setProgramEndDate( Date programEndDate )
+    {
+        this.programEndDate = programEndDate;
     }
 
     public TrackedEntity getTrackedEntity()
@@ -468,14 +565,44 @@ public class TrackedEntityInstanceQueryParams
         this.trackedEntity = trackedEntity;
     }
 
-    public Set<OrganisationUnit> getOrganisationUnits()
+    public OrganisationUnitSelectionMode getOrganisationUnitMode()
     {
-        return organisationUnits;
+        return organisationUnitMode;
     }
 
-    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
+    public void setOrganisationUnitMode( OrganisationUnitSelectionMode organisationUnitMode )
     {
-        this.organisationUnits = organisationUnits;
+        this.organisationUnitMode = organisationUnitMode;
+    }
+
+    public EventStatus getEventStatus()
+    {
+        return eventStatus;
+    }
+
+    public void setEventStatus( EventStatus eventStatus )
+    {
+        this.eventStatus = eventStatus;
+    }
+
+    public Date getEventStartDate()
+    {
+        return eventStartDate;
+    }
+
+    public void setEventStartDate( Date eventStartDate )
+    {
+        this.eventStartDate = eventStartDate;
+    }
+
+    public Date getEventEndDate()
+    {
+        return eventEndDate;
+    }
+
+    public void setEventEndDate( Date eventEndDate )
+    {
+        this.eventEndDate = eventEndDate;
     }
 
     public boolean isSkipMeta()

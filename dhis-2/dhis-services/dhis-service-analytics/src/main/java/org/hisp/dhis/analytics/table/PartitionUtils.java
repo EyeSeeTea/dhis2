@@ -69,7 +69,7 @@ public class PartitionUtils
 
     //TODO optimize by including required filter periods only
     
-    public static Partitions getPartitions( Period period, String tablePrefix, String tableSuffix, List<String> validPartitions )
+    public static Partitions getPartitions( Period period, String tablePrefix, String tableSuffix, Set<String> validPartitions )
     {
         tablePrefix = StringUtils.trimToEmpty( tablePrefix );
         tableSuffix = StringUtils.trimToEmpty( tableSuffix );
@@ -89,7 +89,7 @@ public class PartitionUtils
         return partitions.prunePartitions( validPartitions );
     }
     
-    public static Partitions getPartitions( List<NameableObject> periods, String tablePrefix, String tableSuffix )
+    public static Partitions getPartitions( List<NameableObject> periods, String tablePrefix, String tableSuffix, Set<String> validPartitions )
     {
         Set<String> partitions = new HashSet<String>();
         
@@ -98,16 +98,16 @@ public class PartitionUtils
             partitions.addAll( getPartitions( (Period) period, tablePrefix, tableSuffix, null ).getPartitions() );
         }
         
-        return new Partitions( new ArrayList<String>( partitions ) );
+        return new Partitions( new ArrayList<String>( partitions ) ).prunePartitions( validPartitions );
     }
     
-    public static ListMap<Partitions, NameableObject> getPartitionPeriodMap( List<NameableObject> periods, String tablePrefix, String tableSuffix )
+    public static ListMap<Partitions, NameableObject> getPartitionPeriodMap( List<NameableObject> periods, String tablePrefix, String tableSuffix, Set<String> validPartitions )
     {
         ListMap<Partitions, NameableObject> map = new ListMap<Partitions, NameableObject>();
         
         for ( NameableObject period : periods )
         {
-            map.putValue( getPartitions( (Period) period, tablePrefix, tableSuffix, null ), period );
+            map.putValue( getPartitions( (Period) period, tablePrefix, tableSuffix, null ).prunePartitions( validPartitions ), period );
         }
         
         return map;

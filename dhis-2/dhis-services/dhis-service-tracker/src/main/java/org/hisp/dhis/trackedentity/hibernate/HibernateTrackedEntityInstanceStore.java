@@ -28,21 +28,48 @@ package org.hisp.dhis.trackedentity.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
+import static org.hisp.dhis.program.ProgramStageInstance.SKIPPED_STATUS;
+import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
+import static org.hisp.dhis.system.util.TextUtils.getTokens;
+import static org.hisp.dhis.system.util.TextUtils.removeLastAnd;
+import static org.hisp.dhis.system.util.TextUtils.removeLastComma;
+import static org.hisp.dhis.system.util.TextUtils.removeLastOr;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_EVENT_BY_STATUS;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_INSTANCE;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_PROGRAM_STAGE;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstance.PREFIX_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.CREATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.LAST_UPDATED_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_UNIT_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.criterion.Conjunction;
-import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -51,7 +78,6 @@ import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStatus;
-import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.Timer;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -64,21 +90,6 @@ import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
-import static org.hisp.dhis.system.util.TextUtils.*;
-import static org.hisp.dhis.trackedentity.TrackedEntityInstance.*;
-import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.*;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -231,9 +242,9 @@ public class HibernateTrackedEntityInstanceStore
         final String wordStart = statementBuilder.getRegexpWordStart();
         final String wordEnd = statementBuilder.getRegexpWordEnd();
 
-        String sql = "from trackedentityinstance tei "
-            + "inner join trackedentity te on tei.trackedentityid = te.trackedentityid "
-            + "inner join organisationunit ou on tei.organisationunitid = ou.organisationunitid ";
+        String sql = "from trackedentityinstance tei " + 
+            "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " + 
+            "inner join organisationunit ou on tei.organisationunitid = ou.organisationunitid ";
 
         for ( QueryItem item : params.getAttributesAndFilters() )
         {
@@ -241,18 +252,21 @@ public class HibernateTrackedEntityInstanceStore
 
             final String joinClause = item.hasFilter() ? "inner join" : "left join";
 
-            sql += joinClause + " trackedentityattributevalue as " + col + " " + "on " + col
-                + ".trackedentityinstanceid = tei.trackedentityinstanceid " + "and " + col
-                + ".trackedentityattributeid = " + item.getItem().getId() + " ";
-
-            final String filter = statementBuilder.encode( item.getFilter(), false );
+            sql += joinClause + " " +
+                "trackedentityattributevalue as " + col + " " + "on " + col + ".trackedentityinstanceid = tei.trackedentityinstanceid " + 
+                "and " + col + ".trackedentityattributeid = " + item.getItem().getId() + " ";
 
             if ( !params.isOrQuery() && item.hasFilter() )
             {
-                final String queryCol = item.isNumeric() ? (col + ".value") : "lower(" + col + ".value)";
-
-                sql += "and " + queryCol + " " + item.getSqlOperator() + " "
-                    + StringUtils.lowerCase( item.getSqlFilter( filter ) ) + " ";
+                for ( QueryFilter filter : item.getFilters() )
+                {
+                    final String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
+    
+                    final String queryCol = item.isNumeric() ? (col + ".value") : "lower(" + col + ".value)";
+    
+                    sql += "and " + queryCol + " " + filter.getSqlOperator() + " "
+                        + StringUtils.lowerCase( filter.getSqlFilter( encodedFilter ) ) + " ";
+                }
             }
         }
 
@@ -281,8 +295,7 @@ public class HibernateTrackedEntityInstanceStore
         else if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
         {
         }
-        else
-        // SELECTED (default)
+        else // SELECTED (default)
         {
             sql += hlp.whereAnd() + " tei.organisationunitid in ("
                 + getCommaDelimitedString( getIdentifiers( params.getOrganisationUnits() ) ) + ") ";
@@ -290,24 +303,45 @@ public class HibernateTrackedEntityInstanceStore
 
         if ( params.hasProgram() )
         {
-            sql += hlp.whereAnd() + " exists (" + "select trackedentityinstanceid from programinstance pi "
-                + "where pi.trackedentityinstanceid=tei.trackedentityinstanceid " + "and pi.programid = "
-                + params.getProgram().getId() + " ";
+            sql += hlp.whereAnd() + " exists (" + 
+                "select pi.trackedentityinstanceid " +
+                "from programinstance pi ";
+            
+            if ( params.hasEventStatus() )
+            {
+                sql += 
+                    "left join programstageinstance psi " +
+                    "on pi.programinstanceid = psi.programinstanceid ";                    
+            }
+            
+            sql +=
+                "where pi.trackedentityinstanceid = tei.trackedentityinstanceid " + 
+                "and pi.programid = " + params.getProgram().getId() + " ";
 
             if ( params.hasProgramStatus() )
             {
-                sql += "and pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() + " " );
+                sql += "and pi.status = " + PROGRAM_STATUS_MAP.get( params.getProgramStatus() ) + " ";
             }
 
-            if ( params.hasProgramDates() )
+            if ( params.hasFollowUp() )
             {
-                for ( QueryFilter date : params.getProgramDates() )
-                {
-                    String filter = statementBuilder.encode( date.getFilter(), false );
-
-                    sql += "and pi.enrollmentdate " + date.getSqlOperator() + " " + date.getSqlFilter( filter ) + " ";
-                }
+                sql += "and pi.followup = " + params.getFollowUp() + " ";
             }
+
+            if ( params.hasProgramStartDate() )
+            {
+                sql += "and pi.enrollmentdate >= '" + getMediumDateString( params.getProgramStartDate() ) + "' ";
+            }
+            
+            if ( params.hasProgramEndDate() )
+            {
+                sql += "and pi.enrollmentdate <= '" + getMediumDateString( params.getProgramEndDate() ) + "' ";
+            }
+            
+            if ( params.hasEventStatus() )
+            {
+                sql += getEventStatusWhereClause( params );
+            }   
 
             sql += ") ";
         }
@@ -328,8 +362,9 @@ public class HibernateTrackedEntityInstanceStore
                 {
                     final String col = statementBuilder.columnQuote( item.getItemId() );
 
-                    sql += "lower(" + col + ".value) " + regexp + " '" + wordStart + StringUtils.lowerCase( query )
-                        + wordEnd + "' or ";
+                    sql += 
+                        "lower(" + col + ".value) " + regexp + " '" + wordStart + 
+                        StringUtils.lowerCase( query ) + wordEnd + "' or ";
                 }
 
                 sql = removeLastOr( sql ) + ") and ";
@@ -341,8 +376,39 @@ public class HibernateTrackedEntityInstanceStore
         return sql;
     }
 
+    private String getEventStatusWhereClause( TrackedEntityInstanceQueryParams params )
+    {
+        String start = getMediumDateString( params.getEventStartDate() );
+        String end = getMediumDateString( params.getEventEndDate() );
+        
+        String sql = StringUtils.EMPTY;
+        
+        if ( params.isEventStatus( EventStatus.COMPLETED ) )
+        {
+            sql = "and psi.executiondate >= '" + start + "' and psi.executiondate <= '" + end + "' and psi.completed = true ";
+        }
+        else if ( params.isEventStatus( EventStatus.VISITED ) )
+        {
+            sql = "and psi.executiondate >= '" + start + "' and psi.executiondate <= '" + end + "' and psi.completed = false ";
+        }
+        else if ( params.isEventStatus( EventStatus.FUTURE_VISIT ) )
+        {
+            sql = "and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' and psi.status is not null and date(now()) < date(psi.duedate) ";
+        }
+        else if ( params.isEventStatus( EventStatus.LATE_VISIT ) )
+        {
+            sql = "and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' and psi.status is not null and date(now()) > date(psi.duedate) ";
+        }
+        else if ( params.isEventStatus( EventStatus.SKIPPED ) )
+        {
+            sql = "and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' and psi.status = " + SKIPPED_STATUS + " "; 
+        }
+        
+        return sql;
+    }
+        
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getByOrgUnit( OrganisationUnit organisationUnit, Integer min, Integer max )
     {
         String hql = "select p from TrackedEntityInstance p where p.organisationUnit = :organisationUnit order by p.id DESC";
@@ -359,7 +425,7 @@ public class HibernateTrackedEntityInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program,
         Integer min, Integer max )
     {
@@ -376,7 +442,7 @@ public class HibernateTrackedEntityInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max )
     {
         String hql = "select pt from TrackedEntityInstance pt inner join pt.programInstances pi "
@@ -415,7 +481,7 @@ public class HibernateTrackedEntityInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance instance )
     {
         String hql = "select distinct p from TrackedEntityInstance p where p.representative = :representative order by p.id DESC";
@@ -424,7 +490,7 @@ public class HibernateTrackedEntityInstanceStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityInstance> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
     {
         Criteria criteria = getCriteria();
@@ -446,7 +512,6 @@ public class HibernateTrackedEntityInstanceStore
     {
         if ( instance.getAttributeValues() != null && instance.getAttributeValues().size() > 0 )
         {
-            boolean hasUnique = false;
 
             for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
             {
@@ -454,62 +519,37 @@ public class HibernateTrackedEntityInstanceStore
 
                 if ( attribute.isUnique() )
                 {
-                    hasUnique = true;
-                    break;
-                }
-            }
 
-            if ( hasUnique )
-            {
-                Criteria criteria = getCriteria();
-                criteria.createAlias( "attributeValues", "attributeValue" );
-                criteria.createAlias( "attributeValue.attribute", "attribute" );
-                criteria.createAlias( "organisationUnit", "orgunit" );
-                criteria.createAlias( "programInstances", "programInstance" );
+                    Criteria criteria = getCriteria();
+                    criteria.createAlias( "attributeValues", "attributeValue" );
+                    criteria.createAlias( "attributeValue.attribute", "attribute" );
+                    criteria.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );
+                    criteria.add( Restrictions.eq( "attributeValue.attribute", attribute ) );
 
-                Disjunction disjunction = Restrictions.disjunction();
-
-                for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
-                {
-                    TrackedEntityAttribute attribute = attributeValue.getAttribute();
-
-                    if ( attribute.isUnique() )
+                    if ( attribute.getId() != 0 )
                     {
-                        Conjunction conjunction = Restrictions.conjunction();
-                        conjunction.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );
-                        conjunction.add( Restrictions.eq( "attribute", attribute ) );
-
-                        if ( attribute.getId() != 0 )
-                        {
-                            conjunction.add( Restrictions.ne( "id", instance.getId() ) );
-                        }
-
-                        if ( attribute.getValueType().equals( TrackedEntityAttribute.VALUE_TYPE_LOCAL_ID )
-                            && attribute.getOrgunitScope() )
-                        {
-                            conjunction.add( Restrictions.eq( "orgunit.id", instance.getOrganisationUnit().getId() ) );
-                        }
-
-                        if ( program != null
-                            && attribute.getValueType().equals( TrackedEntityAttribute.VALUE_TYPE_LOCAL_ID )
-                            && attribute.getProgramScope() )
-                        {
-                            conjunction.add( Restrictions.eq( "programInstance.program", program ) );
-                        }
-
-                        disjunction.add( conjunction );
+                        criteria.add( Restrictions.ne( "id", attribute.getId() ) );
                     }
-                }
 
-                criteria.add( disjunction );
+                    if ( attribute.getOrgunitScope() )
+                    {
+                        criteria.add( Restrictions.eq( "organisationUnit", instance.getOrganisationUnit() ) );
+                    }
 
-                Number rs = (Number) criteria.setProjection(
-                    Projections.projectionList().add( Projections.property( "attribute.id" ) ) ).uniqueResult();
+                    if ( program != null && attribute.getProgramScope() )
+                    {
+                        criteria.createAlias( "programInstances", "programInstance" );
+                        criteria.add( Restrictions.eq( "programInstance.program", program ) );
+                    }
 
-                if ( rs != null && rs.intValue() > 0 )
-                {
-                    return TrackedEntityInstanceService.ERROR_DUPLICATE_IDENTIFIER
-                        + TrackedEntityInstanceService.SAPERATOR + rs.intValue();
+                    Number rs = (Number) criteria.setProjection(
+                        Projections.projectionList().add( Projections.property( "attribute.id" ) ) ).uniqueResult();
+
+                    if ( rs != null && rs.intValue() > 0 )
+                    {
+                        return TrackedEntityInstanceService.ERROR_DUPLICATE_IDENTIFIER
+                            + TrackedEntityInstanceService.SAPERATOR + rs.intValue();
+                    }
                 }
             }
         }
@@ -591,38 +631,7 @@ public class HibernateTrackedEntityInstanceStore
             throw new RuntimeException( ex );
         }
     }
-
-    // -------------------------------------------------------------------------
-    // TODO Everything from here downwards must be replaced or removed!
-    // -------------------------------------------------------------------------
-
-    @Override
-    // TODO this method must be changed - cannot retrieve one by one
-    public Collection<TrackedEntityInstance> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<TrackedEntityAttribute> attributes, Integer statusEnrollment, Integer min,
-        Integer max )
-    {
-        String sql = searchTrackedEntityInstanceSql( false, searchKeys, orgunits, followup, attributes,
-            statusEnrollment, min, max );
-        Collection<TrackedEntityInstance> instances = new HashSet<TrackedEntityInstance>();
-        try
-        {
-            instances = jdbcTemplate.query( sql, new RowMapper<TrackedEntityInstance>()
-            {
-                public TrackedEntityInstance mapRow( ResultSet rs, int rowNum )
-                    throws SQLException
-                {
-                    return get( rs.getInt( 1 ) );
-                }
-            } );
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-        return instances;
-    }
-
+    
     @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Collection<TrackedEntityAttribute> attributes, Integer statusEnrollment, Integer min,
@@ -649,29 +658,6 @@ public class HibernateTrackedEntityInstanceStore
         }
 
         return programStageInstanceIds;
-    }
-
-    public int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
-        Integer statusEnrollment )
-    {
-        String sql = searchTrackedEntityInstanceSql( true, searchKeys, orgunits, followup, null, statusEnrollment,
-            null, null );
-        return jdbcTemplate.queryForObject( sql, Integer.class );
-    }
-
-    @Override
-    public Grid getTrackedEntityInstanceEventReport( Grid grid, List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, Collection<TrackedEntityAttribute> attributes,
-        Integer statusEnrollment, Integer min, Integer max )
-    {
-        String sql = searchTrackedEntityInstanceSql( false, searchKeys, orgunits, followup, attributes,
-            statusEnrollment, min, max );
-
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
-
-        GridUtils.addRows( grid, rowSet );
-
-        return grid;
     }
 
     private String searchTrackedEntityInstanceSql( boolean count, List<String> searchKeys,
@@ -789,116 +775,116 @@ public class HibernateTrackedEntityInstanceStore
                     int statusEvent = Integer.parseInt( keys[index] );
                     switch ( statusEvent )
                     {
-                        case ProgramStageInstance.COMPLETED_STATUS:
-                            instanceWhere += condition + operatorStatus
-                                + "( psi.executiondate is not null and  psi.executiondate>='" + keys[2]
-                                + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=true ";
+                    case ProgramStageInstance.COMPLETED_STATUS:
+                        instanceWhere += condition + operatorStatus
+                            + "( psi.executiondate is not null and  psi.executiondate>='" + keys[2]
+                            + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=true ";
 
-                            // get events by orgunit children
-                            if ( keys[4].equals( "-1" ) )
-                            {
-                                instanceWhere += " and psi.organisationunitid in( "
-                                    + getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                            }
+                        // get events by orgunit children
+                        if ( keys[4].equals( "-1" ) )
+                        {
+                            instanceWhere += " and psi.organisationunitid in( "
+                                + getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                        }
 
-                            // get events by selected orgunit
-                            else if ( !keys[4].equals( "0" ) )
-                            {
-                                instanceWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
-                            }
+                        // get events by selected orgunit
+                        else if ( !keys[4].equals( "0" ) )
+                        {
+                            instanceWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
+                        }
 
-                            instanceWhere += ")";
-                            operatorStatus = " OR ";
-                            condition = "";
-                            continue;
-                        case ProgramStageInstance.VISITED_STATUS:
-                            instanceWhere += condition + operatorStatus
-                                + "( psi.executiondate is not null and psi.executiondate>='" + keys[2]
-                                + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=false ";
+                        instanceWhere += ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.VISITED_STATUS:
+                        instanceWhere += condition + operatorStatus
+                            + "( psi.executiondate is not null and psi.executiondate>='" + keys[2]
+                            + "' and psi.executiondate<='" + keys[3] + "' and psi.completed=false ";
 
-                            // get events by orgunit children
-                            if ( keys[4].equals( "-1" ) )
-                            {
-                                instanceWhere += " and psi.organisationunitid in( "
-                                    + getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                            }
+                        // get events by orgunit children
+                        if ( keys[4].equals( "-1" ) )
+                        {
+                            instanceWhere += " and psi.organisationunitid in( "
+                                + getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                        }
 
-                            // get events by selected orgunit
-                            else if ( !keys[4].equals( "0" ) )
-                            {
-                                instanceWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
-                            }
+                        // get events by selected orgunit
+                        else if ( !keys[4].equals( "0" ) )
+                        {
+                            instanceWhere += " and psi.organisationunitid=" + getOrgUnitId( keys );
+                        }
 
-                            instanceWhere += ")";
-                            operatorStatus = " OR ";
-                            condition = "";
-                            continue;
-                        case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                            instanceWhere += condition + operatorStatus + "( psi.executiondate is null and psi.duedate>='"
-                                + keys[2] + "' and psi.duedate<='" + keys[3]
-                                + "' and psi.status is not null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
+                        instanceWhere += ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.FUTURE_VISIT_STATUS:
+                        instanceWhere += condition + operatorStatus + "( psi.executiondate is null and psi.duedate>='"
+                            + keys[2] + "' and psi.duedate<='" + keys[3]
+                            + "' and psi.status is not null and (DATE(now()) - DATE(psi.duedate) <= 0) ";
 
-                            // get events by orgunit children
-                            if ( keys[4].equals( "-1" ) )
-                            {
-                                instanceWhere += " and p.organisationunitid in( "
-                                    + getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                            }
+                        // get events by orgunit children
+                        if ( keys[4].equals( "-1" ) )
+                        {
+                            instanceWhere += " and p.organisationunitid in( "
+                                + getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                        }
 
-                            // get events by selected orgunit
-                            else if ( !keys[4].equals( "0" ) )
-                            {
-                                instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
-                            }
+                        // get events by selected orgunit
+                        else if ( !keys[4].equals( "0" ) )
+                        {
+                            instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
+                        }
 
-                            instanceWhere += ")";
-                            operatorStatus = " OR ";
-                            condition = "";
-                            continue;
-                        case ProgramStageInstance.LATE_VISIT_STATUS:
-                            instanceWhere += condition + operatorStatus + "( psi.executiondate is null and  psi.duedate>='"
-                                + keys[2] + "' and psi.duedate<='" + keys[3]
-                                + "' and psi.status is not null and (DATE(now()) - DATE(psi.duedate) > 0) ";
+                        instanceWhere += ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.LATE_VISIT_STATUS:
+                        instanceWhere += condition + operatorStatus + "( psi.executiondate is null and  psi.duedate>='"
+                            + keys[2] + "' and psi.duedate<='" + keys[3]
+                            + "' and psi.status is not null and (DATE(now()) - DATE(psi.duedate) > 0) ";
 
-                            // get events by orgunit children
-                            if ( keys[4].equals( "-1" ) )
-                            {
-                                instanceWhere += " and p.organisationunitid in( "
-                                    + getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                            }
+                        // get events by orgunit children
+                        if ( keys[4].equals( "-1" ) )
+                        {
+                            instanceWhere += " and p.organisationunitid in( "
+                                + getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                        }
 
-                            // get events by selected orgunit
-                            else if ( !keys[4].equals( "0" ) )
-                            {
-                                instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
-                            }
+                        // get events by selected orgunit
+                        else if ( !keys[4].equals( "0" ) )
+                        {
+                            instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
+                        }
 
-                            instanceWhere += ")";
-                            operatorStatus = " OR ";
-                            condition = "";
-                            continue;
-                        case ProgramStageInstance.SKIPPED_STATUS:
-                            instanceWhere += condition + operatorStatus + "( psi.status=5 and  psi.duedate>='" + keys[2]
-                                + "' and psi.duedate<='" + keys[3] + "' ";
+                        instanceWhere += ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    case ProgramStageInstance.SKIPPED_STATUS:
+                        instanceWhere += condition + operatorStatus + "( psi.status=5 and  psi.duedate>='" + keys[2]
+                            + "' and psi.duedate<='" + keys[3] + "' ";
 
-                            // get events by orgunit children
-                            if ( keys[4].equals( "-1" ) )
-                            {
-                                instanceWhere += " and psi.organisationunitid in( "
-                                    + getCommaDelimitedString( orgunitChilrenIds ) + " )";
-                            }
+                        // get events by orgunit children
+                        if ( keys[4].equals( "-1" ) )
+                        {
+                            instanceWhere += " and psi.organisationunitid in( "
+                                + getCommaDelimitedString( orgunitChilrenIds ) + " )";
+                        }
 
-                            // get events by selected orgunit
-                            else if ( !keys[4].equals( "0" ) )
-                            {
-                                instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
-                            }
-                            instanceWhere += ")";
-                            operatorStatus = " OR ";
-                            condition = "";
-                            continue;
-                        default:
-                            continue;
+                        // get events by selected orgunit
+                        else if ( !keys[4].equals( "0" ) )
+                        {
+                            instanceWhere += " and p.organisationunitid=" + getOrgUnitId( keys );
+                        }
+                        instanceWhere += ")";
+                        operatorStatus = " OR ";
+                        condition = "";
+                        continue;
+                    default:
+                        continue;
                     }
                 }
                 if ( condition.isEmpty() )
@@ -920,20 +906,20 @@ public class HibernateTrackedEntityInstanceStore
                 int statusEvent = Integer.parseInt( keys[2] );
                 switch ( statusEvent )
                 {
-                    case ProgramStageInstance.COMPLETED_STATUS:
-                        instanceWhere += "psi.completed=true";
-                        break;
-                    case ProgramStageInstance.VISITED_STATUS:
-                        instanceWhere += "psi.executiondate is not null and psi.completed=false";
-                        break;
-                    case ProgramStageInstance.FUTURE_VISIT_STATUS:
-                        instanceWhere += "psi.executiondate is null and psi.duedate >= now()";
-                        break;
-                    case ProgramStageInstance.LATE_VISIT_STATUS:
-                        instanceWhere += "psi.executiondate is null and psi.duedate < now()";
-                        break;
-                    default:
-                        break;
+                case ProgramStageInstance.COMPLETED_STATUS:
+                    instanceWhere += "psi.completed=true";
+                    break;
+                case ProgramStageInstance.VISITED_STATUS:
+                    instanceWhere += "psi.executiondate is not null and psi.completed=false";
+                    break;
+                case ProgramStageInstance.FUTURE_VISIT_STATUS:
+                    instanceWhere += "psi.executiondate is null and psi.duedate >= now()";
+                    break;
+                case ProgramStageInstance.LATE_VISIT_STATUS:
+                    instanceWhere += "psi.executiondate is null and psi.duedate < now()";
+                    break;
+                default:
+                    break;
                 }
 
                 instanceWhere += " and pgi.status=" + ProgramInstance.STATUS_ACTIVE + " ";
@@ -1056,7 +1042,7 @@ public class HibernateTrackedEntityInstanceStore
         return orgUnitIds;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     @Override
     public Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min,
         Integer max )

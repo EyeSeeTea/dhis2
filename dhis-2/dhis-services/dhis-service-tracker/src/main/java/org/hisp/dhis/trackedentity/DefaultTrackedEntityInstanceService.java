@@ -55,9 +55,8 @@ import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
-import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -291,11 +290,26 @@ public class DefaultTrackedEntityInstanceService
             violation = "Program must be defined when program status is defined";
         }
         
-        if ( params.hasProgramDates() && !params.hasProgram() )
+        if ( params.hasFollowUp() && !params.hasProgram() )
         {
-            violation = "Program must be defined when program dates are specified";
+            violation = "Program must be defined when follow up status is defined";
+        }
+        
+        if ( params.hasProgramStartDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program start date is specified";
+        }
+        
+        if ( params.hasProgramEndDate() && !params.hasProgram() )
+        {
+            violation = "Program must be defined when program end date is specified";
         }
 
+        if ( params.hasEventStatus() && ( !params.hasEventStartDate() || !params.hasEventEndDate() ) )
+        {
+            violation = "Event start and end date must be specified when event status is specified";
+        }
+        
         if ( params.isOrQuery() && params.hasFilters() )
         {
             violation = "Query cannot be specified together with filters";
@@ -321,7 +335,8 @@ public class DefaultTrackedEntityInstanceService
     
     @Override
     public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter, Set<String> ou, 
-        OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Set<String> programDate, String trackedEntity, boolean skipMeta, Integer page, Integer pageSize )
+        OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus, Boolean followUp, Date programStartDate, Date programEndDate,
+        String trackedEntity, EventStatus eventStatus, Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize )
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
@@ -366,17 +381,7 @@ public class DefaultTrackedEntityInstanceService
         {
             throw new IllegalQueryException( "Program does not exist: " + program );
         }
-        
-        if ( programDate != null )
-        {
-            for ( String date : programDate )
-            {
-                QueryFilter queryFilter = getQueryFilter( date );
                 
-                params.getProgramDates().add( queryFilter );
-            }
-        }
-        
         TrackedEntity te = trackedEntity != null ? trackedEntityService.getTrackedEntity( trackedEntity ) : null;
         
         if ( trackedEntity != null && te == null )
@@ -387,25 +392,19 @@ public class DefaultTrackedEntityInstanceService
         params.setQuery( query );
         params.setProgram( pr );
         params.setProgramStatus( programStatus );
+        params.setFollowUp( followUp );
+        params.setProgramStartDate( programStartDate );
+        params.setProgramEndDate( programEndDate );
         params.setTrackedEntity( te );
         params.setOrganisationUnitMode( ouMode );
+        params.setEventStatus( eventStatus );
+        params.setEventStartDate( eventStartDate );
+        params.setEventEndDate( eventEndDate );
         params.setSkipMeta( skipMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
         
         return params;
-    }
-
-    private QueryFilter getQueryFilter( String filter )
-    {
-        String[] split = filter.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
-        
-        if ( split == null || split.length != 2 )
-        {
-            throw new IllegalQueryException( "Program date filter has invalid format: " + filter );
-        }
-        
-        return new QueryFilter( split[0], split[1] );
     }
     
     private QueryItem getQueryItem( String item )
@@ -436,7 +435,14 @@ public class DefaultTrackedEntityInstanceService
             throw new IllegalQueryException( "Attribute does not exist: " + item );
         }
         
-        return new QueryItem( at, operator, filter, at.isNumericType() );
+        if ( operator != null && filter != null )
+        {
+            return new QueryItem( at, operator, filter, at.isNumericType() );
+        }
+        else
+        {
+            return new QueryItem( at, at.isNumericType() );
+        }        
     }
     
     @Override
@@ -730,47 +736,6 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityInstances( List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, Collection<TrackedEntityAttribute> attributes,
-        Integer statusEnrollment, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.search( searchKeys, orgunits, followup, attributes, statusEnrollment, min, max );
-    }
-
-    @Override
-    public int countSearchTrackedEntityInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer statusEnrollment )
-    {
-        return trackedEntityInstanceStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
-    }
-
-    @Override
-    public Collection<String> getTrackedEntityInstancePhoneNumbers( List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, Integer statusEnrollment, Integer min, Integer max )
-    {
-        Collection<TrackedEntityInstance> entityInstances = trackedEntityInstanceStore.search( searchKeys, orgunits, followup,
-            null, statusEnrollment, min, max );
-        Set<String> phoneNumbers = new HashSet<String>();
-
-        for ( TrackedEntityInstance instance : entityInstances )
-        {
-            Collection<TrackedEntityAttributeValue> attributeValues = instance.getAttributeValues();
-            if ( attributeValues != null )
-            {
-                for ( TrackedEntityAttributeValue attributeValue : attributeValues )
-                {
-                    if ( attributeValue.getAttribute().getValueType().equals( TrackedEntityAttribute.TYPE_PHONE_NUMBER ) )
-                    {
-                        phoneNumbers.add( attributeValue.getValue() );
-                    }
-                }
-            }
-        }
-
-        return phoneNumbers;
-    }
-
-    @Override
     public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
         Boolean followup, Integer statusEnrollment, Integer min, Integer max )
     {
@@ -783,97 +748,6 @@ public class DefaultTrackedEntityInstanceService
         Integer max )
     {
         return trackedEntityInstanceStore.getByPhoneNumber( phoneNumber, min, max );
-    }
-
-    @Override
-    public Grid getScheduledEventsReport( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer statusEnrollment, Integer min, Integer max, I18n i18n )
-    {
-        String startDate = "";
-        String endDate = "";
-        for ( String searchKey : searchKeys )
-        {
-            String[] keys = searchKey.split( "_" );
-            if ( keys[0].equals( TrackedEntityInstance.PREFIX_PROGRAM_EVENT_BY_STATUS ) )
-            {
-                startDate = keys[2];
-                endDate = keys[3];
-            }
-        }
-
-        Grid grid = new ListGrid();
-        grid.setTitle( i18n.getString( "activity_plan" ) );
-        if ( !startDate.isEmpty() && !endDate.isEmpty() )
-        {
-            grid.setSubtitle( i18n.getString( "from" ) + " " + startDate + " " + i18n.getString( "to" ) + " " + endDate );
-        }
-
-        grid.addHeader( new GridHeader( "entityInstanceid", true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "first_name" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "middle_name" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "last_name" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "gender" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
-
-        Collection<TrackedEntityAttribute> attributes = attributeService
-            .getTrackedEntityAttributesByDisplayOnVisitSchedule( true );
-        for ( TrackedEntityAttribute attribute : attributes )
-        {
-            grid.addHeader( new GridHeader( attribute.getDisplayName(), false, true ) );
-        }
-
-        grid.addHeader( new GridHeader( "programstageinstanceid", true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
-
-        return trackedEntityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
-            attributes, statusEnrollment, min, max );
-    }
-
-    @Override
-    public Grid getTrackingEventsReport( Program program, List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, Integer statusEnrollment, I18n i18n )
-    {
-        String startDate = "";
-        String endDate = "";
-        for ( String searchKey : searchKeys )
-        {
-            String[] keys = searchKey.split( "_" );
-            if ( keys[0].equals( TrackedEntityInstance.PREFIX_PROGRAM_EVENT_BY_STATUS ) )
-            {
-                startDate = keys[2];
-                endDate = keys[3];
-            }
-        }
-
-        Grid grid = new ListGrid();
-        grid.setTitle( i18n.getString( "program_tracking" ) );
-        if ( !startDate.isEmpty() && !endDate.isEmpty() )
-        {
-            grid.setSubtitle( i18n.getString( "from" ) + " " + startDate + " " + i18n.getString( "to" ) + " " + endDate );
-        }
-
-        grid.addHeader( new GridHeader( "entityInstanceid", true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "first_name" ), true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "middle_name" ), true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "last_name" ), true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "gender" ), true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "phone_number" ), false, true ) );
-
-        Collection<TrackedEntityAttribute> attributes = program.getTrackedEntityAttributes();
-
-        for ( TrackedEntityAttribute attribute : attributes )
-        {
-            grid.addHeader( new GridHeader( attribute.getDisplayName(), false, true ) );
-        }
-
-        grid.addHeader( new GridHeader( "programstageinstanceid", true, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "program_stage" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "due_date" ), false, true ) );
-        grid.addHeader( new GridHeader( i18n.getString( "risk" ), false, true ) );
-
-        return trackedEntityInstanceStore.getTrackedEntityInstanceEventReport( grid, searchKeys, orgunits, followup,
-            attributes, statusEnrollment, null, null );
     }
 
     @Override
@@ -919,4 +793,5 @@ public class DefaultTrackedEntityInstanceService
     {
         return trackedEntityInstanceStore.getByAttributeValue( searchText, attributeId, min, max );
     }
+
 }
