@@ -35,7 +35,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.common.ListMap;
@@ -71,7 +73,21 @@ public class PartitionUtilsTest
         periods.add( createPeriod( "200105" ) );
         periods.add( createPeriod( "200108" ) );
         
-        assertEquals( new Partitions().add( TBL + "_2000" ).add( TBL + "_2001" ), PartitionUtils.getPartitions( periods, TBL, null ) );
+        assertEquals( new Partitions().add( TBL + "_2000" ).add( TBL + "_2001" ), PartitionUtils.getPartitions( periods, TBL, null, null ) );
+    }
+
+    @Test
+    public void getGetPartitionsMultiplePeriodsPrune()
+    {
+        List<NameableObject> periods = new ArrayList<NameableObject>();
+        periods.add( createPeriod( "200011" ) );
+        periods.add( createPeriod( "200105" ) );
+        periods.add( createPeriod( "200108" ) );
+
+        Set<String> validPartitions = new HashSet<String>();
+        validPartitions.add( TBL + "_2000" );
+        
+        assertEquals( new Partitions().add( TBL + "_2000" ), PartitionUtils.getPartitions( periods, TBL, null, validPartitions ) );
     }
 
     @Test
@@ -105,7 +121,7 @@ public class PartitionUtilsTest
         
         assertEquals( expected, PartitionUtils.getPartitions( period, TBL, null, null ) );
         
-        List<String> validPartitions = new ArrayList<String>();
+        Set<String> validPartitions = new HashSet<String>();
         validPartitions.add( TBL + "_2008" );
         validPartitions.add( TBL + "_2010" );
         
@@ -118,7 +134,7 @@ public class PartitionUtilsTest
     public void testGetTablePeriodMapA()
     {        
         ListMap<Partitions, NameableObject> map = PartitionUtils.getPartitionPeriodMap( getList( 
-            createPeriod( "2000S1" ), createPeriod( "2000S2" ), createPeriod( "2001S1" ), createPeriod( "2001S2" ), createPeriod( "2002S1" ) ), TBL, null );
+            createPeriod( "2000S1" ), createPeriod( "2000S2" ), createPeriod( "2001S1" ), createPeriod( "2001S2" ), createPeriod( "2002S1" ) ), TBL, null, null );
         
         assertEquals( 3, map.size() );
         
@@ -135,7 +151,7 @@ public class PartitionUtilsTest
     public void testGetTablePeriodMapB()
     {        
         ListMap<Partitions, NameableObject> map = PartitionUtils.getPartitionPeriodMap( getList( 
-            createPeriod( "2000April" ), createPeriod( "2000" ), createPeriod( "2001" ), createPeriod( "2001Oct" ), createPeriod( "2002Oct" ) ), TBL, null );
+            createPeriod( "2000April" ), createPeriod( "2000" ), createPeriod( "2001" ), createPeriod( "2001Oct" ), createPeriod( "2002Oct" ) ), TBL, null, null );
 
         assertEquals( 5, map.size() );
         
@@ -143,6 +159,25 @@ public class PartitionUtilsTest
         assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2001" ) ) );
         assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2000" ).add( TBL + "_2001" ) ) );
         assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2001" ).add( TBL + "_2002" ) ) );
+        assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2002" ).add( TBL + "_2003" ) ) );
+    }
+
+    @Test
+    public void testGetTablePeriodMapPrune()
+    {        
+        Set<String> validPartitions = new HashSet<String>();
+        validPartitions.add( TBL + "_2000" );
+        validPartitions.add( TBL + "_2002" );
+        validPartitions.add( TBL + "_2003" );
+        
+        ListMap<Partitions, NameableObject> map = PartitionUtils.getPartitionPeriodMap( getList( 
+            createPeriod( "2000April" ), createPeriod( "2000" ), createPeriod( "2001" ), createPeriod( "2001Oct" ), createPeriod( "2002Oct" ) ), TBL, null, validPartitions );
+
+        assertEquals( 4, map.size() );
+        
+        assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2000" ) ) );
+        assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2000" ) ) );
+        assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2002" ) ) );
         assertTrue( map.keySet().contains( new Partitions().add( TBL + "_2002" ).add( TBL + "_2003" ) ) );
     }
 }

@@ -8,31 +8,32 @@ function orgunitSelected( orgUnits, orgUnitNames )
 	showById( "programLoader" );
 	disable('program');
 	hideById('addNewDiv');
-	organisationUnitSelected( orgUnits, orgUnitNames );
+	setFieldValue("orgunitName", orgUnitNames[0]);
+	setFieldValue("orgunitId", orgUnits[0]);
 	clearListById('program');
 	$.postJSON( 'singleEventPrograms.action', {}, function( json )
-		{
-			var count = 0;
-			for ( i in json.programs ) {
-				if( json.programs[i].type==2){
-					jQuery( '#program').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
-					count++;
-				}
+	{
+		var count = 0;
+		for ( i in json.programs ) {
+			if( json.programs[i].type==2){
+				jQuery( '#program').append( '<option value="' + json.programs[i].id +'" programStageId="' + json.programs[i].programStageId + '" type="' + json.programs[i].type + '">' + json.programs[i].name + '</option>' );
+				count++;
 			}
-			
-			if(count==0){
-				jQuery( '#program').prepend( '<option value="" >' + i18n_none_program + '</option>' );
-			}
-			else if(count>1){
-				jQuery( '#program').prepend( '<option value="" selected>' + i18n_please_select + '</option>' );
-				enable('addEntityInstanceBtn');
-			}
-			
-			enableBtn();
-			hideById('programLoader');
-			jQuery('#program').width(width);
-			enable('program');
-		});
+		}
+		
+		if(count==0){
+			jQuery( '#program').prepend( '<option value="" >' + i18n_none_program + '</option>' );
+		}
+		else{
+			jQuery( '#program').prepend( '<option value="" selected>' + i18n_please_select + '</option>' );
+			enable('addEntityInstanceBtn');
+		}
+		
+		enableBtn();
+		hideById('programLoader');
+		jQuery('#program').width(width);
+		enable('program');
+	});
 }
 selection.setListenerFunction( orgunitSelected );
 
@@ -44,17 +45,17 @@ function showAddTrackedEntityInstanceForm()
 	hideById('contentDiv');
 	hideById('searchDiv');
 	hideById('advanced-search');
+	hideById('listRelationshipDiv');
+	showById('entityInstanceMamagementLink');
+	hideById('mainLinkLbl');
 	setInnerHTML('addNewDiv','');
-	setInnerHTML('dataRecordingSelectDiv','');
 	jQuery('#loaderDiv').show();
 	jQuery('#addNewDiv').load('showEventWithRegistrationForm.action',
 		{
 			programId: getFieldValue('program')
 		}, function()
 		{
-			setInnerHTML('singleProgramName',jQuery('#program option:selected').text());	
 			unSave = true;
-			showById('singleProgramName');
 			showById('addNewDiv');
 			jQuery('#loaderDiv').hide();
 		});
@@ -62,21 +63,18 @@ function showAddTrackedEntityInstanceForm()
 
 function showUpdateTrackedEntityInstanceForm( entityInstanceId )
 {
+	showLoader();
+	hideById('searchDiv');
+	hideById('singleDataEntryFormDiv');
 	hideById('dataEntryMenu');
 	showById('eventActionMenu');
 	hideById('nextEventLink');
-	setInnerHTML('singleProgramName',jQuery('#program option:selected').text());	
-	showById('singleProgramName');
 	setInnerHTML('addNewDiv','');
+	hideById('listEntityInstanceDiv');
+	hideById('mainLinkLbl');
+	
 	unSave = false;
-	showSelectedDataRecoding(entityInstanceId, getFieldValue('program'));
-}
-
-function addEventForEntityInstanceForm( divname )
-{
-	jQuery("#" + divname + " [id=checkDuplicateBtn]").click(function() {
-		checkDuplicate( divname );
-	});
+	loadProgramStages(entityInstanceId, getFieldValue('program'));
 }
 
 function validateData()
@@ -176,7 +174,6 @@ function addData( programId, entityInstanceId )
 			}
 			else
 			{
-				setInnerHTML('singleProgramName','');
 				hideById('addNewDiv');
 				if( getFieldValue('listAll')=='true'){
 					listAllTrackedEntityInstance();
@@ -196,14 +193,12 @@ function addData( programId, entityInstanceId )
 function showEntryFormDiv()
 {
 	hideById('singleEventForm');
-	jQuery("#resultSearchDiv").dialog("close");
 }
 
 function backEventList()
 {
 	showById('dataEntryMenu');
 	hideById('eventActionMenu');
-	hideById('singleProgramName');
 	showSearchForm();
 	if( getFieldValue('listAll')=='true'){
 		listAllTrackedEntityInstance();

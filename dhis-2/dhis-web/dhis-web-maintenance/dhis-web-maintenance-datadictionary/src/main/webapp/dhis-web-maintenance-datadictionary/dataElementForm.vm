@@ -101,8 +101,8 @@
             <select id="valueType" name="valueType" onchange="changeValueType( this.value )">
 				<option value="int" #if( $!dataElement.type == 'int' ) selected="selected" #end >$i18n.getString( "number" )</option>
 				<option value="string" #if( $!dataElement.type == 'string' ) selected="selected" #end >$i18n.getString( "text" )</option>
+                <option value="bool" #if( $!dataElement.type == 'bool' ) selected="selected" #end >$i18n.getString( "yes_no" )</option>
 				<option value="trueOnly" #if( $!dataElement.type == 'trueOnly' ) selected="selected" #end >$i18n.getString( "yes_only" )</option>
-				<option value="bool" #if( $!dataElement.type == 'bool' ) selected="selected" #end >$i18n.getString( "yes_no" )</option>
 				<option value="date" #if( $!dataElement.type == 'date' ) selected="selected" #end >$i18n.getString( "date" )</option>
 				<option value="username" #if( $!dataElement.type == 'username' ) selected="selected" #end >$i18n.getString( "user_name" )</option>
 			</select>
@@ -143,6 +143,8 @@
 				<option value="sum" #if( $!dataElement.aggregationOperator == 'sum' ) selected="selected" #end>$i18n.getString( "sum" )</option>
 				<option value="average" #if( $!dataElement.aggregationOperator == 'average' ) selected="selected" #end>$i18n.getString( "average" )</option>
                 <option value="count" #if( $!dataElement.aggregationOperator == 'count' ) selected="selected" #end>$i18n.getString( "count" )</option>
+                <option value="stddev" #if( $!dataElement.aggregationOperator == 'stddev' ) selected="selected" #end>$i18n.getString( "stddev" )</option>
+                <option value="variance" #if( $!dataElement.aggregationOperator == 'variance' ) selected="selected" #end>$i18n.getString( "variance" )</option>
 			</select>
 		</td>
 	</tr>
@@ -184,7 +186,7 @@
 		</td>
 	</tr>
 	<tr>
-		<td>$i18n.getString( 'option_set_for_data_values' )</td>			
+		<td><label>$i18n.getString( 'option_set_for_data_values' )</label></td>			
 		<td>
 			<select id="selectedOptionSetId" name="selectedOptionSetId">
 				<option value="0">[$i18n.getString('please_select')]</option>
@@ -195,7 +197,7 @@
 		</td>
     </tr>
     <tr>
-        <td>$i18n.getString( 'option_set_for_comments' )</td>            
+        <td><label>$i18n.getString( 'option_set_for_comments' )</label></td>            
         <td>
             <select id="selectedCommentOptionSetId" name="selectedCommentOptionSetId">
                 <option value="0">[$i18n.getString('please_select')]</option>
@@ -206,7 +208,7 @@
         </td>
     </tr>
     <tr>
-        <td>$i18n.getString( 'legend_set' )</td>            
+        <td><label>$i18n.getString( 'legend_set' )</label></td>            
         <td>
             <select id="selectedLegendSetId" name="selectedLegendSetId">
                 <option value="0">[$i18n.getString('please_select')]</option>
@@ -217,7 +219,7 @@
         </td>
     </tr>
     <tr>
-        <td style="width:200px">$i18n.getString( "aggregation_levels" )</td>
+        <td style="width:200px"><label>$i18n.getString( "aggregation_levels" )</label></td>
         <td><input type="checkbox" #if ( $!dataElement.hasAggregationLevels() )checked="checked"#end onclick="toggleById( 'aggregationLevelsContainer' )"/></td>
     </tr>
 </table>
@@ -273,7 +275,7 @@
     
 	#foreach ( $groupSet in $groupSets )
     <tr>
-		<td>$!encoder.htmlEncode( $groupSet.name )</td>
+		<td><label>$!encoder.htmlEncode( $groupSet.name )</label></td>
 		<td>
 			<select id="dataElementGroups" name="dataElementGroups">
 				<option value="-1">[ $i18n.getString( "select_group" ) ]</option>

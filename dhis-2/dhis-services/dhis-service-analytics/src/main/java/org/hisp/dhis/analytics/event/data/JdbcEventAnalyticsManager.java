@@ -46,15 +46,14 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
-import org.hisp.dhis.analytics.event.EventQueryPlanner;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.Program;
 import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -296,19 +295,7 @@ public class JdbcEventAnalyticsManager
         
         return count;
     }
-    
-    public List<String> getAnalyticsTables( Program program )
-    {
-        final String sql = 
-            "select table_name from information_schema.tables " +
-            "where table_name like '" + EventQueryPlanner.TABLE_PREFIX + "_%_" + program.getUid().toLowerCase() + "' " +
-            "and table_type = 'BASE TABLE'";
         
-        log.info( "Information schema SQL: " + sql );
-        
-        return jdbcTemplate.queryForList( sql, String.class );
-    }
-    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -325,8 +312,8 @@ public class JdbcEventAnalyticsManager
         {
             sql += statementBuilder.columnQuote( dimension.getDimensionName() ) + ",";
         }
-        
-        for ( QueryItem queryItem : params.getUniqueItems() )
+                
+        for ( QueryItem queryItem : params.getItems() )
         {
             IdentifiableObject item = queryItem.getItem();
             
@@ -400,15 +387,21 @@ public class JdbcEventAnalyticsManager
         {
             if ( item.hasFilter() )
             {
-                sql += "and " + getColumn( item ) + " " + item.getSqlOperator() + " " + getSqlFilter( item ) + " ";
+                for ( QueryFilter filter : item.getFilters() )
+                {
+                    sql += "and " + getColumn( item ) + " " + filter.getSqlOperator() + " " + getSqlFilter( filter, item.isNumeric() ) + " ";
+                }
             }
         }
         
-        for ( QueryItem filter : params.getItemFilters() )
+        for ( QueryItem item : params.getItemFilters() )
         {
-            if ( filter.hasFilter() )
+            if ( item.hasFilter() )
             {
-                sql += "and " + getColumn( filter ) + " " + filter.getSqlOperator() + " " + getSqlFilter( filter ) + " ";
+                for ( QueryFilter filter : item.getFilters() )
+                {
+                    sql += "and " + getColumn( item ) + " " + filter.getSqlOperator() + " " + getSqlFilter( filter, item.isNumeric() ) + " ";
+                }
             }
         }
         
@@ -433,13 +426,13 @@ public class JdbcEventAnalyticsManager
     /**
      * Returns the filter value for the given query item.
      */
-    private String getSqlFilter( QueryItem item )
+    private String getSqlFilter( QueryFilter filter, boolean numeric )
     {
-        String encodedFilter = statementBuilder.encode( item.getFilter(), false );
+        String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
         
-        String sqlFilter = item.getSqlFilter( encodedFilter );
+        String sqlFilter = filter.getSqlFilter( encodedFilter );
         
-        return item.isNumeric() ? sqlFilter : sqlFilter.toLowerCase();
+        return numeric ? sqlFilter : sqlFilter.toLowerCase();
     }
 
     /**

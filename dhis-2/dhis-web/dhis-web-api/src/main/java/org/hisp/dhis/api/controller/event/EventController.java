@@ -32,15 +32,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.hisp.dhis.api.controller.WebMetaData;
 import org.hisp.dhis.api.controller.WebOptions;
-import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
@@ -50,7 +49,6 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
-import org.hisp.dhis.dxf2.events.event.EventStatus;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.event.ImportEventTask;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -60,6 +58,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
@@ -90,6 +89,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class EventController
 {
     public static final String RESOURCE_PATH = "/events";
+    
+    private static final String META_DATA_KEY_DE = "de";
 
     //--------------------------------------------------------------------------
     // Dependencies
@@ -121,7 +122,7 @@ public class EventController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "", method = RequestMethod.GET )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public String getEvents(
         @RequestParam( required = false ) String program,
         @RequestParam( required = false ) String programStage,
@@ -133,76 +134,49 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request ) throws NotFoundException
+        @RequestParam( required = false ) boolean skipMeta,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request )
     {
-        WebOptions options = new WebOptions( parameters );        
-        WebMetaData metaData = new WebMetaData();
+        WebOptions options = new WebOptions( parameters );
         
         Program pr = manager.get( Program.class, program );
         ProgramStage prs = manager.get( ProgramStage.class, programStage );
         List<OrganisationUnit> organisationUnits = new ArrayList<OrganisationUnit>();
-        OrganisationUnit rootOrganisationUnit;
         TrackedEntityInstance tei = null;
+        OrganisationUnit rootOrganisationUnit = null;
 
         if ( trackedEntityInstance != null )
         {
             tei = trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
+        }
 
-            if ( tei == null )
+        if ( orgUnit != null )
+        {
+            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+        }
+
+        if ( rootOrganisationUnit != null )
+        {
+            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
             {
-                throw new NotFoundException( "TrackedEntityInstance", trackedEntityInstance );
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( rootOrganisationUnit.getUid() ) );
             }
-        }
-
-        rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
-
-        if ( rootOrganisationUnit == null )
-        {
-            try
+            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
             {
-                rootOrganisationUnit = manager.get( OrganisationUnit.class, Integer.parseInt( orgUnit ) );
+                organisationUnits.add( rootOrganisationUnit );
+                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
             }
-            catch ( NumberFormatException ignored )
+            else // SELECTED
             {
+                organisationUnits.add( rootOrganisationUnit );
             }
-        }
-
-        if ( rootOrganisationUnit == null && tei != null )
-        {
-            Events events = eventService.getEvents( pr, prs, programStatus, followUp, null, tei, startDate, endDate, status );
-
-            model.addAttribute( "model", events );
-            model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
-
-            return "events";            
-        }        
-
-        if ( rootOrganisationUnit == null )
-        {
-            throw new NotFoundException( "OrganisationUnit", program );
-        }
-
-        if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
-        {
-            organisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( rootOrganisationUnit.getUid() ) );
-        }
-        else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
-        {
-            organisationUnits.add( rootOrganisationUnit );
-            organisationUnits.addAll( rootOrganisationUnit.getChildren() );
-        }
-        else // SELECTED
-        {
-            organisationUnits.add( rootOrganisationUnit );
         }
 
         Events events = eventService.getEvents( pr, prs, programStatus, followUp, organisationUnits, tei, startDate, endDate, status );
         
-        List<Event> eventList = new ArrayList<Event>( events.getEvents() );
-
         if ( options.hasLinks() )
         {
-            for ( Event event : eventList )
+            for ( Event event : events.getEvents() )
             {
                 event.setHref( ContextUtils.getRootPath( request ) + RESOURCE_PATH + "/" + event.getEvent() );
             }
@@ -210,21 +184,24 @@ public class EventController
         
         if ( options.hasPaging() )
         {      	
-            Pager pager = new Pager( options.getPage(), eventList.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            eventList = PagerUtils.pageCollection( eventList, pager );        	
+            Pager pager = new Pager( options.getPage(), events.getEvents().size(), options.getPageSize() );
+            events.setPager( pager );
+            events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );        	
         }        
         
-        metaData.setEvents( eventList );
-
-        model.addAttribute( "model", metaData );
+        if ( !skipMeta && pr != null )
+        {
+            events.setMetaData( getMetaData( pr ) );
+        }
+        
+        model.addAttribute( "model", events );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return "events";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public String getEvent( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
@@ -248,12 +225,31 @@ public class EventController
         return "event";
     }
 
+    private Map<Object, Object> getMetaData( Program program )
+    {
+        Map<Object, Object> metaData = new HashMap<Object, Object>();
+        
+        if ( program != null )
+        {
+            Map<String, String> dataElements = new HashMap<String, String>();
+            
+            for ( DataElement de : program.getAllDataElements() )
+            {
+                dataElements.put( de.getUid(), de.getDisplayName() );
+            }
+
+            metaData.put( META_DATA_KEY_DE, dataElements );
+        }
+        
+        return metaData;
+    }
+    
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/xml" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void postXmlEvent( HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
         InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
@@ -298,7 +294,7 @@ public class EventController
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void postJsonEvent( HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws Exception
     {
         InputStream inputStream = StreamUtils.wrapAndCheckCompressionFormat( request.getInputStream() );
@@ -347,7 +343,7 @@ public class EventController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putXmlEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws IOException
     {
         Event event = eventService.getEvent( uid );
@@ -366,7 +362,7 @@ public class EventController
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEvent( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws IOException
     {
         Event event = eventService.getEvent( uid );
@@ -385,7 +381,7 @@ public class EventController
     }
     
     @RequestMapping( value = "/{uid}/{dataElementUid}", method = RequestMethod.PUT, consumes = "application/json" )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_ADD')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventSingleValue( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, @PathVariable( "dataElementUid" ) String dataElementUid ) throws IOException
     {
         Event event = eventService.getEvent( uid );
@@ -418,7 +414,7 @@ public class EventController
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
     @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_PATIENT_DATAVALUE_DELETE')" )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_DELETE')" )
     public void deleteEvent( HttpServletResponse response, @PathVariable( "uid" ) String uid )
     {
         Event event = eventService.getEvent( uid );

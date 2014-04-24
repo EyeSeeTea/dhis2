@@ -2,6 +2,7 @@
 <input type='hidden' id='orgunitId' name='orgunitId' value='$organisationUnit.uid' >
 <input type="hidden" id='hideLink' name='hideLink' value='false'>
 <input type='hidden' id='isSearchByProgram' name='isSearchByProgram' value='false' >
+	<select id='attributeIds' name='attributeIds' class='hidden'></select>
 
 <table style="margin-bottom:8px" id="commonSearchDiv" name="commonSearchDiv">    
 	<tr>
@@ -19,7 +20,7 @@
 		<td>$i18n.getString('program')</td>
 		<td>
 			<select id='program' name='program' onchange='enableBtn();'>
-				<option value="">[$i18n.getString( "view_all" )]</option>
+				<option value="" type=''>[$i18n.getString( "view_all" )]</option>
 				#foreach($program in $programs)
 					<option value="$program.uid" type='$program.type'>$program.displayName</option>
 				#end
@@ -47,9 +48,8 @@
 		<td>$i18n.getString('status')</td>
 		<td>
 			<select id="status" name="status">
-				<option value=''>$i18n.getString("all")</option>
+				<option value='ACTIVE'>$i18n.getString("all")</option>
 				<option value='LATE_VISIT'>$i18n.getString("overdue")</option>
-				<option value='ACTIVE'>$i18n.getString("active")</option>
 				<option value='VISITED'>$i18n.getString("incomplete")</option>
 				<option value='COMPLETED'>$i18n.getString("completed")</option>
 				<option value='FUTURE_VISIT'>$i18n.getString("scheduled_in_future")</option> 
@@ -142,7 +142,6 @@
 	<div style="padding: 10px 0 15px 3px">
 		<input type="button" class='large-button' value='$i18n.getString( "add_filter" )' onclick='addAttributeOption();'>
         <input type="button" class='large-button' value='$i18n.getString( "search" )' onclick='isAdvancedSearch=true;validateAdvancedSearch(1);' id='searchEntityInstanceBtn'>
-        <input type="button" class='large-button hidden' id='sendSmsToListBtn' value="$i18n.getString('sms')" onclick="setFieldValue('sendToList', true);showSendSmsForm();">
     </div>
 </div>
 

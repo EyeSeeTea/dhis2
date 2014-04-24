@@ -162,6 +162,14 @@
 
     <property name="rewindRelativePeriods" />
 
+    <property name="rangeAxisMaxValue" />
+
+    <property name="rangeAxisMinValue" />
+
+    <property name="rangeAxisSteps" />
+
+    <property name="rangeAxisDecimals" />
+
     <!-- Access properties -->
     <property name="externalAccess" />
 
