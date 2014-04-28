@@ -35,7 +35,9 @@ dhis2.settings = dhis2.settings || {};
 
 (function (undefined) {
 
-    var getBaseUrl = (function () {
+    var templates = {},
+        profileLinks = [],
+        getBaseUrl = (function () {
         var href = window.location.origin;
         return function () {
             var urlParts = href.split("/"),
@@ -60,6 +62,58 @@ dhis2.settings = dhis2.settings || {};
         }
     })();
 
+    profileLinks = [
+        {
+            name: "settings",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-about/userSettings.action",
+            icon: "../icons/usersettings.png",
+            description: ""
+        },
+        {
+            name: "profile",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-about/showUpdateUserProfileForm.action",
+            icon: "../icons/function-profile.png",
+            description: ""
+        },
+        {
+            name: "account",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-about/showUpdateUserAccountForm.action",
+            icon: "../icons/function-account.png",
+            description: ""
+        },
+        {
+            name: "help",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-about/help.action",
+            icon: "../icons/function-account.png",
+            description: ""
+        },
+        {
+            name: "log_out",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-security/logout.action",
+            icon: "../icons/function-log-out.png",
+            description: ""
+        },
+        {
+            name: "about_dhis2",
+            namespace: "/dhis-web-commons-about",
+            defaultAction: "../dhis-web-commons-about/about.action",
+            icon: "../icons/function-about-dhis2.png",
+            description: ""
+        }
+    ];
+
+    function fixUrlIfNeeded(iconUrl) {
+        if (iconUrl.substring(0, 2) === "..") {
+            return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
+        }
+        return iconUrl;
+    }
+
     (function (dhis2, undefined) {
         var MAX_FAVORITES = 9,
             du = {
@@ -71,7 +125,7 @@ dhis2.settings = dhis2.settings || {};
              * Object that represents the list of menu items
              * and managers the order of the items to be saved.
              */
-                menuItemsList = (function () {
+            menuItemsList = (function () {
                 var menuOrder = [],
                     menuItems = {};
 
@@ -194,13 +248,6 @@ dhis2.settings = dhis2.settings || {};
                 return inverse ? result.reverse() : result;
             }
 
-            function fixUrlIfNeeded(iconUrl) {
-                if (iconUrl.substring(0, 2) === "..") {
-                    return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
-                }
-                return iconUrl;
-            }
-
             /***********************************************************************
              * Public methods
              **********************************************************************/
@@ -276,6 +323,7 @@ dhis2.settings = dhis2.settings || {};
                         keysToTranslate.push("intro_" + item.name);
                     }
                     item.icon = fixUrlIfNeeded(item.icon);
+                    item.defaultAction = fixUrlIfNeeded(item.defaultAction);
                     menuItems.setItem(item.id, item);
                 });
 
@@ -433,16 +481,6 @@ dhis2.settings = dhis2.settings || {};
                 menu: "/api/menu/"
             };
 
-        markup += '<li data-id="${id}" data-app-name="${name}" data-app-action="${defaultAction}">';
-        markup += '  <a href="${defaultAction}" class="app-menu-item">';
-        markup += '    <img src="${baseUrl}${icon}" onError="javascript: this.onerror=null; this.src = \'../icons/program.png\';">';
-        markup += '    <span>${name}</span>';
-        markup += '    <div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i><p>${description}</p></div>';
-        markup += '  </a>';
-        markup += '</li>';
-
-        $.template('appMenuItemTemplate', markup);
-
         function renderDropDownFavorites() {
             var selector = '#appsDropDown .menuDropDownBox',
                 apps = dhis2.menu.getOrderedAppList();
@@ -546,6 +584,87 @@ dhis2.settings = dhis2.settings || {};
 
         menu.subscribe(renderMenu);
 
+        function prepareTemplates() {
+            /**
+             * Templates that are used during the menu
+             */
+            templates.buttons = '<ul id="menuLinkArea">' +
+                '<li id="profileDropDown_button">' +
+                '<a id="profileMenuLink" class="menu-link drop-down-menu-link">' +
+                '<i class="fa fa-user"></i>Profile' +
+                '</a>' +
+                '</li>' +
+                '<li id="appsDropDown_button">' +
+                '<a id="appsMenuLink" class="menu-link drop-down-menu-link">' +
+                '<i class="fa fa-th"></i>Apps' +
+                '</a>' +
+                '</li>' +
+                '</ul>';
+
+            templates.dropDownApps = '<div id="appsDropDown" class="menuDropDownArea app-menu-dropdown appsMenuLink_menu">' +
+                '<div class="caret-up-border"></div>'+
+                '<div class="caret-up-background"></div>'+
+                '<div class="menu-drop-down-wrap">'+
+                '<div class="menu-drop-down-scroll">'+
+                '<ul class="menuDropDownBox">' +
+                '<li class="menu-placeholder">' +
+                '<img src="' + getBaseUrl() + '/images/ajax-loader-bar.gif">' +
+                '</li>' +
+                '</ul>'+
+                '</div>'+
+                '</div>'+
+                '<div class="apps-menu-more">' +
+                '<a href="../dhis-web-commons-about/modules.action">More apps</a>' +
+                '</div>'+
+                '</div>';
+
+            templates.dropDownProfile =
+                '<div id="profileDropDown" class="menuDropDownArea app-menu-dropdown ui-helper-clearfix profileMenuLink_menu">' +
+                    '<div class="caret-up-border"></div>' +
+                    '<div class="caret-up-background"></div>' +
+                    '<ul class="menuDropDownBox">' +
+                    '<li class="menu-placeholder">' +
+                    '<img src="' + getBaseUrl() + '/images/ajax-loader-bar.gif">' +
+                    '</li>' +
+                    '</ul>' +
+                    '</div>';
+
+            templates.appMenuItemTemplate = '<li data-id="${id}" data-app-name="${name}" data-app-action="${baseUrl}${defaultAction}">' +
+                        '<a href="${baseUrl}${defaultAction}" class="app-menu-item">' +
+                            '<img src="${baseUrl}${icon}" onError="javascript: this.onerror=null; this.src = \'' + getBaseUrl() + '/icons/program.png\';">' +
+                            '<span>${name}</span>${baseUrl}' +
+                            '<div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i><p>${description}</p></div>' +
+                        '</a>' +
+                     '</li>';
+
+            $.template('buttonsHtml', templates.buttons);
+            $.template('dropDownHtml', templates.dropDownApps + templates.dropDownProfile);
+            $.template('appMenuItemTemplate', templates.appMenuItemTemplate);
+        }
+
+        function initInitialMenuHtml() {
+            if (typeof dhis2.menu.elementId === "string") {
+                $.tmpl('buttonsHtml').appendTo('#' + dhis2.menu.elementId);
+                $.tmpl('dropDownHtml').appendTo('#' + dhis2.menu.elementId);
+            }
+        }
+
+        function prepareProfileMenu() {
+            dhis2.translate.get(["settings", "profile", "account", "help", "log_out","about_dhis2"], addProfileMenu);
+            $('#profileDropDown ul li').remove();
+        }
+
+        function addProfileMenu(translations) {
+            profileLinks.forEach(function (item, index, profileLinks) {
+                item.id = item.name;
+                item.name = translations.get(item.id);
+                item.icon = fixUrlIfNeeded(item.icon);
+                item.defaultAction = fixUrlIfNeeded(item.defaultAction);
+            });
+            $('#profileDropDown ul li').remove();
+            $.tmpl( "appMenuItemTemplate", profileLinks).appendTo('#profileDropDown ul')
+        }
+
         /**
          * jQuery events that communicate with the web api
          * TODO: Check the urls (they seem to be specific to the dev location atm)
@@ -554,6 +673,10 @@ dhis2.settings = dhis2.settings || {};
             var menuTimeout = 500,
                 closeTimer = null,
                 dropDownId = null;
+
+            prepareTemplates();
+            initInitialMenuHtml();
+            prepareProfileMenu();
 
             $.ajax(getBaseUrl() + urls["getModules"]).success(function (data) {
                 if (typeof data.modules === 'object') {

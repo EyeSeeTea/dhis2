@@ -288,6 +288,7 @@ a.menu-link:hover
     display: block;
     height: 110px;
     padding: 0;
+    text-decoration: none;
     width: 120px;
 }
 
