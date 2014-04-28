@@ -7,6 +7,10 @@
 
   <context:component-scan base-package="org.hisp.dhis.schema.descriptors" />
 
+  <context:component-scan base-package="org.hisp.dhis.calendar.impl" />
+
+  <bean id="org.hisp.dhis.calendar.CalendarService" class="org.hisp.dhis.calendar.DefaultCalendarService" />
+
   <bean id="org.hisp.dhis.schema.SchemaService" class="org.hisp.dhis.schema.DefaultSchemaService" />
 
   <bean id="org.hisp.dhis.schema.PropertyIntrospectorService" class="org.hisp.dhis.schema.DefaultPropertyIntrospectorService" />
