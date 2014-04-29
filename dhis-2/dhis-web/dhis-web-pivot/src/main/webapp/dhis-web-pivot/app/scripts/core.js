@@ -1922,7 +1922,8 @@ Ext.onReady( function() {
 					totalColObjects = [],
 					uuidDimUuidsMap = {},
 					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
-					htmlArray;
+                    tdCount = 0,
+                    htmlArray;
 
 				xResponse.sortableIdObjects = [];
 
@@ -1951,6 +1952,9 @@ Ext.onReady( function() {
                     if (config.hidden || config.collapsed) {
                         return '';
                     }
+
+                    // number of cells
+                    tdCount = tdCount + 1;
 
 					// Background color from legend set
 					if (isNumeric && xLayout.legendSet) {
@@ -2604,7 +2608,10 @@ Ext.onReady( function() {
 
 					return {
 						html: getHtml(htmlArray),
-						uuidDimUuidsMap: uuidDimUuidsMap
+						uuidDimUuidsMap: uuidDimUuidsMap,
+						xColAxis: xColAxis,
+						xRowAxis: xRowAxis,
+                        tdCount: tdCount
 					};
 				}();
 			};
