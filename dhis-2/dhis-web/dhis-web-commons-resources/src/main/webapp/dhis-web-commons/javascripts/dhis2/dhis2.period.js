@@ -41,7 +41,7 @@ dhis2.period.DEFAULT_DATE_FORMAT = "yyyy-mm-dd";
  *  - dhis2.period.calendar   The currently selected system calendar
  *  - dhis2.period.generator  An instance of this class using the system calendar
  *
- * @param calendar Calendar to use, this must coming from $.calendars.instance(chronology).
+ * @param calendar Calendar to use, this must come from $.calendars.instance(chronology).
  * @param format Date format to use for formatting, will default to ISO 8601
  * @constructor
  */
@@ -53,10 +53,6 @@ dhis2.period.PeriodGenerator = function( calendar, format ) {
   if( typeof format === 'undefined' ) {
     format = dhis2.period.DEFAULT_DATE_FORMAT;
   }
-
-  // $.calendars date formatter uses a different format than joda-time/JdkCalendar, for the most common cases we can get away
-  // with just doing lower case on the string, but special handling might be needed in the future.
-  format = format.toLowerCase();
 
   this.calendar = calendar;
 
@@ -76,7 +72,7 @@ dhis2.period.PeriodGenerator = function( calendar, format ) {
 };
 
 /**
- * @returns All available period generators
+ * @returns Object All available period generators
  */
 dhis2.period.PeriodGenerator.prototype.getAll = function() {
   return this.periodTypes;
@@ -256,6 +252,9 @@ dhis2.period.makeDailyPeriodGenerator = function( cal, format ) {
       period['name'] = startDate.formatDate(format);
       period['id'] = 'Daily_' + period['startDate'];
       period['iso'] = startDate.formatDate("yyyymmdd");
+
+      period['_startDate'] = startDate;
+      period['_endDate'] = startDate;
 
       periods.push(period);
 

@@ -28,13 +28,10 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.calendar.AbstractCalendar;
 import org.hisp.dhis.calendar.Calendar;
-import org.hisp.dhis.calendar.CalendarComparator;
 import org.hisp.dhis.calendar.CalendarService;
+import org.hisp.dhis.calendar.DateFormat;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
@@ -54,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -172,7 +168,12 @@ public class GetGeneralSettingsAction
 
     public List<Calendar> getCalendars()
     {
-        return calendarService.getAll();
+        return calendarService.getAllCalendars();
+    }
+
+    public List<DateFormat> getDateFormats()
+    {
+        return calendarService.getAllDateFormats();
     }
 
     // -------------------------------------------------------------------------

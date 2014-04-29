@@ -54,6 +54,11 @@ public class DefaultCalendarService implements CalendarService
 
     private Map<String, Calendar> calendarMap = Maps.newHashMap();
 
+    private List<DateFormat> dateFormats = Lists.newArrayList(
+        new DateFormat( "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-MM-dd", "yyyy-mm-dd" ),
+        new DateFormat( "dd-MM-yyyy", "dd-MM-yyyy", "dd-MM-yyyy", "dd-mm-yyyy" )
+    );
+
     @PostConstruct
     public void init()
     {
@@ -64,7 +69,7 @@ public class DefaultCalendarService implements CalendarService
     }
 
     @Override
-    public List<Calendar> getAll()
+    public List<Calendar> getAllCalendars()
     {
         List<Calendar> sortedCalendars = Lists.newArrayList( calendarMap.values() );
         Collections.sort( sortedCalendars, CalendarComparator.INSTANCE );
@@ -72,15 +77,46 @@ public class DefaultCalendarService implements CalendarService
     }
 
     @Override
+    public List<DateFormat> getAllDateFormats()
+    {
+        return dateFormats;
+    }
+
+    @Override
     public Calendar getSystemCalendar()
     {
-        String calendar = (String) settingManager.getSystemSetting( SystemSettingManager.KEY_CALENDAR, SystemSettingManager.DEFAULT_CALENDAR );
+        String calendarKey = (String) settingManager.getSystemSetting( SystemSettingManager.KEY_CALENDAR, SystemSettingManager.DEFAULT_CALENDAR );
+        String dateFormat = (String) settingManager.getSystemSetting( SystemSettingManager.KEY_DATE_FORMAT, SystemSettingManager.DEFAULT_DATE_FORMAT );
 
-        if ( calendarMap.containsKey( calendar ) )
+        Calendar calendar;
+
+        if ( calendarMap.containsKey( calendarKey ) )
         {
-            return calendarMap.get( calendar );
+            calendar = calendarMap.get( calendarKey );
+        }
+        else
+        {
+            calendar = Iso8601Calendar.getInstance();
         }
 
-        return Iso8601Calendar.getInstance();
+        calendar.setDateFormat( dateFormat );
+
+        return calendar;
+    }
+
+    @Override
+    public DateFormat getSystemDateFormat()
+    {
+        String dateFormatKey = (String) settingManager.getSystemSetting( SystemSettingManager.KEY_DATE_FORMAT, SystemSettingManager.DEFAULT_DATE_FORMAT );
+
+        for ( DateFormat dateFormat : dateFormats )
+        {
+            if ( dateFormat.name().equals( dateFormatKey ) )
+            {
+                return dateFormat;
+            }
+        }
+
+        return dateFormats.get( 0 );
     }
 }

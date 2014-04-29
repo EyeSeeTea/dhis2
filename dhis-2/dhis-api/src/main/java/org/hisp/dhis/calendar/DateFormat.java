@@ -28,37 +28,44 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 /**
- * Simple service for returning all available calendars, and also giving the current system calendar.
  * @author Morten Olav Hansen <mortenoh@gmail.com>
- * @see Calendar
  */
-public interface CalendarService
+public class DateFormat
 {
-    /**
-     * Gets all available calendars as a sorted list.
-     * @return All available calendars
-     */
-    List<Calendar> getAllCalendars();
+    private final String name;
 
-    /**
-     * Gets all available date formats as list.
-     * @return All available date formats
-     */
-    List<DateFormat> getAllDateFormats();
+    private final String jdkDateFormat;
 
-    /**
-     * Gets the currently selected system calendar.
-     * @return System calendar
-     */
-    Calendar getSystemCalendar();
+    private final String jodaDateFormat;
 
-    /**
-     * Gets the currently selected date format.
-     * @return Date format
-     * @see DateFormat
-     */
-    DateFormat getSystemDateFormat();
+    private final String jsDateFormat;
+
+    public DateFormat( String name, String jdkDateFormat, String jodaDateFormat, String jsDateFormat )
+    {
+        this.name = name;
+        this.jdkDateFormat = jdkDateFormat;
+        this.jodaDateFormat = jodaDateFormat;
+        this.jsDateFormat = jsDateFormat;
+    }
+
+    public String name()
+    {
+        return name;
+    }
+
+    public String getJdk()
+    {
+        return jdkDateFormat;
+    }
+
+    public String getJoda()
+    {
+        return jodaDateFormat;
+    }
+
+    public String getJs()
+    {
+        return jsDateFormat;
+    }
 }

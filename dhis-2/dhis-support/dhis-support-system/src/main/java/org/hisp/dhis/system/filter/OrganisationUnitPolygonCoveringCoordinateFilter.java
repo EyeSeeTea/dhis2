@@ -1,4 +1,4 @@
-package org.hisp.dhis.calendar;
+package org.hisp.dhis.system.filter;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,37 +28,38 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.GeoUtils;
 
-/**
- * Simple service for returning all available calendars, and also giving the current system calendar.
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- * @see Calendar
- */
-public interface CalendarService
-{
-    /**
-     * Gets all available calendars as a sorted list.
-     * @return All available calendars
-     */
-    List<Calendar> getAllCalendars();
+public class OrganisationUnitPolygonCoveringCoordinateFilter
+    implements Filter<OrganisationUnit>
+{    
+    private double longitude;
+    private double latitude;
+    
+    public OrganisationUnitPolygonCoveringCoordinateFilter( double longitude, double latitude )
+    {
+        this.longitude = longitude;
+        this.latitude = latitude;
+    }
+    
+    @Override
+    public boolean retain( OrganisationUnit unit )
+    {
+        String featureType = unit.getFeatureType();
+        String coordinate = unit.getCoordinates();
 
-    /**
-     * Gets all available date formats as list.
-     * @return All available date formats
-     */
-    List<DateFormat> getAllDateFormats();
-
-    /**
-     * Gets the currently selected system calendar.
-     * @return System calendar
-     */
-    Calendar getSystemCalendar();
-
-    /**
-     * Gets the currently selected date format.
-     * @return Date format
-     * @see DateFormat
-     */
-    DateFormat getSystemDateFormat();
+        if ( featureType != null
+            && coordinate != null
+            && !coordinate.isEmpty()
+            && ( featureType.equals( OrganisationUnit.FEATURETYPE_POLYGON )
+            || featureType.equals( OrganisationUnit.FEATURETYPE_MULTIPOLYGON ) )
+            && GeoUtils.checkPointWithMultiPolygon( longitude, latitude, unit.getCoordinates(), featureType ) )
+        {
+            return true;
+        }
+        
+        return false;
+    }
 }
