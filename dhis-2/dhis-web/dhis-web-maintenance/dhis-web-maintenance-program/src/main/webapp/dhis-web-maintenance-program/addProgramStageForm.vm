@@ -78,7 +78,7 @@
 		#end
 		
 		<tr>
-			<td><label for="openAfterEnrollment">$i18n.getString( "open_data_entry_form_after_enrolment" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+			<td><label for="openAfterEnrollment">$i18n.getString( "open_data_entry_form_after_enrolment" )</label></td>
 			<td><input type="checkbox" id="openAfterEnrollment" name="openAfterEnrollment" value='true' 
 				onchange="openAfterEnrollmentOnchange();" 
 				#if($openAfterEnrollment!='') disabled #end>
@@ -106,20 +106,20 @@
 	</tr>
 	
 	<tr>
-		<td><label for="remindCompleted">$i18n.getString( "remind_completing_program_after_program_stage_completed" )</label></td>
+		<td><label for="remindCompleted">$i18n.getString( "ask_user_to_complete_program_when_stage_complete" )</label></td>
 		<td><input type="checkbox" id="remindCompleted" name="remindCompleted" value='true' ></td>
 		<td></td>
 	</tr>
 	
 	<tr>
-		<td><label for="allowGenerateNextVisit">$i18n.getString( "remind_creating_next_event_on_this_event_completed" )</label></td>
+		<td><label for="allowGenerateNextVisit">$i18n.getString( "ask_user_to_create_new_event_when_stage_complete" )</label></td>
 		<td><input type="checkbox" id="allowGenerateNextVisit" name="allowGenerateNextVisit" value='true' ></td>
 		<td></td>
 	</tr>
 	
 	#if($program.type==1)
 	<tr>
-		<td><label for="generatedByEnrollmentDate">$i18n.getString( "generated_events_by_enrollment_date" )</label></td>
+		<td><label for="generatedByEnrollmentDate">$i18n.getString( "generate_events_based_on_enrollment_date" ) <span class="tipText">($i18n.getString( "not_incident_date" ))</label></td>
 		<td><input type="checkbox" id="generatedByEnrollmentDate" name="generatedByEnrollmentDate" value='true'></td>
 		<td></td>
 	</tr>
