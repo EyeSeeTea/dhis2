@@ -209,7 +209,6 @@ public class SetGeneralSettingsAction
 
     public String execute()
     {
-System.out.println("KEY: " + KEY_ANALYTICS_MAX_LIMIT + ", " + analyticsMaxLimit);
         systemSettingManager.saveSystemSetting( KEY_CALENDAR, calendar );
         systemSettingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormat );
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
