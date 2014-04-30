@@ -29,12 +29,14 @@ package org.hisp.dhis.organisationunit;
  */
 
 import com.google.common.collect.Maps;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitLevelComparator;
+import org.hisp.dhis.system.filter.OrganisationUnitPolygonCoveringCoordinateFilter;
 import org.hisp.dhis.system.util.ConversionUtils;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
@@ -122,16 +124,17 @@ public class DefaultOrganisationUnitService
 
             currentUserService.getCurrentUser().getOrganisationUnits().add( organisationUnit );
         }
-
-        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
-
+        
         return id;
     }
 
     public void updateOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        organisationUnitStore.update( organisationUnit );
-
+        organisationUnitStore.update( organisationUnit );        
+    }
+    
+    public void updateOrganisationUnitVersion()
+    {
         versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
     }
 
@@ -160,8 +163,6 @@ public class DefaultOrganisationUnitService
         }
 
         organisationUnitStore.delete( organisationUnit );
-
-        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
     }
 
     public OrganisationUnit getOrganisationUnit( int id )
@@ -256,11 +257,6 @@ public class DefaultOrganisationUnitService
     public int getLevelOfOrganisationUnit( int id )
     {
         return getOrganisationUnit( id ).getOrganisationUnitLevel();
-    }
-
-    public int getLevelOfOrganisationUnit( String uid )
-    {
-        return getOrganisationUnit( uid ).getOrganisationUnitLevel();
     }
 
     public Collection<OrganisationUnit> getLeafOrganisationUnits( int id )
@@ -846,9 +842,14 @@ public class DefaultOrganisationUnitService
         return organisationUnitLevelStore.getMaxLevels();
     }
 
-    public Collection<OrganisationUnit> getWithinCoordinateArea( double longitude, double latitude, double distance )
+    /**
+     * Get all the Organisation Units within the distance of a coordinate.
+     */
+    public Collection<OrganisationUnit> getOrganisationUnitWithinDistance( double longitude, double latitude,
+        double distance )
     {
-        Collection<OrganisationUnit> objects = organisationUnitStore.getWithinCoordinateArea( GeoUtils.getBoxShape( longitude, latitude, distance ) );
+        Collection<OrganisationUnit> objects = organisationUnitStore.getWithinCoordinateArea( GeoUtils.getBoxShape(
+            longitude, latitude, distance ) );
 
         // Go through the list and remove the ones located outside radius
         
@@ -875,6 +876,77 @@ public class DefaultOrganisationUnitService
         return objects;
     }
 
+    /**
+     * Get lowest level/target level Organisation Units that includes the coordinates.
+     */
+    public Collection<OrganisationUnit> getOrganisationUnitByCoordinate( double longitude, double latitude,
+        String topOrgUnitUid, Integer targetLevel )
+    {
+        Collection<OrganisationUnit> orgUnits = new ArrayList<OrganisationUnit>();
+
+        if ( GeoUtils.checkGeoJsonPointValid( longitude, latitude ) )
+        {
+            OrganisationUnit topOrgUnit = null;
+
+            if ( topOrgUnitUid != null && !topOrgUnitUid.isEmpty() )
+            {
+                topOrgUnit = getOrganisationUnit( topOrgUnitUid );
+            }
+            else
+            {
+                // Get top search point through top level org unit which contains coordinate
+                
+                Collection<OrganisationUnit> orgUnitsTopLevel = getTopLevelOrgUnitWithPoint( longitude, latitude, 1,
+                    getNumberOfOrganisationalLevels() - 1 );
+
+                if ( orgUnitsTopLevel.size() == 1 )
+                {
+                    topOrgUnit = orgUnitsTopLevel.iterator().next();
+                }
+            }
+
+            // Search children org units to get the lowest level org unit that contains coordinate
+            
+            if ( topOrgUnit != null )
+            {
+                Collection<OrganisationUnit> orgUnitChildren = new ArrayList<OrganisationUnit>();
+
+                if ( targetLevel != null )
+                {
+                    orgUnitChildren = getOrganisationUnitsAtLevel( targetLevel, topOrgUnit );
+                }
+                else
+                {
+                    orgUnitChildren = getOrganisationUnitWithChildren( topOrgUnit.getId() );
+                }
+
+                FilterUtils.filter( orgUnitChildren, new OrganisationUnitPolygonCoveringCoordinateFilter( longitude, latitude ) );
+                
+                // Get org units with lowest level
+                
+                int bottomLevel = topOrgUnit.getLevel();
+
+                for ( OrganisationUnit ou : orgUnitChildren )
+                {
+                    if ( ou.getLevel() > bottomLevel )
+                    {
+                        bottomLevel = ou.getLevel();
+                    }
+                }
+
+                for ( OrganisationUnit ou : orgUnitChildren )
+                {
+                    if ( ou.getLevel() == bottomLevel )
+                    {
+                        orgUnits.add( ou );
+                    }
+                }
+            }
+        }
+
+        return orgUnits;
+    }
+
     // -------------------------------------------------------------------------
     // Version
     // -------------------------------------------------------------------------
@@ -883,5 +955,29 @@ public class DefaultOrganisationUnitService
     public void updateVersion()
     {
         versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    /**
+     * Searches organisation units until finding one with polygon containing point.
+     */
+    private List<OrganisationUnit> getTopLevelOrgUnitWithPoint( double longitude, double latitude, 
+        int searchLevel, int stopLevel )
+    {
+        for ( int i = searchLevel; i <= stopLevel; i++ )
+        {
+            List<OrganisationUnit> unitsAtLevel = new ArrayList<OrganisationUnit>( getOrganisationUnitsAtLevel( i ) );
+            FilterUtils.filter( unitsAtLevel, new OrganisationUnitPolygonCoveringCoordinateFilter( longitude, latitude ) );
+            
+            if ( unitsAtLevel.size() > 0 )
+            {
+                return unitsAtLevel;
+            }
+        }
+
+        return new ArrayList<OrganisationUnit>();
     }
 }

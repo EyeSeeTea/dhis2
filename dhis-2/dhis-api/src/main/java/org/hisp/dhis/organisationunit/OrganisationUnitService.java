@@ -58,7 +58,7 @@ public interface OrganisationUnitService
      * @param organisationUnit the OrganisationUnit to add.
      * @return a generated unique id of the added OrganisationUnit.
      */
-    public int addOrganisationUnit( OrganisationUnit organisationUnit );
+    int addOrganisationUnit( OrganisationUnit organisationUnit );
 
     /**
      * Updates an OrganisationUnit.
@@ -67,6 +67,11 @@ public interface OrganisationUnitService
      */
     void updateOrganisationUnit( OrganisationUnit organisationUnit );
 
+    /**
+     * Updates the version of the organisation unit hierarchy.
+     */
+    void updateOrganisationUnitVersion();
+    
     /**
      * Updates an OrganisationUnit.
      *
@@ -210,13 +215,6 @@ public interface OrganisationUnitService
      * @return the level of the organisation unit with the given identifier.
      */
     int getLevelOfOrganisationUnit( int id );
-
-    /**
-     * Returns the level of the organisation unit with the given uid.
-     *
-     * @return the level of the organisation unit with the given uid.
-     */
-    int getLevelOfOrganisationUnit( String uid );
 
     /**
      * Returns all OrganisationUnits which are part of the subtree of the
@@ -390,7 +388,21 @@ public interface OrganisationUnitService
      * 
      * @return collection of objects.
      */
-    Collection<OrganisationUnit> getWithinCoordinateArea( double longitude, double latitude, double distance );
+    Collection<OrganisationUnit> getOrganisationUnitWithinDistance( double longitude, double latitude, double distance );
+
+    /**
+     * Retrieves the orgunit(s) by coordinate.
+     * 
+     * @param longitude The longitude of the location.
+     * @param latitude The latitude of the location.
+     * @param topOrgUnitUid Optional. Uid of the search top level org unit (ex.
+     *        Country level orgunit)
+     * @param targetLevel Optional. The level being searched.
+     * 
+     * @return collection of objects.
+     */
+    Collection<OrganisationUnit> getOrganisationUnitByCoordinate( double longitude, double latitude, String topOrgUnitUid,
+        Integer targetLevel );
     
     boolean isInUserHierarchy( OrganisationUnit organisationUnit );
     

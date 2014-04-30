@@ -28,9 +28,13 @@ package org.hisp.dhis.api.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javax.validation.ConstraintViolationException;
+
 import org.hisp.dhis.api.controller.exception.NotAuthenticatedException;
 import org.hisp.dhis.api.controller.exception.NotFoundException;
 import org.hisp.dhis.api.controller.exception.NotFoundForQueryException;
+import org.hisp.dhis.common.DeleteNotAllowedException;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -56,7 +60,7 @@ public class CrudControllerAdvice
         return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.UNAUTHORIZED );
     }
 
-    @ExceptionHandler({ NotFoundException.class, NotFoundForQueryException.class })
+    @ExceptionHandler( { NotFoundException.class, NotFoundForQueryException.class } )
     public ResponseEntity<String> notFoundExceptionHandler( Exception ex )
     {
         HttpHeaders headers = new HttpHeaders();
@@ -72,5 +76,41 @@ public class CrudControllerAdvice
         headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
 
         return new ResponseEntity<String>( ex.getStatusText(), headers, ex.getStatusCode() );
+    }
+
+    @ExceptionHandler( ConstraintViolationException.class )
+    public ResponseEntity<String> constraintViolationExceptionHandler( ConstraintViolationException ex )
+    {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
+
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.UNPROCESSABLE_ENTITY );
+    }
+
+    @ExceptionHandler(DeleteNotAllowedException.class)
+    public ResponseEntity<String> deleteNotAllowedExceptionHandler( DeleteNotAllowedException ex )
+    {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
+        
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.CONFLICT );
+    }
+
+    @ExceptionHandler(IllegalQueryException.class)
+    public ResponseEntity<String> handleError( IllegalQueryException ex )
+    {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
+        
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.CONFLICT );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleError( IllegalArgumentException ex )
+    {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add( "Content-Type", MediaType.TEXT_PLAIN_VALUE );
+        
+        return new ResponseEntity<String>( ex.getMessage(), headers, HttpStatus.CONFLICT );
     }
 }
