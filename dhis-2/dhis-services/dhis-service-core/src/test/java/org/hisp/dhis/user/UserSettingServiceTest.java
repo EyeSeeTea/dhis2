@@ -54,7 +54,7 @@ public class UserSettingServiceTest
     private UserCredentialsStore userCredentialStore;
 
     private User testUser;
-    
+
     @Override
     protected void setUpTest()
         throws Exception
@@ -78,15 +78,11 @@ public class UserSettingServiceTest
 
    @Test
    public void testShouldGetUserSettings() {
-       User testUser = createUser( 'D' );
-       userStore.save( testUser );
        UserCredentials userCredentials = testUser.getUserCredentials();
        userCredentials.setUser( testUser );
        userCredentialStore.addUserCredentials( userCredentials );
        userSettingService.saveUserSetting("mykey", "value", "username");
-
        Serializable preference = userSettingService.getUserSetting("mykey", "username");
-
        assertEquals(preference, "value");
    }
 }
