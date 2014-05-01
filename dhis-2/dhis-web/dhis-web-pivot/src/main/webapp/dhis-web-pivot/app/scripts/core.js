@@ -1946,11 +1946,13 @@ Ext.onReady( function() {
 					getTotalHtmlArray,
 					getHtml,
 					getUniqueFactor = function(xAxis) {
+                        var unique;
+
 						if (!xAxis) {
 							return null;
 						}
 
-						var unique = xAxis.xItems.unique;
+						unique = xAxis.xItems.unique;
 
 						if (unique) {
 							return unique.length < 2 ? 1 : (xAxis.size / unique[0].length);
@@ -1999,7 +2001,7 @@ Ext.onReady( function() {
                     // number of cells
                     tdCount = tdCount + 1;
 
-					// Background color from legend set
+					// background color from legend set
 					if (isNumeric && xLayout.legendSet) {
 						var value = parseFloat(config.value);
 						mapLegends = xLayout.legendSet.mapLegends;
@@ -2023,7 +2025,7 @@ Ext.onReady( function() {
 					cls += isValue ? ' pointer' : '';
 					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
 
-					// sorting
+					// if sorting
 					if (Ext.isString(metaDataId)) {
 						cls += ' td-sortable';
 
@@ -2036,7 +2038,6 @@ Ext.onReady( function() {
 					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
 					html += ' class="' + cls + '" ' + colSpan + rowSpan
 
-
 					if (bgColor) {
 						html += '>';
 						html += '<div class="legendCt">';
@@ -2044,19 +2045,6 @@ Ext.onReady( function() {
 						html += '<div class="arrowCt ' + config.cls + '">';
 						html += '<div class="arrow" style="border-bottom:8px solid transparent; border-right:8px solid ' + bgColor + '">&nbsp;</div>';
 						html += '</div></div></div></td>';
-
-						//cls = 'legend';
-						//cls += config.hidden ? ' td-hidden' : '';
-						//cls += config.collapsed ? ' td-collapsed' : '';
-
-						//html += '<td class="' + cls + '" ';
-						//html += colSpan + rowSpan + '>';
-						//html += '<div class="legendCt">';
-						//html += '<div style="display:table-cell; padding:' + displayDensity + '; font-size:' + fontSize + '"';
-						//html += config.cls ? ' class="' + config.cls + '">' : '';
-						//html += htmlValue + '</div>';
-						//html += '<div class="legendColor" style="background-color:' + bgColor + '">&nbsp;</div>';
-						//html += '</div></td>';
 					}
 					else {
 						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
@@ -2067,23 +2055,6 @@ Ext.onReady( function() {
 
 				doSubTotals = function(xAxis) {
 					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
-
-					//var multiItemDimension = 0,
-						//unique;
-
-					//if (!(xLayout.showSubTotals && xAxis && xAxis.dims > 1)) {
-						//return false;
-					//}
-
-					//unique = xAxis.xItems.unique;
-
-					//for (var i = 0; i < unique.length; i++) {
-						//if (unique[i].length > 1) {
-							//multiItemDimension++;
-						//}
-					//}
-
-					//return (multiItemDimension > 1);
 				};
 
 				doTotals = function() {
@@ -2133,6 +2104,7 @@ Ext.onReady( function() {
 
 							// sortable column headers. last dim only.
 							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
+
 								//condoId = xColAxis.ids[j].split('-').join('');
 								condoId = xColAxis.ids[j];
 							}
@@ -2313,17 +2285,17 @@ Ext.onReady( function() {
 								// if value row is empty
 								if (isValueRowEmpty) {
 
-									// Hide values by adding collapsed = true to all items
+									// hide values by adding collapsed = true to all items
 									for (var j = 0; j < valueRow.length; j++) {
 										valueRow[j].collapsed = true;
 									}
 
-									// Hide totals by adding collapsed = true to all items
+									// hide totals by adding collapsed = true to all items
 									if (doTotals()) {
 										totalValueObjects[i].collapsed = true;
 									}
 
-									// Hide/reduce parent dim span
+									// hide/reduce parent dim span
 									dimLeaf = axisAllObjects[i][xRowAxis.dims-1];
 									recursiveReduce(dimLeaf);
 								}
@@ -2331,7 +2303,6 @@ Ext.onReady( function() {
 						}
 					}
 
-					//xValueObjects = Ext.clone(valueObjects);
                     xValueObjects = valueObjects;
 
 					// col subtotals
@@ -2411,7 +2382,7 @@ Ext.onReady( function() {
 							tmpAxisAllObjects.push(axisAllObjects[i]);
 							collapsed.push(!!axisAllObjects[i][0].collapsed);
 
-							// Insert subtotal after last objects
+							// insert subtotal after last objects
 							if (!Ext.isArray(axisAllObjects[i+1]) || !!axisAllObjects[i+1][0].root) {
 								tmpAxisAllObjects.push(getAxisSubTotalRow(collapsed));
 
@@ -2487,7 +2458,7 @@ Ext.onReady( function() {
 						totalValueObjects = tmpTotalValueObjects;
 					}
 
-					// Merge dim, value, total
+					// merge dim, value, total
 					for (var i = 0, row; i < xValueObjects.length; i++) {
 						row = [];
 
@@ -2504,7 +2475,7 @@ Ext.onReady( function() {
 						mergedObjects.push(row);
 					}
 
-					// Create html items
+					// create html items
 					for (var i = 0, row; i < mergedObjects.length; i++) {
 						row = [];
 
@@ -2524,7 +2495,7 @@ Ext.onReady( function() {
 					if (xRowAxis && doTotals()) {
 						var xTotalColObjects;
 
-						// Total col items
+						// total col items
 						for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
 							for (var j = 0, obj; j < valueObjects.length; j++) {
 								obj = valueObjects[j][i];
@@ -2575,7 +2546,7 @@ Ext.onReady( function() {
 							xTotalColObjects = tmp;
 						}
 
-						// Total col html items
+						// total col html items
 						for (var i = 0; i < xTotalColObjects.length; i++) {
 							a.push(getTdHtml(xTotalColObjects[i]));
 						}
