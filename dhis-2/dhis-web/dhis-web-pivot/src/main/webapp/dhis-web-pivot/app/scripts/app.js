@@ -2351,7 +2351,6 @@ Ext.onReady( function() {
 
 				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
 
-                // timing
                 ns.app.dateSorting = new Date();
 
 				if (layout.sorting) {
