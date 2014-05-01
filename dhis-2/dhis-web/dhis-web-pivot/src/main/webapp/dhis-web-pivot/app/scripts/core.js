@@ -9,7 +9,7 @@ Ext.onReady( function() {
 
 	NS.instances = [];
 	NS.i18n = {};
-	NS.isDebug = true;
+	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
 	NS.getCore = function(init) {
@@ -1325,7 +1325,6 @@ Ext.onReady( function() {
 	//					    [pe-id1],
 	//					    [ou-id1, ou-id2, ou-id3, ou-id4] ]
 
-
 				// nAxisHeight
 				nAxisHeight = aaUniqueFloorIds.length;
 	//nAxisHeight = 3
@@ -1346,15 +1345,15 @@ Ext.onReady( function() {
 				// aFloorSpan
 				for (var i = 0; i < nAxisHeight; i++) {
 					if (aUniqueFloorWidth[i] === 1) {
-						if (i === 0) { // if top floor
-							aFloorSpan.push(nAxisWidth); // span max
+						if (i === 0) { // if top floor, set maximum span
+							aFloorSpan.push(nAxisWidth);
 						}
 						else {
 							if (xLayout.hideEmptyRows && type === 'row') {
 								aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
 							}
-							else {
-								aFloorSpan.push(aFloorSpan[0]); //if just one item and not top level, span same as top level
+							else { //if just one item and not top level, use same span as top level
+								aFloorSpan.push(aFloorSpan[0]);
 							}
 						}
 					}
@@ -1362,7 +1361,7 @@ Ext.onReady( function() {
 						aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
 					}
 				}
-	//aFloorSpan			= [4, 12, 1]
+	//aFloorSpan = [4, 12, 1]
 
 
 				// aaGuiFloorIds
@@ -1384,7 +1383,6 @@ Ext.onReady( function() {
 	//					[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
 	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
 	//		  	  	  ]
-
 
 				// aaAllFloorIds
 				for (var i = 0, aAllFloorIds, aUniqueFloorIds, span, factor; i < nAxisHeight; i++) {
@@ -1408,7 +1406,6 @@ Ext.onReady( function() {
 	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
 	//		  	  	  ]
 
-
 				// aCondoId
 				for (var i = 0, id; i < nAxisWidth; i++) {
 					id = '';
@@ -1421,7 +1418,7 @@ Ext.onReady( function() {
 						aCondoId.push(id);
 					}
 				}
-	//aCondoId	= [ id11+id21+id31, id12+id22+id32, ... ]
+	//aCondoId = [ id11+id21+id31, id12+id22+id32, ... ]
 
 
 				// allObjects
@@ -1459,7 +1456,6 @@ Ext.onReady( function() {
 							obj[spanType] = aFloorSpan[i];
 
 							// children
-							//obj.children = Ext.isDefined(aFloorSpan[i + 1]) ? aFloorSpan[i] / aFloorSpan[i + 1] : 0;
 							obj.children = obj.leaf ? 0 : aFloorSpan[i];
 
 							// first sibling
@@ -1484,12 +1480,12 @@ Ext.onReady( function() {
 
 				// add parents if more than 1 floor
 				if (nAxisHeight > 1) {
-					for (var i = 1, allFloor; i < nAxisHeight; i++) {
-						allFloor = aaAllFloorObjects[i];
+					for (var i = 1, aAllFloor; i < nAxisHeight; i++) {
+						aAllFloor = aaAllFloorObjects[i];
 
-						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aaAllFloorObjects[i - 1][0]; j < allFloor.length; j++) {
-						for (var j = 0, doorCount = 0, span = aFloorSpan[i - 1]; j < allFloor.length; j++) {
-							allFloor[j].parent = aaAllFloorObjects[i - 1][j];
+						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aaAllFloorObjects[i - 1][0]; j < aAllFloor.length; j++) {
+						for (var j = 0, doorCount = 0, span = aFloorSpan[i - 1]; j < aAllFloor.length; j++) {
+							aAllFloor[j].parent = aaAllFloorObjects[i - 1][j];
 
 							//doorCount++;
 
@@ -1505,11 +1501,11 @@ Ext.onReady( function() {
 				if (aaAllFloorObjects.length) {
 
 					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
-					var span = nAxisHeight > 1 ? support.prototype.array.sort(Ext.clone(aFloorSpan))[1] : nAxisWidth,
-						allFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
+					var nSpan = nAxisHeight > 1 ? support.prototype.array.sort(Ext.clone(aFloorSpan))[1] : nAxisWidth,
+						aAllFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
 
-					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allFloorObjectsLast.length; i++) {
-						leaf = allFloorObjectsLast[i];
+					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < aAllFloorObjectsLast.length; i++) {
+						leaf = aAllFloorObjectsLast[i];
 						leafUuids.push(leaf.uuid);
 						parentUuids = [];
 						obj = leaf;
@@ -1524,10 +1520,10 @@ Ext.onReady( function() {
 						leaf.uuids = Ext.clone(parentUuids);
 
 						// add uuid for all leaves
-						if (leafUuids.length === span) {
-							for (var j = (i - span) + 1, leaf; j <= i; j++) {
-								leaf = allFloorObjectsLast[j];
-								leaf.uuids = leaf.uuids.concat(Ext.clone(leafUuids));
+						if (leafUuids.length === nSpan) {
+							for (var j = (i - nSpan) + 1, leaf; j <= i; j++) {
+								leaf = aAllFloorObjectsLast[j];
+								leaf.uuids = leaf.uuids.concat(leafUuids);
 							}
 
 							leafUuids = [];
@@ -1539,12 +1535,10 @@ Ext.onReady( function() {
 				for (var i = 0; i < aaAllFloorObjects.length; i++) {
 					for (var j = 0, object; j < aaAllFloorObjects[i].length; j++) {
 						object = aaAllFloorObjects[i][j];
-//console.log(object.uuid, object);
+
 						uuidObjectMap[object.uuid] = object;
 					}
 				}
-
-//console.log("aaAllFloorObjects", aaAllFloorObjects);
 
 				return {
 					type: type,
