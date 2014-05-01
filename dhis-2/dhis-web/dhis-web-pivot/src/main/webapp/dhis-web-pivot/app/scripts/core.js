@@ -9,7 +9,7 @@ Ext.onReady( function() {
 
 	NS.instances = [];
 	NS.i18n = {};
-	NS.isDebug = false;
+	NS.isDebug = true;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
 	NS.getCore = function(init) {
@@ -255,8 +255,7 @@ Ext.onReady( function() {
 			};
 
 			api.layout.Layout = function(config) {
-				var config = Ext.clone(config),
-					layout = {},
+				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
@@ -2220,7 +2219,7 @@ Ext.onReady( function() {
 	//				     [ dim, dim ] ];
 
 					// value
-					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowAxisSize; i++) {
+					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = xResponse.idValueMap; i < rowAxisSize; i++) {
 						valueItemsRow = [];
 						valueObjectsRow = [];
 
@@ -2232,7 +2231,7 @@ Ext.onReady( function() {
 							//id = (xColAxis ? support.prototype.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? support.prototype.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
 							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
 
-							// value html element id
+                            // value html element id
 							uuid = Ext.data.IdGenerator.get('uuid').generate();
 
 							// get uuids array from colaxis/rowaxis leaf
@@ -2332,7 +2331,8 @@ Ext.onReady( function() {
 						}
 					}
 
-					xValueObjects = Ext.clone(valueObjects);
+					//xValueObjects = Ext.clone(valueObjects);
+                    xValueObjects = valueObjects;
 
 					// col subtotals
 					if (doSubTotals(xColAxis)) {
@@ -2546,7 +2546,7 @@ Ext.onReady( function() {
 							empty = [];
 						}
 
-						xTotalColObjects = Ext.clone(totalColObjects);
+						xTotalColObjects = totalColObjects;
 
 						if (xColAxis && doSubTotals(xColAxis)) {
 							var tmp = [];
@@ -2628,7 +2628,7 @@ Ext.onReady( function() {
 							})];
 						}
 
-						row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
+						row = [].concat(dimTotalArray || [], colTotal || [], grandTotal || []);
 
 						a.push(row);
 					}

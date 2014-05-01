@@ -2286,6 +2286,9 @@ Ext.onReady( function() {
 				// show mask
 				web.mask.show(ns.app.centerRegion);
 
+                // timing
+                ns.app.dateData = new Date();
+
 				Ext.Ajax.request({
 					url: init.contextPath + '/api/analytics.json' + paramString,
 					timeout: 60000,
@@ -2307,6 +2310,8 @@ Ext.onReady( function() {
 						}
 					},
 					success: function(r) {
+                        ns.app.dateCreate = new Date();
+
 						var response = api.response.Response(Ext.decode(r.responseText));
 
 						if (!response) {
@@ -2342,6 +2347,9 @@ Ext.onReady( function() {
 
 				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
 
+                // timing
+                ns.app.dateSorting = new Date();
+
 				if (layout.sorting) {
 					if (!xResponse) {
 						xResponse = getXResponse(xLayout, response);
@@ -2357,8 +2365,14 @@ Ext.onReady( function() {
 
 				table = getHtml(xLayout, xResponse);
 
+                // timing
+                ns.app.dateRender = new Date();
+
 				ns.app.centerRegion.removeAll(true);
 				ns.app.centerRegion.update(table.html);
+
+                // timing
+                ns.app.dateTotal = new Date();
 
 				// after render
 				ns.app.layout = layout;
@@ -2381,8 +2395,18 @@ Ext.onReady( function() {
 				web.mask.hide(ns.app.centerRegion);
 
 				if (NS.isDebug) {
-					console.log("core", ns.core);
-					console.log("app", ns.app);
+                    console.log("Number of cells", table.tdCount);
+                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                    console.log("SORTING", (ns.app.dateRender - ns.app.dateSorting) / 1000);
+                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+					console.log("layout", layout);
+                    console.log("response", response);
+                    console.log("xResponse", xResponse);
+                    console.log("xLayout", xLayout);
+                    console.log("core", ns.core);
+                    console.log("app", ns.app);
 				}
 			};
 		}());
