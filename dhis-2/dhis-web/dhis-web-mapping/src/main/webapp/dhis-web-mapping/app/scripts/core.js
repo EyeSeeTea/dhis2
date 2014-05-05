@@ -13,6 +13,7 @@ Ext.onReady( function() {
 		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null,
 		logg: []
 	};
+inst = GIS.core.instances;
 
 	GIS.core.getOLMap = function(gis) {
 		var olmap,
@@ -1087,7 +1088,7 @@ Ext.onReady( function() {
                     }
 
                     // name-column map
-                    map = Ext.clone(r.metaData.names);
+                    map = r.metaData.names;
 
                     for (var i = 0; i < r.headers.length; i++) {
                         map[r.headers[i].name] = r.headers[i].column;
@@ -2918,6 +2919,8 @@ Ext.onReady( function() {
 		gis.olmap.addLayers(layers);
 
 		GIS.core.instances.push(gis);
+g = gis;
+b = gis.layer.boundary;
 
 		return gis;
 	};
