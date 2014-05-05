@@ -98,14 +98,14 @@ public class HibernateTranslationStore
     }
 
     @SuppressWarnings( "unchecked" )
-    public Translation getTranslationNoFallback( String className, int id, Locale locale, String property )
+    public Translation getTranslationNoFallback( String className, int id, Locale locale, String property, String uid )
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( Translation.class );
 
         criteria.add( Restrictions.eq( "className", className ) );
-        criteria.add( Restrictions.eq( "id", id ) );
+        criteria.add( Restrictions.eq( "uid", uid ) );
         criteria.add( Restrictions.eq( "locale", locale.toString() ) );
         criteria.add( Restrictions.eq( "property", property ) );
 

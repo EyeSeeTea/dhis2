@@ -71,9 +71,9 @@ public class DefaultTranslationService
         return translationStore.getTranslation( className, id, locale, property );
     }
 
-    public Translation getTranslationNoFallback( String className, int id, Locale locale, String property )
+    public Translation getTranslationNoFallback( String className, int id, Locale locale, String property, String uid )
     {
-        return translationStore.getTranslationNoFallback( className, id, locale, property );
+        return translationStore.getTranslationNoFallback( className, id, locale, property,uid );
     }
 
     public Collection<Translation> getTranslations( String className, int id, Locale locale )

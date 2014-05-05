@@ -218,7 +218,7 @@ public class DefaultI18nService
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
                 
-                Translation translation = translationService.getTranslationNoFallback( className, id, locale, key );
+                Translation translation = translationService.getTranslationNoFallback( className, id, locale, key, uid);
 
                 if ( value != null && !value.trim().isEmpty() )
                 {                    
@@ -229,7 +229,7 @@ public class DefaultI18nService
                     }
                     else
                     {
-                        translation = new Translation( className, id, locale.toString(), key, value );
+                        translation = new Translation( className, id, locale.toString(), key, value, uid);
                         translationService.addTranslation( translation );
                     }
                 }

@@ -29,6 +29,7 @@ package org.hisp.dhis.translation;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Oyvind Brucker
@@ -51,7 +52,11 @@ public class Translation
 
     private String value;
 
-    // -------------------------------------------------------------------------
+    private String uid;
+
+    private Date lastUpdated;
+
+        // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
@@ -59,13 +64,14 @@ public class Translation
     {
     }
 
-    public Translation( String className, int id, String locale, String property, String value )
+    public Translation( String className, int id, String locale, String property, String value, String uid )
     {
         this.className = className;
         this.id = id;
         this.locale = locale;
         this.property = property;
         this.value = value;
+            this.uid = uid;
     }
 
     // -------------------------------------------------------------------------
@@ -101,6 +107,16 @@ public class Translation
         this.id = id;
     }
 
+    public String getUid()
+    {
+        return uid;
+    }
+
+    public void setUid( String uid )
+    {
+        this.uid = uid;
+    }
+
     public String getLocale()
     {
         return locale;
@@ -129,6 +145,16 @@ public class Translation
     public void setValue( String value )
     {
         this.value = value;
+    }
+
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
     }
 
     // -------------------------------------------------------------------------
@@ -169,13 +195,13 @@ public class Translation
 
         Translation translation = (Translation) o;
 
-        return className.equals( translation.getClassName() ) && id == translation.getId() &&
+        return className.equals( translation.getClassName() ) && id == translation.getId() && uid == translation.getUid() &&
             locale.equals( translation.getLocale() ) && property.equals( translation.getProperty());
     }
 
     @Override
     public String toString()
     {
-        return "[Class name: " + className + " id: " + id + " locale: " + locale + " property: " + property + " value: " + value + "]";
+        return "[Class name: " + className + " id: " + id + " uid: " + uid + " locale: " + locale + " property: " + property + " value: " + value + "]";
     }
 }
