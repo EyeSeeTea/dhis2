@@ -682,6 +682,13 @@ inst = GIS.core.instances;
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
+        // workaround
+        //selectHandlers.selectStyle = {
+            //fillOpacity: 0.5,
+            //strokeWidth: 1,
+            //strokeColor: '#444'
+        //};
+
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
 	};
@@ -1513,7 +1520,10 @@ inst = GIS.core.instances;
 				success: function(r) {
 					var geojson = gis.util.geojson.decode(r),
 						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+						features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
+                        colors = ['black', 'blue', 'red', 'green', 'yellow'],
+                        levels = [],
+                        levelObjectMap = {};
 
 					if (!Ext.isArray(features)) {
 						olmap.mask.hide();
@@ -1526,6 +1536,44 @@ inst = GIS.core.instances;
 						alert(GIS.i18n.no_valid_coordinates_found);
 						return;
 					}
+
+                    //// get levels, colors, map
+                    //for (var i = 0; i < features.length; i++) {
+                        //levels.push(parseFloat(features[i].attributes.level));
+                    //}
+
+                    //levels = Ext.Array.unique(levels).sort();
+
+                    //for (var i = 0; i < levels.length; i++) {
+                        //levelObjectMap[levels[i]] = {
+                            //strokeColor: colors[i],
+                            //strokeWidth: levels.length - i
+                        //};
+//console.log(levels.length - i);
+                    //}
+
+                    //// style
+                    //for (var i = 0, feature, obj; i < features.length; i++) {
+                        //feature = features[i];
+                        //obj = levelObjectMap[feature.attributes.level];
+
+                        //feature.style = {
+                            //strokeColor: obj.strokeColor || 'black',
+                            //strokeWidth: obj.strokeWidth || 1,
+                            //fillOpacity: 0
+                        //};
+                    //}
+
+
+
+
+
+
+
+
+
+
+
 
 					layer.core.featureStore.loadFeatures(features.slice(0));
 
