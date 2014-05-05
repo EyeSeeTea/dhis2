@@ -5772,11 +5772,11 @@ Ext.onReady( function() {
 
 					table = getHtml(xLayout, xResponse);
 
-                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
-                        alert('Table has too many cells. Please reduce the table and try again.');
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
+                    //if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
+                        //alert('Table has too many cells. Please reduce the table and try again.');
+                        //web.mask.hide(ns.app.centerRegion);
+                        //return;
+                    //}
 
 					if (layout.sorting) {
 						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
@@ -5816,6 +5816,9 @@ Ext.onReady( function() {
 					web.mask.hide(ns.app.centerRegion);
 
 					if (NS.isDebug) {
+                        var res = response || xResponse;
+
+                        console.log("Number of records", res.rows.length);
                         console.log("Number of cells", table.tdCount);
                         console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
                         console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);

@@ -73,10 +73,12 @@ public class ValidationRuleGroup
 
     public ValidationRuleGroup()
     {
+        setAutoFields();
     }
 
     public ValidationRuleGroup( String name, String description, Set<ValidationRule> members )
     {
+        this();
         this.name = name;
         this.description = description;
         this.members = members;
@@ -145,7 +147,7 @@ public class ValidationRuleGroup
 
     @JsonProperty
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class } )
+    @JsonView( {DetailedView.class, ExportView.class} )
     @JacksonXmlElementWrapper( localName = "userGroupsToAlert", namespace = DxfNamespaces.DXF_2_0)
     @JacksonXmlProperty( localName = "userGroupToAlert", namespace = DxfNamespaces.DXF_2_0)
     public Set<UserGroup> getUserGroupsToAlert()
@@ -153,9 +155,6 @@ public class ValidationRuleGroup
         return userGroupsToAlert;
     }
 
-    @JsonProperty
-    @JsonView( {DetailedView.class, ExportView.class} )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public void setUserGroupsToAlert( Set<UserGroup> userGroupsToAlert )
     {
         this.userGroupsToAlert = userGroupsToAlert;

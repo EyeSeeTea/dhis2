@@ -28,6 +28,27 @@ package org.hisp.dhis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+
+import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.aggregation.AggregatedDataValueService;
@@ -40,7 +61,17 @@ import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.datadictionary.DataDictionaryService;
-import org.hisp.dhis.dataelement.*;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dataelement.DataElementGroupSet;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -103,24 +134,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.util.Assert;
 import org.xml.sax.InputSource;
-
-import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-import java.io.File;
-import java.io.StringReader;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -347,7 +360,7 @@ public abstract class DhisConvenienceTest
      * @param targetService the target service.
      * @param fieldName     the name of the dependency field in the target service.
      * @param dependency    the dependency.
-     * @param clazz         the class type of the dependency.
+     * @param clazz         the interface type of the dependency.
      */
     protected void setDependency( Object targetService, String fieldName, Object dependency, Class<?> clazz )
     {
@@ -366,7 +379,7 @@ public abstract class DhisConvenienceTest
         }
         catch ( Exception ex )
         {
-            throw new RuntimeException( "Failed to set dependency '" + fieldName + "' on service", ex );
+            throw new RuntimeException( "Failed to set dependency '" + fieldName + "' on service: " + getStackTrace( ex ), ex );
         }
     }
 
@@ -399,6 +412,7 @@ public abstract class DhisConvenienceTest
     public static DataElement createDataElement( char uniqueCharacter )
     {
         DataElement dataElement = new DataElement();
+        dataElement.setAutoFields();
 
         dataElement.setUid( BASE_DE_UID + uniqueCharacter );
         dataElement.setName( "DataElement" + uniqueCharacter );
@@ -462,16 +476,17 @@ public abstract class DhisConvenienceTest
 
     /**
      * @param categoryComboUniqueIdentifier A unique character to identify the
-     *        category option combo.
-     * @param categories the categories
-     *        category options.
+     *                                      category option combo.
+     * @param categories                    the categories
+     *                                      category options.
      * @return DataElementCategoryOptionCombo
      */
     public static DataElementCategoryCombo createCategoryCombo( char categoryComboUniqueIdentifier,
-                                                                            DataElementCategory... categories )
+        DataElementCategory... categories )
     {
         DataElementCategoryCombo categoryCombo = new DataElementCategoryCombo( "CategoryCombo" + categoryComboUniqueIdentifier,
-                new ArrayList<DataElementCategory>() );
+            new ArrayList<DataElementCategory>() );
+        categoryCombo.setAutoFields();
 
         for ( DataElementCategory category : categories )
         {
@@ -489,17 +504,18 @@ public abstract class DhisConvenienceTest
      * @return DataElementCategoryOptionCombo
      */
     public static DataElementCategoryOptionCombo createCategoryOptionCombo( char categoryComboUniqueIdentifier,
-                                                                            char... categoryOptionUniqueIdentifiers )
+        char... categoryOptionUniqueIdentifiers )
     {
         DataElementCategoryOptionCombo categoryOptionCombo = new DataElementCategoryOptionCombo();
+        categoryOptionCombo.setAutoFields();
 
         categoryOptionCombo.setCategoryCombo( new DataElementCategoryCombo( "CategoryCombo"
-                + categoryComboUniqueIdentifier ) );
+            + categoryComboUniqueIdentifier ) );
 
         for ( char identifier : categoryOptionUniqueIdentifiers )
         {
             categoryOptionCombo.getCategoryOptions()
-                    .add( new DataElementCategoryOption( "CategoryOption" + identifier ) );
+                .add( new DataElementCategoryOption( "CategoryOption" + identifier ) );
         }
 
         return categoryOptionCombo;
@@ -507,16 +523,17 @@ public abstract class DhisConvenienceTest
 
     /**
      * @param categoryComboUniqueIdentifier A unique character to identify the
-     *        category option combo.
-     * @param dataElementCategoryCombo The associated category combination.
-     * @param categoryOptions the category options.
+     *                                      category option combo.
+     * @param dataElementCategoryCombo      The associated category combination.
+     * @param categoryOptions               the category options.
      * @return DataElementCategoryOptionCombo
      */
     public static DataElementCategoryOptionCombo createCategoryOptionCombo( char categoryComboUniqueIdentifier,
-                                                                            DataElementCategoryCombo dataElementCategoryCombo,
-                                                                            DataElementCategoryOption... categoryOptions )
+        DataElementCategoryCombo dataElementCategoryCombo,
+        DataElementCategoryOption... categoryOptions )
     {
         DataElementCategoryOptionCombo categoryOptionCombo = new DataElementCategoryOptionCombo();
+        categoryOptionCombo.setAutoFields();
 
         categoryOptionCombo.setCategoryCombo( dataElementCategoryCombo );
 
@@ -539,6 +556,7 @@ public abstract class DhisConvenienceTest
         DataElementCategoryOption... categoryOptions )
     {
         DataElementCategoryOptionCombo categoryOptionCombo = new DataElementCategoryOptionCombo();
+        categoryOptionCombo.setAutoFields();
 
         categoryOptionCombo.setCategoryCombo( categoryCombo );
 
@@ -553,16 +571,17 @@ public abstract class DhisConvenienceTest
     }
 
     /**
-     * @param categoryUniqueIdentifier  A unique character to identify the
-     *        category.
-     * @param categoryOptions the category options.
+     * @param categoryUniqueIdentifier A unique character to identify the
+     *                                 category.
+     * @param categoryOptions          the category options.
      * @return DataElementCategory
      */
-    public static DataElementCategory createDataElementCategory(  char categoryUniqueIdentifier,
-                                                                  DataElementCategoryOption... categoryOptions )
+    public static DataElementCategory createDataElementCategory( char categoryUniqueIdentifier,
+        DataElementCategoryOption... categoryOptions )
     {
         DataElementCategory dataElementCategory = new DataElementCategory( "DataElementCategory" + categoryUniqueIdentifier,
-                new ArrayList<DataElementCategoryOption>() );
+            new ArrayList<DataElementCategoryOption>() );
+        dataElementCategory.setAutoFields();
 
         for ( DataElementCategoryOption categoryOption : categoryOptions )
         {
@@ -572,16 +591,25 @@ public abstract class DhisConvenienceTest
         return dataElementCategory;
     }
 
+    public static DataElementCategoryOption createCategoryOption( char uniqueIdentifier )
+    {
+        DataElementCategoryOption categoryOption = new DataElementCategoryOption( "CategoryOption" + uniqueIdentifier );
+        categoryOption.setAutoFields();
+
+        return categoryOption;
+    }
+
     /**
-     * @param categoryGroupUniqueIdentifier  A unique character to identify the
-     *        category option group.
-     * @param categoryOptions the category options.
+     * @param categoryGroupUniqueIdentifier A unique character to identify the
+     *                                      category option group.
+     * @param categoryOptions               the category options.
      * @return CategoryOptionGroup
      */
-    public static CategoryOptionGroup createCategoryOptionGroup(  char categoryGroupUniqueIdentifier,
-                                                                  DataElementCategoryOption... categoryOptions )
+    public static CategoryOptionGroup createCategoryOptionGroup( char categoryGroupUniqueIdentifier,
+        DataElementCategoryOption... categoryOptions )
     {
         CategoryOptionGroup categoryOptionGroup = new CategoryOptionGroup( "CategoryOptionGroup" + categoryGroupUniqueIdentifier );
+        categoryOptionGroup.setAutoFields();
 
         categoryOptionGroup.setMembers( new HashSet<DataElementCategoryOption>() );
 
@@ -594,15 +622,16 @@ public abstract class DhisConvenienceTest
     }
 
     /**
-     * @param categoryGroupSetUniqueIdentifier  A unique character to identify the
-     *        category option group set.
-     * @param categoryOptionGroups the category option groups.
+     * @param categoryGroupSetUniqueIdentifier A unique character to identify the
+     *                                         category option group set.
+     * @param categoryOptionGroups             the category option groups.
      * @return CategoryOptionGroupSet
      */
-    public static CategoryOptionGroupSet createCategoryOptionGroupSet(  char categoryGroupSetUniqueIdentifier,
-                                                                     CategoryOptionGroup... categoryOptionGroups )
+    public static CategoryOptionGroupSet createCategoryOptionGroupSet( char categoryGroupSetUniqueIdentifier,
+        CategoryOptionGroup... categoryOptionGroups )
     {
         CategoryOptionGroupSet categoryOptionGroupSet = new CategoryOptionGroupSet( "CategoryOptionGroupSet" + categoryGroupSetUniqueIdentifier );
+        categoryOptionGroupSet.setAutoFields();
 
         // categoryOptionGroupSet.setMembers( new ArrayList<CategoryOptionGroup>() );
 
@@ -622,6 +651,7 @@ public abstract class DhisConvenienceTest
     public static DataElementGroup createDataElementGroup( char uniqueCharacter )
     {
         DataElementGroup group = new DataElementGroup();
+        group.setAutoFields();
 
         group.setUid( BASE_UID + uniqueCharacter );
         group.setName( "DataElementGroup" + uniqueCharacter );
@@ -637,6 +667,7 @@ public abstract class DhisConvenienceTest
     public static DataElementGroupSet createDataElementGroupSet( char uniqueCharacter )
     {
         DataElementGroupSet groupSet = new DataElementGroupSet();
+        groupSet.setAutoFields();
 
         groupSet.setUid( BASE_UID + uniqueCharacter );
         groupSet.setName( "DataElementGroupSet" + uniqueCharacter );
@@ -650,6 +681,7 @@ public abstract class DhisConvenienceTest
     public static DataDictionary createDataDictionary( char uniqueCharacter )
     {
         DataDictionary dictionary = new DataDictionary();
+        dictionary.setAutoFields();
 
         dictionary.setName( "DataDictionary" + uniqueCharacter );
         dictionary.setDescription( "Description" + uniqueCharacter );
@@ -664,6 +696,7 @@ public abstract class DhisConvenienceTest
     public static IndicatorType createIndicatorType( char uniqueCharacter )
     {
         IndicatorType type = new IndicatorType();
+        type.setAutoFields();
 
         type.setName( "IndicatorType" + uniqueCharacter );
         type.setFactor( 100 );
@@ -678,6 +711,7 @@ public abstract class DhisConvenienceTest
     public static Indicator createIndicator( char uniqueCharacter, IndicatorType type )
     {
         Indicator indicator = new Indicator();
+        indicator.setAutoFields();
 
         indicator.setUid( BASE_IN_UID + uniqueCharacter );
         indicator.setName( "Indicator" + uniqueCharacter );
@@ -700,6 +734,7 @@ public abstract class DhisConvenienceTest
     public static IndicatorGroup createIndicatorGroup( char uniqueCharacter )
     {
         IndicatorGroup group = new IndicatorGroup();
+        group.setAutoFields();
 
         group.setUid( BASE_UID + uniqueCharacter );
         group.setName( "IndicatorGroup" + uniqueCharacter );
@@ -713,6 +748,7 @@ public abstract class DhisConvenienceTest
     public static IndicatorGroupSet createIndicatorGroupSet( char uniqueCharacter )
     {
         IndicatorGroupSet groupSet = new IndicatorGroupSet();
+        groupSet.setAutoFields();
 
         groupSet.setUid( BASE_UID + uniqueCharacter );
         groupSet.setName( "IndicatorGroupSet" + uniqueCharacter );
@@ -727,6 +763,7 @@ public abstract class DhisConvenienceTest
     public static DataSet createDataSet( char uniqueCharacter, PeriodType periodType )
     {
         DataSet dataSet = new DataSet();
+        dataSet.setAutoFields();
 
         dataSet.setUid( BASE_DS_UID + uniqueCharacter );
         dataSet.setName( "DataSet" + uniqueCharacter );
@@ -743,6 +780,7 @@ public abstract class DhisConvenienceTest
     public static OrganisationUnit createOrganisationUnit( char uniqueCharacter )
     {
         OrganisationUnit unit = new OrganisationUnit();
+        unit.setAutoFields();
 
         unit.setUid( BASE_OU_UID + uniqueCharacter );
         unit.setName( "OrganisationUnit" + uniqueCharacter );
@@ -776,6 +814,7 @@ public abstract class DhisConvenienceTest
     public static OrganisationUnitGroup createOrganisationUnitGroup( char uniqueCharacter )
     {
         OrganisationUnitGroup group = new OrganisationUnitGroup();
+        group.setAutoFields();
 
         group.setUid( BASE_UID + uniqueCharacter );
         group.setName( "OrganisationUnitGroup" + uniqueCharacter );
@@ -791,6 +830,7 @@ public abstract class DhisConvenienceTest
     public static OrganisationUnitGroupSet createOrganisationUnitGroupSet( char uniqueCharacter )
     {
         OrganisationUnitGroupSet groupSet = new OrganisationUnitGroupSet();
+        groupSet.setAutoFields();
 
         groupSet.setName( "OrganisationUnitGroupSet" + uniqueCharacter );
         groupSet.setDescription( "Description" + uniqueCharacter );
@@ -807,6 +847,7 @@ public abstract class DhisConvenienceTest
     public static Period createPeriod( PeriodType type, Date startDate, Date endDate )
     {
         Period period = new Period();
+        period.setAutoFields();
 
         period.setPeriodType( type );
         period.setStartDate( startDate );
@@ -830,6 +871,7 @@ public abstract class DhisConvenienceTest
     public static Period createPeriod( Date startDate, Date endDate )
     {
         Period period = new Period();
+        period.setAutoFields();
 
         period.setPeriodType( new MonthlyPeriodType() );
         period.setStartDate( startDate );
@@ -929,6 +971,7 @@ public abstract class DhisConvenienceTest
         Expression rightSide, PeriodType periodType )
     {
         ValidationRule validationRule = new ValidationRule();
+        validationRule.setAutoFields();
 
         validationRule.setName( "ValidationRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
@@ -963,6 +1006,7 @@ public abstract class DhisConvenienceTest
         int annualSampleCount, int highOutliers, int lowOutliers )
     {
         ValidationRule validationRule = new ValidationRule();
+        validationRule.setAutoFields();
 
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
@@ -988,6 +1032,7 @@ public abstract class DhisConvenienceTest
     public static ValidationRuleGroup createValidationRuleGroup( char uniqueCharacter )
     {
         ValidationRuleGroup group = new ValidationRuleGroup();
+        group.setAutoFields();
 
         group.setName( "ValidationRuleGroup" + uniqueCharacter );
         group.setDescription( "Description" + uniqueCharacter );
@@ -1043,6 +1088,7 @@ public abstract class DhisConvenienceTest
     public static MapLegend createMapLegend( char uniqueCharacter, Double startValue, Double endValue )
     {
         MapLegend legend = new MapLegend();
+        legend.setAutoFields();
 
         legend.setName( "MapLegend" + uniqueCharacter );
         legend.setStartValue( startValue );
@@ -1055,6 +1101,7 @@ public abstract class DhisConvenienceTest
     public static MapLegendSet createMapLegendSet( char uniqueCharacter )
     {
         MapLegendSet legendSet = new MapLegendSet();
+        legendSet.setAutoFields();
 
         legendSet.setName( "MapLegendSet" + uniqueCharacter );
 
@@ -1065,6 +1112,7 @@ public abstract class DhisConvenienceTest
         List<OrganisationUnit> units )
     {
         Chart chart = new Chart();
+        chart.setAutoFields();
 
         chart.setName( "Chart" + uniqueCharacter );
         chart.setIndicators( indicators );
@@ -1079,6 +1127,7 @@ public abstract class DhisConvenienceTest
     public static User createUser( char uniqueCharacter )
     {
         User user = new User();
+        user.setAutoFields();
 
         user.setFirstName( "FirstName" + uniqueCharacter );
         user.setSurname( "Surname" + uniqueCharacter );
@@ -1097,6 +1146,7 @@ public abstract class DhisConvenienceTest
     public static UserGroup createUserGroup( char uniqueCharacter, Set<User> users )
     {
         UserGroup userGroup = new UserGroup();
+        userGroup.setAutoFields();
 
         userGroup.setName( "UserGroup" + uniqueCharacter );
         userGroup.setMembers( users );
@@ -1108,6 +1158,7 @@ public abstract class DhisConvenienceTest
         OrganisationUnit organisationUnit )
     {
         Program program = new Program();
+        program.setAutoFields();
 
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
@@ -1137,6 +1188,7 @@ public abstract class DhisConvenienceTest
     public static ProgramStage createProgramStage( char uniqueCharacter, int minDays, boolean irregular )
     {
         ProgramStage programStage = new ProgramStage();
+        programStage.setAutoFields();
 
         programStage.setName( "ProgramStage" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
@@ -1199,6 +1251,7 @@ public abstract class DhisConvenienceTest
     public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar )
     {
         TrackedEntityAttribute attribute = new TrackedEntityAttribute();
+        attribute.setAutoFields();
 
         attribute.setName( "Attribute" + uniqueChar );
         attribute.setDescription( "Attribute" + uniqueChar );
@@ -1214,6 +1267,7 @@ public abstract class DhisConvenienceTest
     public static TrackedEntityAttribute createTrackedEntityAttribute( char uniqueChar, String type )
     {
         TrackedEntityAttribute attribute = new TrackedEntityAttribute();
+        attribute.setAutoFields();
 
         attribute.setName( "Attribute" + uniqueChar );
         attribute.setDescription( "Attribute" + uniqueChar );
@@ -1229,6 +1283,7 @@ public abstract class DhisConvenienceTest
     public static TrackedEntityAttributeGroup createTrackedEntityAttributeGroup( char uniqueChar, List<TrackedEntityAttribute> attributes )
     {
         TrackedEntityAttributeGroup attributeGroup = new TrackedEntityAttributeGroup();
+        attributeGroup.setAutoFields();
 
         attributeGroup.setName( "TrackedEntityAttributeGroup" + uniqueChar );
         attributeGroup.setDescription( "TrackedEntityAttributeGroup" + uniqueChar );
@@ -1245,6 +1300,7 @@ public abstract class DhisConvenienceTest
         String value )
     {
         ValidationCriteria validationCriteria = new ValidationCriteria();
+        validationCriteria.setAutoFields();
 
         validationCriteria.setName( "ValidationCriteria" + uniqueCharacter );
         validationCriteria.setDescription( "Description" + uniqueCharacter );
@@ -1262,6 +1318,7 @@ public abstract class DhisConvenienceTest
     public static RelationshipType createRelationshipType( char uniqueChar )
     {
         RelationshipType relationshipType = new RelationshipType();
+        relationshipType.setAutoFields();
 
         relationshipType.setaIsToB( "aIsToB" );
         relationshipType.setbIsToA( "bIsToA" );
@@ -1278,6 +1335,7 @@ public abstract class DhisConvenienceTest
     protected static SqlView createSqlView( char uniqueCharacter, String sql )
     {
         SqlView sqlView = new SqlView();
+        sqlView.setAutoFields();
 
         sqlView.setName( "SqlView" + uniqueCharacter );
         sqlView.setDescription( "Description" + uniqueCharacter );
@@ -1293,6 +1351,7 @@ public abstract class DhisConvenienceTest
     protected static Concept createConcept( char uniqueCharacter )
     {
         Concept concept = new Concept();
+        concept.setAutoFields();
 
         concept.setName( "Concept" + uniqueCharacter );
 
@@ -1307,6 +1366,7 @@ public abstract class DhisConvenienceTest
     protected static Constant createConstant( char uniqueCharacter, double value )
     {
         Constant constant = new Constant();
+        constant.setAutoFields();
 
         constant.setName( "Constant" + uniqueCharacter );
         constant.setValue( value );
@@ -1409,11 +1469,7 @@ public abstract class DhisConvenienceTest
             return null;
         }
     }
-
-    // -------------------------------------------------------------------------
-    // Allow xpath testing of DXF2
-    // -------------------------------------------------------------------------
-
+    
     /**
      * Creates a user and injects into the security context with username
      * "username". Requires <code>identifiableObjectManager</code> and
@@ -1423,7 +1479,7 @@ public abstract class DhisConvenienceTest
      * @param auths   authorities to grant to user.
      * @return the user.
      */
-    public User createUserAndInjectSecurityContext( boolean allAuth, String... auths )
+    protected User createUserAndInjectSecurityContext( boolean allAuth, String... auths )
     {
         return createUserAndInjectSecurityContext( null, allAuth, auths );
     }
@@ -1438,7 +1494,7 @@ public abstract class DhisConvenienceTest
      * @param auths             authorities to grant to user.
      * @return the user.
      */
-    public User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, boolean allAuth, String... auths )
+    protected User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, boolean allAuth, String... auths )
     {
         return createUserAndInjectSecurityContext( organisationUnits, null, allAuth, auths );
     }
@@ -1454,7 +1510,7 @@ public abstract class DhisConvenienceTest
      * @param auths                     authorities to grant to user.
      * @return the user.
      */
-    public User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, Set<OrganisationUnit> dataViewOrganisationUnits, boolean allAuth, String... auths )
+    protected User createUserAndInjectSecurityContext( Set<OrganisationUnit> organisationUnits, Set<OrganisationUnit> dataViewOrganisationUnits, boolean allAuth, String... auths )
     {
         Assert.notNull( identifiableObjectManager, "IdentifiableObjectManager must be injected in test" );
         Assert.notNull( userService, "UserService must be injected in test" );
@@ -1503,5 +1559,16 @@ public abstract class DhisConvenienceTest
         SecurityContextHolder.getContext().setAuthentication( authentication );
 
         return user;
+    }
+
+    protected static String getStackTrace( Throwable t )
+    {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter( sw, true );
+        t.printStackTrace( pw );
+        pw.flush();
+        sw.flush();
+        
+        return sw.toString();
     }
 }

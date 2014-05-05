@@ -29,6 +29,9 @@ package org.hisp.dhis.settings.action.system;
  */
 
 import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.calendar.CalendarService;
+import org.hisp.dhis.calendar.DateFormat;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
@@ -42,6 +45,7 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.comparator.UserGroupComparator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -93,6 +97,9 @@ public class GetGeneralSettingsAction
     {
         this.organisationUnitService = organisationUnitService;
     }
+
+    @Autowired
+    private CalendarService calendarService;
 
     // -------------------------------------------------------------------------
     // Output
@@ -159,6 +166,16 @@ public class GetGeneralSettingsAction
         return configuration;
     }
 
+    public List<Calendar> getCalendars()
+    {
+        return calendarService.getAllCalendars();
+    }
+
+    public List<DateFormat> getDateFormats()
+    {
+        return calendarService.getAllDateFormats();
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -176,7 +193,7 @@ public class GetGeneralSettingsAction
             // default to highest level
             // TODO what if the org unit level hierarchy hasn't been created yet?
             int size = organisationUnitService.getOrganisationUnitLevels().size();
-            
+
             offlineOrganisationUnitLevel = organisationUnitService.getOrganisationUnitLevelByLevel( size );
         }
 

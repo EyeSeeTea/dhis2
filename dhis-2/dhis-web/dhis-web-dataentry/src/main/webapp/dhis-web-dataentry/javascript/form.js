@@ -61,9 +61,6 @@ dhis2.de.currentPeriodOffset = 0;
 // Username of user who marked the current data set as complete if any
 dhis2.de.currentCompletedByUser = null;
 
-// Period type object
-dhis2.de.periodTypeFactory = new PeriodType();
-
 // Instance of the StorageManager
 dhis2.de.storageManager = new StorageManager();
 
@@ -422,32 +419,12 @@ function addEventListeners()
             keyPress( event, this );
         } );
 
-		if ( formType != FORMTYPE_CUSTOM )
-		{
-        	$( this ).css( 'width', '100%' );
-		}
-
         if ( type == 'date' )
         {
-            $( this ).css( 'width', '100%' );
             datePicker( id );
         }
     } );
     
-    $( '.entryfield' ).not( '.entryarea' ).each( function( i )
-    {
-		if ( formType != FORMTYPE_CUSTOM )
-		{
-        	$( this ).css( 'text-align', 'center' );
-		}
-    } );
-
-    $( '.entryarea' ).each( function( i )
-    {
-    	$( this ).css( 'min-width', '264px' );
-    	$( this ).css( 'min-height', '45px' );
-    } );
-
     $( '.entryselect' ).each( function( i )
     {
         var id = $( this ).attr( 'id' );
@@ -467,9 +444,6 @@ function addEventListeners()
         {
             saveBoolean( dataElementId, optionComboId, id );
         } );
-
-        $( this ).css( 'width', '88%' );
-        $( this ).css( 'margin-right', '2px' );
     } );
 
     $( '.entrytrueonly' ).each( function( i )
@@ -490,8 +464,6 @@ function addEventListeners()
         {
             saveTrueOnly( dataElementId, optionComboId, id );
         } );
-
-        $( this ).css( 'width', '60%' );
     } );
 
     $( '.entryoptionset' ).each( function( i )
@@ -512,12 +484,6 @@ function addEventListeners()
         {
             saveVal( dataElementId, optionComboId, id );
         } );
-
-        if ( formType != FORMTYPE_CUSTOM ) 
-        {
-            $( this ).css( 'width', '85%' );
-            $( this ).css( 'text-align', 'center' );
-        }
     } );
 
     $( '.commentlink' ).each( function( i )
@@ -940,13 +906,12 @@ function dataSetSelected()
     {
 	    var periodType = dhis2.de.dataSets[dataSetId].periodType;
 	    var allowFuturePeriods = dhis2.de.dataSets[dataSetId].allowFuturePeriods;
-	    var periods = dhis2.de.periodTypeFactory.get( periodType ).generatePeriods( dhis2.de.currentPeriodOffset );
-	    periods = dhis2.de.periodTypeFactory.reverse( periods );
-	    
-	    if ( allowFuturePeriods == false )
-	    {
-	    	periods = dhis2.de.periodTypeFactory.filterFuturePeriods( periods );
-	    }
+      var periods = dhis2.period.generator.generateReversedPeriods(periodType, dhis2.de.currentPeriodOffset);
+
+      if( allowFuturePeriods == false )
+      {
+        periods = dhis2.period.generator.filterFuturePeriods(periods);
+      }
 
         clearListById( 'selectedPeriodId' );
         clearSectionFilters();
@@ -1038,12 +1003,11 @@ function displayPeriodsInternal()
     var dataSetId = $( '#selectedDataSetId' ).val();
     var periodType = dhis2.de.dataSets[dataSetId].periodType;
     var allowFuturePeriods = dhis2.de.dataSets[dataSetId].allowFuturePeriods;
-    var periods = dhis2.de.periodTypeFactory.get( periodType ).generatePeriods( dhis2.de.currentPeriodOffset );
-    periods = dhis2.de.periodTypeFactory.reverse( periods );
-    
+    var periods = dhis2.period.generator.generateReversedPeriods(periodType, dhis2.de.currentPeriodOffset);
+
     if ( allowFuturePeriods == false )
     {
-    	periods = dhis2.de.periodTypeFactory.filterFuturePeriods( periods );
+      periods = dhis2.period.generator.filterFuturePeriods(periods);
     }
 
     clearListById( 'selectedPeriodId' );
@@ -1323,6 +1287,7 @@ function getAndInsertDataValues()
       complete: function()
       {
         $( '.indicator' ).attr( 'readonly', 'readonly' );
+        $( '.dataelementtotal' ).attr( 'readonly', 'readonly' );
         $( document ).trigger('dhis2.de.event.dataValuesLoaded');
       }
 	} );

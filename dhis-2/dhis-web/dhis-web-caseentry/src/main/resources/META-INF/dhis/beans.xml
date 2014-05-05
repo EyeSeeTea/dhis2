@@ -601,6 +601,10 @@
 	<bean id="org.hisp.dhis.caseentry.action.trackedentity.GetAttributesByProgramAction"
 		class="org.hisp.dhis.caseentry.action.trackedentity.GetAttributesByProgramAction" scope="prototype">
 	</bean>
+	
+	<bean id="org.hisp.dhis.caseentry.action.trackedentity.GetVisitScheduleAttributesAction"
+		class="org.hisp.dhis.caseentry.action.trackedentity.GetVisitScheduleAttributesAction" scope="prototype">
+	</bean>
 
 	<!-- Relationship -->
 
@@ -746,6 +750,12 @@
 		class="org.hisp.dhis.caseentry.action.caseentry.RemoveProgramInstanceAction"
 		scope="prototype">
 		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
+	</bean>
+	
+	<bean
+		id="org.hisp.dhis.caseentry.action.caseentry.RemoveSingleEventAction"
+		class="org.hisp.dhis.caseentry.action.caseentry.RemoveSingleEventAction"
+		scope="prototype">
 	</bean>
 
 	<!-- Comment && Message -->
