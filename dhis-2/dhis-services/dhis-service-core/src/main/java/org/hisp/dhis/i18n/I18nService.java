@@ -63,7 +63,7 @@ public interface I18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    void updateTranslation( String className, int id, Locale thisLocale, Map<String, String> translations );
+    void updateTranslation( String className, int id, Locale thisLocale, Map<String, String> translations, String uid );
     
     Map<String, String> getTranslations( String className, int id );
 

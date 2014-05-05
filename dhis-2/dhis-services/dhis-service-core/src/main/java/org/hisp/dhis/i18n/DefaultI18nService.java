@@ -209,7 +209,7 @@ public class DefaultI18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    public void updateTranslation( String className, int id, Locale locale, Map<String, String> translations )
+    public void updateTranslation( String className, int id, Locale locale, Map<String, String> translations, String uid )
     {
         if ( locale != null && className != null )
         {
