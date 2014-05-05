@@ -724,8 +724,10 @@ public class TableAlteror
 
         executeSql( "ALTER TABLE translation ADD COLUMN lastupdated timestamp" );
         executeSql( "ALTER TABLE translation ADD COLUMN uid varchar(11)" );
+        executeSql( "ALTER TABLE translation DROP COLUMN objectid" );
 
-        log.info( "Tables updated" );
+
+            log.info( "Tables updated" );
     }
 
     private void upgradeDataValuesWithAttributeOptionCombo()

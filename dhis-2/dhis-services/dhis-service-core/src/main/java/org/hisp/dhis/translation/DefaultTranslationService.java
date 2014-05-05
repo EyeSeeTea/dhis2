@@ -71,9 +71,9 @@ public class DefaultTranslationService
         return translationStore.getTranslation( className, id, locale, property );
     }
 
-    public Translation getTranslationNoFallback( String className, int id, Locale locale, String property, String uid )
+    public Translation getTranslationNoFallback( String className, Locale locale, String property, String uid )
     {
-        return translationStore.getTranslationNoFallback( className, id, locale, property,uid );
+        return translationStore.getTranslationNoFallback( className, locale, property,uid );
     }
 
     public Collection<Translation> getTranslations( String className, int id, Locale locale )
@@ -81,9 +81,9 @@ public class DefaultTranslationService
         return translationStore.getTranslations( className, id, locale );
     }
 
-    public Collection<Translation> getTranslationsNoFallback( String className, int id, Locale locale )
+    public Collection<Translation> getTranslationsNoFallback( String className, String uid, Locale locale )
     {
-        return translationStore.getTranslationsNoFallback( className, id, locale );
+        return translationStore.getTranslationsNoFallback( className, uid, locale );
     }
 
     public Collection<Translation> getTranslations( String className, Locale locale )

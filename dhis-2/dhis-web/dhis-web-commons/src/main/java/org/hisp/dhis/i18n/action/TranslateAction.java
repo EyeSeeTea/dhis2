@@ -168,7 +168,7 @@ public class TranslateAction
 
         if ( thisLocale != null && !loc.equals( "NONE" ) )
         {
-            i18nService.updateTranslation( className, Integer.parseInt( uid ), thisLocale, translations,object.getUid() );
+            i18nService.updateTranslation( className, thisLocale, translations,object.getUid() );
         }
 
         return SUCCESS;
