@@ -35,32 +35,49 @@ dhis2.settings = dhis2.settings || {};
 
 (function (undefined) {
 
-    var templates = {},
-        profileLinks = [],
+    var requiredLibraries = [
+                { name: "jQuery", variable: "jQuery", url: "http://jquery.com" },
+                { name: "jQuery Template Plugin", variable: "jQuery.template", url: "http://github.com/jquery/jquery-tmpl" },
+                { name: "jQuery UI", variable: "jQuery.ui", url: "https://jqueryui.com" },
+                { name: "DHIS2 Translate", variable: "dhis2.translate", url: "http://www.dhis2.org" }
+            ],
         getBaseUrl = (function () {
-        var href = window.location.origin;
-        return function () {
-            var urlParts = href.split("/"),
-                baseUrl;
+            var href = window.location.origin;
+            return function () {
+                var urlParts = href.split("/"),
+                    baseUrl;
 
-            if (dhis2.settings.baseUrl === undefined) {
-                return "..";
-            }
+                if (dhis2.settings.baseUrl === undefined) {
+                    return "..";
+                }
 
-            if (typeof dhis2.settings.baseUrl !== "string") {
-                throw new TypeError("Dhis2 settings: baseUrl should be a string");
-            }
+                if (typeof dhis2.settings.baseUrl !== "string") {
+                    throw new TypeError("Dhis2 settings: baseUrl should be a string");
+                }
 
-            if (urlParts[urlParts.length - 1] !== "") {
-                baseUrl = href + '/' + dhis2.settings.baseUrl;
-            } else {
-                urlParts.pop();
-                urlParts.push(dhis2.settings.baseUrl);
-                baseUrl = urlParts.join('/');
+                if (urlParts[urlParts.length - 1] !== "") {
+                    baseUrl = href + '/' + dhis2.settings.baseUrl;
+                } else {
+                    urlParts.pop();
+                    urlParts.push(dhis2.settings.baseUrl);
+                    baseUrl = urlParts.join('/');
+                }
+                return baseUrl;
             }
-            return baseUrl;
+        })(),
+
+    /**
+     * Adjusts the url to include the baseUrl
+     *
+     * @param iconUrl
+     * @returns {String}
+     */
+    fixUrlIfNeeded = function (iconUrl) {
+        if (iconUrl.substring(0, 2) === "..") {
+            return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
         }
-    })();
+        return iconUrl;
+    },
 
     profileLinks = [
         {
@@ -107,15 +124,47 @@ dhis2.settings = dhis2.settings || {};
         }
     ];
 
-    function fixUrlIfNeeded(iconUrl) {
-        if (iconUrl.substring(0, 2) === "..") {
-            return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
-        }
-        return iconUrl;
-    }
 
+    /*******************************************************************************************************************
+     * Dependency checker for the menu
+     ******************************************************************************************************************/
+    (function (undefined) {
+        var libraries = requiredLibraries || [];
+
+        //In IE 8 we can not use console
+        if (typeof console === "undefined") {
+            return;
+        }
+
+        //Throw error for the required libraries
+        libraries.forEach(function (library, index, libraries) {
+            var parts = library.variable.split('.'),
+                checkParts = function (checkOn, parts) {
+                    var checkedOn = checkOn[parts[0]];
+
+                    if (checkOn[parts[0]] === undefined) {
+                        console.error("DHIS2 Menu: Missing required library: " + library.name + ". Please see (" + library.url + ")");
+                        return;
+                    }
+
+                    if (parts.length > 1) {
+                        checkParts(checkedOn, parts.slice(1));
+                    }
+                }
+            checkParts(window, parts);
+        });
+    })();
+
+    /*******************************************************************************************************************
+     * Dhis2 menu logic and order
+     ******************************************************************************************************************/
     (function (dhis2, undefined) {
         var MAX_FAVORITES = 9,
+            /**
+             * Utilities object that contains a copy of underscore.js its isFunction method
+             *
+             * @type {{isFunction: isFunction}}
+             */
             du = {
                 isFunction: function(obj) {
                     return Object.prototype.toString.call(obj) == '[object Function]';
@@ -194,7 +243,7 @@ dhis2.settings = dhis2.settings || {};
              * Execute any callbacks that are set onto the callbacks array
              */
             function executeCallBacks() {
-                var onceCallBack, callBackIndex;
+                var onceCallBack;
 
                 //If not ready or no menu items
                 if ( ! isReady() || menuItems === {})
@@ -402,6 +451,12 @@ dhis2.settings = dhis2.settings || {};
                 return favApps.concat(nonFavApps);;
             }
 
+            /**
+             * Updates the order of the apps based on the current set display order
+             *
+             * @param reorderedApps
+             * @return undefined
+             */
             that.updateOrder = function (reorderedApps) {
                 switch (dhis2.menu.displayOrder) {
                     case 'name-asc':
@@ -416,6 +471,12 @@ dhis2.settings = dhis2.settings || {};
                 }
             }
 
+            /**
+             * Calls the passed in save function passing in a array with the keys in the current order
+             *
+             * @param saveMethod
+             * @returns {*}
+             */
             that.save = function (saveMethod) {
                 if ( ! du.isFunction(saveMethod)) {
                     return false;
@@ -428,53 +489,16 @@ dhis2.settings = dhis2.settings || {};
         }();
     })(dhis2 = dhis2 || {});
 
-    /*
-     * Function used for checking dependencies for the menu
-     */
-    (function (undefined) {
-        var libraries = [
-            { name: "jQuery", variable: "jQuery", url: "http://jquery.com" },
-            { name: "jQuery Template Plugin", variable: "jQuery.template", url: "http://github.com/jquery/jquery-tmpl" },
-            { name: "jQuery UI", variable: "jQuery.ui", url: "https://jqueryui.com" },
-            { name: "DHIS2 Translate", variable: "dhis2.translate", url: "http://www.dhis2.org" }
-        ];
-
-        //In IE 8 we can not use console
-        if (typeof console === "undefined") {
-            return;
-        }
-
-        //Throw error for the required libraries
-        libraries.forEach(function (library, index, libraries) {
-            var parts = library.variable.split('.'),
-            checkParts = function (checkOn, parts) {
-                var checkedOn = checkOn[parts[0]];
-
-                if (checkOn[parts[0]] === undefined) {
-                    console.error("DHIS2 Menu: Missing required library: " + library.name + ". Please see (" + library.url + ")");
-                    return;
-                }
-
-                if (parts.length > 1) {
-                    checkParts(checkedOn, parts.slice(1));
-                }
-            }
-            checkParts(window, parts);
-        });
-    })();
-
-    /**
-     * Created by Mark Polak on 28/01/14.
-     *
-     * @description jQuery part of the menu
+    /*******************************************************************************************************************
+     * Dhis2 menu jQuery logic and dom manupulation code
      *
      * @see jQuery (http://jquery.com)
      * @see jQuery Template Plugin (http://github.com/jquery/jquery-tmpl)
      * @see jQuery UI (https://jqueryui.com)
-     */
+     ******************************************************************************************************************/
     (function ($, dhis2, undefined) {
         var menu = dhis2.menu,
-            markup = '',
+            templates = {},
             selector = 'appsMenu',
             urls = {
                 getModules: "/dhis-web-commons/menu/getModules.action",
@@ -584,6 +608,9 @@ dhis2.settings = dhis2.settings || {};
 
         menu.subscribe(renderMenu);
 
+        /**
+         * Prepares the templates for the menu
+         */
         function prepareTemplates() {
             /**
              * Templates that are used during the menu
@@ -642,19 +669,32 @@ dhis2.settings = dhis2.settings || {};
             $.template('appMenuItemTemplate', templates.appMenuItemTemplate);
         }
 
-        function initInitialMenuHtml() {
+        /**
+         * Adds the menu html to the dom
+         */
+        function addMenuHtml() {
+            prepareTemplates();
             if (typeof dhis2.menu.elementId === "string") {
                 $.tmpl('buttonsHtml').appendTo('#' + dhis2.menu.elementId);
                 $.tmpl('dropDownHtml').appendTo('#' + dhis2.menu.elementId);
             }
         }
 
-        function prepareProfileMenu() {
-            dhis2.translate.get(["settings", "profile", "account", "help", "log_out","about_dhis2"], addProfileMenu);
+        /**
+         * Starts the process of adding the profile menu to the page
+         * Asks the translation service for translations and then calls the callback to add the data
+         */
+        function addProfileMenu() {
+            dhis2.translate.get(["settings", "profile", "account", "help", "log_out","about_dhis2"], processProfileMenu);
             $('#profileDropDown ul li').remove();
         }
 
-        function addProfileMenu(translations) {
+        /**
+         * Adds the profile menu to the page
+         *
+         * @param {Object} translations Translations that are used in the profile menu
+         */
+        function processProfileMenu(translations) {
             profileLinks.forEach(function (item, index, profileLinks) {
                 item.id = item.name;
                 item.name = translations.get(item.id);
@@ -666,66 +706,27 @@ dhis2.settings = dhis2.settings || {};
         }
 
         /**
-         * jQuery events that communicate with the web api
-         * TODO: Check the urls (they seem to be specific to the dev location atm)
+         * Add apps menu to the page
          */
-        $(function () {
-            var menuTimeout = 500,
-                closeTimer = null,
-                dropDownId = null;
-
-            prepareTemplates();
-            initInitialMenuHtml();
-            prepareProfileMenu();
-
+        function addAppsMenu() {
             $.ajax(getBaseUrl() + urls["getModules"]).success(function (data) {
                 if (typeof data.modules === 'object') {
                     menu.addMenuItems(data.modules);
                 }
             }).error(function () {
-                    //TODO: Give user feedback for failure to load items
-                    //TODO: Translate this error message
-                    var error_template = '<li class="app-menu-error"><a href="' + window.location.href +'">Unable to load your apps, click to refresh</a></li>';
-                    $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
-                    $('#appsDropDown .menuDropDownBox').html(error_template);
-                });
-
-            /**
-             * Event handler for the sort order box
-             */
-            $('#menuOrderBy').change(function (event) {
-                var orderBy = $(event.target).val();
-
-                dhis2.menu.displayOrder = orderBy;
-
-                renderMenu();
+                //TODO: Give user feedback for failure to load items
+                //TODO: Translate this error message
+                var error_template = '<li class="app-menu-error"><a href="' +
+                        window.location.href +'">Unable to load your apps, click to refresh</a></li>';
+                $('#' + selector).addClass('app-menu').html('<ul>' + error_template + '</ul>');
+                $('#appsDropDown .menuDropDownBox').html(error_template);
             });
+        }
 
-            /**
-             * Check if we need to fix columns when the window resizes
-             */
-            $(window).resize(twoColumnRowFix);
-
-            /**
-             * Adds a scrolling mechanism that makes space for the scrollbar and shows/hides the more apps button
-             */
-            $('.menu-drop-down-scroll').scroll(function (event) {
-                var self = $(this),
-                    moreAppsElement = $('#appsDropDown > .apps-menu-more');
-
-                if (self.scrollTop() < 10) {
-                    moreAppsElement.show();
-                    self.parent().css('width', '360px');
-                    self.parent().parent().css('width', '360px');
-                } else {
-                    if (self.innerHeight() === 330 ) {
-                        moreAppsElement.hide();
-                        self.parent().css('width', '384px');
-                        self.parent().parent().css('width', '384px');
-                    }
-                }
-
-            });
+        function addDropDownEvent() {
+            var menuTimeout = 500,
+                closeTimer = null,
+                dropDownId = null;
 
             function showDropDown( id )
             {
@@ -817,6 +818,61 @@ dhis2.settings = dhis2.settings || {};
                     }
                 }());
             });
+        }
+
+        /**
+         * Event handler for the sort order box
+         */
+        function addOrderEvent() {
+            $('#menuOrderBy').change(function (event) {
+                var orderBy = $(event.target).val();
+
+                dhis2.menu.displayOrder = orderBy;
+
+                renderMenu();
+            });
+        }
+
+        /**
+         * jQuery events that communicate with the web api
+         * TODO: Check the urls (they seem to be specific to the dev location atm)
+         */
+        $(function () {
+            // Add the base html that the menu uses before calling the ajax functions to get the data
+            addMenuHtml();
+
+            addProfileMenu();
+            addAppsMenu();
+
+            addOrderEvent();
+
+            /**
+             * Check if we need to fix columns when the window resizes
+             */
+            $(window).resize(twoColumnRowFix);
+
+            /**
+             * Adds a scrolling mechanism that makes space for the scrollbar and shows/hides the more apps button
+             */
+            $('.menu-drop-down-scroll').scroll(function (event) {
+                var self = $(this),
+                    moreAppsElement = $('#appsDropDown > .apps-menu-more');
+
+                if (self.scrollTop() < 10) {
+                    moreAppsElement.show();
+                    self.parent().css('width', '360px');
+                    self.parent().parent().css('width', '360px');
+                } else {
+                    if (self.innerHeight() === 330 ) {
+                        moreAppsElement.hide();
+                        self.parent().css('width', '384px');
+                        self.parent().parent().css('width', '384px');
+                    }
+                }
+
+            });
+
+            addDropDownEvent();
 
             $(window).resize(function () {
                 $('.app-menu-dropdown').get().forEach(function (element, index, elements) {
