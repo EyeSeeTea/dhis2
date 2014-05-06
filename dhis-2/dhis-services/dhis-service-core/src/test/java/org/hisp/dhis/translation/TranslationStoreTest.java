@@ -87,11 +87,11 @@ public class TranslationStoreTest
     @Test
     public void testAddGet()
     {
-        translation1a = new Translation( className1, id1, locale1, "name", "cheers" );
-        translation1b = new Translation( className1, id1, locale1, "shortName", "goodbye" );
-        translation2a = new Translation( className1, id1, locale2, "name", "hello" );
-        translation2b = new Translation( className2, id1, locale2, "name", "hey" );
-        translation2c = new Translation( className2, id2, locale3, "name", "bonjour" );
+        translation1a = new Translation( className1, locale1, "name", "cheers", className1 + id1);
+        translation1b = new Translation( className1, locale1, "shortName", "goodbye",className1 + id1 );
+        translation2a = new Translation( className1, locale2, "name", "hello",className1 + id1 );
+        translation2b = new Translation( className2, locale2, "name", "hey",className1 + id1 );
+        translation2c = new Translation( className2, locale3, "name", "bonjour",className1 + id2 );
         
         translationStore.addTranslation( translation1a );
         translationStore.addTranslation( translation1b );

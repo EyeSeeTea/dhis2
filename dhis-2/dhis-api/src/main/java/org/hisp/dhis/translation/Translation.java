@@ -29,6 +29,7 @@ package org.hisp.dhis.translation;
  */
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * @author Oyvind Brucker
@@ -43,15 +44,17 @@ public class Translation
 
     private String className;
 
-    private int id;
-
-    private String locale;
+        private String locale;
 
     private String property;
 
     private String value;
 
-    // -------------------------------------------------------------------------
+    private String uid;
+
+    private Date lastUpdated;
+
+        // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
@@ -59,13 +62,13 @@ public class Translation
     {
     }
 
-    public Translation( String className, int id, String locale, String property, String value )
+    public Translation( String className, String locale, String property, String value, String uid )
     {
         this.className = className;
-        this.id = id;
-        this.locale = locale;
+            this.locale = locale;
         this.property = property;
         this.value = value;
+        this.uid = uid;
     }
 
     // -------------------------------------------------------------------------
@@ -74,7 +77,7 @@ public class Translation
 
     public String getClassIdPropKey()
     {
-        return className + "-" + id + "-" + property;
+        return className + "-" + uid + "-" + property;
     }
     
     // -------------------------------------------------------------------------
@@ -91,14 +94,14 @@ public class Translation
         this.className = className;
     }
 
-    public int getId()
+        public String getUid()
     {
-        return id;
+        return uid;
     }
 
-    public void setId( int id )
+    public void setUid( String uid )
     {
-        this.id = id;
+        this.uid = uid;
     }
 
     public String getLocale()
@@ -131,6 +134,16 @@ public class Translation
         this.value = value;
     }
 
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+
     // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
@@ -142,7 +155,7 @@ public class Translation
         int result = 1;
 
         result = result * prime + className.hashCode();
-        result = result * prime + id;
+        result = result * prime + uid.hashCode();
         result = result * prime + locale.hashCode();
         result = result * prime + property.hashCode();
         
@@ -169,13 +182,13 @@ public class Translation
 
         Translation translation = (Translation) o;
 
-        return className.equals( translation.getClassName() ) && id == translation.getId() &&
+        return className.equals( translation.getClassName() ) &&  uid == translation.getUid() &&
             locale.equals( translation.getLocale() ) && property.equals( translation.getProperty());
     }
 
     @Override
     public String toString()
     {
-        return "[Class name: " + className + " id: " + id + " locale: " + locale + " property: " + property + " value: " + value + "]";
+        return "[Class name: " + className + " uid: " + uid + " locale: " + locale + " property: " + property + " value: " + value + "]";
     }
 }

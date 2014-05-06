@@ -68,13 +68,15 @@ public interface TranslationService
      * Retrieves a Translation. Only exact matches on the given
      * Locale will be returned.
      * 
+     *
+     *
      * @param className the class name.
-     * @param id the id.
      * @param locale the locale.
      * @param property the property.
+     * @param uid
      * @return a Translation.
      */
-    Translation getTranslationNoFallback( String className, int id, Locale locale, String property );
+    Translation getTranslationNoFallback( String className, Locale locale, String property, String uid );
 
     /**
      * Retrieves a Collection of Translations.
@@ -90,12 +92,13 @@ public interface TranslationService
      * Retrieves a Collection of Translations. Only exact matches on the given
      * Locale will be returned.
      * 
+     *
      * @param className the class name.
-     * @param id the id.
+     * @param uid the id.
      * @param locale the locale.
      * @return a Collection of Translations.
      */
-    Collection<Translation> getTranslationsNoFallback( String className, int id, Locale locale );
+    Collection<Translation> getTranslationsNoFallback( String className, String uid, Locale locale );
 
     /**
      * Retrieves a Collection of Translations.
