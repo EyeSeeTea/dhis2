@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Stian Strandli
@@ -153,4 +154,6 @@ public interface SystemSettingManager
     String googleAnalyticsUA();
 
     Integer credentialsExpires();
+
+    Map<String, Serializable> getSystemSettingsAsMap();
 }

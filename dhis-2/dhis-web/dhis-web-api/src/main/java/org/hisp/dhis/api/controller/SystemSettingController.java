@@ -29,7 +29,6 @@ package org.hisp.dhis.api.controller;
  */
 
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.setting.SystemSetting;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,8 +42,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -90,18 +87,10 @@ public class SystemSettingController
         return setting != null ? String.valueOf( setting ) : null;
     }
 
-    @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
+    @RequestMapping(method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON)
     public @ResponseBody Map<String, Serializable> getSystemSetting()
     {
-        Map<String, Serializable> settingsMap = new HashMap<String, Serializable>();
-
-        Collection<SystemSetting> systemSettings = systemSettingManager.getAllSystemSettings();
-        for ( SystemSetting systemSetting : systemSettings )
-        {
-            settingsMap.put( systemSetting.getName(), systemSetting.getValue() );
-        }
-
-        return settingsMap;
+        return systemSettingManager.getSystemSettingsAsMap();
     }
 
     @RequestMapping(value = "/{key}", method = RequestMethod.DELETE)
