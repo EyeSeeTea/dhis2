@@ -13,7 +13,6 @@ Ext.onReady( function() {
 		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null,
 		logg: []
 	};
-inst = GIS.core.instances;
 
 	GIS.core.getOLMap = function(gis) {
 		var olmap,
@@ -189,6 +188,9 @@ inst = GIS.core.instances;
             eventWindow;
 
 		defaultHoverSelect = function fn(feature) {
+            selectHandlers.selectStyle.strokeColor = feature.style.strokeColor;
+            selectHandlers.selectStyle.strokeWidth = feature.style.strokeWidth;
+
 			if (defaultHoverWindow) {
 				defaultHoverWindow.destroy();
 			}
@@ -683,11 +685,14 @@ inst = GIS.core.instances;
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
         // workaround
-        //selectHandlers.selectStyle = {
-            //fillOpacity: 0.5,
-            //strokeWidth: 1,
-            //strokeColor: '#444'
-        //};
+        selectHandlers.selectStyle = {
+            fillOpacity: 0.2,
+            fillColor: '#000',
+            strokeWidth: 1,
+            strokeColor: '#444',
+            cursor: 'pointer',
+            pointRadius: 5
+        };
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
@@ -1518,7 +1523,7 @@ inst = GIS.core.instances;
 				scope: this,
 				disableCaching: false,
 				success: function(r) {
-					var geojson = gis.util.geojson.decode(r),
+					var geojson = gis.util.geojson.decode(r, 'DESC'),
 						format = new OpenLayers.Format.GeoJSON(),
 						features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
                         colors = ['black', 'blue', 'red', 'green', 'yellow'],
@@ -1537,32 +1542,33 @@ inst = GIS.core.instances;
 						return;
 					}
 
-                    //// get levels, colors, map
-                    //for (var i = 0; i < features.length; i++) {
-                        //levels.push(parseFloat(features[i].attributes.level));
-                    //}
+                    // get levels, colors, map
+                    for (var i = 0; i < features.length; i++) {
+                        levels.push(parseFloat(features[i].attributes.level));
+                    }
 
-                    //levels = Ext.Array.unique(levels).sort();
+                    levels = Ext.Array.unique(levels).sort();
 
-                    //for (var i = 0; i < levels.length; i++) {
-                        //levelObjectMap[levels[i]] = {
-                            //strokeColor: colors[i],
-                            //strokeWidth: levels.length - i
-                        //};
-//console.log(levels.length - i);
-                    //}
+                    for (var i = 0; i < levels.length; i++) {
+                        levelObjectMap[levels[i]] = {
+                            strokeColor: colors[i],
+                            strokeWidth: levels.length - i
+                        };
+                    }
 
-                    //// style
-                    //for (var i = 0, feature, obj; i < features.length; i++) {
-                        //feature = features[i];
-                        //obj = levelObjectMap[feature.attributes.level];
+                    // style
+                    for (var i = 0, feature, obj; i < features.length; i++) {
+                        feature = features[i];
+                        obj = levelObjectMap[feature.attributes.level];
 
-                        //feature.style = {
-                            //strokeColor: obj.strokeColor || 'black',
+                        feature.style = {
+                            strokeColor: obj.strokeColor || 'black',
                             //strokeWidth: obj.strokeWidth || 1,
-                            //fillOpacity: 0
-                        //};
-                    //}
+                            strokeWidth: 1,
+                            fillOpacity: 0,
+                            pointRadius: 6
+                        };
+                    }
 
 
 
@@ -2400,7 +2406,7 @@ inst = GIS.core.instances;
 
 			util.geojson = {};
 
-			util.geojson.decode = function(doc) {
+			util.geojson.decode = function(doc, levelOrder) {
 				var geojson = {};
 				geojson.type = 'FeatureCollection';
 				geojson.crs = {
@@ -2410,6 +2416,11 @@ inst = GIS.core.instances;
 					}
 				};
 				geojson.features = [];
+
+                levelOrder = levelOrder || 'ASC';
+
+                // sort
+                doc.geojson = util.array.sort(doc.geojson, levelOrder, 'le');
 
 				for (var i = 0; i < doc.geojson.length; i++) {
 					geojson.features.push({
