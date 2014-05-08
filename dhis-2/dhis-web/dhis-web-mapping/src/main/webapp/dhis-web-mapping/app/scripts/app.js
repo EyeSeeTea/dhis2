@@ -1435,10 +1435,14 @@ Ext.onReady( function() {
 			text: GIS.i18n.labels,
 			iconCls: 'gis-menu-item-icon-labels',
 			handler: function() {
-                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer)),
-                    fn = layer.id === 'boundary' ? window.updateLabels : window.show;
+                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer));
 
-                fn.call();
+                if (layer.id === 'boundary') {
+                    window.updateLabels();
+                }
+                else {
+                    window.show();
+                }
 			}
 		};
 		items.push(item);
