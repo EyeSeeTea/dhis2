@@ -185,11 +185,15 @@ Ext.onReady( function() {
             selectHandlers,
 			dimConf = gis.conf.finals.dimension,
             defaultHoverWindow,
-            eventWindow;
+            eventWindow,
+            isBoundary = layer.id === 'boundary',
+            isEvent = layer.id === 'event';
 
 		defaultHoverSelect = function fn(feature) {
-            selectHandlers.selectStyle.strokeColor = feature.style.strokeColor;
-            selectHandlers.selectStyle.strokeWidth = feature.style.strokeWidth;
+            if (isBoundary) {
+                selectHandlers.selectStyle.strokeColor = feature.style.strokeColor;
+                selectHandlers.selectStyle.strokeWidth = feature.style.strokeWidth;
+            }
 
 			if (defaultHoverWindow) {
 				defaultHoverWindow.destroy();
@@ -628,7 +632,7 @@ Ext.onReady( function() {
             onClickSelect: defaultClickSelect
         };
 
-		if (layer.id === 'event') {
+		if (isEvent) {
 			options.onClickSelect = function fn(feature) {
                 var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
                     attributes = feature.attributes,
@@ -684,15 +688,16 @@ Ext.onReady( function() {
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
-        // workaround
-        selectHandlers.selectStyle = {
-            fillOpacity: 0.2,
-            fillColor: '#000',
-            strokeWidth: 1,
-            strokeColor: '#444',
-            cursor: 'pointer',
-            pointRadius: 5
-        };
+        if (isBoundary) {
+            selectHandlers.selectStyle = {
+                fillOpacity: 0.2,
+                fillColor: '#000',
+                strokeWidth: 1,
+                strokeColor: '#444',
+                cursor: 'pointer',
+                pointRadius: 5
+            };
+        }
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
@@ -739,12 +744,14 @@ Ext.onReady( function() {
 		var defaults = {
 				fillOpacity: 1,
 				strokeColor: '#fff',
-				strokeWidth: 1
+				strokeWidth: 1,
+                pointRadius: 4
 			},
 			select = {
 				fillOpacity: 0.9,
 				strokeColor: '#fff',
 				strokeWidth: 1,
+                pointRadius: 4,
 				cursor: 'pointer'
 			};
 
@@ -754,7 +761,7 @@ Ext.onReady( function() {
 			defaults.strokeWidth = 1;
 
 			select.fillColor = '#000';
-			select.fillOpacity = 0.15;
+			select.fillOpacity = 0.2;
 			select.strokeColor = '#000';
 			select.strokeWidth = 1;
 		}
