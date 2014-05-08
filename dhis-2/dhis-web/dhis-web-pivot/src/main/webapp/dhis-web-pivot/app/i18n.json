@@ -151,5 +151,7 @@
 "aggregation_type",
 "count",
 "sum",
-"by_data_element"
+"by_data_element",
+"stddev",
+"variance"
 ]

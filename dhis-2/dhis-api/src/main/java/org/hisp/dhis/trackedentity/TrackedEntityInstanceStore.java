@@ -50,9 +50,9 @@ public interface TrackedEntityInstanceStore
     final int MAX_RESULTS = 50000;
 
     List<Map<String, String>> getTrackedEntityInstances( TrackedEntityInstanceQueryParams params );
-    
+
     int getTrackedEntityInstanceCount( TrackedEntityInstanceQueryParams params );
-    
+
     /**
      * Search entityInstances who registered in a certain organisation unit
      * 
@@ -79,8 +79,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return List of entityInstances
      */
-    Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program,
-        Integer min, Integer max );
+    Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min, Integer max );
 
     /**
      * Search instances who has the same representative
@@ -99,7 +98,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return The number of entityInstances
      */
-    int countListTrackedEntityInstanceByOrgunit( OrganisationUnit organisationUnit );
+    //int countListTrackedEntityInstanceByOrgunit( OrganisationUnit organisationUnit );
 
     /**
      * Get the number of entityInstances who registered into a certain
@@ -113,7 +112,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return The number of entityInstances
      */
-    int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
+    //int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
 
     /**
      * Search entityInstances by phone number (performs partial search)
@@ -125,29 +124,6 @@ public interface TrackedEntityInstanceStore
      * @return List of instances
      */
     Collection<TrackedEntityInstance> getByPhoneNumber( String phoneNumber, Integer min, Integer max );
-    
-    /**
-     * Search events which meet the criteria for searching
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param attributes The attribute values of these attribute are displayed
-     *        into result
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * @param min
-     * @param max
-     * 
-     * @return List of entityInstances
-     */
-    List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<TrackedEntityAttribute> attributes, Integer statusEnrollment, Integer min,
-        Integer max );
 
     /**
      * Search entityInstances who enrolled into a program with active status
@@ -158,20 +134,20 @@ public interface TrackedEntityInstanceStore
      * 
      *        return List of entityInstances
      */
-    Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max );
+    //Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max );
 
     /**
-     * Validate entity-instances attribute values and validation criteria by program
-     * before registering / updating information
+     * Validate entity-instances attribute values and validation criteria by
+     * program before registering / updating information
      * 
      * @param entityinstance TrackedEntityInstance object
      * @param program Program which person needs to enroll. If this parameter is
      *        null, the system check attribute values of the instances
      * @param format I18nFormat
      * 
-     * @return Error code 0 : Validation is OK 
-     *                    1_<duplicate-value> : The attribute value is duplicated 
-     *                    2_<validation-criteria-id> : Violate validation criteria of the program
+     * @return Error code 0 : Validation is OK 1_<duplicate-value> : The
+     *         attribute value is duplicated 2_<validation-criteria-id> :
+     *         Violate validation criteria of the program
      */
     String validate( TrackedEntityInstance entityinstance, Program program, I18nFormat format );
 
@@ -185,7 +161,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return ValidationCriteria object which is violated
      */
-    ValidationCriteria validateEnrollment(TrackedEntityInstance entityinstance, Program program, I18nFormat format );
+    ValidationCriteria validateEnrollment( TrackedEntityInstance entityinstance, Program program, I18nFormat format );
 
     /**
      * Validate instances attribute values and validation criteria by program
@@ -197,4 +173,13 @@ public interface TrackedEntityInstanceStore
      * @return TrackedEntityInstance list
      */
     Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min, Integer max );
+
+     /**
+     * Get entityInstances by {@link TrackedEntity}
+     * 
+     * @param trackedEntity {@link TrackedEntity}
+     * 
+     * @return List of entityInstance
+     */
+    Collection<TrackedEntityInstance> get( TrackedEntity trackedEntity );
 }

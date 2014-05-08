@@ -65,6 +65,8 @@ public class MobileOrgUnitLinks
 
     private String updateNewVersionUrl;
 
+    private String sendFeedbackUrl;
+
     private String updateContactUrl;
 
     private String findPatientUrl;
@@ -90,6 +92,8 @@ public class MobileOrgUnitLinks
     private String handleLostToFollowUpUrl;
 
     private String generateRepeatableEventUrl;
+
+    private String uploadSingleEventWithoutRegistration;
 
     @XmlAttribute
     public int getId()
@@ -211,6 +215,16 @@ public class MobileOrgUnitLinks
     public void setUpdateNewVersionUrl( String updateNewVersionUrl )
     {
         this.updateNewVersionUrl = updateNewVersionUrl;
+    }
+
+    public String getSendFeedbackUrl()
+    {
+        return sendFeedbackUrl;
+    }
+
+    public void setSendFeedbackUrl( String sendFeedbackUrl )
+    {
+        this.sendFeedbackUrl = sendFeedbackUrl;
     }
 
     public String getUpdateContactUrl()
@@ -343,6 +357,16 @@ public class MobileOrgUnitLinks
         this.generateRepeatableEventUrl = generateRepeatableEventUrl;
     }
 
+    public String getUploadSingleEventWithoutRegistration()
+    {
+        return uploadSingleEventWithoutRegistration;
+    }
+
+    public void setUploadSingleEventWithoutRegistration( String uploadSingleEventWithoutRegistration )
+    {
+        this.uploadSingleEventWithoutRegistration = uploadSingleEventWithoutRegistration;
+    }
+
     public void serialize( DataOutputStream dataOutputStream )
         throws IOException
     {
@@ -357,6 +381,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( changeUpdateDataSetLangUrl );
         dataOutputStream.writeUTF( searchUrl );
         dataOutputStream.writeUTF( updateNewVersionUrl );
+        dataOutputStream.writeUTF( sendFeedbackUrl );
         dataOutputStream.writeUTF( updateContactUrl );
         dataOutputStream.writeUTF( findPatientUrl );
         dataOutputStream.writeUTF( registerPersonUrl );
@@ -370,6 +395,9 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( findLostToFollowUpUrl );
         dataOutputStream.writeUTF( handleLostToFollowUpUrl );
         dataOutputStream.writeUTF( generateRepeatableEventUrl );
+        dataOutputStream.writeUTF( uploadSingleEventWithoutRegistration );
+   
+
     }
 
     public void deSerialize( DataInputStream dataInputStream )
@@ -386,6 +414,7 @@ public class MobileOrgUnitLinks
         changeUpdateDataSetLangUrl = dataInputStream.readUTF();
         searchUrl = dataInputStream.readUTF();
         updateNewVersionUrl = dataInputStream.readUTF();
+        sendFeedbackUrl = dataInputStream.readUTF();
         updateContactUrl = dataInputStream.readUTF();
         findPatientUrl = dataInputStream.readUTF();
         registerPersonUrl = dataInputStream.readUTF();
@@ -399,6 +428,8 @@ public class MobileOrgUnitLinks
         findLostToFollowUpUrl = dataInputStream.readUTF();
         handleLostToFollowUpUrl = dataInputStream.readUTF();
         generateRepeatableEventUrl = dataInputStream.readUTF();
+        uploadSingleEventWithoutRegistration = dataInputStream.readUTF();
+
     }
 
     @Override
@@ -432,6 +463,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( this.changeUpdateDataSetLangUrl );
         dataOutputStream.writeUTF( this.searchUrl );
         dataOutputStream.writeUTF( this.updateNewVersionUrl );
+        dataOutputStream.writeUTF( this.sendFeedbackUrl );
         // dataOutputStream.writeUTF( this.updateContactUrl );
     }
 
@@ -450,6 +482,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( changeUpdateDataSetLangUrl );
         dataOutputStream.writeUTF( searchUrl );
         dataOutputStream.writeUTF( updateNewVersionUrl );
+        dataOutputStream.writeUTF( sendFeedbackUrl );
         dataOutputStream.writeUTF( updateContactUrl );
         dataOutputStream.writeUTF( findPatientUrl );
         dataOutputStream.writeUTF( registerPersonUrl );
@@ -463,5 +496,7 @@ public class MobileOrgUnitLinks
         dataOutputStream.writeUTF( findLostToFollowUpUrl );
         dataOutputStream.writeUTF( handleLostToFollowUpUrl );
         dataOutputStream.writeUTF( generateRepeatableEventUrl );
+        dataOutputStream.writeUTF( uploadSingleEventWithoutRegistration );
+
     }
 }

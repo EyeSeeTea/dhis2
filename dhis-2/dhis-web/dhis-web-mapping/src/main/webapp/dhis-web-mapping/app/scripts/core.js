@@ -13,6 +13,7 @@ Ext.onReady( function() {
 		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null,
 		logg: []
 	};
+inst = GIS.core.instances;
 
 	GIS.core.getOLMap = function(gis) {
 		var olmap,
@@ -681,6 +682,13 @@ Ext.onReady( function() {
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
+        // workaround
+        //selectHandlers.selectStyle = {
+            //fillOpacity: 0.5,
+            //strokeWidth: 1,
+            //strokeColor: '#444'
+        //};
+
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
 	};
@@ -749,7 +757,7 @@ Ext.onReady( function() {
 		if (labelConfig) {
 			defaults.label = '\${label}';
 			defaults.fontFamily = 'arial,sans-serif,ubuntu,consolas';
-			defaults.fontSize = labelConfig.fontSize ? labelConfig.fontSize + 'px' : '13px';
+			defaults.fontSize = (labelConfig.fontSize || 13) + 'px';
 			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
 			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
 			defaults.fontColor = labelConfig.color ? (labelConfig.color.split('').shift() !== '#' ? '#' + labelConfig.color : labelConfig.color) : '#000000';
@@ -1087,7 +1095,7 @@ Ext.onReady( function() {
                     }
 
                     // name-column map
-                    map = Ext.clone(r.metaData.names);
+                    map = r.metaData.names;
 
                     for (var i = 0; i < r.headers.length; i++) {
                         map[r.headers[i].name] = r.headers[i].column;
@@ -1512,7 +1520,10 @@ Ext.onReady( function() {
 				success: function(r) {
 					var geojson = gis.util.geojson.decode(r),
 						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+						features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
+                        colors = ['black', 'blue', 'red', 'green', 'yellow'],
+                        levels = [],
+                        levelObjectMap = {};
 
 					if (!Ext.isArray(features)) {
 						olmap.mask.hide();
@@ -1525,6 +1536,44 @@ Ext.onReady( function() {
 						alert(GIS.i18n.no_valid_coordinates_found);
 						return;
 					}
+
+                    //// get levels, colors, map
+                    //for (var i = 0; i < features.length; i++) {
+                        //levels.push(parseFloat(features[i].attributes.level));
+                    //}
+
+                    //levels = Ext.Array.unique(levels).sort();
+
+                    //for (var i = 0; i < levels.length; i++) {
+                        //levelObjectMap[levels[i]] = {
+                            //strokeColor: colors[i],
+                            //strokeWidth: levels.length - i
+                        //};
+//console.log(levels.length - i);
+                    //}
+
+                    //// style
+                    //for (var i = 0, feature, obj; i < features.length; i++) {
+                        //feature = features[i];
+                        //obj = levelObjectMap[feature.attributes.level];
+
+                        //feature.style = {
+                            //strokeColor: obj.strokeColor || 'black',
+                            //strokeWidth: obj.strokeWidth || 1,
+                            //fillOpacity: 0
+                        //};
+                    //}
+
+
+
+
+
+
+
+
+
+
+
 
 					layer.core.featureStore.loadFeatures(features.slice(0));
 
@@ -2452,6 +2501,81 @@ Ext.onReady( function() {
 
 				return array;
 			};
+
+            util.layout = {};
+
+			util.layout.getAnalytical = function(map) {
+				var layout,
+					layer;
+
+				if (Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length) {
+					for (var i = 0, view, id; i < map.mapViews.length; i++) {
+						view = map.mapViews[i];
+						id = view.layer;
+
+						if (gis.layer.hasOwnProperty(id) && gis.layer[id].layerCategory === gis.conf.finals.layer.category_thematic) {
+							layout = gis.api.layout.Layout(view);
+
+							if (layout) {
+								return layout;
+							}
+						}
+					}
+				}
+				else {
+					for (var key in gis.layer) {
+						if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic && gis.layer[key].core.view) {
+							layer = gis.layer[key];
+							layout = gis.api.layout.Layout(layer.core.view);
+
+							if (layout) {
+								if (!layout.parentGraphMap && layer.widget) {
+									layout.parentGraphMap = layer.widget.getParentGraphMap();
+								}
+
+								return layout;
+							}
+						}
+					}
+				}
+
+				return;
+			};
+
+			util.layout.getPluginConfig = function() {
+				var layers = gis.util.map.getVisibleVectorLayers(),
+					map = {};
+
+				if (gis.map) {
+					return gis.map;
+				}
+
+				map.mapViews = [];
+
+				for (var i = 0, layer; i < layers.length; i++) {
+					layer = layers[i];
+
+					if (layer.core.view) {
+						layer.core.view.layer = layer.id;
+
+						map.mapViews.push(layer.core.view);
+					}
+				}
+
+				return map;
+			};
+
+			util.layout.setSessionStorage = function(session, obj, url) {
+				if (GIS.isSessionStorage) {
+					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+					dhis2[session] = obj;
+					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+					if (Ext.isString(url)) {
+						window.location.href = url;
+					}
+				}
+			};
 		}());
 
 		gis.init = init;
@@ -2843,6 +2967,8 @@ Ext.onReady( function() {
 		gis.olmap.addLayers(layers);
 
 		GIS.core.instances.push(gis);
+g = gis;
+b = gis.layer.boundary;
 
 		return gis;
 	};

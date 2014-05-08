@@ -52,7 +52,7 @@ dhis2.translate = dhis2.translate || {};
                 var urlParts = href.split("/"),
                     baseUrl;
 
-                if (dhis2.settings.baseUrl === undefined) {
+                if (dhis2.settings === undefined || dhis2.settings.baseUrl === undefined) {
                     return "..";
                 }
 

@@ -69,9 +69,23 @@ function searchObjectOnChange(this_) {
 	$('#' + container + ' [id=dateOperator]').replaceWith("");
 	if (valueType == 'bool') {
 		element.replaceWith(getTrueFalseBox());
-	} else {
+	}
+	else if ( attributeId=='programDate' || valueType == 'date')
+	{
+		element.replaceWith( getDateField(container) );
+		datePickerValid( 'searchText_' + container );
+	} 
+	else {
 		element.replaceWith(searchTextBox);
 	}
+	
+}
+
+function getDateField( container )
+{
+	var dateField = '<select id="dateOperator_' + container + '" name="dateOperator" style="width:40px"><option value="GT"> > </option><option value="GE"> >= </option><option value="EQ"> = </option><option value="LT"> < </option><option value="LE"> <= </option></select>';
+	dateField += '<input type="text" id="searchText_' + container + '" name="searchText" style="width:160px;" onkeyup="searchPatientsOnKeyUp( event );">';
+	return dateField;
 }
 
 function getTrueFalseBox() {
@@ -173,7 +187,7 @@ function getSearchParams(page) {
 						} else if (item.name == 'searchText') {
 							if (item.value != '') {
 								if( isProgramDate ){
-									p += "&programDate=EQ:" + item.value;
+									p += "&programDate=" + dateOperator + ":" + item.value;
 								}
 								else if (dateOperator.length > 0) {
 									p += dateOperator + ":" + item.value.toLowerCase();
@@ -193,11 +207,9 @@ function getSearchParams(page) {
 		});
 	
 	var p = params;
-	$('#searchingAttributeIdTD [id=searchObjectId] option').each(
-		function(i, item) {
-			if ($(item).attr('displayed')=="true" 
-				&& p.indexOf(item.value) < 0 ) {
-					params += "&attribute=" + item.value;
+	$('#attributeIds option').each(function(i, item) {
+		if ( p.indexOf(item.value) < 0 ) {
+				params += "&attribute=" + item.value;
 		}
 	}); 
 		
@@ -379,13 +391,13 @@ function enableBtn() {
 		clearListById('attributeIds');
 		for ( var i in json.attributes) {
 			jQuery('#searchObjectId').append(
-				'<option value="' + json.attributes[i].id 
-					+ '" displayed="' + json.attributes[i].displayed  + '">'
+				'<option value="' + json.attributes[i].id + '" >'
 					+ json.attributes[i].name + '</option>');
 			
 			if(json.attributes[i].displayed=='true'){
 				jQuery('#attributeIds').append(
-				'<option value="' + json.attributes[i].id + '"></option>');
+				'<option value="' + json.attributes[i].id 
+				+ '" valueType="' + json.attributes[i].valueType  + '"></option>');
 			}
 		}
 		

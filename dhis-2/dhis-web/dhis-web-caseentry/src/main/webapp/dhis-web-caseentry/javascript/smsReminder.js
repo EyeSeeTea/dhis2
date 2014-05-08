@@ -89,7 +89,7 @@ function listAllTrackedEntityInstance( page )
 		data : params,
 		dataType : "json",
 		success : function(json) {
-			setInnerHTML('listEventDiv', displayevents(json, page));
+			setInnerHTML('listEventDiv', displayEvents(json, page));
 			showById('listEventDiv');
 			jQuery('#loaderDiv').hide();
 			setTableStyles();
@@ -97,7 +97,7 @@ function listAllTrackedEntityInstance( page )
 	});
 }
 
-function displayevents(json, page) {
+function displayEvents(json, page) {
 	var table = "";
 	
 	// Header
@@ -108,7 +108,6 @@ function displayevents(json, page) {
 		table += "<p>" + i18n_no_result_found + "</p>";
 	}
 	
-	// TEI list
 	table += "<table class='listTable' width='100%'>";
 	
 	var idx = 4;
@@ -118,6 +117,32 @@ function displayevents(json, page) {
 	else if(getFieldValue('program') != '') {
 		idx = 5;
 	}
+	
+	// Yes/No and Yes Only attributes in result
+	
+	var attList = new Array();
+	var attDate = new Array();
+	$('#attributeIds option').each(function(i, item) {
+		var valueType = $(item).attr('valueType');
+		var value = $(item).val();
+		if ( valueType == 'bool' || valueType == 'trueOnly' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attList.push(i);
+				}
+			}
+		}
+		else if ( valueType == 'date' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attDate.push(i);
+				}
+			}
+		}
+	});
+	
+	// TEI list
+	
 	table += "<col width='30' />";
 	for (var i = idx; i < json.width; i++) {
 		table += "<col />";
@@ -143,6 +168,14 @@ function displayevents(json, page) {
 			if (j == 4) {
 				colVal = json.metaData.names[colVal];
 			}
+			
+			if( jQuery.inArray( j, attList )>=0 && colVal!="" ){
+				colVal = (colVal=='true')? i18n_yes : i18n_no;
+			}
+			else if( jQuery.inArray( j, attDate )>=0 && colVal!="" ){
+				colVal = colVal.split(' ')[0];
+			}
+			
 			table += "<td onclick=\"javascript:isDashboard=true;showTrackedEntityInstanceDashboardForm( '"
 				+ uid
 				+ "' )\" title='"
@@ -272,15 +305,15 @@ function showEvents( isAdvancedSearch, teiUid){
 	var params = "orgUnit=" + getFieldValue("orgunitId");
 	params += "&program=" + getFieldValue('program');
 	params += "&trackedEntityInstance=" + teiUid;
-	params += '&eventStatus=' + getFieldValue('status');
+	params += '&status=' + getFieldValue('status');
 	if( isAdvancedSearch ){ // advanced-search
-		params += "&eventStartDate=" + getFieldValue('startDate');
-		params += "&eventEndDate=" + getFieldValue('endDate');
+		params += "&startDate=" + getFieldValue('startDate');
+		params += "&endDate=" + getFieldValue('endDate');
 	}
 	else // list
 	{
-		params += "&eventStartDate=1900-01-01";
-		params += "&eventEndDate=3000-01-01";
+		params += "&startDate=1900-01-01";
+		params += "&endDate=3000-01-01";
 	}
 	
 	$.ajax({
@@ -328,7 +361,7 @@ function advancedSearch( params, page )
 		type : "GET",
 		data : params,
 		success : function(json) {
-			setInnerHTML('listEventDiv', displayevents(json, page));
+			setInnerHTML('listEventDiv', displayEvents(json, page));
 			showById('listEventDiv');
 			jQuery('#loaderDiv').hide();
 			setTableStyles();
@@ -366,49 +399,6 @@ function programTrackingList( programStageInstanceId, isSendSMS )
 			showById('smsManagementDiv');
 			hideLoader();
 		});
-}
-
-// --------------------------------------------------------------------
-// Send SMS 
-// --------------------------------------------------------------------
-
-function showSendSmsForm()
-{
-	jQuery('#sendSmsToListForm').dialog({
-			title: i18n_send_message,
-			maximize: true, 
-			closable: true,
-			modal:true,
-			overlay:{background:'#000000', opacity:0.1},
-			width: 420,
-			height: 200
-		});
-}
-
-function sendSmsToList()
-{
-	params = getSearchParams();
-	params += "&msg=" + getFieldValue( 'smsMessage' );
-	params += "&programStageInstanceId=" + getFieldValue('programStageInstanceId');
-	$.ajax({
-		url: 'sendSMSTotList.action',
-		type:"POST",
-		data: params,
-		success: function( json ){
-			if ( json.response == "success" ) {
-				var programStageName = getFieldValue('programStageName');
-				var currentTime = date.getHours() + ":" + date.getMinutes();
-				jQuery('#commentTB').prepend("<tr><td>" + getFieldValue("currentDate") + " " + currentTime + "</td>"
-						+ "<td>" + programStageName + "</td>"
-						+ "<td>" + getFieldValue( 'smsMessage' ) + "</td></tr>");
-				showSuccessMessage( json.message );
-			}
-			else {
-				showErrorMessage( json.message );
-			}
-			jQuery('#sendSmsFormDiv').dialog('close')
-		}
-	});
 }
 
 // --------------------------------------------------------------------

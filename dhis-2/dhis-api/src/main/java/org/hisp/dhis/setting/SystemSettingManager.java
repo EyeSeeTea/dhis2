@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Stian Strandli
@@ -49,6 +50,8 @@ public interface SystemSettingManager
     final String KEY_APPLICATION_INTRO = "keyApplicationIntro";
     final String KEY_APPLICATION_NOTIFICATION = "keyApplicationNotification";
     final String KEY_APPLICATION_FOOTER = "keyApplicationFooter";
+    final String KEY_CALENDAR = "keyCalendar";
+    final String KEY_DATE_FORMAT = "keyDateFormat";
     final String KEY_FLAG = "keyFlag";
     final String KEY_FLAG_IMAGE = "keyFlagImage";
     final String KEY_START_MODULE = "startModule";
@@ -88,9 +91,12 @@ public interface SystemSettingManager
     final String KEY_OPENID_PROVIDER_LABEL = "keyOpenIdProviderLabel";
     final String KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS = "keyCanGrantOwnUserAuthorityGroups";
     final String KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS = "keyHideUnapprovedDataInAnalytics";
+    final String KEY_ANALYTICS_MAX_LIMIT = "keyAnalyticsMaxLimit";
 
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
     final String DEFAULT_FLAG = "dhis2";
+    final String DEFAULT_CALENDAR = "iso8601";
+    final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd"; // ISO 8601
     final int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
     final int DEFAULT_TIMEFRAME_MINUTES = 1;
     final double DEFAULT_FACTOR_OF_DEVIATION = 2.0;
@@ -102,6 +108,7 @@ public interface SystemSettingManager
     final int DEFAULT_COMPLETENESS_OFFSET = 15;
     final String DEFAULT_TIME_FOR_SENDING_MESSAGE = "08:00";
     final String DEFAULT_CACHE_STRATEGY = "CACHE_6AM_TOMORROW";
+    final int DEFAULT_ANALYTICS_MAX_LIMIT = 50000;
 
     final String SYSPROP_PORTAL = "runningAsPortal";
 
@@ -149,4 +156,6 @@ public interface SystemSettingManager
     String googleAnalyticsUA();
 
     Integer credentialsExpires();
+
+    Map<String, Serializable> getSystemSettingsAsMap();
 }

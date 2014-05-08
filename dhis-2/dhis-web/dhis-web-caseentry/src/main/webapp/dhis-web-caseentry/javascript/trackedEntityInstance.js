@@ -284,6 +284,35 @@ function displayTEIList(json, page) {
 	else if(getFieldValue('program') != '') {
 		idx = 5;
 	}
+	
+	// Yes/No and Yes Only attributes in result
+	
+	var attList = new Array();
+	var attDate = new Array();
+	$('#attributeIds option').each(function(i, item) {
+		var valueType = $(item).attr('valueType');
+		var value = $(item).val();
+		if ( valueType == 'bool' || valueType == 'trueOnly' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attList.push(i);
+				}
+				else if( valueType=='date'){
+					attDate.push(i);
+				}
+			}
+		}
+		else if ( valueType == 'date' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attDate.push(i);
+				}
+			}
+		}
+	});
+
+	// TEI List
+	
 	table += "<col width='30' />";
 	for (var i = idx; i < json.width; i++) {
 		table += "<col />";
@@ -309,6 +338,14 @@ function displayTEIList(json, page) {
 			if (j == 4) {
 				colVal = json.metaData.names[colVal];
 			}
+			
+			if( jQuery.inArray( j, attList )>=0 && colVal!="" ){
+				colVal = (colVal=='true')? i18n_yes : i18n_no;
+			}
+			else if( jQuery.inArray( j, attDate )>=0 && colVal!="" ){
+				colVal = colVal.split(' ')[0];
+			}
+			
 			table += "<td onclick=\"javascript:isDashboard=true;showTrackedEntityInstanceDashboardForm( '"
 				+ uid
 				+ "' )\" title='"
@@ -325,7 +362,7 @@ function displayTEIList(json, page) {
 				+ "'><img src='../images/enroll.png' alt='"
 				+ i18n_dashboard
 				+ "'></a>";
-		table += "<a href=\"javascript:isDashboard=false;showUpdateTrackedEntityInstanceForm( '"
+		table += "<a href=\"javascript:isDashboard=false;statusSearching=3;showUpdateTrackedEntityInstanceForm( '"
 				+ uid
 				+ "' )\" title='"
 				+ i18n_edit_profile
@@ -498,7 +535,7 @@ function loadTrackedEntityInstanceList() {
 	} else if (statusSearching == 1) {
 		validateAdvancedSearch();
 	} else if (statusSearching == 3) {
-		showById('listTrackedEntityInstanceDiv');
+		showById('listEntityInstanceDiv');
 	}
 }
 

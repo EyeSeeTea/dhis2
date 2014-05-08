@@ -169,6 +169,20 @@ public class DefaultEventAnalyticsService
         {
             throw new IllegalQueryException( "Number of rows produced by query is larger than the max limit: " + MAX_ROWS_LIMIT );
         }
+
+        // ---------------------------------------------------------------------
+        // Limit and sort - done again due to potential multiple partitions
+        // ---------------------------------------------------------------------
+
+        if ( params.hasSortOrder() )
+        {            
+            grid.sortGrid( 1, params.getSortOrderAsInt() );
+        }
+        
+        if ( params.hasLimit() && grid.getHeight() > params.getLimit() )
+        {
+            grid.limitGrid( params.getLimit() );
+        }
         
         // ---------------------------------------------------------------------
         // Meta-data
@@ -372,7 +386,7 @@ public class DefaultEventAnalyticsService
             for ( NameableObject object : params.getDimensionOrFilter( ORGUNIT_DIM_ID ) )
             {
                 OrganisationUnit unit = (OrganisationUnit) object;
-                unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getUid() ) );
+                unit.setLevel( organisationUnitService.getLevelOfOrganisationUnit( unit.getId() ) );
             }
         }
 

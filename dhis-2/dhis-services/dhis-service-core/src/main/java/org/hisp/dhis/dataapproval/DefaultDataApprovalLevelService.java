@@ -28,6 +28,14 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -37,15 +45,6 @@ import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Jim Grace
@@ -135,7 +134,7 @@ public class DefaultDataApprovalLevelService
             for ( OrganisationUnit orgUnit : user.getOrganisationUnits() )
             {
                 int orgUnitLevel = orgUnit.hasLevel() ?
-                    orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getUid() );
+                    orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() );
 
                 userOrgUnitLevels.add( orgUnitLevel );
             }
@@ -248,8 +247,7 @@ public class DefaultDataApprovalLevelService
 
         for ( DataApprovalLevel dataApprovalLevel : dataApprovalLevels )
         {
-            if ( level.getOrgUnitLevel() == dataApprovalLevel.getOrgUnitLevel()
-                && level.getCategoryOptionGroupSet() == dataApprovalLevel.getCategoryOptionGroupSet() )
+            if ( level.levelEquals( dataApprovalLevel ) )
             {
                 return true;
             }
@@ -261,11 +259,6 @@ public class DefaultDataApprovalLevelService
     public int addDataApprovalLevel( DataApprovalLevel newLevel )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
-
-        if ( newLevel.getOrgUnitLevel() <= 0 )
-        {
-            return -1;
-        }
 
         int index = getInsertIndex( dataApprovalLevels, newLevel );
 
@@ -284,9 +277,15 @@ public class DefaultDataApprovalLevelService
         }
 
         newLevel.setLevel( index + 1 );
-        newLevel.setCreated( new Date() );
 
         return dataApprovalLevelStore.save( newLevel );
+    }
+
+    public int addDataApprovalLevel( DataApprovalLevel approvalLevel, int level )
+    {
+        approvalLevel.setLevel( level );
+        
+        return dataApprovalLevelStore.save( approvalLevel );        
     }
     
     public void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
@@ -386,8 +385,6 @@ public class DefaultDataApprovalLevelService
     {
         dataApprovalLevel.setLevel( index + 1 );
 
-        dataApprovalLevel.setCreated( new Date() );
-
         dataApprovalLevelStore.update( dataApprovalLevel );
     }
 
@@ -417,7 +414,7 @@ public class DefaultDataApprovalLevelService
 
             if ( orgLevelDifference == 0 )
             {
-                if ( newLevel.getCategoryOptionGroupSet() == test.getCategoryOptionGroupSet() )
+                if ( newLevel.levelEquals( test ) )
                 {
                     return -1;
                 }
@@ -430,6 +427,7 @@ public class DefaultDataApprovalLevelService
 
             i--;
         }
+        
         return i + 1;
     }
 
@@ -444,17 +442,17 @@ public class DefaultDataApprovalLevelService
     private int requiredApprovalLevel( OrganisationUnit orgUnit )
     {
         int orgUnitLevel = orgUnit.getLevel() != 0 ?
-                orgUnit.getLevel() :
-                organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getUid() );
+            orgUnit.getLevel() :
+            organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() );
 
         int required = APPROVAL_LEVEL_UNAPPROVED;
 
         for ( DataApprovalLevel level : getAllDataApprovalLevels() )
         {
             if ( level.getOrgUnitLevel() >= orgUnitLevel
-                    && securityService.canRead( level )
-                    && ( level.getCategoryOptionGroupSet() == null || canReadSomeCategory( level.getCategoryOptionGroupSet() ) )
-                    && level.getLevel() < getAllDataApprovalLevels().size() )
+                && securityService.canRead( level )
+                && ( level.getCategoryOptionGroupSet() == null || canReadSomeCategory( level.getCategoryOptionGroupSet() ) )
+                && level.getLevel() < getAllDataApprovalLevels().size() )
             {
                 required = level.getLevel() + 1;
                 break;
@@ -480,7 +478,7 @@ public class DefaultDataApprovalLevelService
                 return true;
             }
         }
+        
         return false;
     }
-
 }

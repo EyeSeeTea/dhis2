@@ -33,6 +33,7 @@ import java.util.Date;
 
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
+import org.hisp.dhis.api.mobile.model.Message;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Notification;
@@ -97,6 +98,12 @@ public interface ActivityReportingService
         throws NotAllowedException;
 
     public Patient generateRepeatableEvent( int orgUnitId, String eventInfo )
+        throws NotAllowedException;
+
+    public String saveSingleEventWithoutRegistration( ProgramStage programStage, int orgUnitId )
+        throws NotAllowedException;
+
+    public String sendFeedback( Message message )
         throws NotAllowedException;
 
 }

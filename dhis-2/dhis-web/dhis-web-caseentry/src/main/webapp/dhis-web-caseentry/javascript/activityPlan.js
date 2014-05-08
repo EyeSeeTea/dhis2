@@ -64,6 +64,7 @@ function showActitityList(page)
 		success : function(json) {
 			setInnerHTML('listEntityInstanceDiv', displayevents(json, page));
 			showById('listEntityInstanceDiv');
+			setTableStyles();
 			jQuery('#loaderDiv').hide();
 			hideLoader();
 		}
@@ -81,14 +82,39 @@ function displayevents(json, page) {
 		table += "<p>" + i18n_no_result_found + "</p>";
 	}
 	
+	var idx = 4;
+	
+	// Yes/No and Yes Only attributes in result
+	
+	var attList = new Array();
+	var attDate = new Array();
+	$('#attributeIds option').each(function(i, item) {
+		var valueType = $(item).attr('valueType');
+		var value = $(item).val();
+		if ( valueType == 'bool' || valueType == 'trueOnly' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attList.push(i);
+				}
+			}
+		}
+		else if ( valueType == 'date' ) {
+			for (var i = idx; i < json.width; i++) {
+				if( value==json.headers[i].name ){
+					attDate.push(i);
+				}
+			}
+		}
+	});
+	
 	// TEI list
 	table += "<table class='listTable' width='100%'>";
 	
-	var idx = 4;
 	table += "<col width='30' />";
 	for (var i = idx; i < json.width; i++) {
 		table += "<col />";
-	}
+	}	
+	
 	table += "<col width='200' />";
 	table += "<thead><tr><th>#</th>";
 	for (var i = idx; i < json.width; i++) {
@@ -110,6 +136,14 @@ function displayevents(json, page) {
 			if (j == 4) {
 				colVal = json.metaData.names[colVal];
 			}
+			
+			if( jQuery.inArray( j, attList )>=0 && colVal!="" ){
+				colVal = (colVal=='true')? i18n_yes : i18n_no;
+			}
+			else if( jQuery.inArray( j, attDate )>=0 && colVal!="" ){
+				colVal = colVal.split(' ')[0];
+			}
+			
 			table += "<td onclick=\"javascript:isDashboard=true;showTrackedEntityInstanceDashboardForm( '"
 				+ uid
 				+ "' )\" title='"
@@ -132,12 +166,6 @@ function displayevents(json, page) {
 				+ i18n_dashboard
 				+ "'><img src='../images/enroll.png' alt='"
 				+ i18n_dashboard
-				+ "'></a>";
-		table += "<a href=\"javascript:loadDataEntryDialog( '" + uid + "' ) \" "
-				+ " title='"
-				+ i18n_edit
-				+ "'><img src= '../images/edit.png' alt='"
-				+ i18n_edit
 				+ "'></a>";
 		table += "<a href=\"javascript:showTrackedEntityInstanceHistory( '" + uid + "' ) \" "
 				+ " title='"
@@ -236,10 +264,10 @@ function showEvents( teiUid){
 	params += "&programStatus=ACTIVE";
 	params += "&trackedEntityInstance=" + teiUid;
 	if(getFieldValue('status')!=''){
-		params += '&eventStatus=' + getFieldValue('status');
+		params += '&status=' + getFieldValue('status');
 	}
-	params += "&eventStartDate=" + getFieldValue('startDueDate');
-	params += "&eventEndDate=" + getFieldValue('endDueDate');
+	params += "&startDate=" + getFieldValue('startDueDate');
+	params += "&endDate=" + getFieldValue('endDueDate');
 	
 	$.ajax({
 		type : "GET",
@@ -252,7 +280,7 @@ function showEvents( teiUid){
 				var row = json.events[i];
 				var uid = row.event;
 				var eventDate = row.eventDate;
-				table += "<tr><td><a href='javascript:programTrackingList( \"" + uid + "\") ' >" + eventDate + "</a></td></tr>";
+				table += "<tr><td><a href='javascript:loadDataEntryDialog( \"" + uid + "\") ' >" + eventDate + "</a></td></tr>";
 			}
 			table += "</table>";
 			$('#eventList').html(table);
@@ -260,7 +288,7 @@ function showEvents( teiUid){
 				title : i18n_events,
 				maximize : true,
 				closable : true,
-				modal : false,
+				modal : true,
 				width : 380,
 				height : 290
 			}).show('fast');
@@ -296,28 +324,40 @@ function exportActitityList( type )
 // EntityInstance program tracking
 // --------------------------------------------------------------------
 
-function loadDataEntryDialog( programStageInstanceId, programStageUid )
+function loadDataEntryDialog( programStageInstanceId )
 {
-    jQuery('[id=programStageInstanceId]').val(programStageInstanceId);
-    jQuery('.stage-object-selected').attr('psuid', programStageUid);
-
-    $('#contentDataRecord' ).load("viewProgramStageRecords.action", {
-        programStageInstanceId: programStageInstanceId
-    }, function() {
-        jQuery('#programStageUid').val(programStageUid);
-        showById('reportDateDiv');
-        showById('entityInstanceInforTB');
-        showById('entryForm');
-        showById('inputCriteriaDiv');
-    }).dialog({
-        title:i18n_program_stage,
-        maximize:true,
-        closable:true,
-        modal:false,
-        overlay:{background:'#000000', opacity:0.1},
-        width:850,
-        height:500
-    });
+	$.ajax({
+		type : "GET",
+		url : "getProgramStageInstanceByUid.action?programStageInstanceId=" + programStageInstanceId,
+		dataType : "json",
+		success : function(json) {
+			var psiid = json.id;
+			jQuery('.stage-object-selected').attr('psuid', json.programStage.uid);
+			jQuery('[id=programStageInstanceId]').val(psiid);
+			jQuery('#programStageUid').val(json.programStage.uid);
+					
+			$('#contentDataRecord' ).load("viewProgramStageRecords.action", {
+					programStageInstanceId: psiid
+				}, function( html ) {
+					setInnerHTML('contentDataRecord',html);
+					showById('reportDateDiv');
+					showById('entityInstanceInforTB');
+					showById('entryForm');
+					showById('inputCriteriaDiv');
+					entryFormContainerOnReady();
+				}).dialog({
+					title:i18n_program_stage,
+					maximize:true,
+					closable:true,
+					modal:false,
+					overlay:{background:'#000000', opacity:0.1},
+					width:850,
+					height:500
+			});
+		}
+	});
+	
+	
 }
 
 
@@ -437,4 +477,23 @@ function setDateRangeAll()
 	var d = date.getDate();
 	var m = date.getMonth();
 	var y= date.getFullYear();
+}
+
+
+function programOnChange() {
+	var program = getFieldValue('program');
+	if( program != '' ){
+		$.postJSON("getVisitScheduleAttributes.action", {
+			id : program
+		}, function(json) {
+			clearListById('attributeIds');
+			for ( var i in json.attributes) {
+				if(json.attributes[i].displayed=='true'){
+					jQuery('#attributeIds').append(
+					'<option value="' + json.attributes[i].id 
+					+ '" valueType="' + json.attributes[i].valueType  + '"></option>');
+				}
+			}
+		});
+	}
 }

@@ -2,7 +2,13 @@
 <input type='hidden' id='orgunitId' name='orgunitId' value='$organisationUnit.uid' >
 <input type="hidden" id='hideLink' name='hideLink' value='false'>
 <input type='hidden' id='isSearchByProgram' name='isSearchByProgram' value='false' >
-	<select id='attributeIds' name='attributeIds' class='hidden'></select>
+<select id='attributeIds' name='attributeIds' class='hidden'>
+	#if( $auth.hasAccess( "dhis-web-caseentry", "accessAttributes" ) )
+		#foreach( $attribute in $attributes )
+			<option value="$attribute.uid" valueType='$attribute.valueType'>$encoder.htmlEncode( $attribute.displayName )</option>
+		#end
+	#end
+</select>
 
 <table style="margin-bottom:8px" id="commonSearchDiv" name="commonSearchDiv">    
 	<tr>
@@ -113,7 +119,7 @@
 			  <select class='search-field' id="searchObjectId" name="searchObjectId" #if( $attributes.size() == 0 ) disabled="disabled" #end onchange="searchObjectOnChange(this)">
 				#if( $auth.hasAccess( "dhis-web-caseentry", "accessAttributes" ) )
 					#foreach( $attribute in $attributes )
-						<option value="$attribute.uid" valueType='$attribute.valueType'>$encoder.htmlEncode( $attribute.displayName )</option>
+						<option value="$attribute.uid">$encoder.htmlEncode( $attribute.displayName )</option>
 					#end
 				#end
 			  </select>
@@ -142,7 +148,6 @@
 	<div style="padding: 10px 0 15px 3px">
 		<input type="button" class='large-button' value='$i18n.getString( "add_filter" )' onclick='addAttributeOption();'>
         <input type="button" class='large-button' value='$i18n.getString( "search" )' onclick='isAdvancedSearch=true;validateAdvancedSearch(1);' id='searchEntityInstanceBtn'>
-        <input type="button" class='large-button hidden' id='sendSmsToListBtn' value="$i18n.getString('sms')" onclick="setFieldValue('sendToList', true);showSendSmsForm();">
     </div>
 </div>
 

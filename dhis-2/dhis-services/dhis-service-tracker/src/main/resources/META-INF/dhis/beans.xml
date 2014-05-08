@@ -30,7 +30,6 @@
 		<property name="sessionFactory" ref="sessionFactory" />
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-		<property name="statementBuilder" ref="statementBuilder" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramInstanceStore"
@@ -77,8 +76,6 @@
 		<property name="clazz"
 			value="org.hisp.dhis.trackedentity.TrackedEntityInstance" />
 		<property name="sessionFactory" ref="sessionFactory" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
 		<property name="jdbcTemplate" ref="jdbcTemplate" />
 		<property name="statementBuilder" ref="statementBuilder" />
 	</bean>
@@ -570,6 +567,9 @@
 		<aop:aspect ref="deletionInterceptor">
 
 			<aop:before
+				pointcut="execution( * org.hisp.dhis.trackedentity.TrackedEntityService.delete*(..) )"
+				method="intercept" />
+			<aop:before
 				pointcut="execution( * org.hisp.dhis.trackedentity.TrackedEntityInstanceService.delete*(..) )"
 				method="intercept" />
 			<aop:before
@@ -620,7 +620,7 @@
 			<aop:before
 				pointcut="execution( * org.hisp.dhis.caseaggregation.CaseAggregationConditionService.delete*(..) )"
 				method="intercept" />
-
+		
 		</aop:aspect>
 
 	</aop:config>
