@@ -159,8 +159,30 @@ public class TrackedEntityInstanceQueryParams
     // -------------------------------------------------------------------------
     
     /**
-     * //TODO allow attributes only once and allow multiple filters per item
-     * 
+     * Adds a query item as attribute to the parameters.
+     */
+    public void addAttribute( QueryItem attribute )
+    {
+        this.attributes.add( attribute );
+    }
+    
+    /**
+     * Adds a query item as filter to the parameters.
+     */
+    public void addFilter( QueryItem filter )
+    {
+        this.filters.add( filter );
+    }
+    
+    /**
+     * Adds an organisation unit to the parameters.
+     */
+    public void addOrganisationUnit( OrganisationUnit unit )
+    {
+        this.organisationUnits.add( unit );
+    }
+
+    /**
      * Performs a set of operations on this params.
      * 
      * <ul>
