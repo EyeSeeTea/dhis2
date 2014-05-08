@@ -1435,23 +1435,10 @@ Ext.onReady( function() {
 			text: GIS.i18n.labels,
 			iconCls: 'gis-menu-item-icon-labels',
 			handler: function() {
-                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer));
+                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer)),
+                    fn = layer.id === 'boundary' ? window.updateLabels : window.show;
 
-                if (layer.id === 'boundary') {
-                    window.updateLabels();
-                }
-                else {
-                    window.show();
-                }
-
-
-				//if (layer.labelWindow) {
-					//layer.labelWindow.show();
-				//}
-				//else {
-					//layer.labelWindow = GIS.app.LabelWindow(layer);
-					//layer.labelWindow.show();
-				//}
+                fn.call();
 			}
 		};
 		items.push(item);
