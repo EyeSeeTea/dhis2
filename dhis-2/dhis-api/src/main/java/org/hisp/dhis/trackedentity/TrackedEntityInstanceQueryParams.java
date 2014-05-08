@@ -232,7 +232,34 @@ public class TrackedEntityInstanceQueryParams
         
         return setMap;
     }
+
+    /**
+     * Add the given attributes to this params if they are not already present.
+     */
+    public void addAttributesIfNotExist( List<QueryItem> attrs )
+    {
+        for ( QueryItem attr : attrs )
+        {
+            if ( attributes != null && !attributes.contains( attr ) )
+            {
+                attributes.add( attr );            
+            }
+        }
+    }
     
+    /**
+     * Adds the given filters to this params if they are not already present.
+     */
+    public void addFiltersIfNotExist( List<QueryItem> filtrs )
+    {
+        for ( QueryItem filter : filtrs )
+        {
+            if ( filters != null && !filters.contains( filter ) )
+            {
+                filters.add( filter );
+            }
+        }
+    }
     /**
      * Indicates whether this is a logical OR query, meaning that a query string
      * is specified and instances which matches this query on one or more attributes
@@ -300,35 +327,7 @@ public class TrackedEntityInstanceQueryParams
         
         return duplicates;
     }
-        
-    /**
-     * Add the given attributes to this params if they are not already present.
-     */
-    public void addAttributesIfNotExist( List<QueryItem> attrs )
-    {
-        for ( QueryItem attr : attrs )
-        {
-            if ( attributes != null && !attributes.contains( attr ) )
-            {
-                attributes.add( attr );            
-            }
-        }
-    }
-    
-    /**
-     * Adds the given filters to this params if they are not already present.
-     */
-    public void addFiltersIfNotExist( List<QueryItem> filtrs )
-    {
-        for ( QueryItem filter : filtrs )
-        {
-            if ( filters != null && !filters.contains( filter ) )
-            {
-                filters.add( filter );
-            }
-        }
-    }
-    
+           
     /**
      * Indicates whether this params specifies any attributes and/or filters.
      */
