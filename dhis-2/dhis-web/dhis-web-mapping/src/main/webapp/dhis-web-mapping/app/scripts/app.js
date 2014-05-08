@@ -1435,13 +1435,23 @@ Ext.onReady( function() {
 			text: GIS.i18n.labels,
 			iconCls: 'gis-menu-item-icon-labels',
 			handler: function() {
-				if (layer.labelWindow) {
-					layer.labelWindow.show();
-				}
-				else {
-					layer.labelWindow = GIS.app.LabelWindow(layer);
-					layer.labelWindow.show();
-				}
+                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer));
+
+                if (layer.id === 'boundary') {
+                    window.updateLabels();
+                }
+                else {
+                    window.show();
+                }
+
+
+				//if (layer.labelWindow) {
+					//layer.labelWindow.show();
+				//}
+				//else {
+					//layer.labelWindow = GIS.app.LabelWindow(layer);
+					//layer.labelWindow.show();
+				//}
 			}
 		};
 		items.push(item);
@@ -2050,13 +2060,31 @@ Ext.onReady( function() {
 		};
 
 		updateLabels = function() {
-			if (layer.hasLabels) {
-				layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
+            var loader = layer.core.getLoader();
+            loader.hideMask = true;
 
-				var loader = layer.core.getLoader();
-				loader.hideMask = true;
-				loader.loadLegend();
-			}
+            if (layer.hasLabels) {
+                layer.hasLabels = false;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(false);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id);
+                    loader.loadLegend();
+                }
+            }
+            else {
+                layer.hasLabels = true;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(true);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
+                    loader.loadLegend();
+                }
+            }
 		};
 
 		window = Ext.create('Ext.window.Window', {
@@ -2066,6 +2094,7 @@ Ext.onReady( function() {
 			width: gis.conf.layout.tool.window_width,
 			resizable: false,
 			closeAction: 'hide',
+            updateLabels: updateLabels,
 			items: {
 				layout: 'fit',
 				cls: 'gis-container-inner',
@@ -2126,31 +2155,7 @@ Ext.onReady( function() {
 					xtype: 'button',
 					text: GIS.i18n.showhide,
 					handler: function() {
-                        var loader = layer.core.getLoader();
-                        loader.hideMask = true;
-
-						if (layer.hasLabels) {
-							layer.hasLabels = false;
-
-                            if (layer.id === 'boundary') {
-                                layer.core.setFeatureLabelStyle(false);
-                            }
-                            else {
-                                layer.styleMap = GIS.core.StyleMap(layer.id);
-                                loader.loadLegend();
-                            }
-						}
-						else {
-							layer.hasLabels = true;
-
-                            if (layer.id === 'boundary') {
-                                layer.core.setFeatureLabelStyle(true);
-                            }
-                            else {
-                                layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
-                                loader.loadLegend();
-                            }
-						}
+                        updateLabels();
 					}
 				}
 			],
