@@ -2151,10 +2151,6 @@ Ext.onReady( function() {
                                 loader.loadLegend();
                             }
 						}
-
-						//var loader = layer.core.getLoader();
-						//loader.hideMask = true;
-						//loader.loadLegend();
 					}
 				}
 			],
