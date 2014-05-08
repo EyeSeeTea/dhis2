@@ -411,7 +411,7 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
             fillColor: '#000',
             strokeColor: '#000',
             strokeWidth: 1,
-            pointRadius: 4,
+            pointRadius: 5,
             cursor: 'pointer'
         };
     },
@@ -433,6 +433,8 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
                 style.label = feature.attributes.label;
                 style.fontColor = style.strokeColor;
                 style.fontWeight = style.strokeWidth > 1 ? 'bold' : 'normal';
+                style.labelAlign = 'cr';
+                style.labelYOffset = 13;
             }
             else {
                 style.label = null;

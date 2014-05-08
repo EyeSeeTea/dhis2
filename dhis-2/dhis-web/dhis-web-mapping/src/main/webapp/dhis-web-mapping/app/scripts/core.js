@@ -199,6 +199,8 @@ Ext.onReady( function() {
                 style.label = feature.style.label;
                 style.fontFamily = feature.style.fontFamily;
                 style.fontWeight = feature.style.strokeWidth > 1 ? 'bold' : 'normal';
+                style.labelAlign = feature.style.labelAlign;
+                style.labelYOffset = feature.style.labelYOffset;
 
                 layer.drawFeature(feature, style);
             }
@@ -696,17 +698,6 @@ Ext.onReady( function() {
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
-        //if (isBoundary) {
-            //selectHandlers.selectStyle = {
-                //fillOpacity: 0.2,
-                //fillColor: '#000',
-                //strokeWidth: 1,
-                //strokeColor: '#444',
-                //cursor: 'pointer',
-                //pointRadius: 5
-            //};
-        //}
-
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
 	};
@@ -753,14 +744,18 @@ Ext.onReady( function() {
 				fillOpacity: 1,
 				strokeColor: '#fff',
 				strokeWidth: 1,
-                pointRadius: 4
+                pointRadius: 5,
+                labelAlign: 'cr',
+                labelYOffset: 13
 			},
 			select = {
 				fillOpacity: 0.9,
 				strokeColor: '#fff',
 				strokeWidth: 1,
-                pointRadius: 4,
-				cursor: 'pointer'
+                pointRadius: 5,
+				cursor: 'pointer',
+                labelAlign: 'cr',
+                labelYOffset: 13
 			};
 
 		if (labelConfig) {
@@ -1569,7 +1564,9 @@ Ext.onReady( function() {
                             strokeColor: obj.strokeColor || 'black',
                             strokeWidth: strokeWidth,
                             fillOpacity: 0,
-                            pointRadius: 4
+                            pointRadius: 5,
+                            labelAlign: 'cr',
+                            labelYOffset: 13
                         };
                     }
 
