@@ -2033,13 +2033,20 @@ Ext.onReady( function() {
 			}
 		});
 
-		getLabelConfig = function() {
-			return {
+		getLabelConfig = function(isLabel) {
+			var style = {
 				fontSize: fontSize.getValue(),
 				strong: strong.getValue(),
 				italic: italic.getValue(),
 				color: color.getValue()
-			};
+            };
+
+            if (isLabel) {
+                style.label = '\${label}';
+                style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
+			}
+
+            return style;
 		};
 
 		updateLabels = function() {
@@ -2119,18 +2126,35 @@ Ext.onReady( function() {
 					xtype: 'button',
 					text: GIS.i18n.showhide,
 					handler: function() {
+                        var loader = layer.core.getLoader();
+                        loader.hideMask = true;
+
 						if (layer.hasLabels) {
 							layer.hasLabels = false;
-							layer.styleMap = GIS.core.StyleMap(layer.id);
+
+                            if (layer.id === 'boundary') {
+                                layer.core.setFeatureLabelStyle(false);
+                            }
+                            else {
+                                layer.styleMap = GIS.core.StyleMap(layer.id);
+                                loader.loadLegend();
+                            }
 						}
 						else {
 							layer.hasLabels = true;
-							layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
+
+                            if (layer.id === 'boundary') {
+                                layer.core.setFeatureLabelStyle(true);
+                            }
+                            else {
+                                layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
+                                loader.loadLegend();
+                            }
 						}
 
-						var loader = layer.core.getLoader();
-						loader.hideMask = true;
-						loader.loadLegend();
+						//var loader = layer.core.getLoader();
+						//loader.hideMask = true;
+						//loader.loadLegend();
 					}
 				}
 			],

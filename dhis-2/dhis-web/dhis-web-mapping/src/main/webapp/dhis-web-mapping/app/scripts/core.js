@@ -191,8 +191,16 @@ Ext.onReady( function() {
 
 		defaultHoverSelect = function fn(feature) {
             if (isBoundary) {
-                selectHandlers.selectStyle.strokeColor = feature.style.strokeColor;
-                selectHandlers.selectStyle.strokeWidth = feature.style.strokeWidth;
+                var style = layer.core.getDefaultFeatureStyle();
+
+                style.fillOpacity = 0.15;
+                style.strokeColor = feature.style.strokeColor;
+                style.strokeWidth = feature.style.strokeWidth;
+                style.label = feature.style.label;
+                style.fontFamily = feature.style.fontFamily;
+                style.fontWeight = feature.style.strokeWidth > 1 ? 'bold' : 'normal';
+
+                layer.drawFeature(feature, style);
             }
 
 			if (defaultHoverWindow) {
@@ -688,16 +696,16 @@ Ext.onReady( function() {
 
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
-        if (isBoundary) {
-            selectHandlers.selectStyle = {
-                fillOpacity: 0.2,
-                fillColor: '#000',
-                strokeWidth: 1,
-                strokeColor: '#444',
-                cursor: 'pointer',
-                pointRadius: 5
-            };
-        }
+        //if (isBoundary) {
+            //selectHandlers.selectStyle = {
+                //fillOpacity: 0.2,
+                //fillColor: '#000',
+                //strokeWidth: 1,
+                //strokeColor: '#444',
+                //cursor: 'pointer',
+                //pointRadius: 5
+            //};
+        //}
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
@@ -767,8 +775,6 @@ Ext.onReady( function() {
 		}
 
 		if (labelConfig) {
-			defaults.label = '\${label}';
-			defaults.fontFamily = 'arial,sans-serif,ubuntu,consolas';
 			defaults.fontSize = (labelConfig.fontSize || 13) + 'px';
 			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
 			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
@@ -1559,19 +1565,18 @@ Ext.onReady( function() {
                     for (var i = 0; i < levels.length; i++) {
                         levelObjectMap[levels[i]] = {
                             strokeColor: colors[i]
-                            //strokeWidth: levels.length - i
                         };
                     }
 
                     // style
-                    for (var i = 0, feature, obj; i < features.length; i++) {
+                    for (var i = 0, feature, obj, strokeWidth; i < features.length; i++) {
                         feature = features[i];
                         obj = levelObjectMap[feature.attributes.level];
+                        strokeWidth = levels.length === 1 ? 1 : feature.attributes.level == 2 ? 2 : 1;
 
                         feature.style = {
                             strokeColor: obj.strokeColor || 'black',
-                            //strokeWidth: obj.strokeWidth || 1,
-                            strokeWidth: feature.attributes.level == 2 ? 2 : 1,
+                            strokeWidth: strokeWidth,
                             fillOpacity: 0,
                             pointRadius: 4
                         };
@@ -1599,6 +1604,11 @@ Ext.onReady( function() {
 
 			layer.removeFeatures(layer.features);
 			layer.addFeatures(features);
+
+            // labels
+            if (layer.hasLabels) {
+                layer.core.setFeatureLabelStyle(true, true);
+            }
 
 			loadLegend(view);
 		};

@@ -405,6 +405,45 @@ mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
 		return;
 	},
 
+    getDefaultFeatureStyle: function() {
+        return {
+            fillOpacity: 0,
+            fillColor: '#000',
+            strokeColor: '#000',
+            strokeWidth: 1,
+            pointRadius: 4,
+            cursor: 'pointer'
+        };
+    },
+
+    setFeatureStyle: function(style) {
+        for (var i = 0; i < this.layer.features.length; i++) {
+            this.layer.features[i].style = style;
+        }
+
+        this.layer.redraw();
+    },
+
+    setFeatureLabelStyle: function(isLabel, skipDraw) {
+        for (var i = 0, feature, style, label; i < this.layer.features.length; i++) {
+            feature = this.layer.features[i];
+            style = feature.style;
+
+            if (isLabel) {
+                style.label = feature.attributes.label;
+                style.fontColor = style.strokeColor;
+                style.fontWeight = style.strokeWidth > 1 ? 'bold' : 'normal';
+            }
+            else {
+                style.label = null;
+            }
+        }
+
+        if (!skipDraw) {
+            this.layer.redraw();
+        }
+    },
+
     updateOptions: function(newOptions) {
         var oldOptions = OpenLayers.Util.extend({}, this.options);
         this.addOptions(newOptions);
