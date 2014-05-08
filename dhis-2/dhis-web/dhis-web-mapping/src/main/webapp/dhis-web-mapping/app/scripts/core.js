@@ -1551,8 +1551,8 @@ Ext.onReady( function() {
 
                     for (var i = 0; i < levels.length; i++) {
                         levelObjectMap[levels[i]] = {
-                            strokeColor: colors[i],
-                            strokeWidth: levels.length - i
+                            strokeColor: colors[i]
+                            //strokeWidth: levels.length - i
                         };
                     }
 
@@ -1564,22 +1564,11 @@ Ext.onReady( function() {
                         feature.style = {
                             strokeColor: obj.strokeColor || 'black',
                             //strokeWidth: obj.strokeWidth || 1,
-                            strokeWidth: 1,
+                            strokeWidth: feature.attributes.level == 2 ? 2 : 1,
                             fillOpacity: 0,
-                            pointRadius: 6
+                            pointRadius: 4
                         };
                     }
-
-
-
-
-
-
-
-
-
-
-
 
 					layer.core.featureStore.loadFeatures(features.slice(0));
 
