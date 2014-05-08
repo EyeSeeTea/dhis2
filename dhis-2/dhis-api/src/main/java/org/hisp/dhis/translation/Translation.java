@@ -28,12 +28,21 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.ExportView;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author Oyvind Brucker
  */
+@JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class Translation
     implements Serializable
 {
@@ -44,7 +53,7 @@ public class Translation
 
     private String className;
 
-        private String locale;
+    private String locale;
 
     private String property;
 
@@ -60,12 +69,14 @@ public class Translation
 
     public Translation()
     {
+       setLastUpdated( new Date() );
     }
 
     public Translation( String className, String locale, String property, String value, String uid )
     {
+        this();
         this.className = className;
-            this.locale = locale;
+        this.locale = locale;
         this.property = property;
         this.value = value;
         this.uid = uid;
@@ -79,11 +90,12 @@ public class Translation
     {
         return className + "-" + uid + "-" + property;
     }
-    
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getClassName()
     {
         return className;
@@ -94,7 +106,9 @@ public class Translation
         this.className = className;
     }
 
-        public String getUid()
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getUid()
     {
         return uid;
     }
@@ -104,6 +118,9 @@ public class Translation
         this.uid = uid;
     }
 
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getLocale()
     {
         return locale;
@@ -114,6 +131,8 @@ public class Translation
         this.locale = locale;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getProperty()
     {
         return property;
@@ -124,6 +143,8 @@ public class Translation
         this.property = property;
     }
 
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getValue()
     {
         return value;
@@ -133,6 +154,7 @@ public class Translation
     {
         this.value = value;
     }
+
 
     public Date getLastUpdated()
     {
@@ -158,7 +180,7 @@ public class Translation
         result = result * prime + uid.hashCode();
         result = result * prime + locale.hashCode();
         result = result * prime + property.hashCode();
-        
+
         return result;
     }
 
