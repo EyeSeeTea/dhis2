@@ -37,7 +37,6 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACK
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
 
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -56,6 +55,7 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -442,7 +442,9 @@ public class DefaultTrackedEntityInstanceService
 
         if ( operator != null && filter != null )
         {
-            return new QueryItem( at, operator, filter, at.isNumericType() );
+            QueryOperator op = QueryOperator.fromString( operator );
+            
+            return new QueryItem( at, op, filter, at.isNumericType() );
         }
         else
         {
@@ -457,7 +459,7 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public int createTrackedEntityInstance( TrackedEntityInstance instance, Integer representativeId,
+    public int createTrackedEntityInstance( TrackedEntityInstance instance, String representativeId,
         Integer relationshipTypeId, Set<TrackedEntityAttributeValue> attributeValues )
     {
         int id = addTrackedEntityInstance( instance );
@@ -474,7 +476,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( representativeId != null )
         {
-            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
             if ( representative != null )
             {
                 instance.setRepresentative( representative );
@@ -526,16 +528,10 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> getAllTrackedEntityInstances()
-    {
-        return trackedEntityInstanceStore.getAll();
-    }
-
-    @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstancesForMobile( String searchText, int orgUnitId )
     {
         Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
-        entityInstances.addAll( getTrackedEntityInstancesByPhone( searchText, 0, Integer.MAX_VALUE ) );
+        entityInstances.addAll( trackedEntityInstanceStore.getByPhoneNumber( searchText, 0, Integer.MAX_VALUE ) );
 
         if ( orgUnitId != 0 )
         {
@@ -563,74 +559,7 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstances( Program program )
-    {
-        return trackedEntityInstanceStore.getByProgram( program, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit,
-        Program program )
-    {
-        return trackedEntityInstanceStore.getByOrgUnitProgram( organisationUnit, program, 0, Integer.MAX_VALUE );
-    }
-
-    @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstance( Integer attributeId, String value )
-    {
-        TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( attributeId );
-        if ( attribute != null )
-        {
-            return attributeValueService.getTrackedEntityInstance( attribute, value );
-        }
-
-        return null;
-    }
-
-    @Override
-    public Collection<TrackedEntityInstance> sortTrackedEntityInstancesByAttribute(
-        Collection<TrackedEntityInstance> entityInstances, TrackedEntityAttribute attribute )
-    {
-        Collection<TrackedEntityInstance> sortedTrackedEntityInstances = new ArrayList<TrackedEntityInstance>();
-
-        // ---------------------------------------------------------------------
-        // Better to fetch all attribute values at once than fetching the
-        // required attribute value of each instance using loop
-        // ---------------------------------------------------------------------
-
-        Collection<TrackedEntityAttributeValue> attributeValues = attributeValueService
-            .getTrackedEntityAttributeValues( entityInstances );
-
-        if ( attributeValues != null )
-        {
-            for ( TrackedEntityAttributeValue attributeValue : attributeValues )
-            {
-                if ( attribute == attributeValue.getAttribute() )
-                {
-                    sortedTrackedEntityInstances.add( attributeValue.getEntityInstance() );
-                    entityInstances.remove( attributeValue.getEntityInstance() );
-                }
-            }
-        }
-
-        // ---------------------------------------------------------------------
-        // Make sure all entityInstances are in the sorted list - because all
-        // entityInstances might not have the sorting attribute/value
-        // ---------------------------------------------------------------------
-
-        sortedTrackedEntityInstances.addAll( entityInstances );
-
-        return sortedTrackedEntityInstances;
-    }
-
-    @Override
-    public int countGetTrackedEntityInstancesByOrgUnit( OrganisationUnit organisationUnit )
-    {
-        return trackedEntityInstanceStore.countListTrackedEntityInstanceByOrgunit( organisationUnit );
-    }
-
-    @Override
-    public void updateTrackedEntityInstance( TrackedEntityInstance instance, Integer representativeId,
+    public void updateTrackedEntityInstance( TrackedEntityInstance instance, String representativeId,
         Integer relationshipTypeId, List<TrackedEntityAttributeValue> valuesForSave,
         List<TrackedEntityAttributeValue> valuesForUpdate, Collection<TrackedEntityAttributeValue> valuesForDelete )
     {
@@ -653,7 +582,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( shouldSaveRepresentativeInformation( instance, representativeId ) )
         {
-            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
 
             if ( representative != null )
             {
@@ -676,14 +605,14 @@ public class DefaultTrackedEntityInstanceService
         }
     }
 
-    private boolean shouldSaveRepresentativeInformation( TrackedEntityInstance instance, Integer representativeId )
+    private boolean shouldSaveRepresentativeInformation( TrackedEntityInstance instance, String representativeId )
     {
-        if ( representativeId == null )
+        if ( representativeId == null || representativeId.isEmpty() )
         {
             return false;
         }
 
-        return instance.getRepresentative() == null || !(instance.getRepresentative().getId() == representativeId);
+        return instance.getRepresentative() == null || !(instance.getRepresentative().getUid() == representativeId);
     }
 
     @Override
@@ -691,12 +620,6 @@ public class DefaultTrackedEntityInstanceService
         Program program, Integer min, Integer max )
     {
         return trackedEntityInstanceStore.getByOrgUnitProgram( organisationUnit, program, min, max );
-    }
-
-    @Override
-    public int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program )
-    {
-        return trackedEntityInstanceStore.countGetTrackedEntityInstancesByOrgUnitProgram( organisationUnit, program );
     }
 
     @Override
@@ -741,21 +664,6 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer statusEnrollment, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.getProgramStageInstances( searchKeys, orgunits, followup, null,
-            statusEnrollment, min, max );
-    }
-
-    @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstancesByPhone( String phoneNumber, Integer min,
-        Integer max )
-    {
-        return trackedEntityInstanceStore.getByPhoneNumber( phoneNumber, min, max );
-    }
-
-    @Override
     public String validateTrackedEntityInstance( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
         return trackedEntityInstanceStore.validate( instance, program, format );
@@ -773,7 +681,7 @@ public class DefaultTrackedEntityInstanceService
     {
         Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
 
-        entityInstances.addAll( getTrackedEntityInstancesByAttributeValue( searchText, attributeId, 0,
+        entityInstances.addAll( trackedEntityInstanceStore.getByAttributeValue( searchText, attributeId, 0,
             Integer.MAX_VALUE ) );
 
         if ( orgUnitId != 0 )
@@ -793,34 +701,10 @@ public class DefaultTrackedEntityInstanceService
 
         return entityInstances;
     }
-
-    @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstancesByAttributeValue( String searchText,
-        int attributeId, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.getByAttributeValue( searchText, attributeId, min, max );
-    }
-
-    @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityInstances( List<String> searchKeys,
-        Collection<OrganisationUnit> orgunits, Boolean followup, Collection<TrackedEntityAttribute> attributes,
-        Integer statusEnrollment, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.search( searchKeys, orgunits, followup, attributes, statusEnrollment, min,
-            max );
-    }
-
-    @Override
-    public int countSearchTrackedEntityInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Integer statusEnrollment )
-    {
-        return trackedEntityInstanceStore.countSearch( searchKeys, orgunits, followup, statusEnrollment );
-    }
     
     @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntity trackedEntity )
     {
         return trackedEntityInstanceStore.get( trackedEntity );
     }
-
 }

@@ -51,6 +51,14 @@
         <property name="bankDetailsStore" ref="org.hisp.dhis.rbf.api.BankDetailsStore" />
     </bean>
     
+    <bean id="org.hisp.dhis.rbf.api.QualityScorePaymentStore" class="org.hisp.dhis.rbf.impl.HibernateQualityScorePaymentStore">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="org.hisp.dhis.rbf.api.QualityScorePaymentService" class="org.hisp.dhis.rbf.impl.DefaultQualityScorePaymentService">
+        <property name="qualityScorePaymentStore" ref="org.hisp.dhis.rbf.api.QualityScorePaymentStore" />
+    </bean>
+    
 	<!-- Home page -->
 	<bean id="org.hisp.dhis.rbf.action.NoAction" class="org.hisp.dhis.rbf.action.NoAction" scope="prototype">
     </bean>
@@ -368,6 +376,46 @@
         <property name="aggregationConditionService" ref="org.hisp.dhis.caseaggregation.CaseAggregationConditionService" />
     </bean>
 	
+
+
+	<!-- Quality Score Payment -->
+
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.GetQualityScorePaymentList"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.GetQualityScorePaymentList"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+
+	 <!-- Add Quality Score Payment Form -->
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.AddQualityScorePaymentFormAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.AddQualityScorePaymentFormAction"
+        scope="prototype">
+    </bean>
+
+	<!-- Add Quality Score Payment -->
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.AddQualityScorePaymentAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.AddQualityScorePaymentAction"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+
+	<!-- Delete Quality Score Payment --> 
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.DeleteQualityScorePaymentAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.DeleteQualityScorePaymentAction"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+
+
+	<!-- Show Details -->
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.GetQualityScorePaymentAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.GetQualityScorePaymentAction"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+
+
+
 	 <!-- Get All Lookups -->
     
 	<bean id="org.hisp.dhis.rbf.lookup.action.GetAllLookupsAction"

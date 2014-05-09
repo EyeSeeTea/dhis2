@@ -38,7 +38,6 @@ import java.util.Map;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.paging.ActionPagingSupport;
-import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
@@ -55,7 +54,7 @@ public class SearchPatientAction
     private OrganisationUnitSelectionManager selectionManager;
 
     @Autowired
-    private TrackedEntityInstanceService patientService;
+    private TrackedEntityInstanceService trackedEntityInstanceService;
 
     @Autowired
     private ProgramService programService;
@@ -123,11 +122,12 @@ public class SearchPatientAction
         // List all patients
         if ( listAll )
         {
-            total = patientService.countGetTrackedEntityInstancesByOrgUnit( organisationUnit );
+            //TODO re-implement using TrackedEntityInstanceService.getTrackedEntityInstances( TrackedEntityInstanceQueryParams )
+            
+            //total = patientService.countGetTrackedEntityInstancesByOrgUnit( organisationUnit );
             this.paging = createPaging( total );
 
-            patients = new ArrayList<TrackedEntityInstance>( patientService.getTrackedEntityInstances( organisationUnit, paging.getStartPos(),
-                paging.getPageSize() ) );
+            //patients = new ArrayList<TrackedEntityInstance>( patientService.getTrackedEntityInstances( organisationUnit, paging.getStartPos(), paging.getPageSize() ) );
 
         }
         // search patients
@@ -139,10 +139,12 @@ public class SearchPatientAction
                 orgunits.add( organisationUnit );
             }
 
-            total = patientService.countSearchTrackedEntityInstances( searchTexts, orgunits, null, ProgramInstance.STATUS_ACTIVE );
+            //TODO re-implement using TrackedEntityInstanceService.getTrackedEntityInstances( TrackedEntityInstanceQueryParams )
+            
+            //total = patientService.countSearchTrackedEntityInstances( searchTexts, orgunits, null, ProgramInstance.STATUS_ACTIVE );
             this.paging = createPaging( total );
-            patients = patientService.searchTrackedEntityInstances( searchTexts, orgunits, null, null, ProgramInstance.STATUS_ACTIVE,
-                paging.getStartPos(), paging.getPageSize() );
+            //patients = patientService.searchTrackedEntityInstances( searchTexts, orgunits, null, null, ProgramInstance.STATUS_ACTIVE,
+            //    paging.getStartPos(), paging.getPageSize() );
 
             if ( !searchBySelectedOrgunit )
             {

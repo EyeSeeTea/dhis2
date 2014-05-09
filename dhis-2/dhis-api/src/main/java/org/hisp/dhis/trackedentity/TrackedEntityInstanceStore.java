@@ -79,8 +79,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return List of entityInstances
      */
-    Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program,
-        Integer min, Integer max );
+    Collection<TrackedEntityInstance> getByOrgUnitProgram( OrganisationUnit organisationUnit, Program program, Integer min, Integer max );
 
     /**
      * Search instances who has the same representative
@@ -99,7 +98,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return The number of entityInstances
      */
-    int countListTrackedEntityInstanceByOrgunit( OrganisationUnit organisationUnit );
+    //int countListTrackedEntityInstanceByOrgunit( OrganisationUnit organisationUnit );
 
     /**
      * Get the number of entityInstances who registered into a certain
@@ -113,7 +112,7 @@ public interface TrackedEntityInstanceStore
      * 
      * @return The number of entityInstances
      */
-    int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
+    //int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
 
     /**
      * Search entityInstances by phone number (performs partial search)
@@ -127,29 +126,6 @@ public interface TrackedEntityInstanceStore
     Collection<TrackedEntityInstance> getByPhoneNumber( String phoneNumber, Integer min, Integer max );
 
     /**
-     * Search events which meet the criteria for searching
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param attributes The attribute values of these attribute are displayed
-     *        into result
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * @param min
-     * @param max
-     * 
-     * @return List of entityInstances
-     */
-    List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<TrackedEntityAttribute> attributes, Integer statusEnrollment, Integer min,
-        Integer max );
-
-    /**
      * Search entityInstances who enrolled into a program with active status
      * 
      * @param program Program
@@ -158,7 +134,7 @@ public interface TrackedEntityInstanceStore
      * 
      *        return List of entityInstances
      */
-    Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max );
+    //Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max );
 
     /**
      * Validate entity-instances attribute values and validation criteria by
@@ -197,48 +173,6 @@ public interface TrackedEntityInstanceStore
      * @return TrackedEntityInstance list
      */
     Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min, Integer max );
-
-    /**
-     * Search entityInstances by attribute values and/or a program which
-     * entityInstances enrolled into
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values, identifiers and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param attributes The attribute values of these attribute are displayed
-     *        into result
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * @param min
-     * @param max
-     * 
-     * @return An object
-     */
-    Collection<TrackedEntityInstance> search( List<String> searchKeys, Collection<OrganisationUnit> orgunits,
-        Boolean followup, Collection<TrackedEntityAttribute> attributes, Integer statusEnrollment, Integer min,
-        Integer max );
-
-    /**
-     * Get the number of entityInstances who meet the criteria for searching
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * 
-     * @return The number of entityInstances
-     */
-    int countSearch( List<String> searchKeys, Collection<OrganisationUnit> orgunits, Boolean followup,
-        Integer statusEnrollment );
 
      /**
      * Get entityInstances by {@link TrackedEntity}

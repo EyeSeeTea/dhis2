@@ -45,6 +45,49 @@ import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.validation.ValidationCriteria;
 
 /**
+ * <p>This interface is responsible for retrieving tracked entity instances (TEI).
+ * The query methods accepts a TrackedEntityInstanceQueryParams object which
+ * encapsulates all arguments.</p> 
+ * 
+ * <p>The TEIs are returned as a Grid object, which is a two-dimensional list with 
+ * headers. The TEI attribute values are returned in the same order as specified
+ * in the arguments. The grid has a set of columns which are always present
+ * starting at index 0, followed by attributes specified for the query. All
+ * values in the grid are of type String. The order is:</p>
+ * 
+ * <ul>
+ * <li>0: Tracked entity instance UID</li>
+ * <li>1: Created time stamp</li>
+ * <li>2: Last updated time stamp</li>
+ * <li>3: Organisation unit UID</li>
+ * <li>4: Tracked entity UID</li>
+ * <ul>
+ * 
+ * <p>Attributes specified in the query follows on the next column indexes.
+ * Example usage for retrieving TEIs with two attributes using one attribute as 
+ * filter:</p>
+ * 
+ * <pre>
+ * <code>
+ * TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
+ *
+ * params.addAttribute( new QueryItem( gender, QueryOperator.EQ, "Male", false ) );
+ * params.addAttribute( new QueryItem( age, QueryOperator.LT, "5", true ) );
+ * params.addFilter( new QueryItem( weight, QueryOperator.GT, "2500", true ) );
+ * params.addOrganistionUnit( unit );
+ * 
+ * Grid instances = teiService.getTrackedEntityInstances( params );
+ * 
+ * for ( List&lt;Object&gt; row : instances.getRows() )
+ * {
+ *     String tei = row.get( 0 );
+ *     String ou = row.get( 3 );
+ *     String gender = row.get( 5 );
+ *     String age = row.get( 6 );
+ * }
+ * </code>
+ * </pre>
+ * 
  * @author Abyot Asalefew Gizaw
  */
 public interface TrackedEntityInstanceService
@@ -154,7 +197,7 @@ public interface TrackedEntityInstanceService
      * @return a collection of all TrackedEntityInstance, or an empty collection
      *         if there are no TrackedEntityInstances.
      */
-    Collection<TrackedEntityInstance> getAllTrackedEntityInstances();
+    //Collection<TrackedEntityInstance> getAllTrackedEntityInstances();
 
     /**
      * Retrieve entityInstances for mobile base on identifier value
@@ -184,7 +227,7 @@ public interface TrackedEntityInstanceService
      * @param program Program
      * @return TrackedEntityInstance list
      */
-    Collection<TrackedEntityInstance> getTrackedEntityInstances( Program program );
+    //Collection<TrackedEntityInstance> getTrackedEntityInstances( Program program );
 
     /**
      * Retrieve entityInstances registered in a orgunit and enrolled into a
@@ -194,16 +237,7 @@ public interface TrackedEntityInstanceService
      * @param program
      * @return
      */
-    Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Program program );
-
-    /**
-     * Retrieve entityInstances base on Attribute
-     * 
-     * @param attributeId
-     * @param value
-     * @return
-     */
-    Collection<TrackedEntityInstance> getTrackedEntityInstance( Integer attributeId, String value );
+    //Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Program program );
 
     /**
      * Search entityInstances base on OrganisationUnit and Program with result
@@ -225,8 +259,7 @@ public interface TrackedEntityInstanceService
      * @param attribute
      * @return TrackedEntityInstance List
      */
-    Collection<TrackedEntityInstance> sortTrackedEntityInstancesByAttribute(
-        Collection<TrackedEntityInstance> entityInstances, TrackedEntityAttribute attribute );
+    //Collection<TrackedEntityInstance> sortTrackedEntityInstancesByAttribute( Collection<TrackedEntityInstance> entityInstances, TrackedEntityAttribute attribute );
 
     /**
      * Get entityInstances who has the same representative
@@ -241,13 +274,13 @@ public interface TrackedEntityInstanceService
      * Register a new entityInstance
      * 
      * @param entityInstance TrackedEntityInstance
-     * @param representativeId The id of entityInstance who is representative
+     * @param representativeId The uid of entityInstance who is representative
      * @param relationshipTypeId The id of relationship type defined
      * @param attributeValues Set of attribute values
      * 
      * @return The error code after registering entityInstance
      */
-    int createTrackedEntityInstance( TrackedEntityInstance entityInstance, Integer representativeId,
+    int createTrackedEntityInstance( TrackedEntityInstance entityInstance, String representativeId,
         Integer relationshipTypeId, Set<TrackedEntityAttributeValue> attributeValues );
 
     /**
@@ -261,7 +294,7 @@ public interface TrackedEntityInstanceService
      * @param valuesForDelete The entityInstance attribute values for deleting
      * 
      */
-    void updateTrackedEntityInstance( TrackedEntityInstance entityInstance, Integer representativeId,
+    void updateTrackedEntityInstance( TrackedEntityInstance entityInstance, String representativeId,
         Integer relationshipTypeId, List<TrackedEntityAttributeValue> valuesForSave,
         List<TrackedEntityAttributeValue> valuesForUpdate, Collection<TrackedEntityAttributeValue> valuesForDelete );
 
@@ -273,7 +306,7 @@ public interface TrackedEntityInstanceService
      * 
      * @return The number of entityInstances
      */
-    int countGetTrackedEntityInstancesByOrgUnit( OrganisationUnit organisationUnit );
+    //int countGetTrackedEntityInstancesByOrgUnit( OrganisationUnit organisationUnit );
 
     /**
      * Get the number of entityInstances who registered into an organisation
@@ -284,7 +317,7 @@ public interface TrackedEntityInstanceService
      * 
      * @return The number of entityInstances
      */
-    int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
+    //int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
 
     /**
      * Cache value from String to the value type based on property
@@ -298,26 +331,6 @@ public interface TrackedEntityInstanceService
     Object getObjectValue( String property, String value, I18nFormat format );
 
     /**
-     * Get events which meet the criteria for searching
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * @parma min
-     * @param max
-     * 
-     * @return List of entityInstance
-     */
-    List<Integer> getProgramStageInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
-        Boolean followup, Integer statusEnrollment, Integer min, Integer max );
-
-    /**
      * Search entityInstances by phone number (performs partial search)
      * 
      * @param phoneNumber The string for searching by phone number
@@ -326,7 +339,7 @@ public interface TrackedEntityInstanceService
      * 
      * @return List of entityInstance
      */
-    Collection<TrackedEntityInstance> getTrackedEntityInstancesByPhone( String phoneNumber, Integer min, Integer max );
+    //Collection<TrackedEntityInstance> getTrackedEntityInstancesByPhone( String phoneNumber, Integer min, Integer max );
 
     /**
      * Validate entityInstance attributes and validation criteria by program
@@ -364,8 +377,7 @@ public interface TrackedEntityInstanceService
      * @return TrackedEntityInstance List
      */
 
-    Collection<TrackedEntityInstance> searchTrackedEntityInstancesForMobile( String searchText, int orgUnitId,
-        int attributeId );
+    Collection<TrackedEntityInstance> searchTrackedEntityInstancesForMobile( String searchText, int orgUnitId, int attributeId );
 
     /**
      * Search entityInstances by entityInstance attribute value (performs
@@ -378,50 +390,8 @@ public interface TrackedEntityInstanceService
      * 
      * @return List of TrackedEntityInstance
      */
-    Collection<TrackedEntityInstance> getTrackedEntityInstancesByAttributeValue( String searchText, int attributeId,
-        Integer min, Integer max );
+    //Collection<TrackedEntityInstance> getTrackedEntityInstancesByAttributeValue( String searchText, int attributeId, Integer min, Integer max );
 
-    /**
-     * Search entityInstances by attribute values and/or a program which
-     * entityInstances enrolled into
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values, identifiers and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param attributes The attribute values of these attribute are displayed
-     *        into result
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * @param min
-     * @param max
-     * 
-     * @return An object
-     */
-    Collection<TrackedEntityInstance> searchTrackedEntityInstances( List<String> searchKeys,
-        Collection<OrganisationUnit> orgunit, Boolean followup, Collection<TrackedEntityAttribute> attributes,
-        Integer statusEnrollment, Integer min, Integer max );
-
-    /**
-     * Get the number of entityInstances who meet the criteria for searching
-     * 
-     * @param searchKeys The key for searching entityInstances by attribute
-     *        values and/or a program
-     * @param orgunit Organisation unit where entityInstances registered
-     * @param followup Only getting entityInstances with program risked if this
-     *        property is true. And getting entityInstances without program
-     *        risked if its value is false
-     * @param statusEnrollment The status of program of entityInstances. There
-     *        are three status, includes Active enrollments only, Completed
-     *        enrollments only and Active and completed enrollments
-     * 
-     * @return The number of entityInstances
-     */
-    int countSearchTrackedEntityInstances( List<String> searchKeys, Collection<OrganisationUnit> orgunit,
-        Boolean followup, Integer statusEnrollment );
     /**
      * Get entityInstances by {@link TrackedEntity}
      * 
@@ -430,5 +400,4 @@ public interface TrackedEntityInstanceService
      * @return List of entityInstance
      */
     Collection<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntity trackedEntity );
-
 }
