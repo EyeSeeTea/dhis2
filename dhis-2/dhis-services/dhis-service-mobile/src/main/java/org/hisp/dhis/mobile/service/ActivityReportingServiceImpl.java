@@ -414,13 +414,6 @@ public class ActivityReportingServiceImpl
 
         for ( TrackedEntityInstance patient : patients )
         {
-            System.out.println( "----------------------------------------------------------------------------" );
-            System.out.println( "Display Name: " + patient.getDisplayName() );
-            System.out.println( "Name: " + patient.getName() );
-            System.out.println( "Tracked Entity Display Name: " + patient.getTrackedEntity().getDisplayName() );
-            System.out.println( "Tracked Entity Name: " + patient.getTrackedEntity().getName() );
-            System.out.println( "----------------------------------------------------------------------------" );
-
             resultSet += patient.getId() + "/";
             String attText = "";
             for ( TrackedEntityAttribute displayAttribute : displayAttributes )
@@ -764,6 +757,11 @@ public class ActivityReportingServiceImpl
         if ( patient.getOrganisationUnit() != null )
         {
             patientModel.setOrganisationUnitName( patient.getOrganisationUnit().getName() );
+        }
+        
+        if ( patient.getTrackedEntity() != null )
+        {
+            patientModel.setTrackedEntityName( patient.getTrackedEntity().getName() );
         }
 
         this.setSetting( getSettings() );
