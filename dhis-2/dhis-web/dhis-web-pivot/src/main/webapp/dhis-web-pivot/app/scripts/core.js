@@ -1482,7 +1482,7 @@ Ext.onReady( function() {
 						}
 					}
 
-                    // children
+                    // set above floor door children to number of unique door ids on this floor
                     if (i > 0) {
                         aAboveFloorObjects = aaAllFloorObjects[i-1];
                         uniqueDoorIds = Ext.Array.unique(doorIds);
