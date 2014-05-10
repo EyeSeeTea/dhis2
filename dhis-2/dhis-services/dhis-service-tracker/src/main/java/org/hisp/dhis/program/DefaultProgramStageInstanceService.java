@@ -226,13 +226,7 @@ public class DefaultProgramStageInstanceService
         int total = programInstanceService.countProgramInstances( program, orgunitIds, startDate, endDate );
         grid.addRow();
         grid.addValue( i18n.getString( "total_new_enrollments_in_this_period" ) );
-        grid.addValue( total );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addValue( total ).addEmptyValues( 6 );
 
         // Total programs completed in this period
 
@@ -240,13 +234,7 @@ public class DefaultProgramStageInstanceService
             program, orgunitIds, startDate, endDate );
         grid.addRow();
         grid.addValue( i18n.getString( "total_programs_completed_in_this_period" ) );
-        grid.addValue( totalCompleted );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addValue( totalCompleted ).addEmptyValues( 6 );
 
         // Total programs discontinued (un-enrollments)
 
@@ -254,13 +242,7 @@ public class DefaultProgramStageInstanceService
             program, orgunitIds, startDate, endDate );
         grid.addRow();
         grid.addValue( i18n.getString( "total_programs_discontinued_unenrollments" ) );
-        grid.addValue( totalDiscontinued );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addValue( totalDiscontinued ).addEmptyValues( 6 );
 
         // Average number of stages for complete programs
 
@@ -273,37 +255,16 @@ public class DefaultProgramStageInstanceService
                 ProgramInstance.STATUS_ACTIVE );
             percent = (stageCompleted + 0.0) / totalCompleted;
         }
-        grid.addValue( format.formatValue( percent ) );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addValue( format.formatValue( percent ) ).addEmptyValues( 6 );
 
         // Add empty row
 
-        grid.addRow();
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addRow().addEmptyValues( 8 );
 
         // Summary by stage
 
         grid.addRow();
-        grid.addValue( i18n.getString( "summary_by_stage" ) );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
-        grid.addValue( "" );
+        grid.addValue( i18n.getString( "summary_by_stage" ) ).addEmptyValues( 7 );
 
         // Add titles for stage details
 
@@ -619,5 +580,4 @@ public class DefaultProgramStageInstanceService
 
         return outboundSms;
     }
-
 }
