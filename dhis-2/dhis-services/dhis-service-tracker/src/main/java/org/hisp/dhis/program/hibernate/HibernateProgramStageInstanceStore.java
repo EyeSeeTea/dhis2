@@ -43,7 +43,6 @@ import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -86,9 +85,10 @@ public class HibernateProgramStageInstanceStore
     @SuppressWarnings( "unchecked" )
     public ProgramStageInstance get( ProgramInstance programInstance, ProgramStage programStage )
     {
-        List<ProgramStageInstance> list = new ArrayList<ProgramStageInstance>( getCriteria(
-            Restrictions.eq( "programInstance", programInstance ), Restrictions.eq( "programStage", programStage ) )
-            .addOrder( Order.asc( "id" ) ).list() );
+        List<ProgramStageInstance> list = getCriteria(
+            Restrictions.eq( "programInstance", programInstance ), 
+            Restrictions.eq( "programStage", programStage ) ).
+            addOrder( Order.asc( "id" ) ).list();
 
         return list.isEmpty() ? null : list.get( list.size() - 1 );
     }
@@ -97,10 +97,10 @@ public class HibernateProgramStageInstanceStore
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramStageInstance> getAll( ProgramInstance programInstance, ProgramStage programStage )
     {
-        Criteria criteria = getCriteria( Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ) ).addOrder( Order.asc( "id" ) );
-
-        return criteria.list();
+        return getCriteria( 
+            Restrictions.eq( "programInstance", programInstance ),
+            Restrictions.eq( "programStage", programStage ) )
+            .addOrder( Order.asc( "id" ) ).list();
     }
 
     @Override
@@ -114,7 +114,8 @@ public class HibernateProgramStageInstanceStore
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, boolean completed )
     {
-        return getCriteria( Restrictions.in( "programInstance", programInstances ),
+        return getCriteria( 
+            Restrictions.in( "programInstance", programInstances ), 
             Restrictions.eq( "completed", completed ) ).list();
     }
 
@@ -127,15 +128,8 @@ public class HibernateProgramStageInstanceStore
         return getQuery( hql ).setEntity( "entityInstance", entityInstance ).setBoolean( "completed", completed ).list();
     }
 
-    @Override
-    public void removeEmptyEvents( ProgramStage programStage, OrganisationUnit organisationUnit )
-    {
-        String sql = "delete from programstageinstance where programstageid=" + programStage.getId()
-            + " and organisationunitid=" + organisationUnit.getId() + " and programstageinstanceid not in "
-            + "(select pdv.programstageinstanceid from trackedentitydatavalue pdv )";
-        jdbcTemplate.execute( sql );
-    }
-
+    // TODO this class must be re-written from here
+    
     @Override
     public void update( Collection<Integer> programStageInstanceIds, OutboundSms outboundSms )
     {

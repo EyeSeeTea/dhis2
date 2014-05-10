@@ -144,6 +144,24 @@ public abstract class AbstractCalendar implements Calendar
     }
 
     @Override
+    public DateInterval toInterval( DateIntervalType type )
+    {
+        return toInterval( today(), type );
+    }
+
+    @Override
+    public DateInterval toInterval( DateUnit dateUnit, DateIntervalType type )
+    {
+        return toInterval( dateUnit, type, 0, 1 );
+    }
+
+    @Override
+    public DateInterval toInterval( DateIntervalType type, int offset, int length )
+    {
+        return toInterval( today(), type, offset, length );
+    }
+
+    @Override
     public DateUnit today()
     {
         DateTime dateTime = DateTime.now( ISOChronology.getInstance() );
