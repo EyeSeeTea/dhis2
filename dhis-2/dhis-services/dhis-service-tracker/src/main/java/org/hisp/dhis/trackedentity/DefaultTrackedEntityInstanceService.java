@@ -55,6 +55,7 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -441,7 +442,9 @@ public class DefaultTrackedEntityInstanceService
 
         if ( operator != null && filter != null )
         {
-            return new QueryItem( at, operator, filter, at.isNumericType() );
+            QueryOperator op = QueryOperator.fromString( operator );
+            
+            return new QueryItem( at, op, filter, at.isNumericType() );
         }
         else
         {
@@ -456,7 +459,7 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public int createTrackedEntityInstance( TrackedEntityInstance instance, Integer representativeId,
+    public int createTrackedEntityInstance( TrackedEntityInstance instance, String representativeId,
         Integer relationshipTypeId, Set<TrackedEntityAttributeValue> attributeValues )
     {
         int id = addTrackedEntityInstance( instance );
@@ -473,7 +476,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( representativeId != null )
         {
-            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
             if ( representative != null )
             {
                 instance.setRepresentative( representative );
@@ -556,19 +559,7 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstance( Integer attributeId, String value )
-    {
-        TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( attributeId );
-        if ( attribute != null )
-        {
-            return attributeValueService.getTrackedEntityInstance( attribute, value );
-        }
-
-        return null;
-    }
-
-    @Override
-    public void updateTrackedEntityInstance( TrackedEntityInstance instance, Integer representativeId,
+    public void updateTrackedEntityInstance( TrackedEntityInstance instance, String representativeId,
         Integer relationshipTypeId, List<TrackedEntityAttributeValue> valuesForSave,
         List<TrackedEntityAttributeValue> valuesForUpdate, Collection<TrackedEntityAttributeValue> valuesForDelete )
     {
@@ -591,7 +582,7 @@ public class DefaultTrackedEntityInstanceService
 
         if ( shouldSaveRepresentativeInformation( instance, representativeId ) )
         {
-            TrackedEntityInstance representative = trackedEntityInstanceStore.get( representativeId );
+            TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
 
             if ( representative != null )
             {
@@ -614,14 +605,14 @@ public class DefaultTrackedEntityInstanceService
         }
     }
 
-    private boolean shouldSaveRepresentativeInformation( TrackedEntityInstance instance, Integer representativeId )
+    private boolean shouldSaveRepresentativeInformation( TrackedEntityInstance instance, String representativeId )
     {
-        if ( representativeId == null )
+        if ( representativeId == null || representativeId.isEmpty() )
         {
             return false;
         }
 
-        return instance.getRepresentative() == null || !(instance.getRepresentative().getId() == representativeId);
+        return instance.getRepresentative() == null || !(instance.getRepresentative().getUid() == representativeId);
     }
 
     @Override
