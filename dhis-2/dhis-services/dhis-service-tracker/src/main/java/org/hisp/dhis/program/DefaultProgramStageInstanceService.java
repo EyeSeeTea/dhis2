@@ -40,7 +40,6 @@ import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.message.MessageConversation;
@@ -54,8 +53,6 @@ import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,13 +79,6 @@ public class DefaultProgramStageInstanceService
     public void setProgramInstanceService( ProgramInstanceService programInstanceService )
     {
         this.programInstanceService = programInstanceService;
-    }
-
-    private TrackedEntityDataValueService dataValueService;
-
-    public void setDataValueService( TrackedEntityDataValueService dataValueService )
-    {
-        this.dataValueService = dataValueService;
     }
 
     private SmsSender smsSender;
@@ -192,76 +182,6 @@ public class DefaultProgramStageInstanceService
     public List<ProgramStageInstance> getProgramStageInstances( TrackedEntityInstance entityInstance, Boolean completed )
     {
         return programStageInstanceStore.get( entityInstance, completed );
-    }
-
-    @Override
-    public List<Grid> getProgramStageInstancesReport( ProgramInstance programInstance, I18nFormat format, I18n i18n )
-    {
-        List<Grid> grids = new ArrayList<Grid>();
-
-        Collection<ProgramStageInstance> programStageInstances = programInstance.getProgramStageInstances();
-
-        for ( ProgramStageInstance programStageInstance : programStageInstances )
-        {
-            Grid grid = new ListGrid();
-
-            // -----------------------------------------------------------------
-            // Title
-            // -----------------------------------------------------------------
-
-            Date executionDate = programStageInstance.getExecutionDate();
-            String executionDateValue = (executionDate != null) ? format.formatDate( programStageInstance
-                .getExecutionDate() ) : "[" + i18n.getString( "none" ) + "]";
-
-            grid.setTitle( programStageInstance.getProgramStage().getName() );
-            grid.setSubtitle( i18n.getString( "due_date" ) + ": "
-                + format.formatDate( programStageInstance.getDueDate() ) + " - " + i18n.getString( "report_date" )
-                + ": " + executionDateValue );
-
-            // -----------------------------------------------------------------
-            // Headers
-            // -----------------------------------------------------------------
-
-            grid.addHeader( new GridHeader( i18n.getString( "name" ), false, true ) );
-            grid.addHeader( new GridHeader( i18n.getString( "value" ), false, true ) );
-
-            // -----------------------------------------------------------------
-            // Values
-            // -----------------------------------------------------------------
-
-            Collection<TrackedEntityDataValue> entityDataValues = dataValueService
-                .getTrackedEntityDataValues( programStageInstance );
-
-            if ( executionDate == null || entityDataValues == null || entityDataValues.size() == 0 )
-            {
-                grid.addRow();
-                grid.addValue( "[" + i18n.getString( "none" ) + "]" );
-                grid.addValue( "" );
-            }
-            else
-            {
-                for ( TrackedEntityDataValue entityDataValue : entityDataValues )
-                {
-                    DataElement dataElement = entityDataValue.getDataElement();
-
-                    grid.addRow();
-                    grid.addValue( dataElement.getName() );
-
-                    if ( dataElement.getType().equals( DataElement.VALUE_TYPE_BOOL ) )
-                    {
-                        grid.addValue( i18n.getString( entityDataValue.getValue() ) );
-                    }
-                    else
-                    {
-                        grid.addValue( entityDataValue.getValue() );
-                    }
-                }
-            }
-
-            grids.add( grid );
-        }
-
-        return grids;
     }
 
     @Override
