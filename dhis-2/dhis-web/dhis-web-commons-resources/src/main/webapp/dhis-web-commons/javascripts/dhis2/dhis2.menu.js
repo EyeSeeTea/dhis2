@@ -137,7 +137,7 @@ dhis2.settings = dhis2.settings || {};
         }
 
         //Throw error for the required libraries
-        libraries.forEach(function (library, index, libraries) {
+        libraries.forEach(function (library) {
             var parts = library.variable.split('.'),
                 checkParts = function (checkOn, parts) {
                     var checkedOn = checkOn[parts[0]];
@@ -164,47 +164,44 @@ dhis2.settings = dhis2.settings || {};
                 isFunction: function(obj) {
                     return Object.prototype.toString.call(obj) == '[object Function]';
                 }
-            },
-            /**
-             * Object that represents the list of menu items
-             * and managers the order of the items to be saved.
-             */
-                menuItemsList = (function () {
-                var menuOrder = [],
-                    menuItems = {};
+            };
 
-                return {
-                    getItem: function (key) {
-                        return menuItems[key];
-                    },
-                    setItem: function (key, item) {
-                        menuOrder.push(key);
-                        menuItems[key] = item;
-                    },
-                    list: function () {
-                        var result = [];
-
-                        menuOrder.forEach(function (element, index, array) {
-                            result.push(menuItems[element]);
-                        });
-
-                        return result;
-                    },
-                    setOrder: function (order) {
-                        menuOrder = order;
-                    },
-                    getOrder: function () {
-                        return menuOrder;
-                    }
-                }
-            })();
-
-        dhis2.menu = {};
-
-        dhis2.menu = function () {
+        dhis2.menu = (function () {
             var that = {},
                 menuReady = false,
-                menuItems = menuItemsList,
+                menuItems = (function () {
+                        /**
+                         * Object that represents the list of menu items
+                         * and managers the order of the items to be saved.
+                         */
+                        var menuOrder = [],
+                            menuItems = {};
+
+                        return {
+                            getItem: function (key) {
+                                return menuItems[key];
+                            },
+                            setItem: function (key, item) {
+                                menuOrder.push(key);
+                                menuItems[key] = item;
+                            },
+                            list: function () {
+                                var result = [];
+
+                                menuOrder.forEach(function (element) {
+                                    result.push(menuItems[element]);
+                                });
+
+                                return result;
+                            },
+                            setOrder: function (order) {
+                                menuOrder = order;
+                            },
+                            getOrder: function () {
+                                return menuOrder;
+                            }
+                        }
+                    })(),
                 callBacks = [], //Array of callbacks to call when serviced is updated
                 onceCallBacks = [];
 
@@ -213,7 +210,7 @@ dhis2.settings = dhis2.settings || {};
              **********************************************************************/
 
             function processTranslations(translations) {
-                var items = dhis2.menu.getApps();
+                var items = that.getApps();
 
                 items.forEach(function (element, index, items) {
                     if (element.id && translations[element.id]) {
@@ -240,7 +237,7 @@ dhis2.settings = dhis2.settings || {};
              * Execute any callbacks that are set onto the callbacks array
              */
             function executeCallBacks() {
-                var onceCallBack, callBackIndex;
+                var onceCallBack;
 
                 //If not ready or no menu items
                 if ( ! isReady() || menuItems === {})
@@ -251,8 +248,8 @@ dhis2.settings = dhis2.settings || {};
                     onceCallBack = onceCallBacks.pop();
                     onceCallBack(menuItems);
                 }
-                callBacks.forEach(function (callback, index, callBacks) {
-                    callback.apply(dhis2.menu, [menuItems]);
+                callBacks.forEach(function (callback) {
+                    callback.apply(that, [menuItems]);
                 });
             }
 
@@ -435,7 +432,7 @@ dhis2.settings = dhis2.settings || {};
              * @returns {Array} Array of app objects
              */
             that.getOrderedAppList = function () {
-                var favApps = dhis2.menu.getFavorites(),
+                var favApps = that.getFavorites(),
                     nonFavApps = that.getNonFavoriteApps();
                 switch (that.displayOrder) {
                     case 'name-asc':
@@ -449,7 +446,7 @@ dhis2.settings = dhis2.settings || {};
             }
 
             that.updateOrder = function (reorderedApps) {
-                switch (dhis2.menu.displayOrder) {
+                switch (that.displayOrder) {
                     case 'name-asc':
                     case 'name-desc':
                         that.updateFavoritesFromList(reorderedApps);
@@ -470,8 +467,33 @@ dhis2.settings = dhis2.settings || {};
                 return saveMethod(that.getMenuItems().getOrder());
             }
 
+            that.search = function (searchFor) {
+                var searchMatches = [];
+
+                menuItems.list().forEach(function (menuItem) {
+                    var menuItemName = menuItem.name.toLowerCase(),
+                        searchScore = menuItemName.indexOf(searchFor);
+
+                    if (searchScore !== -1) {
+                        menuItem.searchScore = searchScore;
+                        searchMatches.push(menuItem);
+                    }
+                });
+
+                //Order the search matches on occurance
+                searchMatches.sort(function (a, b) {
+                    if (a.searchScore < b.searchScore)
+                        return -1;
+                    if (a.searchScore > b.searchScore)
+                        return 1;
+                    return 0;
+                });
+
+                return searchMatches;
+            }
+
             return that;
-        }();
+        });
     })(dhis2 = dhis2 || {});
 
     /*******************************************************************************************************************
@@ -481,13 +503,14 @@ dhis2.settings = dhis2.settings || {};
      * @see jQuery Template Plugin (http://github.com/jquery/jquery-tmpl)
      * @see jQuery UI (https://jqueryui.com)
      ******************************************************************************************************************/
-    (function ($, menu, undefined) {
+    (function ($, undefined) {
         var templates = {},
-            selector = 'appsMenu';
+            selector = 'appsMenu',
+            menu = dhis2.menu();
 
         function renderDropDownFavorites() {
             var selector = '#appsDropDown .menuDropDownBox',
-                apps = dhis2.menu.getOrderedAppList();
+                apps = menu.getOrderedAppList();
 
             $('#appsDropDown').addClass('app-menu-dropdown ui-helper-clearfix');
             $(selector).html('');
@@ -497,7 +520,7 @@ dhis2.settings = dhis2.settings || {};
         }
 
         function renderAppManager(selector) {
-            var apps = dhis2.menu.getOrderedAppList();
+            var apps = menu.getOrderedAppList();
             $('#' + selector).html('');
             $('#' + selector).append($('<ul></ul><hr class="app-separator">').addClass('ui-helper-clearfix'));
             $('#' + selector).addClass('app-menu');
@@ -561,7 +584,7 @@ dhis2.settings = dhis2.settings || {};
         /**
          * Render the menumanager and the dropdown menu and attach the update handler
          */
-            //TODO: Rename this as the name is not very clear to what it does
+        //TODO: Rename this as the name is not very clear to what it does
         function renderMenu() {
             var options = {
                 placeholder: 'app-menu-placeholder',
@@ -569,8 +592,8 @@ dhis2.settings = dhis2.settings || {};
                 update: function (event, ui) {
                     var reorderedApps = $("#" + selector + " ul"). sortable('toArray', {attribute: "data-id"});
 
-                    dhis2.menu.updateOrder(reorderedApps);
-                    dhis2.menu.save(saveOrder);
+                    menu.updateOrder(reorderedApps);
+                    menu.save(saveOrder);
 
                     //Render the dropdown menu
                     renderDropDownFavorites();
@@ -618,8 +641,7 @@ dhis2.settings = dhis2.settings || {};
             }
 
             function performSearch() {
-                var menuItems = [],
-                    searchFor = $('#apps-search').val().toLowerCase(),
+                var searchFor = $('#apps-search').val().toLowerCase(),
                     searchMatches = [];
 
                 //Re-render all the apps
@@ -632,28 +654,7 @@ dhis2.settings = dhis2.settings || {};
                 }
                 $('#apps-search-clear').show();
 
-                //Get all the apps
-                menuItems = menu.getApps();
-
-                //Find the matches
-                menuItems.forEach(function (menuItem) {
-                    var menuItemName = menuItem.name.toLowerCase(),
-                        searchScore = menuItemName.indexOf(searchFor);
-
-                    if (searchScore !== -1) {
-                        menuItem.searchScore = searchScore;
-                        searchMatches.push(menuItem);
-                    }
-                });
-
-                //Order the search matches on occurance
-                searchMatches.sort(function (a, b) {
-                    if (a.searchScore < b.searchScore)
-                        return -1;
-                    if (a.searchScore > b.searchScore)
-                        return 1;
-                    return 0;
-                });
+                searchMatches = menu.search(searchFor);
 
                 //Remove all the apps
                 $(dropDownId).find('ul').find('li').remove();
@@ -790,7 +791,7 @@ dhis2.settings = dhis2.settings || {};
             $('#menuOrderBy').change(function (event) {
                 var orderBy = $(event.target).val();
 
-                dhis2.menu.displayOrder = orderBy;
+                menu.displayOrder = orderBy;
 
                 renderMenu();
             });
@@ -883,13 +884,13 @@ dhis2.settings = dhis2.settings || {};
          */
         function addMenuHtml() {
             //Get a custom set elementid or use the default one
-            dhis2.menu.elementId = dhis2.menu.elementId || 'dhisDropdownMenu';
+            menu.elementId = dhis2.menu.elementId || 'dhisDropdownMenu';
 
             prepareTemplates();
 
-            if (typeof dhis2.menu.elementId === "string") {
-                $.tmpl('buttonsHtml').appendTo('#' + dhis2.menu.elementId);
-                $.tmpl('dropDownHtml').appendTo('#' + dhis2.menu.elementId);
+            if (typeof menu.elementId === "string") {
+                $.tmpl('buttonsHtml').appendTo('#' + menu.elementId);
+                $.tmpl('dropDownHtml').appendTo('#' + menu.elementId);
             }
 
             dhis2.translate.get(["app_search_placeholder"], addPlaceHolderToSearch);
@@ -901,26 +902,23 @@ dhis2.settings = dhis2.settings || {};
 
         /**
          * Starts the process of adding the profile menu to the page
-         * Asks the translation service for translations and then calls the callback to add the data
+         * Creates a menu object for the profile menu and adds the render function as a subscriber
          */
         function addProfileMenu() {
-            dhis2.translate.get(["settings", "profile", "account", "help", "log_out", "about_dhis2"], processProfileMenu);
+            var profileMenu = dhis2.menu();
+
+            profileMenu.addMenuItems(profileLinks);
+            profileMenu.subscribe(processProfileMenu);
         }
 
         /**
          * Adds the profile menu to the page
          *
-         * @param {Object} translations Translations that are used in the profile menu
+         * @param {Object} profileMenuItems Object with the profile menu items that are translated
          */
-        function processProfileMenu(translations) {
-            profileLinks.forEach(function (item) {
-                item.id = item.name;
-                item.name = translations.get(item.id);
-                item.icon = fixUrlIfNeeded(item.icon);
-                item.defaultAction = fixUrlIfNeeded(item.defaultAction);
-            });
+        function processProfileMenu(profileMenuItems) {
             $('#profileDropDown ul li').remove();
-            $.tmpl( "appMenuItemTemplate", profileLinks).appendTo('#profileDropDown ul')
+            $.tmpl( "appMenuItemTemplate", profileMenuItems.list()).appendTo('#profileDropDown ul')
         }
 
         /**
@@ -975,5 +973,5 @@ dhis2.settings = dhis2.settings || {};
             });
         });
 
-    })(jQuery, dhis2.menu);
+    })(jQuery);
 })();
