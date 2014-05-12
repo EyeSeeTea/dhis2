@@ -29,7 +29,9 @@ package org.hisp.dhis.period;
  */
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -54,6 +56,14 @@ public abstract class PeriodType
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 2402122626196305083L;
+
+    private CalendarService calendarService;
+
+    @Autowired
+    public void setCalendarService( CalendarService calendarService )
+    {
+        this.calendarService = calendarService;
+    }
 
     // -------------------------------------------------------------------------
     // Available PeriodTypes
@@ -273,47 +283,47 @@ public abstract class PeriodType
     {
         if ( isoPeriod.matches( "\\b\\d{4}\\b" ) )
         {
-            return new YearlyPeriodType();
+            return PERIOD_TYPE_MAP.get( YearlyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}[-]?\\d{2}\\b" ) )
         {
-            return new MonthlyPeriodType();
+            return PERIOD_TYPE_MAP.get( MonthlyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}W\\d[\\d]?\\b" ) )
         {
-            return new WeeklyPeriodType();
+            return PERIOD_TYPE_MAP.get( WeeklyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{8}\\b" ) )
         {
-            return new DailyPeriodType();
+            return PERIOD_TYPE_MAP.get( DailyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}Q\\d\\b" ) )
         {
-            return new QuarterlyPeriodType();
+            return PERIOD_TYPE_MAP.get( QuarterlyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}S\\d\\b" ) )
         {
-            return new SixMonthlyPeriodType();
+            return PERIOD_TYPE_MAP.get( SixMonthlyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}AprilS\\d\\b" ) )
         {
-            return new SixMonthlyAprilPeriodType();
+            return PERIOD_TYPE_MAP.get( SixMonthlyAprilPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{6}B\\b" ) )
         {
-            return new BiMonthlyPeriodType();
+            return PERIOD_TYPE_MAP.get( BiMonthlyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}April\\b" ) )
         {
-            return new FinancialAprilPeriodType();
+            return PERIOD_TYPE_MAP.get( FinancialAprilPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}July\\b" ) )
         {
-            return new FinancialJulyPeriodType();
+            return PERIOD_TYPE_MAP.get( FinancialJulyPeriodType.NAME );
         }
         if ( isoPeriod.matches( "\\b\\d{4}Oct\\b" ) )
         {
-            return new FinancialOctoberPeriodType();
+            return PERIOD_TYPE_MAP.get( FinancialOctoberPeriodType.NAME );
         }
 
         return null;
