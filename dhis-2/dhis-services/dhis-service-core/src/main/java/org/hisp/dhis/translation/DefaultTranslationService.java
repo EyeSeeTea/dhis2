@@ -31,6 +31,7 @@ package org.hisp.dhis.translation;
 import java.util.Collection;
 import java.util.Locale;
 
+import org.hisp.dhis.system.util.LocaleUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -61,11 +62,11 @@ public class DefaultTranslationService
         translationStore.addTranslation( translation );
     }
 
-    public void addTranslation( Collection<Translation> translations )
+    public void createOrUpdate( Collection<Translation> translations )
     {
         for ( Translation translation : translations )
         {
-            addTranslation( translation );
+            createOrUpdate( translation );
         }
     }
 
@@ -117,5 +118,27 @@ public class DefaultTranslationService
     public void deleteTranslations( String className, int id )
     {
         translationStore.deleteTranslations( className, id );
+    }
+
+    public void createOrUpdate( Translation translation )
+    {
+        Translation translationNoFallback = getTranslationNoFallback( translation.getClassName(), LocaleUtils.getLocale( translation.getLocale() ), translation.getProperty(), translation.getUid() );
+
+        if ( translation.getValue() != null && !translation.getValue().trim().isEmpty() )
+        {
+            if ( translationNoFallback != null )
+            {
+                translationNoFallback.setValue( translation.getValue() );
+                updateTranslation( translationNoFallback );
+            }
+            else
+            {
+                addTranslation( translation );
+            }
+        }
+        else if ( translationNoFallback != null )
+        {
+            deleteTranslation( translationNoFallback );
+        }
     }
 }

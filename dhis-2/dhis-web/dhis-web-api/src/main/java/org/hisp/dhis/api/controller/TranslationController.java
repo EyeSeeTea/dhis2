@@ -2,7 +2,6 @@ package org.hisp.dhis.api.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.hisp.dhis.api.utils.ContextUtils;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
@@ -49,7 +48,7 @@ public class TranslationController
     {
         TypeReference<Collection<Translation>> typeReference = new TypeReference<Collection<Translation>>(){};
         Collection<Translation> translations = JacksonUtils.fromJson( request.getInputStream(), typeReference );
-        translationService.addTranslation( translations );
+        translationService.createOrUpdate( translations );
     }
 
 }

@@ -51,7 +51,7 @@ public interface TranslationService
      *
      * @param translations the collection of translations
      */
-    void addTranslation( Collection<Translation> translations );
+    void createOrUpdate( Collection<Translation> translations );
 
     /**
      * Updates a Translation.
@@ -145,4 +145,6 @@ public interface TranslationService
      * @param id the id.
      */
     void deleteTranslations( String className, int id );
+
+    void createOrUpdate( Translation translation );
 }

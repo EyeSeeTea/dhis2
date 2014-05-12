@@ -217,26 +217,8 @@ public class DefaultI18nService
             {
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
-                
-                Translation translation = translationService.getTranslationNoFallback( className, locale, key, uid);
-
-                if ( value != null && !value.trim().isEmpty() )
-                {                    
-                    if ( translation != null )
-                    {
-                        translation.setValue( value );
-                        translationService.updateTranslation( translation );
-                    }
-                    else
-                    {
-                        translation = new Translation( className, locale.toString(), key, value, uid);
-                        translationService.addTranslation( translation );
-                    }
-                }
-                else if ( translation != null )
-                {
-                    translationService.deleteTranslation( translation );
-                }
+                Translation t = new Translation( className, locale.toString(), key, value, uid );
+                translationService.createOrUpdate( t );
             }
         }
     }
