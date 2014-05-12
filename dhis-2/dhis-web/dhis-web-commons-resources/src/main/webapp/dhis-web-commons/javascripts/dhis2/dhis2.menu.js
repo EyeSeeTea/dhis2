@@ -833,7 +833,7 @@ dhis2.settings = dhis2.settings || {};
                 '</ul>';
 
             templates.dropDownApps = '' +
-                '<div id="appsDropDown" class="menuDropDownArea app-menu-dropdown appsMenuLink_menu">' +
+                '<div id="appsDropDown" class="menuDropDownArea app-menu-hide app-menu-dropdown appsMenuLink_menu">' +
                     '<div class="caret-up-border"></div>' +
                     '<div class="caret-up-background"></div>' +
                     '<div class="menu-drop-down-wrap">' +
@@ -855,7 +855,7 @@ dhis2.settings = dhis2.settings || {};
                 '</div>';
 
             templates.dropDownProfile = '' +
-                '<div id="profileDropDown" class="menuDropDownArea app-menu-dropdown ui-helper-clearfix profileMenuLink_menu">' +
+                '<div id="profileDropDown" class="menuDropDownArea app-menu-hide app-menu-dropdown ui-helper-clearfix profileMenuLink_menu">' +
                     '<div class="caret-up-border"></div>' +
                     '<div class="caret-up-background"></div>' +
                     '<ul class="menuDropDownBox">' +
@@ -869,7 +869,7 @@ dhis2.settings = dhis2.settings || {};
                 '<li data-id="${id}" data-app-name="${name}" data-app-action="${baseUrl}${defaultAction}">' +
                     '<a href="${baseUrl}${defaultAction}" class="app-menu-item">' +
                         '<img src="${baseUrl}${icon}" onError="javascript: this.onerror=null; this.src = \'' + getBaseUrl() + '/icons/program.png\';">' +
-                        '<span>${name}</span>${baseUrl}' +
+                        '<span>${name}</span>' +
                         '<div class="app-menu-item-description"><span class="bold">${name}</span><i class="fa fa-arrows"></i><p>${description}</p></div>' +
                     '</a>' +
                 '</li>';

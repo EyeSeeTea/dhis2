@@ -34,11 +34,8 @@ dhis2.translate = dhis2.translate || {};
 
 /**
  * Created by Mark Polak on 28/01/14.
- *
- * @see jQuery (http://jquery.com)
- * @see Underscore.js (http://underscorejs.org)
  */
-(function ($, translate, undefined) {
+(function (translate, undefined) {
     var translationCache = {
             get: function (key) {
                 if (this.hasOwnProperty(key))
@@ -77,7 +74,13 @@ dhis2.translate = dhis2.translate || {};
      * @param translations {Object}
      */
     function  addToCache(translations) {
-        translationCache = $.extend(translationCache, translations);
+        var translationIndex;
+
+        for (translationIndex in translations) {
+            if (typeof translationIndex === 'string' && translationIndex !== 'get') {
+                translationCache[translationIndex] = translations[translationIndex];
+            }
+        }
     }
 
     /**
@@ -88,18 +91,23 @@ dhis2.translate = dhis2.translate || {};
      * @param callback {function}
      */
     function getTranslationsFromServer(translateKeys, callback) {
-        $.ajax({
-            url: getBaseUrl() + "/api/i18n",
-            type:"POST",
-            data: JSON.stringify(translateKeys),
-            contentType:"application/json; charset=utf-8",
-            dataType:"json"
-        }).success(function (data) {
-                addToCache(data);
+        var http = new XMLHttpRequest();
+        var url = getBaseUrl() + "/api/i18n";
+        var keysToTranslate = JSON.stringify(translateKeys);
+        http.open("POST", url, true);
+
+        //Send the proper header information along with the request
+        http.setRequestHeader("Content-type", "application/json; charset=utf-8");
+
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                addToCache(JSON.parse(http.responseText));
                 if (typeof callback === 'function') {
                     callback(translationCache);
                 }
-            });
+            }
+        }
+        http.send(keysToTranslate);
     }
 
     /**
@@ -110,8 +118,7 @@ dhis2.translate = dhis2.translate || {};
      * @param callback {function}
      */
     translate.get = function (translate, callback) {
-        var translateKeys = [],
-            key;
+        var translateKeys = [];
 
         //Only ask for the translations that we do not already have
         translate.forEach(function (text, index, translate) {
@@ -130,4 +137,4 @@ dhis2.translate = dhis2.translate || {};
 
     };
 
-})(jQuery, dhis2.translate);
+})(dhis2.translate);

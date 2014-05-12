@@ -11,6 +11,10 @@
     float: right;
 }
 
+#menuLinkArea .app-menu-dropdown li {
+    float: left;
+}
+
 #apps-search {
     border: 1px solid #ccc;
     border-radius: 3px;
@@ -20,6 +24,11 @@
     padding-right: 25px;
     padding-left: 5px;
     width: 328px;
+}
+
+#apps-search[type="search"] {
+    padding-right: 5px;
+    width: 348px;
 }
 
 .apps-search-wrap {
@@ -253,18 +262,29 @@ a.menu-link:hover
     border-radius: 2px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 2px 8px 0px;
     color: #000;
-    display: none;
     font-size: 9pt;
     max-height: 610px;
     overflow-y: inherit;
     padding: 10px;
+    top: 10px;
+    position: relative;
     width: 360px;
     z-index: 10;
+}
+
+.app-menu-dropdown-wrap {
+    position: absolute;
+    left: -9999px;
+}
+
+.app-menu-hide {
+    display: none;
 }
 
 .app-menu-dropdown ul
 {
     margin: 0;
+    overflow: auto;
 }
 
 .app-menu-dropdown li
