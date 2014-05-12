@@ -61,6 +61,14 @@ public class DefaultTranslationService
         translationStore.addTranslation( translation );
     }
 
+    public void addTranslation( Collection<Translation> translations )
+    {
+        for ( Translation translation : translations )
+        {
+            addTranslation( translation );
+        }
+    }
+
     public void updateTranslation( Translation translation )
     {
         translationStore.updateTranslation( translation );

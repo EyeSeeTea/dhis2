@@ -47,6 +47,13 @@ public interface TranslationService
     void addTranslation( Translation translation );
 
     /**
+     * Adds a collection of Translation.
+     *
+     * @param translations the collection of translations
+     */
+    void addTranslation( Collection<Translation> translations );
+
+    /**
      * Updates a Translation.
      * 
      * @param translation the Translation.
