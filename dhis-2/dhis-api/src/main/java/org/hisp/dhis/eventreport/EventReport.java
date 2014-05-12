@@ -376,7 +376,7 @@ public class EventReport
         return countType;
     }
 
-    public void getCountType( String countType )
+    public void setCountType( String countType )
     {
         this.countType = countType;
     }
