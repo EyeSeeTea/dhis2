@@ -1,3 +1,5 @@
+package org.hisp.dhis.dxf2.filter.ops;
+
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -26,7 +28,25 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace('dhis2.period');
+/**
+* @author Morten Olav Hansen <mortenoh@gmail.com>
+*/
+public class NnullOp extends Op
+{
+    @Override
+    public boolean wantValue()
+    {
+        return false;
+    }
 
-// HMIS period format for Nepal
-dhis2.period.DEFAULT_DATE_FORMAT = "dd-mm-yyyy";
+    @Override
+    public OpStatus evaluate( Object object )
+    {
+        if ( object != null )
+        {
+            return OpStatus.INCLUDE;
+        }
+
+        return OpStatus.IGNORE;
+    }
+}

@@ -104,6 +104,13 @@ public class SetGeneralSettingsAction
     {
         this.cacheStrategy = cacheStrategy;
     }
+    
+    private Integer analyticsMaxLimit;
+    
+    public void setAnalyticsMaxLimit( Integer analyticsMaxLimit )
+    {
+        this.analyticsMaxLimit = analyticsMaxLimit;
+    }
 
     private Integer infrastructuralDataElements;
 
@@ -202,14 +209,15 @@ public class SetGeneralSettingsAction
 
     public String execute()
     {
-        systemSettingManager.saveSystemSetting( KEY_CALENDAR, calendar );
-        systemSettingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormat );
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
+        systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAX_LIMIT, analyticsMaxLimit );
         systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, omitIndicatorsZeroNumeratorDataMart );
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
         systemSettingManager.saveSystemSetting( KEY_PHONE_NUMBER_AREA_CODE, phoneNumberAreaCode );
         systemSettingManager.saveSystemSetting( KEY_MULTI_ORGANISATION_UNIT_FORMS, multiOrganisationUnitForms );
         systemSettingManager.saveSystemSetting( KEY_GOOGLE_ANALYTICS_UA, googleAnalyticsUA );
+        systemSettingManager.saveSystemSetting( KEY_CALENDAR, calendar );
+        systemSettingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormat );
 
         Configuration configuration = configurationService.getConfiguration();
 
@@ -220,10 +228,9 @@ public class SetGeneralSettingsAction
 
         if ( offlineOrganisationUnitLevel != null )
         {
-            configuration.setOfflineOrganisationUnitLevel( organisationUnitService
-                .getOrganisationUnitLevel( offlineOrganisationUnitLevel ) );
+            configuration.setOfflineOrganisationUnitLevel( 
+                organisationUnitService.getOrganisationUnitLevel( offlineOrganisationUnitLevel ) );
 
-            // When level is changed, make sure that the version is updated
             organisationUnitService.updateVersion();
         }
 
