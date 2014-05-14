@@ -77,21 +77,21 @@ public class BiMonthlyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        cal.set( Calendar.MONTH, cal.get( Calendar.MONTH ) - cal.get( Calendar.MONTH ) % 2 );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 1 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
+        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
     }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return null;
+        dateUnit.setMonth( ((dateUnit.getMonth() - 1) - (dateUnit.getMonth() - 1) % 2) + 1 );
+
+        DateUnit startDateUnit = new DateUnit( dateUnit );
+        startDateUnit.setDay( 1 );
+
+        dateUnit = getCalendar().plusMonths( dateUnit, 1 );
+        dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
+
+        return new Period( this, startDateUnit.toJdkDate(), dateUnit.toJdkDate() );
     }
 
     @Override
@@ -151,22 +151,22 @@ public class BiMonthlyPeriodType
     {
         Calendar cal = createCalendarInstance( date );
         cal.set( Calendar.DAY_OF_MONTH, 1 );
-        cal.add( Calendar.MONTH, ( ( cal.get( Calendar.MONTH ) % 2 ) * -1 ) - 10 );        
+        cal.add( Calendar.MONTH, ((cal.get( Calendar.MONTH ) % 2) * -1) - 10 );
 
         ArrayList<Period> periods = new ArrayList<Period>();
-        
+
         for ( int i = 0; i < 6; i++ )
         {
             periods.add( createPeriod( cal ) );
             cal.add( Calendar.MONTH, 2 );
         }
-        
+
         return periods;
     }
 
     @Override
     public String getIsoDate( Period period )
-    {        
+    {
         return new SimpleDateFormat( "yyyyMM" ).format( period.getStartDate() ) + "B";
     }
 
@@ -189,14 +189,14 @@ public class BiMonthlyPeriodType
     {
         return ISO_FORMAT;
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
+        Calendar cal = createCalendarInstance( date );
         cal.add( Calendar.MONTH, (rewindedPeriods * -2) );
 
         return cal.getTime();
