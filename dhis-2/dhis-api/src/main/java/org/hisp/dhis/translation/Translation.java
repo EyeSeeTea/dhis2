@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -44,7 +45,8 @@ import java.util.Date;
  */
 @JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
 public class Translation
-    implements Serializable
+    extends BaseIdentifiableObject
+
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -59,11 +61,8 @@ public class Translation
 
     private String value;
 
-    private String uid;
 
-    private Date lastUpdated;
-
-        // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 

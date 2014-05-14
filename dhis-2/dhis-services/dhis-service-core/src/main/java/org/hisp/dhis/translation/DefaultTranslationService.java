@@ -75,9 +75,9 @@ public class DefaultTranslationService
         translationStore.updateTranslation( translation );
     }
 
-    public Translation getTranslation( String className, int id, Locale locale, String property )
+    public Translation getTranslation( String className, Locale locale, String property, String uid )
     {
-        return translationStore.getTranslation( className, id, locale, property );
+        return translationStore.getTranslation( className, locale, property, uid );
     }
 
     public Translation getTranslationNoFallback( String className, Locale locale, String property, String uid )
@@ -85,12 +85,12 @@ public class DefaultTranslationService
         return translationStore.getTranslationNoFallback( className, locale, property,uid );
     }
 
-    public Collection<Translation> getTranslations( String className, int id, Locale locale )
+    public Collection<Translation> getTranslations( String className, Locale locale, String uid )
     {
-        return translationStore.getTranslations( className, id, locale );
+        return translationStore.getTranslations( className, locale, uid );
     }
 
-    public Collection<Translation> getTranslationsNoFallback( String className, String uid, Locale locale )
+    public Collection<Translation> getTranslationsNoFallback( String className, Locale locale, String uid )
     {
         return translationStore.getTranslationsNoFallback( className, uid, locale );
     }
@@ -115,9 +115,9 @@ public class DefaultTranslationService
         translationStore.deleteTranslation( translation );
     }
 
-    public void deleteTranslations( String className, int id )
+    public void deleteTranslations( String className, String uid )
     {
-        translationStore.deleteTranslations( className, id );
+        translationStore.deleteTranslations( className, uid );
     }
 
     public void createOrUpdate( Translation translation )

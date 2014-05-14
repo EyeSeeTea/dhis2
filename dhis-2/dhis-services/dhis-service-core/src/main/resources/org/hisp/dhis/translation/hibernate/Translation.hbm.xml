@@ -8,12 +8,14 @@
 
 	<cache usage="read-write" />
 
-	<composite-id>
-	  <key-property name="className" column="objectclass" length="127" />
-	  <key-property name="locale" column="locale" length="15" />
-	  <key-property name="property" column="objectproperty" length="63" />
-      <key-property name="uid" column="uid" length="11" />
-    </composite-id>
+  <id name="id" column="translationid">
+    <generator class="native" />
+  </id>
+
+  <property name="className" column="objectclass" length="127" />
+  <property name="locale" column="locale" length="15" />
+  <property name="property" column="objectproperty" length="63" />
+  <property name="uid" column="uid" length="11" />
 
 	<property name="lastUpdated" type="timestamp"/>
 	<property name="value" column="value" type="text" not-null="true" />

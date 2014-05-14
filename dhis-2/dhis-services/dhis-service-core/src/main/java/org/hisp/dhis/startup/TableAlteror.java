@@ -722,12 +722,13 @@ public class TableAlteror
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
 
+        executeSql( "ALTER TABLE translation ADD COLUMN translationid integer NOT NULL" );
         executeSql( "ALTER TABLE translation ADD COLUMN lastupdated timestamp" );
         executeSql( "ALTER TABLE translation ADD COLUMN uid varchar(11)" );
-        executeSql( "ALTER TABLE translation DROP COLUMN objectid" );
+        executeSql( "ALTER TABLE translation ALTER COLUMN objectid DROP NOT NULL" );
 
 
-            log.info( "Tables updated" );
+        log.info( "Tables updated" );
     }
 
     private void upgradeDataValuesWithAttributeOptionCombo()

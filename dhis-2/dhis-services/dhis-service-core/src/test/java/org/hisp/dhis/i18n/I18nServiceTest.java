@@ -84,7 +84,7 @@ public class I18nServiceTest
         String className = DataElement.class.getSimpleName();
         
         DataElement dataElementA = createDataElement( 'A' );
-        int idA = dataElementService.addDataElement( dataElementA );
+        String idA = dataElementA.getUid();
         
         Map<String, String> translationsA = new HashMap<String, String>();
         translationsA.put( "name", "frenchNameA" );
@@ -93,7 +93,7 @@ public class I18nServiceTest
         
         i18nService.updateTranslation( className, locale, translationsA, dataElementA.getUid());
         
-        Map<String, String> actual = i18nService.getTranslations( className, idA, locale );
+        Map<String, String> actual = i18nService.getTranslations( className, locale, idA );
         
         assertNotNull( actual );
         assertEquals( 3, actual.size() );

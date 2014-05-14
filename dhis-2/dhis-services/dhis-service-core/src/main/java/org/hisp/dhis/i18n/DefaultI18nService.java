@@ -29,7 +29,6 @@ package org.hisp.dhis.i18n;
  */
 
 import static org.hisp.dhis.system.util.ReflectionUtils.getClassName;
-import static org.hisp.dhis.system.util.ReflectionUtils.getId;
 import static org.hisp.dhis.system.util.ReflectionUtils.getProperty;
 import static org.hisp.dhis.system.util.ReflectionUtils.isCollection;
 import static org.hisp.dhis.system.util.ReflectionUtils.setProperty;
@@ -119,7 +118,7 @@ public class DefaultI18nService
         List<String> properties = getObjectPropertyNames( object );
 
         Collection<Translation> translations = translationService.getTranslations( getClassName( object ),
-            getId( object ), locale );
+            locale, getProperty( object, "uid" ) );
 
         Map<String, String> translationMap = convertTranslations( translations );
 
@@ -201,7 +200,7 @@ public class DefaultI18nService
     {
         if ( object != null )
         {
-            translationService.deleteTranslations( getClassName( object ), getId( object ) );
+            translationService.deleteTranslations( getClassName( object ), getProperty( object, "uid" ) );
         }
     }
 
@@ -223,16 +222,16 @@ public class DefaultI18nService
         }
     }
 
-    public Map<String, String> getTranslations( String className, int id )
+    public Map<String, String> getTranslations( String className, String uid )
     {
-        return getTranslations( className, id, getCurrentLocale() );
+        return getTranslations( className, getCurrentLocale(), uid );
     }
 
-    public Map<String, String> getTranslations( String className, int id, Locale locale )
+    public Map<String, String> getTranslations( String className, Locale locale, String uid )
     {
         if ( locale != null && className != null )
         {
-            return convertTranslations( translationService.getTranslations( className, id, locale ) );
+            return convertTranslations( translationService.getTranslations( className, locale, uid ) );
         }
 
         return new HashMap<String, String>();
@@ -247,7 +246,7 @@ public class DefaultI18nService
     {
         if ( locale != null && className != null )
         {
-            return convertTranslations( translationService.getTranslationsNoFallback( className, uid, locale ) );
+            return convertTranslations( translationService.getTranslationsNoFallback( className, locale, uid ) );
         }
 
         return new HashMap<String, String>();
