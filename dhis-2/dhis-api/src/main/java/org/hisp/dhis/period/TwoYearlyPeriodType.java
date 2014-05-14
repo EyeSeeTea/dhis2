@@ -28,6 +28,8 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -90,6 +92,12 @@ public class TwoYearlyPeriodType
         cal.set( Calendar.DAY_OF_YEAR, cal.getActualMaximum( Calendar.DAY_OF_YEAR ) );
 
         return new Period( this, startDate, cal.getTime() );
+    }
+
+    @Override
+    public Period createPeriod( DateUnit dateUnit )
+    {
+        return null;
     }
 
     @Override

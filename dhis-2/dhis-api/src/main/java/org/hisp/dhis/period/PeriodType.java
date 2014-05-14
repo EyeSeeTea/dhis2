@@ -30,6 +30,7 @@ package org.hisp.dhis.period;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.calendar.CalendarService;
+import org.hisp.dhis.calendar.DateUnit;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.common.DxfNamespaces;
 
@@ -61,6 +62,11 @@ public abstract class PeriodType
     public static void setCalendarService( CalendarService calendarService )
     {
         PeriodType.calendarService = calendarService;
+    }
+
+    public static CalendarService getCalendarService()
+    {
+        return calendarService;
     }
 
     public static org.hisp.dhis.calendar.Calendar getCalendar()
@@ -206,6 +212,8 @@ public abstract class PeriodType
     public abstract Period createPeriod( Date date );
 
     public abstract Period createPeriod( Calendar cal );
+
+    public abstract Period createPeriod( DateUnit dateUnit );
 
     /**
      * Returns a comparable value for the frequency length of this PeriodType.

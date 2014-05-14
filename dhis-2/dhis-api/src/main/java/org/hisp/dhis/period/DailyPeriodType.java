@@ -28,6 +28,8 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -89,6 +91,12 @@ public class DailyPeriodType
         return new Period( this, date, date );
     }
     
+    @Override
+    public Period createPeriod( DateUnit dateUnit )
+    {
+        return null;
+    }
+
     @Override
     public int getFrequencyOrder()
     {

@@ -28,6 +28,8 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

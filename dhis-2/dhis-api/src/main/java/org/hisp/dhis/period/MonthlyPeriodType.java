@@ -28,6 +28,8 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +41,7 @@ import java.util.List;
  * PeriodType for monthly Periods. A valid monthly Period has startDate set to
  * the first day of a calendar month, and endDate set to the last day of the
  * same month.
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: MonthlyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
@@ -86,11 +89,17 @@ public class MonthlyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-        Date startDate = cal.getTime();
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
+        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
+    }
 
-        return new Period( this, startDate, cal.getTime() );
+    @Override
+    public Period createPeriod( DateUnit dateUnit )
+    {
+        DateUnit startDateUnit = new DateUnit( dateUnit );
+        startDateUnit.setDay( 1 );
+        dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
+
+        return new Period( this, startDateUnit.toJdkDate(), dateUnit.toJdkDate() );
     }
 
     @Override

@@ -204,7 +204,7 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
     public int daysInMonth( int year, int month )
     {
         DateTime dateTime = new DateTime( year, month, 1, 0, 0, chronology );
-        return (int) dateTime.monthOfYear().toInterval().toDuration().getStandardDays();
+        return dateTime.dayOfMonth().getMaximumValue();
     }
 
     @Override
