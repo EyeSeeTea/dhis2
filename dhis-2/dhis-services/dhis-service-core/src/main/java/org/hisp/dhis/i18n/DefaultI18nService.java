@@ -28,26 +28,16 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.ReflectionUtils.getClassName;
-import static org.hisp.dhis.system.util.ReflectionUtils.getProperty;
-import static org.hisp.dhis.system.util.ReflectionUtils.isCollection;
-import static org.hisp.dhis.system.util.ReflectionUtils.setProperty;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.translation.TranslationService;
 import org.hisp.dhis.user.UserSettingService;
+
+import java.util.*;
+
+import static org.hisp.dhis.system.util.ReflectionUtils.*;
 
 /**
  * @author Oyvind Brucker
@@ -291,7 +281,7 @@ public class DefaultI18nService
 
         for ( Translation translation : translations )
         {
-            if ( translation.getUid() == uid )
+            if (translation.getUid().equals(uid))
             {
                 objectTranslations.add( translation );
             }
