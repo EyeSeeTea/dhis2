@@ -28,22 +28,19 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
 
-import java.io.Serializable;
 import java.util.Date;
 
 /**
  * @author Oyvind Brucker
  */
-@JacksonXmlRootElement( localName = "dataElement", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement( localName = "translation", namespace = DxfNamespaces.DXF_2_0 )
 public class Translation
     extends BaseIdentifiableObject
 
@@ -85,6 +82,7 @@ public class Translation
     // Logic
     // -------------------------------------------------------------------------
 
+    @JsonIgnore
     public String getClassIdPropKey()
     {
         return className + "-" + uid + "-" + property;
