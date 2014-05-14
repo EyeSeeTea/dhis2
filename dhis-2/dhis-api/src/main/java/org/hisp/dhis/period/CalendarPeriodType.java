@@ -28,8 +28,6 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.calendar.DateUnit;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -38,7 +36,7 @@ import java.util.List;
 /**
  * The superclass of all PeriodTypes which represent typical calendar periods
  * like days, weeks, months, etc.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: CalendarPeriodType.java 2952 2007-03-01 23:40:10Z torgeilo $
  */
@@ -59,7 +57,7 @@ public abstract class CalendarPeriodType
      * Periods are returned. If the given Period is of different PeriodType than
      * the executing PeriodType, or the given Period is invalid, the returned
      * Period might overlap the given Period.
-     * 
+     *
      * @param period the Period to base the next Period on.
      * @return a Period which is the next of the given Period.
      */
@@ -70,7 +68,7 @@ public abstract class CalendarPeriodType
      * Periods are returned. If the given Period is of different PeriodType than
      * the executing PeriodType, or the given Period is invalid, the returned
      * Period might overlap the given Period.
-     * 
+     *
      * @param period the Period to base the previous Period on.
      * @return a Period which is the previous of the given Period.
      */
@@ -81,34 +79,34 @@ public abstract class CalendarPeriodType
      * Period. E.g. if the given Period is March 2007, and a monthly PeriodType
      * generates for a year, all months in 2007 should be generated and returned
      * in order.
-     * 
+     *
      * @param period the Period which touches the time span to generate Periods
-     *        for.
+     *               for.
      * @return a list of Periods for a defined time span.
      */
     public List<Period> generatePeriods( Period period )
     {
         return generatePeriods( period.getStartDate() );
-    }    
-    
+    }
+
     /**
      * Generates a list of Periods for a defined time span containing the given
      * date. E.g. if the given date is March 2007, and a monthly PeriodType
      * generates for a year, all months in 2007 should be generated and returned
      * in order.
-     * 
+     *
      * @param date the date which touches the time span to generate Periods for.
      * @return a list of Periods for a defined time span.
      */
     public abstract List<Period> generatePeriods( Date date );
-    
+
     public abstract List<Period> generateRollingPeriods( Date date );
-    
+
     /**
      * Generates a list of Periods for the last 5 years. Must be overridden by
      * CalendarPeriodTypes which do not generate periods for the current year
      * only in their implementation of generatePeriods( Date ).
-     * 
+     *
      * @param date the date which touches the time span to generate Periods for.
      * @return a list of Periods for a defined time span.
      */
@@ -117,37 +115,37 @@ public abstract class CalendarPeriodType
         ArrayList<Period> periods = new ArrayList<Period>();
         Calendar cal = createCalendarInstance( date );
         cal.add( Calendar.YEAR, -4 );
-        
+
         for ( int i = 0; i < 5; i++ )
         {
             periods.addAll( generatePeriods( cal.getTime() ) );
             cal.add( Calendar.YEAR, 1 );
         }
-        
+
         return periods;
     }
-    
+
     /**
      * Generates a list of all Periods between the given start and end date. The
      * first period will span the start date. The last period will span the end
      * date.
-     * 
+     *
      * @param startDate the start date.
-     * @param endDate the end date.
+     * @param endDate   the end date.
      * @return a list of Periods for the defined time span.
      */
     public List<Period> generatePeriods( Date startDate, Date endDate )
     {
         List<Period> periods = new ArrayList<Period>();
-        
+
         Period period = createPeriod( startDate );
-        
+
         while ( period.getStartDate().before( endDate ) )
         {
             periods.add( period );
             period = getNextPeriod( period );
         }
-        
+
         return periods;
     }
 }
