@@ -32,7 +32,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -58,15 +57,14 @@ public abstract class PeriodType
      */
     private static final long serialVersionUID = 2402122626196305083L;
 
-    private CalendarService calendarService;
+    private static CalendarService calendarService;
 
-    @Autowired
-    public void setCalendarService( CalendarService calendarService )
+    public static void setCalendarService( CalendarService calendarService )
     {
-        this.calendarService = calendarService;
+        PeriodType.calendarService = calendarService;
     }
 
-    public org.hisp.dhis.calendar.Calendar getCalendar()
+    public static org.hisp.dhis.calendar.Calendar getCalendar()
     {
         if ( calendarService != null )
         {
