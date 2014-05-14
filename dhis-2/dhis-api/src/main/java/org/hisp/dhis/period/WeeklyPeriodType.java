@@ -39,7 +39,7 @@ import java.util.List;
  * PeriodType for weekly Periods. A valid weekly Period has startDate set to
  * monday and endDate set to sunday the same week, assuming monday is the first
  * day and sunday is the last day of the week.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: WeeklyPeriodType.java 2976 2007-03-03 22:50:19Z torgeilo $
  */
@@ -84,7 +84,7 @@ public class WeeklyPeriodType
 
     @Override
     public Period createPeriod( Calendar cal )
-    {    	
+    {
         cal.set( Calendar.DAY_OF_WEEK, Calendar.MONDAY );
         Date startDate = cal.getTime();
         cal.add( Calendar.DAY_OF_YEAR, 6 );
@@ -122,13 +122,13 @@ public class WeeklyPeriodType
         cal.add( Calendar.WEEK_OF_YEAR, -1 );
         return createPeriod( cal );
     }
-    
+
     @Override
     public List<Period> generatePeriods( Date date )
     {
         return generatePeriods( createCalendarInstance( date ) );
     }
-    
+
     /**
      * Generates weekly Periods for the whole year in which the given Period's
      * startDate exists.
@@ -164,7 +164,7 @@ public class WeeklyPeriodType
     }
 
     /**
-     * Generates the last 52 weeks where the last one is the week which the 
+     * Generates the last 52 weeks where the last one is the week which the
      * given date is inside.
      */
     @Override
@@ -176,16 +176,16 @@ public class WeeklyPeriodType
         cal.add( Calendar.DAY_OF_YEAR, -357 );
 
         ArrayList<Period> periods = new ArrayList<Period>();
-        
+
         for ( int i = 0; i < 52; i++ )
         {
             periods.add( createPeriod( cal ) );
             cal.add( Calendar.DAY_OF_YEAR, 1 );
         }
-        
+
         return periods;
     }
-    
+
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
@@ -202,13 +202,13 @@ public class WeeklyPeriodType
         // 1st day of week is Monday
         // 1st week of the year is the first week with a Thursday
         // ---------------------------------------------------------------------
-        
-        cal.setMinimalDaysInFirstWeek(4);
-        cal.setFirstDayOfWeek(Calendar.MONDAY);
-        
+
+        cal.setMinimalDaysInFirstWeek( 4 );
+        cal.setFirstDayOfWeek( Calendar.MONDAY );
+
         cal.set( Calendar.WEEK_OF_YEAR, 1 );
         cal.set( Calendar.DAY_OF_WEEK, Calendar.MONDAY );
-        
+
         int firstWeek = cal.get( Calendar.WEEK_OF_YEAR );
 
         ArrayList<Period> weeks = new ArrayList<Period>();
@@ -233,17 +233,17 @@ public class WeeklyPeriodType
     public String getIsoDate( Period period )
     {
         Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.setMinimalDaysInFirstWeek(4);
-        cal.setFirstDayOfWeek(Calendar.MONDAY);
-        int year = cal.get( Calendar.YEAR);
-        int week = cal.get( Calendar.WEEK_OF_YEAR);
-        int month = cal.get( Calendar.MONTH);
+        cal.setMinimalDaysInFirstWeek( 4 );
+        cal.setFirstDayOfWeek( Calendar.MONDAY );
+        int year = cal.get( Calendar.YEAR );
+        int week = cal.get( Calendar.WEEK_OF_YEAR );
+        int month = cal.get( Calendar.MONTH );
 
         if ( week == 1 && month == Calendar.DECEMBER )
         {
-            ++year; 
+            ++year;
         }
-        
+
         String periodString = year + "W" + week;
         return periodString;
     }
@@ -253,10 +253,10 @@ public class WeeklyPeriodType
     {
         int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
         int week = Integer.parseInt( isoDate.substring( 5 ) );
-        
+
         Calendar cal = Calendar.getInstance();
         cal.clear();
-        cal.setMinimalDaysInFirstWeek(4);
+        cal.setMinimalDaysInFirstWeek( 4 );
         cal.setFirstDayOfWeek( Calendar.MONDAY );
 
         cal.set( Calendar.YEAR, year );
@@ -273,14 +273,14 @@ public class WeeklyPeriodType
     {
         return ISO_FORMAT;
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
+        Calendar cal = createCalendarInstance( date );
         cal.add( Calendar.DAY_OF_YEAR, (rewindedPeriods * -7) );
 
         return cal.getTime();

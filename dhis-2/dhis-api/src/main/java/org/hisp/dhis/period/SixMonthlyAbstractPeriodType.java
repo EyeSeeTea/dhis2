@@ -44,7 +44,7 @@ import java.util.List;
  */
 
 public abstract class SixMonthlyAbstractPeriodType
-        extends CalendarPeriodType
+    extends CalendarPeriodType
 {
     private static final long serialVersionUID = -7135018015977806913L;
 
@@ -75,24 +75,27 @@ public abstract class SixMonthlyAbstractPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        int yearMonth = cal.get( Calendar.MONTH ) + 12 * cal.get( Calendar.YEAR ) - getBaseMonth();
-
-        cal.set( Calendar.YEAR, yearMonth / 12 );
-        cal.set( Calendar.MONTH, ( ( ( yearMonth % 12 ) / 6 ) * 6 ) + getBaseMonth() );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 5 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
+        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
     }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return null;
+        int year = getCalendar().monthsInYear() * dateUnit.getYear();
+        int yearMonth = year + dateUnit.getMonth() - getBaseMonth();
+        int months = (((yearMonth % 12) / 6) * 6) + getBaseMonth();
+
+        dateUnit.setDay( 1 );
+        dateUnit.setMonth( 1 );
+        dateUnit = getCalendar().plusMonths( dateUnit, months );
+        dateUnit.setDayOfWeek( getCalendar().weekday( dateUnit ) );
+
+        DateUnit endDateUnit = new DateUnit( dateUnit );
+        endDateUnit = getCalendar().plusMonths( endDateUnit, 5 );
+        endDateUnit.setDay( getCalendar().daysInMonth( endDateUnit.getYear(), endDateUnit.getMonth() ) );
+        endDateUnit.setDayOfWeek( getCalendar().weekday( endDateUnit ) );
+
+        return new Period( this, dateUnit.toJdkDate(), endDateUnit.toJdkDate() );
     }
 
     @Override
@@ -130,7 +133,7 @@ public abstract class SixMonthlyAbstractPeriodType
     {
         ArrayList<Period> periods = new ArrayList<Period>();
 
-        Period period = createPeriod ( date );
+        Period period = createPeriod( date );
 
         Calendar cal = createCalendarInstance( period.getStartDate() );
 

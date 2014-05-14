@@ -40,7 +40,7 @@ import java.util.List;
 /**
  * PeriodType for daily Periods. A valid daily Period has equal startDate and
  * endDate.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: DailyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
@@ -82,19 +82,17 @@ public class DailyPeriodType
     {
         return createPeriod( createCalendarInstance( date ) );
     }
-    
+
     @Override
     public Period createPeriod( Calendar cal )
     {
-        Date date = cal.getTime();
-
-        return new Period( this, date, date );
+        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
     }
-    
+
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return null;
+        return new Period( this, dateUnit.toJdkDate(), dateUnit.toJdkDate() );
     }
 
     @Override
@@ -102,7 +100,7 @@ public class DailyPeriodType
     {
         return FREQUENCY_ORDER;
     }
-    
+
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------
@@ -128,7 +126,7 @@ public class DailyPeriodType
 
         return new Period( this, date, date );
     }
-    
+
     /**
      * Generates daily Periods for the whole year in which the given Period's
      * startDate exists.
@@ -152,24 +150,24 @@ public class DailyPeriodType
     }
 
     /**
-     * Generates the last 365 days where the last one is the day of the given 
+     * Generates the last 365 days where the last one is the day of the given
      * date.
      */
     @Override
     public List<Period> generateRollingPeriods( Date date )
     {
         Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_MONTH, -364 );        
+        cal.set( Calendar.DAY_OF_MONTH, -364 );
 
         ArrayList<Period> periods = new ArrayList<Period>();
-        
+
         for ( int i = 0; i < 365; i++ )
         {
             periods.add( createPeriod( cal ) );
             cal.add( Calendar.MONTH, 1 );
         }
-        
-        return periods;        
+
+        return periods;
     }
 
     @Override
@@ -197,14 +195,14 @@ public class DailyPeriodType
     {
         return ISO_FORMAT;
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
+        Calendar cal = createCalendarInstance( date );
         cal.add( Calendar.DAY_OF_YEAR, (rewindedPeriods * -1) );
 
         return cal.getTime();
