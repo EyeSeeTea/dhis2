@@ -725,6 +725,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE translation ADD COLUMN translationid integer NOT NULL" );
         executeSql( "ALTER TABLE translation ADD COLUMN lastupdated timestamp" );
         executeSql( "ALTER TABLE translation ADD COLUMN uid varchar(11)" );
+        executeSql( "ALTER TABLE translation ADD COLUMN objectUid varchar(11)" );
         executeSql( "ALTER TABLE translation ALTER COLUMN objectid DROP NOT NULL" );
 
 

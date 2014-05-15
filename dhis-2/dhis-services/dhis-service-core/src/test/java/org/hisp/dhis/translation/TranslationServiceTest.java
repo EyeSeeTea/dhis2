@@ -110,7 +110,7 @@ public class TranslationServiceTest
         assertNull( translationService.getTranslationNoFallback( className1, Locale.UK, "name", uid1 ) );
         assertNotNull( translationService.getTranslationNoFallback( className1, Locale.UK, "shortName", uid1 ) );
 
-        translationService.deleteTranslations( translation1b.getClassName(),translation1b.getUid() );
+        translationService.deleteTranslations( translation1b.getClassName(),translation1b.getObjectUid() );
 
         assertNull( translationService.getTranslationNoFallback( className1, Locale.UK, "name", uid1 ) );
         assertNull( translationService.getTranslationNoFallback( className1, Locale.UK, "shortName", uid1 ) );
