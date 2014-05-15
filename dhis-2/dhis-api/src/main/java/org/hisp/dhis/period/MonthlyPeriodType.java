@@ -89,7 +89,7 @@ public class MonthlyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
+        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
     }
 
     @Override
