@@ -198,7 +198,7 @@ public class DefaultI18nService
     // Translation
     // -------------------------------------------------------------------------
 
-    public void updateTranslation( String className, Locale locale, Map<String, String> translations, String uid )
+    public void updateTranslation( String className, Locale locale, Map<String, String> translations, String objectUid )
     {
         if ( locale != null && className != null )
         {
@@ -206,37 +206,37 @@ public class DefaultI18nService
             {
                 String key = translationEntry.getKey();
                 String value = translationEntry.getValue();
-                Translation t = new Translation( className, locale.toString(), key, value, uid );
+                Translation t = new Translation( className, locale.toString(), key, value, objectUid );
                 translationService.createOrUpdate( t );
             }
         }
     }
 
-    public Map<String, String> getTranslations( String className, String uid )
+    public Map<String, String> getTranslations( String className, String objectUid )
     {
-        return getTranslations( className, getCurrentLocale(), uid );
+        return getTranslations( className, getCurrentLocale(), objectUid );
     }
 
-    public Map<String, String> getTranslations( String className, Locale locale, String uid )
+    public Map<String, String> getTranslations( String className, Locale locale, String objectUid )
     {
         if ( locale != null && className != null )
         {
-            return convertTranslations( translationService.getTranslations( className, locale, uid ) );
+            return convertTranslations( translationService.getTranslations( className, locale, objectUid ) );
         }
 
         return new HashMap<String, String>();
     }
 
-    public Map<String, String> getTranslationsNoFallback( String className, String uid )
+    public Map<String, String> getTranslationsNoFallback( String className, String objectUid )
     {
-        return getTranslationsNoFallback( className, uid, getCurrentLocale() );
+        return getTranslationsNoFallback( className, objectUid, getCurrentLocale() );
     }
 
-    public Map<String, String> getTranslationsNoFallback( String className, String uid, Locale locale )
+    public Map<String, String> getTranslationsNoFallback( String className, String objectUid, Locale locale )
     {
         if ( locale != null && className != null )
         {
-            return convertTranslations( translationService.getTranslationsNoFallback( className, locale, uid ) );
+            return convertTranslations( translationService.getTranslationsNoFallback( className, locale, objectUid ) );
         }
 
         return new HashMap<String, String>();
@@ -272,16 +272,16 @@ public class DefaultI18nService
      * 
      *
      * @param translations Collection to search.
-     * @param uid
+     * @param objectUid
      * @return Map of property/value pairs.
      */
-    private Map<String, String> getTranslationsForObject( Collection<Translation> translations, String uid )
+    private Map<String, String> getTranslationsForObject( Collection<Translation> translations, String objectUid )
     {
         Collection<Translation> objectTranslations = new ArrayList<Translation>();
 
         for ( Translation translation : translations )
         {
-            if (translation.getUid().equals(uid))
+            if (translation.getObjectUid().equals( objectUid ))
             {
                 objectTranslations.add( translation );
             }

@@ -35,8 +35,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 
-import java.util.Date;
-
 /**
  * @author Oyvind Brucker
  */
@@ -49,6 +47,7 @@ public class Translation
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 4432944068677351446L;
+    private  String objectUid;
 
     private String className;
 
@@ -65,17 +64,17 @@ public class Translation
 
     public Translation()
     {
-       setLastUpdated( new Date() );
+       setAutoFields();
     }
 
-    public Translation( String className, String locale, String property, String value, String uid )
+    public Translation( String className, String locale, String property, String value, String objectUid )
     {
         this();
         this.className = className;
         this.locale = locale;
         this.property = property;
         this.value = value;
-        this.uid = uid;
+        this.objectUid = objectUid;
     }
 
     // -------------------------------------------------------------------------
@@ -85,7 +84,7 @@ public class Translation
     @JsonIgnore
     public String getClassIdPropKey()
     {
-        return className + "-" + uid + "-" + property;
+        return className + "-" + objectUid + "-" + property;
     }
 
     // -------------------------------------------------------------------------
@@ -102,19 +101,6 @@ public class Translation
     {
         this.className = className;
     }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getUid()
-    {
-        return uid;
-    }
-
-    public void setUid( String uid )
-    {
-        this.uid = uid;
-    }
-
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -153,19 +139,20 @@ public class Translation
     }
 
 
-    public Date getLastUpdated()
-    {
-        return lastUpdated;
-    }
-
-    public void setLastUpdated( Date lastUpdated )
-    {
-        this.lastUpdated = lastUpdated;
-    }
-
-    // -------------------------------------------------------------------------
     // hashCode, equals and toString
     // -------------------------------------------------------------------------
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getObjectUid()
+    {
+        return objectUid;
+    }
+
+    public void setObjectUid( String objectUid )
+    {
+        this.objectUid = objectUid;
+    }
 
     @Override
     public int hashCode()
@@ -174,7 +161,7 @@ public class Translation
         int result = 1;
 
         result = result * prime + className.hashCode();
-        result = result * prime + uid.hashCode();
+        result = result * prime + objectUid.hashCode();
         result = result * prime + locale.hashCode();
         result = result * prime + property.hashCode();
 
@@ -201,13 +188,13 @@ public class Translation
 
         Translation translation = (Translation) o;
 
-        return className.equals( translation.getClassName() ) &&  uid == translation.getUid() &&
+        return className.equals( translation.getClassName() ) &&  objectUid == translation.getObjectUid() &&
             locale.equals( translation.getLocale() ) && property.equals( translation.getProperty());
     }
 
     @Override
     public String toString()
     {
-        return "[Class name: " + className + " uid: " + uid + " locale: " + locale + " property: " + property + " value: " + value + "]";
+        return "[Class name: " + className + " objectUid: " + objectUid + " uid: " + uid + " locale: " + locale + " property: " + property + " value: " + value + "]";
     }
 }

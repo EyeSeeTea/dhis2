@@ -6,19 +6,20 @@
 <hibernate-mapping>
   <class name="org.hisp.dhis.translation.Translation" table="translation">
 
-	<cache usage="read-write" />
+    <cache usage="read-write" />
 
-  <id name="id" column="translationid">
-    <generator class="native" />
-  </id>
+    <id name="id" column="translationid">
+      <generator class="native" />
+    </id>
 
-  <property name="className" column="objectclass" length="127" />
-  <property name="locale" column="locale" length="15" />
-  <property name="property" column="objectproperty" length="63" />
-  <property name="uid" column="uid" length="11" />
+    <property name="className" column="objectclass" length="127" />
+    <property name="locale" column="locale" length="15" />
+    <property name="property" column="objectproperty" length="63" />
+    <property name="uid" column="uid" length="11" />
+    <property name="objectUid" column="objectUid" length="11" />
 
-	<property name="lastUpdated" type="timestamp"/>
-	<property name="value" column="value" type="text" not-null="true" />
+    <property name="lastUpdated" type="timestamp" />
+    <property name="value" column="value" type="text" not-null="true" />
 
   </class>
 </hibernate-mapping>

@@ -75,24 +75,24 @@ public class DefaultTranslationService
         translationStore.updateTranslation( translation );
     }
 
-    public Translation getTranslation( String className, Locale locale, String property, String uid )
+    public Translation getTranslation( String className, Locale locale, String property, String objectUid )
     {
-        return translationStore.getTranslation( className, locale, property, uid );
+        return translationStore.getTranslation( className, locale, property, objectUid );
     }
 
-    public Translation getTranslationNoFallback( String className, Locale locale, String property, String uid )
+    public Translation getTranslationNoFallback( String className, Locale locale, String property, String objectUid )
     {
-        return translationStore.getTranslationNoFallback( className, locale, property,uid );
+        return translationStore.getTranslationNoFallback( className, locale, property, objectUid );
     }
 
-    public Collection<Translation> getTranslations( String className, Locale locale, String uid )
+    public Collection<Translation> getTranslations( String className, Locale locale, String objectUid )
     {
-        return translationStore.getTranslations( className, locale, uid );
+        return translationStore.getTranslations( className, locale, objectUid );
     }
 
-    public Collection<Translation> getTranslationsNoFallback( String className, Locale locale, String uid )
+    public Collection<Translation> getTranslationsNoFallback( String className, Locale locale, String objectUid )
     {
-        return translationStore.getTranslationsNoFallback( className, uid, locale );
+        return translationStore.getTranslationsNoFallback( className, objectUid, locale );
     }
 
     public Collection<Translation> getTranslations( String className, Locale locale )
@@ -115,14 +115,14 @@ public class DefaultTranslationService
         translationStore.deleteTranslation( translation );
     }
 
-    public void deleteTranslations( String className, String uid )
+    public void deleteTranslations( String className, String objectUid )
     {
-        translationStore.deleteTranslations( className, uid );
+        translationStore.deleteTranslations( className, objectUid );
     }
 
     public void createOrUpdate( Translation translation )
     {
-        Translation translationNoFallback = getTranslationNoFallback( translation.getClassName(), LocaleUtils.getLocale( translation.getLocale() ), translation.getProperty(), translation.getUid() );
+        Translation translationNoFallback = getTranslationNoFallback( translation.getClassName(), LocaleUtils.getLocale( translation.getLocale() ), translation.getProperty(), translation.getObjectUid() );
 
         if ( translation.getValue() != null && !translation.getValue().trim().isEmpty() )
         {
