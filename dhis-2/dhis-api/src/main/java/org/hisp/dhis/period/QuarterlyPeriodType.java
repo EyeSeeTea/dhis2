@@ -28,9 +28,9 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
  * PeriodType for quarterly Periods. A valid quarterly Period has startDate set
  * to the first day of a calendar quarter, and endDate set to the last day of
  * the same quarter.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: QuarterlyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
@@ -85,21 +85,22 @@ public class QuarterlyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        cal.set( Calendar.MONTH, cal.get( Calendar.MONTH ) - cal.get( Calendar.MONTH ) % 3 );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.MONTH, 2 );
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-
-        return new Period( this, startDate, cal.getTime() );
+        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
     }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return null;
+        DateUnit start = new DateUnit( dateUnit );
+
+        start.setMonth( (dateUnit.getMonth() - (dateUnit.getMonth() % 3)) + 1 );
+        start.setDay( 1 );
+
+        DateUnit end = new DateUnit( start );
+        end = getCalendar().plusMonths( end, 2 );
+        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
+
+        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
     }
 
     @Override
@@ -115,17 +116,19 @@ public class QuarterlyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, 3 );
-        return createPeriod( cal );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().plusMonths( dateUnit, 3 );
+
+        return createPeriod( dateUnit );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, -3 );
-        return createPeriod( cal );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().minusMonths( dateUnit, 3 );
+
+        return createPeriod( dateUnit );
     }
 
     /**
@@ -135,43 +138,48 @@ public class QuarterlyPeriodType
     @Override
     public List<Period> generatePeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_YEAR, 1 );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit.setMonth( 1 );
+        dateUnit.setDay( 1 );
 
-        int year = cal.get( Calendar.YEAR );
-        ArrayList<Period> periods = new ArrayList<Period>();
+        int year = dateUnit.getYear();
+        List<Period> periods = Lists.newArrayList();
 
-        while ( cal.get( Calendar.YEAR ) == year )
+        while ( year == dateUnit.getYear() )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 3 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusMonths( dateUnit, 3 );
         }
 
         return periods;
     }
 
     /**
-     * Generates the last 4 quarters where the last one is the quarter which the 
+     * Generates the last 4 quarters where the last one is the quarter which the
      * given date is inside.
      */
     @Override
     public List<Period> generateRollingPeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-        cal.add( Calendar.MONTH, ( ( cal.get( Calendar.MONTH ) % 3 ) * -1 ) - 9 );
+        // get current quarter start date
+        date = createPeriod( date ).getStartDate();
 
-        ArrayList<Period> periods = new ArrayList<Period>();
-        
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit.setDay( 1 );
+
+        dateUnit = getCalendar().minusMonths( dateUnit, 9 );
+
+        List<Period> periods = Lists.newArrayList();
+
         for ( int i = 0; i < 4; i++ )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 3 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusMonths( dateUnit, 3 );
         }
-        
+
         return periods;
     }
-    
+
     @Override
     public String getIsoDate( Period period )
     {
@@ -187,7 +195,7 @@ public class QuarterlyPeriodType
     {
         int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
         int month = Quarter.valueOf( isoDate.substring( 4, 6 ) ).getMonth();
-        
+
         Calendar cal = createCalendarInstance();
         cal.set( year, month, 1 );
         return createPeriod( cal );
@@ -222,29 +230,29 @@ public class QuarterlyPeriodType
         {
             switch ( month )
             {
-            case Calendar.JANUARY:
-                return Q1;
-            case Calendar.APRIL:
-                return Q2;
-            case Calendar.JULY:
-                return Q3;
-            case Calendar.OCTOBER:
-                return Q4;
-            default:
-                throw new IllegalArgumentException( "Not a valid quarterly starting month" );
+                case Calendar.JANUARY:
+                    return Q1;
+                case Calendar.APRIL:
+                    return Q2;
+                case Calendar.JULY:
+                    return Q3;
+                case Calendar.OCTOBER:
+                    return Q4;
+                default:
+                    throw new IllegalArgumentException( "Not a valid quarterly starting month" );
             }
         }
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
-        cal.add( Calendar.MONTH, (rewindedPeriods * -3) );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit = getCalendar().minusMonths( dateUnit, rewindedPeriods * 3 );
 
-        return cal.getTime();
+        return getCalendar().toIso( dateUnit ).toJdkDate();
     }
 }
