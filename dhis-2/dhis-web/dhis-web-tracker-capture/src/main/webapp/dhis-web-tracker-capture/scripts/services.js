@@ -173,13 +173,30 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return promise;
         },
-        getByOrgUnit: function(orgUnitUid) {
+        getByOrgUnit: function(orgUnitUid) {           
             
-            //var attributes = AttributesFactory.convertListingForToQuery();
             var url =  '../api/trackedEntityInstances.json?ou=' + orgUnitUid;
             
-            promise = $http.get( url ).then(function(response){
-                                
+            promise = $http.get( url ).then(function(response){                                
+                return entityFormatter(response.data);
+            });            
+            return promise;
+        },        
+        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl) {           
+            
+            var url =  '../api/trackedEntityInstances.json?ou=' + ouId + '&ouMode='+ ouMode;
+            
+            if(queryUrl){
+                url = url + '&'+ queryUrl;
+            }
+            if(programUrl){
+                url = url + '&' + programUrl;
+            }
+            if(attributeUrl){
+                url = url + '&' + attributeUrl;
+            }
+            
+            promise = $http.get( url ).then(function(response){                                
                 return entityFormatter(response.data);
             });            
             return promise;
@@ -214,8 +231,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             return programAttributes;            
         },
-        getForListing: function(){
-            
+        getWithoutProgram: function(){            
             var attributes = [];
             
             angular.forEach(this.getAll(), function(attribute) {
