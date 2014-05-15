@@ -28,11 +28,11 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -86,7 +86,7 @@ public class DailyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        return createPeriod( DateUnit.fromJdkCalendar( cal ) );
+        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
     }
 
     @Override
@@ -108,10 +108,10 @@ public class DailyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.DAY_OF_YEAR, 1 );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().plusDays( dateUnit, 1 );
 
-        Date date = cal.getTime();
+        Date date = getCalendar().toIso( dateUnit ).toJdkDate();
 
         return new Period( this, date, date );
     }
@@ -119,10 +119,10 @@ public class DailyPeriodType
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.DAY_OF_YEAR, -1 );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().minusDays( dateUnit, 1 );
 
-        Date date = cal.getTime();
+        Date date = getCalendar().toIso( dateUnit ).toJdkDate();
 
         return new Period( this, date, date );
     }
@@ -134,16 +134,18 @@ public class DailyPeriodType
     @Override
     public List<Period> generatePeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_YEAR, 1 );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit.setMonth( 1 );
+        dateUnit.setDay( 1 );
 
-        int year = cal.get( Calendar.YEAR );
-        ArrayList<Period> periods = new ArrayList<Period>();
+        List<Period> periods = Lists.newArrayList();
 
-        while ( cal.get( Calendar.YEAR ) == year )
+        int year = dateUnit.getYear();
+
+        while ( year == dateUnit.getYear() )
         {
-            periods.add( createPeriod( cal.getTime() ) );
-            cal.add( Calendar.DAY_OF_YEAR, 1 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusDays( dateUnit, 1 );
         }
 
         return periods;
@@ -156,15 +158,15 @@ public class DailyPeriodType
     @Override
     public List<Period> generateRollingPeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_MONTH, -364 );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit = getCalendar().minusDays( dateUnit, 364 );
 
-        ArrayList<Period> periods = new ArrayList<Period>();
+        List<Period> periods = Lists.newArrayList();
 
         for ( int i = 0; i < 365; i++ )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 1 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusDays( dateUnit, 1 );
         }
 
         return periods;
@@ -202,9 +204,9 @@ public class DailyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );
-        cal.add( Calendar.DAY_OF_YEAR, (rewindedPeriods * -1) );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit = getCalendar().minusDays( dateUnit, rewindedPeriods );
 
-        return cal.getTime();
+        return getCalendar().toIso( dateUnit ).toJdkDate();
     }
 }
