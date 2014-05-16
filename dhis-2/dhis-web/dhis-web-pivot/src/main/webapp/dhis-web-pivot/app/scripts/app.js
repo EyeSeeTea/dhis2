@@ -4064,10 +4064,10 @@ Ext.onReady( function() {
 							periodOffset: 0,
 							listeners: {
 								select: function() {
-									var nsype = new PeriodType(),
+									var ptype = new PeriodType(),
 										periodType = this.getValue();
 
-									var periods = nsype.get(periodType).generatePeriods({
+									var periods = ptype.get(periodType).generatePeriods({
 										offset: this.periodOffset,
 										filterFuturePeriods: true,
 										reversePeriods: true
