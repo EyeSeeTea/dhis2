@@ -28,6 +28,7 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
 import java.util.ArrayList;
@@ -85,16 +86,19 @@ public class WeeklyPeriodType
     @Override
     public Period createPeriod( Calendar cal )
     {
-        cal.set( Calendar.DAY_OF_WEEK, Calendar.MONDAY );
-        Date startDate = cal.getTime();
-        cal.add( Calendar.DAY_OF_YEAR, 6 );
-        return new Period( this, startDate, cal.getTime() );
+        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
     }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return null;
+        DateUnit start = new DateUnit( dateUnit );
+        start = getCalendar().minusDays( dateUnit, getCalendar().weekday( start ) - 1 );
+
+        DateUnit end = new DateUnit( start );
+        end = getCalendar().plusDays( end, getCalendar().daysInWeek() - 1 );
+
+        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
     }
 
     @Override
@@ -110,17 +114,19 @@ public class WeeklyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.WEEK_OF_YEAR, 1 );
-        return createPeriod( cal );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
+
+        return createPeriod( dateUnit );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.WEEK_OF_YEAR, -1 );
-        return createPeriod( cal );
+        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = getCalendar().minusWeeks( dateUnit, 1 );
+
+        return createPeriod( dateUnit );
     }
 
     @Override
@@ -170,17 +176,17 @@ public class WeeklyPeriodType
     @Override
     public List<Period> generateRollingPeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.setFirstDayOfWeek( Calendar.MONDAY );
-        cal.set( Calendar.DAY_OF_WEEK, Calendar.MONDAY );
-        cal.add( Calendar.DAY_OF_YEAR, -357 );
+        List<Period> periods = Lists.newArrayList();
 
-        ArrayList<Period> periods = new ArrayList<Period>();
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit.setMonth( 1 );
+        dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
+        dateUnit = getCalendar().minusDays( dateUnit, 357 );
 
         for ( int i = 0; i < 52; i++ )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.DAY_OF_YEAR, 1 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
         }
 
         return periods;

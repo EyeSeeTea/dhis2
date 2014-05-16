@@ -38,6 +38,7 @@ import java.util.GregorianCalendar;
 
 /**
  * Class representing a specific calendar date.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  * @see DateInterval
  * @see Calendar
@@ -144,7 +145,10 @@ public class DateUnit
 
     public java.util.Calendar toJdkCalendar()
     {
-        return new GregorianCalendar( year, month - 1, day );
+        java.util.Calendar calendar = new GregorianCalendar( year, month - 1, day );
+        calendar.setTime( calendar.getTime() );
+
+        return calendar;
     }
 
     public Date toJdkDate()
