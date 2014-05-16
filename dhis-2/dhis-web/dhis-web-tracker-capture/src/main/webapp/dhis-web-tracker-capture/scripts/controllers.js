@@ -8,6 +8,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         function($rootScope,
                 $scope,
                 $location,
+                $modal,
                 Paginator,
                 TranslationService, 
                 SelectedEntity,
@@ -111,8 +112,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.emptySearchText = false;
         $scope.emptySearchAttribute = false;
         $scope.showSearchDiv = false;
-        $scope.showRegistrationDiv = false;                
-        $scope.gridColumns = $scope.attributes;     
+        $scope.showRegistrationDiv = false;                          
         $scope.trackedEntityList = null; 
         
         var queryUrl = null, 
@@ -121,17 +121,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
         if($scope.selectedProgram){
             programUrl = 'program=' + $scope.selectedProgram.id;
-        }      
+        }     
 
-        //generate grid column for the selected program
-        angular.forEach($scope.gridColumns, function(gridColumn){
-            gridColumn.showFilter =  false;
-            gridColumn.hide = false;                   
-            if(gridColumn.type === 'date'){
-                 $scope.filterText[gridColumn.id]= {start: '', end: ''};
-            }
-        });
-        
+        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);        
+           
         if( mode === $scope.searchMode.freeText ){     
             if(!$scope.searchText){                
                 $scope.emptySearchText = true;
@@ -151,7 +144,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 return;
             }
         }
-       else if( mode === $scope.searchMode.listAll ){   
+        else if( mode === $scope.searchMode.listAll ){   
             $scope.showTrackedEntityDiv = true;    
         }      
 
@@ -163,6 +156,31 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                                             attributeUrl.url).then(function(data){
             $scope.trackedEntityList = data;
         });
+    };
+    
+    $scope.generateGridColumns = function(attributes){
+        var columns = attributes;   
+        
+        //also add extra columns - orgunit for example
+        columns.push({id: 'orgUnitName', name: 'Organisation unit', type: 'string'});
+        
+        //generate grid column for the selected program/attributes
+        angular.forEach(columns, function(column){
+            
+            if(column.id === 'orgUnitName' && $scope.ouMode === 'SELECTED'){
+                column.show = false;    
+            }
+            else{
+                column.show = true;
+            }
+            
+            column.showFilter =  false;
+            
+            if(column.type === 'date'){
+                 $scope.filterText[column.id]= {start: '', end: ''};
+            }
+        });        
+        return columns;        
     };
     
     $scope.clearEntities = function(){
@@ -216,7 +234,36 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $scope.gridColumns[i].showFilter = false;
             }
         }
-    };    
+    };   
+    
+    $scope.showHideColumns = function(){
+        
+        $scope.hiddenGridColumns = 0;
+        
+        angular.forEach($scope.gColumns, function(gridColumn){
+            if(!gridColumn.show){
+                $scope.hiddenGridColumns++;
+            }
+        });
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'views/column-modal.html',
+            controller: 'ColumnDisplayController',
+            resolve: {
+                gridColumns: function () {
+                    return $scope.gridColumns;
+                },
+                hiddenGridColumns: function(){
+                    return $scope.hiddenGridColumns;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (gridColumns) {
+            $scope.gridColumns = gridColumns;
+        }, function () {
+        });
+    };
     
     $scope.showDashboard = function(currentEntity){       
         SelectedEntity.setSelectedEntity(currentEntity);
@@ -226,6 +273,31 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
        
     $scope.getHelpContent = function(){
         console.log('I will get help content');
+    };    
+})
+
+//Controller for column show/hide
+.controller('ColumnDisplayController', 
+    function($scope, 
+            $modalInstance, 
+            hiddenGridColumns,
+            gridColumns){
+    
+    $scope.gridColumns = gridColumns;
+    $scope.hiddenGridColumns = hiddenGridColumns;
+    
+    $scope.close = function () {
+      $modalInstance.close($scope.gridColumns);
+    };
+    
+    $scope.showHideColumns = function(gridColumn){
+       
+        if(gridColumn.show){                
+            $scope.hiddenGridColumns--;            
+        }
+        else{
+            $scope.hiddenGridColumns++;            
+        }      
     };    
 })
 
@@ -239,17 +311,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.attributes = AttributesFactory.getWithoutProgram();
     
-    $scope.selectedProgram = null;
-    
-    $scope.getProgramAttributes = function(program){        
-        if(program){
-            $scope.selectedProgram = program;
-            $scope.attributes = AttributesFactory.getByProgram(program);
+    //watch for selection of org unit from tree
+    $scope.$watch('selectedProgram', function() {        
+        if( angular.isObject($scope.selectedProgram)){                  
+            $scope.trackedEntityList = [];
+            $scope.attributes = AttributesFactory.getByProgram($scope.selectedProgram);
         }
-        else{
-            $scope.attributes = AttributesFactory.getWithoutProgram();
-        }
-    };
+    });
     
     $scope.showDashboard = function(){        
         $scope.registerEntity();
