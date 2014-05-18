@@ -286,9 +286,9 @@ public class WeeklyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );
-        cal.add( Calendar.DAY_OF_YEAR, (rewindedPeriods * -7) );
+        DateUnit dateUnit = createDateUnitInstance( date );
+        dateUnit = getCalendar().minusWeeks( dateUnit, rewindedPeriods );
 
-        return cal.getTime();
+        return getCalendar().toIso( dateUnit ).toJdkDate();
     }
 }
