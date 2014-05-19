@@ -398,6 +398,10 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     padding-right: 40px;
 }
 
+.btn-no-border {
+    border: none !important;
+}
+
 .max-column-width {
     max-width:200px !important; 
     word-wrap:break-word; 
@@ -431,7 +435,9 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     width: 100%;
     border-collapse: collapse;
     cursor: pointer;
+    table-layout: fixed;
 }
+
 
 .dhis2-table-striped-border tr th {
     border: 1px solid #cad5e5;
@@ -776,6 +782,14 @@ input[type=text], input[type=password], textarea {
     padding-left: 5px;
 }
 
+.invalid-input {
+    border-style:solid;
+    border-color:red;
+}
+
+.alert {
+    padding: 5px;
+}
 .input-field {
     border: 1px solid #aaa;
     padding: 4px 1px;
@@ -807,4 +821,8 @@ input[type=text], input[type=password], textarea {
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
     -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+}
+
+.underline{
+    text-decoration: underline;
 }

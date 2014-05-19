@@ -504,6 +504,7 @@
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
+    <property name="dataElementCategoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
@@ -589,6 +590,7 @@
     <property name="userCredentialsStore" ref="org.hisp.dhis.user.UserCredentialsStore" />
     <property name="userAuthorityGroupStore" ref="org.hisp.dhis.user.UserAuthorityGroupStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
@@ -955,6 +957,7 @@
         <value>dataelementcategoryoption</value>
         <value>categorycombo</value>
         <value>categoryoptioncombo</value>
+        <value>translation</value>
         <value>userinfo</value>
         <value>usergroup</value>
         <value>userrole</value>

@@ -36,7 +36,6 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.PAGER
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
 
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,7 +44,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -528,30 +526,6 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstancesForMobile( String searchText, int orgUnitId )
-    {
-        Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
-        entityInstances.addAll( trackedEntityInstanceStore.getByPhoneNumber( searchText, 0, Integer.MAX_VALUE ) );
-
-        if ( orgUnitId != 0 )
-        {
-            Set<TrackedEntityInstance> toRemoveList = new HashSet<TrackedEntityInstance>();
-
-            for ( TrackedEntityInstance instance : entityInstances )
-            {
-                if ( instance.getOrganisationUnit().getId() != orgUnitId )
-                {
-                    toRemoveList.add( instance );
-                }
-            }
-
-            entityInstances.removeAll( toRemoveList );
-        }
-
-        return entityInstances;
-    }
-
-    @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Integer min,
         Integer max )
     {
@@ -614,49 +588,7 @@ public class DefaultTrackedEntityInstanceService
 
         return instance.getRepresentative() == null || !(instance.getRepresentative().getUid() == representativeId);
     }
-
-    @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit,
-        Program program, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.getByOrgUnitProgram( organisationUnit, program, min, max );
-    }
-
-    @Override
-    public Object getObjectValue( String property, String value, I18nFormat format )
-    {
-        try
-        {
-            Type type = TrackedEntityInstance.class.getMethod( "get" + StringUtils.capitalize( property ) )
-                .getReturnType();
-
-            if ( type == Integer.class || type == Integer.TYPE )
-            {
-                return Integer.valueOf( value );
-            }
-            else if ( type.equals( Boolean.class ) || type == Boolean.TYPE )
-            {
-                return Boolean.valueOf( value );
-            }
-            else if ( type.equals( Date.class ) )
-            {
-                return format.parseDate( value.trim() );
-            }
-            else if ( type.equals( Character.class ) || type == Character.TYPE )
-            {
-                return Character.valueOf( value.charAt( 0 ) );
-            }
-
-            return value;
-        }
-        catch ( Exception ex )
-        {
-            ex.printStackTrace();
-        }
-
-        return null;
-    }
-
+    
     @Override
     public Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance instance )
     {
@@ -675,33 +607,6 @@ public class DefaultTrackedEntityInstanceService
         return trackedEntityInstanceStore.validateEnrollment( instance, program, format );
     }
 
-    @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityInstancesForMobile( String searchText, int orgUnitId,
-        int attributeId )
-    {
-        Set<TrackedEntityInstance> entityInstances = new HashSet<TrackedEntityInstance>();
-
-        entityInstances.addAll( trackedEntityInstanceStore.getByAttributeValue( searchText, attributeId, 0,
-            Integer.MAX_VALUE ) );
-
-        if ( orgUnitId != 0 )
-        {
-            Set<TrackedEntityInstance> toRemoveList = new HashSet<TrackedEntityInstance>();
-
-            for ( TrackedEntityInstance instance : entityInstances )
-            {
-
-                if ( instance.getOrganisationUnit().getId() != orgUnitId )
-                {
-                    toRemoveList.add( instance );
-                }
-            }
-            entityInstances.removeAll( toRemoveList );
-        }
-
-        return entityInstances;
-    }
-    
     @Override
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntity trackedEntity )
     {

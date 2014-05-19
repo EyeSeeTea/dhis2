@@ -28,7 +28,6 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -51,7 +50,6 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceStore;
 import org.hisp.dhis.program.SchedulingProgramObject;
-import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.TextUtils;
@@ -95,23 +93,6 @@ public class HibernateProgramStageInstanceStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageInstance> getAll( ProgramInstance programInstance, ProgramStage programStage )
-    {
-        return getCriteria( 
-            Restrictions.eq( "programInstance", programInstance ),
-            Restrictions.eq( "programStage", programStage ) )
-            .addOrder( Order.asc( "id" ) ).list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageInstance> get( ProgramStage programStage )
-    {
-        return getCriteria( Restrictions.eq( "programStage", programStage ) ).list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
     public Collection<ProgramStageInstance> get( Collection<ProgramInstance> programInstances, boolean completed )
     {
         return getCriteria( 
@@ -129,31 +110,6 @@ public class HibernateProgramStageInstanceStore
         criteria.add(  Restrictions.eq( "completed", completed ));
         
         return criteria.list();
-    }
-
-    // TODO this class must be re-written from here
-    
-    @Override
-    public void update( Collection<Integer> programStageInstanceIds, OutboundSms outboundSms )
-    {
-        for ( Integer programStageInstanceId : programStageInstanceIds )
-        {
-            if ( programStageInstanceId != null && programStageInstanceId != 0 )
-            {
-                ProgramStageInstance programStageInstance = get( programStageInstanceId );
-
-                List<OutboundSms> outboundSmsList = programStageInstance.getOutboundSms();
-
-                if ( outboundSmsList == null )
-                {
-                    outboundSmsList = new ArrayList<OutboundSms>();
-                }
-
-                outboundSmsList.add( outboundSms );
-                programStageInstance.setOutboundSms( outboundSmsList );
-                update( programStageInstance );
-            }
-        }
     }
 
     @Override
@@ -206,33 +162,6 @@ public class HibernateProgramStageInstanceStore
     }
 
     @Override
-    public int getStatisticalProgramStageReport( ProgramStage programStage, Collection<Integer> orgunitIds,
-        Date startDate, Date endDate, int status )
-    {
-        Criteria criteria = getStatisticalProgramStageCriteria( programStage, orgunitIds, startDate, endDate, status );
-
-        Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
-
-        return rs != null ? rs.intValue() : 0;
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public List<ProgramStageInstance> getStatisticalProgramStageDetailsReport( ProgramStage programStage,
-        Collection<Integer> orgunitIds, Date startDate, Date endDate, int status, Integer min, Integer max )
-    {
-        Criteria criteria = getStatisticalProgramStageCriteria( programStage, orgunitIds, startDate, endDate, status );
-
-        if ( min != null && max != null )
-        {
-            criteria.setFirstResult( min );
-            criteria.setMaxResults( max );
-        }
-
-        return criteria.list();
-    }
-
-    @Override
     public int getOverDueCount( ProgramStage programStage, Collection<Integer> orgunitIds, Date startDate, Date endDate )
     {
         Calendar yesterday = Calendar.getInstance();
@@ -262,23 +191,6 @@ public class HibernateProgramStageInstanceStore
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageInstance> get( Program program, Collection<Integer> orgunitIds, Date startDate,
-        Date endDate, Boolean completed )
-    {
-        return getCriteria( program, orgunitIds, startDate, endDate, completed ).list();
-    }
-
-    @Override
-    public int count( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate, Boolean completed )
-    {
-        Number rs = (Number) getCriteria( program, orgunitIds, startDate, endDate, completed ).setProjection(
-            Projections.rowCount() ).uniqueResult();
-
-        return rs != null ? rs.intValue() : 0;
-    }
-
-    @Override
     public int count( ProgramStage programStage, Collection<Integer> orgunitIds, Date startDate, Date endDate,
         Boolean completed )
     {
@@ -292,29 +204,19 @@ public class HibernateProgramStageInstanceStore
     public Grid getCompleteness( Collection<Integer> orgunitIds, Program program, String startDate, String endDate,
         I18n i18n )
     {
-        String sql = "SELECT ou.name as orgunit, ps.name as events, psi.completeduser as user_name, count(psi.programstageinstanceid) as number_of_events "
-            + "         FROM programstageinstance psi INNER JOIN programstage ps "
-            + "                         ON psi.programstageid = ps.programstageid "
-            + "                 INNER JOIN organisationunit ou "
-            + "                         ON ou.organisationunitid=psi.organisationunitid"
-            + "                 INNER JOIN program pg "
-            + "                         ON pg.programid = ps.programid "
-            + "         WHERE ou.organisationunitid in ( "
-            + TextUtils.getCommaDelimitedString( orgunitIds )
-            + " )                AND pg.programid = "
-            + program.getId()
-            + "         GROUP BY ou.name, ps.name, psi.completeduser, psi.completeddate, psi.completed "
-            + "         HAVING psi.completeddate >= '"
-            + startDate
-            + "'                AND psi.completeddate <= '"
-            + endDate
-            + "' "
-            + "                 AND psi.completed=true "
-            + "         ORDER BY ou.name, ps.name, psi.completeduser";
+        String sql = "select ou.name as orgunit, ps.name as events, psi.completeduser as user_name, count(psi.programstageinstanceid) as number_of_events "
+            + "from programstageinstance psi "
+            + "inner join programstage ps on psi.programstageid = ps.programstageid "
+            + "inner join organisationunit ou on ou.organisationunitid=psi.organisationunitid "
+            + "inner join program pg on pg.programid = ps.programid "
+            + "where ou.organisationunitid in ( " + TextUtils.getCommaDelimitedString( orgunitIds ) + " ) "
+            + "and pg.programid = " + program.getId()
+            + "group by ou.name, ps.name, psi.completeduser, psi.completeddate, psi.completed "
+            + "having psi.completeddate >= '" + startDate + "' AND psi.completeddate <= '" + endDate + "' "
+            + "and psi.completed=true "
+            + "order by ou.name, ps.name, psi.completeduser";
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
-
-        // Create column with Total column
 
         Grid grid = new ListGrid();
 
@@ -332,45 +234,37 @@ public class HibernateProgramStageInstanceStore
 
         return grid;
     }
+    
+    @Override
+    public int averageNumberCompleted( Program program, Collection<Integer> orgunitIds, Date after, Date before,
+        int status )
+    {
+        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstancesByStatus(
+            ProgramInstance.STATUS_COMPLETED, program, orgunitIds, after, before );
+        
+        Criteria criteria = getCriteria();
+        criteria.createAlias( "programInstance", "programInstance" );
+        criteria.createAlias( "programStage", "programStage" );
+        criteria.createAlias( "programInstance.entityInstance", "entityInstance" );
+        criteria.add( Restrictions.eq( "programInstance.program", program ) );
+        criteria.add( Restrictions.eq( "programInstance.status", status ) );
+        criteria.add( Restrictions.in( "organisationUnit.id", orgunitIds ) );
+        criteria.add( Restrictions.between( "programInstance.endDate", after, before ) );
+        criteria.add( Restrictions.eq( "completed", true ) );
+        
+        if ( programInstances != null && programInstances.size() > 0 )
+        {
+            criteria.add( Restrictions.not( Restrictions.in( "programInstance", programInstances ) ) );
+        }
+        
+        Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
+        
+        return rs != null ? rs.intValue() : 0;
+    }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    private Criteria getCriteria( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate,
-        Boolean completed )
-    {
-        Criteria criteria = getCriteria();
-        criteria.createAlias( "programInstance", "programInstance" );
-        criteria.add( Restrictions.eq( "programInstance.program", program ) );
-
-        if ( completed == null )
-        {
-            criteria.add( Restrictions.between( "programInstance.enrollmentDate", startDate, endDate ) );
-        }
-        else
-        {
-            if ( completed )
-            {
-                criteria.add( Restrictions.and( Restrictions.eq( "completed", true ),
-                    Restrictions.between( "executionDate", startDate, endDate ),
-                    Restrictions.in( "organisationUnit.id", orgunitIds ) ) );
-            }
-            else
-            {
-                criteria.createAlias( "programInstance.entityInstance", "entityInstance" );
-                criteria.createAlias( "entityInstance.organisationUnit", "regOrgunit" );
-                criteria.add( Restrictions.or( Restrictions.and( Restrictions.isNull( "executionDate" ),
-                    Restrictions.between( "dueDate", startDate, endDate ),
-                    Restrictions.in( "regOrgunit.id", orgunitIds ) ), Restrictions.and(
-                    Restrictions.eq( "completed", false ), Restrictions.isNotNull( "executionDate" ),
-                    Restrictions.between( "executionDate", startDate, endDate ),
-                    Restrictions.in( "organisationUnit.id", orgunitIds ) ) ) );
-            }
-        }
-
-        return criteria;
-    }
 
     private Criteria getCriteria( ProgramStage programStage, Collection<Integer> orgunitIds, Date startDate,
         Date endDate, Boolean completed )
@@ -418,81 +312,8 @@ public class HibernateProgramStageInstanceStore
         return criteria;
     }
 
-    private Criteria getStatisticalProgramStageCriteria( ProgramStage programStage, Collection<Integer> orgunitIds,
-        Date startDate, Date endDate, int status )
-    {
-        Criteria criteria = getCriteria( Restrictions.eq( "programStage", programStage ),
-            Restrictions.isNull( "programInstance.endDate" ) );
-        criteria.createAlias( "programInstance", "programInstance" );
-        criteria.createAlias( "programInstance.entityInstance", "entityInstance" );
-        criteria.createAlias( "entityInstance.organisationUnit", "regOrgunit" );
-        criteria.add( Restrictions.in( "regOrgunit.id", orgunitIds ) );
-
-        switch ( status )
-        {
-        case ProgramStageInstance.COMPLETED_STATUS:
-            criteria.add( Restrictions.eq( "completed", true ) );
-            criteria.add( Restrictions.between( "executionDate", startDate, endDate ) );
-            break;
-        case ProgramStageInstance.VISITED_STATUS:
-            criteria.add( Restrictions.eq( "completed", false ) );
-            criteria.add( Restrictions.between( "executionDate", startDate, endDate ) );
-            break;
-        case ProgramStageInstance.FUTURE_VISIT_STATUS:
-            criteria.add( Restrictions.between( "programInstance.enrollmentDate", startDate, endDate ) );
-            criteria.add( Restrictions.isNull( "executionDate" ) );
-            criteria.add( Restrictions.ge( "dueDate", new Date() ) );
-            break;
-        case ProgramStageInstance.LATE_VISIT_STATUS:
-            criteria.add( Restrictions.between( "programInstance.enrollmentDate", startDate, endDate ) );
-            criteria.add( Restrictions.isNull( "executionDate" ) );
-            criteria.add( Restrictions.lt( "dueDate", new Date() ) );
-            break;
-        default:
-            break;
-        }
-
-        return criteria;
-    }
-
-    @Override
-    public int averageNumberCompleted( Program program, Collection<Integer> orgunitIds, Date after, Date before,
-        int status )
-    {
-        Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstancesByStatus(
-            ProgramInstance.STATUS_COMPLETED, program, orgunitIds, after, before );
-        Criteria criteria = getCriteria();
-        criteria.createAlias( "programInstance", "programInstance" );
-        criteria.createAlias( "programStage", "programStage" );
-        criteria.createAlias( "programInstance.entityInstance", "entityInstance" );
-        criteria.add( Restrictions.eq( "programInstance.program", program ) );
-        criteria.add( Restrictions.eq( "programInstance.status", status ) );
-        criteria.add( Restrictions.in( "organisationUnit.id", orgunitIds ) );
-        criteria.add( Restrictions.between( "programInstance.endDate", after, before ) );
-        criteria.add( Restrictions.eq( "completed", true ) );
-        if ( programInstances != null && programInstances.size() > 0 )
-        {
-            criteria.add( Restrictions.not( Restrictions.in( "programInstance", programInstances ) ) );
-        }
-        Number rs = (Number) criteria.setProjection( Projections.rowCount() ).uniqueResult();
-        return rs != null ? rs.intValue() : 0;
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<Integer> getOrgunitIds( Date startDate, Date endDate )
-    {
-        Criteria criteria = getCriteria();
-        criteria.add( Restrictions.between( "executionDate", startDate, endDate ) );
-        criteria.createAlias( "organisationUnit", "orgunit" );
-        criteria.setProjection( Projections.distinct( Projections.projectionList().add(
-            Projections.property( "orgunit.id" ), "orgunitid" ) ) );
-        return criteria.list();
-    }
-
-    // ---------------------------------------------------------------------
-    // Supportive methods
-    // ---------------------------------------------------------------------
-
+    //TODO this must be re-written
+    
     private String sendMessageToTrackedEntityInstanceSql()
     {
         return "select psi.programstageinstanceid, pav.value as phonenumber, prm.templatemessage, org.name as orgunitName "

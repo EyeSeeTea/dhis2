@@ -152,14 +152,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service for getting tracked entity instances */
-.factory('TrackedEntityInstanceService', function($http, AttributesFactory) {
+.factory('TrackedEntityInstanceService', function($http, $filter, EntityService) {
     
     var promise;
     return {
         
         get: function(entityUid) {
-            promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){                                
-                return response.data;
+            promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){     
+                var tei = response.data;
+                
+                angular.forEach(tei.attributes, function(attribute){                   
+                   if(attribute.type && attribute.value){                       
+                       if(attribute.type === 'date'){                           
+                           attribute.value = moment(attribute.value, 'YYYY-MM-DD')._d;
+                           attribute.value = Date.parse(attribute.value);
+                           attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');                           
+                       }
+                   } 
+                });
+                return tei;
             });            
             return promise;
         },
@@ -169,7 +180,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var url = '../api/trackedEntityInstances.json?ou=' + orgUnitUid + '&program=' + programUid;
             
             promise = $http.get( url ).then(function(response){               
-                return entityFormatter(response.data);
+                return EntityService.formatter(response.data);
             });            
             return promise;
         },
@@ -178,7 +189,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var url =  '../api/trackedEntityInstances.json?ou=' + orgUnitUid;
             
             promise = $http.get( url ).then(function(response){                                
-                return entityFormatter(response.data);
+                return EntityService.formatter(response.data);
             });            
             return promise;
         },        
@@ -197,7 +208,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             
             promise = $http.get( url ).then(function(response){                                
-                return entityFormatter(response.data);
+                return EntityService.formatter(response.data);
             });            
             return promise;
         }
@@ -338,8 +349,53 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
-.service('ProgramAttributes', function(){
+.service('EntityQueryFactory', function(){  
     
+    this.getQueryForAttributes = function(attributes){
+        
+        var query = {url: null, hasValue: false};
+        
+        angular.forEach(attributes, function(attribute){           
+
+            if(attribute.value && attribute.value !== ''){                    
+                query.hasValue = true;                
+                if(angular.isArray(attribute.value)){
+                    var index = 0, q = '';
+                    
+                    angular.forEach(attribute.value, function(val){
+                        
+                        if(index < attribute.value.length-1){
+                            q = q + val + ';';
+                        }
+                        else{
+                            q = q + val;
+                        }                        
+                        index++;
+                    });
+                    
+                    if(query.url){
+                        if(q){
+                            query.url = query.url + '&filter=' + attribute.id + ':IN:' + q;
+                        }
+                    }
+                    else{
+                        if(q){
+                            query.url = 'filter=' + attribute.id + ':IN:' + q;
+                        }
+                    }                    
+                }
+                else{                        
+                    if(query.url){
+                        query.url = query.url + '&filter=' + attribute.id + ':LIKE:' + attribute.value;
+                    }
+                    else{
+                        query.url = 'filter=' + attribute.id + ':LIKE:' + attribute.value;
+                    }
+                }
+            }            
+        });
+        return query;
+    };    
 })
 
 /* Modal service for user interaction */
@@ -559,7 +615,58 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         }
     };
             
+})
+
+.service('EntityService', function(OrgUnitService){
+    
+    return {
+        formatter: function(grid){
+            if(!grid || !grid.rows){
+                return;
+            }
+            
+            //grid.headers[0-4] = Instance, Created, Last updated, Org unit, Tracked entity
+            //grid.headers[5..] = Attribute, Attribute,.... 
+            var attributes = [];
+            for(var i=5; i<grid.headers.length; i++){
+                attributes.push({id: grid.headers[i].name, name: grid.headers[i].column});
+            }
+
+            var entityList = [];
+
+            OrgUnitService.open().then(function(){
+
+                angular.forEach(grid.rows, function(row){
+                    var entity = {};
+                    var isEmpty = true;
+
+                    entity.id = row[0];
+                    entity.orgUnit = row[3];                              
+                    entity.type = row[4];  
+
+                    OrgUnitService.get(row[3]).then(function(ou){
+                        if(ou){
+                            entity.orgUnitName = ou.n;
+                        }                                                       
+                    });
+
+                    for(var i=5; i<row.length; i++){
+                        if(row[i] && row[i] !== ''){
+                            isEmpty = false;
+                            entity[grid.headers[i].name] = row[i];
+                        }
+                    }
+
+                    if(!isEmpty){
+                        entityList.push(entity);
+                    }        
+                });                
+            });
+            return {headers: attributes, rows: entityList};                                    
+        }
+    };
 });
+
 
 /*
 * Helper functions
@@ -581,20 +688,34 @@ function entityFormatter(grid){
     
     var entityList = [];
     
-    angular.forEach(grid.rows, function(row){
-        var entity = {};
+    OrgUnitService.open().then(function(){
         
-        entity.id = row[0];
-        entity.orgUnit = row[3];
-        entity.type = row[4];        
-        
-        for(var i=5; i<row.length; i++){
-            entity[grid.headers[i].name] = row[i];            
-        }
-        
-        entityList.push(entity);        
-        
-    });
-    
-    return {headers: attributes, rows: entityList};
+        angular.forEach(grid.rows, function(row){
+            var entity = {};
+            var isEmpty = true;
+
+            entity.id = row[0];
+            entity.orgUnit = row[3];
+            entity[row[3]] = row[3]; //this is orgunit.           
+            entity.type = row[4];  
+            
+            OrgUnitService.get(row[3]).then(function(ou){
+                if(ou){
+                    entity[row[3]] = ou.n;
+                }                                                       
+            });
+
+            for(var i=5; i<row.length; i++){
+                if(row[i] && row[i] !== ''){
+                    isEmpty = false;
+                    entity[grid.headers[i].name] = row[i];
+                }
+            }
+
+            if(!isEmpty){
+                entityList.push(entity);
+            }        
+        });          
+        return {headers: attributes, rows: entityList};                                    
+    });    
 }
