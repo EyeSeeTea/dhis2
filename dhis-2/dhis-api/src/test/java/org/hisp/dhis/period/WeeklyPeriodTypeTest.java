@@ -28,15 +28,14 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Calendar;
-import java.util.List;
-
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+import java.util.List;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Bob Jolliffe
@@ -50,7 +49,7 @@ public class WeeklyPeriodTypeTest
     {
         Calendar testCal = Calendar.getInstance();
         WeeklyPeriodType wpt = new WeeklyPeriodType();
-        
+
         for ( int year = 1990; year < 2020; year++ )
         {
             for ( int day = -7; day < 7; day++ )
@@ -115,13 +114,13 @@ public class WeeklyPeriodTypeTest
         cal.set( 2011, 0, 3 ); // Wednesday
         WeeklyPeriodType wpt = new WeeklyPeriodType();
         Period p = wpt.createPeriod( cal.getTime() );
-        assertEquals( "2011W1", p.getIsoDate());
+        assertEquals( "2011W1", p.getIsoDate() );
 
         cal.set( 2012, 11, 31 ); // Monday
         p = wpt.createPeriod( cal.getTime() );
-        assertEquals( "2013W1", p.getIsoDate());
+        assertEquals( "2013W1", p.getIsoDate() );
     }
-    
+
     @Test
     public void testGetPeriodsBetween()
     {
@@ -133,5 +132,17 @@ public class WeeklyPeriodTypeTest
         assertEquals( 13, new QuarterlyPeriodType().createPeriod().getPeriodSpan( periodType ) );
         assertEquals( 26, new SixMonthlyPeriodType().createPeriod().getPeriodSpan( periodType ) );
         assertEquals( 52, new YearlyPeriodType().createPeriod().getPeriodSpan( periodType ) );
+    }
+
+    @Test
+    public void testGeneratePeriodsWithCalendar()
+    {
+        WeeklyPeriodType periodType = new WeeklyPeriodType();
+
+        List<Period> periods = periodType.generatePeriods( new GregorianCalendar( 2009, 0, 1 ).getTime() );
+        assertEquals( 53, periods.size() );
+
+        periods = periodType.generatePeriods( new GregorianCalendar( 2011, 0, 3 ).getTime() );
+        assertEquals( 52, periods.size() );
     }
 }
