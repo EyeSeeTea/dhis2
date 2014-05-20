@@ -50,14 +50,14 @@ public class NepaliCalendarTest
     @Test
     public void testToIso()
     {
-        DateUnit dateUnit = new DateUnit( 2071, 1, 1 );
-        Assert.assertEquals( new DateUnit( 2014, 4, 14 ), calendar.toIso( dateUnit ) );
+        Assert.assertEquals( new DateUnit( 2014, 4, 14 ), calendar.toIso( new DateUnit( 2071, 1, 1 ) ) );
+        Assert.assertEquals( new DateUnit( 2014, 4, 14 ), calendar.toIso( 2071, 1, 1 ) );
     }
 
     @Test
     public void testFromIso()
     {
-        DateUnit dateUnit = new DateUnit( 2014, 4, 14 );
-        Assert.assertEquals( new DateUnit( 2071, 1, 1 ), calendar.fromIso( dateUnit ) );
+        Assert.assertEquals( new DateUnit( 2071, 1, 1 ), calendar.fromIso( new DateUnit( 2014, 4, 14 ) ) );
+        Assert.assertEquals( new DateUnit( 2071, 1, 1 ), calendar.fromIso( 2014, 4, 14 ) );
     }
 }
