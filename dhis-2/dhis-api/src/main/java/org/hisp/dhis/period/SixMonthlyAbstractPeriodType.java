@@ -31,7 +31,6 @@ package org.hisp.dhis.period;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -59,24 +58,6 @@ public abstract class SixMonthlyAbstractPeriodType
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
-
-    @Override
-    public Period createPeriod()
-    {
-        return createPeriod( createCalendarInstance() );
-    }
-
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
-
-    @Override
-    public Period createPeriod( Calendar cal )
-    {
-        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
-    }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )

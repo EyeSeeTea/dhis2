@@ -205,7 +205,10 @@ public abstract class PeriodType
      *
      * @return a valid Period based on the current date.
      */
-    public abstract Period createPeriod();
+    public Period createPeriod()
+    {
+        return createPeriod( createCalendarInstance() );
+    }
 
     /**
      * Creates a valid Period based on the given date. E.g. the given date is
@@ -214,9 +217,15 @@ public abstract class PeriodType
      * @param date the date which is contained by the created period.
      * @return the valid Period based on the given date
      */
-    public abstract Period createPeriod( Date date );
+    public Period createPeriod( Date date )
+    {
+        return createPeriod( createCalendarInstance( date ) );
+    }
 
-    public abstract Period createPeriod( Calendar cal );
+    public Period createPeriod( Calendar cal )
+    {
+        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
+    }
 
     public abstract Period createPeriod( DateUnit dateUnit );
 

@@ -31,7 +31,6 @@ package org.hisp.dhis.period;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -57,39 +56,6 @@ public abstract class FinancialPeriodType
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
-
-    @Override
-    public Period createPeriod()
-    {
-        return createPeriod( createCalendarInstance() );
-    }
-
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
-
-    @Override
-    public Period createPeriod( Calendar cal )
-    {
-        /*
-        boolean past = cal.get( Calendar.MONTH ) >= getBaseMonth();
-        
-        cal.set( Calendar.YEAR, past ? cal.get( Calendar.YEAR ) : cal.get( Calendar.YEAR ) - 1 );
-        cal.set( Calendar.MONTH, getBaseMonth() );
-        cal.set( Calendar.DATE, 1 );
-
-        Date startDate = cal.getTime();
-
-        cal.add( Calendar.YEAR, 1 );
-        cal.set( Calendar.DAY_OF_YEAR, cal.get( Calendar.DAY_OF_YEAR ) - 1  );
-
-        return new Period( this, startDate, cal.getTime() );
-        */
-
-        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
-    }
 
     @Override
     public Period createPeriod( DateUnit dateUnit )

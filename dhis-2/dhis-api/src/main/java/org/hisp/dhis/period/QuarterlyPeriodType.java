@@ -71,24 +71,6 @@ public class QuarterlyPeriodType
     }
 
     @Override
-    public Period createPeriod()
-    {
-        return createPeriod( createCalendarInstance() );
-    }
-
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
-
-    @Override
-    public Period createPeriod( Calendar cal )
-    {
-        return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
-    }
-
-    @Override
     public Period createPeriod( DateUnit dateUnit )
     {
         DateUnit start = new DateUnit( dateUnit );
