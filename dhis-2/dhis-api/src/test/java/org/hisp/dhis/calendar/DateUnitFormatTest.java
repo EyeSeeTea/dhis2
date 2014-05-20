@@ -51,7 +51,15 @@ public class DateUnitFormatTest
         // daily
         Assert.assertEquals( new DateInterval( new DateUnit( 2014, 2, 4 ), new DateUnit( 2014, 2, 4 ) ), format.parse( "20140204" ) );
 
+        // weekly
+        Assert.assertEquals( new DateInterval( new DateUnit( 2013, 12, 30 ), new DateUnit( 2014, 1, 5 ) ), format.parse( "2014W1" ) );
+        Assert.assertEquals( new DateInterval( new DateUnit( 2014, 1, 6 ), new DateUnit( 2014, 1, 12 ) ), format.parse( "2014W2" ) );
+
         // monthly
+        Assert.assertNull( format.parse( "2014W0" ) );
+        Assert.assertNull( format.parse( "2014W53" ) );
+        Assert.assertNotNull( format.parse( "2009W53" ) ); // 2009 has 53 weeks
+        Assert.assertNull( format.parse( "2009W54" ) );
         Assert.assertEquals( new DateInterval( new DateUnit( 2014, 2, 1 ), new DateUnit( 2014, 2, 28 ) ), format.parse( "201402" ) );
         Assert.assertEquals( new DateInterval( new DateUnit( 2014, 4, 1 ), new DateUnit( 2014, 4, 30 ) ), format.parse( "201404" ) );
         Assert.assertEquals( new DateInterval( new DateUnit( 2014, 3, 1 ), new DateUnit( 2014, 3, 31 ) ), format.parse( "2014-03" ) );

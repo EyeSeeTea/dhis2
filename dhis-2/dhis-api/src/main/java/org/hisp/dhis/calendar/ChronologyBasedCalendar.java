@@ -208,6 +208,13 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
     }
 
     @Override
+    public int weeksInYear( int year )
+    {
+        DateTime dateTime = new DateTime( year, 1, 1, 0, 0, chronology );
+        return dateTime.weekOfWeekyear().getMaximumValue();
+    }
+
+    @Override
     public int isoWeek( DateUnit dateUnit )
     {
         DateTime dateTime = dateUnit.toDateTime( chronology );

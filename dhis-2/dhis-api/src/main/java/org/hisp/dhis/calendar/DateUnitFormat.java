@@ -105,6 +105,26 @@ public class DateUnitFormat
             DateUnit dateUnit = new DateUnit( year, month, day );
             return new DateInterval( dateUnit, dateUnit );
         }
+        else if ( DateUnitType.WEEKLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int week = Integer.parseInt( matcher.group( 2 ) );
+
+            if ( week < 1 || week > getCalendar().weeksInYear( year ) )
+            {
+                return null;
+            }
+
+            DateUnit start = new DateUnit( year, 1, 1 );
+            start = getCalendar().minusDays( start, getCalendar().weekday( start ) - 1 ); // rewind to start of week
+            start = getCalendar().plusWeeks( start, week - 1 );
+
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusWeeks( end, 1 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
         else if ( DateUnitType.MONTHLY.equals( type ) )
         {
             int year = Integer.parseInt( matcher.group( 1 ) );

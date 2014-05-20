@@ -219,6 +219,13 @@ public class NepaliCalendar extends AbstractCalendar
     }
 
     @Override
+    public int weeksInYear( int year )
+    {
+        DateTime dateTime = new DateTime( year, 1, 1, 0, 0, ISOChronology.getInstance() );
+        return dateTime.weekOfWeekyear().getMaximumValue();
+    }
+
+    @Override
     public int isoWeek( DateUnit dateUnit )
     {
         DateTime dateTime = toIso( dateUnit ).toDateTime( ISOChronology.getInstance() );
