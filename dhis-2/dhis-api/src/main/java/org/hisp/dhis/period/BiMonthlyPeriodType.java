@@ -176,20 +176,6 @@ public class BiMonthlyPeriodType
     }
 
     @Override
-    public Period createPeriod( String isoDate )
-    {
-        try
-        {
-            Date date = new SimpleDateFormat( "yyyyMM" ).parse( isoDate.substring( 0, 6 ) );
-            return createPeriod( date );
-        }
-        catch ( ParseException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-    }
-
-    @Override
     public String getIsoFormat()
     {
         return ISO_FORMAT;

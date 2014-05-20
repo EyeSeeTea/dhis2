@@ -254,23 +254,6 @@ public class WeeklyPeriodType
         return periodString;
     }
 
-    @Override
-    public Period createPeriod( String isoDate )
-    {
-        int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
-        int week = Integer.parseInt( isoDate.substring( 5 ) );
-
-        Calendar cal = Calendar.getInstance();
-        cal.clear();
-        cal.setMinimalDaysInFirstWeek( 4 );
-        cal.setFirstDayOfWeek( Calendar.MONDAY );
-
-        cal.set( Calendar.YEAR, year );
-        cal.set( Calendar.WEEK_OF_YEAR, week );
-
-        return createPeriod( cal.getTime() );
-    }
-
     /**
      * n refers to week number, can be [1-53].
      */

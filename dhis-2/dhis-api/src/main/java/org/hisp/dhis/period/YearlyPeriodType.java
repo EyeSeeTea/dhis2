@@ -194,14 +194,6 @@ public class YearlyPeriodType
     }
 
     @Override
-    public Period createPeriod( String isoDate )
-    {
-        Calendar cal = createCalendarInstance();
-        cal.set( Calendar.YEAR, Integer.parseInt( isoDate ) );
-        return createPeriod( cal );
-    }
-
-    @Override
     public String getIsoFormat()
     {
         return ISO_FORMAT;

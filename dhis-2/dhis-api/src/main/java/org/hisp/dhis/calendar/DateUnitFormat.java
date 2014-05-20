@@ -117,6 +117,13 @@ public class DateUnitFormat
 
             DateUnit start = new DateUnit( year, 1, 1 );
             start = getCalendar().minusDays( start, getCalendar().weekday( start ) - 1 ); // rewind to start of week
+
+            // since we rewind to start of week, we might end up in the previous years weeks, so we check and forward if needed
+            if ( getCalendar().isoWeek( start ) == getCalendar().weeksInYear( year ) )
+            {
+                start = getCalendar().plusWeeks( start, 1 );
+            }
+
             start = getCalendar().plusWeeks( start, week - 1 );
 
             DateUnit end = new DateUnit( start );

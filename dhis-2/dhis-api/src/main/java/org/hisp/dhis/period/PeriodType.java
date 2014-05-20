@@ -30,7 +30,9 @@ package org.hisp.dhis.period;
 
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.calendar.CalendarService;
+import org.hisp.dhis.calendar.DateInterval;
 import org.hisp.dhis.calendar.DateUnit;
+import org.hisp.dhis.calendar.DateUnitFormat;
 import org.hisp.dhis.calendar.DateUnitType;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -79,6 +81,8 @@ public abstract class PeriodType
 
         return Iso8601Calendar.getInstance();
     }
+
+    protected DateUnitFormat dateUnitFormat = new DateUnitFormat();
 
     // -------------------------------------------------------------------------
     // Available PeriodTypes
@@ -348,6 +352,23 @@ public abstract class PeriodType
     // -------------------------------------------------------------------------
 
     /**
+     * @param dateInterval DateInterval to create period from
+     * @return the period.
+     */
+    public Period createPeriod( DateInterval dateInterval )
+    {
+        if ( dateInterval == null || dateInterval.getFrom() == null || dateInterval.getTo() == null )
+        {
+            return null;
+        }
+
+        final DateUnit from = getCalendar().toIso( dateInterval.getFrom() );
+        final DateUnit to = getCalendar().toIso( dateInterval.getTo() );
+
+        return new Period( this, from.toJdkDate(), to.toJdkDate() );
+    }
+
+    /**
      * Returns an iso8601 formatted string representation of the period
      *
      * @param period Period
@@ -361,7 +382,10 @@ public abstract class PeriodType
      * @param isoDate the iso8601 string.
      * @return the period.
      */
-    public abstract Period createPeriod( String isoDate );
+    public Period createPeriod( String isoDate )
+    {
+        return createPeriod( dateUnitFormat.parse( isoDate ) );
+    }
 
     /**
      * Returns the iso8601 format as a string for this period type.

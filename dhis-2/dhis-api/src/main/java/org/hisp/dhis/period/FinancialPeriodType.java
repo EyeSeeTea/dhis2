@@ -198,17 +198,6 @@ public abstract class FinancialPeriodType
     }
 
     @Override
-    public Period createPeriod( String isoDate )
-    {
-        int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
-        Calendar cal = createCalendarInstance();
-        cal.set( Calendar.YEAR, year );
-        cal.set( Calendar.MONTH, 11 );
-        cal.set( Calendar.DAY_OF_MONTH, 31 );
-        return createPeriod( cal );
-    }
-
-    @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
         date = date != null ? date : new Date();

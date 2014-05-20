@@ -86,17 +86,6 @@ public class SixMonthlyAprilPeriodType
         return year + BASE_MONTH_NAME + Semester.getByMonth( month ).name();
     }
 
-    @Override
-    public Period createPeriod( String isoDate )
-    {
-        int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
-        int month = Semester.valueOf( isoDate.substring( 9, 11 ) ).getMonth();
-
-        Calendar cal = createCalendarInstance();
-        cal.set( year, month, 1 );
-        return createPeriod( cal );
-    }
-
     /**
      * n refers to the semester, can be [1-2].
      */

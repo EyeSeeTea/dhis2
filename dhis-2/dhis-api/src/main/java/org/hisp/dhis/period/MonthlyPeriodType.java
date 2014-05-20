@@ -183,30 +183,6 @@ public class MonthlyPeriodType
     }
 
     @Override
-    public Period createPeriod( String isoDate )
-    {
-        try
-        {
-            Date date = new SimpleDateFormat( ISO_FORMAT ).parse( isoDate );
-            return createPeriod( date );
-        }
-        catch ( ParseException ex )
-        {
-            // Ignore and try alternative format
-        }
-
-        try
-        {
-            Date date = new SimpleDateFormat( ALTERNATIVE_ISO_FORMAT ).parse( isoDate );
-            return createPeriod( date );
-        }
-        catch ( ParseException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-    }
-
-    @Override
     public String getIsoFormat()
     {
         return ISO_FORMAT;

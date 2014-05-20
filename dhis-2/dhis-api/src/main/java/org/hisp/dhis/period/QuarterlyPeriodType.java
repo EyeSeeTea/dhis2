@@ -190,17 +190,6 @@ public class QuarterlyPeriodType
         return year + Quarter.getByMonth( month ).name();
     }
 
-    @Override
-    public Period createPeriod( String isoDate )
-    {
-        int year = Integer.parseInt( isoDate.substring( 0, 4 ) );
-        int month = Quarter.valueOf( isoDate.substring( 4, 6 ) ).getMonth();
-
-        Calendar cal = createCalendarInstance();
-        cal.set( year, month, 1 );
-        return createPeriod( cal );
-    }
-
     /**
      * n refers to the quarter, can be [1-4].
      */
