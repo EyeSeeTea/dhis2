@@ -273,7 +273,7 @@ public abstract class PeriodType
      * @param date date of calendar in local calendar
      * @return an instance of a Calendar without any time of day.
      */
-    public static DateUnit createDateUnitInstance( Date date )
+    public static DateUnit createLocalDateUnitInstance( Date date )
     {
         return getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
     }
@@ -376,7 +376,7 @@ public abstract class PeriodType
      */
     public String getIsoDate( Period period )
     {
-        return getIsoDate( getCalendar().fromIso( createDateUnitInstance( period.getStartDate() ) ) );
+        return getIsoDate( createLocalDateUnitInstance( period.getStartDate() ) );
     }
 
     /**

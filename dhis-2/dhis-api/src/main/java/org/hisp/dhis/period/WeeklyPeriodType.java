@@ -114,7 +114,7 @@ public class WeeklyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
 
         return createPeriod( dateUnit );
@@ -123,7 +123,7 @@ public class WeeklyPeriodType
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().minusWeeks( dateUnit, 1 );
 
         return createPeriod( dateUnit );
@@ -178,7 +178,7 @@ public class WeeklyPeriodType
     {
         List<Period> periods = Lists.newArrayList();
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setMonth( 1 );
         dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
         dateUnit = getCalendar().minusDays( dateUnit, 357 );
@@ -275,7 +275,7 @@ public class WeeklyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusWeeks( dateUnit, rewindedPeriods );
 
         return getCalendar().toIso( dateUnit ).toJdkDate();

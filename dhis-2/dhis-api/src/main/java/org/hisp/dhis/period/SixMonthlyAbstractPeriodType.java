@@ -137,7 +137,7 @@ public abstract class SixMonthlyAbstractPeriodType
     {
         DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
         Period period = createPeriod( dateUnit );
-        dateUnit = createDateUnitInstance( period.getStartDate() );
+        dateUnit = createLocalDateUnitInstance( period.getStartDate() );
 
         List<Period> periods = Lists.newArrayList();
 
@@ -178,7 +178,7 @@ public abstract class SixMonthlyAbstractPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         getCalendar().minusMonths( dateUnit, rewindedPeriods * 6 );
 
         return getCalendar().toIso( dateUnit ).toJdkDate();

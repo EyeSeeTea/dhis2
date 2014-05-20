@@ -106,7 +106,7 @@ public class DailyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().plusDays( dateUnit, 1 );
 
         Date date = getCalendar().toIso( dateUnit ).toJdkDate();
@@ -117,7 +117,7 @@ public class DailyPeriodType
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().minusDays( dateUnit, 1 );
 
         Date date = getCalendar().toIso( dateUnit ).toJdkDate();
@@ -132,7 +132,7 @@ public class DailyPeriodType
     @Override
     public List<Period> generatePeriods( Date date )
     {
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setMonth( 1 );
         dateUnit.setDay( 1 );
 
@@ -156,7 +156,7 @@ public class DailyPeriodType
     @Override
     public List<Period> generateRollingPeriods( Date date )
     {
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusDays( dateUnit, 364 );
 
         List<Period> periods = Lists.newArrayList();
@@ -188,7 +188,7 @@ public class DailyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusDays( dateUnit, rewindedPeriods );
 
         return getCalendar().toIso( dateUnit ).toJdkDate();

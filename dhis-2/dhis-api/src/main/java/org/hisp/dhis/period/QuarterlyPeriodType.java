@@ -116,7 +116,7 @@ public class QuarterlyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().plusMonths( dateUnit, 3 );
 
         return createPeriod( dateUnit );
@@ -125,7 +125,7 @@ public class QuarterlyPeriodType
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        DateUnit dateUnit = createDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
         dateUnit = getCalendar().minusMonths( dateUnit, 3 );
 
         return createPeriod( dateUnit );
@@ -138,7 +138,7 @@ public class QuarterlyPeriodType
     @Override
     public List<Period> generatePeriods( Date date )
     {
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setMonth( 1 );
         dateUnit.setDay( 1 );
 
@@ -164,7 +164,7 @@ public class QuarterlyPeriodType
         // get current quarter start date
         date = createPeriod( date ).getStartDate();
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setDay( 1 );
 
         dateUnit = getCalendar().minusMonths( dateUnit, 9 );
@@ -247,7 +247,7 @@ public class QuarterlyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusMonths( dateUnit, rewindedPeriods * 3 );
 
         return getCalendar().toIso( dateUnit ).toJdkDate();
