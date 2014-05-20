@@ -31,6 +31,7 @@ package org.hisp.dhis.period;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.calendar.DateUnit;
+import org.hisp.dhis.calendar.DateUnitType;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.common.DxfNamespaces;
 
@@ -297,52 +298,8 @@ public abstract class PeriodType
      */
     public static PeriodType getPeriodTypeFromIsoString( String isoPeriod )
     {
-        if ( isoPeriod.matches( "\\b\\d{4}\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( YearlyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}[-]?\\d{2}\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( MonthlyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}W\\d[\\d]?\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( WeeklyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{8}\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( DailyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}Q\\d\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( QuarterlyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}S\\d\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( SixMonthlyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}AprilS\\d\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( SixMonthlyAprilPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{6}B\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( BiMonthlyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}April\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( FinancialAprilPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}July\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( FinancialJulyPeriodType.NAME );
-        }
-        if ( isoPeriod.matches( "\\b\\d{4}Oct\\b" ) )
-        {
-            return PERIOD_TYPE_MAP.get( FinancialOctoberPeriodType.NAME );
-        }
-
-        return null;
+        DateUnitType dateUnitType = DateUnitType.find( isoPeriod );
+        return dateUnitType != null ? PERIOD_TYPE_MAP.get( dateUnitType.getType() ) : null;
     }
 
     /**
