@@ -29,6 +29,7 @@ package org.hisp.dhis.calendar;
  */
 
 import com.google.common.collect.Maps;
+import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -40,9 +41,31 @@ import java.util.regex.PatternSyntaxException;
  */
 public class DateUnitFormat
 {
-    private static Map<String, Pattern> compileCache = Maps.newHashMap();
+    private Map<String, Pattern> compileCache = Maps.newHashMap();
 
-    public static DateUnit parse( String period )
+    private static CalendarService calendarService;
+
+    public static void setCalendarService( CalendarService calendarService )
+    {
+        DateUnitFormat.calendarService = calendarService;
+    }
+
+    public static CalendarService getCalendarService()
+    {
+        return calendarService;
+    }
+
+    public static org.hisp.dhis.calendar.Calendar getCalendar()
+    {
+        if ( calendarService != null )
+        {
+            return calendarService.getSystemCalendar();
+        }
+
+        return Iso8601Calendar.getInstance();
+    }
+
+    public DateInterval parse( String period )
     {
         DateUnitType type = DateUnitType.find( period );
 
@@ -64,24 +87,145 @@ public class DateUnitFormat
             }
         }
 
-        System.err.println( "type: " + type );
-
         Pattern pattern = compileCache.get( type.getType() );
-        System.err.println( "pattern: " + pattern );
-
         Matcher matcher = pattern.matcher( period );
-        System.err.println( "matcher.groupCount: " + matcher.groupCount() );
+        boolean match = matcher.find();
 
-        while ( matcher.find() )
+        if ( !match )
         {
-            for ( int i = 1; i <= matcher.groupCount(); i++ )
-            {
-                System.err.println( "group" + i + ": " + matcher.group( i ) );
-            }
+            return null;
         }
 
-        DateUnit dateUnit = new DateUnit();
+        if ( DateUnitType.DAILY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int month = Integer.parseInt( matcher.group( 2 ) );
+            int day = Integer.parseInt( matcher.group( 3 ) );
 
-        return dateUnit;
+            DateUnit dateUnit = new DateUnit( year, month, day );
+            return new DateInterval( dateUnit, dateUnit );
+        }
+        else if ( DateUnitType.MONTHLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int month = Integer.parseInt( matcher.group( 2 ) );
+
+            DateUnit start = new DateUnit( year, month, 1 );
+            DateUnit end = new DateUnit( year, month, getCalendar().daysInMonth( start.getYear(), start.getMonth() ) );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.BI_MONTHLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int month = Integer.parseInt( matcher.group( 2 ) );
+
+            DateUnit start = new DateUnit( year, month, 1 );
+
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusMonths( end, 2 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.QUARTERLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int quarter = Integer.parseInt( matcher.group( 2 ) );
+
+            // valid quarters are from 1 - 4
+            if ( quarter < 1 || quarter > 4 )
+            {
+                return null;
+            }
+
+            DateUnit start = new DateUnit( year, ((quarter - 1) * 3) + 1, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusMonths( end, 3 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.SIX_MONTHLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int semester = Integer.parseInt( matcher.group( 2 ) );
+
+            // valid six-monthly are from 1 - 2
+            if ( semester < 1 || semester > 2 )
+            {
+                return null;
+            }
+
+            DateUnit start = new DateUnit( year, semester == 1 ? 1 : 7, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusMonths( end, 6 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.SIX_MONTHLY_APRIL.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+            int semester = Integer.parseInt( matcher.group( 2 ) );
+
+            // valid six-monthly are from 1 - 2
+            if ( semester < 1 || semester > 2 )
+            {
+                return null;
+            }
+
+            DateUnit start = new DateUnit( year, semester == 1 ? 4 : 10, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusMonths( end, 6 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.YEARLY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+
+            DateUnit start = new DateUnit( year, 1, 1 );
+            DateUnit end = new DateUnit( year, getCalendar().monthsInYear(),
+                getCalendar().daysInMonth( start.getYear(), getCalendar().monthsInYear() ) );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.FINANCIAL_APRIL.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+
+            DateUnit start = new DateUnit( year, 4, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusYears( end, 1 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.FINANCIAL_JULY.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+
+            DateUnit start = new DateUnit( year, 7, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusYears( end, 1 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+        else if ( DateUnitType.FINANCIAL_OCTOBER.equals( type ) )
+        {
+            int year = Integer.parseInt( matcher.group( 1 ) );
+
+            DateUnit start = new DateUnit( year, 10, 1 );
+            DateUnit end = new DateUnit( start );
+            end = getCalendar().plusYears( end, 1 );
+            end = getCalendar().minusDays( end, 1 );
+
+            return new DateInterval( start, end );
+        }
+
+        return null;
     }
 }

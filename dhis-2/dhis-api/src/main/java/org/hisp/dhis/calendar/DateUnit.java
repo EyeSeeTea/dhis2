@@ -173,6 +173,30 @@ public class DateUnit
     }
 
     @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        DateUnit dateUnit = (DateUnit) o;
+
+        if ( day != dateUnit.day ) return false;
+        if ( month != dateUnit.month ) return false;
+        if ( year != dateUnit.year ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = year;
+        result = 31 * result + month;
+        result = 31 * result + day;
+        return result;
+    }
+
+    @Override
     public String toString()
     {
         return "DateUnit{" +
