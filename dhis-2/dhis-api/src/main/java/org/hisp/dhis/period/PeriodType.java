@@ -374,7 +374,18 @@ public abstract class PeriodType
      * @param period Period
      * @return the period as string
      */
-    public abstract String getIsoDate( Period period );
+    public String getIsoDate( Period period )
+    {
+        return getIsoDate( getCalendar().fromIso( createDateUnitInstance( period.getStartDate() ) ) );
+    }
+
+    /**
+     * Returns an iso8601 formatted string representation of the dataUnit
+     *
+     * @param dateUnit Period
+     * @return the period as string
+     */
+    public abstract String getIsoDate( DateUnit dateUnit );
 
     /**
      * Generates a period based on the given iso8601 formatted string.

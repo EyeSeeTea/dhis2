@@ -254,6 +254,12 @@ public class WeeklyPeriodType
         return periodString;
     }
 
+    @Override
+    public String getIsoDate( DateUnit dateUnit )
+    {
+        return null;
+    }
+
     /**
      * n refers to week number, can be [1-53].
      */

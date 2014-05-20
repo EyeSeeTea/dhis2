@@ -31,7 +31,6 @@ package org.hisp.dhis.period;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -170,9 +169,9 @@ public class BiMonthlyPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        return new SimpleDateFormat( "yyyyMM" ).format( period.getStartDate() ) + "B";
+        return String.format( "%d%02dB", dateUnit.getYear(), dateUnit.getMonth() );
     }
 
     @Override

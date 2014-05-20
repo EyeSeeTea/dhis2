@@ -186,11 +186,9 @@ public class YearlyPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        int year = cal.get( Calendar.YEAR );
-        return String.valueOf( year );
+        return String.valueOf( dateUnit.getYear() );
     }
 
     @Override

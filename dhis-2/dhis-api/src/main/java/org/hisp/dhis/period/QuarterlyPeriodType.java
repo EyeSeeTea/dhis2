@@ -181,13 +181,21 @@ public class QuarterlyPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        int year = cal.get( Calendar.YEAR );
-        int month = cal.get( Calendar.MONTH );
-
-        return year + Quarter.getByMonth( month ).name();
+        switch ( dateUnit.getMonth() )
+        {
+            case 1:
+                return dateUnit.getYear() + "Q1";
+            case 4:
+                return dateUnit.getYear() + "Q2";
+            case 7:
+                return dateUnit.getYear() + "Q3";
+            case 10:
+                return dateUnit.getYear() + "Q4";
+            default:
+                throw new IllegalArgumentException( "Month not valid [1,4,7,10]" );
+        }
     }
 
     /**

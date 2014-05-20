@@ -31,7 +31,6 @@ package org.hisp.dhis.period;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -172,9 +171,9 @@ public class DailyPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        return new SimpleDateFormat( ISO_FORMAT ).format( period.getStartDate() );
+        return String.format( "%d%02d%02d", dateUnit.getYear(), dateUnit.getMonth(), dateUnit.getDay() );
     }
 
     @Override

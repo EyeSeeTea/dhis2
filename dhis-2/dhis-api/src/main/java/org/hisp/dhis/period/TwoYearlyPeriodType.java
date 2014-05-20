@@ -198,6 +198,12 @@ public class TwoYearlyPeriodType
     }
 
     @Override
+    public String getIsoDate( DateUnit dateUnit )
+    {
+        return null; // TODO
+    }
+
+    @Override
     public Period createPeriod( String isoDate )
     {
         return null; // TODO

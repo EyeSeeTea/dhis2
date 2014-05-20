@@ -28,6 +28,8 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.util.Calendar;
 
 /**
@@ -77,13 +79,17 @@ public class SixMonthlyAprilPeriodType
     // -------------------------------------------------------------------------
 
     @Override
-    public String getIsoDate( Period period )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        int year = cal.get( Calendar.YEAR );
-        int month = cal.get( Calendar.MONTH );
-
-        return year + BASE_MONTH_NAME + Semester.getByMonth( month ).name();
+        switch ( dateUnit.getMonth() )
+        {
+            case 4:
+                return dateUnit.getYear() + "AprilS1";
+            case 10:
+                return dateUnit.getYear() + "AprilS2";
+            default:
+                throw new IllegalArgumentException( "Month not valid [4,10]" );
+        }
     }
 
     /**
@@ -93,35 +99,5 @@ public class SixMonthlyAprilPeriodType
     public String getIsoFormat()
     {
         return ISO_FORMAT;
-    }
-
-    public enum Semester
-    {
-        S1( Calendar.APRIL ), S2( Calendar.OCTOBER );
-
-        private final int month;
-
-        Semester( int month )
-        {
-            this.month = month;
-        }
-
-        public int getMonth()
-        {
-            return month;
-        }
-
-        public static Semester getByMonth( int month )
-        {
-            switch ( month )
-            {
-                case Calendar.APRIL:
-                    return S1;
-                case Calendar.OCTOBER:
-                    return S2;
-                default:
-                    throw new IllegalArgumentException( "Not a valid six-monthly starting month" );
-            }
-        }
     }
 }
