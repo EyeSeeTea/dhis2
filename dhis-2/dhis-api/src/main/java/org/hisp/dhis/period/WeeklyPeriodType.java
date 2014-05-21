@@ -29,9 +29,10 @@ package org.hisp.dhis.period;
  */
 
 import com.google.common.collect.Lists;
+import org.hisp.dhis.calendar.DateInterval;
+import org.hisp.dhis.calendar.DateIntervalType;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -196,43 +197,23 @@ public class WeeklyPeriodType
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private List<Period> generatePeriods( Calendar cal )
+    public List<Period> generatePeriods( Calendar calendar )
     {
-        // ---------------------------------------------------------------------
-        // Generate weeks
-        // ---------------------------------------------------------------------
+        DateUnit dateUnit = createLocalDateUnitInstance( calendar.getTime() );
+        List<Period> periods = Lists.newArrayList();
 
-        // ---------------------------------------------------------------------
-        // Enforce ISO8601 week to match createPeriod, getNextPeriod etc
-        // Note: perhaps there is need for another weekly type based on locale
-        // 1st day of week is Monday
-        // 1st week of the year is the first week with a Thursday
-        // ---------------------------------------------------------------------
+        // rewind to start of week
+        dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
 
-        cal.setMinimalDaysInFirstWeek( 4 );
-        cal.setFirstDayOfWeek( Calendar.MONDAY );
-
-        cal.set( Calendar.WEEK_OF_YEAR, 1 );
-        cal.set( Calendar.DAY_OF_WEEK, Calendar.MONDAY );
-
-        int firstWeek = cal.get( Calendar.WEEK_OF_YEAR );
-
-        ArrayList<Period> weeks = new ArrayList<Period>();
-
-        Date startDate = cal.getTime();
-        cal.add( Calendar.DAY_OF_YEAR, 6 );
-        weeks.add( new Period( this, startDate, cal.getTime() ) );
-        cal.add( Calendar.DAY_OF_YEAR, 1 );
-
-        while ( cal.get( Calendar.WEEK_OF_YEAR ) != firstWeek )
+        for ( int i = 0; i < getCalendar().weeksInYear( dateUnit.getYear() ); i++ )
         {
-            startDate = cal.getTime();
-            cal.add( Calendar.DAY_OF_YEAR, 6 );
-            weeks.add( new Period( this, startDate, cal.getTime() ) );
-            cal.add( Calendar.DAY_OF_YEAR, 1 );
+            DateInterval interval = getCalendar().toInterval( dateUnit, DateIntervalType.ISO8601_WEEK );
+            periods.add( new Period( this, interval.getFrom().toJdkDate(), interval.getTo().toJdkDate() ) );
+
+            dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
         }
 
-        return weeks;
+        return periods;
     }
 
     @Override
