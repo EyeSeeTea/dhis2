@@ -81,7 +81,7 @@ public class TimeUnitTest
     private void testHelper( TimeUnit timeUnit, int hour, int minutes, int seconds )
     {
         Assert.assertEquals( hour, timeUnit.getHour() );
-        Assert.assertEquals( minutes, timeUnit.getMinutes() );
-        Assert.assertEquals( seconds, timeUnit.getSeconds() );
+        Assert.assertEquals( minutes, timeUnit.getMinute() );
+        Assert.assertEquals( seconds, timeUnit.getSecond() );
     }
 }

@@ -44,19 +44,19 @@ public class TimeUnit
 {
     private int hour;
 
-    private int minutes;
+    private int minute;
 
-    private int seconds;
+    private int second;
 
     public TimeUnit()
     {
     }
 
-    public TimeUnit( int hour, int minutes, int seconds )
+    public TimeUnit( int hour, int minute, int second )
     {
         this.hour = hour;
-        this.minutes = minutes;
-        this.seconds = seconds;
+        this.minute = minute;
+        this.second = second;
     }
 
     public int getHour()
@@ -69,24 +69,24 @@ public class TimeUnit
         this.hour = hour;
     }
 
-    public int getMinutes()
+    public int getMinute()
     {
-        return minutes;
+        return minute;
     }
 
-    public void setMinutes( int minutes )
+    public void setMinute( int minute )
     {
-        this.minutes = minutes;
+        this.minute = minute;
     }
 
-    public int getSeconds()
+    public int getSecond()
     {
-        return seconds;
+        return second;
     }
 
-    public void setSeconds( int seconds )
+    public void setSecond( int second )
     {
-        this.seconds = seconds;
+        this.second = second;
     }
 
     public static TimeUnit fromDateTime( DateTime dateTime )
@@ -116,8 +116,8 @@ public class TimeUnit
         TimeUnit timeUnit = (TimeUnit) o;
 
         if ( hour != timeUnit.hour ) return false;
-        if ( minutes != timeUnit.minutes ) return false;
-        if ( seconds != timeUnit.seconds ) return false;
+        if ( minute != timeUnit.minute ) return false;
+        if ( second != timeUnit.second ) return false;
 
         return true;
     }
@@ -126,8 +126,8 @@ public class TimeUnit
     public int hashCode()
     {
         int result = hour;
-        result = 31 * result + minutes;
-        result = 31 * result + seconds;
+        result = 31 * result + minute;
+        result = 31 * result + second;
         return result;
     }
 
@@ -136,8 +136,8 @@ public class TimeUnit
     {
         return "TimeUnit{" +
             "hour=" + hour +
-            ", minutes=" + minutes +
-            ", seconds=" + seconds +
+            ", minute=" + minute +
+            ", second=" + second +
             '}';
     }
 }
