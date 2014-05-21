@@ -44,7 +44,6 @@ import java.util.Set;
 
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
-import org.hisp.dhis.api.mobile.TrackedEntityMobileSettingService;
 import org.hisp.dhis.api.mobile.model.Activity;
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
@@ -92,7 +91,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
-import org.hisp.dhis.trackedentity.TrackedEntityMobileSetting;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
@@ -131,8 +129,6 @@ public class ActivityReportingServiceImpl
     private TrackedEntityAttributeValueService attValueService;
 
     private TrackedEntityDataValueService dataValueService;
-
-    private TrackedEntityMobileSettingService mobileSettingService;
 
     private ProgramStageSectionService programStageSectionService;
 
@@ -200,17 +196,6 @@ public class ActivityReportingServiceImpl
         this.attValueService = attValueService;
     }
 
-    @Required
-    public void setMobileSettingService( TrackedEntityMobileSettingService mobileSettingService )
-    {
-        this.mobileSettingService = mobileSettingService;
-    }
-
-    public void setSetting( TrackedEntityMobileSetting setting )
-    {
-        this.setting = setting;
-    }
-
     public void setGroupByAttribute( TrackedEntityAttribute groupByAttribute )
     {
         this.groupByAttribute = groupByAttribute;
@@ -267,8 +252,6 @@ public class ActivityReportingServiceImpl
     // -------------------------------------------------------------------------
     // MobileDataSetService
     // -------------------------------------------------------------------------
-
-    private TrackedEntityMobileSetting setting;
 
     private TrackedEntityAttribute groupByAttribute;
 
@@ -711,29 +694,8 @@ public class ActivityReportingServiceImpl
     {
         Beneficiary beneficiary = new Beneficiary();
         List<org.hisp.dhis.api.mobile.model.PatientAttribute> patientAtts = new ArrayList<org.hisp.dhis.api.mobile.model.PatientAttribute>();
-        List<TrackedEntityAttribute> atts;
-
         beneficiary.setId( patient.getId() );
         beneficiary.setName( patient.getName() );
-
-        this.setSetting( getSettings() );
-
-        if ( setting != null )
-        {
-            atts = setting.getAttributes();
-            for ( TrackedEntityAttribute each : atts )
-            {
-                TrackedEntityAttributeValue value = attValueService.getTrackedEntityAttributeValue( patient, each );
-                if ( value != null )
-                {
-                    // patientAtts.add( new TrackedEntityAttribute(
-                    // each.getName(),
-                    // value.getValue(), each.getValueType(),
-                    // new ArrayList<String>() ) );
-                }
-            }
-
-        }
 
         // Set attribute which is used to group beneficiary on mobile (only if
         // there is attribute which is set to be group factor)
@@ -778,8 +740,6 @@ public class ActivityReportingServiceImpl
         {
             patientModel.setTrackedEntityName( "" );
         }
-
-        this.setSetting( getSettings() );
 
         List<TrackedEntityAttributeValue> atts = new ArrayList<TrackedEntityAttributeValue>(
             patient.getAttributeValues() );
@@ -1039,16 +999,6 @@ public class ActivityReportingServiceImpl
             mobileDataElements.add( mobileDataElement );
         }
         return mobileDataElements;
-    }
-
-    private TrackedEntityMobileSetting getSettings()
-    {
-        TrackedEntityMobileSetting setting = null;
-
-        Collection<TrackedEntityMobileSetting> currentSetting = mobileSettingService.getCurrentSetting();
-        if ( currentSetting != null && !currentSetting.isEmpty() )
-            setting = currentSetting.iterator().next();
-        return setting;
     }
 
     private boolean isNumber( String value )
