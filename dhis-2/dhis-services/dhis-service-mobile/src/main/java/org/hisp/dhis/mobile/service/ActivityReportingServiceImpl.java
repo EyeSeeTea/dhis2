@@ -44,7 +44,6 @@ import java.util.Set;
 
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
-import org.hisp.dhis.api.mobile.TrackedEntityMobileSettingService;
 import org.hisp.dhis.api.mobile.model.Activity;
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
@@ -55,6 +54,7 @@ import org.hisp.dhis.api.mobile.model.PatientAttribute;
 import org.hisp.dhis.api.mobile.model.Task;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Notification;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Section;
 import org.hisp.dhis.api.mobile.model.comparator.ActivityComparator;
 import org.hisp.dhis.common.Grid;
@@ -91,7 +91,6 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
-import org.hisp.dhis.trackedentity.TrackedEntityMobileSetting;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
@@ -130,8 +129,6 @@ public class ActivityReportingServiceImpl
     private TrackedEntityAttributeValueService attValueService;
 
     private TrackedEntityDataValueService dataValueService;
-
-    private TrackedEntityMobileSettingService mobileSettingService;
 
     private ProgramStageSectionService programStageSectionService;
 
@@ -199,17 +196,6 @@ public class ActivityReportingServiceImpl
         this.attValueService = attValueService;
     }
 
-    @Required
-    public void setMobileSettingService( TrackedEntityMobileSettingService mobileSettingService )
-    {
-        this.mobileSettingService = mobileSettingService;
-    }
-
-    public void setSetting( TrackedEntityMobileSetting setting )
-    {
-        this.setting = setting;
-    }
-
     public void setGroupByAttribute( TrackedEntityAttribute groupByAttribute )
     {
         this.groupByAttribute = groupByAttribute;
@@ -267,8 +253,6 @@ public class ActivityReportingServiceImpl
     // MobileDataSetService
     // -------------------------------------------------------------------------
 
-    private TrackedEntityMobileSetting setting;
-
     private TrackedEntityAttribute groupByAttribute;
 
     @Override
@@ -283,13 +267,19 @@ public class ActivityReportingServiceImpl
         long lowerBound = cal.getTime().getTime();
 
         List<Activity> items = new ArrayList<Activity>();
-        Collection<TrackedEntityInstance> patients = entityInstanceService.getTrackedEntityInstances( unit, 0,
-            Integer.MAX_VALUE );
 
-        for ( TrackedEntityInstance patient : patients )
+        TrackedEntityInstanceQueryParams param = new TrackedEntityInstanceQueryParams();
+        param.addOrganisationUnit( unit );
+
+        Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstances( param );
+        List<List<Object>> entityInstanceList = trackedEntityDrid.getRows();
+
+        for ( List<Object> entityInstance : entityInstanceList )
         {
+            TrackedEntityInstance trackedEntityInstance = entityInstanceService
+                .getTrackedEntityInstance( entityInstance.get( 0 ).toString() );
             for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
-                patient, false ) )
+                trackedEntityInstance, false ) )
             {
                 if ( programStageInstance.getDueDate().getTime() >= lowerBound
                     && programStageInstance.getDueDate().getTime() <= upperBound )
@@ -319,19 +309,19 @@ public class ActivityReportingServiceImpl
         param.addOrganisationUnit( unit );
 
         Grid trackedEntityDrid = entityInstanceService.getTrackedEntityInstances( param );
-        List<List<Object>> listOfListProgramStageInstance = trackedEntityDrid.getRows();
+        List<List<Object>> entityInstanceList = trackedEntityDrid.getRows();
 
-        for ( List<Object> listProgramStageInstance : listOfListProgramStageInstance )
+        for ( List<Object> entityInstance : entityInstanceList )
         {
-            for ( Object obj : listProgramStageInstance )
+            TrackedEntityInstance trackedEntityInstance = entityInstanceService
+                .getTrackedEntityInstance( entityInstance.get( 0 ).toString() );
+            for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
+                trackedEntityInstance, false ) )
             {
-                TrackedEntityInstance patient = (TrackedEntityInstance) obj;
-                for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
-                    patient, false ) )
-                {
-                    items.add( getActivity( programStageInstance, false ) );
-                }
+
+                items.add( getActivity( programStageInstance, false ) );
             }
+
         }
 
         if ( items.isEmpty() )
@@ -597,7 +587,8 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient enrollProgram( String enrollInfo, Date incidentDate )
+    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient enrollProgram( String enrollInfo,
+        List<org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage> mobileProgramStageList, Date incidentDate )
         throws NotAllowedException
     {
         String[] enrollProgramInfo = enrollInfo.split( "-" );
@@ -614,8 +605,13 @@ public class ActivityReportingServiceImpl
         programInstance.setEntityInstance( patient );
         programInstance.setStatus( ProgramInstance.STATUS_ACTIVE );
         programInstanceService.addProgramInstance( programInstance );
-        for ( ProgramStage programStage : program.getProgramStages() )
+
+        Iterator<ProgramStage> programStagesIterator = program.getProgramStages().iterator();
+
+        for ( int i = 0; i < program.getProgramStages().size(); i++ )
         {
+            ProgramStage programStage = programStagesIterator.next();
+
             if ( programStage.getAutoGenerateEvent() )
             {
                 ProgramStageInstance programStageInstance = new ProgramStageInstance();
@@ -636,7 +632,20 @@ public class ActivityReportingServiceImpl
                     programStageInstance.setExecutionDate( dueDate );
                 }
 
-                programStageInstanceService.addProgramStageInstance( programStageInstance );
+                int programStageInstanceId = programStageInstanceService.addProgramStageInstance( programStageInstance );
+
+                // Inject Datavalue avaiable on-the-fly
+                if ( mobileProgramStageList != null && mobileProgramStageList.size() > 0 )
+                {
+                    org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage mobileProgramStage = mobileProgramStageList
+                        .get( i );
+                    if ( mobileProgramStage != null && mobileProgramStage.getDataElements().size() > 0 )
+                    {
+                        mobileProgramStage.setId( programStageInstanceId );
+                        this.saveProgramStage( mobileProgramStage, patientId, patient.getOrganisationUnit().getId() );
+                    }
+                }
+
                 programInstance.getProgramStageInstances().add( programStageInstance );
             }
         }
@@ -685,29 +694,8 @@ public class ActivityReportingServiceImpl
     {
         Beneficiary beneficiary = new Beneficiary();
         List<org.hisp.dhis.api.mobile.model.PatientAttribute> patientAtts = new ArrayList<org.hisp.dhis.api.mobile.model.PatientAttribute>();
-        List<TrackedEntityAttribute> atts;
-
         beneficiary.setId( patient.getId() );
         beneficiary.setName( patient.getName() );
-
-        this.setSetting( getSettings() );
-
-        if ( setting != null )
-        {
-            atts = setting.getAttributes();
-            for ( TrackedEntityAttribute each : atts )
-            {
-                TrackedEntityAttributeValue value = attValueService.getTrackedEntityAttributeValue( patient, each );
-                if ( value != null )
-                {
-                    // patientAtts.add( new TrackedEntityAttribute(
-                    // each.getName(),
-                    // value.getValue(), each.getValueType(),
-                    // new ArrayList<String>() ) );
-                }
-            }
-
-        }
 
         // Set attribute which is used to group beneficiary on mobile (only if
         // there is attribute which is set to be group factor)
@@ -752,8 +740,6 @@ public class ActivityReportingServiceImpl
         {
             patientModel.setTrackedEntityName( "" );
         }
-
-        this.setSetting( getSettings() );
 
         List<TrackedEntityAttributeValue> atts = new ArrayList<TrackedEntityAttributeValue>(
             patient.getAttributeValues() );
@@ -1015,16 +1001,6 @@ public class ActivityReportingServiceImpl
         return mobileDataElements;
     }
 
-    private TrackedEntityMobileSetting getSettings()
-    {
-        TrackedEntityMobileSetting setting = null;
-
-        Collection<TrackedEntityMobileSetting> currentSetting = mobileSettingService.getCurrentSetting();
-        if ( currentSetting != null && !currentSetting.isEmpty() )
-            setting = currentSetting.iterator().next();
-        return setting;
-    }
-
     private boolean isNumber( String value )
     {
         try
@@ -1147,7 +1123,7 @@ public class ActivityReportingServiceImpl
                         programsInfo += program.getId() + "/" + program.getName() + "$";
                     }
                 }
-                
+
                 throw new NotAllowedException( programsInfo );
             }
         }
@@ -1410,18 +1386,7 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findLatestPatient()
-        throws NotAllowedException
-    {
-        // Patient patient = entityInstanceService.getPatient( this.patientId );
-        //
-        // org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile =
-        // getPatientModel( patient );
-        return this.getPatientMobile();
-    }
-
-    @Override
-    public Integer savePatient( org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patient, int orgUnitId,
+    public Patient savePatient( org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patient, int orgUnitId,
         String programIdText )
         throws NotAllowedException
     {
@@ -1455,25 +1420,24 @@ public class ActivityReportingServiceImpl
         }
 
         patientId = entityInstanceService.createTrackedEntityInstance( patientWeb, null, null, patientAttributeValues );
-
+        TrackedEntityInstance newTrackedEntityInstance = entityInstanceService
+            .getTrackedEntityInstance( this.patientId );
         try
         {
             for ( org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramInstance mobileProgramInstance : patient
                 .getEnrollmentPrograms() )
             {
                 Date incidentDate = PeriodUtil.stringToDate( mobileProgramInstance.getDateOfIncident() );
-                enrollProgram( patientId + "-" + mobileProgramInstance.getProgramId(), incidentDate );
+                enrollProgram( patientId + "-" + mobileProgramInstance.getProgramId(),
+                    mobileProgramInstance.getProgramStageInstances(), incidentDate );
             }
         }
         catch ( Exception e )
         {
-            return patientId;
+            throw new NotAllowedException( e.getMessage() );
         }
 
-        TrackedEntityInstance patientNew = entityInstanceService.getTrackedEntityInstance( this.patientId );
-        setPatientMobile( getPatientModel( patientNew ) );
-
-        return patientId;
+        return getPatientModel( newTrackedEntityInstance );
 
     }
 
@@ -1762,23 +1726,10 @@ public class ActivityReportingServiceImpl
         programInstanceService.updateProgramInstance( programInstance );
 
         org.hisp.dhis.api.mobile.model.LWUITmodel.Patient mobilePatient = getPatientModel( entityInstanceService
-            .getTrackedEntityInstance( programInstance.getEntityInstance().getId() ) );
+            .getTrackedEntityInstance( programInstance.getEntityInstance().getId() ) ); // TODO:
+                                                                                        // SHERIE
 
         return mobilePatient;
-    }
-
-    // TODO remove, we cannot have state like this in a singleton
-    
-    private org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile;
-
-    private org.hisp.dhis.api.mobile.model.LWUITmodel.Patient getPatientMobile()
-    {
-        return patientMobile;
-    }
-
-    private void setPatientMobile( org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile )
-    {
-        this.patientMobile = patientMobile;
     }
 
     @Override
@@ -1893,6 +1844,111 @@ public class ActivityReportingServiceImpl
         }
 
         return userList;
+    }
+
+    @Override
+    public String findVisitSchedule( int orgUnitId, int programId, String info )
+        throws NotAllowedException
+    {
+        String status = info.substring( 0, info.indexOf( "$" ) );
+        String fromDays = info.substring( info.indexOf( "$" ) + 1, info.indexOf( "/" ) );
+        String toDays = info.substring( info.indexOf( "/" ) + 1 );
+
+        // Event Status
+        EventStatus eventStatus = null;
+
+        if ( status.equals( "Schedule in future" ) )
+        {
+            eventStatus = EventStatus.FUTURE_VISIT;
+        }
+        else if ( status.equals( "Overdue" ) )
+        {
+            eventStatus = EventStatus.LATE_VISIT;
+        }
+        else if ( status.equals( "Incomplete" ) )
+        {
+            eventStatus = EventStatus.VISITED;
+        }
+        else if ( status.equals( "Completed" ) )
+        {
+            eventStatus = EventStatus.COMPLETED;
+        }
+        else if ( status.equals( "Skipped" ) )
+        {
+            eventStatus = EventStatus.SKIPPED;
+        }
+
+        // From/To Date
+        Date fromDate = getDate( -1, fromDays );
+        Date toDate = getDate( 1, toDays );
+
+        TrackedEntityInstanceQueryParams param = new TrackedEntityInstanceQueryParams();
+        List<TrackedEntityAttribute> trackedEntityAttributeList = new ArrayList<TrackedEntityAttribute>(
+            attributeService.getTrackedEntityAttributesByDisplayOnVisitSchedule( true ) );
+
+        for ( TrackedEntityAttribute trackedEntityAttribute : trackedEntityAttributeList )
+        {
+            QueryItem queryItem = new QueryItem( trackedEntityAttribute );
+            param.addAttribute( queryItem );
+        }
+
+        param.setProgram( programService.getProgram( programId ) );
+        param.addOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
+        param.setEventStatus( eventStatus );
+        param.setEventStartDate( fromDate );
+        param.setEventEndDate( toDate );
+
+        Grid programStageInstanceGrid = entityInstanceService.getTrackedEntityInstances( param );
+        List<List<Object>> listOfListProgramStageInstance = programStageInstanceGrid.getRows();
+
+        if ( listOfListProgramStageInstance.size() == 0 )
+        {
+            throw NotAllowedException.NO_EVENT_FOUND;
+        }
+
+        String eventsInfo = "";
+        for ( List<Object> row : listOfListProgramStageInstance )
+        {
+            TrackedEntityInstance instance = entityInstanceService.getTrackedEntityInstance( (String)row.get(0) );
+            Collection<TrackedEntityAttribute> displayAttributes = attributeService.getTrackedEntityAttributesDisplayInList();
+            
+            eventsInfo += instance.getId() + "/";
+            String displayName = "";
+            for ( TrackedEntityAttribute displayAttribute : displayAttributes )
+            {
+                TrackedEntityAttributeValue value = attValueService.getTrackedEntityAttributeValue( instance, displayAttribute );
+                if ( value != null )
+                {
+                    displayName += value.getValue() + " ";
+                }
+            }
+            eventsInfo += displayName.trim() + "$";
+        }
+
+        return eventsInfo;
+    }
+
+    public Date getDate( int operation, String adjustment )
+    {
+        Calendar calendar = Calendar.getInstance();
+
+        if ( adjustment.equals( "1 day" ) )
+        {
+            calendar.add( Calendar.DATE, operation );
+        }
+        else if ( adjustment.equals( "3 days" ) )
+        {
+            calendar.add( Calendar.DATE, operation * 3 );
+        }
+        else if ( adjustment.equals( "1 week" ) )
+        {
+            calendar.add( Calendar.DATE, operation * 7 );
+        }
+        else if ( adjustment.equals( "1 month"   ))
+        {
+            calendar.add( Calendar.DATE, operation * 30 );
+        }
+        return calendar.getTime();
     }
 
     @Override

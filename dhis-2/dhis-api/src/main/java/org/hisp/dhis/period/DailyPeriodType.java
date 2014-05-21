@@ -71,7 +71,7 @@ public class DailyPeriodType
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        return new Period( this, dateUnit.toJdkDate(), dateUnit.toJdkDate() );
+        return new Period( this, getCalendar().toIso( dateUnit ).toJdkDate(), getCalendar().toIso( dateUnit ).toJdkDate() );
     }
 
     @Override

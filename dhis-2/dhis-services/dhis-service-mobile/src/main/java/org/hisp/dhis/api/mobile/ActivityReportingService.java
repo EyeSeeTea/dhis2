@@ -30,6 +30,7 @@ package org.hisp.dhis.api.mobile;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
@@ -65,7 +66,7 @@ public interface ActivityReportingService
     String saveProgramStage( ProgramStage programStage, int patientId, int orgUnitId )
         throws NotAllowedException;
 
-    Patient enrollProgram( String enrollInfo, Date incidentDate )
+    Patient enrollProgram( String  enrollInfo, List<org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage>  mobileProgramStageList, Date incidentDate )
         throws NotAllowedException;
 
     Collection<org.hisp.dhis.trackedentity.TrackedEntityAttribute> getPatientAtts( String programId );
@@ -83,10 +84,7 @@ public interface ActivityReportingService
     Program findProgram( String programInfo )
         throws NotAllowedException;
 
-    Patient findLatestPatient()
-        throws NotAllowedException;
-
-    Integer savePatient( Patient patient, int orgUnitId, String programId )
+    Patient savePatient( Patient patient, int orgUnitId, String programId )
         throws NotAllowedException;
 
     String findLostToFollowUp( int orgUnitId, String programId )
@@ -105,6 +103,9 @@ public interface ActivityReportingService
         throws NotAllowedException;
 
     Collection<User> findUser( String keyword )
+        throws NotAllowedException;
+
+    String findVisitSchedule( int orgUnitId, int programId, String info )
         throws NotAllowedException;
 
     String sendMessage( Message message )

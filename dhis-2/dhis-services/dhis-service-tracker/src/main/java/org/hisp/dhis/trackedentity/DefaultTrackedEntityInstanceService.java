@@ -526,13 +526,6 @@ public class DefaultTrackedEntityInstanceService
     }
 
     @Override
-    public Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Integer min,
-        Integer max )
-    {
-        return trackedEntityInstanceStore.getByOrgUnit( organisationUnit, min, max );
-    }
-
-    @Override
     public void updateTrackedEntityInstance( TrackedEntityInstance instance, String representativeId,
         Integer relationshipTypeId, List<TrackedEntityAttributeValue> valuesForSave,
         List<TrackedEntityAttributeValue> valuesForUpdate, Collection<TrackedEntityAttributeValue> valuesForDelete )
@@ -589,12 +582,6 @@ public class DefaultTrackedEntityInstanceService
         return instance.getRepresentative() == null || !(instance.getRepresentative().getUid() == representativeId);
     }
     
-    @Override
-    public Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance instance )
-    {
-        return trackedEntityInstanceStore.getRepresentatives( instance );
-    }
-
     @Override
     public String validateTrackedEntityInstance( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
