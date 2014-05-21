@@ -75,14 +75,7 @@ public class QuarterlyPeriodType
     {
         DateUnit start = new DateUnit( dateUnit );
 
-        start.setMonth( (dateUnit.getMonth() - (dateUnit.getMonth() % 3)) + 1 );
-
-        if ( start.getMonth() > getCalendar().monthsInYear() )
-        {
-            start.setMonth( start.getMonth() - 2 );
-            start.setMonth( (dateUnit.getMonth() - (dateUnit.getMonth() % 3)) + 1 );
-        }
-
+        start.setMonth( ((dateUnit.getMonth() - 1) - ((dateUnit.getMonth() - 1) % 3)) + 1 );
         start.setDay( 1 );
 
         DateUnit end = new DateUnit( start );
