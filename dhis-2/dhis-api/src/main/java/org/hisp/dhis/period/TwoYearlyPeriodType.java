@@ -153,6 +153,12 @@ public class TwoYearlyPeriodType
     }
 
     @Override
+    public List<Period> generatePeriods( DateUnit dateUnit )
+    {
+        return null; // TODO
+    }
+
+    @Override
     public List<Period> generateRollingPeriods( Date date )
     {
         return generateLast5Years( date );

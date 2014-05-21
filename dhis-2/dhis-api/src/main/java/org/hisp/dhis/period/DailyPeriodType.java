@@ -111,9 +111,8 @@ public class DailyPeriodType
      * startDate exists.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setMonth( 1 );
         dateUnit.setDay( 1 );
 

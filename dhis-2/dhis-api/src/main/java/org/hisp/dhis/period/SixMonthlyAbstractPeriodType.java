@@ -114,9 +114,8 @@ public abstract class SixMonthlyAbstractPeriodType
      * Period's startDate exists.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
         Period period = createPeriod( dateUnit );
         dateUnit = createLocalDateUnitInstance( period.getStartDate() );
 

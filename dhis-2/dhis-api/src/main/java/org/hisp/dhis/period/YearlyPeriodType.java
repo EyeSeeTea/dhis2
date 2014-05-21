@@ -115,9 +115,8 @@ public class YearlyPeriodType
      * Generates yearly periods for the last 5, current and next 5 years.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusYears( dateUnit, 5 );
         dateUnit.setDay( 1 );
         dateUnit.setMonth( 1 );

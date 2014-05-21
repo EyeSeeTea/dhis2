@@ -112,9 +112,8 @@ public abstract class FinancialPeriodType
      * financial years.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
         List<Period> periods = Lists.newArrayList();

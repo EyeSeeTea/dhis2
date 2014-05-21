@@ -33,7 +33,6 @@ import org.hisp.dhis.calendar.DateInterval;
 import org.hisp.dhis.calendar.DateIntervalType;
 import org.hisp.dhis.calendar.DateUnit;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -117,9 +116,8 @@ public class WeeklyPeriodType
      * startDate exists.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         List<Period> periods = Lists.newArrayList();
 
         // rewind to start of week

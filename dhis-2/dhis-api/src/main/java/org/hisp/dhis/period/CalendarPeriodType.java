@@ -28,8 +28,10 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -98,7 +100,12 @@ public abstract class CalendarPeriodType
      * @param date the date which touches the time span to generate Periods for.
      * @return a list of Periods for a defined time span.
      */
-    public abstract List<Period> generatePeriods( Date date );
+    public List<Period> generatePeriods( Date date )
+    {
+        return generatePeriods( createLocalDateUnitInstance( date ) );
+    }
+
+    public abstract List<Period> generatePeriods( DateUnit dateUnit );
 
     public abstract List<Period> generateRollingPeriods( Date date );
 
@@ -112,14 +119,14 @@ public abstract class CalendarPeriodType
      */
     public List<Period> generateLast5Years( Date date )
     {
-        ArrayList<Period> periods = new ArrayList<Period>();
-        Calendar cal = createCalendarInstance( date );
-        cal.add( Calendar.YEAR, -4 );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
+        dateUnit = getCalendar().minusYears( dateUnit, 4 );
+        List<Period> periods = Lists.newArrayList();
 
         for ( int i = 0; i < 5; i++ )
         {
-            periods.addAll( generatePeriods( cal.getTime() ) );
-            cal.add( Calendar.YEAR, 1 );
+            periods.addAll( generatePeriods( dateUnit.toJdkDate() ) );
+            dateUnit = getCalendar().plusYears( dateUnit, 1 );
         }
 
         return periods;
