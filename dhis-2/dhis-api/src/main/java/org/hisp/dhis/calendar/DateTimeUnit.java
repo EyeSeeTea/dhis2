@@ -34,11 +34,15 @@ import java.util.Date;
 
 /**
  * Simple class that can hold both a TimeUnit and DateUnit which is useful in cases
- * where we don't want to drop the time dimension.
+ * where we are converting from a DateTime, Jdk Calendar or Jdk Date and don't want to
+ * loose either date or time dimension.
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  * @see DateUnit
  * @see TimeUnit
+ * @see org.joda.time.DateTime
+ * @see java.util.Calendar
+ * @see java.util.Date
  */
 public class DateTimeUnit
 {
