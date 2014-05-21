@@ -39,7 +39,6 @@ import java.util.List;
  * endDate.
  *
  * @author Torgeir Lorange Ostby
- * @version $Id: DailyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
 public class DailyPeriodType
     extends CalendarPeriodType
