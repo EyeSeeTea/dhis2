@@ -44,10 +44,19 @@ import java.util.Date;
  */
 public class TimeUnit
 {
+    /**
+     * Hour of day, range is 1 - 24.
+     */
     private int hour;
 
+    /**
+     * Minute of day, range is 0 - 59.
+     */
     private int minute;
 
+    /**
+     * Second of day, range is 0 - 59.
+     */
     private int second;
 
     public TimeUnit()
