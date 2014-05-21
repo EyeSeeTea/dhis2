@@ -33,6 +33,7 @@ import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
 import javax.validation.constraints.NotNull;
+import java.time.DateTimeException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -68,8 +69,19 @@ public class DateUnit
      */
     int dayOfWeek;
 
+    /**
+     * Does dateUnit represent ISO 8601.
+     */
+    final boolean iso8601;
+
+    public DateUnit( boolean iso8601 )
+    {
+        this.iso8601 = iso8601;
+    }
+
     public DateUnit()
     {
+        this( false );
     }
 
     public DateUnit( DateUnit dateUnit )
@@ -78,19 +90,40 @@ public class DateUnit
         this.month = dateUnit.getMonth();
         this.day = dateUnit.getDay();
         this.dayOfWeek = dateUnit.getDayOfWeek();
+        this.iso8601 = dateUnit.isIso8601();
     }
 
-    public DateUnit( int year, int month, int day )
+    public DateUnit( DateUnit dateUnit, boolean iso8601 )
+    {
+        this.year = dateUnit.getYear();
+        this.month = dateUnit.getMonth();
+        this.day = dateUnit.getDay();
+        this.dayOfWeek = dateUnit.getDayOfWeek();
+        this.iso8601 = iso8601;
+    }
+
+    public DateUnit( int year, int month, int day, boolean iso8601 )
     {
         this.year = year;
         this.month = month;
         this.day = day;
+        this.iso8601 = iso8601;
+    }
+
+    public DateUnit( int year, int month, int day )
+    {
+        this( year, month, day, false );
+    }
+
+    public DateUnit( int year, int month, int day, int dayOfWeek, boolean iso8601 )
+    {
+        this( year, month, day, iso8601 );
+        this.dayOfWeek = dayOfWeek;
     }
 
     public DateUnit( int year, int month, int day, int dayOfWeek )
     {
-        this( year, month, day );
-        this.dayOfWeek = dayOfWeek;
+        this( year, month, day, dayOfWeek, false );
     }
 
     public int getYear()
@@ -133,8 +166,18 @@ public class DateUnit
         this.dayOfWeek = dayOfWeek;
     }
 
+    public boolean isIso8601()
+    {
+        return iso8601;
+    }
+
     public DateTime toDateTime()
     {
+        if ( !iso8601 )
+        {
+            throw new DateTimeException( "Can't convert non-ISO8601 DateUnit to DateTime." );
+        }
+
         return new DateTime( year, month, day, 0, 0, ISOChronology.getInstance() );
     }
 
@@ -145,6 +188,11 @@ public class DateUnit
 
     public java.util.Calendar toJdkCalendar()
     {
+        if ( !iso8601 )
+        {
+            throw new DateTimeException( "Can't convert non-ISO8601 DateUnit to JDK Calendar." );
+        }
+
         java.util.Calendar calendar = new GregorianCalendar( year, month - 1, day );
         calendar.setTime( calendar.getTime() );
 
@@ -164,12 +212,13 @@ public class DateUnit
     public static DateUnit fromJdkCalendar( java.util.Calendar calendar )
     {
         return new DateUnit( calendar.get( java.util.Calendar.YEAR ), calendar.get( java.util.Calendar.MONTH ) + 1,
-            calendar.get( java.util.Calendar.DAY_OF_MONTH ), calendar.get( java.util.Calendar.DAY_OF_WEEK ) );
+            calendar.get( java.util.Calendar.DAY_OF_MONTH ), calendar.get( java.util.Calendar.DAY_OF_WEEK ), true );
     }
 
     public static DateUnit fromJdkDate( Date date )
     {
-        return fromDateTime( new DateTime( date.getTime() ) );
+        DateUnit dateUnit = fromDateTime( new DateTime( date.getTime() ) );
+        return new DateUnit( dateUnit, true );
     }
 
     @Override
@@ -181,6 +230,7 @@ public class DateUnit
         DateUnit dateUnit = (DateUnit) o;
 
         if ( day != dateUnit.day ) return false;
+        if ( iso8601 != dateUnit.iso8601 ) return false;
         if ( month != dateUnit.month ) return false;
         if ( year != dateUnit.year ) return false;
 
@@ -193,6 +243,7 @@ public class DateUnit
         int result = year;
         result = 31 * result + month;
         result = 31 * result + day;
+        result = 31 * result + (iso8601 ? 1 : 0);
         return result;
     }
 
@@ -203,7 +254,7 @@ public class DateUnit
             "year=" + year +
             ", month=" + month +
             ", day=" + day +
-            ", dayOfWeek=" + dayOfWeek +
+            ", iso8601=" + iso8601 +
             '}';
     }
 }

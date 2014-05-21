@@ -130,7 +130,7 @@ public abstract class CalendarPeriodType
 
         for ( int i = 0; i < 5; i++ )
         {
-            periods.addAll( generatePeriods( dateUnit.toJdkDate() ) );
+            periods.addAll( generatePeriods( dateUnit ) );
             dateUnit = getCalendar().plusYears( dateUnit, 1 );
         }
 

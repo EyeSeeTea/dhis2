@@ -70,7 +70,7 @@ public class BiMonthlyPeriodType
         dateUnit = getCalendar().plusMonths( dateUnit, 1 );
         dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
 
-        return new Period( this, startDateUnit.toJdkDate(), dateUnit.toJdkDate() );
+        return new Period( this, getCalendar().toIso( startDateUnit ).toJdkDate(), getCalendar().toIso( dateUnit ).toJdkDate() );
     }
 
     @Override

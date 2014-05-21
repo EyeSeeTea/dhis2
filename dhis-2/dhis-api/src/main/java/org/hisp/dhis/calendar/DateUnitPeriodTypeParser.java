@@ -104,6 +104,8 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             int day = Integer.parseInt( matcher.group( 3 ) );
 
             DateUnit dateUnit = new DateUnit( year, month, day );
+            dateUnit.setDayOfWeek( getCalendar().weekday( dateUnit ) );
+
             return new DateInterval( dateUnit, dateUnit );
         }
         else if ( DateUnitType.WEEKLY.equals( type ) )
@@ -126,10 +128,12 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             }
 
             start = getCalendar().plusWeeks( start, week - 1 );
-
             DateUnit end = new DateUnit( start );
             end = getCalendar().plusWeeks( end, 1 );
             end = getCalendar().minusDays( end, 1 );
+
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
 
             return new DateInterval( start, end );
         }
@@ -141,6 +145,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             DateUnit start = new DateUnit( year, month, 1 );
             DateUnit end = new DateUnit( year, month, getCalendar().daysInMonth( start.getYear(), start.getMonth() ) );
 
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
+
             return new DateInterval( start, end );
         }
         else if ( DateUnitType.BI_MONTHLY.equals( type ) )
@@ -149,10 +156,12 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             int month = Integer.parseInt( matcher.group( 2 ) );
 
             DateUnit start = new DateUnit( year, month, 1 );
-
             DateUnit end = new DateUnit( start );
             end = getCalendar().plusMonths( end, 2 );
             end = getCalendar().minusDays( end, 1 );
+
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
 
             return new DateInterval( start, end );
         }
@@ -172,6 +181,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             end = getCalendar().plusMonths( end, 3 );
             end = getCalendar().minusDays( end, 1 );
 
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
+
             return new DateInterval( start, end );
         }
         else if ( DateUnitType.SIX_MONTHLY.equals( type ) )
@@ -189,6 +201,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             DateUnit end = new DateUnit( start );
             end = getCalendar().plusMonths( end, 6 );
             end = getCalendar().minusDays( end, 1 );
+
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
 
             return new DateInterval( start, end );
         }
@@ -208,6 +223,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             end = getCalendar().plusMonths( end, 6 );
             end = getCalendar().minusDays( end, 1 );
 
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
+
             return new DateInterval( start, end );
         }
         else if ( DateUnitType.YEARLY.equals( type ) )
@@ -217,6 +235,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             DateUnit start = new DateUnit( year, 1, 1 );
             DateUnit end = new DateUnit( year, getCalendar().monthsInYear(),
                 getCalendar().daysInMonth( start.getYear(), getCalendar().monthsInYear() ) );
+
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
 
             return new DateInterval( start, end );
         }
@@ -229,6 +250,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             end = getCalendar().plusYears( end, 1 );
             end = getCalendar().minusDays( end, 1 );
 
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
+
             return new DateInterval( start, end );
         }
         else if ( DateUnitType.FINANCIAL_JULY.equals( type ) )
@@ -240,6 +264,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             end = getCalendar().plusYears( end, 1 );
             end = getCalendar().minusDays( end, 1 );
 
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
+
             return new DateInterval( start, end );
         }
         else if ( DateUnitType.FINANCIAL_OCTOBER.equals( type ) )
@@ -250,6 +277,9 @@ public class DateUnitPeriodTypeParser implements PeriodTypeParser
             DateUnit end = new DateUnit( start );
             end = getCalendar().plusYears( end, 1 );
             end = getCalendar().minusDays( end, 1 );
+
+            start.setDayOfWeek( getCalendar().weekday( start ) );
+            end.setDayOfWeek( getCalendar().weekday( end ) );
 
             return new DateInterval( start, end );
         }

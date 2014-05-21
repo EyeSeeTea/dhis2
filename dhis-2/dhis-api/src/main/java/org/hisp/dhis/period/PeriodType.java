@@ -52,7 +52,7 @@ import java.util.Map;
  *
  * @author Kristian Nordal
  */
-@JacksonXmlRootElement(localName = "periodType", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "periodType", namespace = DxfNamespaces.DXF_2_0 )
 public abstract class PeriodType
     implements Serializable
 {
@@ -257,7 +257,7 @@ public abstract class PeriodType
      */
     public static Calendar createCalendarInstance()
     {
-        return getCalendar().today().toJdkCalendar();
+        return getCalendar().toIso( getCalendar().today() ).toJdkCalendar();
     }
 
     /**

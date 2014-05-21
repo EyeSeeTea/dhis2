@@ -50,7 +50,7 @@ public class RelativePeriodTest
 
     private static Date getDate( int year, int month, int day )
     {
-        return new DateUnit( year, month, day ).toJdkDate();
+        return new DateUnit( year, month, day, true ).toJdkDate();
     }
 
     @Test
