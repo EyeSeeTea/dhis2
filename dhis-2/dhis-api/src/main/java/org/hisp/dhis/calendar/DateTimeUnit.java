@@ -28,6 +28,10 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.joda.time.DateTime;
+
+import java.util.Date;
+
 /**
  * Simple class that can hold both a TimeUnit and DateUnit which is useful in cases
  * where we don't want to drop the time dimension.
@@ -70,6 +74,27 @@ public class DateTimeUnit
     public void setTimeUnit( TimeUnit timeUnit )
     {
         this.timeUnit = timeUnit;
+    }
+
+    public static DateTimeUnit fromDateTime( DateTime dateTime )
+    {
+        DateUnit dateUnit = DateUnit.fromDateTime( dateTime );
+        TimeUnit timeUnit = TimeUnit.fromDateTime( dateTime );
+
+        return new DateTimeUnit( dateUnit, timeUnit );
+    }
+
+    public static DateTimeUnit fromJdkCalendar( java.util.Calendar calendar )
+    {
+        DateUnit dateUnit = DateUnit.fromJdkCalendar( calendar );
+        TimeUnit timeUnit = TimeUnit.fromJdkCalendar( calendar );
+
+        return new DateTimeUnit( dateUnit, timeUnit );
+    }
+
+    public static DateTimeUnit fromJdkDate( Date date )
+    {
+        return fromDateTime( new DateTime( date.getTime() ) );
     }
 
     @Override
