@@ -130,49 +130,14 @@ public class WeeklyPeriodType
         return createPeriod( dateUnit );
     }
 
-    @Override
-    public List<Period> generatePeriods( Date date )
-    {
-        return generatePeriods( createCalendarInstance( date ) );
-    }
-
     /**
      * Generates weekly Periods for the whole year in which the given Period's
      * startDate exists.
      */
     @Override
-    public List<Period> generatePeriods( Period period )
+    public List<Period> generatePeriods( Date date )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.setMinimalDaysInFirstWeek( 4 );
-        cal.setFirstDayOfWeek( Calendar.MONDAY );
-
-        // ---------------------------------------------------------------------
-        // If the supplied period is the first week of a year where the start
-        // date is in the year before, we want to generate weeks for the year
-        // of the end date
-        // ---------------------------------------------------------------------
-
-        if ( period.getPeriodType().equals( this ) )
-        {
-            Calendar cal2 = createCalendarInstance( period.getEndDate() );
-
-            if ( cal.get( Calendar.YEAR ) != cal2.get( Calendar.YEAR ) )
-            {
-                if ( cal2.get( Calendar.WEEK_OF_YEAR ) == 1 )
-                {
-                    cal = cal2;
-                    cal2 = null;
-                }
-            }
-        }
-
-        return generatePeriods( cal );
-    }
-
-    public List<Period> generatePeriods( Calendar calendar )
-    {
-        DateUnit dateUnit = createLocalDateUnitInstance( calendar.getTime() );
+        DateUnit dateUnit = createLocalDateUnitInstance( date );
         List<Period> periods = Lists.newArrayList();
 
         // rewind to start of week
