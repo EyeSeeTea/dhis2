@@ -74,11 +74,13 @@ public class MonthlyPeriodType
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        DateUnit startDateUnit = new DateUnit( dateUnit );
-        startDateUnit.setDay( 1 );
-        dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
+        DateUnit start = new DateUnit( dateUnit );
+        DateUnit end = new DateUnit( dateUnit );
 
-        return toIsoPeriod( startDateUnit, dateUnit );
+        start.setDay( 1 );
+        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
+
+        return toIsoPeriod( start, end );
     }
 
     @Override
