@@ -33,6 +33,8 @@ package org.hisp.dhis.calendar;
  * where we don't want to drop the time dimension.
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @see DateUnit
+ * @see TimeUnit
  */
 public class DateTimeUnit
 {

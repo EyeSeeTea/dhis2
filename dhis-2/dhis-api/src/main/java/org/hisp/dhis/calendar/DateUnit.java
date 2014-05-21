@@ -43,6 +43,8 @@ import java.util.GregorianCalendar;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  * @see DateInterval
  * @see Calendar
+ * @see TimeUnit
+ * @see DateTimeUnit
  */
 public class DateUnit
 {

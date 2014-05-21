@@ -39,6 +39,8 @@ import java.util.Date;
  * from a JDK Date/Calendar and you don't want to loose the time dimension.
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @see DateUnit
+ * @see DateTimeUnit
  */
 public class TimeUnit
 {
