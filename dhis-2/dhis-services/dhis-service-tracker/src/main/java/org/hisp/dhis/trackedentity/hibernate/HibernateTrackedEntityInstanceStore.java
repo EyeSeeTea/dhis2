@@ -41,10 +41,10 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.LAST_
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_UNIT_ID;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
+import static org.hisp.dhis.trackedentity.TrackedEntityInstanceService.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +60,6 @@ import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.event.EventStatus;
-import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
@@ -68,14 +67,11 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.Timer;
-import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
-import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceStore;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -423,179 +419,44 @@ public class HibernateTrackedEntityInstanceStore
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<TrackedEntityInstance> getByPhoneNumber( String phoneNumber, Integer min, Integer max )
+    public String validate( TrackedEntityInstance instance, TrackedEntityAttributeValue attributeValue, Program program )
     {
-        Criteria criteria = getCriteria();
-        criteria.createAlias( "attributeValues", "attributeValue" );
-        criteria.createAlias( "attributeValue.attribute", "attribute" );
-        criteria.add( Restrictions.eq( "attribute.valueType", TrackedEntityAttribute.TYPE_PHONE_NUMBER ) );
-        criteria.add( Restrictions.like( "attributeValue.value", phoneNumber ) );
+        TrackedEntityAttribute attribute = attributeValue.getAttribute();
 
-        if ( min != null && max != null )
+        if ( attribute.isUnique() )
         {
-            criteria.setFirstResult( min );
-            criteria.setMaxResults( max );
-        }
+            Criteria criteria = getCriteria();
+            criteria.add( Restrictions.ne( "id", instance.getId() ) );
+            criteria.createAlias( "attributeValues", "attributeValue" );
+            criteria.createAlias( "attributeValue.attribute", "attribute" );
+            criteria.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );
+            criteria.add( Restrictions.eq( "attributeValue.attribute", attribute ) );
 
-        return criteria.list();
-    }
-
-    public String validate( TrackedEntityInstance instance, Program program, I18nFormat format )
-    {
-        if ( instance.getAttributeValues() != null && instance.getAttributeValues().size() > 0 )
-        {
-
-            for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
+            if ( attribute.getId() != 0 )
             {
-                TrackedEntityAttribute attribute = attributeValue.getAttribute();
-
-                if ( attribute.isUnique() )
-                {
-                    Criteria criteria = getCriteria();
-                    criteria.add( Restrictions.ne( "id", instance.getId() ) );
-                    criteria.createAlias( "attributeValues", "attributeValue" );
-                    criteria.createAlias( "attributeValue.attribute", "attribute" );
-                    criteria.add( Restrictions.eq( "attributeValue.value", attributeValue.getValue() ) );
-                    criteria.add( Restrictions.eq( "attributeValue.attribute", attribute ) );
-
-                    if ( attribute.getId() != 0 )
-                    {
-                        criteria.add( Restrictions.ne( "id", attribute.getId() ) );
-                    }
-
-                    if ( attribute.getOrgunitScope() )
-                    {
-                        criteria.add( Restrictions.eq( "organisationUnit", instance.getOrganisationUnit() ) );
-                    }
-
-                    if ( program != null && attribute.getProgramScope() )
-                    {
-                        criteria.createAlias( "programInstances", "programInstance" );
-                        criteria.add( Restrictions.eq( "programInstance.program", program ) );
-                    }
-
-                    Number rs = (Number) criteria.setProjection(
-                        Projections.projectionList().add( Projections.property( "attribute.id" ) ) ).uniqueResult();
-
-                    if ( rs != null && rs.intValue() > 0 )
-                    {
-                        return TrackedEntityInstanceService.ERROR_DUPLICATE_IDENTIFIER
-                            + TrackedEntityInstanceService.SAPERATOR + rs.intValue();
-                    }
-                }
-            }
-        }
-
-        if ( program != null )
-        {
-            ValidationCriteria validationCriteria = validateEnrollment( instance, program, format );
-
-            if ( validationCriteria != null )
-            {
-                return TrackedEntityInstanceService.ERROR_ENROLLMENT + TrackedEntityInstanceService.SAPERATOR
-                    + validationCriteria.getId();
-            }
-        }
-
-        return TrackedEntityInstanceService.ERROR_NONE + "";
-    }
-
-    public ValidationCriteria validateEnrollment( TrackedEntityInstance instance, Program program, I18nFormat format )
-    {
-        try
-        {
-            for ( ValidationCriteria criteria : program.getValidationCriteria() )
-            {
-                String value = "";
-                for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
-                {
-                    if ( attributeValue.getAttribute().getUid().equals( criteria.getProperty() ) )
-                    {
-                        value = attributeValue.getValue();
-
-                        String type = attributeValue.getAttribute().getValueType();
-                        // For integer type
-                        if ( type.equals( TrackedEntityAttribute.TYPE_NUMBER ) )
-                        {
-                            int value1 = Integer.parseInt( value );
-                            int value2 = Integer.parseInt( criteria.getValue() );
-
-                            if ( (criteria.getOperator() == ValidationCriteria.OPERATOR_LESS_THAN && value1 >= value2)
-                                || (criteria.getOperator() == ValidationCriteria.OPERATOR_EQUAL_TO && value1 != value2)
-                                || (criteria.getOperator() == ValidationCriteria.OPERATOR_GREATER_THAN && value1 <= value2) )
-                            {
-                                return criteria;
-                            }
-                        }
-                        // For Date type
-                        else if ( type.equals( TrackedEntityAttribute.TYPE_DATE ) )
-                        {
-                            Date value1 = format.parseDate( value );
-                            Date value2 = format.parseDate( criteria.getValue() );
-                            int i = value1.compareTo( value2 );
-                            if ( i != criteria.getOperator() )
-                            {
-                                return criteria;
-                            }
-                        }
-                        // For other types
-                        else
-                        {
-                            if ( criteria.getOperator() == ValidationCriteria.OPERATOR_EQUAL_TO
-                                && !value.equals( criteria.getValue() ) )
-                            {
-                                return criteria;
-                            }
-
-                        }
-
-                    }
-                }
-
+                criteria.add( Restrictions.ne( "id", attribute.getId() ) );
             }
 
-            // Return null if all criteria are met
+            if ( attribute.getOrgunitScope() )
+            {
+                criteria.add( Restrictions.eq( "organisationUnit", instance.getOrganisationUnit() ) );
+            }
 
-            return null;
+            if ( program != null && attribute.getProgramScope() )
+            {
+                criteria.createAlias( "programInstances", "programInstance" );
+                criteria.add( Restrictions.eq( "programInstance.program", program ) );
+            }
+
+            Number rs = (Number) criteria.setProjection( Projections.projectionList().add( 
+                Projections.property( "attribute.id" ) ) ).uniqueResult();
+
+            if ( rs != null && rs.intValue() > 0 )
+            {
+                return ERROR_DUPLICATE_IDENTIFIER + SEPARATOR + rs.intValue();
+            }
         }
-        catch ( Exception ex )
-        {
-            throw new RuntimeException( ex );
-        }
-    }
-
-    @SuppressWarnings( "unchecked" )
-    @Override
-    public Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min,
-        Integer max )
-    {
-        String hql = "FROM TrackedEntityAttributeValue pav WHERE lower (pav.value) LIKE lower ('%" + searchText
-            + "%') AND pav.attribute.id =:attributeId order by pav.entityInstance";
-
-        Query query = getQuery( hql );
-
-        query.setInteger( "attributeId", attributeId );
-
-        if ( min != null && max != null )
-        {
-            query.setFirstResult( min ).setMaxResults( max );
-        }
-
-        List<TrackedEntityInstance> entityInstances = new ArrayList<TrackedEntityInstance>();
-        Collection<TrackedEntityAttributeValue> attributeValue = query.list();
-        for ( TrackedEntityAttributeValue pv : attributeValue )
-        {
-            entityInstances.add( pv.getEntityInstance() );
-        }
-
-        return entityInstances;
-    }
-    
-    @SuppressWarnings( "unchecked" )
-    @Override
-    public Collection<TrackedEntityInstance> get( TrackedEntity trackedEntity )
-    {
-        return getCriteria( Restrictions.eq( "trackedEntity", trackedEntity ) ).list();
+        
+        return null;
     }
 }

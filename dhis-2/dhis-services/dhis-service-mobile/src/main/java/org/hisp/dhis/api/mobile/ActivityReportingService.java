@@ -49,68 +49,65 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
  */
 public interface ActivityReportingService
 {
-    public ActivityPlan getCurrentActivityPlan( OrganisationUnit unit, String localeString );
+    ActivityPlan getCurrentActivityPlan( OrganisationUnit unit, String localeString );
 
-    public ActivityPlan getAllActivityPlan( OrganisationUnit unit, String localeString );
+    ActivityPlan getAllActivityPlan( OrganisationUnit unit, String localeString );
 
-    public void saveActivityReport( OrganisationUnit unit, ActivityValue activityValue, Integer programStageSectionId )
+    void saveActivityReport( OrganisationUnit unit, ActivityValue activityValue, Integer programStageSectionId )
         throws NotAllowedException;
 
-    public String findPatient( String name, int orgUnitId )
+    Patient findPatient( int patientId )
         throws NotAllowedException;
 
-    public Patient findPatient( int patientId )
+    String findPatientInAdvanced( String keyword, int orgUnitId, int programId )
         throws NotAllowedException;
 
-    public String findPatientInAdvanced( String keyword, int orgUnitId, int programId )
+    String saveProgramStage( ProgramStage programStage, int patientId, int orgUnitId )
         throws NotAllowedException;
 
-    public String saveProgramStage( ProgramStage programStage, int patientId, int orgUnitId )
+    Patient enrollProgram( String enrollInfo, Date incidentDate )
         throws NotAllowedException;
 
-    public Patient enrollProgram( String enrollInfo, Date incidentDate )
+    Collection<org.hisp.dhis.trackedentity.TrackedEntityAttribute> getPatientAtts( String programId );
+
+    Collection<PatientAttribute> getAttsForMobile();
+
+    Collection<PatientAttribute> getPatientAttributesForMobile( String programId );
+
+    Patient addRelationship( Relationship enrollmentRelationship, int orgUnitId )
         throws NotAllowedException;
 
-    public Collection<org.hisp.dhis.trackedentity.TrackedEntityAttribute> getPatientAtts( String programId );
-
-    public Collection<PatientAttribute> getAttsForMobile();
-
-    public Collection<PatientAttribute> getPatientAttributesForMobile( String programId );
-
-    public Patient addRelationship( Relationship enrollmentRelationship, int orgUnitId )
+    Program getAllProgramByOrgUnit( int orgUnitId, String programType )
         throws NotAllowedException;
 
-    public Program getAllProgramByOrgUnit( int orgUnitId, String programType )
+    Program findProgram( String programInfo )
         throws NotAllowedException;
 
-    public Program findProgram( String programInfo )
+    Patient findLatestPatient()
         throws NotAllowedException;
 
-    public Patient findLatestPatient()
+    Integer savePatient( Patient patient, int orgUnitId, String programId )
         throws NotAllowedException;
 
-    public Integer savePatient( Patient patient, int orgUnitId, String programId )
+    String findLostToFollowUp( int orgUnitId, String programId )
         throws NotAllowedException;
 
-    public String findLostToFollowUp( int orgUnitId, String programId )
+    Notification handleLostToFollowUp( LostEvent lostEvent )
         throws NotAllowedException;
 
-    public Notification handleLostToFollowUp( LostEvent lostEvent )
+    Patient generateRepeatableEvent( int orgUnitId, String eventInfo )
         throws NotAllowedException;
 
-    public Patient generateRepeatableEvent( int orgUnitId, String eventInfo )
+    String saveSingleEventWithoutRegistration( ProgramStage programStage, int orgUnitId )
         throws NotAllowedException;
 
-    public String saveSingleEventWithoutRegistration( ProgramStage programStage, int orgUnitId )
+    String sendFeedback( Message message )
         throws NotAllowedException;
 
-    public String sendFeedback( Message message )
+    Collection<User> findUser( String keyword )
         throws NotAllowedException;
 
-    public Collection<User> findUser( String keyword )
-        throws NotAllowedException;
-
-    public String sendMessage( Message message )
+    String sendMessage( Message message )
         throws NotAllowedException;
 
 }
