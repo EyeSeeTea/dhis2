@@ -35,14 +35,14 @@ import org.junit.Test;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DateUnitFormatTest
+public class DateUnitPeriodTypeParserTest
 {
-    private DateUnitFormat format;
+    private PeriodTypeParser format;
 
     @Before
     public void init()
     {
-        format = new DateUnitFormat();
+        format = new DateUnitPeriodTypeParser();
     }
 
     @Test

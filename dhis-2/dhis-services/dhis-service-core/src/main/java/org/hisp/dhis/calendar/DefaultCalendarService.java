@@ -71,7 +71,7 @@ public class DefaultCalendarService implements CalendarService
 
         PeriodType.setCalendarService( this );
         Cal.setCalendarService( this );
-        DateUnitFormat.setCalendarService( this );
+        DateUnitPeriodTypeParser.setCalendarService( this );
     }
 
     @Override

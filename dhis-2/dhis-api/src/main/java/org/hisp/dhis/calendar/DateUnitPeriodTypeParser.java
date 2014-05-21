@@ -39,7 +39,7 @@ import java.util.regex.PatternSyntaxException;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DateUnitFormat
+public class DateUnitPeriodTypeParser implements PeriodTypeParser
 {
     private Map<String, Pattern> compileCache = Maps.newHashMap();
 
@@ -47,7 +47,7 @@ public class DateUnitFormat
 
     public static void setCalendarService( CalendarService calendarService )
     {
-        DateUnitFormat.calendarService = calendarService;
+        DateUnitPeriodTypeParser.calendarService = calendarService;
     }
 
     public static CalendarService getCalendarService()
@@ -65,6 +65,7 @@ public class DateUnitFormat
         return Iso8601Calendar.getInstance();
     }
 
+    @Override
     public DateInterval parse( String period )
     {
         DateUnitType type = DateUnitType.find( period );

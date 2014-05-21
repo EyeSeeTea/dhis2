@@ -32,8 +32,9 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.calendar.DateInterval;
 import org.hisp.dhis.calendar.DateUnit;
-import org.hisp.dhis.calendar.DateUnitFormat;
+import org.hisp.dhis.calendar.DateUnitPeriodTypeParser;
 import org.hisp.dhis.calendar.DateUnitType;
+import org.hisp.dhis.calendar.PeriodTypeParser;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
 import org.hisp.dhis.common.DxfNamespaces;
 
@@ -82,7 +83,7 @@ public abstract class PeriodType
         return Iso8601Calendar.getInstance();
     }
 
-    protected DateUnitFormat dateUnitFormat = new DateUnitFormat();
+    protected PeriodTypeParser dateUnitFormat = new DateUnitPeriodTypeParser();
 
     // -------------------------------------------------------------------------
     // Available PeriodTypes
