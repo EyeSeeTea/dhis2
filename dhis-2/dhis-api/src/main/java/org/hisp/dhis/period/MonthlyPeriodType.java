@@ -75,9 +75,9 @@ public class MonthlyPeriodType
     public Period createPeriod( DateUnit dateUnit )
     {
         DateUnit start = new DateUnit( dateUnit );
-        DateUnit end = new DateUnit( dateUnit );
-
         start.setDay( 1 );
+
+        DateUnit end = new DateUnit( dateUnit );
         end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
 
         return toIsoPeriod( start, end );

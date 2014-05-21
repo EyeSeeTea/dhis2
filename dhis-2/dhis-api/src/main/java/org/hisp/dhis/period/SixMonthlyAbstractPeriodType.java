@@ -68,17 +68,18 @@ public abstract class SixMonthlyAbstractPeriodType
         // TODO how should we handle years with odd number of months? (Ethiopian)
         int months = (((yearMonth % 12) / 6) * 6) + getBaseMonth();
 
-        dateUnit.setDay( 1 );
-        dateUnit.setMonth( 1 );
-        dateUnit = getCalendar().plusMonths( dateUnit, months );
-        dateUnit.setDayOfWeek( getCalendar().weekday( dateUnit ) );
+        DateUnit start = new DateUnit( dateUnit );
+        start.setDay( 1 );
+        start.setMonth( 1 );
+        start = getCalendar().plusMonths( start, months );
+        start.setDayOfWeek( getCalendar().weekday( start ) );
 
-        DateUnit endDateUnit = new DateUnit( dateUnit );
-        endDateUnit = getCalendar().plusMonths( endDateUnit, 5 );
-        endDateUnit.setDay( getCalendar().daysInMonth( endDateUnit.getYear(), endDateUnit.getMonth() ) );
-        endDateUnit.setDayOfWeek( getCalendar().weekday( endDateUnit ) );
+        DateUnit end = new DateUnit( start );
+        end = getCalendar().plusMonths( end, 5 );
+        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
+        end.setDayOfWeek( getCalendar().weekday( end ) );
 
-        return toIsoPeriod( dateUnit, endDateUnit );
+        return toIsoPeriod( start, end );
     }
 
     @Override
