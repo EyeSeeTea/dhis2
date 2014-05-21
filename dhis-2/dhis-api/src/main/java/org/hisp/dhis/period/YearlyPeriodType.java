@@ -80,7 +80,7 @@ public class YearlyPeriodType
         end.setMonth( getCalendar().monthsInYear() );
         end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
 
-        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
+        return toIsoPeriod( start, end );
     }
 
     @Override

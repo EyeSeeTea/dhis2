@@ -228,6 +228,16 @@ public abstract class PeriodType
         return createPeriod( getCalendar().fromIso( DateUnit.fromJdkCalendar( cal ) ) );
     }
 
+    public Period toIsoPeriod( DateUnit start, DateUnit end )
+    {
+        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
+    }
+
+    public Period toIsoPeriod( DateUnit dateUnit )
+    {
+        return toIsoPeriod( dateUnit, dateUnit );
+    }
+
     public abstract Period createPeriod( DateUnit dateUnit );
 
     /**

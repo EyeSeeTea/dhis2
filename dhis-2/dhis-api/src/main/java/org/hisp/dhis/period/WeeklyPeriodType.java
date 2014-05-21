@@ -80,7 +80,7 @@ public class WeeklyPeriodType
         DateUnit end = new DateUnit( start );
         end = getCalendar().plusDays( end, getCalendar().daysInWeek() - 1 );
 
-        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
+        return toIsoPeriod( start, end );
     }
 
     @Override

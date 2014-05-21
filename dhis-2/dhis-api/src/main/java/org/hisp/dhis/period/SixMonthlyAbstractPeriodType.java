@@ -78,7 +78,7 @@ public abstract class SixMonthlyAbstractPeriodType
         endDateUnit.setDay( getCalendar().daysInMonth( endDateUnit.getYear(), endDateUnit.getMonth() ) );
         endDateUnit.setDayOfWeek( getCalendar().weekday( endDateUnit ) );
 
-        return new Period( this, getCalendar().toIso( dateUnit ).toJdkDate(), getCalendar().toIso( endDateUnit ).toJdkDate() );
+        return toIsoPeriod( dateUnit, endDateUnit );
     }
 
     @Override

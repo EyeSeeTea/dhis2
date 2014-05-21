@@ -76,7 +76,7 @@ public abstract class FinancialPeriodType
         end = getCalendar().plusYears( end, 1 );
         end = getCalendar().minusDays( end, 1 );
 
-        return new Period( this, getCalendar().toIso( start ).toJdkDate(), getCalendar().toIso( end ).toJdkDate() );
+        return toIsoPeriod( start, end );
     }
 
     @Override

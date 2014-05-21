@@ -78,7 +78,7 @@ public class MonthlyPeriodType
         startDateUnit.setDay( 1 );
         dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
 
-        return new Period( this, getCalendar().toIso( startDateUnit ).toJdkDate(), getCalendar().toIso( dateUnit ).toJdkDate() );
+        return toIsoPeriod( startDateUnit, dateUnit );
     }
 
     @Override
