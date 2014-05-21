@@ -62,15 +62,16 @@ public class BiMonthlyPeriodType
     @Override
     public Period createPeriod( DateUnit dateUnit )
     {
-        dateUnit.setMonth( ((dateUnit.getMonth() - 1) - (dateUnit.getMonth() - 1) % 2) + 1 );
+        DateUnit start = new DateUnit( dateUnit );
+        start.setMonth( ((start.getMonth() - 1) - (start.getMonth() - 1) % 2) + 1 );
+        start.setDay( 1 );
 
-        DateUnit startDateUnit = new DateUnit( dateUnit );
-        startDateUnit.setDay( 1 );
+        DateUnit end = new DateUnit( start );
 
-        dateUnit = getCalendar().plusMonths( dateUnit, 1 );
-        dateUnit.setDay( getCalendar().daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
+        end = getCalendar().plusMonths( end, 1 );
+        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
 
-        return toIsoPeriod( startDateUnit, dateUnit );
+        return toIsoPeriod( start, end );
     }
 
     @Override
