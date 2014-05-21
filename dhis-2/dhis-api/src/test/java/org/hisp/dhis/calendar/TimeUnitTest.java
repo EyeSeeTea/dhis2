@@ -42,33 +42,46 @@ public class TimeUnitTest
     @Test
     public void testFromDateTime()
     {
-        DateTime dateTime = new DateTime( 2014, 1, 1, 12, 13, 14 );
-        TimeUnit timeUnit = TimeUnit.fromDateTime( dateTime );
+        TimeUnit timeUnit = TimeUnit.fromDateTime( new DateTime( 2014, 1, 1, 12, 13, 14 ) );
+        testHelper( timeUnit, 12, 13, 14 );
 
-        Assert.assertEquals( 12, timeUnit.getHour() );
-        Assert.assertEquals( 13, timeUnit.getMinutes() );
-        Assert.assertEquals( 14, timeUnit.getSeconds() );
+        timeUnit = TimeUnit.fromDateTime( new DateTime( 2014, 1, 1, 16, 12, 1 ) );
+        testHelper( timeUnit, 16, 12, 1 );
+
+        timeUnit = TimeUnit.fromDateTime( new DateTime( 2014, 1, 1, 1, 1, 1 ) );
+        testHelper( timeUnit, 1, 1, 1 );
     }
 
     @Test
     public void testFromJdkCalendar()
     {
-        java.util.Calendar calendar = new GregorianCalendar( 2014, 0, 1, 12, 13, 14 );
-        TimeUnit timeUnit = TimeUnit.fromJdkCalendar( calendar );
+        TimeUnit timeUnit = TimeUnit.fromJdkCalendar( new GregorianCalendar( 2014, 0, 1, 12, 13, 14 ) );
+        testHelper( timeUnit, 12, 13, 14 );
 
-        Assert.assertEquals( 12, timeUnit.getHour() );
-        Assert.assertEquals( 13, timeUnit.getMinutes() );
-        Assert.assertEquals( 14, timeUnit.getSeconds() );
+        timeUnit = TimeUnit.fromJdkCalendar( new GregorianCalendar( 2014, 0, 1, 16, 12, 1 ) );
+        testHelper( timeUnit, 16, 12, 1 );
+
+        timeUnit = TimeUnit.fromJdkCalendar( new GregorianCalendar( 2014, 0, 1, 1, 1, 1 ) );
+        testHelper( timeUnit, 1, 1, 1 );
     }
 
     @Test
     public void testFromJdkDate()
     {
-        java.util.Calendar calendar = new GregorianCalendar( 2014, 0, 1, 12, 13, 14 );
-        TimeUnit timeUnit = TimeUnit.fromJdkDate( calendar.getTime() );
+        TimeUnit timeUnit = TimeUnit.fromJdkDate( new GregorianCalendar( 2014, 0, 1, 12, 13, 14 ).getTime() );
+        testHelper( timeUnit, 12, 13, 14 );
 
-        Assert.assertEquals( 12, timeUnit.getHour() );
-        Assert.assertEquals( 13, timeUnit.getMinutes() );
-        Assert.assertEquals( 14, timeUnit.getSeconds() );
+        timeUnit = TimeUnit.fromJdkDate( new GregorianCalendar( 2014, 0, 1, 16, 12, 1 ).getTime() );
+        testHelper( timeUnit, 16, 12, 1 );
+
+        timeUnit = TimeUnit.fromJdkDate( new GregorianCalendar( 2014, 0, 1, 1, 1, 1 ).getTime() );
+        testHelper( timeUnit, 1, 1, 1 );
+    }
+
+    private void testHelper( TimeUnit timeUnit, int hour, int minutes, int seconds )
+    {
+        Assert.assertEquals( hour, timeUnit.getHour() );
+        Assert.assertEquals( minutes, timeUnit.getMinutes() );
+        Assert.assertEquals( seconds, timeUnit.getSeconds() );
     }
 }
