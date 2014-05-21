@@ -144,8 +144,12 @@ public class QuarterlyPeriodType
     {
         // get current quarter start date
         date = createPeriod( date ).getStartDate();
+        return generateRollingPeriods( createLocalDateUnitInstance( date ) );
+    }
 
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
+    @Override
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
+    {
         dateUnit.setDay( 1 );
 
         dateUnit = getCalendar().minusMonths( dateUnit, 9 );

@@ -129,10 +129,8 @@ public class BiMonthlyPeriodType
      * which the given date is inside.
      */
     @Override
-    public List<Period> generateRollingPeriods( Date date )
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
-
-        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
         dateUnit.setDay( 1 );
         dateUnit = getCalendar().minusMonths( dateUnit, (dateUnit.getMonth() % 2) + 10 );
 

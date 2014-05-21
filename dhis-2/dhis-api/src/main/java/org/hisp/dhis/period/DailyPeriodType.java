@@ -134,9 +134,8 @@ public class DailyPeriodType
      * date.
      */
     @Override
-    public List<Period> generateRollingPeriods( Date date )
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit = getCalendar().minusDays( dateUnit, 364 );
 
         List<Period> periods = Lists.newArrayList();

@@ -39,7 +39,7 @@ import java.util.List;
  * PeriodType for two-yearly Periods. A valid two-yearly Period has startDate
  * set to January 1st on an even year (2000, 2002, 2004, etc), and endDate set
  * to the last day of the next year.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: TwoYearlyPeriodType.java 2975 2007-03-03 22:24:36Z torgeilo $
  */
@@ -163,7 +163,13 @@ public class TwoYearlyPeriodType
     {
         return generateLast5Years( date );
     }
-    
+
+    @Override
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
+    {
+        return generateLast5Years( getCalendar().toIso( dateUnit ).toJdkDate() );
+    }
+
     @Override
     public List<Period> generateLast5Years( Date date )
     {
@@ -208,14 +214,14 @@ public class TwoYearlyPeriodType
     {
         return null; // TODO
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
+        Calendar cal = createCalendarInstance( date );
         cal.add( Calendar.YEAR, (rewindedPeriods * -2) );
 
         return cal.getTime();

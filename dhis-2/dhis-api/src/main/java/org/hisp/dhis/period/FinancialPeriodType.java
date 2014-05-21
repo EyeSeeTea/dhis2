@@ -142,6 +142,12 @@ public abstract class FinancialPeriodType
     }
 
     @Override
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
+    {
+        return generateLast5Years( getCalendar().toIso( dateUnit ).toJdkDate() );
+    }
+
+    @Override
     public List<Period> generateLast5Years( Date date )
     {
         DateUnit dateUnit = createLocalDateUnitInstance( date );

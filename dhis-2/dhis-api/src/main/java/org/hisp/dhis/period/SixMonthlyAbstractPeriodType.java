@@ -153,6 +153,12 @@ public abstract class SixMonthlyAbstractPeriodType
     }
 
     @Override
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
+    {
+        return generateRollingPeriods( getCalendar().toIso( dateUnit ).toJdkDate() );
+    }
+
+    @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
         date = date != null ? date : new Date();

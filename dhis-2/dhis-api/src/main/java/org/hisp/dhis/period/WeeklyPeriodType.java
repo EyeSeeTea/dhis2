@@ -139,11 +139,9 @@ public class WeeklyPeriodType
      * given date is inside.
      */
     @Override
-    public List<Period> generateRollingPeriods( Date date )
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
         List<Period> periods = Lists.newArrayList();
-
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
         dateUnit.setMonth( 1 );
         dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
         dateUnit = getCalendar().minusDays( dateUnit, 357 );

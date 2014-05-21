@@ -107,7 +107,12 @@ public abstract class CalendarPeriodType
 
     public abstract List<Period> generatePeriods( DateUnit dateUnit );
 
-    public abstract List<Period> generateRollingPeriods( Date date );
+    public List<Period> generateRollingPeriods( Date date )
+    {
+        return generateRollingPeriods( createLocalDateUnitInstance( date ) );
+    }
+
+    public abstract List<Period> generateRollingPeriods( DateUnit dateUnit );
 
     /**
      * Generates a list of Periods for the last 5 years. Must be overridden by
