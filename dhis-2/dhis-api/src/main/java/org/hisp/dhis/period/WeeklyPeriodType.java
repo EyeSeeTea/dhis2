@@ -170,6 +170,25 @@ public class WeeklyPeriodType
         return generatePeriods( cal );
     }
 
+    public List<Period> generatePeriods( Calendar calendar )
+    {
+        DateUnit dateUnit = createLocalDateUnitInstance( calendar.getTime() );
+        List<Period> periods = Lists.newArrayList();
+
+        // rewind to start of week
+        dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
+
+        for ( int i = 0; i < getCalendar().weeksInYear( dateUnit.getYear() ); i++ )
+        {
+            DateInterval interval = getCalendar().toInterval( dateUnit, DateIntervalType.ISO8601_WEEK );
+            periods.add( new Period( this, interval.getFrom().toJdkDate(), interval.getTo().toJdkDate() ) );
+
+            dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
+        }
+
+        return periods;
+    }
+
     /**
      * Generates the last 52 weeks where the last one is the week which the
      * given date is inside.
@@ -196,25 +215,6 @@ public class WeeklyPeriodType
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
-
-    public List<Period> generatePeriods( Calendar calendar )
-    {
-        DateUnit dateUnit = createLocalDateUnitInstance( calendar.getTime() );
-        List<Period> periods = Lists.newArrayList();
-
-        // rewind to start of week
-        dateUnit = getCalendar().minusDays( dateUnit, getCalendar().weekday( dateUnit ) - 1 );
-
-        for ( int i = 0; i < getCalendar().weeksInYear( dateUnit.getYear() ); i++ )
-        {
-            DateInterval interval = getCalendar().toInterval( dateUnit, DateIntervalType.ISO8601_WEEK );
-            periods.add( new Period( this, interval.getFrom().toJdkDate(), interval.getTo().toJdkDate() ) );
-
-            dateUnit = getCalendar().plusWeeks( dateUnit, 1 );
-        }
-
-        return periods;
-    }
 
     @Override
     public String getIsoDate( DateUnit dateUnit )

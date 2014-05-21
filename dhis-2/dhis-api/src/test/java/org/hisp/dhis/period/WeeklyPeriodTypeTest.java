@@ -149,6 +149,27 @@ public class WeeklyPeriodTypeTest
     }
 
     @Test
+    public void testGeneratePeriodsWithPeriod()
+    {
+        Period period = new Period( periodType, new GregorianCalendar( 2008, 11, 28 ).getTime(),
+            new GregorianCalendar( 2009, 0, 3 ).getTime() );
+
+        List<Period> periods = periodType.generatePeriods( period );
+        assertEquals( 53, periods.size() );
+
+        period = new Period( periodType, new GregorianCalendar( 2012, 11, 31 ).getTime(),
+            new GregorianCalendar( 2013, 0, 6 ).getTime() );
+        periods = periodType.generatePeriods( period );
+        assertEquals( 52, periods.size() );
+
+        assertEquals( new Period( periodType, new GregorianCalendar( 2012, 11, 31 ).getTime(),
+            new GregorianCalendar( 2013, 0, 6 ).getTime() ), periods.get( 0 ) );
+
+        assertEquals( new Period( periodType, new GregorianCalendar( 2013, 11, 23 ).getTime(),
+            new GregorianCalendar( 2013, 11, 29 ).getTime() ), periods.get( periods.size() - 1 ) );
+    }
+
+    @Test
     public void testGetIsoDate()
     {
         Calendar calendar = Calendar.getInstance();
