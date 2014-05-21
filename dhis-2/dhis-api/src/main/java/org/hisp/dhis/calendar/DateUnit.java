@@ -33,7 +33,6 @@ import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
 import javax.validation.constraints.NotNull;
-import java.time.DateTimeException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
@@ -177,7 +176,7 @@ public class DateUnit
     {
         if ( !iso8601 )
         {
-            throw new DateTimeException( "Can't convert non-ISO8601 DateUnit to DateTime." );
+            throw new RuntimeException( "Cannot convert non-ISO8601 DateUnit to DateTime." );
         }
 
         return new DateTime( year, month, day, 0, 0, ISOChronology.getInstance() );
@@ -192,7 +191,7 @@ public class DateUnit
     {
         if ( !iso8601 )
         {
-            throw new DateTimeException( "Can't convert non-ISO8601 DateUnit to JDK Calendar." );
+            throw new RuntimeException( "Cannot convert non-ISO8601 DateUnit to JDK Calendar." );
         }
 
         java.util.Calendar calendar = new GregorianCalendar( year, month - 1, day );
