@@ -28,6 +28,7 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -43,6 +44,14 @@ import static org.junit.Assert.*;
  */
 public class WeeklyPeriodTypeTest
 {
+    WeeklyPeriodType periodType;
+
+    @Before
+    public void init()
+    {
+        periodType = new WeeklyPeriodType();
+    }
+
     @Test
     @Ignore
     public void testGeneratePeriods()
@@ -89,20 +98,18 @@ public class WeeklyPeriodTypeTest
     @Test
     public void isoDates()
     {
-        WeeklyPeriodType weekly = new WeeklyPeriodType();
         Calendar cal = Calendar.getInstance();
-
         cal.clear();
 
         cal.set( 2008, 11, 29 );
-        Period period = weekly.createPeriod( "2009W1" );
+        Period period = periodType.createPeriod( "2009W1" );
         assertEquals( cal.getTime(), period.getStartDate() );
 
         cal.set( 2011, 0, 3 );
-        period = weekly.createPeriod( "2011W1" );
+        period = periodType.createPeriod( "2011W1" );
         assertEquals( cal.getTime(), period.getStartDate() );
 
-        period = weekly.createPeriod( "2011W11" );
+        period = periodType.createPeriod( "2011W11" );
         cal.set( 2011, 2, 14 );
         assertEquals( cal.getTime(), period.getStartDate() );
     }
@@ -112,20 +119,17 @@ public class WeeklyPeriodTypeTest
     {
         Calendar cal = Calendar.getInstance();
         cal.set( 2011, 0, 3 ); // Wednesday
-        WeeklyPeriodType wpt = new WeeklyPeriodType();
-        Period p = wpt.createPeriod( cal.getTime() );
+        Period p = periodType.createPeriod( cal.getTime() );
         assertEquals( "2011W1", p.getIsoDate() );
 
         cal.set( 2012, 11, 31 ); // Monday
-        p = wpt.createPeriod( cal.getTime() );
+        p = periodType.createPeriod( cal.getTime() );
         assertEquals( "2013W1", p.getIsoDate() );
     }
 
     @Test
     public void testGetPeriodsBetween()
     {
-        PeriodType periodType = new WeeklyPeriodType();
-
         assertEquals( 1, periodType.createPeriod().getPeriodSpan( periodType ) );
         assertEquals( 4, new MonthlyPeriodType().createPeriod().getPeriodSpan( periodType ) );
         assertEquals( 8, new BiMonthlyPeriodType().createPeriod().getPeriodSpan( periodType ) );
@@ -137,12 +141,15 @@ public class WeeklyPeriodTypeTest
     @Test
     public void testGeneratePeriodsWithCalendar()
     {
-        WeeklyPeriodType periodType = new WeeklyPeriodType();
-
         List<Period> periods = periodType.generatePeriods( new GregorianCalendar( 2009, 0, 1 ).getTime() );
         assertEquals( 53, periods.size() );
 
         periods = periodType.generatePeriods( new GregorianCalendar( 2011, 0, 3 ).getTime() );
         assertEquals( 52, periods.size() );
+    }
+
+    public void testGetIsoDate()
+    {
+
     }
 }
