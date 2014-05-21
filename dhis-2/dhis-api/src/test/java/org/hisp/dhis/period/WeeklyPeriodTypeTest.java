@@ -148,8 +148,21 @@ public class WeeklyPeriodTypeTest
         assertEquals( 52, periods.size() );
     }
 
+    @Test
     public void testGetIsoDate()
     {
+        Calendar calendar = Calendar.getInstance();
 
+        calendar.set( 2012, Calendar.DECEMBER, 31 );
+        assertEquals( "2013W1", periodType.getIsoDate( new Period( periodType, calendar.getTime(), calendar.getTime() ) ) );
+
+        calendar.set( 2012, Calendar.DECEMBER, 30 );
+        assertEquals( "2012W52", periodType.getIsoDate( new Period( periodType, calendar.getTime(), calendar.getTime() ) ) );
+
+        calendar.set( 2009, Calendar.DECEMBER, 29 );
+        assertEquals( "2009W53", periodType.getIsoDate( new Period( periodType, calendar.getTime(), calendar.getTime() ) ) );
+
+        calendar.set( 2010, Calendar.JANUARY, 4 );
+        assertEquals( "2010W1", periodType.getIsoDate( new Period( periodType, calendar.getTime(), calendar.getTime() ) ) );
     }
 }

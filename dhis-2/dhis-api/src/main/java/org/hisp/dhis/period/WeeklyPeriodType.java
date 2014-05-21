@@ -236,28 +236,16 @@ public class WeeklyPeriodType
     }
 
     @Override
-    public String getIsoDate( Period period )
-    {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.setMinimalDaysInFirstWeek( 4 );
-        cal.setFirstDayOfWeek( Calendar.MONDAY );
-        int year = cal.get( Calendar.YEAR );
-        int week = cal.get( Calendar.WEEK_OF_YEAR );
-        int month = cal.get( Calendar.MONTH );
-
-        if ( week == 1 && month == Calendar.DECEMBER )
-        {
-            ++year;
-        }
-
-        String periodString = year + "W" + week;
-        return periodString;
-    }
-
-    @Override
     public String getIsoDate( DateUnit dateUnit )
     {
-        return null;
+        int week = getCalendar().week( dateUnit );
+
+        if ( week == 1 && dateUnit.getMonth() == getCalendar().monthsInYear() )
+        {
+            dateUnit.setYear( dateUnit.getYear() + 1 );
+        }
+
+        return String.format( "%dW%d", dateUnit.getYear(), week );
     }
 
     /**
