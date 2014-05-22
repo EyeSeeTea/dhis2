@@ -40,6 +40,7 @@ import org.hisp.dhis.api.mobile.IProgramService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.Contact;
+import org.hisp.dhis.api.mobile.model.Conversation;
 import org.hisp.dhis.api.mobile.model.DataSetList;
 import org.hisp.dhis.api.mobile.model.DataSetValue;
 import org.hisp.dhis.api.mobile.model.DataSetValueList;
@@ -403,7 +404,7 @@ public class MobileOrganisationUnitController
     String enrollInfo )
         throws NotAllowedException
     {
-        return activityReportingService.enrollProgram( enrollInfo, new Date() );
+        return activityReportingService.enrollProgram( enrollInfo, null, new Date() );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/addRelationship" )
@@ -524,14 +525,7 @@ public class MobileOrganisationUnitController
     String programId )
         throws NotAllowedException
     {
-        if ( activityReportingService.savePatient( patient, id, programId ) != null )
-        {
-            return activityReportingService.findLatestPatient();
-        }
-        else
-        {
-            return null;
-        }
+        return activityReportingService.savePatient( patient, id, programId );
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/getVariesInfo" )
@@ -569,9 +563,19 @@ public class MobileOrganisationUnitController
         throws NotAllowedException
     {
         Recipient recipient = new Recipient();
-        recipient.setClientVersion( clientVersion );
         recipient.setUsers( activityReportingService.findUser( keyword ) );
         return recipient;
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findVisitSchedule/{programId}" )
+    @ResponseBody
+    public String findVisitSchedule( @PathVariable
+    int programId, @PathVariable
+    int id, @RequestHeader( "details" )
+    String info )
+        throws NotAllowedException
+    {
+        return activityReportingService.findVisitSchedule( id, programId, info );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/orgUnits/{id}/sendMessage" )
@@ -581,7 +585,36 @@ public class MobileOrganisationUnitController
     Message message )
         throws NotAllowedException
     {
-        return activityReportingService.sendMessage(message);
+        return activityReportingService.sendMessage( message );
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/downloadMessageConversation" )
+    @ResponseBody
+    public Conversation downloadConversation( String clientVersion )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setClientVersion( clientVersion );
+        conversation.setConversations( activityReportingService.downloadMessageConversation() );
+
+        return conversation;
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/getMessage" )
+    @ResponseBody
+    public Conversation getMessage( String clientVersion, @PathVariable
+    int id, @RequestHeader( "id" )
+    String conversationId )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setMessages( activityReportingService.getMessage( conversationId ) );
+
+        return conversation;
+
     }
 
 }

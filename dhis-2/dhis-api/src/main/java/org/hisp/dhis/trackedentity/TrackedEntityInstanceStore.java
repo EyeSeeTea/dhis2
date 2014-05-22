@@ -28,15 +28,12 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.validation.ValidationCriteria;
+import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 
 /**
  * @author Abyot Asalefew Gizaw
@@ -54,116 +51,12 @@ public interface TrackedEntityInstanceStore
     int getTrackedEntityInstanceCount( TrackedEntityInstanceQueryParams params );
 
     /**
-     * Search entityInstances who registered in a certain organisation unit
+     * Returns null if valid, a descriptive, non-null string if invalid.
      * 
-     * @param organisationUnit Organisation unit where entityInstances
-     *        registered
-     * @param min
-     * @param max
-     * 
-     * @return List of entityInstances
+     * @param instance
+     * @param attributeValue
+     * @param program
+     * @return
      */
-    Collection<TrackedEntityInstance> getByOrgUnit( OrganisationUnit organisationUnit, Integer min, Integer max );
-
-    /**
-     * Search instances who has the same representative
-     * 
-     * @param instances Representative
-     * 
-     * @return List of entityInstances
-     */
-    Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance instances );
-
-    /**
-     * Search the number of entityInstances who registered into an organisation
-     * unit
-     * 
-     * @param organisationUnit Organisation unit
-     * 
-     * @return The number of entityInstances
-     */
-    //int countListTrackedEntityInstanceByOrgunit( OrganisationUnit organisationUnit );
-
-    /**
-     * Get the number of entityInstances who registered into a certain
-     * organisation unit and enrolled into a program with active status
-     * 
-     * @param organisationUnit Organisation unit where entityInstances
-     *        registered
-     * @param program Program. It's is used for getting attributes of this
-     *        program and put attribute values of entityInstances into the
-     *        result
-     * 
-     * @return The number of entityInstances
-     */
-    //int countGetTrackedEntityInstancesByOrgUnitProgram( OrganisationUnit organisationUnit, Program program );
-
-    /**
-     * Search entityInstances by phone number (performs partial search)
-     * 
-     * @param phoneNumber The string for searching by phone number
-     * @param min
-     * @param max
-     * 
-     * @return List of instances
-     */
-    Collection<TrackedEntityInstance> getByPhoneNumber( String phoneNumber, Integer min, Integer max );
-
-    /**
-     * Search entityInstances who enrolled into a program with active status
-     * 
-     * @param program Program
-     * @param min
-     * @param max
-     * 
-     *        return List of entityInstances
-     */
-    //Collection<TrackedEntityInstance> getByProgram( Program program, Integer min, Integer max );
-
-    /**
-     * Validate entity-instances attribute values and validation criteria by
-     * program before registering / updating information
-     * 
-     * @param entityinstance TrackedEntityInstance object
-     * @param program Program which person needs to enroll. If this parameter is
-     *        null, the system check attribute values of the instances
-     * @param format I18nFormat
-     * 
-     * @return Error code 0 : Validation is OK 1_<duplicate-value> : The
-     *         attribute value is duplicated 2_<validation-criteria-id> :
-     *         Violate validation criteria of the program
-     */
-    String validate( TrackedEntityInstance entityinstance, Program program, I18nFormat format );
-
-    /**
-     * Validate entity-instance enrollment
-     * 
-     * @param entityinstance TrackedEntityInstance object
-     * @param program Program which person needs to enroll. If this parameter is
-     *        null, the system check identifiers of the patient
-     * @param format I18nFormat
-     * 
-     * @return ValidationCriteria object which is violated
-     */
-    ValidationCriteria validateEnrollment( TrackedEntityInstance entityinstance, Program program, I18nFormat format );
-
-    /**
-     * Validate instances attribute values and validation criteria by program
-     * before registering / updating information
-     * 
-     * @param searchText The value of a TrackedEntityAttribute
-     * @param attributeId The id of a TrackedEntityAttribute
-     * 
-     * @return TrackedEntityInstance list
-     */
-    Collection<TrackedEntityInstance> getByAttributeValue( String searchText, int attributeId, Integer min, Integer max );
-
-     /**
-     * Get entityInstances by {@link TrackedEntity}
-     * 
-     * @param trackedEntity {@link TrackedEntity}
-     * 
-     * @return List of entityInstance
-     */
-    Collection<TrackedEntityInstance> get( TrackedEntity trackedEntity );
+    String validate( TrackedEntityInstance instance, TrackedEntityAttributeValue attributeValue, Program program );
 }

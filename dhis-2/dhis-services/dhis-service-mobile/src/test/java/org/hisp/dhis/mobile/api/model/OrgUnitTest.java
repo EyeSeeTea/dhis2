@@ -62,6 +62,8 @@ public class OrgUnitTest
         unit.setSendFeedbackUrl( "sendFeedbackUrl" );
         unit.setFindUserUrl( "findUserUrl" );
         unit.setSendMessageUrl( "sendMessageUrl" );
+        unit.setDownloadMessageConversationUrl( "downloadMessageConversationUrl" );
+        unit.setGetMessageUrl( "getMessageUrl" );
         unit.setUpdateContactUrl( "updateContactUrl" );
         unit.setFindPatientUrl( "findPatientUrl" );
         unit.setUploadProgramStageUrl( "uploadProgramStageUrl" );
@@ -72,6 +74,7 @@ public class OrgUnitTest
         unit.setDownloadAnonymousProgramUrl( "downloadAnonymousProgramUrl" );
         unit.setFindProgramUrl( "findProgramUrl" );
         unit.setFindPatientInAdvancedUrl( "findPatientInAdvanced" );
+        unit.setFindVisitScheduleUrl( "findVisitSchedule" );
         unit.setFindLostToFollowUpUrl( "findLostToFollowUpUrl" );
         unit.setHandleLostToFollowUpUrl( "handleLostToFollowUpUrl" );
         unit.setGenerateRepeatableEventUrl( "generateRepeatableEventUrl" );

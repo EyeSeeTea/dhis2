@@ -38,7 +38,6 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
@@ -89,6 +88,7 @@ import org.hisp.dhis.validation.ValidationCriteria;
  * </pre>
  * 
  * @author Abyot Asalefew Gizaw
+ * @author Lars Helge Overland
  */
 public interface TrackedEntityInstanceService
 {
@@ -100,7 +100,7 @@ public interface TrackedEntityInstanceService
 
     public static final int ERROR_ENROLLMENT = 2;
 
-    public static final String SAPERATOR = "_";
+    public static final String SEPARATOR = "_";
 
     /**
      * Returns a grid with tracked entity instance values based on the given
@@ -192,27 +192,6 @@ public interface TrackedEntityInstanceService
     TrackedEntityInstance getTrackedEntityInstance( String uid );
 
     /**
-     * Retrieve entityInstances base on organization unit with result limited
-     * 
-     * @param organisationUnit organisationUnit
-     * @param min
-     * @param max
-     * 
-     * @return TrackedEntityInstance List
-     */
-    Collection<TrackedEntityInstance> getTrackedEntityInstances( OrganisationUnit organisationUnit, Integer min,
-        Integer max );
-
-    /**
-     * Get entityInstances who has the same representative
-     * 
-     * @params entityInstance The representatives
-     * 
-     * @return TrackedEntityInstance List
-     * **/
-    Collection<TrackedEntityInstance> getRepresentatives( TrackedEntityInstance entityInstance );
-
-    /**
      * Register a new entityInstance
      * 
      * @param entityInstance TrackedEntityInstance
@@ -266,13 +245,4 @@ public interface TrackedEntityInstanceService
      * @return ValidationCriteria object which is violated
      */
     ValidationCriteria validateEnrollment( TrackedEntityInstance entityInstance, Program program, I18nFormat format );
-
-    /**
-     * Get entityInstances by {@link TrackedEntity}
-     * 
-     * @param trackedEntity {@link TrackedEntity}
-     * 
-     * @return List of entityInstance
-     */
-    Collection<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntity trackedEntity );
 }

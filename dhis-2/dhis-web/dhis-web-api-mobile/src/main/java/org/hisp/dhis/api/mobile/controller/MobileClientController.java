@@ -149,7 +149,9 @@ public class MobileClientController
         orgUnit.setUpdateNewVersionUrl( getUrl( request, unit.getId(), "updateNewVersionUrl" ) );
         orgUnit.setSendFeedbackUrl( getUrl( request, unit.getId(), "sendFeedback" ) );
         orgUnit.setFindUserUrl( getUrl( request, unit.getId(), "findUser" ) );
-        orgUnit.setSendMessageUrl(getUrl( request, unit.getId(), "sendMessage" ));
+        orgUnit.setSendMessageUrl( getUrl( request, unit.getId(), "sendMessage" ) );
+        orgUnit.setDownloadMessageConversationUrl( getUrl( request, unit.getId(), "downloadMessageConversation" ) );
+        orgUnit.setGetMessageUrl( getUrl( request, unit.getId(), "getMessage" ) );
         orgUnit.setUpdateContactUrl( getUrl( request, unit.getId(), "updateContactForMobile" ) );
         orgUnit.setFindPatientUrl( getUrl( request, unit.getId(), "findPatient" ) );
         orgUnit.setRegisterPersonUrl( getUrl( request, unit.getId(), "registerPerson" ) );
@@ -160,6 +162,7 @@ public class MobileClientController
         orgUnit.setDownloadAnonymousProgramUrl( getUrl( request, unit.getId(), "downloadAnonymousProgram" ) );
         orgUnit.setFindProgramUrl( getUrl( request, unit.getId(), "findProgram" ) );
         orgUnit.setFindPatientInAdvancedUrl( getUrl( request, unit.getId(), "findPatientInAdvanced" ) );
+        orgUnit.setFindVisitScheduleUrl( getUrl( request, unit.getId(), "findVisitSchedule" ) );
         orgUnit.setFindLostToFollowUpUrl( getUrl( request, unit.getId(), "findLostToFollowUp" ) );
         orgUnit.setHandleLostToFollowUpUrl( getUrl( request, unit.getId(), "handleLostToFollowUp" ) );
         orgUnit.setGenerateRepeatableEventUrl( getUrl( request, unit.getId(), "generateRepeatableEvent" ) );

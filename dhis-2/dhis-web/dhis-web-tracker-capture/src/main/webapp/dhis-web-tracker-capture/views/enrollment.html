@@ -8,7 +8,7 @@
     <table class="table">
         <tr>
             <td>
-                {{'program'| translate}}{{selectedProgram.name}}
+                {{'program'| translate}}
             </td>
             <td>
                 <select ng-model="selectedProgram"
@@ -22,7 +22,7 @@
                 <button type="button" 
                         class="btn btn-default"
                         ng-if="selectedProgram && !selectedEnrollment" 
-                        ng-click="enroll()">
+                        ng-click="showEnrollment()">
                     {{'enroll'| translate}}
                 </button>  
             </td>                

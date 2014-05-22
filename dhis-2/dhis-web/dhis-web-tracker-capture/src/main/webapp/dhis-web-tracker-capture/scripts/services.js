@@ -152,7 +152,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service for getting tracked entity instances */
-.factory('TrackedEntityInstanceService', function($http, $filter, EntityService) {
+.factory('TEIService', function($http, $filter, EntityService) {
     
     var promise;
     return {
@@ -211,6 +211,24 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return EntityService.formatter(response.data);
             });            
             return promise;
+        },                
+        update: function(tei){
+            
+            var url = '../api/trackedEntityInstances';
+            
+            var promise = $http.put( url + '/' + tei.trackedEntityInstance , tei).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        register: function(tei){
+            
+            var url = '../api/trackedEntityInstances';
+            
+            var promise = $http.post(url, tei).then(function(response){
+                return response.data;
+            });
+            return promise;
         }
     };
 })
@@ -220,13 +238,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         getAll: function(){  
-
-            var attributes = storage.get('ATTRIBUTES');
-            
-            if(attributes){
-                return attributes;
-            }                
-            return; 
+            return storage.get('ATTRIBUTES');
         }, 
         getByProgram: function(program){
             var attributes = [];
@@ -264,7 +276,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http) {   
     
@@ -274,76 +285,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
                 return response.data.events;
             });            
-            return promise;
-        },
-        
-        getByStage: function(orgUnit, programStage){
-            var promise = $http.get( '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&paging=false')
-                    .then(function(response){
-                        
-                return response.data.events;             
-        
-            }, function(){
-                
-                return dhis2.ec.storageManager.getEvents(orgUnit, programStage);
-                
-            });            
-            
-            return promise;
-        },
-        
-        get: function(eventUid){
-            
-            var promise = $http.get( '../api/events/' + eventUid + '.json').then(function(response){               
-                return response.data;
-                
-            }, function(){
-                return dhis2.ec.storageManager.getEvent(eventUid);
-            });            
-            return promise;
-        },
-        
-        create: function(dhis2Event){
-            
-            var e = angular.copy(dhis2Event);            
-            dhis2.ec.storageManager.saveEvent(e);            
-        
-            var promise = $http.post( '../api/events.json', dhis2Event).then(function(response){
-                dhis2.ec.storageManager.clearEvent(e);
-                return response.data;
-            }, function(){
-                return {importSummaries: [{status: 'SUCCESS', reference: e.event}]};
-            });
-            return promise;            
-        },
-        
-        delete: function(dhis2Event){
-            dhis2.ec.storageManager.clearEvent(dhis2Event);
-            var promise = $http.delete( '../api/events/' + dhis2Event.event).then(function(response){
-                return response.data;
-            }, function(){                
-            });
-            return promise;           
-        },
-    
-        update: function(dhis2Event){   
-            dhis2.ec.storageManager.saveEvent(dhis2Event);
-            var promise = $http.put( '../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
-                dhis2.ec.storageManager.clearEvent(dhis2Event);
-                return response.data;
-            });
-            return promise;
-        },
-        
-        updateForSingleValue: function(singleValue, fullValue){                
-            
-            dhis2.ec.storageManager.saveEvent(fullValue);            
-            
-            var promise = $http.put( '../api/events/' + singleValue.event + '/' + singleValue.dataValues[0].dataElement, singleValue ).then(function(response){
-                dhis2.ec.storageManager.clearEvent(fullValue);
-                return response.data;
-            }, function(){                
-            });
             return promise;
         }
     };    
@@ -500,16 +441,16 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
     }])
 
-/* current item selected from grid */
-.service('SelectedEntity', function(){
-    this.selectedEntity = '';
+/* current selections */
+.service('CurrentSelection', function(){
+    this.currentSelection = '';
     
-    this.setSelectedEntity = function(selectedEntity){  
-        this.selectedEntity = selectedEntity;        
+    this.set = function(currentSelection){  
+        this.currentSelection = currentSelection;        
     };
     
-    this.getSelectedEntity = function(){
-        return this.selectedEntity;
+    this.get = function(){
+        return this.currentSelection;
     };
 })
 
@@ -629,7 +570,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             //grid.headers[5..] = Attribute, Attribute,.... 
             var attributes = [];
             for(var i=5; i<grid.headers.length; i++){
-                attributes.push({id: grid.headers[i].name, name: grid.headers[i].column});
+                attributes.push({id: grid.headers[i].name, name: grid.headers[i].column, type: grid.headers[i].type});
             }
 
             var entityList = [];
@@ -663,59 +604,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 });                
             });
             return {headers: attributes, rows: entityList};                                    
-        }
+        }        
     };
 });
-
-
-/*
-* Helper functions
-*/
-//This is is to have consistent display of entities and attributes
-//as every entity might not have value for every attribute.                
-function entityFormatter(grid){
-    
-    if(!grid || !grid.rows){
-        return;
-    }   
-   
-    //grid.headers[0-4] = Instance, Created, Last updated, Org unit, Tracked entity
-    //grid.headers[5..] = Attribute, Attribute,.... 
-    var attributes = [];
-    for(var i=5; i<grid.headers.length; i++){
-        attributes.push({id: grid.headers[i].name, name: grid.headers[i].column});
-    }
-    
-    var entityList = [];
-    
-    OrgUnitService.open().then(function(){
-        
-        angular.forEach(grid.rows, function(row){
-            var entity = {};
-            var isEmpty = true;
-
-            entity.id = row[0];
-            entity.orgUnit = row[3];
-            entity[row[3]] = row[3]; //this is orgunit.           
-            entity.type = row[4];  
-            
-            OrgUnitService.get(row[3]).then(function(ou){
-                if(ou){
-                    entity[row[3]] = ou.n;
-                }                                                       
-            });
-
-            for(var i=5; i<row.length; i++){
-                if(row[i] && row[i] !== ''){
-                    isEmpty = false;
-                    entity[grid.headers[i].name] = row[i];
-                }
-            }
-
-            if(!isEmpty){
-                entityList.push(entity);
-            }        
-        });          
-        return {headers: attributes, rows: entityList};                                    
-    });    
-}

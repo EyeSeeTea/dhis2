@@ -118,7 +118,7 @@ $(document).ready(function()
         }
         else {
             setHeaderMessage(i18n_offline_notification);
-            selection.responseReceived(); //notify angular 
+            //selection.responseReceived(); //notify angular 
         }
     });
    
@@ -163,7 +163,6 @@ function getUserProfile()
     
     return def.promise(); 
 }
-
 
 function getMetaPrograms()
 {
@@ -293,9 +292,10 @@ function getTrackedEntities()
         type: 'GET',
         data:'viewClass=detailed&paging=false'
     }).done( function(response) {
-        _.each(_.values(response.trackedEntities), function(te){
+        /*_.each(_.values(response.trackedEntities), function(te){
             localStorage[te.id] = JSON.stringify(te);;
-        });        
+        });  */      
+        localStorage['TRACKED_ENTITIES'] = JSON.stringify(response.trackedEntities);           
         def.resolve();
     });
     
@@ -339,7 +339,7 @@ function uploadLocalData()
             dhis2.tc.storageManager.clear();
             log( 'Successfully uploaded local events' );      
             setHeaderDelayMessage( i18n_sync_success );
-            selection.responseReceived(); //notify angular 
+            //selection.responseReceived(); //notify angular 
         },
         error: function( xhr )
         {

@@ -1979,6 +1979,9 @@ Ext.onReady( function() {
                     tdCount = 0,
                     htmlArray;
 
+xLayout.showRowTotals = true;
+xLayout.showColTotals = true;
+
 				xResponse.sortableIdObjects = [];
 
 				getRoundedHtmlValue = function(value, dec) {
@@ -2068,8 +2071,12 @@ Ext.onReady( function() {
 					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
 				};
 
-				doTotals = function() {
-					return !!xLayout.showTotals;
+				doRowTotals = function() {
+					return !!xLayout.showRowTotals;
+				};
+
+                doColTotals = function() {
+					return !!xLayout.showColTotals;
 				};
 
 				doSortableColumnHeaders = function() {
@@ -2133,7 +2140,7 @@ Ext.onReady( function() {
 								spanCount = 0;
 							}
 
-							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
+							if (i === 0 && (j === xColAxis.size - 1) && doRowTotals()) {
 								totalId = doSortableColumnHeaders() ? 'total_' : null;
 
 								dimHtml.push(getTdHtml({
@@ -2255,7 +2262,7 @@ Ext.onReady( function() {
 					}
 
 					// totals
-					if (xColAxis && doTotals()) {
+					if (xColAxis && doRowTotals()) {
 						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
 							for (j = 0, obj; j < valueObjects[i].length; j++) {
 								obj = valueObjects[i][j];
@@ -2302,7 +2309,7 @@ Ext.onReady( function() {
 									}
 
 									// hide totals by adding collapsed = true to all items
-									if (doTotals()) {
+									if (doRowTotals()) {
 										totalValueObjects[i].collapsed = true;
 									}
 
@@ -2503,7 +2510,7 @@ Ext.onReady( function() {
 				getColTotalHtmlArray = function() {
 					var a = [];
 
-					if (xRowAxis && doTotals()) {
+					if (xRowAxis && doColTotals()) {
 						var xTotalColObjects;
 
 						// total col items
@@ -2571,7 +2578,7 @@ Ext.onReady( function() {
 						empty = [],
 						a = [];
 
-					if (doTotals()) {
+					if (doRowTotals() && doColTotals()) {
 						for (var i = 0, obj; i < totalColObjects.length; i++) {
 							obj = totalColObjects[i];
 
@@ -2600,7 +2607,7 @@ Ext.onReady( function() {
 						row,
 						a = [];
 
-					if (doTotals()) {
+					if (doColTotals()) {
 						if (xRowAxis) {
 							dimTotalArray = [getTdHtml({
 								type: 'dimensionSubtotal',

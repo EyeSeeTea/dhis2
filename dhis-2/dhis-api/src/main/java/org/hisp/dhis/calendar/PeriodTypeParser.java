@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.filter;
+package org.hisp.dhis.calendar;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,36 +28,10 @@ package org.hisp.dhis.system.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserCredentials;
-
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class UserCredentialsCanUpdateFilter
-    implements Filter<UserCredentials>
+public interface PeriodTypeParser
 {
-    private UserCredentials userCredentials;
-    
-    private boolean canGrantOwnUserAuthorityGroups = false;
-    
-    protected UserCredentialsCanUpdateFilter()
-    {
-    }
-    
-    public UserCredentialsCanUpdateFilter( User user, boolean canGrantOwnUserAuthorityGroups )
-    {
-        if ( user != null && user.getUserCredentials() != null )
-        {
-            this.userCredentials = user.getUserCredentials();
-            this.canGrantOwnUserAuthorityGroups = canGrantOwnUserAuthorityGroups;
-        }
-    }
-    
-    @Override
-    public boolean retain( UserCredentials credentials )
-    {
-        return userCredentials != null && credentials != null && userCredentials.canIssueAll( credentials.getUserAuthorityGroups(), canGrantOwnUserAuthorityGroups );
-    }
+    public DateInterval parse( String period );
 }

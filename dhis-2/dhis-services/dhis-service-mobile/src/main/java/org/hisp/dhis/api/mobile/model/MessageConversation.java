@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity;
+package org.hisp.dhis.api.mobile.model;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,23 +28,27 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 
-public class TrackedEntityMobileSetting
+public class MessageConversation
+    implements DataStreamSerializable
 {
-    public static final long serialVersionUID = -5947521380646718129L;
+    private String clientVersion;
 
     private int id;
 
-    private Boolean autoUpdateClient = false;
+    private String subject;
 
-    private Double versionToUpdate;
-
-    private List<TrackedEntityAttribute> attributes = new ArrayList<TrackedEntityAttribute>();
-
-    public TrackedEntityMobileSetting()
+    public String getClientVersion()
     {
+        return clientVersion;
+    }
+
+    public void setClientVersion( String clientVersion )
+    {
+        this.clientVersion = clientVersion;
     }
 
     public int getId()
@@ -57,38 +61,54 @@ public class TrackedEntityMobileSetting
         this.id = id;
     }
 
-    public List<TrackedEntityAttribute> getAttributes()
+    public String getSubject()
     {
-        return attributes;
+        return subject;
     }
 
-    public void setAttributes( List<TrackedEntityAttribute> attributes )
+    public void setSubject( String subject )
     {
-        this.attributes = attributes;
+        this.subject = subject;
     }
 
-    public Boolean getAutoUpdateClient()
+    @Override
+    public void serialize( DataOutputStream dout )
+        throws IOException
     {
-        return autoUpdateClient;
+        dout.writeInt( id );
+        dout.writeUTF( subject );
+
     }
 
-    public void setAutoUpdateClient( Boolean autoUpdateClient )
+    @Override
+    public void deSerialize( DataInputStream din )
+        throws IOException
     {
-        this.autoUpdateClient = autoUpdateClient;
+
+        this.id = din.readInt();
+        this.subject = din.readUTF();
+
     }
 
-    public double getVersionToUpdate()
+    @Override
+    public void serializeVersion2_8( DataOutputStream dataOutputStream )
+        throws IOException
     {
-        if ( versionToUpdate != null )
-        {
-            return versionToUpdate;
-        }
 
-        return 0;
     }
 
-    public void setVersionToUpdate( Double versionToUpdate )
+    @Override
+    public void serializeVersion2_9( DataOutputStream dataOutputStream )
+        throws IOException
     {
-        this.versionToUpdate = versionToUpdate;
+
     }
+
+    @Override
+    public void serializeVersion2_10( DataOutputStream dataOutputStream )
+        throws IOException
+    {
+
+    }
+
 }
