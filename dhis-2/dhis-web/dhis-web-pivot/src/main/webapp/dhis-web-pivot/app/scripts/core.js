@@ -265,7 +265,9 @@ Ext.onReady( function() {
 
 				// filters: [Dimension]
 
-				// showTotals: boolean (true)
+				// showRowTotals: boolean (true)
+
+				// showColTotals: boolean (true)
 
 				// showSubTotals: boolean (true)
 
@@ -432,7 +434,8 @@ Ext.onReady( function() {
 					layout.filters = config.filters;
 
 					// properties
-					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
+					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
+					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
@@ -1612,8 +1615,12 @@ Ext.onReady( function() {
 					}
 				}
 
-				if (layout.showTotals) {
-					delete layout.showTotals;
+				if (layout.showRowTotals) {
+					delete layout.showRowTotals;
+				}
+
+                if (layout.showColTotals) {
+					delete layout.showColTotals;
 				}
 
 				if (layout.showSubTotals) {
@@ -1978,9 +1985,6 @@ Ext.onReady( function() {
 					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
                     tdCount = 0,
                     htmlArray;
-
-xLayout.showRowTotals = true;
-xLayout.showColTotals = true;
 
 				xResponse.sortableIdObjects = [];
 
