@@ -5033,7 +5033,6 @@ Ext.onReady( function() {
 
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
-					
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6476,7 +6475,15 @@ Ext.onReady( function() {
 		});
 
         getLayoutWindow = function(dataType) {
-			return ns.app.aggregateLayoutWindow;
+            if (dataType === 'aggregated_values') {
+                return ns.app.aggregateLayoutWindow;
+            }
+
+            if (dataType === 'individual_cases') {
+                return ns.app.queryLayoutWindow;
+            }
+
+            return null;
         };
 
         getOptionsWindow = function(dataType) {
