@@ -5033,6 +5033,7 @@ Ext.onReady( function() {
 
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
+					
 					a = map[item.data.id] || [];
 
 					if (a.length) {
@@ -6475,15 +6476,7 @@ Ext.onReady( function() {
 		});
 
         getLayoutWindow = function(dataType) {
-            if (dataType === 'aggregated_values') {
-                return ns.app.aggregateLayoutWindow;
-            }
-
-            if (dataType === 'individual_cases') {
-                return ns.app.queryLayoutWindow;
-            }
-
-            return null;
+			return ns.app.aggregateLayoutWindow;
         };
 
         getOptionsWindow = function(dataType) {
@@ -6611,7 +6604,7 @@ Ext.onReady( function() {
 						var i18nArray = Ext.decode(r.responseText);
 
 						Ext.Ajax.request({
-							url: init.contextPath + '/api/system/context.json',
+							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
 								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
