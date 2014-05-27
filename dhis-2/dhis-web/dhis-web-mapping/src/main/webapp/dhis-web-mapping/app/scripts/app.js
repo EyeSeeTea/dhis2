@@ -8552,7 +8552,6 @@ Ext.onReady( function() {
 
 		fn = function() {
 			if (++callbacks === requests.length) {
-
 				gis = GIS.core.getInstance(init);
 
 				GIS.app.createExtensions();
@@ -8627,10 +8626,8 @@ Ext.onReady( function() {
 												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
 											}
 
-											init.user = {
-												ou: ou,
-												ouc: ouc
-											}
+											init.user.ou = ou;
+                                            init.user.ouc = ouc;
 										}
 										else {
 											alert('User is not assigned to any organisation units');
@@ -8644,7 +8641,7 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/me/authorization/F_GIS_ADMIN',
 									success: function(r) {
-										init.user.isAdmin = Ext.decode(r.responseText);
+										init.user.isAdmin = (r.responseText === 'true');
 										fn();
 									}
 								});
