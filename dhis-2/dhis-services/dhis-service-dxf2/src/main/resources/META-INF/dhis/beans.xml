@@ -30,6 +30,11 @@
 
   <bean id="org.hisp.dhis.dxf2.events.enrollment.EnrollmentService" class="org.hisp.dhis.dxf2.events.enrollment.JacksonEnrollmentService" />
 
+  <bean id="pdfDataEntryFormService" class="org.hisp.dhis.dxf2.pdfform.DefaultPdfDataEntryFormService" scope="prototype" />
+
+  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependencyService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService"
+    scope="prototype" />
+
   <!-- register idObject handlers -->
 
   <bean id="organisationUnitObjectHandler"
@@ -201,10 +206,48 @@
     <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.datadictionary.DataDictionary" />
   </bean>
 
-  <bean id="pdfDataEntryFormService" class="org.hisp.dhis.dxf2.pdfform.DefaultPdfDataEntryFormService" scope="prototype">
+  <!-- register tracker importers -->
+  <bean id="eventReportImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.eventreport.EventReport" />
   </bean>
 
-  <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependencyService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService"
-    scope="prototype" />
+  <bean id="programImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.Program" />
+  </bean>
+
+  <bean id="programStageImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramStage" />
+  </bean>
+
+  <bean id="programStageSectionImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramStageSection" />
+  </bean>
+
+  <bean id="relationshipTypeImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.relationship.RelationshipType" />
+  </bean>
+
+  <bean id="programValidationImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.program.ProgramValidation" />
+  </bean>
+
+  <bean id="validationCriteriaImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter" scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.validation.ValidationCriteria" />
+  </bean>
+
+  <bean id="trackedEntityImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.trackedentity.TrackedEntity" />
+  </bean>
+
+  <bean id="trackedEntityAttributeImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.trackedentity.TrackedEntityAttribute" />
+  </bean>
+
+  <bean id="trackedEntityAttributeGroupImporter" class="org.hisp.dhis.dxf2.metadata.importers.DefaultIdentifiableObjectImporter"
+    scope="prototype">
+    <constructor-arg name="importerClass" type="java.lang.Class" value="org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup" />
+  </bean>
 
 </beans>

@@ -59,6 +59,8 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.CollectionUtils;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.system.util.functional.Function1;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,7 +114,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private AclService aclService;
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -229,19 +231,17 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Expression extractExpression( T object, String fieldName )
         {
-            Expression expression = null;
-
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
             {
-                expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
+                Object expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
 
-                if ( expression != null )
+                if ( expression != null && Expression.class.isAssignableFrom( expression.getClass() ) )
                 {
                     ReflectionUtils.invokeSetterMethod( fieldName, object, new Object[]{ null } );
                 }
             }
 
-            return expression;
+            return null;
         }
 
         private Set<DataElementOperand> extractDataElementOperands( T object, String fieldName )
@@ -762,7 +762,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         {
             NameableObject nameableObject = (NameableObject) object;
 
-            if ( nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0 )
+            if ( (nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0)
+                // this is nasty, but we have types in the system which have shortName, but which do -not- require not-null )
+                && !TrackedEntityAttribute.class.isAssignableFrom( object.getClass() )
+                && !TrackedEntity.class.isAssignableFrom( object.getClass() ) )
             {
                 conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty shortName for object " + object );
             }

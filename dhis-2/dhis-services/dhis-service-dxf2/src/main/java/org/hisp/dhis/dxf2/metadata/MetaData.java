@@ -33,7 +33,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
@@ -59,7 +58,6 @@ import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.eventreport.EventReport;
-import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.filter.MetaDataFilter;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorGroup;
@@ -79,9 +77,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.program.ProgramValidation;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
@@ -89,6 +90,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeGroup;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
@@ -105,11 +107,11 @@ public class MetaData
     private Date created;
 
     private List<Schema> schemas = Lists.newArrayList();
-    
+
     private List<Attribute> attributes = new ArrayList<Attribute>();
 
     private List<DataApprovalLevel> dataApprovalLevels = new ArrayList<DataApprovalLevel>();
-    
+
     private List<Document> documents = new ArrayList<Document>();
 
     private List<Constant> constants = new ArrayList<Constant>();
@@ -198,18 +200,24 @@ public class MetaData
 
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 
+    private List<MetaDataFilter> metaDataFilters = new ArrayList<MetaDataFilter>();
+
+    private List<Event> events = new ArrayList<Event>();
+
+    private List<EventReport> eventReports = new ArrayList<EventReport>();
+
     private List<Program> programs = new ArrayList<Program>();
 
     private List<ProgramStage> programStages = new ArrayList<ProgramStage>();
 
+    private List<ProgramValidation> programValidations = Lists.newArrayList();
+
+    private List<ProgramStageSection> programStageSections = new ArrayList<ProgramStageSection>();
+
     private List<RelationshipType> relationshipTypes = new ArrayList<RelationshipType>();
 
-    private List<MetaDataFilter> metaDataFilters = new ArrayList<MetaDataFilter>();
-    
-    private List<Event> events = new ArrayList<Event>();
+    private List<ValidationCriteria> validationCriterias = new ArrayList<ValidationCriteria>();
 
-    private List<EventReport> eventReports = new ArrayList<EventReport>();
-    
     private List<TrackedEntity> trackedEntities = new ArrayList<TrackedEntity>();
 
     private List<TrackedEntityAttribute> trackedEntityAttributes = new ArrayList<TrackedEntityAttribute>();
@@ -857,6 +865,32 @@ public class MetaData
     }
 
     @JsonProperty
+    @JacksonXmlElementWrapper( localName = "programValidations", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programValidation", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ProgramValidation> getProgramValidations()
+    {
+        return programValidations;
+    }
+
+    public void setProgramValidations( List<ProgramValidation> programValidations )
+    {
+        this.programValidations = programValidations;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "programStageSections", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ProgramStageSection> getProgramStageSections()
+    {
+        return programStageSections;
+    }
+
+    public void setProgramStageSections( List<ProgramStageSection> programStageSections )
+    {
+        this.programStageSections = programStageSections;
+    }
+
+    @JsonProperty
     @JacksonXmlElementWrapper( localName = "relationshipTypes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "relationshipType", namespace = DxfNamespaces.DXF_2_0 )
     public List<RelationshipType> getRelationshipTypes()
@@ -868,7 +902,20 @@ public class MetaData
     {
         this.relationshipTypes = relationshipTypes;
     }
-    
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "validationCriterias", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "validationCriteria", namespace = DxfNamespaces.DXF_2_0 )
+    public List<ValidationCriteria> getValidationCriterias()
+    {
+        return validationCriterias;
+    }
+
+    public void setValidationCriterias( List<ValidationCriteria> validationCriterias )
+    {
+        this.validationCriterias = validationCriterias;
+    }
+
     @JsonProperty
     @JacksonXmlElementWrapper( localName = "events", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "event", namespace = DxfNamespaces.DXF_2_0 )

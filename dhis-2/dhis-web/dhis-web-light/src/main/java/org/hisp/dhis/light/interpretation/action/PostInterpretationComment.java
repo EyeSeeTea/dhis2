@@ -1,20 +1,21 @@
 package org.hisp.dhis.light.interpretation.action;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationService;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Paul Mark Castillo 
- */
 public class PostInterpretationComment
     implements Action
 {
+    private static final Log log = LogFactory.getLog( PostInterpretationComment.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
+
     private InterpretationService interpretationService;
 
     public void setInterpretationService( InterpretationService interpretationService )
@@ -28,11 +29,6 @@ public class PostInterpretationComment
 
     private int interpretationId;
 
-    public int getInterpretationId()
-    {
-        return interpretationId;
-    }
-
     public void setInterpretationId( int interpretationId )
     {
         this.interpretationId = interpretationId;
@@ -40,22 +36,17 @@ public class PostInterpretationComment
 
     private Interpretation interpretation;
 
-    public Interpretation getInterpretation()
-    {
-        return interpretation;
-    }
-
     public void setInterpretation( Interpretation interpretation )
     {
         this.interpretation = interpretation;
     }
 
-    private String comment;
-
-    public String getComment()
+    public Interpretation getInterpretation()
     {
-        return comment;
+        return interpretation;
     }
+
+    private String comment;
 
     public void setComment( String comment )
     {
@@ -70,10 +61,10 @@ public class PostInterpretationComment
     public String execute()
         throws Exception
     {
-        setInterpretation( interpretationService.getInterpretation( getInterpretationId() ) );
-        
-        interpretationService.addInterpretationComment( getInterpretation().getUid(), getComment() );
-        
+        setInterpretation( interpretationService.getInterpretation( interpretationId ) );
+
+        interpretationService.addInterpretationComment( interpretation.getUid(), comment );
+
         return SUCCESS;
     }
 }

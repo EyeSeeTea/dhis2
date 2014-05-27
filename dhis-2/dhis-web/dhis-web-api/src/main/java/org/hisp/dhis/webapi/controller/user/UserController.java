@@ -29,18 +29,25 @@ package org.hisp.dhis.webapi.controller.user;
  */
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
-import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.schema.descriptors.UserSchemaDescriptor;
 import org.hisp.dhis.security.PasswordManager;
+import org.hisp.dhis.security.RestoreOptions;
+import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.hisp.dhis.webapi.controller.WebMetaData;
+import org.hisp.dhis.webapi.controller.WebOptions;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -59,21 +66,32 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = UserController.RESOURCE_PATH )
+@RequestMapping( value = UserSchemaDescriptor.API_ENDPOINT )
 public class UserController
     extends AbstractCrudController<User>
 {
-    public static final String RESOURCE_PATH = "/users";
+    public static final String INVITE_PATH = "/invite";
 
     @Autowired
     private UserService userService;
 
     @Autowired
+    private UserGroupService userGroupService;
+
+    @Autowired
     private PasswordManager passwordManager;
+
+    @Autowired
+    private SecurityService securityService;
+
+    @Autowired
+    private SystemSettingManager systemSettingManager;
 
     @Override
     @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
@@ -130,38 +148,34 @@ public class UserController
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
     public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
-        if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
-        {
-            throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
-        }
-
         User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
 
-        String encodePassword = passwordManager.encodePassword( user.getUsername(),
-            user.getUserCredentials().getPassword() );
-        user.getUserCredentials().setPassword( encodePassword );
-
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
-        renderService.toJson( response.getOutputStream(), summary );
+        createUser( user, response );
     }
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
     public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
-        if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
-        {
-            throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
-        }
-
         User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
 
-        String encodePassword = passwordManager.encodePassword( user.getUsername(),
-            user.getUserCredentials().getPassword() );
-        user.getUserCredentials().setPassword( encodePassword );
+        createUser( user, response );
+    }
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
-        renderService.toJson( response.getOutputStream(), summary );
+    @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
+    public void postXmlInvite( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
+
+        inviteUser( user, response );
+    }
+
+    @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = "application/json" )
+    public void postJsonInvite( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
+
+        inviteUser( user, response );
     }
 
     //--------------------------------------------------------------------------
@@ -188,7 +202,7 @@ public class UserController
 
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
-        if (parsed.getUserCredentials().getPassword() != null)
+        if ( parsed.getUserCredentials().getPassword() != null )
         {
             String encodePassword = passwordManager.encodePassword( parsed.getUsername(),
                 parsed.getUserCredentials().getPassword() );
@@ -220,7 +234,7 @@ public class UserController
         User parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
 
-        if (parsed.getUserCredentials().getPassword() != null)
+        if ( parsed.getUserCredentials().getPassword() != null )
         {
             String encodePassword = passwordManager.encodePassword( parsed.getUsername(),
                 parsed.getUserCredentials().getPassword() );
@@ -229,5 +243,132 @@ public class UserController
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
         renderService.toJson( response.getOutputStream(), summary );
+    }
+
+    //--------------------------------------------------------------------------
+    // Supportive methods
+    //--------------------------------------------------------------------------
+
+    /**
+     * Creates a user invitation and invites the user
+     *
+     * @param user     user object parsed from the POST request
+     * @param response response for created user invitation
+     * @throws Exception
+     */
+    private void inviteUser( User user, HttpServletResponse response ) throws Exception
+    {
+        RestoreOptions restoreOptions = user.getUsername() == null || user.getUsername().isEmpty() ?
+            RestoreOptions.INVITE_WITH_USERNAME_CHOICE : RestoreOptions.INVITE_WITH_DEFINED_USERNAME;
+
+        securityService.prepareUserForInvite( user );
+
+        createUser( user, response );
+
+        securityService.sendRestoreMessage( user.getUserCredentials(),
+            ContextUtils.getContextPath( ServletActionContext.getRequest() ), restoreOptions );
+    }
+
+    /**
+     * Creates a user
+     *
+     * @param user     user object parsed from the POST request
+     * @param response response for created user
+     * @throws Exception
+     */
+    private void createUser( User user, HttpServletResponse response ) throws Exception
+    {
+        if ( currentUserService.getCurrentUser() == null )
+        {
+            throw new CreateAccessDeniedException( "Internal error: currentUserService.getCurrentUser() returns null." );
+        }
+
+        if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
+        {
+            throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
+        }
+
+        checkUserGroups( user );
+
+        user.getUserCredentials().getCogsDimensionConstraints().addAll(
+            currentUserService.getCurrentUser().getUserCredentials().getCogsDimensionConstraints() );
+
+        user.getUserCredentials().getCatDimensionConstraints().addAll(
+            currentUserService.getCurrentUser().getUserCredentials().getCatDimensionConstraints() );
+
+        String encodePassword = passwordManager.encodePassword( user.getUsername(),
+            user.getUserCredentials().getPassword() );
+        user.getUserCredentials().setPassword( encodePassword );
+
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
+
+        renderService.toJson( response.getOutputStream(), summary );
+
+        addUserGroups( user );
+    }
+
+    /**
+     * Before adding the user, checks to see that any specified user groups
+     * exist. Also checks to see that user can be created by the current
+     * user, if it is required that the current user have read/write access
+     * to a user group that is assigned to the new user.
+     *
+     * @param user user object parsed from the POST request
+     */
+    private void checkUserGroups( User user )
+    {
+        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
+
+        boolean writeGroupFound = false;
+
+        if ( currentUserService.getCurrentUser() != null && user.getGroups() != null )
+        {
+            for ( UserGroup ug : user.getGroups() )
+            {
+                UserGroup group = userGroupService.getUserGroup( ug.getUid() );
+
+                if ( group == null )
+                {
+                    throw new UpdateAccessDeniedException( "Can't add user: Can't find user group with UID = " + ug.getUid() );
+                }
+
+                if ( writeGroupRequired && securityService.canWrite( group ) )
+                {
+                    writeGroupFound = true;
+
+                    break;
+                }
+            }
+        }
+
+        if ( writeGroupRequired && !writeGroupFound )
+        {
+            throw new CreateAccessDeniedException( "The new user must be assigned to a user group to which you have write access." );
+        }
+    }
+
+    /**
+     * Adds user groups (if any) to the newly-created user
+     *
+     * @param user user object (including user groups) parsed from the POST request
+     */
+    private void addUserGroups( User user )
+    {
+        if ( user.getGroups() != null )
+        {
+            boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
+
+            for ( UserGroup ug : new ArrayList<UserGroup>( user.getGroups() ) )
+            {
+                UserGroup group = userGroupService.getUserGroup( ug.getUid() );
+
+                if ( group != null && (!writeGroupRequired || securityService.canWrite( group )) )
+                {
+                    group.addUser( user );
+
+                    userGroupService.updateUserGroup( group );
+                }
+            }
+        }
     }
 }

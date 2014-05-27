@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
@@ -43,7 +44,6 @@ import java.util.List;
 
 /**
  * @author Chau Thu Tran
- * @version ProgramStageSection.java 11:07:27 AM Aug 22, 2012 $
  */
 @JacksonXmlRootElement( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramStageSection
@@ -103,5 +103,19 @@ public class ProgramStageSection
     public void setProgramStageDataElements( List<ProgramStageDataElement> programStageDataElements )
     {
         this.programStageDataElements = programStageDataElements;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramStageSection programStageSection = (ProgramStageSection) other;
+
+            programStageDataElements.clear();
+            programStageDataElements.addAll( programStageSection.getProgramStageDataElements() );
+        }
     }
 }

@@ -28,7 +28,7 @@
         </table>
         <hr>
         <div ng-show="currentEvent">
-            <table class="table table-striped table-hover">
+            <table class="table-borderless table-striped">
                 <thead>
                     <tr>
                         <th>
@@ -45,7 +45,7 @@
                     
                 <tr ng-repeat="prStDe in currentStage.programStageDataElements">
                     <td>
-                        {{prStDe.dataElement.name}}
+                        {{prStDe.dataElement.name}}-{{prStDe.dataElement.type}}
                     </td>
                     <td>
                         <div ng-switch="prStDe.dataElement.type">
