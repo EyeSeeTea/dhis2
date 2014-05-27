@@ -42,45 +42,29 @@ import java.util.List;
 /**
  * @author Abyot Asalefew
  */
-/**
- * @author abyot
- * 
- */
 public class ProgramStageInstance
     extends BaseIdentifiableObject
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 6239130884678145713L;
-
     public static final int ACTIVE_STATUS = 0;
+    private Integer status = ACTIVE_STATUS;
     public static final int COMPLETED_STATUS = 1;
     public static final int VISITED_STATUS = 2;
     public static final int FUTURE_VISIT_STATUS = 3;
     public static final int LATE_VISIT_STATUS = 4;
     public static final int SKIPPED_STATUS = 5;
-
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = 6239130884678145713L;
     private ProgramInstance programInstance;
-
     private ProgramStage programStage;
-
     private Date dueDate;
-
     private Date executionDate;
-
     private OrganisationUnit organisationUnit;
-
     private boolean completed;
-
     private List<OutboundSms> outboundSms = new ArrayList<OutboundSms>();
-
     private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
-
     private TrackedEntityComment comment;
-
-    private Integer status = ACTIVE_STATUS;
-
     private Double longitude;
 
     private Double latitude;
@@ -103,46 +87,7 @@ public class ProgramStageInstance
         this.programInstance = programInstance;
         this.programStage = programStage;
     }
-
-    // -------------------------------------------------------------------------
-    // hashCode and equals
-    // -------------------------------------------------------------------------
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( !getClass().isAssignableFrom( object.getClass() ) )
-        {
-            return false;
-        }
-
-        final ProgramStageInstance other = (ProgramStageInstance) object;
-
-        return programInstance.equals( other.getProgramInstance() ) && programStage.equals( other.getProgramStage() );
-    }
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-
-        result = result * prime + programInstance.hashCode();
-        result = result * prime + programStage.hashCode();
-
-        return result;
-    }
-
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
