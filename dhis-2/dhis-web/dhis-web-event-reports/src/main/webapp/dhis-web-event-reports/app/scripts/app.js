@@ -5776,90 +5776,119 @@ Ext.onReady( function() {
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
-				var xLayout,
-					xColAxis,
-					xRowAxis,
-					table,
-					getHtml,
-					getXLayout = service.layout.getExtendedLayout,
-					getSXLayout = service.layout.getSyncronizedXLayout,
-					getXResponse = service.response.aggregate.getExtendedResponse,
-					getXAxis = service.layout.getExtendedAxis;
+				var map = {};
 
-				response = response || ns.app.response;
+				map['aggregated_values'] = function() {
+					var xLayout,
+						xColAxis,
+						xRowAxis,
+						table,
+						getHtml,
+						getXLayout = service.layout.getExtendedLayout,
+						getSXLayout = service.layout.getSyncronizedXLayout,
+						getXResponse = service.response.aggregate.getExtendedResponse,
+						getXAxis = service.layout.getExtendedAxis;
 
-				getHtml = function(xLayout, xResponse) {
-					xColAxis = getXAxis(xLayout, 'col');
-					xRowAxis = getXAxis(xLayout, 'row');
+					response = response || ns.app.response;
 
-					return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+					getHtml = function(xLayout, xResponse) {
+						xColAxis = getXAxis(xLayout, 'col');
+						xRowAxis = getXAxis(xLayout, 'row');
+
+						return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+					};
+
+					xLayout = getXLayout(layout);
+					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
+					xLayout = getSXLayout(xLayout, xResponse);
+
+					table = getHtml(xLayout, xResponse);
+
+                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
+                        alert('Table has too many cells. Please reduce the table and try again.');
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
+
+					if (layout.sorting) {
+						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
+						xLayout = getSXLayout(xLayout, xResponse);
+						table = getHtml(xLayout, xResponse);
+					}
+
+                    web.mask.show(ns.app.centerRegion, 'Rendering table..');
+
+                    // timing
+                    ns.app.dateRender = new Date();
+
+					ns.app.centerRegion.removeAll(true);
+					ns.app.centerRegion.update(table.html);
+
+                    // timing
+                    ns.app.dateTotal = new Date();
+
+					// after render
+					ns.app.layout = layout;
+					ns.app.xLayout = xLayout;
+					ns.app.response = response;
+					ns.app.xResponse = xResponse;
+					ns.app.xColAxis = xColAxis;
+					ns.app.xRowAxis = xRowAxis;
+					ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
+					ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+
+					if (NS.isSessionStorage) {
+						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+						web.storage.session.set(layout, 'table');
+					}
+
+					ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
+
+					web.mask.hide(ns.app.centerRegion);
+
+					if (NS.isDebug) {
+                        console.log("Number of cells", table.tdCount);
+                        console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                        console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                        console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                        console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
+						console.log("core", ns.core);
+						console.log("app", ns.app);
+					}
 				};
 
-				xLayout = getXLayout(layout);
-				xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-				xLayout = getSXLayout(xLayout, xResponse);
+				map['individual_cases'] = function() {
+					var xResponse = service.response.query.getExtendedResponse(layout, response),
+                        table = web.report.query.getHtml(layout, xResponse);
 
-				table = getHtml(xLayout, xResponse);
+					if (layout.sorting) {
+						xResponse = web.report.query.sort(layout, xResponse);
+						table = web.report.query.getHtml(layout, xResponse);
+					}
 
-				//if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
-					//alert('Table has too many cells. Please reduce the table and try again.');
-					//web.mask.hide(ns.app.centerRegion);
-					//return;
-				//}
+					ns.app.centerRegion.removeAll(true);
+					ns.app.centerRegion.update(table.html);
 
-				if (layout.sorting) {
-					xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-					xLayout = getSXLayout(xLayout, xResponse);
-					table = getHtml(xLayout, xResponse);
-				}
+					// after render
+					ns.app.layout = layout;
+					ns.app.response = response;
+					ns.app.xResponse = xResponse;
 
-				web.mask.show(ns.app.centerRegion, 'Rendering table..');
+					if (NS.isSessionStorage) {
+						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+					}
 
-				// timing
-				ns.app.dateRender = new Date();
+					ns.app.widget.setGui(layout, null, response, isUpdateGui, table);
 
-				ns.app.centerRegion.removeAll(true);
-				ns.app.centerRegion.update(table.html);
+					web.mask.hide(ns.app.centerRegion);
+				};
 
-				// timing
-				ns.app.dateTotal = new Date();
-
-				// after render
-				ns.app.layout = layout;
-				ns.app.xLayout = xLayout;
-				ns.app.response = response;
-				ns.app.xResponse = xResponse;
-				ns.app.xColAxis = xColAxis;
-				ns.app.xRowAxis = xRowAxis;
-				ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
-				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
-
-				if (NS.isSessionStorage) {
-					//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-					web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-					web.storage.session.set(layout, 'table');
-				}
-
-				ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
-
-				web.mask.hide(ns.app.centerRegion);
-
-				if (NS.isDebug) {
-					var res = response || xResponse;
-
-					console.log("Number of records", res.rows.length);
-					console.log("Number of cells", table.tdCount);
-					console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-					console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-					console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-					console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-					console.log("layout", layout);
-					console.log("response", response);
-					console.log("xResponse", xResponse);
-					console.log("xLayout", xLayout);
-					console.log("core", ns.core);
-					console.log("app", ns.app);
-				}				
+				map[layout.dataType]();
 			};
 		}());
 	};
@@ -6445,15 +6474,15 @@ Ext.onReady( function() {
 		});
 
         getLayoutWindow = function(dataType) {
-            //if (dataType === 'aggregated_values') {
+            if (dataType === 'aggregated_values') {
                 return ns.app.aggregateLayoutWindow;
-            //}
+            }
 
-            //if (dataType === 'individual_cases') {
-                //return ns.app.queryLayoutWindow;
-            //}
+            if (dataType === 'individual_cases') {
+                return ns.app.queryLayoutWindow;
+            }
 
-            //return null;
+            return null;
         };
 
         getOptionsWindow = function(dataType) {
