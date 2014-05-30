@@ -2,7 +2,6 @@ Ext.onReady( function() {
 	var NS = ER,
 
 		AggregateLayoutWindow,
-        QueryLayoutWindow,
 		AggregateOptionsWindow,
 		FavoriteWindow,
 		SharingWindow,
@@ -2705,7 +2704,6 @@ Ext.onReady( function() {
             reset();
 
             ns.app.aggregateLayoutWindow.reset();
-            ns.app.queryLayoutWindow.reset();
 
 			// data
             programStore.add(layout.program);
@@ -2839,7 +2837,6 @@ Ext.onReady( function() {
                 stagesByProgramStore.loadData(stages);
 
                 ns.app.aggregateLayoutWindow.resetData();
-				ns.app.queryLayoutWindow.resetData();
 
                 stageId = (layout ? layout.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
 
@@ -2918,7 +2915,6 @@ Ext.onReady( function() {
             if (!layout) {
                 dataElementSelected.removeAll();
                 ns.app.aggregateLayoutWindow.resetData();
-                ns.app.queryLayoutWindow.resetData();
             }
 
 			loadDataElements(stageId, layout);
@@ -3125,7 +3121,6 @@ Ext.onReady( function() {
 					dataElementsByStageStore.sort();
 
                     ns.app.aggregateLayoutWindow.removeDimension(element.id);
-                    ns.app.queryLayoutWindow.removeDimension(element.id);
 				}
 			};
 
@@ -3143,7 +3138,6 @@ Ext.onReady( function() {
             var dataElements = [],
 				allElements = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
-                queryWindow = ns.app.queryLayoutWindow,
                 includeKeys = ['int', 'number', 'boolean', 'bool'],
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
@@ -6057,16 +6051,8 @@ Ext.onReady( function() {
             return ns.app.aggregateLayoutWindow;
         };
 
-        getOptionsWindow = function(dataType) {
-            if (dataType === 'aggregated_values') {
-                return ns.app.aggregateOptionsWindow;
-            }
-
-            if (dataType === 'individual_cases') {
-                return ns.app.queryOptionsWindow;
-            }
-
-            return null;
+        getOptionsWindow = function() {
+            return ns.app.aggregateOptionsWindow;
         };
 
 		viewport = Ext.create('Ext.container.Viewport', {
