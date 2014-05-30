@@ -5553,7 +5553,7 @@ Ext.onReady( function() {
 
         chartType = Ext.create('Ext.toolbar.Toolbar', {
             height: 45,
-            style: 'padding-top:0px; border-style:none',
+            style: 'padding-top:1px; border:0 none; border-bottom:1px solid #ddd',
             getChartType: function() {
                 for (var i = 0; i < buttons.length; i++) {
                     if (buttons[i].pressed) {
