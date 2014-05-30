@@ -1191,7 +1191,6 @@ Ext.onReady( function() {
 			autoShow: true,
 			modal: true,
 			resizable: false,
-			dataType: dataType,
 			colStore: colStore,
 			rowStore: rowStore,
             fixedFilterStore: fixedFilterStore,
@@ -2696,12 +2695,8 @@ Ext.onReady( function() {
 				isOugc = false,
 				levels = [],
 				groups = [],
-
-				winMap = {
-					'aggregated_values': ns.app.aggregateOptionsWindow,
-					'individual_cases': ns.app.queryOptionsWindow
-				},
-				optionsWindow = winMap[layout.dataType];
+                
+				optionsWindow = ns.app.aggregateOptionsWindow;
 
             reset();
 
@@ -3210,37 +3205,36 @@ Ext.onReady( function() {
 				}
 
                 aggWindow.addDimension(element, store);
-                queryWindow.colStore.add(element);
 			}
 
-			if (layout && layout.dataType === 'aggregated_values') {
-				aggWindow.reset(true);
+			//if (layout && layout.dataType === 'aggregated_values') {
+            aggWindow.reset(true);
 
-				if (layout.startDate && layout.endDate) {
-					aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
-				}
+            if (layout.startDate && layout.endDate) {
+                aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
+            }
 
-				if (layout.columns) {
-					for (var i = 0; i < layout.columns.length; i++) {
-						aggWindow.colStore.add(recordMap[layout.columns[i].dimension]);
-					}
-				}
+            if (layout.columns) {
+                for (var i = 0; i < layout.columns.length; i++) {
+                    aggWindow.colStore.add(recordMap[layout.columns[i].dimension]);
+                }
+            }
 
-				if (layout.rows) {
-					for (var i = 0; i < layout.rows.length; i++) {
-						aggWindow.rowStore.add(recordMap[layout.rows[i].dimension]);
-					}
-				}
+            if (layout.rows) {
+                for (var i = 0; i < layout.rows.length; i++) {
+                    aggWindow.rowStore.add(recordMap[layout.rows[i].dimension]);
+                }
+            }
 
-				if (layout.filters) {
-					for (var i = 0, store, record; i < layout.filters.length; i++) {
-						record = recordMap[layout.filters[i].dimension];
-						store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
+            if (layout.filters) {
+                for (var i = 0, store, record; i < layout.filters.length; i++) {
+                    record = recordMap[layout.filters[i].dimension];
+                    store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
 
-						store.add(record);
-					}
-				}
-			}
+                    store.add(record);
+                }
+            }
+			//}
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
@@ -5141,28 +5135,18 @@ Ext.onReady( function() {
                     return;
                 }
 
-                if (view.dataType === 'aggregated_values') {
-                    options = ns.app.aggregateOptionsWindow.getOptions();
-                    Ext.applyIf(view, options);
+                //if (view.dataType === 'aggregated_values') {
+                options = ns.app.aggregateOptionsWindow.getOptions();
+                Ext.applyIf(view, options);
 
-                    // if order and limit -> sort
-                    if (view.sortOrder && view.topLimit) {
-                        view.sorting = {
-                            id: 1,
-                            direction: view.sortOrder == 1 ? 'DESC' : 'ASC'
-                        };
-                    }
-                }
-
-                if (view.dataType === 'individual_cases') {
-                    options = ns.app.queryOptionsWindow.getOptions();
-                    Ext.applyIf(view, options);
-
-                    view.paging = {
-                        page: ns.app.statusBar.getCurrentPage(),
-                        pageSize: 100
+                // if order and limit -> sort
+                if (view.sortOrder && view.topLimit) {
+                    view.sorting = {
+                        id: 1,
+                        direction: view.sortOrder == 1 ? 'DESC' : 'ASC'
                     };
                 }
+                //}
 
                 return view;
             };
@@ -5257,117 +5241,90 @@ Ext.onReady( function() {
 			web.report.createReport = function(layout, response, isUpdateGui) {
 				var map = {};
 
-				map['aggregated_values'] = function() {
-					var xLayout,
-						xColAxis,
-						xRowAxis,
-						table,
-						getHtml,
-						getXLayout = service.layout.getExtendedLayout,
-						getSXLayout = service.layout.getSyncronizedXLayout,
-						getXResponse = service.response.aggregate.getExtendedResponse,
-						getXAxis = service.layout.getExtendedAxis;
+				//map['aggregated_values'] = function() {
+                var xLayout,
+                    xColAxis,
+                    xRowAxis,
+                    table,
+                    getHtml,
+                    getXLayout = service.layout.getExtendedLayout,
+                    getSXLayout = service.layout.getSyncronizedXLayout,
+                    getXResponse = service.response.aggregate.getExtendedResponse,
+                    getXAxis = service.layout.getExtendedAxis;
 
-					response = response || ns.app.response;
+                response = response || ns.app.response;
 
-					getHtml = function(xLayout, xResponse) {
-						xColAxis = getXAxis(xLayout, 'col');
-						xRowAxis = getXAxis(xLayout, 'row');
+                getHtml = function(xLayout, xResponse) {
+                    xColAxis = getXAxis(xLayout, 'col');
+                    xRowAxis = getXAxis(xLayout, 'row');
 
-						return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
-					};
+                    return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+                };
 
-					xLayout = getXLayout(layout);
-					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-					xLayout = getSXLayout(xLayout, xResponse);
+                xLayout = getXLayout(layout);
+                xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
+                xLayout = getSXLayout(xLayout, xResponse);
 
-					table = getHtml(xLayout, xResponse);
+                table = getHtml(xLayout, xResponse);
 
-                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
-                        alert('Table has too many cells. Please reduce the table and try again.');
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
+                if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
+                    alert('Table has too many cells. Please reduce the table and try again.');
+                    web.mask.hide(ns.app.centerRegion);
+                    return;
+                }
 
-					if (layout.sorting) {
-						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-						xLayout = getSXLayout(xLayout, xResponse);
-						table = getHtml(xLayout, xResponse);
-					}
+                if (layout.sorting) {
+                    xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
+                    xLayout = getSXLayout(xLayout, xResponse);
+                    table = getHtml(xLayout, xResponse);
+                }
 
-                    web.mask.show(ns.app.centerRegion, 'Rendering table..');
+                web.mask.show(ns.app.centerRegion, 'Rendering table..');
 
-                    // timing
-                    ns.app.dateRender = new Date();
+                // timing
+                ns.app.dateRender = new Date();
 
-					ns.app.centerRegion.removeAll(true);
-					ns.app.centerRegion.update(table.html);
+                ns.app.centerRegion.removeAll(true);
+                ns.app.centerRegion.update(table.html);
 
-                    // timing
-                    ns.app.dateTotal = new Date();
+                // timing
+                ns.app.dateTotal = new Date();
 
-					// after render
-					ns.app.layout = layout;
-					ns.app.xLayout = xLayout;
-					ns.app.response = response;
-					ns.app.xResponse = xResponse;
-					ns.app.xColAxis = xColAxis;
-					ns.app.xRowAxis = xRowAxis;
-					ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
-					ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+                // after render
+                ns.app.layout = layout;
+                ns.app.xLayout = xLayout;
+                ns.app.response = response;
+                ns.app.xResponse = xResponse;
+                ns.app.xColAxis = xColAxis;
+                ns.app.xRowAxis = xRowAxis;
+                ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
+                ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
-					if (NS.isSessionStorage) {
-						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-						web.storage.session.set(layout, 'table');
-					}
+                if (NS.isSessionStorage) {
+                    //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+                    web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                    web.storage.session.set(layout, 'table');
+                }
 
-					ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
+                ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
 
-					web.mask.hide(ns.app.centerRegion);
+                web.mask.hide(ns.app.centerRegion);
 
-					if (NS.isDebug) {
-                        console.log("Number of cells", table.tdCount);
-                        console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-                        console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-                        console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-                        console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-                        console.log("layout", layout);
-                        console.log("response", response);
-                        console.log("xResponse", xResponse);
-                        console.log("xLayout", xLayout);
-						console.log("core", ns.core);
-						console.log("app", ns.app);
-					}
-				};
+                if (NS.isDebug) {
+                    console.log("Number of cells", table.tdCount);
+                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                    console.log("layout", layout);
+                    console.log("response", response);
+                    console.log("xResponse", xResponse);
+                    console.log("xLayout", xLayout);
+                    console.log("core", ns.core);
+                    console.log("app", ns.app);
+                }
+				//};
 
-				map['individual_cases'] = function() {
-					var xResponse = service.response.query.getExtendedResponse(layout, response),
-                        table = web.report.query.getHtml(layout, xResponse);
-
-					if (layout.sorting) {
-						xResponse = web.report.query.sort(layout, xResponse);
-						table = web.report.query.getHtml(layout, xResponse);
-					}
-
-					ns.app.centerRegion.removeAll(true);
-					ns.app.centerRegion.update(table.html);
-
-					// after render
-					ns.app.layout = layout;
-					ns.app.response = response;
-					ns.app.xResponse = xResponse;
-
-					if (NS.isSessionStorage) {
-						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-					}
-
-					ns.app.widget.setGui(layout, null, response, isUpdateGui, table);
-
-					web.mask.hide(ns.app.centerRegion);
-				};
-
-				map[layout.dataType]();
 			};
 		}());
 	};
