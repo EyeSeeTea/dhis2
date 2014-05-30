@@ -2704,7 +2704,6 @@ Ext.onReady( function() {
 
             reset();
 
-            ns.app.typeToolbar.setType(layout.dataType);
             ns.app.aggregateLayoutWindow.reset();
             ns.app.queryLayoutWindow.reset();
 
@@ -4468,19 +4467,17 @@ Ext.onReady( function() {
 
 		getView = function(config) {
 			var view = {},
-				dataType = ns.app.typeToolbar.getType(),
-				layoutWindow = ns.app.viewport.getLayoutWindow(dataType),
+				layoutWindow = ns.app.viewport.getLayoutWindow(),
 				map = {},
 				columns = [],
 				rows = [],
 				filters = [],
 				a;
 
-			view.dataType = dataType;
             view.program = program.getRecord();
             view.programStage = stage.getRecord();
 
-            if (!(view.dataType && view.program && view.programStage)) {
+            if (!(view.program && view.programStage)) {
                 return;
             }
 
@@ -5613,183 +5610,7 @@ Ext.onReady( function() {
                 radar
             ]
         });
-
-		getDimensionStore = function() {
-			return Ext.create('Ext.data.Store', {
-				fields: ['id', 'name'],
-				data: function() {
-					var data = [
-							{id: dimConf.data.dimensionName, name: dimConf.data.name},
-							{id: dimConf.period.dimensionName, name: dimConf.period.name},
-							{id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name}
-						];
-
-					return data.concat(Ext.clone(ns.core.init.dimensions));
-				}()
-			});
-		};
-
-        colStore = getDimensionStore();
-		ns.app.stores.col = colStore;
-
-        rowStore = getDimensionStore();
-		ns.app.stores.row = rowStore;
-
-        filterStore = getDimensionStore();
-		ns.app.stores.filter = filterStore;
-
-        series = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'ns-combo',
-            baseBodyCls: 'small',
-            style: 'margin-bottom:0',
-            name: ns.core.conf.finals.chart.series,
-            queryMode: 'local',
-            editable: false,
-            valueField: 'id',
-            displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3),
-            value: ns.core.conf.finals.dimension.data.dimensionName,
-            filterNext: function() {
-                category.filter(this.getValue());
-                filter.filter([this.getValue(), category.getValue()]);
-            },
-            store: colStore,
-            listeners: {
-                added: function(cb) {
-                    cb.filterNext();
-                },
-                select: function(cb) {
-                    cb.filterNext();
-                }
-            }
-        });
-
-        category = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'ns-combo',
-            baseBodyCls: 'small',
-            style: 'margin-bottom:0',
-            name: ns.core.conf.finals.chart.category,
-            queryMode: 'local',
-            editable: false,
-            lastQuery: '',
-            valueField: 'id',
-            displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3),
-            value: ns.core.conf.finals.dimension.period.dimensionName,
-            filter: function(value) {
-                if (Ext.isString(value)) {
-                    if (value === this.getValue()) {
-                        this.clearValue();
-                    }
-
-                    this.store.clearFilter();
-
-                    this.store.filterBy(function(record, id) {
-                        return id !== value;
-                    });
-                }
-            },
-            filterNext: function() {
-                filter.filter([series.getValue(), this.getValue()]);
-            },
-            store: rowStore,
-            listeners: {
-                added: function(cb) {
-                    cb.filterNext();
-                },
-                select: function(cb) {
-                    cb.filterNext();
-                }
-            }
-        });
-
-        filter = Ext.create('Ext.form.field.ComboBox', {
-            cls: 'ns-combo',
-            multiSelect: true,
-            baseBodyCls: 'small',
-            style: 'margin-bottom:0',
-            name: ns.core.conf.finals.chart.filter,
-            queryMode: 'local',
-            editable: false,
-            lastQuery: '',
-            valueField: 'id',
-            displayField: 'name',
-            width: (ns.core.conf.layout.west_fieldset_width / 3) + 1,
-            value: ns.core.conf.finals.dimension.organisationUnit.dimensionName,
-            filter: function(values) {
-                var a = Ext.clone(this.getValue()),
-                    b = [];
-
-                for (var i = 0; i < a.length; i++) {
-                    if (!Ext.Array.contains(values, a[i])) {
-                        b.push(a[i]);
-                    }
-                }
-
-                this.clearValue();
-                this.setValue(b);
-
-                this.store.filterBy(function(record, id) {
-                    return !Ext.Array.contains(values, id);
-                });
-            },
-            store: filterStore,
-            listeners: {
-                beforedeselect: function(cb) {
-                    return cb.getValue().length !== 1;
-                }
-            }
-        });
-
-        layout = Ext.create('Ext.toolbar.Toolbar', {
-            id: 'chartlayout_tb',
-            style: 'padding:2px 0 0 1px; background:#f5f5f5; border:0 none; border-top:1px dashed #ccc; border-bottom:1px solid #ccc',
-            height: 45,
-            items: [
-                {
-                    xtype: 'container',
-                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-                    style: 'margin:0',
-                    items: [
-                        {
-                            xtype: 'label',
-                            text: NS.i18n.series,
-                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
-                        },
-                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-                        series
-                    ]
-                },
-                {
-                    xtype: 'container',
-                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-                    style: 'margin:0',
-                    items: [
-                        {
-                            xtype: 'label',
-                            text: NS.i18n.category,
-                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
-                        },
-                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-                        category
-                    ]
-                },
-                {
-                    xtype: 'container',
-                    bodyStyle: 'border-style:none; background-color:transparent; padding:0',
-                    items: [
-                        {
-                            xtype: 'label',
-                            text: NS.i18n.filters,
-                            style: 'font-size:11px; font-weight:bold; padding:0 4px'
-                        },
-                        { bodyStyle: 'padding:1px 0; border-style:none;	background-color:transparent' },
-                        filter
-                    ]
-                }
-            ]
-        });
-
+        
 		widget = LayerWidgetEvent();
 
 		accordion = Ext.create('Ext.panel.Panel', {
@@ -5864,7 +5685,6 @@ Ext.onReady( function() {
 			}(),
 			items: [
                 chartType,
-                layout,
                 accordion
 			],
 			listeners: {
@@ -5878,7 +5698,7 @@ Ext.onReady( function() {
 			text: 'Layout',
 			menu: {},
 			handler: function() {
-                getLayoutWindow(typeToolbar.getType()).show();
+                getLayoutWindow().show();
 			},
 			listeners: {
 				added: function() {
@@ -5891,7 +5711,7 @@ Ext.onReady( function() {
 			text: NS.i18n.options,
 			menu: {},
 			handler: function() {
-                getOptionsWindow(typeToolbar.getType()).show();
+                getOptionsWindow().show();
 			},
 			listeners: {
 				added: function() {
@@ -6233,16 +6053,8 @@ Ext.onReady( function() {
 			}
 		});
 
-        getLayoutWindow = function(dataType) {
-            if (dataType === 'aggregated_values') {
-                return ns.app.aggregateLayoutWindow;
-            }
-
-            if (dataType === 'individual_cases') {
-                return ns.app.queryLayoutWindow;
-            }
-
-            return null;
+        getLayoutWindow = function() {
+            return ns.app.aggregateLayoutWindow;
         };
 
         getOptionsWindow = function(dataType) {
