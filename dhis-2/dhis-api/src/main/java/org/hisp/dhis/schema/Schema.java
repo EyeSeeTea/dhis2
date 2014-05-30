@@ -37,6 +37,7 @@ import com.google.common.collect.Maps;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.springframework.core.Ordered;
 
 import java.util.List;
 import java.util.Map;
@@ -45,25 +46,66 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @JacksonXmlRootElement( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
-public class Schema
+public class Schema implements Ordered
 {
+    /**
+     * Class that is described in this schema.
+     */
     private Class<?> klass;
 
+    /**
+     * Is this class a sub-class of IdentifiableObject
+     *
+     * @see org.hisp.dhis.common.IdentifiableObject
+     */
     private boolean identifiableObject;
 
+    /**
+     * Is this class a sub-class of NameableObject
+     *
+     * @see org.hisp.dhis.common.NameableObject
+     */
     private boolean nameableObject;
 
+    /**
+     * Singular name.
+     */
     private String singular;
 
+    /**
+     * Plural name.
+     */
     private String plural;
 
+    /**
+     * Is sharing supported for instances of this class.
+     */
     private boolean shareable;
 
+    /**
+     * Points to Web-API endpoint (if exposed).
+     */
     private String apiEndpoint;
 
+    /**
+     * Is this class considered metadata, this is mainly used for our metadata importer/exporter.
+     */
+    private boolean metadata;
+
+    /**
+     * List of authorities required for doing operations on this class.
+     */
     private List<Authority> authorities = Lists.newArrayList();
 
+    /**
+     * List of all exposed properties on this class.
+     */
     private List<Property> properties = Lists.newArrayList();
+
+    /**
+     * Used for sorting of schema list when doing metadata import/export.
+     */
+    private int order = Ordered.LOWEST_PRECEDENCE;
 
     public Schema( Class<?> klass, String singular, String plural )
     {
@@ -72,6 +114,7 @@ public class Schema
         this.nameableObject = NameableObject.class.isAssignableFrom( klass );
         this.singular = singular;
         this.plural = plural;
+        this.metadata = true;
     }
 
     @JsonProperty
@@ -154,6 +197,18 @@ public class Schema
     }
 
     @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isMetadata()
+    {
+        return metadata;
+    }
+
+    public void setMetadata( boolean metadata )
+    {
+        this.metadata = metadata;
+    }
+
+    @JsonProperty
     @JacksonXmlElementWrapper( localName = "authorities", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "authority", namespace = DxfNamespaces.DXF_2_0 )
     public List<Authority> getAuthorities()
@@ -199,6 +254,18 @@ public class Schema
         }
 
         return authorityMap.get( type );
+    }
+
+    // TODO not exposed right now, should we?
+    @Override
+    public int getOrder()
+    {
+        return order;
+    }
+
+    public void setOrder( int order )
+    {
+        this.order = order;
     }
 
     @Override

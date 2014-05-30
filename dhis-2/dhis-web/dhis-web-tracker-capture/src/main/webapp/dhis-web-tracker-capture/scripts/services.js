@@ -248,18 +248,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return storage.get('ATTRIBUTES');
         }, 
         getByProgram: function(program){
-            var attributes = [];
-            var programAttributes = [];
             
-            angular.forEach(this.getAll(), function(attribute){
-                attributes[attribute.id] = attribute;
-            });
-           
-            angular.forEach(program.programTrackedEntityAttributes, function(pAttribute){
-               programAttributes.push(attributes[pAttribute.attribute.id]);                
-            });            
-            
-            return programAttributes;            
+            if(program){
+                var attributes = [];
+                var programAttributes = [];
+
+                angular.forEach(this.getAll(), function(attribute){
+                    attributes[attribute.id] = attribute;
+                });
+
+                angular.forEach(program.programTrackedEntityAttributes, function(pAttribute){
+                   programAttributes.push(attributes[pAttribute.attribute.id]);                
+                }); 
+                
+                return programAttributes;            
+            }
+            return this.getWithoutProgram();           
         },
         getWithoutProgram: function(){            
             var attributes = [];
@@ -279,6 +283,41 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             
             return param;
+        },
+        getMissingAttributesForEnrollment: function(tei, program){
+            var programAttributes = this.getByProgram(program);
+            var existingAttributes = tei.attributes;
+            var missingAttributes = [];
+            for(var i=0; i<programAttributes.length; i++){
+                var exists = false;
+                for(var j=0; j<existingAttributes.length && !exists; j++){
+                    if(programAttributes[i].id === existingAttributes[j].attribute){
+                        exists = true;
+                    }
+                }
+                if(!exists){
+                    missingAttributes.push(programAttributes[i]);
+                }
+            }
+            return missingAttributes;
+        },
+        hideAttributesNotInProgram: function(tei, program){
+            var programAttributes = this.getByProgram(program);
+            var teiAttributes = tei.attributes;
+            
+            for(var i=0; i<teiAttributes.length; i++){
+                teiAttributes[i].show = true;
+                var inProgram = false;
+                for(var j=0; j<programAttributes.length && !inProgram; j++){
+                    if(teiAttributes[i].attribute === programAttributes[j].id){
+                        inProgram = true;
+                    }
+                }
+                if(!inProgram){
+                    teiAttributes[i].show = false;
+                }                
+            }            
+            return tei.attributes;
         }
     };
 })

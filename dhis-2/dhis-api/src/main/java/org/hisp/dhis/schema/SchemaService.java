@@ -40,4 +40,6 @@ public interface SchemaService
     Schema getSchemaBySingularName( String name );
 
     List<Schema> getSchemas();
+
+    List<Schema> getMetadataSchemas();
 }

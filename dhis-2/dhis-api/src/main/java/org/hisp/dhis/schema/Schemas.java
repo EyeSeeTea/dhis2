@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.schema;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,41 +25,45 @@ package org.hisp.dhis.schema.descriptors;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.schema.Authority;
-import org.hisp.dhis.schema.AuthorityType;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import org.hisp.dhis.common.DxfNamespaces;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Component
-public class DataDictionarySchemaDescriptor implements SchemaDescriptor
+@JacksonXmlRootElement( localName = "schemas", namespace = DxfNamespaces.DXF_2_0 )
+public class Schemas
 {
-    public static final String SINGULAR = "dataDictionary";
+    private List<Schema> schemas = Lists.newArrayList();
 
-    public static final String PLURAL = "dataDictionaries";
-
-    public static final String API_ENDPOINT = "/" + PLURAL;
-
-    @Override
-    public Schema getSchema()
+    public Schemas()
     {
-        Schema schema = new Schema( DataDictionary.class, SINGULAR, PLURAL );
-        schema.setApiEndpoint( API_ENDPOINT );
-        schema.setShareable( true );
-        schema.setOrder( 128 );
+    }
 
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DATADICTIONARY_PUBLIC_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_DATADICTIONARY_PRIVATE_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_DATADICTIONARY_DELETE" ) ) );
+    public Schemas( List<Schema> schemas )
+    {
+        this.schemas = schemas;
+    }
 
-        return schema;
+    @JsonProperty
+    @JacksonXmlProperty( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "schemas", namespace = DxfNamespaces.DXF_2_0, useWrapping = false )
+    public List<Schema> getSchemas()
+    {
+        return schemas;
+    }
+
+    public void setSchemas( List<Schema> schemas )
+    {
+        this.schemas = schemas;
     }
 }
