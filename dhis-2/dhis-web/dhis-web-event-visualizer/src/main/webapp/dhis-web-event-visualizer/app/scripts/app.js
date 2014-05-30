@@ -3207,34 +3207,34 @@ Ext.onReady( function() {
                 aggWindow.addDimension(element, store);
 			}
 
-			//if (layout && layout.dataType === 'aggregated_values') {
-            aggWindow.reset(true);
+			if (layout) { // && layout.dataType === 'aggregated_values') {
+                aggWindow.reset(true);
 
-            if (layout.startDate && layout.endDate) {
-                aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
-            }
-
-            if (layout.columns) {
-                for (var i = 0; i < layout.columns.length; i++) {
-                    aggWindow.colStore.add(recordMap[layout.columns[i].dimension]);
+                if (layout.startDate && layout.endDate) {
+                    aggWindow.fixedFilterStore.add({id: dimConf.startEndDate.value, name: dimConf.startEndDate.name});
                 }
-            }
 
-            if (layout.rows) {
-                for (var i = 0; i < layout.rows.length; i++) {
-                    aggWindow.rowStore.add(recordMap[layout.rows[i].dimension]);
+                if (layout.columns) {
+                    for (var i = 0; i < layout.columns.length; i++) {
+                        aggWindow.colStore.add(recordMap[layout.columns[i].dimension]);
+                    }
                 }
-            }
 
-            if (layout.filters) {
-                for (var i = 0, store, record; i < layout.filters.length; i++) {
-                    record = recordMap[layout.filters[i].dimension];
-                    store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
-
-                    store.add(record);
+                if (layout.rows) {
+                    for (var i = 0; i < layout.rows.length; i++) {
+                        aggWindow.rowStore.add(recordMap[layout.rows[i].dimension]);
+                    }
                 }
-            }
-			//}
+
+                if (layout.filters) {
+                    for (var i = 0, store, record; i < layout.filters.length; i++) {
+                        record = recordMap[layout.filters[i].dimension];
+                        store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.filterStore : aggWindow.fixedFilterStore;
+
+                        store.add(record);
+                    }
+                }
+			}
         };
 
         dataElement = Ext.create('Ext.panel.Panel', {
@@ -4464,6 +4464,7 @@ Ext.onReady( function() {
 				filters = [],
 				a;
 
+            view.type = ns.app.viewport.chartType.getChartType();
             view.program = program.getRecord();
             view.programStage = stage.getRecord();
 
@@ -5615,7 +5616,7 @@ Ext.onReady( function() {
 			}
 
 			// state
-            ns.app.viewport.getLayoutWindow(config.dataType).saveState();
+            ns.app.viewport.getLayoutWindow().saveState();
 
 			ns.core.web.report.getData(config, false);
 		};
@@ -6017,6 +6018,7 @@ Ext.onReady( function() {
 		viewport = Ext.create('Ext.container.Viewport', {
 			layout: 'border',
             getLayoutWindow: getLayoutWindow,
+            chartType: chartType,
 			items: [
 				westRegion,
 				centerRegion
