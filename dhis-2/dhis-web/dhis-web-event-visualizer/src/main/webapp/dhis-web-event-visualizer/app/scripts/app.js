@@ -818,11 +818,13 @@ Ext.onReady( function() {
                 this.activateCmp.setValue(!!(sortOrder > 0 && topLimit > 0));
             },
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    activateWidth = 135,
+                    sortWidth = (this.comboboxWidth - activateWidth) / 2;
 
                 this.activateCmp = Ext.create('Ext.form.field.Checkbox', {
                     boxLabel: container.boxLabel,
-                    width: 135,
+                    width: activateWidth,
                     style: 'margin-bottom:4px',
                     listeners: {
                         change: function(cmp, newValue) {
@@ -834,7 +836,7 @@ Ext.onReady( function() {
                 this.sortOrderCmp = Ext.create('Ext.form.field.ComboBox', {
                     cls: 'ns-combo',
                     style: 'margin-bottom:2px',
-                    width: 70,
+                    width: sortWidth,
                     queryMode: 'local',
                     valueField: 'id',
                     editable: false,
@@ -849,7 +851,7 @@ Ext.onReady( function() {
                 });
 
                 this.topLimitCmp = Ext.create('Ext.form.field.Number', {
-                    width: 56,
+                    width: sortWidth - 1,
                     style: 'margin-bottom:2px; margin-left:1px',
                     minValue: 1,
                     maxValue: 10000,
@@ -967,7 +969,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.column,
+					text: NS.i18n.series,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -1001,7 +1003,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.row,
+					text: NS.i18n.category,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -6170,7 +6172,7 @@ Ext.onReady( function() {
 
 								// i18n
 								requests.push({
-									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.eventchart',
+									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.eventvisualizer',
 									method: 'POST',
 									headers: {
 										'Content-Type': 'application/json',
