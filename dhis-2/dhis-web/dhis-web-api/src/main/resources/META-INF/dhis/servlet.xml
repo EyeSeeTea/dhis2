@@ -13,8 +13,28 @@
 
   <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
 
+  <bean id="org.hisp.dhis.webapi.utils.RootNodeMessageConverter" class="org.hisp.dhis.webapi.utils.RootNodeMessageConverter">
+    <constructor-arg name="supportedMediaTypes">
+      <list>
+        <value>application/json</value>
+        <value>application/xml</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <bean id="org.hisp.dhis.webapi.utils.RenderServiceMessageConverter" class="org.hisp.dhis.webapi.utils.RenderServiceMessageConverter">
+    <constructor-arg name="supportedMediaTypes">
+      <list>
+        <value>application/json</value>
+        <value>application/xml</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
   <mvc:annotation-driven>
-    <mvc:message-converters>
+    <mvc:message-converters register-defaults="true">
+      <ref bean="org.hisp.dhis.webapi.utils.RootNodeMessageConverter" />
+      <ref bean="org.hisp.dhis.webapi.utils.RenderServiceMessageConverter" />
       <bean class="org.hisp.dhis.api.mobile.support.DataStreamSerializableMessageConverter" />
     </mvc:message-converters>
   </mvc:annotation-driven>
@@ -66,10 +86,6 @@
 
         <bean class="org.hisp.dhis.webapi.view.JacksonXmlView">
           <constructor-arg name="withCompression" value="true" />
-        </bean>
-
-        <bean class="org.hisp.dhis.webapi.view.JacksonJsonView">
-          <constructor-arg name="contentType" value="text/html" />
         </bean>
 
         <bean class="org.hisp.dhis.webapi.view.JacksonJsonView">

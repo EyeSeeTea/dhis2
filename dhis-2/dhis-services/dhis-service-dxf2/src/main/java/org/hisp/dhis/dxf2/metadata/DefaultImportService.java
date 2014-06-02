@@ -70,8 +70,8 @@ public class DefaultImportService
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
 
-    @Autowired(required = false)
-    private Set<Importer> importerClasses = new HashSet<Importer>();
+    @Autowired( required = false )
+    private Set<Importer> importerClasses = new HashSet<>();
 
     @Autowired
     private ObjectBridge objectBridge;
@@ -176,8 +176,6 @@ public class DefaultImportService
                         }
 
                         ImportTypeSummary importTypeSummary = doImport( user, objects, importOptions );
-
-                        sessionFactory.getCurrentSession().flush();
 
                         if ( importTypeSummary != null )
                         {
