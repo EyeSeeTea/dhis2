@@ -286,6 +286,8 @@ Ext.onReady( function() {
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
+                // type: string
+
 				// columns: [Dimension]
 
 				// rows: [Dimension]
@@ -454,6 +456,8 @@ Ext.onReady( function() {
 					}
 
 					// layout
+                    layout.type = config.type;
+                    
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
@@ -1770,7 +1774,7 @@ Ext.onReady( function() {
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
 
-						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+						if (Ext.Array.contains(ignoreKeys, dim.dimension) || (dim.dimension === 'pe' && !dim.items && !dim.filter)) {
 							continue;
 						}
 
@@ -1796,8 +1800,19 @@ Ext.onReady( function() {
 					for (var i = 0, dim; i < view.filters.length; i++) {
 						dim = view.filters[i];
 
-						paramString += '&filter=' + dim.dimension;
-						paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+                        paramString += '&filter=' + dim.dimension;
+
+                        if (dim.items) {
+                            paramString += ':';
+
+                            for (var i = 0; i < dim.items.length; i++) {
+                                paramString += encodeURIComponent(dim.items[i].id);
+                                paramString += i < dim.items.length - 1 ? ';' : '';
+                            }
+                        }
+                        else {
+                            paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+                        }
 					}
 				}
 
@@ -2645,10 +2660,7 @@ Ext.onReady( function() {
 			};
 
 			web.report.createChart = function(xLayout, xResponse, centerRegion) {
-				var xResponse = ns.app.xResponse,
-					xLayout = ns.app.xLayout,
-
-                    columnIds = xLayout.columns[0].ids,
+                var columnIds = xLayout.columns[0].ids,
                     rowIds = xLayout.rows[0].ids,
                     filterIds = function() {
                         var ids = [];
