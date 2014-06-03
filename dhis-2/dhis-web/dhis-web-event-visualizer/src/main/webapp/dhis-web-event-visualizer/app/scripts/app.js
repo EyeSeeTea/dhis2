@@ -1,5 +1,5 @@
 Ext.onReady( function() {
-	var NS = ER,
+	var NS = EV,
 
 		AggregateLayoutWindow,
 		AggregateOptionsWindow,

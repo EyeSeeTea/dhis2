@@ -4,8 +4,8 @@ Ext.onReady( function() {
 	Ext.Ajax.method = 'GET';
 
 	// namespace
-	ER = {};
-	var NS = ER;
+	EV = {};
+	var NS = EV;
 
 	NS.instances = [];
 	NS.i18n = {};
@@ -194,22 +194,15 @@ Ext.onReady( function() {
 				multiselect_fill_reportingrates: 315
 			};
 
-			conf.report = {
-				digitGroupSeparator: {
-					'comma': ',',
-					'space': ' '
-				},
-				displayDensity: {
-					'compact': '3px',
-					'normal': '5px',
-					'comfortable': '10px',
-				},
-				fontSize: {
-					'small': '10px',
-					'normal': '11px',
-					'large': '13px'
-				}
-			};
+			conf.chart = {
+                style: {
+                    inset: 30,
+                    fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
+                },
+                theme: {
+                    dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+                }
+            };
 		}());
 
 		// api
@@ -2749,7 +2742,7 @@ Ext.onReady( function() {
                             }
 
                             trendLineFields.push(key);
-                            xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                            xResponse.metaData.names[key] = EV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
                         }
                     }
 
@@ -2861,7 +2854,7 @@ Ext.onReady( function() {
                         return Ext.Array.max(values);
                     };
 
-                    if (DV.isDebug) {
+                    if (NS.isDebug) {
                         console.log("data", data);
                         console.log("rangeFields", store.rangeFields);
                         console.log("domainFields", store.domainFields);
@@ -3052,7 +3045,7 @@ Ext.onReady( function() {
                             stroke: '#041423'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
+                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : NS.i18n.target) + ' (' + xLayout.targetLineValue + ')'
                     };
                 };
 
@@ -3069,7 +3062,7 @@ Ext.onReady( function() {
                             stroke: '#041423'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
+                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : NS.i18n.base) + ' (' + xLayout.baseLineValue + ')'
                     };
                 };
 
