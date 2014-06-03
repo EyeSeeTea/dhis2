@@ -1699,73 +1699,7 @@ Ext.onReady( function() {
 
 				return response;
 			};
-
-				// query
-			service.response.query = {};
-
-			service.response.query.getExtendedResponse = function(layout, response) {
-				var xResponse = Ext.clone(response),
-					metaData = xResponse.metaData,
-                    dimensionNames = Ext.Array.unique(Ext.Array.pluck(layout.columns, 'dimension')),
-                    dimensionHeaders = [],
-					headers = xResponse.headers,
-					nameHeaderMap = {},
-                    nameMap = {},
-                    ouIndex;
-
-                nameMap['pe'] = 'eventdate';
-                nameMap['ou'] = 'ouname';
-
-                // get ou index
-                for (var i = 0, header; i < headers.length; i++) {
-					if (headers[i].name === 'ou') {
-						ouIndex = i;
-						break;
-					}
-				}
-
-				// update rows
-				for (var i = 0, header; i < headers.length; i++) {
-					header = headers[i];
-					header.index = i;
-
-					nameHeaderMap[header.name] = header;
-
-					if (header.type === 'java.lang.Double') {
-						for (var j = 0; j < xResponse.rows.length; j++) {
-							xResponse.rows[j][i] = parseFloat(xResponse.rows[j][i]);
-						}
-					}
-
-					if (header.name === 'eventdate') {
-						for (var j = 0; j < xResponse.rows.length; j++) {
-							xResponse.rows[j][i] = xResponse.rows[j][i].substr(0,10);
-						}
-					}
-
-					// TODO, using descendants -> missing orgunits in ouHierarchy
-
-					//else if (header.name === 'ouname' && layout.showHierarchy && metaData.ouHierarchy) {
-						//for (var j = 0, ouId; j < xResponse.rows.length; j++) {
-							//ouId = xResponse.rows[j][ouIndex];
-							//xResponse.rows[j][i] = service.layout.getHierarchyName(metaData.ouHierarchy, metaData.names, ouId);
-						//}
-					//}
-				}
-
-				// dimension headers
-                for (var i = 0, name; i < dimensionNames.length; i++) {
-                    name = nameMap[dimensionNames[i]] || dimensionNames[i];
-
-                    dimensionHeaders.push(nameHeaderMap[name]);
-                }
-
-				xResponse.dimensionHeaders = dimensionHeaders;
-				xResponse.nameHeaderMap = nameHeaderMap;
-
-				return xResponse;
-			};
-		}());
+        }());
 
 		// web
 		(function() {
@@ -2710,95 +2644,981 @@ Ext.onReady( function() {
 				}();
 			};
 
-				// query
-			web.report.query = {};
+			web.report.createChart = function(xLayout, xResponse, centerRegion) {
+				var xResponse = ns.app.xResponse,
+					xLayout = ns.app.xLayout,
 
-			web.report.query.sort = function(layout, xResponse) {
-				var id = layout.sorting.id,
-					direction = layout.sorting ? layout.sorting.direction : 'DESC',
-					index = xResponse.nameHeaderMap[id].index,
-					rows = xResponse.rows;
+                    columnIds = xLayout.columns[0].ids,
+                    rowIds = xLayout.rows[0].ids,
+                    filterIds = function() {
+                        var ids = [];
+                        
+                        if (xLayout.filters) {
+                            for (var i = 0; i < xLayout.filters.length; i++) {
+                                ids = ids.concat(xLayout.filters[i].ids || []);
+                            }
+                        }
 
-				support.prototype.array.sort(rows, direction, index);
+                        return ids;
+                    }(),
 
-				return xResponse;
-			};
+					getSyncronizedXLayout,
+                    getExtendedResponse,
+                    validateUrl,
 
-			web.report.query.format = function(str) {
-				var n = parseFloat(str);
+                    getDefaultStore,
+                    getDefaultNumericAxis,
+                    getDefaultCategoryAxis,
+                    getDefaultSeriesTitle,
+                    getDefaultSeries,
+                    getDefaultTrendLines,
+                    getDefaultTargetLine,
+                    getDefaultBaseLine,
+                    getDefaultTips,
+                    setDefaultTheme,
+                    getDefaultLegend,
+                    getDefaultChartTitle,
+                    getDefaultChartSizeHandler,
+                    getDefaultChartTitlePositionHandler,
+                    getDefaultChart,
 
-				if (!Ext.isNumber(n)) {
-					return str;
-				}
+                    generator = {};
 
-				if (new Date(str).toString() === 'Invalid Date') {
-					return n;
-				}
+                getDefaultStore = function() {
+                    var pe = conf.finals.dimension.period.dimensionName,
+                        columnDimensionName = xLayout.columns[0].dimensionName,
+                        rowDimensionName = xLayout.rows[0].dimensionName,
 
-				return str;
-			};
+                        data = [],
+                        //columnIds = xLayout.columnIds,
+                        //rowIds = xLayout.rowIds,
+                        trendLineFields = [],
+                        targetLineFields = [],
+                        baseLineFields = [],
+                        store;
 
-			web.report.query.getHtml = function(layout, xResponse) {
-				var dimensionHeaders = xResponse.dimensionHeaders,
-					rows = xResponse.rows,
-					tableCls = 'pivot',
-					html = '';
+                    // data
+                    for (var i = 0, obj, category, rowValues, isEmpty; i < rowIds.length; i++) {
+                        obj = {};
+                        category = rowIds[i];
+                        rowValues = [];
+                        isEmpty = false;
+                        
 
-				xResponse.sortableIdObjects = [];
+                        obj[conf.finals.data.domain] = xResponse.metaData.names[category];
+                        
+                        for (var j = 0, id, value; j < columnIds.length; j++) {
+                            id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
+                            value = xResponse.idValueMap[id];
+                            rowValues.push(value);
 
-				tableCls += layout.displayDensity ? ' ' + layout.displayDensity : '';
-				tableCls += layout.fontSize ? ' ' + layout.fontSize : '';
+                            obj[columnIds[j]] = value ? parseFloat(value) : '0.0';
+                        }
 
-				html += '<table class="' + tableCls + '"><tr>';
+                        isEmpty = !(Ext.Array.clean(rowValues).length);
 
-				// get header indexes
-				for (var i = 0, header, uuid; i < dimensionHeaders.length; i++) {
-					header = dimensionHeaders[i];
-					uuid = Ext.data.IdGenerator.get('uuid').generate();
+                        if (!(isEmpty && xLayout.hideEmptyRows)) {
+                            data.push(obj);
+                        }
+                    }
 
-					html += '<td id="' + uuid + '" class="pivot-dim td-sortable">' + header.column + '</td>';
+                    // trend lines
+                    if (xLayout.showTrendLine) {
+                        for (var i = 0, regression, key; i < columnIds.length; i++) {
+                            regression = new SimpleRegression();
+                            key = conf.finals.data.trendLine + columnIds[i];
 
-					xResponse.sortableIdObjects.push({
-						id: header.name,
-						uuid: uuid
-					});
-				}
+                            for (var j = 0; j < data.length; j++) {
+                                regression.addData(j, data[j][columnIds[i]]);
+                            }
 
-				html += '</tr>';
+                            for (var j = 0; j < data.length; j++) {
+                                data[j][key] = parseFloat(regression.predict(j).toFixed(1));
+                            }
 
-				// rows
-				for (var i = 0, row; i < rows.length; i++) {
-					row = rows[i];
-					html += '<tr>';
+                            trendLineFields.push(key);
+                            xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                        }
+                    }
 
-					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
-						header = dimensionHeaders[j];
-						str = row[header.index];
-						name = web.report.query.format(str);
+                    // target line
+                    if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
+                        for (var i = 0; i < data.length; i++) {
+                            data[i][conf.finals.data.targetLine] = parseFloat(xLayout.targetLineValue);
+                        }
 
-						//if (header.name === 'ouname' && layout.showHierarchy) {
-							//var a = Ext.Array.clean(name.split('/'));
-							//name = '';
+                        targetLineFields.push(conf.finals.data.targetLine);
+                    }
 
-							//for (var k = 0, isLast; k < a.length; k++) {
-								//isLast = !!(i === a.length - 1);
+                    // base line
+                    if (Ext.isNumber(xLayout.baseLineValue) || Ext.isNumber(parseFloat(xLayout.baseLineValue))) {
+                        for (var i = 0; i < data.length; i++) {
+                            data[i][conf.finals.data.baseLine] = parseFloat(xLayout.baseLineValue);
+                        }
 
-								//name += (!isLast ? '<span class="text-weak">' : '') + a[i] + (!isLast ? '</span>' : '') + (!isLast ? ' / ' : '');
-							//}
-						//}
+                        baseLineFields.push(conf.finals.data.baseLine);
+                    }
 
-						html += '<td class="pivot-value align-left">' + name + '</td>';
+                    store = Ext.create('Ext.data.Store', {
+                        fields: function() {
+                            var fields = Ext.clone(columnIds);
+                            fields.push(conf.finals.data.domain);
+                            fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
+
+                            return fields;
+                        }(),
+                        data: data
+                    });
+
+                    store.rangeFields = columnIds;
+                    store.domainFields = [conf.finals.data.domain];
+                    store.trendLineFields = trendLineFields;
+                    store.targetLineFields = targetLineFields;
+                    store.baseLineFields = baseLineFields;
+                    store.numericFields = [].concat(store.rangeFields, store.trendLineFields, store.targetLineFields, store.baseLineFields);
+
+                    store.getMaximum = function() {
+                        var maximums = [];
+
+                        for (var i = 0; i < store.numericFields.length; i++) {
+                            maximums.push(store.max(store.numericFields[i]));
+                        }
+
+                        return Ext.Array.max(maximums);
+                    };
+
+                    store.getMinimum = function() {
+                        var minimums = [];
+
+                        for (var i = 0; i < store.numericFields.length; i++) {
+                            minimums.push(store.max(store.numericFields[i]));
+                        }
+
+                        return Ext.Array.min(minimums);
+                    };
+
+                    store.getMaximumSum = function() {
+                        var sums = [],
+                            recordSum = 0;
+
+                        store.each(function(record) {
+                            recordSum = 0;
+
+                            for (var i = 0; i < store.rangeFields.length; i++) {
+                                recordSum += record.data[store.rangeFields[i]];
+                            }
+
+                            sums.push(recordSum);
+                        });
+
+                        return Ext.Array.max(sums);
+                    };
+
+                    store.hasDecimals = function() {
+                        var records = store.getRange();
+                        
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+                                
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    };
+
+                    store.getNumberOfDecimals = function() {
+                        var records = store.getRange(),
+                            values = [];
+                        
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+                                
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    value = value.toString();
+
+                                    values.push(value.length - value.indexOf('.') - 1);
+                                }
+                            }
+                        }
+
+                        return Ext.Array.max(values);
+                    };
+
+                    if (DV.isDebug) {
+                        console.log("data", data);
+                        console.log("rangeFields", store.rangeFields);
+                        console.log("domainFields", store.domainFields);
+                        console.log("trendLineFields", store.trendLineFields);
+                        console.log("targetLineFields", store.targetLineFields);
+                        console.log("baseLineFields", store.baseLineFields);
+                    }
+
+                    return store;
+                };
+
+                getDefaultNumericAxis = function(store) {
+                    var typeConf = conf.finals.chart,
+                        minimum = store.getMinimum(),
+                        maximum,
+                        numberOfDecimals,
+                        axis;
+
+                    getRenderer = function(numberOfDecimals) {
+                        var renderer = '0.';
+
+                        for (var i = 0; i < numberOfDecimals; i++) {
+                            renderer += '0';
+                        }
+
+                        return renderer;
+                    };
+
+                    // set maximum if stacked + extra line
+                    if ((xLayout.type === typeConf.stackedcolumn || xLayout.type === typeConf.stackedbar) &&
+                        (xLayout.showTrendLine || xLayout.targetLineValue || xLayout.baseLineValue)) {
+                        var a = [store.getMaximum(), store.getMaximumSum()];
+                        maximum = Math.ceil(Ext.Array.max(a) * 1.1);
+                        maximum = Math.floor(maximum / 10) * 10;
+                    }
+
+                    // renderer
+                    numberOfDecimals = store.getNumberOfDecimals();
+                    renderer = !!numberOfDecimals && (store.getMaximum() < 20) ? getRenderer(numberOfDecimals) : '0,0';
+
+                    axis = {
+                        type: 'Numeric',
+                        position: 'left',
+                        fields: store.numericFields,
+                        minimum: minimum < 0 ? minimum : 0,
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer(renderer)
+                        },
+                        grid: {
+                            odd: {
+                                opacity: 1,
+                                stroke: '#aaa',
+                                'stroke-width': 0.1
+                            },
+                            even: {
+                                opacity: 1,
+                                stroke: '#aaa',
+                                'stroke-width': 0.1
+                            }
+                        }
+                    };
+
+                    if (maximum) {
+                        axis.maximum = maximum;
+                    }
+
+                    if (xLayout.rangeAxisMaxValue) {
+						axis.maximum = xLayout.rangeAxisMaxValue;
 					}
 
-					html += '</tr>';
-				}
+                    if (xLayout.rangeAxisMinValue) {
+						axis.minimum = xLayout.rangeAxisMinValue;
+					}
 
-				html += '</table>';
+					if (xLayout.rangeAxisSteps) {
+						axis.majorTickSteps = xLayout.rangeAxisSteps - 1;
+					}
 
-				return {
-					html: html
-				};
-			};
+					if (xLayout.rangeAxisDecimals) {
+						axis.label.renderer = Ext.util.Format.numberRenderer(getRenderer(xLayout.rangeAxisDecimals));
+					}                    
+
+                    if (xLayout.rangeAxisTitle) {
+                        axis.title = xLayout.rangeAxisTitle;
+                    }
+
+                    return axis;
+                };
+
+                getDefaultCategoryAxis = function(store) {
+                    var axis = {
+                        type: 'Category',
+                        position: 'bottom',
+                        fields: store.domainFields,
+                        label: {
+                            rotate: {
+                                degrees: 330
+                            }
+                        }
+                    };
+
+                    if (xLayout.domainAxisTitle) {
+                        axis.title = xLayout.domainAxisTitle;
+                    }
+
+                    return axis;
+                };
+
+                getDefaultSeriesTitle = function(store) {
+                    var a = [];
+
+                    for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
+                        id = store.rangeFields[i];
+                        a.push(xResponse.metaData.names[id]);
+                    }
+
+                    return a;
+                };
+
+                getDefaultSeries = function(store) {
+                    var main = {
+                        type: 'column',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.rangeFields,
+                        style: {
+                            opacity: 0.8,
+                            lineWidth: 3
+                        },
+                        markerConfig: {
+                            type: 'circle',
+                            radius: 4
+                        },
+                        tips: getDefaultTips(),
+                        title: getDefaultSeriesTitle(store)
+                    };
+
+                    if (xLayout.showValues) {
+                        main.label = {
+                            display: 'outside',
+                            'text-anchor': 'middle',
+                            field: store.rangeFields,
+                            font: conf.chart.style.fontFamily,
+                            renderer: function(n) {
+                                return n === '0.0' ? '-' : n;                                    
+                            }
+                        };
+                    }
+
+                    return main;
+                };
+
+                getDefaultTrendLines = function(store) {
+                    var a = [];
+
+                    for (var i = 0; i < store.trendLineFields.length; i++) {
+                        a.push({
+                            type: 'line',
+                            axis: 'left',
+                            xField: store.domainFields,
+                            yField: store.trendLineFields[i],
+                            style: {
+                                opacity: 0.8,
+                                lineWidth: 3,
+                                'stroke-dasharray': 8
+                            },
+                            markerConfig: {
+                                type: 'circle',
+                                radius: 0
+                            },
+                            title: xResponse.metaData.names[store.trendLineFields[i]]
+                        });
+                    }
+
+                    return a;
+                };
+
+                getDefaultTargetLine = function(store) {
+                    return {
+                        type: 'line',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.targetLineFields,
+                        style: {
+                            opacity: 1,
+                            lineWidth: 2,
+                            'stroke-width': 1,
+                            stroke: '#041423'
+                        },
+                        showMarkers: false,
+                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
+                    };
+                };
+
+                getDefaultBaseLine = function(store) {
+                    return {
+                        type: 'line',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.baseLineFields,
+                        style: {
+                            opacity: 1,
+                            lineWidth: 2,
+                            'stroke-width': 1,
+                            stroke: '#041423'
+                        },
+                        showMarkers: false,
+                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
+                    };
+                };
+
+                getDefaultTips = function() {
+                    return {
+                        trackMouse: true,
+                        cls: 'dv-chart-tips',
+                        renderer: function(si, item) {
+                            var value = item.value[1] === '0.0' ? '-' : item.value[1];
+                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                        }
+                    };
+                };
+
+                setDefaultTheme = function(store) {
+                    var colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+
+                    if (xLayout.targetLineValue || xLayout.baseLineValue) {
+                        colors.push('#051a2e');
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        colors.push('#051a2e');
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        colors.push('#051a2e');
+                    }
+
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+                };
+
+                getDefaultLegend = function(store) {
+                    var itemLength = 30,
+                        charLength = 7,
+                        numberOfItems,
+                        numberOfChars = 0,
+                        str = '',
+                        width,
+                        isVertical = false,
+                        position = 'top',
+                        padding = 0;
+
+                    if (xLayout.type === conf.finals.chart.pie) {
+                        numberOfItems = store.getCount();
+                        store.each(function(r) {
+                            str += r.data[store.domainFields[0]];
+                        });
+                    }
+                    else {
+                        numberOfItems = store.rangeFields.length;
+
+                        for (var i = 0, name, ids; i < store.rangeFields.length; i++) {
+                            if (store.rangeFields[i].indexOf('#') !== -1) {
+                                ids = store.rangeFields[i].split('#');
+                                name = xResponse.metaData.names[ids[0]] + ' ' + xResponse.metaData.names[ids[1]];
+                            }
+                            else {
+                                name = xResponse.metaData.names[store.rangeFields[i]];
+                            }
+
+                            str += name;
+                        }
+                    }
+
+                    numberOfChars = str.length;
+
+                    width = (numberOfItems * itemLength) + (numberOfChars * charLength);
+
+                    if (width > ns.app.centerRegion.getWidth() - 50) {
+                        isVertical = true;
+                        position = 'right';
+                    }
+
+                    if (position === 'right') {
+                        padding = 5;
+                    }
+
+                    return Ext.create('Ext.chart.Legend', {
+                        position: position,
+                        isVertical: isVertical,
+                        labelFont: '13px ' + conf.chart.style.fontFamily,
+                        boxStroke: '#ffffff',
+                        boxStrokeWidth: 0,
+                        padding: padding
+                    });
+                };
+
+                getDefaultChartTitle = function(store) {
+                    var ids = filterIds,
+                        a = [],
+                        text = '',
+                        fontSize;
+
+                    if (xLayout.type === conf.finals.chart.pie) {
+                        ids = ids.concat(columnIds);
+                    }
+
+                    if (Ext.isArray(ids) && ids.length) {
+                        for (var i = 0; i < ids.length; i++) {
+                            text += xResponse.metaData.names[ids[i]];
+                            text += i < ids.length - 1 ? ', ' : '';
+                        }
+                    }
+
+                    if (xLayout.title) {
+                        text = xLayout.title;
+                    }
+
+                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+
+                    return Ext.create('Ext.draw.Sprite', {
+                        type: 'text',
+                        text: text,
+                        font: 'bold ' + fontSize + 'px ' + conf.chart.style.fontFamily,
+                        fill: '#111',
+                        height: 20,
+                        y: 	20
+                    });
+                };
+
+                getDefaultChartSizeHandler = function() {
+                    return function() {
+						this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth() - 15);
+                        this.setHeight(ns.app.centerRegion.getHeight() - 40);
+                        this.animate = true;
+                    };
+                };
+
+                getDefaultChartTitlePositionHandler = function() {
+                    return function() {
+                        if (this.items) {
+                            var title = this.items[0],
+                                legend = this.legend,
+                                legendCenterX,
+                                titleX;
+
+                            if (this.legend.position === 'top') {
+                                legendCenterX = legend.x + (legend.width / 2);
+                                titleX = legendCenterX - (title.el.getWidth() / 2);
+                            }
+                            else {
+                                var legendWidth = legend ? legend.width : 0;
+                                titleX = (this.width / 2) - (title.el.getWidth() / 2);
+                            }
+
+                            title.setAttributes({
+                                x: titleX
+                            }, true);
+                        }
+                    };
+                };
+
+                getDefaultChart = function(store, axes, series, theme) {
+                    var chart,
+                        config = {
+							//renderTo: init.el,
+                            store: store,
+                            axes: axes,
+                            series: series,
+                            animate: true,
+                            shadow: false,
+                            insetPadding: 35,
+                            width: ns.app.centerRegion.getWidth() - 15,
+                            height: ns.app.centerRegion.getHeight() - 40,
+                            theme: theme || 'dv1'
+                        };
+
+                    // Legend
+                    if (!xLayout.hideLegend) {
+                        config.legend = getDefaultLegend(store);
+
+                        if (config.legend.position === 'right') {
+                            config.insetPadding = 40;
+                        }
+                    }
+
+                    // Title
+                    if (!xLayout.hideTitle) {
+                        config.items = [getDefaultChartTitle(store)];
+                    }
+                    else {
+                        config.insetPadding = 10;
+                    }
+
+                    chart = Ext.create('Ext.chart.Chart', config);
+
+                    chart.setChartSize = getDefaultChartSizeHandler();
+                    chart.setTitlePosition = getDefaultChartTitlePositionHandler();
+
+                    chart.onViewportResize = function() {
+                        chart.setChartSize();
+                        chart.redraw();
+                        chart.setTitlePosition();
+                    };
+
+                    chart.on('afterrender', function() {
+                        chart.setTitlePosition();
+                    });
+
+                    return chart;
+                };
+
+                generator.column = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = [getDefaultSeries(store)];
+
+                    // Options
+                    if (xLayout.showTrendLine) {
+                        series = getDefaultTrendLines(store).concat(series);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+                    }
+
+                    // Theme
+                    setDefaultTheme(store);
+
+                    return getDefaultChart(store, axes, series);
+                };
+
+                generator.stackedcolumn = function() {
+                    var chart = this.column();
+
+                    for (var i = 0, item; i < chart.series.items.length; i++) {
+                        item = chart.series.items[i];
+
+                        if (item.type === conf.finals.chart.column) {
+                            item.stacked = true;
+                        }
+                    }
+
+                    return chart;
+                };
+
+                generator.bar = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes,
+                        series = getDefaultSeries(store),
+                        trendLines,
+                        targetLine,
+                        baseLine,
+                        chart;
+
+                    // Axes
+                    numericAxis.position = 'bottom';
+                    categoryAxis.position = 'left';
+                    categoryAxis.label.rotate.degrees = 360;
+                    axes = [numericAxis, categoryAxis];
+
+                    // Series
+                    series.type = 'bar';
+                    series.axis = 'bottom';
+
+                    // Options
+                    if (xLayout.showValues) {
+                        series.label = {
+                            display: 'outside',
+                            'text-anchor': 'middle',
+                            field: store.rangeFields
+                        };
+                    }
+
+                    series = [series];
+
+                    if (xLayout.showTrendLine) {
+                        trendLines = getDefaultTrendLines(store);
+
+                        for (var i = 0; i < trendLines.length; i++) {
+                            trendLines[i].axis = 'bottom';
+                            trendLines[i].xField = store.trendLineFields[i];
+                            trendLines[i].yField = store.domainFields;
+                        }
+
+                        series = trendLines.concat(series);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        targetLine = getDefaultTargetLine(store);
+                        targetLine.axis = 'bottom';
+                        targetLine.xField = store.targetLineFields;
+                        targetLine.yField = store.domainFields;
+
+                        series.push(targetLine);
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        baseLine = getDefaultBaseLine(store);
+                        baseLine.axis = 'bottom';
+                        baseLine.xField = store.baseLineFields;
+                        baseLine.yField = store.domainFields;
+
+                        series.push(baseLine);
+                    }
+
+                    // Theme
+                    setDefaultTheme(store);
+
+                    return getDefaultChart(store, axes, series);
+                };
+
+                generator.stackedbar = function() {
+                    var chart = this.bar();
+
+                    for (var i = 0, item; i < chart.series.items.length; i++) {
+                        item = chart.series.items[i];
+
+                        if (item.type === conf.finals.chart.bar) {
+                            item.stacked = true;
+                        }
+                    }
+
+                    return chart;
+                };
+
+                generator.line = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = [],
+                        colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length),
+                        seriesTitles = getDefaultSeriesTitle(store);
+
+                    // Series
+                    for (var i = 0, line; i < store.rangeFields.length; i++) {
+                        line = {
+                            type: 'line',
+                            axis: 'left',
+                            xField: store.domainFields,
+                            yField: store.rangeFields[i],
+                            style: {
+                                opacity: 0.8,
+                                lineWidth: 3
+                            },
+                            markerConfig: {
+                                type: 'circle',
+                                radius: 4
+                            },
+                            tips: getDefaultTips(),
+                            title: seriesTitles[i]
+                        };
+
+                        //if (xLayout.showValues) {
+                            //line.label = {
+                                //display: 'over',
+                                //field: store.rangeFields[i]
+                            //};
+                        //}
+
+                        series.push(line);
+                    }
+
+                    // Options, theme colors
+                    if (xLayout.showTrendLine) {
+                        series = getDefaultTrendLines(store).concat(series);
+
+                        colors = colors.concat(colors);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+
+                        colors.push('#051a2e');
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+
+                        colors.push('#051a2e');
+                    }
+
+                    // Theme
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+
+                    return getDefaultChart(store, axes, series);
+                };
+
+                generator.area = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = getDefaultSeries(store);
+
+                    series.type = 'area';
+                    series.style.opacity = 0.7;
+                    series.style.lineWidth = 0;
+                    delete series.label;
+                    delete series.tips;
+                    series = [series];
+
+                    // Options
+                    if (xLayout.showTrendLine) {
+                        series = getDefaultTrendLines(store).concat(series);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+                    }
+
+                    // Theme
+                    setDefaultTheme(store);
+
+                    return getDefaultChart(store, axes, series);
+                };
+
+                generator.pie = function() {
+                    var store = getDefaultStore(),
+                        series,
+                        colors,
+                        chart,
+                        label = {
+                            field: conf.finals.data.domain
+                        };
+
+                    // Label
+                    if (xLayout.showValues) {
+                        label.display = 'middle';
+                        label.contrast = true;
+                        label.font = '14px ' + conf.chart.style.fontFamily;
+                        label.renderer = function(value) {
+                            var record = store.getAt(store.findExact(conf.finals.data.domain, value));
+                            return record.data[store.rangeFields[0]];
+                        };
+                    }
+
+                    // Series
+                    series = [{
+                        type: 'pie',
+                        field: store.rangeFields[0],
+                        donut: 7,
+                        showInLegend: true,
+                        highlight: {
+                            segment: {
+                                margin: 5
+                            }
+                        },
+                        label: label,
+                        style: {
+                            opacity: 0.8,
+                            stroke: '#555'
+                        },
+                        tips: {
+                            trackMouse: true,
+                            cls: 'dv-chart-tips',
+                            renderer: function(item) {
+                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
+                            }
+                        }
+                    }];
+
+                    // Theme
+                    colors = conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rowDimensionNames[0]].ids.length);
+
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+
+                    // Chart
+                    chart = getDefaultChart(store, null, series);
+                    //chart.legend.position = 'right';
+                    //chart.legend.isVertical = true;
+                    chart.insetPadding = 40;
+                    chart.shadow = true;
+
+                    return chart;
+                };
+
+                generator.radar = function() {
+                    var store = getDefaultStore(),
+                        axes = [],
+                        series = [],
+                        seriesTitles = getDefaultSeriesTitle(store),
+                        chart;
+
+                    // Axes
+                    axes.push({
+                        type: 'Radial',
+                        position: 'radial',
+                        label: {
+                            display: true
+                        }
+                    });
+
+                    // Series
+                    for (var i = 0, obj; i < store.rangeFields.length; i++) {
+                        obj = {
+                            showInLegend: true,
+                            type: 'radar',
+                            xField: store.domainFields,
+                            yField: store.rangeFields[i],
+                            style: {
+                                opacity: 0.5
+                            },
+                            tips: getDefaultTips(),
+                            title: seriesTitles[i]
+                        };
+
+                        if (xLayout.showValues) {
+                            obj.label = {
+                                display: 'over',
+                                field: store.rangeFields[i]
+                            };
+                        }
+
+                        series.push(obj);
+                    }
+
+                    chart = getDefaultChart(store, axes, series, 'Category2');
+
+                    chart.insetPadding = 40;
+                    chart.height = ns.app.centerRegion.getHeight() - 80;
+
+                    chart.setChartSize = function() {
+                        this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
+                        this.animate = true;
+                    };
+
+                    return chart;
+                };
+
+                // initialize
+                return generator[xLayout.type]();
+            };
 
 		}());
 
