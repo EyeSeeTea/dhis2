@@ -5264,7 +5264,7 @@ Ext.onReady( function() {
                 xLayout = getSXLayout(xLayout, xResponse);
 
                 //table = getHtml(xLayout, xResponse);
-                chart = web.report.createChart(xLayout, xResponse, ns.app.centerRegion);
+                chart = web.report.aggregate.createChart(xLayout, xResponse, ns.app.centerRegion);
 
                 //if (layout.sorting) {
                     //xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
@@ -5978,23 +5978,6 @@ Ext.onReady( function() {
 			listeners: {
 				added: function() {
 					ns.app.centerRegion = this;
-				},
-				afterrender: function(p) {
-					var liStyle = 'padding:3px 10px; color:#333',
-						html = '';
-
-					html += '<div style="padding:20px">';
-					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
-					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
-					html += '</div>';
-
-					p.update(html);
 				}
 			}
 		});

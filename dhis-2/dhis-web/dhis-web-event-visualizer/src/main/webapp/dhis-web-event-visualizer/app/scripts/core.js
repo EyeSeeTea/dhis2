@@ -2652,7 +2652,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			web.report.createChart = function(xLayout, xResponse, centerRegion) {
+			web.report.aggregate.createChart = function(xLayout, xResponse, centerRegion) {
                 var columnIds = xLayout.columns[0].ids,
                     rowIds = xLayout.rows[0].ids,
                     filterIds = function() {
@@ -3163,13 +3163,14 @@ Ext.onReady( function() {
                         a = [],
                         text = '',
                         fontSize;
-
+console.log(xResponse.metaData.names);
                     if (xLayout.type === conf.finals.chart.pie) {
                         ids = ids.concat(columnIds);
                     }
 
                     if (Ext.isArray(ids) && ids.length) {
                         for (var i = 0; i < ids.length; i++) {
+console.log(ids[i]);                            
                             text += xResponse.metaData.names[ids[i]];
                             text += i < ids.length - 1 ? ', ' : '';
                         }
