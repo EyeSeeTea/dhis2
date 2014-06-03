@@ -5278,7 +5278,7 @@ Ext.onReady( function() {
                 ns.app.dateRender = new Date();
 
                 ns.app.centerRegion.removeAll(true);
-				ns.app.centerRegion.add(ns.app.chart);
+				ns.app.centerRegion.add(chart);
 
                 // timing
                 ns.app.dateTotal = new Date();

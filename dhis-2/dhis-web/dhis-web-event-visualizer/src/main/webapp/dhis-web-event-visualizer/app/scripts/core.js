@@ -3139,7 +3139,7 @@ Ext.onReady( function() {
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
 
-                    if (width > ns.app.centerRegion.getWidth() - 50) {
+                    if (width > centerRegion.getWidth() - 50) {
                         isVertical = true;
                         position = 'right';
                     }
@@ -3179,7 +3179,7 @@ Ext.onReady( function() {
                         text = xLayout.title;
                     }
 
-                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+                    fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
 
                     return Ext.create('Ext.draw.Sprite', {
                         type: 'text',
@@ -3194,8 +3194,8 @@ Ext.onReady( function() {
                 getDefaultChartSizeHandler = function() {
                     return function() {
 						this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth() - 15);
-                        this.setHeight(ns.app.centerRegion.getHeight() - 40);
+                        this.setWidth(centerRegion.getWidth() - 15);
+                        this.setHeight(centerRegion.getHeight() - 40);
                         this.animate = true;
                     };
                 };
@@ -3234,8 +3234,8 @@ Ext.onReady( function() {
                             animate: true,
                             shadow: false,
                             insetPadding: 35,
-                            width: ns.app.centerRegion.getWidth() - 15,
-                            height: ns.app.centerRegion.getHeight() - 40,
+                            width: centerRegion.getWidth() - 15,
+                            height: centerRegion.getHeight() - 40,
                             theme: theme || 'dv1'
                         };
 
@@ -3609,12 +3609,12 @@ Ext.onReady( function() {
                     chart = getDefaultChart(store, axes, series, 'Category2');
 
                     chart.insetPadding = 40;
-                    chart.height = ns.app.centerRegion.getHeight() - 80;
+                    chart.height = centerRegion.getHeight() - 80;
 
                     chart.setChartSize = function() {
                         this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth());
-                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
+                        this.setWidth(centerRegion.getWidth());
+                        this.setHeight(centerRegion.getHeight() - 80);
                         this.animate = true;
                     };
 
