@@ -5288,6 +5288,7 @@ Ext.onReady( function() {
                 ns.app.xLayout = xLayout;
                 ns.app.response = response;
                 ns.app.xResponse = xResponse;
+                ns.app.chart = chart;
                 //ns.app.xColAxis = xColAxis;
                 //ns.app.xRowAxis = xRowAxis;
                 //ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
@@ -5978,7 +5979,12 @@ Ext.onReady( function() {
 			listeners: {
 				added: function() {
 					ns.app.centerRegion = this;
-				}
+				},
+                resize: function(p) {
+                    if (ns.app.xLayout && ns.app.chart) {
+                        ns.app.chart.onViewportResize();
+                    }
+                }
 			}
 		});
 
