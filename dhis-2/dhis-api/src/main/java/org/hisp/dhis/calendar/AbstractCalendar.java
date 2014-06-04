@@ -28,10 +28,13 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -140,7 +143,38 @@ public abstract class AbstractCalendar implements Calendar
     @Override
     public DateUnit fromIso( int year, int month, int day )
     {
-        return fromIso( new DateUnit( year, month, day ) );
+        return fromIso( new DateUnit( year, month, day, true ) );
+    }
+
+    @Override
+    public DateInterval toInterval( DateIntervalType type )
+    {
+        return toInterval( today(), type );
+    }
+
+    @Override
+    public DateInterval toInterval( DateUnit dateUnit, DateIntervalType type )
+    {
+        return toInterval( dateUnit, type, 0, 1 );
+    }
+
+    @Override
+    public DateInterval toInterval( DateIntervalType type, int offset, int length )
+    {
+        return toInterval( today(), type, offset, length );
+    }
+
+    @Override
+    public List<DateInterval> toIntervals( DateUnit dateUnit, DateIntervalType type, int offset, int length, int periods )
+    {
+        List<DateInterval> dateIntervals = Lists.newArrayList();
+
+        for ( int i = offset; i <= (offset + periods - 1); i++ )
+        {
+            dateIntervals.add( toInterval( dateUnit, type, i, length ) );
+        }
+
+        return dateIntervals;
     }
 
     @Override

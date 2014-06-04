@@ -200,7 +200,7 @@
 
 		<action name="findBeneficiary"
 			class="org.hisp.dhis.light.namebaseddataentry.action.FindBeneficiarytAction">
-			<result name="redirect" type="redirect">showPatientProgramList.action?patientId=${patientId}
+			<result name="redirect" type="redirect">showPatientProgramList.action?patientUID=${patientUID}
 			</result>
 			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
 			<param name="page">/dhis-web-light/namebased/beneficiaryList.vm</param>
@@ -321,13 +321,6 @@
 			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
 		</action>
 
-		<action name="searchBeneficiary"
-			class="org.hisp.dhis.light.beneficiaryenrollment.action.SearchBeneficiaryAction">
-			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
-			<param name="page">/dhis-web-light/enrollment/beneficiarySearchResult.vm</param>
-			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
-		</action>
-
 		<action name="selectEnrollmentProgram"
 			class="org.hisp.dhis.light.beneficiaryenrollment.action.GetEnrollmentProgramListAction">
 			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
@@ -357,12 +350,6 @@
 			class="org.hisp.dhis.light.singleevent.action.GetSingleEventAction">
 			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
 			<param name="page">/dhis-web-light/singleevent/selectSingleEvent.vm</param>
-		</action>
-
-		<action name="selectSingleEventBeneficiary"
-			class="org.hisp.dhis.light.singleevent.action.GetSingleEventBeneficiaryAction">
-			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
-			<param name="page">/dhis-web-light/singleevent/selectSingleEventBeneficiary.vm</param>
 		</action>
 
 		<action name="showSingleEventForm"
@@ -519,6 +506,27 @@
 			class="org.hisp.dhis.light.messaging.action.GetLastRecipientsAction">
 			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
 			<param name="page">/dhis-web-light/messages.vm</param>
+		</action>
+
+
+		<!-- Interpretations -->
+		
+		<action name="getInterpretations"
+			class="org.hisp.dhis.light.interpretation.action.GetInterpretations">
+			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
+			<param name="page">/dhis-web-light/interpretation/interpretations.vm</param>
+		</action>
+
+		<action name="getInterpretation"
+			class="org.hisp.dhis.light.interpretation.action.GetInterpretation">
+			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
+			<param name="page">/dhis-web-light/interpretation/interpretation.vm</param>
+		</action>
+
+		<action name="postInterpretationComment"
+			class="org.hisp.dhis.light.interpretation.action.PostInterpretationComment">
+			<result name="success" type="velocity">/dhis-web-light/main.vm</result>
+			<param name="page">/dhis-web-light/interpretation/interpretation.vm</param>
 		</action>
 
 		<!-- Anonymous -->

@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
@@ -57,10 +56,6 @@ public class ProgramStage
     public static final String TYPE_SECTION = "section";
 
     public static final String TYPE_CUSTOM = "custom";
-
-    public static final String REPORT_DATE_TO_USE_INCIDENT_DATE = "dateOfIncident";
-
-    public static final String REPORT_DATE_TO_USE_ENROLLMENT_DATE = "enrollmentDate";
 
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -170,6 +165,10 @@ public class ProgramStage
         this.remindCompleted = remindCompleted;
     }
 
+    @JsonProperty( value = "trackedEntityInstanceReminders" )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "trackedEntityInstanceReminders", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "trackedEntityInstanceReminder", namespace = DxfNamespaces.DXF_2_0 )
     public Set<TrackedEntityInstanceReminder> getReminders()
     {
         return reminders;
@@ -180,6 +179,9 @@ public class ProgramStage
         this.reminders = reminders;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataEntryForm getDataEntryForm()
     {
         return dataEntryForm;
@@ -196,6 +198,11 @@ public class ProgramStage
     public String getDescription()
     {
         return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
     }
 
     @JsonProperty( value = "programStageSections" )
@@ -223,11 +230,6 @@ public class ProgramStage
     public void setStandardInterval( Integer standardInterval )
     {
         this.standardInterval = standardInterval;
-    }
-
-    public void setDescription( String description )
-    {
-        this.description = description;
     }
 
     @JsonProperty( "repeatable" )

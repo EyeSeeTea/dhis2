@@ -28,6 +28,12 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.BaseDimensionalObject;
@@ -81,12 +87,6 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -157,7 +157,7 @@ final public class ExchangeClasses
         allExportClasses.put( Report.class, "reports" );
         allExportClasses.put( Chart.class, "charts" );
         allExportClasses.put( EventReport.class, "eventReports" );
-        
+
         allExportClasses.put( DataApprovalLevel.class, "dataApprovalLevels" );
 
         allExportClasses.put( Dashboard.class, "dashboards" );
@@ -171,6 +171,7 @@ final public class ExchangeClasses
         allExportClasses.put( MessageConversation.class, "messageConversations" );
         allExportClasses.put( Interpretation.class, "interpretations" );
 
+        // allExportClasses.put( ValidationCriteria.class, "validationCriterias" );
         allExportClasses.put( Program.class, "programs" );
         allExportClasses.put( ProgramStage.class, "programStages" );
         allExportClasses.put( RelationshipType.class, "relationshipTypes" );
@@ -192,7 +193,7 @@ final public class ExchangeClasses
         importClasses.remove( Interpretation.class );
         importClasses.remove( Dashboard.class );
         importClasses.remove( BaseDimensionalObject.class );
-        
+
         // tracker types are not enabled for meta-data import-export yet
         exportClasses.remove( Program.class );
         exportClasses.remove( ProgramStage.class );

@@ -41,10 +41,11 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class GetTranslationsAction 
     extends ActionSupport
+
 {
     private String className;
 
-    private Integer id;
+    private String uid;
 
     private String loc;
 
@@ -70,9 +71,9 @@ public class GetTranslationsAction
         this.className = className;
     }
 
-    public void setId( Integer id )
+    public void setUid( String uid )
     {
-        this.id = id;
+        this.uid = uid;
     }
 
     public void setLoc( String locale )
@@ -94,7 +95,7 @@ public class GetTranslationsAction
     {
         Locale locale = LocaleUtils.getLocale( loc );
 
-        translations = i18nService.getTranslationsNoFallback( className, id, locale );
+        translations = i18nService.getTranslationsNoFallback( className, uid, locale );
         
         return SUCCESS;
     }

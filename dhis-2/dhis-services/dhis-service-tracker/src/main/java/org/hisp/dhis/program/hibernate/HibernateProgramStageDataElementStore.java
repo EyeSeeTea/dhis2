@@ -42,7 +42,6 @@ import java.util.Collection;
 
 /**
  * @author Viet Nguyen
- * @version $Id$
  */
 public class HibernateProgramStageDataElementStore
     implements ProgramStageDataElementStore
@@ -93,28 +92,6 @@ public class HibernateProgramStageDataElementStore
         return criteria.list();
     }
 
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageDataElement> get( ProgramStage programStage )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( ProgramStageDataElement.class );
-
-        return criteria.add( Restrictions.eq( "programStage", programStage ) ).list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<ProgramStageDataElement> get( ProgramStage programStage, boolean compulsory )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( ProgramStageDataElement.class );
-        criteria.add( Restrictions.eq( "programStage", programStage ) );
-        criteria.add( Restrictions.eq( "compulsory", compulsory ) );
-
-        return criteria.list();
-    }
-
     public ProgramStageDataElement get( ProgramStage programStage, DataElement dataElement )
     {
         Session session = sessionFactory.getCurrentSession();
@@ -135,4 +112,5 @@ public class HibernateProgramStageDataElementStore
         criteria.setProjection( Projections.property( "dataElement" ) );
         return criteria.list();
     }
+
 }

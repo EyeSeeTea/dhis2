@@ -96,6 +96,11 @@ public class TableAlteror
         executeSql( "DROP TABLE reporttable_dataelementgroupsets" );
         executeSql( "DROP TABLE dashboardcontent_datamartexports" );
         executeSql( "DROP TABLE dashboardcontent_mapviews" );
+        executeSql( "DROP TABLE dashboardcontent_documents" );
+        executeSql( "DROP TABLE dashboardcontent_maps" );
+        executeSql( "DROP TABLE dashboardcontent_reports" );
+        executeSql( "DROP TABLE dashboardcontent_reporttables" );
+        executeSql( "DROP TABLE dashboardcontent" );
         executeSql( "DROP TABLE customvalue" );
         executeSql( "DROP TABLE reporttable_displaycolumns" );
         executeSql( "DROP TABLE reportreporttables" );
@@ -155,6 +160,10 @@ public class TableAlteror
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name in ( 'Survey', 'OnChange', 'Relative' ))" );
         executeSql( "DELETE FROM periodtype WHERE name in ( 'Survey', 'OnChange', 'Relative' )" );
 
+        // upgrade report table totals
+        executeSql( "UPDATE reporttable SET rowtotals = totals, coltotals = totals" );
+        executeSql( "ALTER TABLE reporttable DROP COLUMN totals" );
+        
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapid" );
@@ -260,14 +269,6 @@ public class TableAlteror
 
         // orgunit shortname uniqueness
         executeSql( "ALTER TABLE organisationunit DROP CONSTRAINT organisationunit_shortname_key" );
-
-        // update dataset-dataentryform association and programstage-cde
-        // association
-        if ( updateDataSetAssociation() && updateProgramStageAssociation() )
-        {
-            // delete table dataentryformassociation
-            executeSql( "DROP TABLE dataentryformassociation" );
-        }
 
         executeSql( "ALTER TABLE section DROP CONSTRAINT section_name_key" );
         executeSql( "UPDATE patientattribute set inheritable=false where inheritable is null" );
@@ -490,6 +491,7 @@ public class TableAlteror
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
+        executeSql( "update eventreport set counttype = 'events' where counttype is null" );
 
         // Move chart filters to chart_filters table
 
@@ -721,7 +723,8 @@ public class TableAlteror
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
-        
+        upgradeTranslations();
+
         log.info( "Tables updated" );
     }
 
@@ -733,8 +736,7 @@ public class TableAlteror
 
         if ( no >= 5 )
         {
-            return; // attributeoptioncomboid already part of datavalue primary
-                    // key
+            return; // attributeoptioncomboid already part of datavalue pkey
         }
 
         int optionComboId = getDefaultOptionCombo();
@@ -989,6 +991,22 @@ public class TableAlteror
             log.debug( ex );
         }
     }
+    
+    private void upgradeTranslations()
+    {
+        final String sql = statementBuilder.getNumberOfColumnsInPrimaryKey( "translation" );
+
+        Integer no = statementManager.getHolder().queryForInteger( sql );
+
+        if ( no == 1 )
+        {
+            return; // translationid already set as single pkey
+        }
+        
+        executeSql( statementBuilder.getDropPrimaryKey( "translation" ) );
+        executeSql( statementBuilder.getAddPrimaryKeyToExistingTable( "translation", "translationid" ) );
+        executeSql( statementBuilder.getDropNotNullConstraint( "translation", "objectid", "integer" ) );
+    }
 
     private List<Integer> getDistinctIdList( String table, String col1 )
     {
@@ -1114,77 +1132,4 @@ public class TableAlteror
         return statementManager.getHolder().queryForInteger( sql );
     }
 
-    private boolean updateDataSetAssociation()
-    {
-        StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            Statement statement = holder.getStatement();
-
-            ResultSet isUpdated = statement
-                .executeQuery( "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'dataentryformassociation'" );
-
-            if ( isUpdated.next() )
-            {
-
-                ResultSet resultSet = statement
-                    .executeQuery( "SELECT associationid, dataentryformid FROM dataentryformassociation WHERE associationtablename = 'dataset'" );
-
-                while ( resultSet.next() )
-                {
-                    executeSql( "UPDATE dataset SET dataentryform=" + resultSet.getInt( 2 ) + " WHERE datasetid="
-                        + resultSet.getInt( 1 ) );
-                }
-                return true;
-            }
-
-            return false;
-
-        }
-        catch ( Exception ex )
-        {
-            log.debug( ex );
-            return false;
-        }
-        finally
-        {
-            holder.close();
-        }
-    }
-
-    private boolean updateProgramStageAssociation()
-    {
-        StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            Statement statement = holder.getStatement();
-
-            ResultSet isUpdated = statement
-                .executeQuery( "SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'dataentryformassociation'" );
-
-            if ( isUpdated.next() )
-            {
-                ResultSet resultSet = statement
-                    .executeQuery( "SELECT associationid, dataentryformid FROM dataentryformassociation WHERE associationtablename = 'programstage'" );
-
-                while ( resultSet.next() )
-                {
-                    executeSql( "UPDATE programstage SET dataentryform=" + resultSet.getInt( 2 )
-                        + " WHERE programstageid=" + resultSet.getInt( 1 ) );
-                }
-            }
-            return true;
-        }
-        catch ( Exception ex )
-        {
-            log.debug( ex );
-            return false;
-        }
-        finally
-        {
-            holder.close();
-        }
-    }
 }

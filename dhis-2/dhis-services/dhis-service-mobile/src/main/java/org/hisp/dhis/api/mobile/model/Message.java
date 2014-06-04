@@ -32,8 +32,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import javax.xml.bind.annotation.XmlAttribute;
-
 public class Message
     implements DataStreamSerializable
 {
@@ -44,16 +42,9 @@ public class Message
 
     private String text;
 
-    public Message( String subject, String text )
-    {
-        super();
-        this.subject = subject;
-        this.text = text;
-    }
+    private String lastSenderName;
 
-    public Message()
-    {
-    }
+    private Recipient recipient;
 
     public String getClientVersion()
     {
@@ -65,7 +56,6 @@ public class Message
         this.clientVersion = clientVersion;
     }
 
-    @XmlAttribute
     public String getSubject()
     {
         return subject;
@@ -76,7 +66,6 @@ public class Message
         this.subject = subject;
     }
 
-    @XmlAttribute
     public String getText()
     {
         return text;
@@ -87,12 +76,45 @@ public class Message
         this.text = text;
     }
 
+    public String getLastSenderName()
+    {
+        return lastSenderName;
+    }
+
+    public void setLastSenderName( String lastSenderName )
+    {
+        this.lastSenderName = lastSenderName;
+    }
+
+    public Recipient getRecipient()
+    {
+        return recipient;
+    }
+
+    public void setRecipient( Recipient recipient )
+    {
+        this.recipient = recipient;
+    }
+
     @Override
     public void serialize( DataOutputStream dout )
         throws IOException
     {
-        dout.writeUTF( this.subject );
-        dout.writeUTF( this.text );
+
+        dout.writeUTF( this.getSubject() );
+        dout.writeUTF( this.getText() );
+        if ( this.getLastSenderName() != null )
+        {
+            dout.writeUTF( this.getLastSenderName() );
+        }
+
+        int recipientSize = (this.recipient == null || this.recipient.getUserList() == null) ? 0 : this.recipient
+            .getUserList().size();
+        dout.writeInt( recipientSize );
+        if ( recipientSize > 0 )
+        {
+            this.getRecipient().serialize( dout );
+        }
 
     }
 
@@ -100,8 +122,22 @@ public class Message
     public void deSerialize( DataInputStream din )
         throws IOException
     {
+
         subject = din.readUTF();
         text = din.readUTF();
+
+        if ( lastSenderName != null )
+        {
+            lastSenderName = din.readUTF();
+        }
+
+        int recipientSize = din.readInt();
+
+        if ( recipientSize > 0 )
+        {
+            recipient = new Recipient();
+            recipient.deSerialize( din );
+        }
 
     }
 
@@ -127,8 +163,6 @@ public class Message
     public void serializeVersion2_10( DataOutputStream dataOutputStream )
         throws IOException
     {
-        dataOutputStream.writeUTF( this.subject );
-        dataOutputStream.writeUTF( this.text );
 
     }
 

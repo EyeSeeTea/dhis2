@@ -48,13 +48,6 @@ public class HibernateTrackedEntityAttributeStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<TrackedEntityAttribute> getByValueType( String valueType )
-    {
-        return getCriteria( Restrictions.eq( "valueType", valueType ) ).list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttribute> getOptionalAttributesWithoutGroup()
     {
         return getCriteria( Restrictions.isNull( "attributeGroup" ) ).list();
@@ -76,8 +69,8 @@ public class HibernateTrackedEntityAttributeStore
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public Collection<TrackedEntityAttribute> getDisplayInList( boolean displayInList )
+    public Collection<TrackedEntityAttribute> getDisplayInList()
     {
-        return getCriteria( Restrictions.eq( "displayInListNoProgram", displayInList ) ).list();
+        return getCriteria( Restrictions.eq( "displayInListNoProgram", true ) ).list();
     }
 }

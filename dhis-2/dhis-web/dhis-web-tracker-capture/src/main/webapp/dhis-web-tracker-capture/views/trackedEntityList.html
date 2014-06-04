@@ -1,0 +1,51 @@
+<div id="listDiv" ng-switch="trackedEntityList">                    
+    <div ng-switch-when=""></div>
+    <div ng-switch-default>        
+        <div ng-switch="trackedEntityList.rows.length">
+            <div ng-switch-when="undefined">
+                <p>
+                    {{'no'| translate}} {{selectedProgram.trackedEntity.name|| 'records' | translate}} {{'found'| translate}}                        
+                </p>
+            </div>
+            <div ng-switch-when="0">
+                <p>
+                    {{'no'| translate}} {{selectedProgram.trackedEntity.name|| 'records' | translate}} {{'found'| translate}} 
+                </p>
+            </div>
+            <div ng-switch-default>
+
+                <!-- show/hide grid colum begins-->
+                <div class="row" style="margin-right: 0;">
+                    <button class="btn btn-default pull-right" ng-click="showHideColumns()">
+                        {{'show_hide_columns'| translate}}
+                    </button>
+                </div>
+                <!-- show/hide grid colum ends-->
+
+                <!-- entity begins -->
+                <div class="vertical-spacing">
+                    <table class="table table-striped dhis2-table-hover">               
+                        <thead>                        
+                            <tr>
+                                <th ng-show="gridColumn.show" ng-repeat="gridColumn in gridColumns">
+                                    {{gridColumn.name}}
+                                </th>                                    
+                            </tr>                        
+                        </thead>
+                        <tbody id="list">
+                            <tr ng-repeat="trackedEntity in trackedEntityList.rows | paginate:rowsPerPage" 
+                                ng-click="showDashboard(trackedEntity)">
+                                <td ng-show="gridColumn.show"                                            
+                                    ng-repeat="gridColumn in gridColumns">                                                
+                                    {{trackedEntity[gridColumn.id]}}                                                
+                                </td>
+                            </tr>
+                        </tbody>        
+                    </table>
+                </div>
+                <paginator></paginator>
+                <!-- entity ends -->                            
+            </div>
+        </div>                        
+    </div>
+</div> 

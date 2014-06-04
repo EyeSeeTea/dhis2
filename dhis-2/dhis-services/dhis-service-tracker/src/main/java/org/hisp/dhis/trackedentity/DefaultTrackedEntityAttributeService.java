@@ -89,11 +89,6 @@ public class DefaultTrackedEntityAttributeService
         attributeStore.update( attribute );
     }
 
-    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesByValueType( String valueType )
-    {
-        return attributeStore.getByValueType( valueType );
-    }
-
     public TrackedEntityAttribute getTrackedEntityAttributeByName( String name )
     {
         return attributeStore.getByName( name );
@@ -149,9 +144,9 @@ public class DefaultTrackedEntityAttributeService
         return new HashSet<TrackedEntityAttribute>();
     }
 
-    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayInList( boolean displayInList )
+    public Collection<TrackedEntityAttribute> getTrackedEntityAttributesDisplayInList()
     {
-        return attributeStore.getDisplayInList( displayInList );
+        return attributeStore.getDisplayInList();
     }
 
     public Collection<TrackedEntityAttribute> getTrackedEntityAttributesBetweenByName( String name, int min, int max )

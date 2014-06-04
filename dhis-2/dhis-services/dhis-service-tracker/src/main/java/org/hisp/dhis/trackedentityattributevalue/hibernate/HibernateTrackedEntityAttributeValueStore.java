@@ -28,6 +28,7 @@ package org.hisp.dhis.trackedentityattributevalue.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hibernate.Query;
@@ -59,14 +60,6 @@ public class HibernateTrackedEntityAttributeValueStore
     }
 
     @Override
-    public int deleteByAttribute( TrackedEntityAttribute attribute )
-    {
-        Query query = getQuery( "delete from TrackedEntityAttributeValue where attribute = :attribute" );
-        query.setEntity( "attribute", attribute );
-        return query.executeUpdate();
-    }
-
-    @Override
     public int deleteByTrackedEntityInstance( TrackedEntityInstance entityInstance )
     {
         Query query = getQuery( "delete from TrackedEntityAttributeValue where entityInstance = :entityInstance" );
@@ -77,7 +70,8 @@ public class HibernateTrackedEntityAttributeValueStore
     @Override
     public TrackedEntityAttributeValue get( TrackedEntityInstance entityInstance, TrackedEntityAttribute attribute )
     {
-        return (TrackedEntityAttributeValue) getCriteria( Restrictions.eq( "entityInstance", entityInstance ),
+        return (TrackedEntityAttributeValue) getCriteria( 
+            Restrictions.eq( "entityInstance", entityInstance ),
             Restrictions.eq( "attribute", attribute ) ).uniqueResult();
     }
 
@@ -99,6 +93,11 @@ public class HibernateTrackedEntityAttributeValueStore
     @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttributeValue> get( Collection<TrackedEntityInstance> entityInstances )
     {
+        if ( entityInstances == null || entityInstances.isEmpty() )
+        {
+            return new ArrayList<TrackedEntityAttributeValue>();
+        }
+        
         return getCriteria( Restrictions.in( "entityInstance", entityInstances ) ).list();
     }
 
@@ -106,7 +105,8 @@ public class HibernateTrackedEntityAttributeValueStore
     @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttributeValue> searchByValue( TrackedEntityAttribute attribute, String searchText )
     {
-        return getCriteria( Restrictions.eq( "attribute", attribute ),
+        return getCriteria( 
+            Restrictions.eq( "attribute", attribute ),
             Restrictions.ilike( "value", "%" + searchText + "%" ) ).list();
     }
 
@@ -115,19 +115,17 @@ public class HibernateTrackedEntityAttributeValueStore
     public Collection<TrackedEntityInstance> getTrackedEntityInstances( TrackedEntityAttribute attribute, String value )
     {
         return getCriteria(
-            Restrictions.and( Restrictions.eq( "attribute", attribute ), Restrictions.eq( "value", value ) ) )
-            .setProjection( Projections.property( "entityInstance" ) ).list();
+            Restrictions.and( Restrictions.eq( "attribute", attribute ), 
+            Restrictions.eq( "value", value ) ) ).
+            setProjection( Projections.property( "entityInstance" ) ).list();
     }
 
     @Override
     @SuppressWarnings( "unchecked" )
     public Collection<TrackedEntityAttributeValue> get( TrackedEntityInstance entityInstance, Program program )
     {
-        String hql = "SELECT pav FROM TrackedEntityAttributeValue as pav WHERE pav.entityInstance=:entityInstance and pav.attribute.program=:program";
-        Query query = getQuery( hql );
-        query.setEntity( "entityInstance", entityInstance );
-        query.setEntity( "program", program );
-
-        return query.list();
+        return getCriteria(
+            Restrictions.and( Restrictions.eq( "entityInstance", entityInstance ),
+            Restrictions.eq( "attribute.program", program ) ) ).list();
     }
 }

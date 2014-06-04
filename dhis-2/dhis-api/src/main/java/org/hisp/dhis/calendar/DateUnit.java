@@ -33,13 +33,17 @@ import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.GregorianCalendar;
 
 /**
  * Class representing a specific calendar date.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  * @see DateInterval
  * @see Calendar
+ * @see TimeUnit
+ * @see DateTimeUnit
  */
 public class DateUnit
 {
@@ -66,21 +70,61 @@ public class DateUnit
      */
     int dayOfWeek;
 
-    public DateUnit()
+    /**
+     * Does dateUnit represent ISO 8601.
+     */
+    final boolean iso8601;
+
+    public DateUnit( boolean iso8601 )
     {
+        this.iso8601 = iso8601;
     }
 
-    public DateUnit( int year, int month, int day )
+    public DateUnit()
+    {
+        this( false );
+    }
+
+    public DateUnit( DateUnit dateUnit )
+    {
+        this( dateUnit.isIso8601() );
+        this.year = dateUnit.getYear();
+        this.month = dateUnit.getMonth();
+        this.day = dateUnit.getDay();
+        this.dayOfWeek = dateUnit.getDayOfWeek();
+    }
+
+    public DateUnit( DateUnit dateUnit, boolean iso8601 )
+    {
+        this( iso8601 );
+        this.year = dateUnit.getYear();
+        this.month = dateUnit.getMonth();
+        this.day = dateUnit.getDay();
+        this.dayOfWeek = dateUnit.getDayOfWeek();
+    }
+
+    public DateUnit( int year, int month, int day, boolean iso8601 )
     {
         this.year = year;
         this.month = month;
         this.day = day;
+        this.iso8601 = iso8601;
+    }
+
+    public DateUnit( int year, int month, int day )
+    {
+        this( year, month, day, false );
+    }
+
+    public DateUnit( int year, int month, int day, int dayOfWeek, boolean iso8601 )
+    {
+        this( year, month, day, iso8601 );
+        this.dayOfWeek = dayOfWeek;
     }
 
     public DateUnit( int year, int month, int day, int dayOfWeek )
     {
-        this( year, month, day );
-        this.dayOfWeek = dayOfWeek;
+        this( year, month, day, dayOfWeek, false );
     }
 
     public int getYear()
@@ -123,8 +167,18 @@ public class DateUnit
         this.dayOfWeek = dayOfWeek;
     }
 
+    public boolean isIso8601()
+    {
+        return iso8601;
+    }
+
     public DateTime toDateTime()
     {
+        if ( !iso8601 )
+        {
+            throw new RuntimeException( "Cannot convert non-ISO8601 DateUnit to DateTime." );
+        }
+
         return new DateTime( year, month, day, 0, 0, ISOChronology.getInstance() );
     }
 
@@ -135,7 +189,20 @@ public class DateUnit
 
     public java.util.Calendar toJdkCalendar()
     {
-        return new GregorianCalendar( year, month - 1, day );
+        if ( !iso8601 )
+        {
+            throw new RuntimeException( "Cannot convert non-ISO8601 DateUnit to JDK Calendar." );
+        }
+
+        java.util.Calendar calendar = new GregorianCalendar( year, month - 1, day );
+        calendar.setTime( calendar.getTime() );
+
+        return calendar;
+    }
+
+    public Date toJdkDate()
+    {
+        return toJdkCalendar().getTime();
     }
 
     public static DateUnit fromDateTime( DateTime dateTime )
@@ -145,8 +212,40 @@ public class DateUnit
 
     public static DateUnit fromJdkCalendar( java.util.Calendar calendar )
     {
-        return new DateUnit( calendar.get( java.util.Calendar.YEAR ), calendar.get( java.util.Calendar.MONTH ),
-            calendar.get( java.util.Calendar.DAY_OF_MONTH ), calendar.get( java.util.Calendar.DAY_OF_WEEK ) );
+        return new DateUnit( calendar.get( java.util.Calendar.YEAR ), calendar.get( java.util.Calendar.MONTH ) + 1,
+            calendar.get( java.util.Calendar.DAY_OF_MONTH ), calendar.get( java.util.Calendar.DAY_OF_WEEK ), true );
+    }
+
+    public static DateUnit fromJdkDate( Date date )
+    {
+        DateUnit dateUnit = fromDateTime( new DateTime( date.getTime() ) );
+        return new DateUnit( dateUnit, true );
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        DateUnit dateUnit = (DateUnit) o;
+
+        if ( day != dateUnit.day ) return false;
+        if ( iso8601 != dateUnit.iso8601 ) return false;
+        if ( month != dateUnit.month ) return false;
+        if ( year != dateUnit.year ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int result = year;
+        result = 31 * result + month;
+        result = 31 * result + day;
+        result = 31 * result + (iso8601 ? 1 : 0);
+        return result;
     }
 
     @Override
@@ -156,7 +255,7 @@ public class DateUnit
             "year=" + year +
             ", month=" + month +
             ", day=" + day +
-            ", dayOfWeek=" + dayOfWeek +
+            ", iso8601=" + iso8601 +
             '}';
     }
 }

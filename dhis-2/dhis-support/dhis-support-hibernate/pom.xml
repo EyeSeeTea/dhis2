@@ -33,8 +33,12 @@
       <artifactId>hibernate-core</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.hibernate</groupId>
-      <artifactId>hibernate-ehcache</artifactId>
+	  <groupId>com.hazelcast</groupId>
+	  <artifactId>hazelcast</artifactId>
+    </dependency> 
+    <dependency>
+	  <groupId>com.hazelcast</groupId>
+	  <artifactId>hazelcast-hibernate4</artifactId>
     </dependency>
     <dependency>
       <groupId>org.hibernate</groupId>

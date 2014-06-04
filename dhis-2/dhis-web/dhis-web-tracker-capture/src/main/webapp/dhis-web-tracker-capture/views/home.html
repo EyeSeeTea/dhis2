@@ -8,122 +8,81 @@
     </div>
     <img id="ouwt_loader" src="../images/ajax-loader-bar.gif"/>
 </div>
-<div class="page" id="mainPage">
+<div class="page" id="mainPage" ng-show="selectedOrgUnit">
     <h1>
-        <span ng-show="!selectedProgram">
+        <span ng-if='showSearchDiv || !showRegistrationDiv'>
             {{'search'| translate}} {{selectedProgram.trackedEntity.name}}
         </span>
-        <span ng-show="selectedProgram">
-            {{'search_for'| translate}} {{selectedProgram.trackedEntity.name}}
-        </span>            
+        <span ng-if='showRegistrationDiv'>
+            {{'register'| translate}} {{selectedProgram.trackedEntity.name}}
+        </span>          
         <a href ng-click="getHelpContent()" title="{{'help'| translate}}"><i class="fa fa-question-circle"></i></a>
     </h1>
 
-    <div class="row">
-        <input type="text" selected-org-unit ng-model="selectedOrgUnit.name" ng-hide=true>
-        <div class="input-group col-md-6">
-            <input type="text" class="form-control" ng-focus="hideSearch()">
+    <input type="text" selected-org-unit ng-model="selectedOrgUnit.name" ng-hide=true>
+    <div class="row">        
+        <div class="input-group col-md-4">
+            <input type="text" placeholder="{{'your_search_input_here'| translate}}" ng-model="searchText" class="form-control" ng-class="{true: 'invalid - input'} [!searchText && emptySearchText]" ng-focus="hideSearch()" ng-disabled="showRegistrationDiv">
             <span class="input-group-btn">
-                <button class="btn btn-default" type="button" title="{{'more' | translate}}" ng-click="showSearch()"><i class="fa fa-caret-down"></i></button>
+                <button class="btn btn-default trim" type="button" title="{{'advanced_search'| translate}}" ng-click="showSearch()" ng-disabled="showRegistrationDiv"><i class="fa fa-caret-down"></i></button>
             </span>                
+        </div>        
+        <div class="col-md-3 trim">            
+            <button type="button" 
+                    class="btn btn-default"
+                    ng-disabled="showRegistrationDiv"
+                    ng-click="search(searchMode.freeText)">
+                {{'search'| translate}}
+            </button>
+            <button type="button" 
+                    class="btn btn-default small-horizonal-spacing"
+                    ng-disabled="showRegistrationDiv"
+                    ng-click="search(searchMode.listAll)">
+                {{'list_all'| translate}}
+            </button>
+        </div>        
+    </div>
+
+    <div class="row vertical-spacing">
+        <div class="col-md-4">
+            <select class="form-control" ng-model="pr" ng-change="getProgramAttributes(pr)" ng-options="program as program.name for program in programs | orderBy: 'name'">
+                <option value="">{{'please_select_a_program'| translate}}</option>
+            </select>
         </div>
-        <div class="btn-group col-md-6">
-            <button type="button" class="btn btn-default">{{'search'| translate}}</button>
-            <button type="button" class="btn btn-default" ng-click="loadTrackedEntities()">{{'list_all_entities'| translate}}</button>
-            <button type="button" class="btn btn-default" ng-click="showRegisteration()">{{'add_new'| translate}}</button>
+        <div class="col-md-3 trim"> 
+            <button type="button" 
+                    class="btn btn-default" 
+                    ng-click="showRegistration()">                    
+                {{'register'| translate}} {{selectedProgram.trackedEntity.name}}
+            </button>
+        </div>  
+    </div>
+
+    <div class="row vertical-spacing" ng-if="!searchText && emptySearchText">
+        <div class="col-md-4">
+            <div class="alert alert-danger">{{'search_input_required'| translate}}</div>         
         </div>
     </div>
+
+    <!-- search begins -->
     <div class="row" ng-show="showSearchDiv">
         <div class="col-md-6">
-            <div ng-include="'views/search.html'" ng-controller='SearchController'></div>             
+            <div ng-include="'views/search.html'"></div>             
         </div>
     </div>
+    <!-- search ends -->
 
+    <!--registration begins -->
+    <div class="row" ng-if="showRegistrationDiv">
+        <div class="col-md-6">
+            <div ng-include="'views/registration.html'" ng-controller="RegistrationController"></div>             
+        </div>
+    </div>
+    <!-- registration ends -->
 
     <!-- entity grid begins -->
-    <div ng-show="trackedEntityList">
-        <div id="listDiv" ng-switch="trackedEntityList">                    
-            <div ng-switch-when=""></div>
-            <div ng-switch-default>
-                <h2>
-                    {{selectedProgram.trackedEntity.name|| 'entity' | translate}} {{'list'| translate}}
-                </h2>
-                <div ng-switch="trackedEntityList.rows.length">
-                    <div ng-switch-when="undefined">
-                        <p>
-                            {{'empty'| translate}} {{selectedProgram.trackedEntity.name|| 'entity' | translate}} {{'list'| translate}}                        
-                        </p>
-                    </div>
-                    <div ng-switch-when="0">
-                        <p>
-                            {{'empty'| translate}} {{selectedProgram.trackedEntity.name|| 'entity' | translate}} {{'list'| translate}}
-                        </p>
-                    </div>
-                    <div ng-switch-default>
-
-                        <!-- entity begins -->
-                        <table class="listTable dhis2-table-striped-border dhis2-table-hover">                    
-                            <thead>                        
-                                <tr>
-                                    <th ng-show="!gridColumn.hide" 
-                                        class="max-column-width"                                                
-                                        ng-repeat="gridColumn in gridColumns">
-
-                                        <!-- sort icon begins -->
-                                        <span ng-hide="gridColumn.showFilter" class="bold" ng-click="sortGrid(gridColumn)">
-                                            <i ng-show="sortHeader == gridColumn.id && !reverse" class="fa fa-sort-desc"></i>
-                                            <i ng-show="sortHeader == gridColumn.id && reverse" class="fa fa-sort-asc"></i>
-                                            {{gridColumn.name}}
-                                        </span>
-                                        <!-- sort icon ends -->
-
-                                        <!-- filter icon begins -->
-                                        <span class='pull-right'>
-                                            <span ng-show="gridColumn.type !== 'date'">
-                                                <a href ng-click="filterInGrid(gridColumn)" title="{{'filter'| translate}}"><span ng-class="{true: 'filter - without - content', false: 'filter - with - content'} [filterText[gridColumn.id] == undefined || filterText[gridColumn.id] == '']"><i class="fa fa-filter"></i></span></a>
-                                            </span>
-                                            <span ng-show="gridColumn.type === 'date'">
-                                                <a href ng-click="filterInGrid(gridColumn)" title="{{'filter'| translate}}"><span ng-class="{true: 'filter - without - content', false: 'filter - with - content'} [(filterText[gridColumn.id].start == 'undefined' || filterText[gridColumn.id].start == '') && (filterText[gridColumn.id].end == 'undefined' || filterText[gridColumn.id].end == '')]"><i class="fa fa-filter"></i></span></a>
-                                            </span>                                                    
-                                        </span>
-                                        <!-- filter icon ends -->
-
-                                        <!-- filter input field begins -->
-                                        <div ng-show="gridColumn.showFilter">
-                                            <span ng-show="gridColumn.type !== 'date'">
-                                                <input type="text" ng-model="filterText[gridColumn.id]" ng-blur="filterInGrid(gridColumn)">
-                                            </span>                                                    
-                                            <span ng-show="gridColumn.type === 'date'">
-                                                <input placeholder="{{'start_date'| translate}}" type="text" ng-model="filterText[gridColumn.id].start" data-ng-date readonly="readonly">
-                                                <span ng-hide="filterText[gridColumn.id].start == 'undefined' || filterText[gridColumn.id].start == ''">
-                                                    <a href ng-click='removeStartFilterText(gridColumn.id)'><span class='black'><i class="fa fa-trash-o"></i></span></a>                                                        
-                                                </span>
-                                                <input placeholder="{{'end_date'| translate}}" type="text" ng-model="filterText[gridColumn.id].end" data-ng-date readonly="readonly">
-                                                <span ng-hide="filterText[gridColumn.id].end == 'undefined' || filterText[gridColumn.id].end == ''">
-                                                    <a href ng-click='removeEndFilterText(gridColumn.id)'><span class='black'><i class="fa fa-trash-o"></i></span></a>                                                        
-                                                </span>
-                                            </span>
-                                        </div>
-                                        <!-- filter input field ends -->
-                                    </th>                                    
-                                </tr>                        
-                            </thead>
-                            <tbody id="list">
-                                <tr ng-repeat="trackedEntity in trackedEntityList.rows| paginate:rowsPerPage | orderBy:sortHeader:reverse | gridFilter:filterText:currentFilter" 
-                                    ng-click="showDashboard(trackedEntity)">
-                                    <td class="max-column-width"                                              
-                                        ng-repeat="gridColumn in gridColumns">                                                
-                                        {{trackedEntity[gridColumn.id]}}                                                
-                                    </td>
-                                </tr>
-                            </tbody>        
-                        </table>
-                        <paginator></paginator>
-                        <!-- entity ends -->                            
-                    </div>
-                </div>                        
-            </div>
-        </div> 
+    <div ng-if="showTrackedEntityDiv">
+        <div ng-include="'views/trackedEntityList.html'"></div>  
     </div>
     <!-- entity grid ends -->
 </div>           

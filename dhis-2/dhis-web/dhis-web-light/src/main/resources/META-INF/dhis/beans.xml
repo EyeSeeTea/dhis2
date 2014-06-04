@@ -245,6 +245,8 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.light.namebaseddataentry.action.FindBeneficiarytAction"
 		scope="prototype">
 		  <property name="patientService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
+		  <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+		  <property name="trackedEntityAttributeService" ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
 	</bean>
 
 
@@ -376,13 +378,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.light.beneficiaryenrollment.action.SearchBeneficiaryAction"
-		class="org.hisp.dhis.light.beneficiaryenrollment.action.SearchBeneficiaryAction"
-		scope="prototype">
-		<property name="patientService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
-	</bean>
-
-	<bean
 		id="org.hisp.dhis.light.beneficiaryenrollment.action.GetEnrollmentProgramListAction"
 		class="org.hisp.dhis.light.beneficiaryenrollment.action.GetEnrollmentProgramListAction"
 		scope="prototype">
@@ -423,17 +418,6 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="organisationUnitService"
 			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.light.singleevent.action.GetSingleEventBeneficiaryAction"
-		class="org.hisp.dhis.light.singleevent.action.GetSingleEventBeneficiaryAction"
-		scope="prototype">
-		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-		<property name="organisationUnitService"
-			ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-		<property name="patientService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.light.singleevent.action.GetSingleEventFormAction"
@@ -542,6 +526,24 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
 		class="org.hisp.dhis.light.message.action.SendFeedbackAction" scope="prototype">
 		<property name="messageService" ref="org.hisp.dhis.message.MessageService" />
 	</bean>
+
+	<!--  Interpretations -->
+
+	<bean id="org.hisp.dhis.light.interpretation.action.GetInterpretations"
+		class="org.hisp.dhis.light.interpretation.action.GetInterpretations" scope="prototype">
+		<property name="interpretationService" ref="org.hisp.dhis.interpretation.InterpretationService" />
+	</bean>	
+
+	<bean id="org.hisp.dhis.light.interpretation.action.GetInterpretation"
+		class="org.hisp.dhis.light.interpretation.action.GetInterpretation" scope="prototype">
+		<property name="interpretationService" ref="org.hisp.dhis.interpretation.InterpretationService" />
+	</bean>	
+
+	<bean id="org.hisp.dhis.light.interpretation.action.PostInterpretationComment"
+		class="org.hisp.dhis.light.interpretation.action.PostInterpretationComment" scope="prototype">
+		<property name="interpretationService" ref="org.hisp.dhis.interpretation.InterpretationService" />
+	</bean>	
+
 
 	<!-- Anonymous -->
 

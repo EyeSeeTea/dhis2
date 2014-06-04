@@ -86,6 +86,11 @@ public class OrgUnitsTest
         orgUnit.setSearchUrl( "search" );
         orgUnit.setUpdateNewVersionUrl( "updateNewVersionUrl" );
         orgUnit.setSendFeedbackUrl( "sendFeedback" );
+        orgUnit.setFindUserUrl( "findUser" );
+        orgUnit.setSendMessageUrl( "sendMessage" );
+        orgUnit.setDownloadMessageConversationUrl( "downloadMessageConversation" );
+        orgUnit.setGetMessageUrl( "getMessage" );
+        orgUnit.setReplyMessageUrl( "replyMessage" );
         orgUnit.setUpdateContactUrl( "updateContactForMobile" );
         orgUnit.setFindPatientUrl( "findPatient" );
         orgUnit.setRegisterPersonUrl( "registerPerson" );
@@ -96,6 +101,7 @@ public class OrgUnitsTest
         orgUnit.setDownloadAnonymousProgramUrl( "downloadAnonymousProgram" );
         orgUnit.setFindProgramUrl( "findProgram" );
         orgUnit.setFindPatientInAdvancedUrl( "findPatientInAdvanced" );
+        orgUnit.setFindVisitScheduleUrl( "findVisitSchedule" );
         orgUnit.setFindLostToFollowUpUrl( "findLostToFollowUp" );
         orgUnit.setHandleLostToFollowUpUrl( "handleLostToFollowUp" );
         orgUnit.setGenerateRepeatableEventUrl( "generateRepeatableEvent" );

@@ -83,7 +83,7 @@ public interface UserService
     /**
      * Retrieves the User with the given unique identifier.
      *
-     * @param id the identifier of the User to retrieve.
+     * @param uid the identifier of the User to retrieve.
      * @return the User.
      */
     User getUser( String uid );
@@ -210,14 +210,6 @@ public interface UserService
      */
     void setLastLogin( String username );
 
-    /**
-     * Get the UserCredentials with the corresponding identifiers.
-     *
-     * @param identifiers the collection of identifiers.
-     * @return a collection of users.
-     */
-    Collection<UserCredentials> getUsers( Collection<Integer> identifiers, User user );
-
     Collection<UserCredentials> searchUsersByName( String key );
 
     Collection<UserCredentials> searchUsersByName( String name, int first, int max );
@@ -286,7 +278,7 @@ public interface UserService
     /**
      * Retrieves the UserAuthorityGroup with the given identifier.
      *
-     * @param id the identifier of the UserAuthorityGroup to retrieve.
+     * @param uid the identifier of the UserAuthorityGroup to retrieve.
      * @return the UserAuthorityGroup.
      */
     UserAuthorityGroup getUserAuthorityGroup( String uid );
@@ -309,21 +301,21 @@ public interface UserService
     /**
      * Retrieves all UserAuthorityGroups.
      *
-     * @return a Collectio of UserAuthorityGroups.
+     * @return a Collection of UserAuthorityGroups.
      */
     Collection<UserAuthorityGroup> getAllUserAuthorityGroups();
 
     /**
      * Retrieves all UserAuthorityGroups.
      *
-     * @return a Collectio of UserAuthorityGroups.
+     * @return a Collection of UserAuthorityGroups.
      */
     Collection<UserAuthorityGroup> getUserRolesBetween( int first, int max );
 
     /**
      * Retrieves all UserAuthorityGroups.
      *
-     * @return a Collectio of UserAuthorityGroups.
+     * @return a Collection of UserAuthorityGroups.
      */
     Collection<UserAuthorityGroup> getUserRolesBetweenByName( String name, int first, int max );
 

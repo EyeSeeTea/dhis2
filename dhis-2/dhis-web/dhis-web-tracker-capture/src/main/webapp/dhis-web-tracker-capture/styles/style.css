@@ -23,6 +23,10 @@ h4 {
     font-weight: bold;
 }
 
+div#orgUnitTree 
+{
+    height: 75%;
+}
 /*----------------------------------------------------------------------------*/
 /* Form
 /*----------------------------------------------------------------------------*/
@@ -144,6 +148,9 @@ div.orgunit-object
     display: block;
 }
 
+.clear {
+    clear: both;
+}
 .inline-block {
     display: inline-block;
 }
@@ -370,6 +377,7 @@ div.paging a.active
     border: 1px solid #c2c2c2;
     border-radius: 5px;
     padding: 5px 10px;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
@@ -393,6 +401,10 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     padding-right: 40px;
 }
 
+.btn-no-border {
+    border: none !important;
+}
+
 .max-column-width {
     max-width:200px !important; 
     word-wrap:break-word; 
@@ -409,8 +421,7 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .table-borderless>tbody>tr>td, 
 .table-borderless>tfoot>tr>td {
     border-top: none; 
-    //background-color: #ebf0f6;
-    padding-right: 8px;
+    padding: 5px;
 }
 
 .dhis2-table>thead>tr>th, 
@@ -426,7 +437,9 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     width: 100%;
     border-collapse: collapse;
     cursor: pointer;
+    table-layout: fixed;
 }
+
 
 .dhis2-table-striped-border tr th {
     border: 1px solid #cad5e5;
@@ -455,8 +468,8 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 
 .dhis2-list-table-striped {
     width: 100%;
-    border: 1px solid #c2c2c2;
     padding: 5px 10px;
+    table-layout: fixed;
 }
 
 .dhis2-list-table-striped>thead>tr, 
@@ -474,6 +487,7 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 
 .dhis2-table-hover > tbody > tr:hover > td, .table-hover > tbody > tr:hover > th {
     background-color: #dfe9f4;
+    cursor: pointer;
 }
 
 #contextMenu {
@@ -554,14 +568,39 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 }
 
 .horizonal-spacing{
-    margin-left: 20px;    
+    margin-left: 10px;    
 }
 
-.vertial-spacing {
+.vertical-spacing{
+    margin-top: 10px;    
+}
+
+.small-horizonal-spacing{
+    margin-left: 5px;    
+}
+
+.small-vertical-spacing{
+    margin-top: 5px;    
+}
+
+.search-container{
     margin-top: 20px;
     margin-bottom: 20px;
 }
 
+.registration-container{
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.widget-content-container{
+    padding: 20px 10px;
+}
+
+.trim {
+    margin-bottom: 5px; 
+    margin-top: 5px;
+}
 /*----------------------------------------------------------------------------*/
 /* Bootstrap modal style
 /*----------------------------------------------------------------------------*/
@@ -685,15 +724,15 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     }
 }
 
-/*.form-control {
-    height: 30px;
-    font-size: 12px;
-    color: #555;
-}*/
-
 input[type=number] {
     border: 1px solid #aaa;
     padding: 4px 1px;
+}
+
+input[type=text], input[type=password], textarea {
+    border: 1px solid #aaa;
+    padding: 6px 12px;
+    font-size: 14px;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -761,6 +800,14 @@ input[type=number] {
     padding-left: 5px;
 }
 
+.invalid-input {
+    border-style:solid;
+    border-color:red;
+}
+
+.alert {
+    padding: 5px;
+}
 .input-field {
     border: 1px solid #aaa;
     padding: 4px 1px;
@@ -776,5 +823,30 @@ input[type=number] {
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
     -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
     transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
-        
+
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    height: 34px;
+    padding: 6px 6px;
+    font-size: 14px;
+    line-height: 1.0;
+    color: #555;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    vertical-align: middle;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+}
+
+.underline{
+    text-decoration: underline;
 }

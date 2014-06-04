@@ -330,7 +330,7 @@ function uploadLocalData()
         var key = array[0];
         var value = dataValues[key];
 
-        if ( value.value.length > 254 )
+        if ( value !== undefined && value.value !== undefined && value.value.length > 254 )
         {
             value.value = value.value.slice(0, 254);
         }
@@ -1711,7 +1711,16 @@ function validate( ignoreSuccessfulValidation, successCallback )
 
 	var validCompleteOnly = dhis2.de.dataSets[dhis2.de.currentDataSetId].validCompleteOnly;
 
+    var cc = dhis2.de.getCurrentCategoryCombo();
+    var cp = dhis2.de.getCurrentCategoryOptionsQueryValue();
+
     var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
+
+    if ( cc && cp )
+    {
+        params.cc = dhis2.de.getCurrentCategoryCombo();
+        params.cp = dhis2.de.getCurrentCategoryOptionsQueryValue();
+    }
 
     $( '#validationDiv' ).load( 'validate.action', params, function( response, status, xhr ) {
     	var success = null;
@@ -2650,7 +2659,7 @@ dhis2.de.autocompleteOptionSetField = function( idField, optionSetUid )
         }
     } ).addClass( 'ui-widget' );
 
-    input.data( 'autocomplete' )._renderItem = function ( ul, item ) {
+    input.data( 'ui-autocomplete' )._renderItem = function ( ul, item ) {
         return $( '<li></li>' )
             .data( 'item.autocomplete', item )
             .append( '<a>' + item.label + '</a>' )
@@ -2661,7 +2670,7 @@ dhis2.de.autocompleteOptionSetField = function( idField, optionSetUid )
         .addClass( 'ui-combobox' )
         .insertAfter( input );
 
-    var button = $( '<a style="width:20px; margin-bottom:-5px;height:20px;">' )
+    var button = $( '<a style="width:20px; margin-bottom:1px; height:20px;">' )
         .attr( 'tabIndex', -1 )
         .attr( 'title', i18n_show_all_items )
         .appendTo( wrapper )

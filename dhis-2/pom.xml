@@ -691,12 +691,12 @@
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-core</artifactId>
         <version>${hibernate.version}</version>
-      </dependency>
+      </dependency> 
       <dependency>
-        <groupId>org.hibernate</groupId>
-        <artifactId>hibernate-ehcache</artifactId>
-        <version>${hibernate.version}</version>
-      </dependency>
+	    <groupId>com.hazelcast</groupId>
+	    <artifactId>hazelcast-hibernate4</artifactId>
+	    <version>3.2.1</version>
+      </dependency>    
       <dependency>
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-entitymanager</artifactId>
@@ -706,6 +706,17 @@
         <groupId>org.hibernate</groupId>
         <artifactId>hibernate-validator</artifactId>
         <version>${hibernate-validator.version}</version>
+      </dependency>
+      <!-- javassist in use by hibernate - make sure versions are kept in sync  -->
+      <dependency>
+	    <groupId>org.javassist</groupId>
+	    <artifactId>javassist</artifactId>
+	    <version>3.15.0-GA</version>
+      </dependency>
+      <dependency>
+	    <groupId>com.hazelcast</groupId>
+	    <artifactId>hazelcast</artifactId>
+	    <version>3.2.1</version>
       </dependency>
       <dependency>
         <groupId>javax.validation</groupId>
@@ -986,6 +997,17 @@
         <groupId>org.openid4java</groupId>
         <artifactId>openid4java</artifactId>
         <version>0.9.8</version>
+        <exclusions>
+          <exclusion>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+      	<groupId>xml-apis</groupId>
+      	<artifactId>xml-apis</artifactId>
+      	<version>1.4.01</version>
       </dependency>
 
     </dependencies>
@@ -994,8 +1016,8 @@
   <properties>
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <spring.version>3.2.8.RELEASE</spring.version>
-    <spring.security.version>3.2.3.RELEASE</spring.security.version>
+    <spring.version>3.2.9.RELEASE</spring.version>
+    <spring.security.version>3.2.4.RELEASE</spring.security.version>
     <hibernate.version>4.2.0.Final</hibernate.version>
     <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
     <jackson.version>2.3.3</jackson.version>

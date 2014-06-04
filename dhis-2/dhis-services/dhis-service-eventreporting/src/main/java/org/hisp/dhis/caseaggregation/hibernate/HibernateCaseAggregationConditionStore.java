@@ -652,17 +652,30 @@ public class HibernateCaseAggregationConditionStore
     private String getConditionForTrackedEntityAttribute( String attributeId, Collection<Integer> orgunitIds,
         boolean isExist )
     {
-        String sql = "  SELECT * FROM trackedentityattributevalue _pav "
-            + " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid ";
+        String sql = "  SELECT * FROM trackedentityattributevalue _pav ";
+            
 
         if ( attributeId.split( SEPARATOR_ID ).length == 2 )
         {
-            attributeId = attributeId.split( SEPARATOR_ID )[0];
-            sql += " AND _pav.trackedentityattributeid=" + attributeId + " AND DATE(now()) - DATE( _pav.value ) ";
+            if ( attributeId.split( SEPARATOR_ID )[1].equals( CaseAggregationCondition.FORMULA_VISIT ) )
+            {
+                sql += " inner join programinstance _pi on _pav.trackedentityinstanceid=_pi.trackedentityinstanceid ";
+                sql += " inner join programstageinstance _psi on _pi.programinstanceid=_psi.programinstanceid ";
+                    
+                attributeId = attributeId.split( SEPARATOR_ID )[0];
+                sql += " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid AND _pav.trackedentityattributeid=" + attributeId + " AND DATE(_psi.executiondate) - DATE( _pav.value ) ";
+            }
+            else  if ( attributeId.split( SEPARATOR_ID )[1].equals( CaseAggregationCondition.FORMULA_AGE ) )
+            {
+                sql += " inner join programinstance _pi on _pav.trackedentityinstanceid=_pi.trackedentityinstanceid ";
+                    
+                attributeId = attributeId.split( SEPARATOR_ID )[0];
+                sql += " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid AND _pav.trackedentityattributeid=" + attributeId + " AND DATE(_psi.enrollmentdate) - DATE( _pav.value ) ";
+            }
         }
         else
         {
-            sql += " AND _pav.trackedentityattributeid=" + attributeId + " AND _pav.value ";
+            sql += " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid AND _pav.trackedentityattributeid=" + attributeId + " AND _pav.value ";
         }
 
         if ( isExist )
@@ -887,7 +900,6 @@ public class HibernateCaseAggregationConditionStore
     {
         String sql = "SELECT ";
 
-        boolean hasEntityInstances = hasEntityInstanceCriteria( caseExpression );
         boolean hasDataelement = hasDataelementCriteria( caseExpression );
 
         Collection<Integer> orgunitIds = new HashSet<Integer>();
@@ -902,11 +914,6 @@ public class HibernateCaseAggregationConditionStore
         }
         else
         {
-            if ( hasEntityInstances || operator.equals( CaseAggregationCondition.AGGRERATION_COUNT ) )
-            {
-                sql += "p.name,";
-            }
-
             if ( hasDataelement )
             {
                 sql += "pdv.value,pgs.name as program_stage, psi.executiondate as report_date,";

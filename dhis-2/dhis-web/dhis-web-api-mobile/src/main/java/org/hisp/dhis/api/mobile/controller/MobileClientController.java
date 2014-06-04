@@ -83,8 +83,8 @@ public class MobileClientController
 
     @RequestMapping( method = RequestMethod.GET, value = "/{version}" )
     @ResponseBody
-    public OrgUnits getOrgUnitsForUser( HttpServletRequest request, 
-        @PathVariable String version )
+    public OrgUnits getOrgUnitsForUser( HttpServletRequest request, @PathVariable
+    String version )
         throws NotAllowedException
     {
         User user = currentUserService.getCurrentUser();
@@ -108,8 +108,8 @@ public class MobileClientController
 
     @RequestMapping( method = RequestMethod.GET, value = "/{version}/LWUIT" )
     @ResponseBody
-    public OrgUnits getOrgUnitsForUserLWUIT( HttpServletRequest request, 
-        @PathVariable String version )
+    public OrgUnits getOrgUnitsForUserLWUIT( HttpServletRequest request, @PathVariable
+    String version )
         throws NotAllowedException
     {
         User user = currentUserService.getCurrentUser();
@@ -147,7 +147,12 @@ public class MobileClientController
         orgUnit.setChangeUpdateDataSetLangUrl( getUrl( request, unit.getId(), "changeLanguageDataSet" ) );
         orgUnit.setSearchUrl( getUrl( request, unit.getId(), "search" ) );
         orgUnit.setUpdateNewVersionUrl( getUrl( request, unit.getId(), "updateNewVersionUrl" ) );
-        orgUnit.setSendFeedbackUrl( getUrl(request, unit.getId(), "sendFeedback") );
+        orgUnit.setSendFeedbackUrl( getUrl( request, unit.getId(), "sendFeedback" ) );
+        orgUnit.setFindUserUrl( getUrl( request, unit.getId(), "findUser" ) );
+        orgUnit.setSendMessageUrl( getUrl( request, unit.getId(), "sendMessage" ) );
+        orgUnit.setDownloadMessageConversationUrl( getUrl( request, unit.getId(), "downloadMessageConversation" ) );
+        orgUnit.setGetMessageUrl( getUrl( request, unit.getId(), "getMessage" ) );
+        orgUnit.setReplyMessageUrl( getUrl( request, unit.getId(), "replyMessage" ) );
         orgUnit.setUpdateContactUrl( getUrl( request, unit.getId(), "updateContactForMobile" ) );
         orgUnit.setFindPatientUrl( getUrl( request, unit.getId(), "findPatient" ) );
         orgUnit.setRegisterPersonUrl( getUrl( request, unit.getId(), "registerPerson" ) );
@@ -158,10 +163,12 @@ public class MobileClientController
         orgUnit.setDownloadAnonymousProgramUrl( getUrl( request, unit.getId(), "downloadAnonymousProgram" ) );
         orgUnit.setFindProgramUrl( getUrl( request, unit.getId(), "findProgram" ) );
         orgUnit.setFindPatientInAdvancedUrl( getUrl( request, unit.getId(), "findPatientInAdvanced" ) );
+        orgUnit.setFindVisitScheduleUrl( getUrl( request, unit.getId(), "findVisitSchedule" ) );
         orgUnit.setFindLostToFollowUpUrl( getUrl( request, unit.getId(), "findLostToFollowUp" ) );
         orgUnit.setHandleLostToFollowUpUrl( getUrl( request, unit.getId(), "handleLostToFollowUp" ) );
         orgUnit.setGenerateRepeatableEventUrl( getUrl( request, unit.getId(), "generateRepeatableEvent" ) );
-        orgUnit.setUploadSingleEventWithoutRegistration(getUrl( request, unit.getId(), "uploadSingleEventWithoutRegistration" ));
+        orgUnit.setUploadSingleEventWithoutRegistration( getUrl( request, unit.getId(),
+            "uploadSingleEventWithoutRegistration" ) );
 
         // generate URL for download new version
         String full = UrlUtils.buildFullRequestUrl( request );

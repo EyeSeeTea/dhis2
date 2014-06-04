@@ -270,6 +270,8 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
+                // countType: string ('events') - 'events', 'tracked_entity_instance'
+
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
 				// showHierarchy: boolean (false)
@@ -434,6 +436,7 @@ Ext.onReady( function() {
 					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
+					layout.countType = Ext.isString(config.countType) && !Ext.isEmpty(config.countType) ? config.countType : 'events';
                     layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
@@ -1313,10 +1316,13 @@ Ext.onReady( function() {
 				}
 
 				// add span and children
-				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+				for (var i = 0, aAboveFloorObjects, doorIds, uniqueDoorIds; i < aaAllFloorObjects.length; i++) {
+                    doorIds = [];
+
 					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j++) {
 
 						obj = aaAllFloorObjects[i][j];
+                        doorIds.push(obj.id);
 
 						if (doorCount === 0) {
 
@@ -1324,8 +1330,9 @@ Ext.onReady( function() {
 							obj[spanType] = aFloorSpan[i];
 
 							// children
-							//obj.children = Ext.isDefined(aFloorSpan[i + 1]) ? aFloorSpan[i] / aFloorSpan[i + 1] : 0;
-							obj.children = obj.leaf ? 0 : aFloorSpan[i];
+                            if (obj.leaf) {
+                                obj.children = 0;
+                            }
 
 							// first sibling
 							obj.oldest = true;
@@ -1345,6 +1352,16 @@ Ext.onReady( function() {
 							doorCount = 0;
 						}
 					}
+
+                    // set above floor door children to number of unique door ids on this floor
+                    if (i > 0) {
+                        aAboveFloorObjects = aaAllFloorObjects[i-1];
+                        uniqueDoorIds = Ext.Array.unique(doorIds);
+
+                        for (var j = 0; j < aAboveFloorObjects.length; j++) {
+                            aAboveFloorObjects[j].children = uniqueDoorIds.length;
+                        }
+                    }
 				}
 
 				// add parents if more than 1 floor
@@ -1704,8 +1721,9 @@ Ext.onReady( function() {
 					nameHeaderMap[header.name] = header;
 
 					if (header.type === 'java.lang.Double') {
-						for (var j = 0; j < xResponse.rows.length; j++) {
-							xResponse.rows[j][i] = parseFloat(xResponse.rows[j][i]);
+						for (var j = 0, value; j < xResponse.rows.length; j++) {
+                            value = xResponse.rows[j][i];
+							xResponse.rows[j][i] = value ? parseFloat(value) : value;
 						}
 					}
 
@@ -1812,7 +1830,7 @@ Ext.onReady( function() {
 					for (var i = 0, dim; i < dimensions.length; i++) {
 						dim = dimensions[i];
 
-						if (Ext.Array.contains(ignoreKeys, dim.dimension)) {
+						if (Ext.Array.contains(ignoreKeys, dim.dimension) || (dim.dimension === 'pe' && !dim.items && !dim.filter)) {
 							continue;
 						}
 
@@ -1838,8 +1856,19 @@ Ext.onReady( function() {
 					for (var i = 0, dim; i < view.filters.length; i++) {
 						dim = view.filters[i];
 
-						paramString += '&filter=' + dim.dimension;
-						paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+                        paramString += '&filter=' + dim.dimension;
+
+                        if (dim.items) {
+                            paramString += ':';
+
+                            for (var i = 0; i < dim.items.length; i++) {
+                                paramString += encodeURIComponent(dim.items[i].id);
+                                paramString += i < dim.items.length - 1 ? ';' : '';
+                            }
+                        }
+                        else {
+                            paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+                        }
 					}
 				}
 
@@ -1854,6 +1883,13 @@ Ext.onReady( function() {
                 // limit
                 if (view.dataType === 'aggregated_values' && (view.sortOrder && view.topLimit)) {
                     paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
+                }
+
+                // count type
+                if (view.dataType === 'aggregated_values' && view.countType) {
+                    if (view.countType === 'tracked_entity_instances') {
+                        paramString += '&uniqueInstances=true';
+                    }
                 }
 
                 // sorting

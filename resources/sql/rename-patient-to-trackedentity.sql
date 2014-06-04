@@ -15,14 +15,9 @@ DROP TABLE patienttabularreportmembers;
 DROP TABLE patienttabularreportusergroupaccesses;
 DROP TABLE patienttabularreport;
 
--- program attributes - must be recreated
-
-DROP TABLE program_patientattributes;
-
 -- attribute option
 
 ALTER TABLE patientattributevalue DROP COLUMN patientattributeoptionid;
-DROP TABLE patientattributeoption;
 
 -- patient
 
@@ -132,9 +127,10 @@ ALTER TABLE trackedentityattribute RENAME COLUMN sort_order_patientattributename
 
 DROP TABLE patientmobilesetting;
 
--- form
+-- tables to migrate before dropping
 
 -- DROP TABLE program_patientidentifiertypes;
 -- DROP TABLE patientidentifiertype;
 -- DROP TABLE patientidentifier;
+-- DROP TABLE patientattributeoption;
 

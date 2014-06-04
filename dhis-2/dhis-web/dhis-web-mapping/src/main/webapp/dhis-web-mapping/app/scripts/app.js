@@ -1435,13 +1435,14 @@ Ext.onReady( function() {
 			text: GIS.i18n.labels,
 			iconCls: 'gis-menu-item-icon-labels',
 			handler: function() {
-				if (layer.labelWindow) {
-					layer.labelWindow.show();
-				}
-				else {
-					layer.labelWindow = GIS.app.LabelWindow(layer);
-					layer.labelWindow.show();
-				}
+                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer));
+
+                if (layer.id === 'boundary') {
+                    window.updateLabels();
+                }
+                else {
+                    window.show();
+                }
 			}
 		};
 		items.push(item);
@@ -1495,7 +1496,7 @@ Ext.onReady( function() {
 		});
 
 		item = {
-			text: GIS.i18n.close,
+			text: GIS.i18n.clear,
 			iconCls: 'gis-menu-item-icon-clear',
 			handler: function() {
 				layer.core.reset();
@@ -2033,23 +2034,48 @@ Ext.onReady( function() {
 			}
 		});
 
-		getLabelConfig = function() {
-			return {
+		getLabelConfig = function(isLabel) {
+			var style = {
 				fontSize: fontSize.getValue(),
 				strong: strong.getValue(),
 				italic: italic.getValue(),
 				color: color.getValue()
-			};
+            };
+
+            if (isLabel) {
+                style.label = '\${label}';
+                style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
+			}
+
+            return style;
 		};
 
 		updateLabels = function() {
-			if (layer.hasLabels) {
-				layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
+            var loader = layer.core.getLoader();
+            loader.hideMask = true;
 
-				var loader = layer.core.getLoader();
-				loader.hideMask = true;
-				loader.loadLegend();
-			}
+            if (layer.hasLabels) {
+                layer.hasLabels = false;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(false);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id);
+                    loader.loadLegend();
+                }
+            }
+            else {
+                layer.hasLabels = true;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(true);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
+                    loader.loadLegend();
+                }
+            }
 		};
 
 		window = Ext.create('Ext.window.Window', {
@@ -2059,6 +2085,7 @@ Ext.onReady( function() {
 			width: gis.conf.layout.tool.window_width,
 			resizable: false,
 			closeAction: 'hide',
+            updateLabels: updateLabels,
 			items: {
 				layout: 'fit',
 				cls: 'gis-container-inner',
@@ -2119,18 +2146,7 @@ Ext.onReady( function() {
 					xtype: 'button',
 					text: GIS.i18n.showhide,
 					handler: function() {
-						if (layer.hasLabels) {
-							layer.hasLabels = false;
-							layer.styleMap = GIS.core.StyleMap(layer.id);
-						}
-						else {
-							layer.hasLabels = true;
-							layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig());
-						}
-
-						var loader = layer.core.getLoader();
-						loader.hideMask = true;
-						loader.loadLegend();
+                        updateLabels();
 					}
 				}
 			],
@@ -8114,7 +8130,8 @@ Ext.onReady( function() {
 							viewport.favoriteWindow.show();
 						}
 					});
-					//if (gis.init.user.isAdmin) {
+
+					if (gis.init.user.isAdmin) {
 						a.push({
 							text: GIS.i18n.legend,
 							menu: {},
@@ -8127,7 +8144,7 @@ Ext.onReady( function() {
 								viewport.legendSetWindow.show();
 							}
 						});
-					//}
+					}
 					a.push({
 						xtype: 'tbseparator',
 						height: 18,
@@ -8174,7 +8191,7 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: 'Go to pivot tables' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
 											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html';
@@ -8182,7 +8199,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'Open this map as table' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.open_this_map_as_table + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && gis.util.layout.getAnalytical()),
 										handler: function() {
@@ -8192,7 +8209,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										text: 'Open last table' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.open_last_table + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
@@ -8230,7 +8247,7 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
 											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html';
@@ -8238,7 +8255,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'Open this map as chart' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.open_this_map_as_chart + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
 										handler: function() {
@@ -8248,7 +8265,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
+										text: GIS.i18n.open_last_chart + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {

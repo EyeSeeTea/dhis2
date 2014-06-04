@@ -379,7 +379,8 @@ Ext.onReady( function() {
 	};
 
 	OptionsWindow = function() {
-		var showTotals,
+		var showRowTotals,
+            showColTotals,
 			showSubTotals,
 			hideEmptyRows,
             aggregationType,
@@ -398,8 +399,14 @@ Ext.onReady( function() {
 			comboboxWidth = 262,
 			window;
 
-		showTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_totals,
+        showColTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_col_totals,
+			style: 'margin-bottom:4px',
+			checked: true
+		});
+
+		showRowTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_row_totals,
 			style: 'margin-bottom:4px',
 			checked: true
 		});
@@ -593,7 +600,8 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showTotals,
+                showColTotals,
+				showRowTotals,
 				showSubTotals,
 				hideEmptyRows,
                 aggregationType
@@ -643,7 +651,8 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
-					showTotals: showTotals.getValue(),
+					showRowTotals: showRowTotals.getValue(),
+                    showColTotals: showColTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     aggregationType: aggregationType.getValue(),
@@ -662,7 +671,8 @@ Ext.onReady( function() {
 				};
 			},
 			setOptions: function(layout) {
-				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
+				showRowTotals.setValue(Ext.isBoolean(layout.showRowTotals) ? layout.showRowTotals : true);
+				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
                 aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
@@ -757,7 +767,8 @@ Ext.onReady( function() {
 					}
 
 					// cmp
-					w.showTotals = showTotals;
+					w.showRowTotals = showRowTotals;
+                    w.showColTotals = showColTotals;
 					w.showSubTotals = showSubTotals;
 					w.hideEmptyRows = hideEmptyRows;
                     w.aggregationType = aggregationType;
@@ -836,8 +847,11 @@ Ext.onReady( function() {
 				dimensions = [].concat(favorite.columns || [], favorite.rows || [], favorite.filters || []);
 
 				// Server sync
-				favorite.totals = favorite.showTotals;
-				delete favorite.showTotals;
+				favorite.rowTotals = favorite.showRowTotals;
+				delete favorite.showRowTotals;
+
+                favorite.colTotals = favorite.showColTotals;
+				delete favorite.showColTotals;
 
 				favorite.subtotals = favorite.showSubTotals;
 				delete favorite.showSubTotals;
@@ -4064,10 +4078,10 @@ Ext.onReady( function() {
 							periodOffset: 0,
 							listeners: {
 								select: function() {
-									var nsype = new PeriodType(),
+									var ptype = new PeriodType(),
 										periodType = this.getValue();
 
-									var periods = nsype.get(periodType).generatePeriods({
+									var periods = ptype.get(periodType).generatePeriods({
 										offset: this.periodOffset,
 										filterFuturePeriods: true,
 										reversePeriods: true
@@ -5304,7 +5318,7 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: 'Go to charts' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
 											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html';
@@ -5312,7 +5326,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'Open this table as chart' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.open_this_table_as_chart + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
@@ -5323,7 +5337,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										text: 'Open last chart' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.open_last_chart + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
@@ -5360,7 +5374,7 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: 'Go to maps' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.go_to_maps + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
 											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html';
@@ -5368,7 +5382,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: 'Open this table as map' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.open_this_table_as_map + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
@@ -5379,7 +5393,7 @@ Ext.onReady( function() {
 										}
 									},
 									{
-										text: 'Open last map' + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.open_last_map + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
 										handler: function() {

@@ -40,15 +40,17 @@ import org.hisp.dhis.api.mobile.IProgramService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.Contact;
+import org.hisp.dhis.api.mobile.model.Conversation;
 import org.hisp.dhis.api.mobile.model.DataSetList;
 import org.hisp.dhis.api.mobile.model.DataSetValue;
 import org.hisp.dhis.api.mobile.model.DataSetValueList;
 import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
+import org.hisp.dhis.api.mobile.model.Message;
 import org.hisp.dhis.api.mobile.model.MobileModel;
 import org.hisp.dhis.api.mobile.model.ModelList;
+import org.hisp.dhis.api.mobile.model.Recipient;
 import org.hisp.dhis.api.mobile.model.SMSCode;
 import org.hisp.dhis.api.mobile.model.SMSCommand;
-import org.hisp.dhis.api.mobile.model.Message;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Notification;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
@@ -402,7 +404,7 @@ public class MobileOrganisationUnitController
     String enrollInfo )
         throws NotAllowedException
     {
-        return activityReportingService.enrollProgram( enrollInfo, new Date() );
+        return activityReportingService.enrollProgram( enrollInfo, null, new Date() );
     }
 
     @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/addRelationship" )
@@ -523,14 +525,7 @@ public class MobileOrganisationUnitController
     String programId )
         throws NotAllowedException
     {
-        if ( activityReportingService.savePatient( patient, id, programId ) != null )
-        {
-            return activityReportingService.findLatestPatient();
-        }
-        else
-        {
-            return null;
-        }
+        return activityReportingService.savePatient( patient, id, programId );
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/getVariesInfo" )
@@ -557,6 +552,79 @@ public class MobileOrganisationUnitController
         throws NotAllowedException
     {
         return activityReportingService.sendFeedback( message );
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/findUser" )
+    @ResponseBody
+    public Recipient findUser( String clientVersion, @PathVariable
+    int id, @RequestHeader( "name" )
+    String keyword )
+        throws NotAllowedException
+    {
+        Recipient recipient = new Recipient();
+        recipient.setUsers( activityReportingService.findUser( keyword ) );
+        return recipient;
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findVisitSchedule/{programId}" )
+    @ResponseBody
+    public String findVisitSchedule( @PathVariable
+    int programId, @PathVariable
+    int id, @RequestHeader( "details" )
+    String info )
+        throws NotAllowedException
+    {
+        return activityReportingService.findVisitSchedule( id, programId, info );
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/orgUnits/{id}/sendMessage" )
+    @ResponseBody
+    public String sendMessage( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.sendMessage( message );
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/downloadMessageConversation" )
+    @ResponseBody
+    public Conversation downloadConversation( String clientVersion )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setClientVersion( clientVersion );
+        conversation.setConversations( activityReportingService.downloadMessageConversation() );
+
+        return conversation;
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/getMessage" )
+    @ResponseBody
+    public Conversation getMessage( String clientVersion, @PathVariable
+    int id, @RequestHeader( "id" )
+    String conversationId )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setMessages( activityReportingService.getMessage( conversationId ) );
+
+        return conversation;
+
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/orgUnits/{id}/replyMessage" )
+    @ResponseBody
+    public String replyMessage( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.replyMessage( message );
 
     }
 

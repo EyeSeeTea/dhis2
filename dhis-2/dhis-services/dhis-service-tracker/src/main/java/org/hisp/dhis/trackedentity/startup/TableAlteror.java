@@ -30,22 +30,15 @@ package org.hisp.dhis.trackedentity.startup;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Collection;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.amplecode.quick.StatementHolder;
 import org.amplecode.quick.StatementManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.common.CodeGenerator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.dataentryform.DataEntryForm;
-import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.jdbc.StatementBuilder;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,27 +68,6 @@ public class TableAlteror
     public void setStatementManager( StatementManager statementManager )
     {
         this.statementManager = statementManager;
-    }
-
-    private ProgramStageService programStageService;
-
-    public void setProgramStageService( ProgramStageService programStageService )
-    {
-        this.programStageService = programStageService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
-    }
-
-    private DataEntryFormService dataEntryFormService;
-
-    public void setDataEntryFormService( DataEntryFormService dataEntryFormService )
-    {
-        this.dataEntryFormService = dataEntryFormService;
     }
 
     @Autowired
@@ -183,8 +155,6 @@ public class TableAlteror
 
         executeSql( "update program set remindCompleted=false where remindCompleted is null" );
         executeSql( "UPDATE programinstance SET followup=false where followup is null" );
-
-        updateUidInDataEntryFrom();
 
         updateProgramInstanceStatus();
 
@@ -293,78 +263,75 @@ public class TableAlteror
 
         executeSql( "UPDATE trackedentityattribute SET valuetype='string' WHERE valuetype='localId';" );
         executeSql( "UPDATE trackedentityattribute SET valuetype='number' WHERE valuetype='age'" );
+        
+        executeSql( "DROP TABLE orgunitgroupprograms" ); 
+        
+        executeSql( "UPDATE trackedentityattribute SET valuetype='combo' WHERE valuetype='optionSet'" );
+        
+        updateAggregateQueryBuilder();
     }
 
     // -------------------------------------------------------------------------
     // Supporting methods
     // -------------------------------------------------------------------------
 
-    private void updateUidInDataEntryFrom()
+    private void updateAggregateQueryBuilder()
     {
-        Collection<ProgramStage> programStages = programStageService.getAllProgramStages();
+        StatementHolder holder = statementManager.getHolder();
 
-        for ( ProgramStage programStage : programStages )
+        try
         {
-            DataEntryForm dataEntryForm = programStage.getDataEntryForm();
-            if ( dataEntryForm != null && dataEntryForm.getFormat() != DataEntryForm.CURRENT_FORMAT )
+            Statement statement = holder.getStatement();
+            ResultSet resultSet = statement
+                .executeQuery( "select trackedentityattributeid from trackedentityattribute where name='Age'" );
+
+            if ( resultSet.next() )
             {
-                String programStageUid = programStage.getUid();
-                String htmlCode = programStage.getDataEntryForm().getHtmlCode();
+                int id = resultSet.getInt( "trackedentityattributeid" );
+                
+                String source = "PC:DATE@executionDate#-DATE@birthDate#";
+                String target = CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE
+                    + CaseAggregationCondition.SEPARATOR_OBJECT + id + ".visit";
 
-                // ---------------------------------------------------------------------
-                // Metadata code to add to HTML before outputting
-                // ---------------------------------------------------------------------
-
-                StringBuffer sb = new StringBuffer();
-
-                // ---------------------------------------------------------------------
-                // Pattern to match data elements in the HTML code
-                // ---------------------------------------------------------------------
-
-                Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
-
-                // ---------------------------------------------------------------------
-                // Iterate through all matching data element fields
-                // ---------------------------------------------------------------------
-
-                while ( inputMatcher.find() )
-                {
-                    String inputHTML = inputMatcher.group();
-
-                    // -----------------------------------------------------------------
-                    // Get HTML input field code
-                    // -----------------------------------------------------------------
-
-                    String dataElementCode = inputMatcher.group( 1 );
-
-                    Matcher identifierMatcher = IDENTIFIER_PATTERN_FIELD.matcher( dataElementCode );
-
-                    if ( identifierMatcher.find() && identifierMatcher.groupCount() > 0 )
-                    {
-                        // -------------------------------------------------------------
-                        // Get data element ID of data element
-                        // -------------------------------------------------------------
-
-                        int dataElementId = Integer.parseInt( identifierMatcher.group( 2 ) );
-                        DataElement dataElement = dataElementService.getDataElement( dataElementId );
-
-                        if ( dataElement != null )
-                        {
-                            inputHTML = inputHTML.replaceFirst( identifierMatcher.group( 1 ), programStageUid );
-                            inputHTML = inputHTML.replaceFirst( identifierMatcher.group( 2 ), dataElement.getUid() );
-                            inputMatcher.appendReplacement( sb, inputHTML );
-                        }
-
-                    }
-                }
-
-                inputMatcher.appendTail( sb );
-
-                htmlCode = (sb.toString().isEmpty()) ? htmlCode : sb.toString();
-                dataEntryForm.setHtmlCode( htmlCode );
-                dataEntryForm.setFormat( DataEntryForm.CURRENT_FORMAT );
-                dataEntryFormService.updateDataEntryForm( dataEntryForm );
+                updateFixedAttributeInCaseAggregate( source, target );
             }
+        }
+        catch ( Exception ex )
+        {
+            ex.printStackTrace();
+        }
+    }
+
+    private void updateFixedAttributeInCaseAggregate( String source, String target )
+    {
+        StatementHolder holder = statementManager.getHolder();
+        try
+        {
+            Statement statement = holder.getStatement();
+            ResultSet resultSet = statement
+                .executeQuery( "SELECT caseaggregationconditionid, aggregationExpression FROM caseaggregationcondition where aggregationExpression like '%"
+                    + source + "%'" );
+
+            source = source.replaceAll( "@", "\\@" ).replaceAll( "#", "\\#" );
+
+            while ( resultSet.next() )
+            {
+                String id = resultSet.getString( "caseaggregationconditionid" );
+                String expression = resultSet.getString( "aggregationExpression" );
+
+                expression = expression.replaceAll( source, target );
+                expression = expression.replaceAll( "'", "\"" );
+                executeSql( "UPDATE caseaggregationcondition SET aggregationExpression='" + expression
+                    + "'  WHERE caseaggregationconditionid=" + id );
+            }
+        }
+        catch ( Exception ex )
+        {
+            log.debug( ex );
+        }
+        finally
+        {
+            holder.close();
         }
     }
 

@@ -32,6 +32,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.calendar.impl.Iso8601Calendar;
+import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,6 +68,10 @@ public class DefaultCalendarService implements CalendarService
         {
             calendarMap.put( calendar.name(), calendar );
         }
+
+        PeriodType.setCalendarService( this );
+        Cal.setCalendarService( this );
+        DateUnitPeriodTypeParser.setCalendarService( this );
     }
 
     @Override

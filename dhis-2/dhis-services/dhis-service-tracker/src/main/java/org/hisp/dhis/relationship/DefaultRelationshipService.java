@@ -30,6 +30,7 @@ package org.hisp.dhis.relationship;
 
 import java.util.Collection;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -61,11 +62,6 @@ public class DefaultRelationshipService
         relationshipStore.delete( relationship );
     }
 
-    public Collection<Relationship> getAllRelationships()
-    {
-        return relationshipStore.getAll();
-    }
-
     public Relationship getRelationship( int id )
     {
         return relationshipStore.get( id );
@@ -86,23 +82,15 @@ public class DefaultRelationshipService
         relationshipStore.update( relationship );
     }
 
-    public Collection<Relationship> getRelationshipsByRelationshipType( RelationshipType relationshipType )
-    {
-        return relationshipStore.getByRelationshipType( relationshipType );
-    }
-
-    public Collection<Relationship> getRelationships( TrackedEntityInstance instanceA, RelationshipType relationshipType )
-    {
-        return relationshipStore.get( instanceA, relationshipType );
-    }
-
     public Relationship getRelationship( TrackedEntityInstance instanceA, TrackedEntityInstance instanceB, RelationshipType relationshipType )
     {
         return relationshipStore.get( instanceA, instanceB, relationshipType );
     }
-    
-    public Relationship getRelationship( TrackedEntityInstance instanceA, TrackedEntityInstance instanceB )
+
+    @Override
+    public Collection<Relationship> getRelationships( TrackedEntityInstance entityInstanceA,
+        RelationshipType relationshipType )
     {
-        return relationshipStore.get( instanceA, instanceB );
+        throw new NotImplementedException();
     }
 }

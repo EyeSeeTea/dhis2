@@ -49,7 +49,7 @@ public class NepaliCalendar extends AbstractCalendar
 {
     private static final DateUnit startNepal = new DateUnit( 2000, 1, 1, java.util.Calendar.WEDNESDAY );
 
-    private static final DateUnit startIso = new DateUnit( 1943, 4, 14, java.util.Calendar.WEDNESDAY );
+    private static final DateUnit startIso = new DateUnit( 1943, 4, 14, java.util.Calendar.WEDNESDAY, true );
 
     private static final Calendar self = new NepaliCalendar();
 
@@ -85,7 +85,7 @@ public class NepaliCalendar extends AbstractCalendar
 
         dateTime = dateTime.plusDays( totalDays );
 
-        return DateUnit.fromDateTime( dateTime );
+        return new DateUnit( DateUnit.fromDateTime( dateTime ), true );
     }
 
     @Override
@@ -94,65 +94,43 @@ public class NepaliCalendar extends AbstractCalendar
         DateTime start = startIso.toDateTime();
         DateTime end = dateUnit.toDateTime();
 
-        int days = Days.daysBetween( start, end ).getDays();
-
-        int curYear = startNepal.getYear();
-        int curMonth = startNepal.getMonth();
-        int curDay = startNepal.getDay();
-        int dayOfWeek = startNepal.getDayOfWeek();
-
-        while ( days != 0 )
-        {
-            // days in month
-            int dm = conversionMap.get( curYear )[curMonth];
-
-            curDay++;
-
-            if ( curDay > dm )
-            {
-                curMonth++;
-                curDay = 1;
-            }
-
-            if ( curMonth > 12 )
-            {
-                curYear++;
-                curMonth = 1;
-            }
-
-            dayOfWeek++;
-
-            if ( dayOfWeek > 7 )
-            {
-                dayOfWeek = 1;
-            }
-
-            days--;
-        }
-
-        return new DateUnit( curYear, curMonth, curDay, dayOfWeek );
+        return plusDays( startNepal, Days.daysBetween( start, end ).getDays() );
     }
 
     @Override
-    public DateInterval toInterval( DateUnit dateUnit, DateIntervalType type )
+    public DateInterval toInterval( DateUnit dateUnit, DateIntervalType type, int offset, int length )
     {
         switch ( type )
         {
             case ISO8601_YEAR:
-                return toYearIsoInterval( dateUnit );
+                return toYearIsoInterval( dateUnit, offset, length );
             case ISO8601_MONTH:
-                return toMonthIsoInterval( dateUnit );
+                return toMonthIsoInterval( dateUnit, offset, length );
             case ISO8601_WEEK:
-                return toWeekIsoInterval( dateUnit );
+                return toWeekIsoInterval( dateUnit, offset, length );
+            case ISO8601_DAY:
+                return toDayIsoInterval( dateUnit, offset, length );
         }
 
         return null;
     }
 
-    private DateInterval toYearIsoInterval( DateUnit dateUnit )
+    private DateInterval toYearIsoInterval( DateUnit dateUnit, int offset, int length )
     {
-        DateUnit from = new DateUnit( dateUnit.getYear(), 1, 1 );
-        DateUnit to = new DateUnit( dateUnit.getYear(), monthsInYear(), daysInMonth( dateUnit.getYear(), monthsInYear() ) );
+        DateUnit from = new DateUnit( dateUnit );
+
+        if ( offset > 0 )
+        {
+            from = plusYears( from, offset );
+        }
+        else if ( offset < 0 )
+        {
+            from = minusYears( from, -offset );
+        }
+
+        DateUnit to = new DateUnit( from );
+        to = plusYears( to, length );
+        to = minusDays( to, length );
 
         from = toIso( from );
         to = toIso( to );
@@ -160,10 +138,22 @@ public class NepaliCalendar extends AbstractCalendar
         return new DateInterval( from, to, DateIntervalType.ISO8601_YEAR );
     }
 
-    private DateInterval toMonthIsoInterval( DateUnit dateUnit )
+    private DateInterval toMonthIsoInterval( DateUnit dateUnit, int offset, int length )
     {
-        DateUnit from = new DateUnit( dateUnit.getYear(), dateUnit.getMonth(), 1 );
-        DateUnit to = new DateUnit( dateUnit.getYear(), dateUnit.getMonth(), daysInMonth( dateUnit.getYear(), dateUnit.getMonth() ) );
+        DateUnit from = new DateUnit( dateUnit );
+
+        if ( offset > 0 )
+        {
+            from = plusMonths( from, offset );
+        }
+        else if ( offset < 0 )
+        {
+            from = minusMonths( from, -offset );
+        }
+
+        DateUnit to = new DateUnit( from );
+        to = plusMonths( to, length );
+        to = minusDays( to, 1 );
 
         from = toIso( from );
         to = toIso( to );
@@ -171,14 +161,49 @@ public class NepaliCalendar extends AbstractCalendar
         return new DateInterval( from, to, DateIntervalType.ISO8601_MONTH );
     }
 
-    private DateInterval toWeekIsoInterval( DateUnit dateUnit )
+    private DateInterval toWeekIsoInterval( DateUnit dateUnit, int offset, int length )
     {
-        DateTime dateTime = toIso( dateUnit ).toDateTime();
+        DateUnit from = new DateUnit( dateUnit );
 
-        DateTime from = dateTime.weekOfWeekyear().toInterval().getStart();
-        DateTime to = dateTime.weekOfWeekyear().toInterval().getEnd().minusDays( 1 );
+        if ( offset > 0 )
+        {
+            from = plusWeeks( from, offset );
+        }
+        else if ( offset < 0 )
+        {
+            from = minusWeeks( from, -offset );
+        }
 
-        return new DateInterval( DateUnit.fromDateTime( from ), DateUnit.fromDateTime( to ), DateIntervalType.ISO8601_WEEK );
+        DateUnit to = new DateUnit( from );
+        to = plusWeeks( to, length );
+        to = minusDays( to, 1 );
+
+        from = toIso( from );
+        to = toIso( to );
+
+        return new DateInterval( from, to, DateIntervalType.ISO8601_WEEK );
+    }
+
+    private DateInterval toDayIsoInterval( DateUnit dateUnit, int offset, int length )
+    {
+        DateUnit from = new DateUnit( dateUnit );
+
+        if ( offset > 0 )
+        {
+            from = plusDays( from, offset );
+        }
+        else if ( offset < 0 )
+        {
+            from = minusDays( from, -offset );
+        }
+
+        DateUnit to = new DateUnit( from );
+        to = plusDays( to, length );
+
+        from = toIso( from );
+        to = toIso( to );
+
+        return new DateInterval( from, to, DateIntervalType.ISO8601_DAY );
     }
 
     @Override
@@ -191,6 +216,13 @@ public class NepaliCalendar extends AbstractCalendar
     public int daysInMonth( int year, int month )
     {
         return conversionMap.get( year )[month];
+    }
+
+    @Override
+    public int weeksInYear( int year )
+    {
+        DateTime dateTime = new DateTime( year, 1, 1, 0, 0, ISOChronology.getInstance() );
+        return dateTime.weekOfWeekyear().getMaximumValue();
     }
 
     @Override
@@ -282,6 +314,174 @@ public class NepaliCalendar extends AbstractCalendar
         }
 
         return conversionMap.get( year )[0];
+    }
+
+    @Override
+    public DateUnit minusYears( DateUnit dateUnit, int years )
+    {
+        DateUnit result = new DateUnit( dateUnit.getYear() - years, dateUnit.getMonth(), dateUnit.getDay(), dateUnit.getDayOfWeek() );
+        updateDateUnit( result );
+
+        return result;
+    }
+
+    @Override
+    public DateUnit minusMonths( DateUnit dateUnit, int months )
+    {
+        DateUnit result = new DateUnit( dateUnit );
+
+        while ( months != 0 )
+        {
+            result.setMonth( result.getMonth() - 1 );
+
+            if ( result.getMonth() < 1 )
+            {
+                result.setMonth( monthsInYear() );
+                result.setYear( result.getYear() - 1 );
+            }
+
+            months--;
+        }
+
+        updateDateUnit( result );
+
+        return result;
+    }
+
+    @Override
+    public DateUnit minusWeeks( DateUnit dateUnit, int weeks )
+    {
+        return minusDays( dateUnit, weeks * daysInWeek() );
+    }
+
+    @Override
+    public DateUnit minusDays( DateUnit dateUnit, int days )
+    {
+        int curYear = dateUnit.getYear();
+        int curMonth = dateUnit.getMonth();
+        int curDay = dateUnit.getDay();
+        int dayOfWeek = dateUnit.getDayOfWeek();
+
+        while ( days != 0 )
+        {
+            curDay--;
+
+            if ( curDay == 0 )
+            {
+                curMonth--;
+
+                if ( curMonth == 0 )
+                {
+                    curYear--;
+                    curMonth = 12;
+                }
+
+                curDay = conversionMap.get( curYear )[curMonth];
+            }
+
+            dayOfWeek--;
+
+            if ( dayOfWeek == 0 )
+            {
+                dayOfWeek = 7;
+            }
+
+            days--;
+        }
+
+        return new DateUnit( curYear, curMonth, curDay, dayOfWeek );
+    }
+
+    @Override
+    public DateUnit plusYears( DateUnit dateUnit, int years )
+    {
+        DateUnit result = new DateUnit( dateUnit.getYear() + years, dateUnit.getMonth(), dateUnit.getDay(), dateUnit.getDayOfWeek() );
+        updateDateUnit( result );
+
+        return result;
+    }
+
+    @Override
+    public DateUnit plusMonths( DateUnit dateUnit, int months )
+    {
+        DateUnit result = new DateUnit( dateUnit );
+
+        while ( months != 0 )
+        {
+            result.setMonth( result.getMonth() + 1 );
+
+            if ( result.getMonth() > monthsInYear() )
+            {
+                result.setMonth( 1 );
+                result.setYear( result.getYear() + 1 );
+            }
+
+            months--;
+        }
+
+        updateDateUnit( result );
+
+        return result;
+    }
+
+    @Override
+    public DateUnit plusWeeks( DateUnit dateUnit, int weeks )
+    {
+        return plusDays( dateUnit, weeks * daysInWeek() );
+    }
+
+    @Override
+    public DateUnit plusDays( DateUnit dateUnit, int days )
+    {
+        int curYear = dateUnit.getYear();
+        int curMonth = dateUnit.getMonth();
+        int curDay = dateUnit.getDay();
+        int dayOfWeek = dateUnit.getDayOfWeek();
+
+        while ( days != 0 )
+        {
+            // days in month
+            int dm = conversionMap.get( curYear )[curMonth];
+
+            curDay++;
+
+            if ( curDay > dm )
+            {
+                curMonth++;
+                curDay = 1;
+            }
+
+            if ( curMonth > 12 )
+            {
+                curYear++;
+                curMonth = 1;
+            }
+
+            dayOfWeek++;
+
+            if ( dayOfWeek > 7 )
+            {
+                dayOfWeek = 1;
+            }
+
+            days--;
+        }
+
+        return new DateUnit( curYear, curMonth, curDay, dayOfWeek );
+    }
+
+    // check if day is more than current maximum for month, don't overflow, just set to maximum
+    // set day of week
+    private void updateDateUnit( DateUnit result )
+    {
+        int dm = conversionMap.get( result.getYear() )[result.getMonth()];
+
+        if ( result.getDay() > dm )
+        {
+            result.setDay( dm );
+        }
+
+        result.setDayOfWeek( weekday( result ) );
     }
 
     //------------------------------------------------------------------------------------------------------------

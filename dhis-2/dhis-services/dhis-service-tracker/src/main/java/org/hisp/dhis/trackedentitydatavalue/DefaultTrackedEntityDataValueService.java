@@ -41,7 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Abyot Asalefew Gizaw
- * @version $Id$
  */
 @Transactional
 public class DefaultTrackedEntityDataValueService
@@ -75,9 +74,9 @@ public class DefaultTrackedEntityDataValueService
         dataValueStore.delete( dataValue );
     }
 
-    public int deleteTrackedEntityDataValue( ProgramStageInstance programStageInstance )
+    public void deleteTrackedEntityDataValue( ProgramStageInstance programStageInstance )
     {
-        return dataValueStore.delete( programStageInstance );
+        dataValueStore.detele( programStageInstance );
     }
 
     public void updateTrackedEntityDataValue( TrackedEntityDataValue dataValue )
@@ -92,11 +91,6 @@ public class DefaultTrackedEntityDataValueService
         }
     }
 
-    public Collection<TrackedEntityDataValue> getAllTrackedEntityDataValues()
-    {
-        return dataValueStore.getAll();
-    }
-
     public Collection<TrackedEntityDataValue> getTrackedEntityDataValues( ProgramStageInstance programStageInstance )
     {
         return dataValueStore.get( programStageInstance );
@@ -108,8 +102,7 @@ public class DefaultTrackedEntityDataValueService
         return dataValueStore.get( programStageInstance, dataElements );
     }
 
-    public Collection<TrackedEntityDataValue> getTrackedEntityDataValues(
-        Collection<ProgramStageInstance> programStageInstances )
+    public Collection<TrackedEntityDataValue> getTrackedEntityDataValues( Collection<ProgramStageInstance> programStageInstances )
     {
         return dataValueStore.get( programStageInstances );
     }

@@ -28,10 +28,9 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
+import com.google.common.collect.Lists;
+import org.hisp.dhis.calendar.DateUnit;
+
 import java.util.Date;
 import java.util.List;
 
@@ -39,7 +38,7 @@ import java.util.List;
  * PeriodType for monthly Periods. A valid monthly Period has startDate set to
  * the first day of a calendar month, and endDate set to the last day of the
  * same month.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: MonthlyPeriodType.java 2971 2007-03-03 18:54:56Z torgeilo $
  */
@@ -53,8 +52,6 @@ public class MonthlyPeriodType
 
     private static final String ISO_FORMAT = "yyyyMM";
 
-    private static final String ALTERNATIVE_ISO_FORMAT = "yyyy-MM";
-
     /**
      * The name of the MonthlyPeriodType, which is "Monthly".
      */
@@ -65,7 +62,7 @@ public class MonthlyPeriodType
     // -------------------------------------------------------------------------
     // PeriodType functionality
     // -------------------------------------------------------------------------
-    
+
     @Override
     public String getName()
     {
@@ -73,25 +70,15 @@ public class MonthlyPeriodType
     }
 
     @Override
-    public Period createPeriod()
+    public Period createPeriod( DateUnit dateUnit )
     {
-        return createPeriod( createCalendarInstance() );
-    }
+        DateUnit start = new DateUnit( dateUnit );
+        start.setDay( 1 );
 
-    @Override
-    public Period createPeriod( Date date )
-    {
-        return createPeriod( createCalendarInstance( date ) );
-    }
+        DateUnit end = new DateUnit( dateUnit );
+        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
 
-    @Override
-    public Period createPeriod( Calendar cal )
-    {
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-        Date startDate = cal.getTime();
-        cal.set( Calendar.DAY_OF_MONTH, cal.getActualMaximum( Calendar.DAY_OF_MONTH ) );
-        
-        return new Period( this, startDate, cal.getTime() );
+        return toIsoPeriod( start, end );
     }
 
     @Override
@@ -103,21 +90,23 @@ public class MonthlyPeriodType
     // -------------------------------------------------------------------------
     // CalendarPeriodType functionality
     // -------------------------------------------------------------------------
-    
+
     @Override
     public Period getNextPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, 1 );
-        return createPeriod( cal );
+        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
+        dateUnit = getCalendar().plusMonths( dateUnit, 1 );
+
+        return createPeriod( getCalendar().toIso( dateUnit ) );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        Calendar cal = createCalendarInstance( period.getStartDate() );
-        cal.add( Calendar.MONTH, -1 );
-        return createPeriod( cal );
+        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
+        dateUnit = getCalendar().minusMonths( dateUnit, 1 );
+
+        return createPeriod( getCalendar().toIso( dateUnit ) );
     }
 
     /**
@@ -125,73 +114,49 @@ public class MonthlyPeriodType
      * startDate exists.
      */
     @Override
-    public List<Period> generatePeriods( Date date )
+    public List<Period> generatePeriods( DateUnit dateUnit )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_YEAR, 1 );
+        dateUnit.setMonth( 1 );
+        dateUnit.setDay( 1 );
 
-        int year = cal.get( Calendar.YEAR );        
-        ArrayList<Period> periods = new ArrayList<Period>();
+        List<Period> periods = Lists.newArrayList();
 
-        while ( cal.get( Calendar.YEAR ) == year )
+        int year = dateUnit.getYear();
+
+        while ( dateUnit.getYear() == year )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 1 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusMonths( dateUnit, 1 );
         }
 
         return periods;
     }
 
     /**
-     * Generates the last 12 months where the last one is the month which the 
+     * Generates the last 12 months where the last one is the month which the
      * given date is inside.
      */
     @Override
-    public List<Period> generateRollingPeriods( Date date )
+    public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
-        Calendar cal = createCalendarInstance( date );
-        cal.set( Calendar.DAY_OF_MONTH, 1 );
-        cal.add( Calendar.MONTH, -11 );
+        dateUnit.setDay( 1 );
+        dateUnit = getCalendar().minusMonths( dateUnit, 11 );
 
-        ArrayList<Period> periods = new ArrayList<Period>();
-        
+        List<Period> periods = Lists.newArrayList();
+
         for ( int i = 0; i < 12; i++ )
         {
-            periods.add( createPeriod( cal ) );
-            cal.add( Calendar.MONTH, 1 );
+            periods.add( createPeriod( dateUnit ) );
+            dateUnit = getCalendar().plusMonths( dateUnit, 1 );
         }
-        
+
         return periods;
-    }
-    
-    @Override
-    public String getIsoDate( Period period )
-    {
-        return new SimpleDateFormat( ISO_FORMAT ).format( period.getStartDate() );
     }
 
     @Override
-    public Period createPeriod( String isoDate )
+    public String getIsoDate( DateUnit dateUnit )
     {
-        try
-        {
-            Date date = new SimpleDateFormat( ISO_FORMAT ).parse( isoDate );
-            return createPeriod( date );
-        }
-        catch ( ParseException ex )
-        {
-            // Ignore and try alternative format
-        }
-        
-        try
-        {
-            Date date = new SimpleDateFormat( ALTERNATIVE_ISO_FORMAT ).parse( isoDate );
-            return createPeriod( date );
-        }
-        catch ( ParseException ex )
-        {
-            throw new RuntimeException( ex );
-        }
+        return String.format( "%d%02d", dateUnit.getYear(), dateUnit.getMonth() );
     }
 
     @Override
@@ -199,16 +164,16 @@ public class MonthlyPeriodType
     {
         return ISO_FORMAT;
     }
-    
+
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
-        date = date != null ? date : new Date();        
+        date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        Calendar cal = createCalendarInstance( date );        
-        cal.add( Calendar.MONTH, (rewindedPeriods * -1) );
+        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
+        dateUnit = getCalendar().minusMonths( dateUnit, rewindedPeriods );
 
-        return cal.getTime();
+        return getCalendar().toIso( dateUnit ).toJdkDate();
     }
 }

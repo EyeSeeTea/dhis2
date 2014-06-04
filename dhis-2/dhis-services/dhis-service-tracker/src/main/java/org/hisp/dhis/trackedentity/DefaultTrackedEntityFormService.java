@@ -121,15 +121,15 @@ public class DefaultTrackedEntityFormService
     }
 
     @Override
-    public TrackedEntityForm getTrackedEntityForm( Program program )
+    public TrackedEntityForm getFormsWithProgram( Program program )
     {
         return formStore.get( program );
     }
 
     @Override
-    public TrackedEntityForm getCommonTrackedEntityForm()
+    public TrackedEntityForm getFormsWithoutProgram()
     {
-        return formStore.getCommonForm();
+        return formStore.getFormsWithoutProgram();
     }
 
     @Override
@@ -325,7 +325,7 @@ public class DefaultTrackedEntityFormService
 
             inputHtml += "</select>";
         }
-        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_COMBO ) )
+        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_OPTION_SET ) )
         {
             inputHtml = inputHtml.replaceFirst( "input", "select" ) + ">";
             inputHtml += "<option value=\"\" selected>" + i18n.getString( "no_value" ) + "</option>";

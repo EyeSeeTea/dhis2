@@ -152,38 +152,82 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service for getting tracked entity instances */
-.factory('TrackedEntityInstanceService', function($http, AttributesFactory) {
+.factory('TEIService', function($http, $filter, EntityService) {
     
     var promise;
     return {
         
         get: function(entityUid) {
-            promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){                                
-                return response.data;
+            promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){     
+                var tei = response.data;
+                
+                angular.forEach(tei.attributes, function(attribute){                   
+                   if(attribute.type && attribute.value){                       
+                       if(attribute.type === 'date'){                           
+                           attribute.value = moment(attribute.value, 'YYYY-MM-DD')._d;
+                           attribute.value = Date.parse(attribute.value);
+                           attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');                           
+                       }
+                   } 
+                });
+                return tei;
             });            
             return promise;
         },
         
         getByOrgUnitAndProgram: function(orgUnitUid, programUid) {
-            
-            //var attributes = AttributesFactory.convertListingForToQuery();
+
             var url = '../api/trackedEntityInstances.json?ou=' + orgUnitUid + '&program=' + programUid;
             
-            promise = $http.get( url ).then(function(response){
-               
-                return entityFormatter(response.data);
+            promise = $http.get( url ).then(function(response){               
+                return EntityService.formatter(response.data);
             });            
             return promise;
         },
-        getByOrgUnit: function(orgUnitUid) {
+        getByOrgUnit: function(orgUnitUid) {           
             
-            //var attributes = AttributesFactory.convertListingForToQuery();
             var url =  '../api/trackedEntityInstances.json?ou=' + orgUnitUid;
             
-            promise = $http.get( url ).then(function(response){
-                                
-                return entityFormatter(response.data);
+            promise = $http.get( url ).then(function(response){                                
+                return EntityService.formatter(response.data);
             });            
+            return promise;
+        },        
+        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl) {           
+            
+            var url =  '../api/trackedEntityInstances.json?ou=' + ouId + '&ouMode='+ ouMode;
+            
+            if(queryUrl){
+                url = url + '&'+ queryUrl;
+            }
+            if(programUrl){
+                url = url + '&' + programUrl;
+            }
+            if(attributeUrl){
+                url = url + '&' + attributeUrl;
+            }
+            
+            promise = $http.get( url ).then(function(response){                                
+                return EntityService.formatter(response.data);
+            });            
+            return promise;
+        },                
+        update: function(tei){
+            
+            var url = '../api/trackedEntityInstances';
+            
+            var promise = $http.put( url + '/' + tei.trackedEntityInstance , tei).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        register: function(tei){
+            
+            var url = '../api/trackedEntityInstances';
+            
+            var promise = $http.post(url, tei).then(function(response){
+                return response.data;
+            });
             return promise;
         }
     };
@@ -194,16 +238,23 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         getAll: function(){  
-
-            var attributes = storage.get('ATTRIBUTES');
+            return storage.get('ATTRIBUTES');
+        }, 
+        getByProgram: function(program){
+            var attributes = [];
+            var programAttributes = [];
             
-            if(attributes){
-                return attributes;
-            }                
-            return; 
-        },        
-        getForListing: function(){
+            angular.forEach(this.getAll(), function(attribute){
+                attributes[attribute.id] = attribute;
+            });
+           
+            angular.forEach(program.programTrackedEntityAttributes, function(pAttribute){
+               programAttributes.push(attributes[pAttribute.attribute.id]);                
+            });            
             
+            return programAttributes;            
+        },
+        getWithoutProgram: function(){            
             var attributes = [];
             
             angular.forEach(this.getAll(), function(attribute) {
@@ -225,7 +276,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http) {   
     
@@ -236,77 +286,56 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return response.data.events;
             });            
             return promise;
-        },
-        
-        getByStage: function(orgUnit, programStage){
-            var promise = $http.get( '../api/events.json?' + 'orgUnit=' + orgUnit + '&programStage=' + programStage + '&paging=false')
-                    .then(function(response){
-                        
-                return response.data.events;             
-        
-            }, function(){
-                
-                return dhis2.ec.storageManager.getEvents(orgUnit, programStage);
-                
-            });            
-            
-            return promise;
-        },
-        
-        get: function(eventUid){
-            
-            var promise = $http.get( '../api/events/' + eventUid + '.json').then(function(response){               
-                return response.data;
-                
-            }, function(){
-                return dhis2.ec.storageManager.getEvent(eventUid);
-            });            
-            return promise;
-        },
-        
-        create: function(dhis2Event){
-            
-            var e = angular.copy(dhis2Event);            
-            dhis2.ec.storageManager.saveEvent(e);            
-        
-            var promise = $http.post( '../api/events.json', dhis2Event).then(function(response){
-                dhis2.ec.storageManager.clearEvent(e);
-                return response.data;
-            }, function(){
-                return {importSummaries: [{status: 'SUCCESS', reference: e.event}]};
-            });
-            return promise;            
-        },
-        
-        delete: function(dhis2Event){
-            dhis2.ec.storageManager.clearEvent(dhis2Event);
-            var promise = $http.delete( '../api/events/' + dhis2Event.event).then(function(response){
-                return response.data;
-            }, function(){                
-            });
-            return promise;           
-        },
-    
-        update: function(dhis2Event){   
-            dhis2.ec.storageManager.saveEvent(dhis2Event);
-            var promise = $http.put( '../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
-                dhis2.ec.storageManager.clearEvent(dhis2Event);
-                return response.data;
-            });
-            return promise;
-        },
-        
-        updateForSingleValue: function(singleValue, fullValue){                
-            
-            dhis2.ec.storageManager.saveEvent(fullValue);            
-            
-            var promise = $http.put( '../api/events/' + singleValue.event + '/' + singleValue.dataValues[0].dataElement, singleValue ).then(function(response){
-                dhis2.ec.storageManager.clearEvent(fullValue);
-                return response.data;
-            }, function(){                
-            });
-            return promise;
         }
+    };    
+})
+
+.service('EntityQueryFactory', function(){  
+    
+    this.getQueryForAttributes = function(attributes){
+        
+        var query = {url: null, hasValue: false};
+        
+        angular.forEach(attributes, function(attribute){           
+
+            if(attribute.value && attribute.value !== ''){                    
+                query.hasValue = true;                
+                if(angular.isArray(attribute.value)){
+                    var index = 0, q = '';
+                    
+                    angular.forEach(attribute.value, function(val){
+                        
+                        if(index < attribute.value.length-1){
+                            q = q + val + ';';
+                        }
+                        else{
+                            q = q + val;
+                        }                        
+                        index++;
+                    });
+                    
+                    if(query.url){
+                        if(q){
+                            query.url = query.url + '&filter=' + attribute.id + ':IN:' + q;
+                        }
+                    }
+                    else{
+                        if(q){
+                            query.url = 'filter=' + attribute.id + ':IN:' + q;
+                        }
+                    }                    
+                }
+                else{                        
+                    if(query.url){
+                        query.url = query.url + '&filter=' + attribute.id + ':LIKE:' + attribute.value;
+                    }
+                    else{
+                        query.url = 'filter=' + attribute.id + ':LIKE:' + attribute.value;
+                    }
+                }
+            }            
+        });
+        return query;
     };    
 })
 
@@ -412,16 +441,16 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
     }])
 
-/* current item selected from grid */
-.service('SelectedEntity', function(){
-    this.selectedEntity = '';
+/* current selections */
+.service('CurrentSelection', function(){
+    this.currentSelection = '';
     
-    this.setSelectedEntity = function(selectedEntity){  
-        this.selectedEntity = selectedEntity;        
+    this.set = function(currentSelection){  
+        this.currentSelection = currentSelection;        
     };
     
-    this.getSelectedEntity = function(){
-        return this.selectedEntity;
+    this.get = function(){
+        return this.currentSelection;
     };
 })
 
@@ -527,42 +556,54 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         }
     };
             
-});
+})
 
-/*
-* Helper functions
-*/
-//This is is to have consistent display of entities and attributes
-//as every entity might not have value for every attribute.                
-function entityFormatter(grid){
+.service('EntityService', function(OrgUnitService){
     
-    if(!grid || !grid.rows){
-        return;
-    }   
-   
-    //grid.headers[0-4] = Instance, Created, Last updated, Org unit, Tracked entity
-    //grid.headers[5..] = Attribute, Attribute,.... 
-    var attributes = [];
-    for(var i=5; i<grid.headers.length; i++){
-        attributes.push({id: grid.headers[i].name, name: grid.headers[i].column});
-    }
-    
-    var entityList = [];
-    
-    angular.forEach(grid.rows, function(row){
-        var entity = {};
-        
-        entity.id = row[0];
-        entity.orgUnit = row[3];
-        entity.type = row[4];        
-        
-        for(var i=5; i<row.length; i++){
-            entity[grid.headers[i].name] = row[i];            
-        }
-        
-        entityList.push(entity);        
-        
-    });
-    
-    return {headers: attributes, rows: entityList};
-}
+    return {
+        formatter: function(grid){
+            if(!grid || !grid.rows){
+                return;
+            }
+            
+            //grid.headers[0-4] = Instance, Created, Last updated, Org unit, Tracked entity
+            //grid.headers[5..] = Attribute, Attribute,.... 
+            var attributes = [];
+            for(var i=5; i<grid.headers.length; i++){
+                attributes.push({id: grid.headers[i].name, name: grid.headers[i].column, type: grid.headers[i].type});
+            }
+
+            var entityList = [];
+
+            OrgUnitService.open().then(function(){
+
+                angular.forEach(grid.rows, function(row){
+                    var entity = {};
+                    var isEmpty = true;
+
+                    entity.id = row[0];
+                    entity.orgUnit = row[3];                              
+                    entity.type = row[4];  
+
+                    OrgUnitService.get(row[3]).then(function(ou){
+                        if(ou){
+                            entity.orgUnitName = ou.n;
+                        }                                                       
+                    });
+
+                    for(var i=5; i<row.length; i++){
+                        if(row[i] && row[i] !== ''){
+                            isEmpty = false;
+                            entity[grid.headers[i].name] = row[i];
+                        }
+                    }
+
+                    if(!isEmpty){
+                        entityList.push(entity);
+                    }        
+                });                
+            });
+            return {headers: attributes, rows: entityList};                                    
+        }        
+    };
+});

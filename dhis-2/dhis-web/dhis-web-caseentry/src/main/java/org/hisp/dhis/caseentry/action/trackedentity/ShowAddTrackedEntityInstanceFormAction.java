@@ -311,7 +311,7 @@ public class ShowAddTrackedEntityInstanceFormAction
 
         if ( programId == null || programId.isEmpty() )
         {
-            trackedEntityForm = trackedEntityFormService.getCommonTrackedEntityForm();
+            trackedEntityForm = trackedEntityFormService.getFormsWithoutProgram();
 
             if ( trackedEntityForm != null && trackedEntityForm.getDataEntryForm() != null )
             {
@@ -323,7 +323,7 @@ public class ShowAddTrackedEntityInstanceFormAction
         else
         {
             program = programService.getProgram( programId );
-            trackedEntityForm = trackedEntityFormService.getTrackedEntityForm( program );
+            trackedEntityForm = trackedEntityFormService.getFormsWithProgram( program );
 
             if ( trackedEntityForm != null && trackedEntityForm.getDataEntryForm() != null )
             {
@@ -344,7 +344,7 @@ public class ShowAddTrackedEntityInstanceFormAction
             if ( program == null )
             {
                 attributes = new ArrayList<TrackedEntityAttribute>(
-                    attributeService.getTrackedEntityAttributesDisplayInList( true ) );
+                    attributeService.getTrackedEntityAttributesDisplayInList() );
                 Collection<Program> programs = programService.getAllPrograms();
 
                 for ( Program p : programs )

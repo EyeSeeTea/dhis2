@@ -80,6 +80,7 @@
     <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.appcache.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.translate.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.menu.js?_rev=$!{buildRevision}"></script>
+    <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.menu.ui.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../dhis-web-commons/i18nJavaScript.action?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../main.js?_rev=$!{buildRevision}"></script>
     <script type="text/javascript" src="../request.js?_rev=$!{buildRevision}"></script>
@@ -107,8 +108,8 @@
       <span id="headerText" onclick="window.location.href='../${startModule}/index.action'" style="cursor:pointer" title="$i18n.getString( 'view_home_page' )">
         $encoder.htmlEncode( $applicationTitle )
       </span>
-      
-      <div id="dhisDropdownMenu"></div>
+
+      <div id="dhisDropDownMenu"></div>
 	  
       <span id="showLeftBar">
         <a href="javascript:dhis2.leftBar.showAnimated()" title="$i18n.getString( 'show_menu' )">

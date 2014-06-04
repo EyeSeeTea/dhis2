@@ -41,15 +41,6 @@ public interface TrackedEntityAttributeStore
     String ID = TrackedEntityAttributeStore.class.getName();
 
     /**
-     * Get attributes by value type
-     * 
-     * @param valueType Value type
-     * 
-     * @return List of attributes
-     */
-    Collection<TrackedEntityAttribute> getByValueType( String valueType );
-
-    /**
      * Get attributes without groups
      * 
      * @return List of attributes
@@ -75,10 +66,8 @@ public interface TrackedEntityAttributeStore
     /**
      * Get attributes which are displayed in visit schedule
      * 
-     * @param displayInList True/False value
-     * 
      * @return List of attributes
      */
-    Collection<TrackedEntityAttribute> getDisplayInList( boolean displayInList );
+    Collection<TrackedEntityAttribute> getDisplayInList();
 
 }
