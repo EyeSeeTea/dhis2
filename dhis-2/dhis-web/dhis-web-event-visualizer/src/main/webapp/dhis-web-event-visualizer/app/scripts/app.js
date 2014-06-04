@@ -1177,8 +1177,8 @@ Ext.onReady( function() {
 			filterStore.removeAll();
 
 			if (!isAll) {
-				colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
-				colStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
+				filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
+				rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 			}
 
 			fixedFilterStore.setListHeight();
@@ -3198,7 +3198,7 @@ Ext.onReady( function() {
                     ux.setRecord(element);
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
 
                 if (store === aggWindow.fixedFilterStore) {
 					fixedFilterElementIds.push(element.id);
@@ -4445,7 +4445,7 @@ Ext.onReady( function() {
 				ns.app.shareButton.enable();
 			}
 
-            ns.app.statusBar.setStatus(layout, response);
+            //ns.app.statusBar.setStatus(layout, response);
 
 			// set gui
 			if (!updateGui) {
@@ -5918,16 +5918,16 @@ Ext.onReady( function() {
 			}
 		});
 
-        statusBar = Ext.create('Ext.ux.toolbar.StatusBar', {
-            height: 27,
-            listeners: {
-                render: function() {
-                    ns.app.statusBar = this;
+        //statusBar = Ext.create('Ext.ux.toolbar.StatusBar', {
+            //height: 27,
+            //listeners: {
+                //render: function() {
+                    //ns.app.statusBar = this;
 
-                    this.reset();
-                }
-            }
-        });
+                    //this.reset();
+                //}
+            //}
+        //});
 
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
@@ -5974,7 +5974,7 @@ Ext.onReady( function() {
 					}
 				]
 			},
-            bbar: statusBar,
+            //bbar: statusBar,
 			listeners: {
 				added: function() {
 					ns.app.centerRegion = this;
