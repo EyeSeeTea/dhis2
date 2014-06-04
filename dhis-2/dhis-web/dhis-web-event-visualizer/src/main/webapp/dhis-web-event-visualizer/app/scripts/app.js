@@ -5258,13 +5258,6 @@ Ext.onReady( function() {
 
                 response = response || ns.app.response;
 
-                //getHtml = function(xLayout, xResponse) {
-                    //xColAxis = getXAxis(xLayout, 'col');
-                    //xRowAxis = getXAxis(xLayout, 'row');
-
-                    //return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
-                //};
-
                 xLayout = getXLayout(layout);
                 xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
                 xLayout = getSXLayout(xLayout, xResponse);

@@ -733,8 +733,17 @@ Ext.onReady( function() {
 				// str
 			support.prototype.str = {};
 
-			support.prototype.str.replaceAll = function(str, find, replace) {
-				return str.replace(new RegExp(find, 'g'), replace);
+			support.prototype.str.replaceAll = function(variable, find, replace) {
+                if (Ext.isString(variable)) {
+                    variable = variable.split(find).join(replace);
+                }
+                else if (Ext.isArray(variable)) {
+                    for (var i = 0; i < variable.length; i++) {
+                        variable[i] = variable[i].split(find).join(replace);
+                    }
+                }
+
+                return variable;
 			};
 
 			support.prototype.str.toggleDirection = function(direction) {
@@ -1738,7 +1747,7 @@ Ext.onReady( function() {
 					for (var j = 0; j < idIndexOrder.length; j++) {
 						id += row[idIndexOrder[j]];
 					}
-
+                    
 					response.idValueMap[id] = row[valueHeaderIndex];
 				}
 
@@ -1952,757 +1961,11 @@ Ext.onReady( function() {
 				return xResponse;
 			};
 
-			web.report.aggregate.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
-				var getRoundedHtmlValue,
-					getTdHtml,
-					doSubTotals,
-					doTotals,
-					getColAxisHtmlArray,
-					getRowHtmlArray,
-					rowAxisHtmlArray,
-					getColTotalHtmlArray,
-					getGrandTotalHtmlArray,
-					getTotalHtmlArray,
-					getHtml,
-					getUniqueFactor = function(xAxis) {
-						if (!xAxis) {
-							return null;
-						}
-
-						var unique = xAxis.xItems.unique;
-
-						if (unique) {
-							return unique.length < 2 ? 1 : (xAxis.size / unique[0].length);
-						}
-
-						return null;
-					},
-					colUniqueFactor = getUniqueFactor(xColAxis),
-					rowUniqueFactor = getUniqueFactor(xRowAxis),
-					valueItems = [],
-					valueObjects = [],
-					totalColObjects = [],
-					uuidDimUuidsMap = {},
-					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
-                    tdCount = 0,
-					htmlArray;
-
-				xResponse.sortableIdObjects = [];
-
-				getRoundedHtmlValue = function(value, dec) {
-					dec = dec || 2;
-					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
-				};
-
-				getTdHtml = function(config, metaDataId) {
-					var bgColor,
-						mapLegends,
-						colSpan,
-						rowSpan,
-						htmlValue,
-						displayDensity,
-						fontSize,
-						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
-						isValue = Ext.isObject(config) && Ext.isString(config.type) && config.type === 'value' && !config.empty,
-						cls = '',
-						html = '';
-
-					if (!Ext.isObject(config)) {
-						return '';
-					}
-
-					if (config.hidden || config.collapsed) {
-						return '';
-					}
-
-                    // number of cells
-                    tdCount = tdCount + 1;
-
-					// background color from legend set
-					if (isNumeric && xLayout.legendSet) {
-						var value = parseFloat(config.value);
-						mapLegends = xLayout.legendSet.mapLegends;
-
-						for (var i = 0; i < mapLegends.length; i++) {
-							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
-								bgColor = mapLegends[i].color;
-							}
-						}
-					}
-
-					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
-					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
-					htmlValue = config.collapsed ? '' : config.htmlValue || config.value || '';
-					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, xLayout.digitGroupSeparator) : htmlValue;
-					displayDensity = conf.report.displayDensity[config.displayDensity] || conf.report.displayDensity[xLayout.displayDensity];
-					fontSize = conf.report.fontSize[config.fontSize] || conf.report.fontSize[xLayout.fontSize];
-
-					cls += config.hidden ? ' td-hidden' : '';
-					cls += config.collapsed ? ' td-collapsed' : '';
-					//cls += isValue ? ' pointer' : '';
-					cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
-
-					// sorting
-					if (Ext.isString(metaDataId)) {
-						cls += ' td-sortable';
-
-						xResponse.sortableIdObjects.push({
-							id: metaDataId,
-							uuid: config.uuid
-						});
-					}
-
-					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
-					html += ' class="' + cls + '" ' + colSpan + rowSpan
-
-
-					if (bgColor) {
-						html += '>';
-						html += '<div class="legendCt">';
-						html += '<div class="number ' + config.cls + '" style="padding:' + displayDensity + '; padding-right:3px; font-size:' + fontSize + '">' + htmlValue + '</div>';
-						html += '<div class="arrowCt ' + config.cls + '">';
-						html += '<div class="arrow" style="border-bottom:8px solid transparent; border-right:8px solid ' + bgColor + '">&nbsp;</div>';
-						html += '</div></div></div></td>';
-
-						//cls = 'legend';
-						//cls += config.hidden ? ' td-hidden' : '';
-						//cls += config.collapsed ? ' td-collapsed' : '';
-
-						//html += '<td class="' + cls + '" ';
-						//html += colSpan + rowSpan + '>';
-						//html += '<div class="legendCt">';
-						//html += '<div style="display:table-cell; padding:' + displayDensity + '; font-size:' + fontSize + '"';
-						//html += config.cls ? ' class="' + config.cls + '">' : '';
-						//html += htmlValue + '</div>';
-						//html += '<div class="legendColor" style="background-color:' + bgColor + '">&nbsp;</div>';
-						//html += '</div></td>';
-					}
-					else {
-						html += 'style="padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
-					}
-
-					return html;
-				};
-
-				doSubTotals = function(xAxis) {
-					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
-
-					//var multiItemDimension = 0,
-						//unique;
-
-					//if (!(xLayout.showSubTotals && xAxis && xAxis.dims > 1)) {
-						//return false;
-					//}
-
-					//unique = xAxis.xItems.unique;
-
-					//for (var i = 0; i < unique.length; i++) {
-						//if (unique[i].length > 1) {
-							//multiItemDimension++;
-						//}
-					//}
-
-					//return (multiItemDimension > 1);
-				};
-
-				doTotals = function() {
-					return !!xLayout.showTotals;
-				};
-
-				doSortableColumnHeaders = function() {
-					return (xRowAxis && xRowAxis.dims === 1);
-				};
-
-				getColAxisHtmlArray = function() {
-					var a = [],
-						getEmptyHtmlArray;
-
-					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml({
-							cls: 'pivot-dim-empty cursor-default',
-							colSpan: xRowAxis.dims,
-							rowSpan: xColAxis.dims,
-							htmlValue: '&nbsp;'
-						}) : '';
-					};
-
-					if (!(xColAxis && Ext.isObject(xColAxis))) {
-						return a;
-					}
-
-					// for each col dimension
-					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
-						dimHtml = [];
-
-						if (i === 0) {
-							dimHtml.push(getEmptyHtmlArray());
-						}
-
-						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
-							spanCount++;
-							condoId = null;
-							totalId = null;
-
-							obj = xColAxis.objects.all[i][j];
-							obj.type = 'dimension';
-							obj.cls = 'pivot-dim';
-							obj.noBreak = false;
-							obj.hidden = !(obj.rowSpan || obj.colSpan);
-							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
-
-							// sortable column headers. last dim only.
-							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
-								//condoId = xColAxis.ids[j].split('-').join('');
-								condoId = xColAxis.ids[j];
-							}
-
-							dimHtml.push(getTdHtml(obj, condoId));
-
-							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
-								dimHtml.push(getTdHtml({
-									type: 'dimensionSubtotal',
-									cls: 'pivot-dim-subtotal cursor-default',
-									rowSpan: xColAxis.dims,
-									htmlValue: '&nbsp;'
-								}));
-
-								spanCount = 0;
-							}
-
-							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
-								totalId = doSortableColumnHeaders() ? 'total_' : null;
-
-								dimHtml.push(getTdHtml({
-									uuid: Ext.data.IdGenerator.get('uuid').generate(),
-									type: 'dimensionTotal',
-									cls: 'pivot-dim-total',
-									rowSpan: xColAxis.dims,
-									htmlValue: 'Total'
-								}, totalId));
-							}
-						}
-
-						a.push(dimHtml);
-					}
-
-					return a;
-				};
-
-				getRowHtmlArray = function() {
-					var a = [],
-						axisAllObjects = [],
-						xValueObjects,
-						totalValueObjects = [],
-						mergedObjects = [],
-						valueItemsCopy,
-						colAxisSize = xColAxis ? xColAxis.size : 1,
-						rowAxisSize = xRowAxis ? xRowAxis.size : 1,
-						recursiveReduce;
-
-					recursiveReduce = function(obj) {
-						if (!obj.children) {
-							obj.collapsed = true;
-
-							if (obj.parent) {
-								obj.parent.oldestSibling.children--;
-							}
-						}
-
-						if (obj.parent) {
-							recursiveReduce(obj.parent.oldestSibling);
-						}
-					};
-
-					// dimension
-					if (xRowAxis) {
-						var aLineBreak = new Array(xRowAxis.dims);
-
-						for (var i = 0, row; i < xRowAxis.size; i++) {
-							row = [];
-
-							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
-								obj = xRowAxis.objects.all[j][i];
-								obj.type = 'dimension';
-								obj.cls = 'pivot-dim ' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
-								obj.noBreak = true;
-								obj.hidden = !(obj.rowSpan || obj.colSpan);
-								obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
-
-								row.push(obj);
-
-								// allow line break for this dim?
-								if (obj.htmlValue.length > 50) {
-									aLineBreak[j] = true;
-								}
-							}
-
-							axisAllObjects.push(row);
-						}
-
-						// add nowrap line break cls
-						for (var i = 0, dim; i < aLineBreak.length; i++) {
-							dim = aLineBreak[i];
-
-							if (!dim) {
-								for (var j = 0, obj; j < xRowAxis.size; j++) {
-									obj = axisAllObjects[j][i];
-
-									obj.cls += ' td-nobreak';
-									obj.noBreak = true;
-								}
-							}
-						}
-					}
-	//axisAllObjects = [ [ dim, dim ]
-	//				     [ dim, dim ]
-	//				     [ dim, dim ]
-	//				     [ dim, dim ] ];
-
-					// value
-					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = Ext.clone(xResponse.idValueMap); i < rowAxisSize; i++) {
-						valueItemsRow = [];
-						valueObjectsRow = [];
-
-						for (var j = 0, id, value, htmlValue, empty, uuid, uuids; j < colAxisSize; j++) {
-							empty = false;
-							uuids = [];
-
-							// meta data uid
-							//id = (xColAxis ? support.prototype.str.replaceAll(xColAxis.ids[j], '-', '') : '') + (xRowAxis ? support.prototype.str.replaceAll(xRowAxis.ids[i], '-', '') : '');
-							id = (xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '');
-
-							// value html element id
-							uuid = Ext.data.IdGenerator.get('uuid').generate();
-
-							// get uuids array from colaxis/rowaxis leaf
-							if (xColAxis) {
-								uuids = uuids.concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids);
-							}
-							if (xRowAxis) {
-								uuids = uuids.concat(xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);
-							}
-
-							if (idValueMap[id]) {
-								value = parseFloat(idValueMap[id]);
-								htmlValue = value.toString();
-							}
-							else {
-								value = 0;
-								htmlValue = '&nbsp;';
-								empty = true;
-							}
-
-							valueItemsRow.push(value);
-							valueObjectsRow.push({
-								uuid: uuid,
-								type: 'value',
-								cls: 'pivot-value' + (empty ? ' cursor-default' : ''),
-								value: value,
-								htmlValue: htmlValue,
-								empty: empty,
-								uuids: uuids
-							});
-
-							// map element id to dim element ids
-							uuidDimUuidsMap[uuid] = uuids;
-						}
-
-						valueItems.push(valueItemsRow);
-						valueObjects.push(valueObjectsRow);
-					}
-
-					// totals
-					if (xColAxis && doTotals()) {
-						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
-							for (j = 0, obj; j < valueObjects[i].length; j++) {
-								obj = valueObjects[i][j];
-
-								empty.push(obj.empty);
-								total += obj.value;
-							}
-
-							// row totals
-							totalValueObjects.push({
-								type: 'valueTotal',
-								cls: 'pivot-value-total',
-								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
-								empty: !Ext.Array.contains(empty, false)
-							});
-
-							// add row totals to idValueMap to make sorting on totals possible
-							if (doSortableColumnHeaders()) {
-								var totalId = 'total_' + xRowAxis.ids[i],
-									isEmpty = !Ext.Array.contains(empty, false);
-
-								xResponse.idValueMap[totalId] = isEmpty ? null : total;
-							}
-
-							empty = [];
-							total = 0;
-						}
-					}
-
-					// hide empty rows (dims/values/totals)
-					if (xColAxis && xRowAxis) {
-						if (xLayout.hideEmptyRows) {
-							for (var i = 0, valueRow, isValueRowEmpty, dimLeaf; i < valueObjects.length; i++) {
-								valueRow = valueObjects[i];
-								isValueRowEmpty = !Ext.Array.contains(Ext.Array.pluck(valueRow, 'empty'), false);
-
-								// if value row is empty
-								if (isValueRowEmpty) {
-
-									// Hide values by adding collapsed = true to all items
-									for (var j = 0; j < valueRow.length; j++) {
-										valueRow[j].collapsed = true;
-									}
-
-									// Hide totals by adding collapsed = true to all items
-									if (doTotals()) {
-										totalValueObjects[i].collapsed = true;
-									}
-
-									// Hide/reduce parent dim span
-									dimLeaf = axisAllObjects[i][xRowAxis.dims-1];
-									recursiveReduce(dimLeaf);
-								}
-							}
-						}
-					}
-
-					xValueObjects = Ext.clone(valueObjects);
-
-					// col subtotals
-					if (doSubTotals(xColAxis)) {
-						var tmpValueObjects = [];
-
-						for (var i = 0, row, rowSubTotal, colCount; i < xValueObjects.length; i++) {
-							row = [];
-							rowSubTotal = 0;
-							colCount = 0;
-
-							for (var j = 0, item, collapsed = [], empty = []; j < xValueObjects[i].length; j++) {
-								item = xValueObjects[i][j];
-								rowSubTotal += item.value;
-								empty.push(!!item.empty);
-								collapsed.push(!!item.collapsed);
-								colCount++;
-
-								row.push(item);
-
-								if (colCount === colUniqueFactor) {
-									var isEmpty = !Ext.Array.contains(empty, false);
-									row.push({
-										type: 'valueSubtotal',
-										cls: 'pivot-value-subtotal' + (isEmpty ? ' cursor-default' : ''),
-										value: rowSubTotal,
-										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(rowSubTotal),
-										empty: isEmpty,
-										collapsed: !Ext.Array.contains(collapsed, false)
-									});
-
-									colCount = 0;
-									rowSubTotal = 0;
-									empty = [];
-									collapsed = [];
-								}
-							}
-
-							tmpValueObjects.push(row);
-						}
-
-						xValueObjects = tmpValueObjects;
-					}
-
-					// row subtotals
-					if (doSubTotals(xRowAxis)) {
-						var tmpAxisAllObjects = [],
-							tmpValueObjects = [],
-							tmpTotalValueObjects = [],
-							getAxisSubTotalRow;
-
-						getAxisSubTotalRow = function(collapsed) {
-							var row = [];
-
-							for (var i = 0, obj; i < xRowAxis.dims; i++) {
-								obj = {};
-								obj.type = 'dimensionSubtotal';
-								obj.cls = 'pivot-dim-subtotal cursor-default';
-								obj.collapsed = Ext.Array.contains(collapsed, true);
-
-								if (i === 0) {
-									obj.htmlValue = '&nbsp;';
-									obj.colSpan = xRowAxis.dims;
-								}
-								else {
-									obj.hidden = true;
-								}
-
-								row.push(obj);
-							}
-
-							return row;
-						};
-
-						// tmpAxisAllObjects
-						for (var i = 0, row, collapsed = []; i < axisAllObjects.length; i++) {
-							tmpAxisAllObjects.push(axisAllObjects[i]);
-							collapsed.push(!!axisAllObjects[i][0].collapsed);
-
-							// Insert subtotal after last objects
-							if (!Ext.isArray(axisAllObjects[i+1]) || !!axisAllObjects[i+1][0].root) {
-								tmpAxisAllObjects.push(getAxisSubTotalRow(collapsed));
-
-								collapsed = [];
-							}
-						}
-
-						// tmpValueObjects
-						for (var i = 0; i < tmpAxisAllObjects.length; i++) {
-							tmpValueObjects.push([]);
-						}
-
-						for (var i = 0; i < xValueObjects[0].length; i++) {
-							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < xValueObjects.length; j++) {
-								item = xValueObjects[j][i];
-								tmpValueObjects[tmpCount++].push(item);
-								subTotal += item.value;
-								empty.push(!!item.empty);
-								rowCount++;
-
-								if (axisAllObjects[j][0].root) {
-									collapsed = !!axisAllObjects[j][0].collapsed;
-								}
-
-								if (!Ext.isArray(axisAllObjects[j+1]) || axisAllObjects[j+1][0].root) {
-									var isEmpty = !Ext.Array.contains(empty, false);
-
-									tmpValueObjects[tmpCount++].push({
-										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
-										value: subTotal,
-										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
-										collapsed: collapsed,
-										cls: (item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total') + (isEmpty ? ' cursor-default' : '')
-									});
-									rowCount = 0;
-									subTotal = 0;
-									empty = [];
-								}
-							}
-						}
-
-						// tmpTotalValueObjects
-						for (var i = 0, obj, collapsed = [], empty = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
-							obj = totalValueObjects[i];
-							tmpTotalValueObjects.push(obj);
-
-							collapsed.push(!!obj.collapsed);
-							empty.push(!!obj.empty);
-							subTotal += obj.value;
-							count++;
-
-							if (count === xRowAxis.span[0]) {
-								var isEmpty = !Ext.Array.contains(empty, false);
-
-								tmpTotalValueObjects.push({
-									type: 'valueTotalSubgrandtotal',
-									cls: 'pivot-value-total-subgrandtotal' + (isEmpty ? ' cursor-default' : ''),
-									value: subTotal,
-									htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
-									empty: isEmpty,
-									collapsed: !Ext.Array.contains(collapsed, false)
-								});
-
-								collapsed = [];
-								empty = [];
-								subTotal = 0;
-								count = 0;
-							}
-						}
-
-						axisAllObjects = tmpAxisAllObjects;
-						xValueObjects = tmpValueObjects;
-						totalValueObjects = tmpTotalValueObjects;
-					}
-
-					// Merge dim, value, total
-					for (var i = 0, row; i < xValueObjects.length; i++) {
-						row = [];
-
-						if (xRowAxis) {
-							row = row.concat(axisAllObjects[i]);
-						}
-
-						row = row.concat(xValueObjects[i]);
-
-						if (xColAxis) {
-							row = row.concat(totalValueObjects[i]);
-						}
-
-						mergedObjects.push(row);
-					}
-
-					// Create html items
-					for (var i = 0, row; i < mergedObjects.length; i++) {
-						row = [];
-
-						for (var j = 0; j < mergedObjects[i].length; j++) {
-							row.push(getTdHtml(mergedObjects[i][j]));
-						}
-
-						a.push(row);
-					}
-
-					return a;
-				};
-
-				getColTotalHtmlArray = function() {
-					var a = [];
-
-					if (xRowAxis && doTotals()) {
-						var xTotalColObjects;
-
-						// Total col items
-						for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
-							for (var j = 0, obj; j < valueObjects.length; j++) {
-								obj = valueObjects[j][i];
-
-								total += obj.value;
-								empty.push(!!obj.empty);
-							}
-
-							// col total
-							totalColObjects.push({
-								type: 'valueTotal',
-								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
-								empty: !Ext.Array.contains(empty, false),
-								cls: 'pivot-value-total'
-							});
-
-							total = 0;
-							empty = [];
-						}
-
-						xTotalColObjects = Ext.clone(totalColObjects);
-
-						if (xColAxis && doSubTotals(xColAxis)) {
-							var tmp = [];
-
-							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < xTotalColObjects.length; i++) {
-								item = xTotalColObjects[i];
-								tmp.push(item);
-								subTotal += item.value;
-								empty.push(!!item.empty);
-								colCount++;
-
-								if (colCount === colUniqueFactor) {
-									tmp.push({
-										type: 'valueTotalSubgrandtotal',
-										value: subTotal,
-										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
-										empty: !Ext.Array.contains(empty, false),
-										cls: 'pivot-value-total-subgrandtotal'
-									});
-
-									subTotal = 0;
-									colCount = 0;
-								}
-							}
-
-							xTotalColObjects = tmp;
-						}
-
-						// Total col html items
-						for (var i = 0; i < xTotalColObjects.length; i++) {
-							a.push(getTdHtml(xTotalColObjects[i]));
-						}
-					}
-
-					return a;
-				};
-
-				getGrandTotalHtmlArray = function() {
-					var total = 0,
-						empty = [],
-						a = [];
-
-					if (doTotals()) {
-						for (var i = 0, obj; i < totalColObjects.length; i++) {
-							obj = totalColObjects[i];
-
-							total += obj.value;
-							empty.push(obj.empty);
-						}
-
-						if (xColAxis && xRowAxis) {
-							a.push(getTdHtml({
-								type: 'valueGrandTotal',
-								cls: 'pivot-value-grandtotal',
-								value: total,
-								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
-								empty: !Ext.Array.contains(empty, false)
-							}));
-						}
-					}
-
-					return a;
-				};
-
-				getTotalHtmlArray = function() {
-					var dimTotalArray,
-						colTotal = getColTotalHtmlArray(),
-						grandTotal = getGrandTotalHtmlArray(),
-						row,
-						a = [];
-
-					if (doTotals()) {
-						if (xRowAxis) {
-							dimTotalArray = [getTdHtml({
-								type: 'dimensionSubtotal',
-								cls: 'pivot-dim-total',
-								colSpan: xRowAxis.dims,
-								htmlValue: 'Total'
-							})];
-						}
-
-						row = [].concat(dimTotalArray || [], Ext.clone(colTotal) || [], Ext.clone(grandTotal) || []);
-
-						a.push(row);
-					}
-
-					return a;
-				};
-
-				getHtml = function() {
-					var s = '<table id="' + xLayout.tableUuid + '" class="pivot">';
-
-					for (var i = 0; i < htmlArray.length; i++) {
-						s += '<tr>' + htmlArray[i].join('') + '</tr>';
-					}
-
-					return s += '</table>';
-				};
-
-				// get html
-				return function() {
-                    var rows = xResponse.rows;
-					htmlArray = Ext.Array.clean([].concat(getColAxisHtmlArray() || [], getRowHtmlArray() || [], getTotalHtmlArray() || []));
-
-					return {
-						html: getHtml(htmlArray),
-						uuidDimUuidsMap: uuidDimUuidsMap,
-						xColAxis: xColAxis,
-						xRowAxis: xRowAxis,
-                        tdCount: tdCount
-					};
-				}();
-			};
-
 			web.report.aggregate.createChart = function(xLayout, xResponse, centerRegion) {
                 var columnIds = xLayout.columns[0].ids,
+                    replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
                     rowIds = xLayout.rows[0].ids,
+                    replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
                     filterIds = function() {
                         var ids = [];
                         
@@ -2714,6 +1977,20 @@ Ext.onReady( function() {
 
                         return ids;
                     }(),
+                    replacedFilterIds = support.prototype.str.replaceAll(Ext.clone(filterIds), '.', ''),
+
+                    replacedIdMap = function() {
+                        var map = {},
+                            names = xResponse.metaData.names,
+                            ids = Ext.clean([].concat(columnIds || [], rowIds || [], filterIds || [])),
+                            replacedIds = Ext.clean([].concat(replacedColumnIds || [], replacedRowIds || [], replacedFilterIds || []));
+
+                        for (var i = 0; i < replacedIds.length; i++) {
+                            map[replacedIds[i]] = ids[i];
+                        }
+
+                        return map;
+                    }(),                          
 
 					getSyncronizedXLayout,
                     getExtendedResponse,
@@ -2743,8 +2020,6 @@ Ext.onReady( function() {
                         rowDimensionName = xLayout.rows[0].dimensionName,
 
                         data = [],
-                        //columnIds = xLayout.columnIds,
-                        //rowIds = xLayout.rowIds,
                         trendLineFields = [],
                         targetLineFields = [],
                         baseLineFields = [],
@@ -2757,15 +2032,15 @@ Ext.onReady( function() {
                         rowValues = [];
                         isEmpty = false;
                         
-
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
                         
-                        for (var j = 0, id, value; j < columnIds.length; j++) {
-                            id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
+                        for (var j = 0, colId, id, value; j < columnIds.length; j++) {
+                            id = columnIds[j] + rowIds[i];
                             value = xResponse.idValueMap[id];
                             rowValues.push(value);
 
-                            obj[columnIds[j]] = value ? parseFloat(value) : '0.0';
+                            dataColId = replacedColumnIds[j];
+                            obj[dataColId] = value ? parseFloat(value) : '0.0';
                         }
 
                         isEmpty = !(Ext.Array.clean(rowValues).length);
@@ -2777,12 +2052,12 @@ Ext.onReady( function() {
 
                     // trend lines
                     if (xLayout.showTrendLine) {
-                        for (var i = 0, regression, key; i < columnIds.length; i++) {
+                        for (var i = 0, regression, key; i < replacedColumnIds.length; i++) {
                             regression = new SimpleRegression();
-                            key = conf.finals.data.trendLine + columnIds[i];
+                            key = conf.finals.data.trendLine + replacedColumnIds[i];
 
                             for (var j = 0; j < data.length; j++) {
-                                regression.addData(j, data[j][columnIds[i]]);
+                                regression.addData(j, data[j][replacedColumnIds[i]]);
                             }
 
                             for (var j = 0; j < data.length; j++) {
@@ -2814,7 +2089,7 @@ Ext.onReady( function() {
 
                     store = Ext.create('Ext.data.Store', {
                         fields: function() {
-                            var fields = Ext.clone(columnIds);
+                            var fields = Ext.clone(replacedColumnIds);
                             fields.push(conf.finals.data.domain);
                             fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
 
@@ -2823,7 +2098,7 @@ Ext.onReady( function() {
                         data: data
                     });
 
-                    store.rangeFields = columnIds;
+                    store.rangeFields = replacedColumnIds;
                     store.domainFields = [conf.finals.data.domain];
                     store.trendLineFields = trendLineFields;
                     store.targetLineFields = targetLineFields;
@@ -3015,7 +2290,7 @@ Ext.onReady( function() {
                     var a = [];
 
                     for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
-                        id = store.rangeFields[i];
+                        id = replacedIdMap[store.rangeFields[i]];
                         a.push(xResponse.metaData.names[id]);
                     }
 
@@ -3211,14 +2486,13 @@ Ext.onReady( function() {
                         a = [],
                         text = '',
                         fontSize;
-console.log(xResponse.metaData.names);
+                        
                     if (xLayout.type === conf.finals.chart.pie) {
                         ids = ids.concat(columnIds);
                     }
 
                     if (Ext.isArray(ids) && ids.length) {
                         for (var i = 0; i < ids.length; i++) {
-console.log(ids[i]);                            
                             text += xResponse.metaData.names[ids[i]];
                             text += i < ids.length - 1 ? ', ' : '';
                         }
