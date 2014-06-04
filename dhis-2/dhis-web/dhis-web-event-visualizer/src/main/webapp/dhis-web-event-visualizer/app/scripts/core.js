@@ -1755,9 +1755,7 @@ Ext.onReady( function() {
                     ignoreKeys = ['longitude', 'latitude'],
                     nameItemsMap;
 
-                format = format || 'json';
-
-                paramString = '/api/analytics/events/aggregate/' + view.program.id + '.' + format + '?';
+                paramString = '/api/analytics/events/aggregate/' + view.program.id + '.' + (format || 'json') + '?';
 
 				// stage
 				paramString += 'stage=' + view.programStage.id;
@@ -1790,10 +1788,12 @@ Ext.onReady( function() {
 
                 // filters
                 if (view.filters) {
+                    var param = format ? 'filter' : 'dimension';
+                    
 					for (var i = 0, dim; i < view.filters.length; i++) {
 						dim = view.filters[i];
 
-                        paramString += '&filter=' + dim.dimension;
+                        paramString += '&' + param + '=' + dim.dimension;
 
                         if (dim.items) {
                             paramString += ':';
