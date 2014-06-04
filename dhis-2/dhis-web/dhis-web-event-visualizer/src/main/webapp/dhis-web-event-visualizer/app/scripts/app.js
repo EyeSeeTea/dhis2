@@ -1521,7 +1521,6 @@ Ext.onReady( function() {
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
 						var config = ns.core.web.report.getLayoutConfig();
-							//layout = ns.core.api.layout.Layout(config);
 
 						if (!config) {
 							return;
@@ -5136,6 +5135,12 @@ Ext.onReady( function() {
                     return;
                 }
 
+                view = api.layout.Layout(view);
+
+                if (!view) {
+                    return;
+                }
+
                 //if (view.dataType === 'aggregated_values') {
                 options = ns.app.aggregateOptionsWindow.getOptions();
                 Ext.applyIf(view, options);
@@ -5147,7 +5152,8 @@ Ext.onReady( function() {
                         direction: view.sortOrder == 1 ? 'DESC' : 'ASC'
                     };
                 }
-                //}
+
+                
 
                 return view;
             };
@@ -5305,7 +5311,6 @@ Ext.onReady( function() {
                 web.mask.hide(ns.app.centerRegion);
 
                 if (NS.isDebug) {
-                    console.log("Number of cells", table.tdCount);
                     console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
                     console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
                     console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);

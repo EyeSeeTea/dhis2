@@ -279,41 +279,77 @@ Ext.onReady( function() {
 					getValidatedDimensionArray,
 					validateSpecialCases;
 
-                // type: string
+                // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
+
+                // program: object
+
+                // programStage: object
 
 				// columns: [Dimension]
 
 				// rows: [Dimension]
 
 				// filters: [Dimension]
+                
+                // showTrendLine: boolean (false)
 
-				// showTotals: boolean (true)
+                // targetLineValue: number
 
-				// showSubTotals: boolean (true)
+                // targetLineTitle: string
+
+                // baseLineValue: number
+
+                // baseLineTitle: string
+
+                // rangeAxisMaxValue: number
+
+                // rangeAxisMinValue: number
+
+                // rangeAxisSteps: number
+
+                // rangeAxisDecimals: number
+
+                // showValues: boolean (true)
+
+                    // showTotals: boolean (true)
+
+                    // showSubTotals: boolean (true)
 
 				// hideEmptyRows: boolean (false)
 
-                // aggregationType: string ('default') - 'default', 'count', 'sum'
+                    // aggregationType: string ('default') - 'default', 'count', 'sum'
 
-				// showHierarchy: boolean (false)
+                    // showHierarchy: boolean (false)
 
-				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
+                    // displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
 
-				// fontSize: string ('normal') - 'small', 'normal', 'large'
+                    // fontSize: string ('normal') - 'small', 'normal', 'large'
 
-				// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
+                    // digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
 
-				// legendSet: object
+                    // legendSet: object
+
+                // hideLegend: boolean (false)
+
+                // hideTitle: boolean (false)
+
+                // domainAxisTitle: string
+
+                // rangeAxisTitle: string
+
+                // userOrganisationUnit: boolean (false)
+
+                // userOrganisationUnitChildren: boolean (false)
 
 				// parentGraphMap: object
 
 				// sorting: transient object
 
-				// reportingPeriod: boolean (false) //report tables only
+                    // reportingPeriod: boolean (false) //report tables only
 
-				// organisationUnit: boolean (false) //report tables only
+                    // organisationUnit: boolean (false) //report tables only
 
-				// parentOrganisationUnit: boolean (false) //report tables only
+                    // parentOrganisationUnit: boolean (false) //report tables only
 
 				// regression: boolean (false)
 
@@ -419,8 +455,13 @@ Ext.onReady( function() {
 					config.filters = getValidatedDimensionArray(config.filters);
 
 					// at least one dimension specified as column or row
-					if (!(config.columns || config.rows)) {
-						alert(NS.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+					if (!config.columns) {
+						alert('No series items selected');
+						return;
+					}
+
+					if (!config.rows) {
+						alert('No category items selected');
 						return;
 					}
 
@@ -450,36 +491,43 @@ Ext.onReady( function() {
 
 					// layout
                     layout.type = config.type;
+
+                    layout.program = config.program;
+                    layout.programStage = config.programStage;
                     
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
 
 					// properties
-					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
-					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
-					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
+                    layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+                    layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
+                    layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
+                    layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
+                    layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
+                        (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
+                    layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
+                    layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
+                        (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
 
-					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
+					layout.rangeAxisMaxValue = Ext.isNumber(config.rangeAxisMaxValue) ? config.rangeAxisMaxValue : null;
+					layout.rangeAxisMinValue = Ext.isNumber(config.rangeAxisMinValue) ? config.rangeAxisMinValue : null;
+					layout.rangeAxisSteps = Ext.isNumber(config.rangeAxisSteps) ? config.rangeAxisSteps : null;
+					layout.rangeAxisDecimals = Ext.isNumber(config.rangeAxisDecimals) ? config.rangeAxisDecimals : null;
+					layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
+                        (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
+					layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
+                        (Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
+                        
+                    layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
+                    layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
+                    layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 
-					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
-					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
-					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
-					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
+                    layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
-
-					layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
-
-					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
-					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
-					layout.parentOrganisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramParentOrganisationUnit) ? config.reportParams.paramParentOrganisationUnit : (Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false);
-
-					layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
-					layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
-					layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
-					layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
+					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
 					if (!validateSpecialCases()) {
 						return;
