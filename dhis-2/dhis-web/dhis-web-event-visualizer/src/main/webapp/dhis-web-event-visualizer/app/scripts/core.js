@@ -2526,7 +2526,7 @@ Ext.onReady( function() {
                             else {
                                 if (dim.filter) {
                                     var a = dim.filter.split(':');
-console.log(a);
+                                    
                                     if (a.length === 2) {
                                         var operator = a[0],
                                             valueArray = a[1].split(';'),
