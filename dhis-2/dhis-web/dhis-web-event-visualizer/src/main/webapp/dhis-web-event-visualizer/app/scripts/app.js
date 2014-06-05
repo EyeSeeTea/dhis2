@@ -1297,182 +1297,245 @@ Ext.onReady( function() {
 	};
 
     AggregateOptionsWindow = function() {
-		var showTotals,
-			showSubTotals,
-			hideEmptyRows,
-            limit,
-            countType,
-            aggregationType,
-			showHierarchy,
-			digitGroupSeparator,
-			displayDensity,
-			fontSize,
-			reportingPeriod,
-			organisationUnit,
-			parentOrganisationUnit,
+		var showValues,
+            hideEmptyRows,
+            showTrendLine,
+			targetLineValue,
+			targetLineTitle,
+			baseLineValue,
+			baseLineTitle,
+
+            rangeAxisMaxValue,
+            rangeAxisMinValue,
+            rangeAxisSteps,
+            rangeAxisDecimals,
+			rangeAxisTitle,
+			domainAxisTitle,
+            
+			hideLegend,
+			hideTitle,
+			title,
 
 			data,
-			style,
-			parameters,
+			axes,
+			general,
+			window,
 
-			comboboxWidth = 280,
-			window;
+			cmpWidth = 340,
+			labelWidth = 125,
+			numberWidth = 80;
 
-		showTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_totals,
-			style: 'margin-bottom:4px',
-			checked: true
+		showTrendLine = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.trend_line,
+			style: 'margin-bottom:6px'
 		});
 
-		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_subtotals,
-			style: 'margin-bottom:4px',
-			checked: true
+		targetLineValue = Ext.create('Ext.form.field.Number', {
+			width: numberWidth,
+			height: 18,
+			listeners: {
+				change: function(nf) {
+					targetLineTitle.xable();
+				}
+			}
+		});
+
+		targetLineTitle = Ext.create('Ext.form.field.Text', {
+			style: 'margin-left:1px; margin-bottom:1px',
+			fieldStyle: 'padding-left:3px',
+			emptyText: NS.i18n.target,
+			width: cmpWidth - labelWidth - 5 - numberWidth - 1,
+			maxLength: 100,
+			enforceMaxLength: true,
+			disabled: true,
+			xable: function() {
+				this.setDisabled(!targetLineValue.getValue() && !Ext.isNumber(targetLineValue.getValue()));
+			}
+		});
+
+		baseLineValue = Ext.create('Ext.form.field.Number', {
+			//cls: 'gis-numberfield',
+			width: numberWidth,
+			height: 18,
+			listeners: {
+				change: function(nf) {
+					baseLineTitle.xable();
+				}
+			}
+		});
+
+		baseLineTitle = Ext.create('Ext.form.field.Text', {
+			//cls: 'ns-textfield-alt1',
+			style: 'margin-left:1px; margin-bottom:1px',
+			fieldStyle: 'padding-left:3px',
+			emptyText: NS.i18n.base,
+			width: cmpWidth - labelWidth - 5 - numberWidth - 1,
+			maxLength: 100,
+			enforceMaxLength: true,
+			disabled: true,
+			xable: function() {
+				this.setDisabled(!baseLineValue.getValue() && !Ext.isNumber(baseLineValue.getValue()));
+			}
 		});
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:4px',
-            checked: true
-		});
-
-        limit = Ext.create('Ext.ux.container.LimitContainer', {
-            boxLabel: NS.i18n.limit,
-            sortOrder: 1,
-            topLimit: 10,
-            comboboxWidth: comboboxWidth
-        });
-
-        countType = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
-			width: comboboxWidth,
-			labelWidth: 130,
-			fieldLabel: NS.i18n.count_type,
-			labelStyle: 'color:#333',
-			queryMode: 'local',
-			valueField: 'id',
-			editable: false,
-			value: 'events',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['id', 'text'],
-				data: [
-					{id: 'events', text: NS.i18n.events},
-					{id: 'tracked_entity_instances', text: NS.i18n.tracked_entity_instances}
-				]
-			})
-		});
-
-		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_hierarchy,
+			boxLabel: NS.i18n.hide_empty_category_items,
 			style: 'margin-bottom:4px'
 		});
 
-		displayDensity = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
-			width: comboboxWidth,
-			labelWidth: 130,
-			fieldLabel: NS.i18n.display_density,
-			labelStyle: 'color:#333',
-			queryMode: 'local',
-			valueField: 'id',
-			editable: false,
-			value: 'normal',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['id', 'text'],
-				data: [
-					{id: 'comfortable', text: NS.i18n.comfortable},
-					{id: 'normal', text: NS.i18n.normal},
-					{id: 'compact', text: NS.i18n.compact}
-				]
-			})
+		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
+			width: numberWidth,
+			height: 18,
+			labelWidth: 125
 		});
 
-		fontSize = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
-			width: comboboxWidth,
-			labelWidth: 130,
-			fieldLabel: NS.i18n.font_size,
-			labelStyle: 'color:#333',
-			queryMode: 'local',
-			valueField: 'id',
-			editable: false,
-			value: 'normal',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['id', 'text'],
-				data: [
-					{id: 'large', text: NS.i18n.large},
-					{id: 'normal', text: NS.i18n.normal},
-					{id: 'small', text: NS.i18n.small_}
-				]
-			})
+		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
+			width: numberWidth,
+			height: 18,
+			labelWidth: 125,
+            style: 'margin-left:1px'
 		});
 
-		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
-			labelStyle: 'color:#333',
-			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
-			width: comboboxWidth,
-			labelWidth: 130,
-			fieldLabel: NS.i18n.digit_group_separator,
-			queryMode: 'local',
-			valueField: 'id',
-			editable: false,
-			value: 'space',
-			store: Ext.create('Ext.data.Store', {
-				fields: ['id', 'text'],
-				data: [
-					{id: 'comma', text: 'Comma'},
-					{id: 'space', text: 'Space'},
-					{id: 'none', text: 'None'}
-				]
-			})
+		rangeAxisSteps = Ext.create('Ext.form.field.Number', {
+			width: labelWidth + 5 + numberWidth,
+			height: 18,
+			fieldLabel: 'Range axis tick steps',
+			labelWidth: 125,
+			minValue: 1
 		});
 
-		//legendSet = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:3px',
-			//width: comboboxWidth,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.legend_set,
-			//valueField: 'id',
-			//displayField: 'name',
-			//editable: false,
-			//value: 0,
-			//store: ns.app.stores.legendSet
-		//});
+		rangeAxisDecimals = Ext.create('Ext.form.field.Number', {
+			width: labelWidth + 5 + numberWidth,
+			height: 18,
+			fieldLabel: 'Range axis decimals',
+			labelWidth: 125,
+			minValue: 0
+		});
 
-		data = {
+		showValues = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_values,
+			style: 'margin-bottom:4px',
+			checked: true
+		});
+
+		hideLegend = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.hide_legend,
+			style: 'margin-bottom:4px'
+		});
+
+		hideTitle = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.hide_chart_title,
+			style: 'margin-bottom:7px',
+			listeners: {
+				change: function() {
+					title.xable();
+				}
+			}
+		});
+
+		title = Ext.create('Ext.form.field.Text', {
+			style: 'margin-bottom:2px',
+			width: cmpWidth,
+			fieldLabel: NS.i18n.chart_title,
+			labelStyle: 'color:#333',
+			labelWidth: 125,
+			maxLength: 100,
+			enforceMaxLength: true,
+			xable: function() {
+				this.setDisabled(hideTitle.getValue());
+			}
+		});
+
+		rangeAxisTitle = Ext.create('Ext.form.field.Text', {
+			width: cmpWidth,
+			fieldLabel: NS.i18n.range_axis_label,
+			labelStyle: 'color:#333',
+			labelWidth: 125,
+			maxLength: 100,
+			enforceMaxLength: true,
+			style: 'margin-bottom:1px'
+		});
+		
+		domainAxisTitle = Ext.create('Ext.form.field.Text', {
+			width: cmpWidth,
+			fieldLabel: NS.i18n.domain_axis_label,
+			labelStyle: 'color:#333',
+			labelWidth: 125,
+			maxLength: 100,
+			enforceMaxLength: true,
+			style: 'margin-bottom:1px'
+		});
+
+        data = {
+			xtype: 'container',
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showTotals,
-				showSubTotals,
+				showValues,
 				hideEmptyRows,
-                limit,
-                countType
-                //aggregationType
+				showTrendLine,
+				{
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						{
+							bodyStyle: 'border:0 none; padding-top:3px; margin-right:5px; color:#333',
+							width: 130,
+							html: 'Target value / title:'
+						},
+						targetLineValue,
+						targetLineTitle
+					]
+				},
+				{
+					xtype: 'container',
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						{
+							bodyStyle: 'border:0 none; padding-top:3px; margin-right:5px; color:#333',
+							width: 130,
+							html: 'Base value / title:'
+						},
+						baseLineValue,
+						baseLineTitle
+					]
+				}
 			]
 		};
 
-		organisationUnits = {
+		axes = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showHierarchy
+				{
+					layout: 'column',
+					bodyStyle: 'border:0 none',
+					items: [
+						{
+							bodyStyle: 'border:0 none; padding-top:3px; margin-right:5px; color:#333',
+							width: 130,
+							html: 'Range axis min/max:'
+						},
+						rangeAxisMinValue,
+						rangeAxisMaxValue
+					]
+				},
+				rangeAxisSteps,
+				rangeAxisDecimals,
+				rangeAxisTitle,
+				domainAxisTitle
 			]
-		};
+		};			
 
-		style = {
+		general = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				displayDensity,
-				fontSize,
-				digitGroupSeparator
-				//legendSet
+				hideLegend,
+				hideTitle,
+				title
 			]
 		};
 
@@ -1486,38 +1549,117 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
-					showTotals: showTotals.getValue(),
-					showSubTotals: showSubTotals.getValue(),
-					hideEmptyRows: hideEmptyRows.getValue(),
-                    sortOrder: limit.getSortOrder(),
-                    topLimit: limit.getTopLimit(),
-					countType: countType.getValue(),
-					showHierarchy: showHierarchy.getValue(),
-					displayDensity: displayDensity.getValue(),
-					fontSize: fontSize.getValue(),
-					digitGroupSeparator: digitGroupSeparator.getValue()
-					//legendSet: {id: legendSet.getValue()}
+					showValues: showValues.getValue(),
+                    hideEmptyRows: hideEmptyRows.getValue(),
+					showTrendLine: showTrendLine.getValue(),
+					targetLineValue: targetLineValue.getValue(),
+					targetLineTitle: targetLineTitle.getValue(),
+					baseLineValue: baseLineValue.getValue(),
+					baseLineTitle: baseLineTitle.getValue(),
+					rangeAxisMaxValue: rangeAxisMaxValue.getValue(),
+					rangeAxisMinValue: rangeAxisMinValue.getValue(),
+					rangeAxisSteps: rangeAxisSteps.getValue(),
+					rangeAxisDecimals: rangeAxisDecimals.getValue(),
+					rangeAxisTitle: rangeAxisTitle.getValue(),
+					domainAxisTitle: domainAxisTitle.getValue(),
+					hideLegend: hideLegend.getValue(),
+					hideTitle: hideTitle.getValue(),
+					title: title.getValue()
 				};
 			},
 			setOptions: function(layout) {
-				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
-				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
+				showValues.setValue(Ext.isBoolean(layout.showValues) ? layout.showValues : false);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
-				limit.setValues(layout.sortOrder, layout.topLimit);
-				countType.setValue(Ext.isString(layout.countType) ? layout.countType : 'events');
-                //aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
-				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
-				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
-				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
-				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
-				//legendSet.setValue(Ext.isObject(layout.legendSet) && Ext.isString(layout.legendSet.id) ? layout.legendSet.id : 0);
-				//reportingPeriod.setValue(Ext.isBoolean(layout.reportingPeriod) ? layout.reportingPeriod : false);
-				//organisationUnit.setValue(Ext.isBoolean(layout.organisationUnit) ? layout.organisationUnit : false);
-				//parentOrganisationUnit.setValue(Ext.isBoolean(layout.parentOrganisationUnit) ? layout.parentOrganisationUnit : false);
-				//regression.setValue(Ext.isBoolean(layout.regression) ? layout.regression : false);
-				//cumulative.setValue(Ext.isBoolean(layout.cumulative) ? layout.cumulative : false);
-				//sortOrder.setValue(Ext.isNumber(layout.sortOrder) ? layout.sortOrder : 0);
-				//topLimit.setValue(Ext.isNumber(layout.topLimit) ? layout.topLimit : 0);
+				showTrendLine.setValue(Ext.isBoolean(layout.showTrendLine) ? layout.showTrendLine : false);
+
+				// target line
+				if (Ext.isNumber(layout.targetLineValue)) {
+					targetLineValue.setValue(layout.targetLineValue);
+				}
+				else {
+					targetLineValue.reset();
+				}
+
+				if (Ext.isString(layout.targetLineTitle)) {
+					targetLineTitle.setValue(layout.targetLineTitle);
+				}
+				else {
+					targetLineTitle.reset();
+				}
+
+				// base line
+				if (Ext.isNumber(layout.baseLineValue)) {
+					baseLineValue.setValue(layout.baseLineValue);
+				}
+				else {
+					baseLineValue.reset();
+				}
+
+				if (Ext.isString(layout.baseLineTitle)) {
+					baseLineTitle.setValue(layout.baseLineTitle);
+				}
+				else {
+					baseLineTitle.reset();
+				}
+
+				// rangeAxisMaxValue
+				if (Ext.isNumber(layout.rangeAxisMaxValue)) {
+					rangeAxisMaxValue.setValue(layout.rangeAxisMaxValue);
+				}
+				else {
+					rangeAxisMaxValue.reset();
+				}
+
+				// rangeAxisMinValue
+				if (Ext.isNumber(layout.rangeAxisMinValue)) {
+					rangeAxisMinValue.setValue(layout.rangeAxisMinValue);
+				}
+				else {
+					rangeAxisMinValue.reset();
+				}
+
+				// rangeAxisSteps
+				if (Ext.isNumber(layout.rangeAxisSteps)) {
+					rangeAxisSteps.setValue(layout.rangeAxisSteps);
+				}
+				else {
+					rangeAxisSteps.reset();
+				}
+
+				// rangeAxisDecimals
+				if (Ext.isNumber(layout.rangeAxisDecimals)) {
+					rangeAxisDecimals.setValue(layout.rangeAxisDecimals);
+				}
+				else {
+					rangeAxisDecimals.reset();
+				}
+
+				// range axis title
+				if (Ext.isString(layout.rangeAxisTitle)) {
+					rangeAxisTitle.setValue(layout.rangeAxisTitle);
+				}
+				else {
+					rangeAxisTitle.reset();
+				}
+
+				// domain axis title
+				if (Ext.isString(layout.domainAxisTitle)) {
+					domainAxisTitle.setValue(layout.domainAxisTitle);
+				}
+				else {
+					domainAxisTitle.reset();
+				}
+				
+				hideLegend.setValue(Ext.isBoolean(layout.hideLegend) ? layout.hideLegend : false);
+				hideTitle.setValue(Ext.isBoolean(layout.hideTitle) ? layout.hideTitle : false);
+
+				// title
+				if (Ext.isString(layout.title)) {
+					title.setValue(layout.title);
+				}
+				else {
+					title.reset();
+				}
 			},
 			items: [
 				{
@@ -1532,18 +1674,18 @@ Ext.onReady( function() {
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
-					html: NS.i18n.organisation_units
+					html: NS.i18n.axes
 				},
-				organisationUnits,
+				axes,
 				{
 					bodyStyle: 'border:0 none; padding:5px'
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
 					style: 'margin-bottom:6px; margin-left:2px',
-					html: NS.i18n.style
+					html: NS.i18n.general
 				},
-				style
+				general
 			],
 			bbar: [
 				'->',
@@ -1556,13 +1698,16 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						var config = ns.core.web.report.getLayoutConfig();
+						//var config = ns.core.web.chart.getLayoutConfig(),
+							//layout = ns.core.api.layout.Layout(config);
 
-						if (!config) {
-							return;
-						}
+						//if (!layout) {
+							//return;
+						//}
 
-						ns.core.web.report.getData(config, false);
+						//ns.core.web.chart.getData(layout, false);
+
+                        ns.app.viewport.update();                        
 
 						window.hide();
 					}
@@ -1578,20 +1723,25 @@ Ext.onReady( function() {
 						}
 					}
 
-					//if (!legendSet.store.isLoaded) {
-						//legendSet.store.load();
-					//}
-
 					// cmp
-					w.showTotals = showTotals;
-					w.showSubTotals = showSubTotals;
-					w.hideEmptyRows = hideEmptyRows;
-                    w.limit = limit;
-					w.countType = countType;
-					w.showHierarchy = showHierarchy;
-					w.displayDensity = displayDensity;
-					w.fontSize = fontSize;
-					w.digitGroupSeparator = digitGroupSeparator;
+					w.showValues = showValues;
+                    w.hideEmptyRows = hideEmptyRows;
+					w.showTrendLine = showTrendLine;
+					w.targetLineValue = targetLineValue;
+					w.targetLineTitle = targetLineTitle;
+					w.baseLineValue = baseLineValue;
+					w.baseLineTitle = baseLineTitle;
+
+					w.rangeAxisMaxValue = rangeAxisMaxValue;
+					w.rangeAxisMinValue = rangeAxisMinValue;
+					w.rangeAxisSteps = rangeAxisSteps;
+					w.rangeAxisDecimals = rangeAxisDecimals;
+					w.rangeAxisTitle = rangeAxisTitle;
+					w.domainAxisTitle = domainAxisTitle;
+					
+					w.hideLegend = hideLegend;
+					w.hideTitle = hideTitle;
+					w.title = title;
 				}
 			}
 		});
@@ -5171,12 +5321,6 @@ Ext.onReady( function() {
                     return;
                 }
 
-                view = api.layout.Layout(view);
-
-                if (!view) {
-                    return;
-                }
-
                 //if (view.dataType === 'aggregated_values') {
                 options = ns.app.aggregateOptionsWindow.getOptions();
                 Ext.applyIf(view, options);
@@ -5188,9 +5332,7 @@ Ext.onReady( function() {
                         direction: view.sortOrder == 1 ? 'DESC' : 'ASC'
                     };
                 }
-
                 
-
                 return view;
             };
 
@@ -6027,6 +6169,7 @@ Ext.onReady( function() {
 			layout: 'border',
             getLayoutWindow: getLayoutWindow,
             chartType: chartType,
+            update: update,
 			items: [
 				westRegion,
 				centerRegion
