@@ -1642,7 +1642,7 @@ Ext.onReady( function() {
                     ouHierarchy,
                     names,
 					headers;
-
+                    
 				response = Ext.clone(response);
 				headers = response.headers;
                 ouHierarchy = response.metaData.ouHierarchy,

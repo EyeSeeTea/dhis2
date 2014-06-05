@@ -1243,31 +1243,17 @@ Ext.onReady( function() {
 				'->',
 				{
 					text: NS.i18n.hide,
-					listeners: {
-						added: function(b) {
-							b.on('click', function() {
-								window.hide();
-							});
-						}
-					}
+                    handler: function() {
+                        window.hide();
+                    }
 				},
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
-					listeners: {
-						added: function(b) {
-							b.on('click', function() {
-								var config = ns.core.web.report.getLayoutConfig();
+                    handler: function() {
+                        ns.app.viewport.update();                        
 
-								if (!config) {
-									return;
-								}
-
-								ns.core.web.report.getData(config, false);
-
-								window.hide();
-							});
-						}
-					}
+                        window.hide();
+                    }
 				}
 			],
 			listeners: {
@@ -1386,14 +1372,14 @@ Ext.onReady( function() {
 		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
-			labelWidth: 125
+			labelWidth: 125,
+            style: 'margin-left:1px'
 		});
 
 		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
-			labelWidth: 125,
-            style: 'margin-left:1px'
+			labelWidth: 125
 		});
 
 		rangeAxisSteps = Ext.create('Ext.form.field.Number', {
@@ -1698,15 +1684,6 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
 					handler: function() {
-						//var config = ns.core.web.chart.getLayoutConfig(),
-							//layout = ns.core.api.layout.Layout(config);
-
-						//if (!layout) {
-							//return;
-						//}
-
-						//ns.core.web.chart.getData(layout, false);
-
                         ns.app.viewport.update();                        
 
 						window.hide();

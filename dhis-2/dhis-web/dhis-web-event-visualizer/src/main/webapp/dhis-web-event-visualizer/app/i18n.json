@@ -181,5 +181,6 @@
 "target_line_value",
 "target_line_label",
 "chart_title",
-"hide_chart_title"
+"hide_chart_title",
+"trend"
 ]
