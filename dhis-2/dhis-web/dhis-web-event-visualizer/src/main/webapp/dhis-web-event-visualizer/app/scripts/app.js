@@ -980,10 +980,28 @@ Ext.onReady( function() {
 						filterStore.add(record);
 					});
 
-					ms.store.on('add', function() {
+					ms.store.on('add', function(store, addedRecords) {
+                        var range = store.getRange();
+                        
+                        if (range.length > 1) {
+                            var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
+                                records = Ext.clone(range);
+
+                            store.removeAll();
+
+                            for (var i = 0; i < range.length; i++) {
+                                if (Ext.Array.contains(addedIds, range[i].internalId)) {
+                                    store.add(range[i]);
+                                }
+                                else {
+                                    filterStore.add(range[i]);
+                                }
+                            }
+                        }
+                        
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
-						}, 10);
+						}, 10);                        
 					});
 				}
 			}
@@ -1014,10 +1032,28 @@ Ext.onReady( function() {
 						filterStore.add(record);
 					});
 
-					ms.store.on('add', function() {
+					ms.store.on('add', function(store, addedRecords) {
+                        var range = store.getRange();
+                        
+                        if (range.length > 1) {
+                            var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
+                                records = Ext.clone(range);
+
+                            store.removeAll();
+
+                            for (var i = 0; i < range.length; i++) {
+                                if (Ext.Array.contains(addedIds, range[i].internalId)) {
+                                    store.add(range[i]);
+                                }
+                                else {
+                                    filterStore.add(range[i]);
+                                }
+                            }
+                        }
+                        
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
-						}, 10);
+						}, 10);                        
 					});
 				}
 			}
