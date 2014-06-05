@@ -5299,7 +5299,7 @@ Ext.onReady( function() {
                 xLayout = getSXLayout(xLayout, xResponse);
 
                 //table = getHtml(xLayout, xResponse);
-                chart = web.report.aggregate.createChart(xLayout, xResponse, ns.app.centerRegion);
+                chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
 
                 //if (layout.sorting) {
                     //xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
@@ -5328,7 +5328,7 @@ Ext.onReady( function() {
                 //ns.app.xRowAxis = xRowAxis;
                 //ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
                 //ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
-
+                
                 if (NS.isSessionStorage) {
                     //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
                     //web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
@@ -5338,7 +5338,7 @@ Ext.onReady( function() {
                 ns.app.widget.setGui(layout, xLayout, response, isUpdateGui); //table);
 
                 web.mask.hide(ns.app.centerRegion);
-
+console.log(layout.filters);
                 if (NS.isDebug) {
                     console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
                     console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);

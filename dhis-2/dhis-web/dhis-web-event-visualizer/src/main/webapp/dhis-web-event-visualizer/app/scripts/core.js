@@ -1844,13 +1844,11 @@ Ext.onReady( function() {
 				}
 
                 // filters
-                if (view.filters) {
-                    var param = format ? 'filter' : 'dimension';
-                    
+                if (view.filters) {                    
 					for (var i = 0, dim; i < view.filters.length; i++) {
 						dim = view.filters[i];
 
-                        paramString += '&' + param + '=' + dim.dimension;
+                        paramString += '&filter=' + dim.dimension;
 
                         if (dim.items) {
                             paramString += ':';
@@ -1961,7 +1959,7 @@ Ext.onReady( function() {
 				return xResponse;
 			};
 
-			web.report.aggregate.createChart = function(xLayout, xResponse, centerRegion) {
+			web.report.aggregate.createChart = function(layout, xLayout, xResponse, centerRegion) {
                 var columnIds = xLayout.columns[0].ids,
                     replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
                     rowIds = xLayout.rows[0].ids,
@@ -2482,24 +2480,88 @@ Ext.onReady( function() {
                 };
 
                 getDefaultChartTitle = function(store) {
-                    var ids = filterIds,
-                        a = [],
+                    var a = [],
                         text = '',
-                        fontSize;
-                        
-                    if (xLayout.type === conf.finals.chart.pie) {
-                        ids = ids.concat(columnIds);
-                    }
-
-                    if (Ext.isArray(ids) && ids.length) {
-                        for (var i = 0; i < ids.length; i++) {
-                            text += xResponse.metaData.names[ids[i]];
-                            text += i < ids.length - 1 ? ', ' : '';
-                        }
-                    }
+                        fontSize,
+                        names = xResponse.metaData.names,
+                        operatorMap = {
+                            'EQ': '=',
+                            'GT': '>',
+                            'GE': '>=',
+                            'LT': '<',
+                            'LE': '<=',
+                            'NE': '!='
+                        };
 
                     if (xLayout.title) {
                         text = xLayout.title;
+                    }
+                    else if (xLayout.type === conf.finals.chart.pie) {
+                        var ids = Ext.Array.clean([].concat(columnIds || []));
+
+                        if (Ext.isArray(ids) && ids.length) {
+                            for (var i = 0; i < ids.length; i++) {
+                                text += xResponse.metaData.names[ids[i]];
+                                text += i < ids.length - 1 ? ', ' : '';
+                            }
+                        }
+                    }
+                    else {
+                        for (var i = 0, dim; i < layout.filters.length; i++) {
+                            dim = layout.filters[i];
+                            text += (text.length ? ', ' : '');
+
+                            if (dim.items) {
+                                for (var ii = 0; ii < dim.items.length; ii++) {
+                                    text += names[dim.items[ii].id];
+                                }
+                            }
+                            else {
+                                if (dim.filter) {
+                                    var a = dim.filter.split(':');
+console.log(a);
+                                    if (a.length === 2) {
+                                        var operator = a[0],
+                                            valueArray = a[1].split(';'),
+                                            tmpText = '';
+
+                                        if (operator === 'IN') {
+                                            for (var ii = 0; ii < valueArray.length; ii++) {
+                                                tmpText += (tmpText.length ? ', ' : '') + valueArray[ii];
+                                            }
+
+                                            text += tmpText;
+                                        }
+                                        else {
+                                            text += names[dim.dimension] + ' ' + operatorMap[operator] + ' ' + a[1];
+                                        }
+                                    }
+                                    else {
+                                        var operators = [],
+                                            values = [],
+                                            tmpText = '';
+
+                                        for (var ii = 0; ii < a.length; ii++) {
+                                            if (ii % 2) {
+                                                values.push(a[ii]);
+                                            }
+                                            else {
+                                                operators.push(a[ii]);
+                                            }
+                                        }
+
+                                        for (var ii = 0; ii < operators.length; ii++) {
+                                            tmpText += (tmpText.length ? ', ' : '') + names[dim.dimension] + ' ' + (operatorMap[operators[ii]] || '') + ' ' + values[ii];
+                                        }
+
+                                        text += tmpText;
+                                    }
+                                }
+                                else {
+                                    text += names[dim.dimension];
+                                }
+                            }
+                        }
                     }
 
                     fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
@@ -2512,6 +2574,38 @@ Ext.onReady( function() {
                         height: 20,
                         y: 	20
                     });
+
+                    
+                    //var ids = filterIds,
+                        //a = [],
+                        //text = '',
+                        //fontSize;
+                        
+                    //if (xLayout.type === conf.finals.chart.pie) {
+                        //ids = ids.concat(columnIds);
+                    //}
+
+                    //if (Ext.isArray(ids) && ids.length) {
+                        //for (var i = 0; i < ids.length; i++) {
+                            //text += xResponse.metaData.names[ids[i]];
+                            //text += i < ids.length - 1 ? ', ' : '';
+                        //}
+                    //}
+
+                    //if (xLayout.title) {
+                        //text = xLayout.title;
+                    //}
+
+                    //fontSize = (centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+
+                    //return Ext.create('Ext.draw.Sprite', {
+                        //type: 'text',
+                        //text: text,
+                        //font: 'bold ' + fontSize + 'px ' + conf.chart.style.fontFamily,
+                        //fill: '#111',
+                        //height: 20,
+                        //y: 	20
+                    //});
                 };
 
                 getDefaultChartSizeHandler = function() {
