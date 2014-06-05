@@ -2507,14 +2507,21 @@ Ext.onReady( function() {
                         }
                     }
                     else {
+                        var meta = ['pe', 'ou'];
+                        
                         for (var i = 0, dim; i < layout.filters.length; i++) {
                             dim = layout.filters[i];
                             text += (text.length ? ', ' : '');
 
-                            if (dim.items) {
-                                for (var ii = 0; ii < dim.items.length; ii++) {
-                                    text += names[dim.items[ii].id];
+                            if (Ext.Array.contains(meta, dim.dimension)) {
+                                var ids = xResponse.metaData[dim.dimension],
+                                tmpText = '';
+                                
+                                for (var ii = 0; ii < ids.length; ii++) {
+                                    tmpText += (tmpText.length ? ', ' : '') + names[ids[ii]];
                                 }
+
+                                text += tmpText;
                             }
                             else {
                                 if (dim.filter) {
