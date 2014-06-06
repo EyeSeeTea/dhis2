@@ -365,7 +365,7 @@ public class MobileOrganisationUnitController
     {
         return activityReportingService.findPatient( Integer.parseInt( patientId ) );
     }
-    
+
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findPatients" )
     @ResponseBody
     public PatientList findPatientsById( @PathVariable
@@ -631,6 +631,79 @@ public class MobileOrganisationUnitController
     @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/orgUnits/{id}/replyMessage" )
     @ResponseBody
     public String replyMessage( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.replyMessage( message );
+
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/sendFeedback" )
+    @ResponseBody
+    public String sendFeedbackTracker( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.sendFeedback( message );
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findUser" )
+    @ResponseBody
+    public Recipient findUserTracker( String clientVersion, @PathVariable
+    int id, @RequestHeader( "name" )
+    String keyword )
+        throws NotAllowedException
+    {
+        Recipient recipient = new Recipient();
+        recipient.setUsers( activityReportingService.findUser( keyword ) );
+        return recipient;
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/sendMessage" )
+    @ResponseBody
+    public String sendMessageTracker( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.sendMessage( message );
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/downloadMessageConversation" )
+    @ResponseBody
+    public Conversation downloadConversationTracker( String clientVersion )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setClientVersion( clientVersion );
+        conversation.setConversations( activityReportingService.downloadMessageConversation() );
+
+        return conversation;
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/getMessage" )
+    @ResponseBody
+    public Conversation getMessageTracker( String clientVersion, @PathVariable
+    int id, @RequestHeader( "id" )
+    String conversationId )
+        throws NotAllowedException
+    {
+
+        Conversation conversation = new Conversation();
+        conversation.setMessages( activityReportingService.getMessage( conversationId ) );
+
+        return conversation;
+
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/replyMessage" )
+    @ResponseBody
+    public String replyMessageTracker( @PathVariable
     int id, @RequestBody
     Message message )
         throws NotAllowedException

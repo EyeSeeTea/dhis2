@@ -21,6 +21,69 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };  
 })
 
+/* Factory to fetch programs */
+.factory('ProgramFactory', function($q, $rootScope) {  
+    
+    dhis2.ec.store = new dhis2.storage.Store({
+        name: EC_STORE_NAME,
+        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+        objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
+    });
+        
+    return {
+        
+        getAll: function(){
+            
+            var def = $q.defer();
+            
+            dhis2.ec.store.open().done(function(){
+                dhis2.ec.store.getAll('eventCapturePrograms').done(function(programs){
+                    
+                    $rootScope.$apply(function(){
+                        def.resolve(programs);
+                    });                    
+                });
+            });            
+            
+            return def.promise;            
+        }        
+        
+    };
+})
+
+/* Factory to fetch programStages */
+.factory('ProgramStageFactory', function($q, $rootScope) {  
+
+    dhis2.ec.store = new dhis2.storage.Store({
+        name: EC_STORE_NAME,
+        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+        objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
+    });
+    
+    return {        
+        get: function(uid){
+            
+            var def = $q.defer();
+            
+            dhis2.ec.store.open().done(function(){
+                dhis2.ec.store.get('programStages', uid).done(function(pst){                    
+                    angular.forEach(pst.programStageDataElements, function(pstDe){   
+                        if(pstDe.dataElement.optionSet){
+                            dhis2.ec.store.get('optionSets', pstDe.dataElement.optionSet.id).done(function(optionSet){
+                                pstDe.dataElement.optionSet = optionSet;                                
+                            });                            
+                        }
+                        $rootScope.$apply(function(){
+                            def.resolve(pst);
+                        });
+                    });                                        
+                });
+            });                        
+            return def.promise;            
+        }        
+    };        
+})
+
 /* factory for handling events */
 .factory('DHIS2EventFactory', function($http) {   
     

@@ -29,24 +29,28 @@ package org.hisp.dhis.node;
  */
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.hisp.dhis.node.exception.InvalidTypeException;
+import org.hisp.dhis.node.types.SimpleNode;
+import org.springframework.core.OrderComparator;
+import org.springframework.core.Ordered;
 
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public abstract class AbstractNode implements Node
 {
-    private final String name;
+    private String name;
 
     private final NodeType nodeType;
 
-    private final List<Node> nodes = Lists.newArrayList();
+    private String namespace;
 
-    private final Map<NodeHint.Type, NodeHint> nodeHints = Maps.newHashMap();
+    private String comment;
+
+    private List<Node> children = Lists.newArrayList();
 
     protected AbstractNode( String name, NodeType nodeType )
     {
@@ -60,6 +64,11 @@ public abstract class AbstractNode implements Node
         return name;
     }
 
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
     @Override
     public NodeType getType()
     {
@@ -67,45 +76,132 @@ public abstract class AbstractNode implements Node
     }
 
     @Override
-    public <T extends Node> T addNode( T node ) throws InvalidTypeException
+    public boolean is( NodeType type )
     {
-        nodes.add( node );
-        return node;
+        return type.equals( nodeType );
     }
 
     @Override
-    public List<Node> getNodes()
+    public boolean isSimple()
     {
-        return nodes;
+        return is( NodeType.SIMPLE );
     }
 
     @Override
-    public NodeHint addHint( NodeHint.Type type, Object value )
+    public boolean isComplex()
     {
-        return addHint( new NodeHint( type, value ) );
+        return is( NodeType.COMPLEX );
     }
 
     @Override
-    public NodeHint addHint( NodeHint nodeHint )
+    public boolean isCollection()
     {
-        nodeHints.put( nodeHint.getType(), nodeHint );
-        return nodeHint;
+        return is( NodeType.COLLECTION );
     }
 
     @Override
-    public NodeHint getHint( NodeHint.Type type )
+    public String getNamespace()
     {
-        if ( haveHint( type ) )
+        return namespace;
+    }
+
+    public void setNamespace( String namespace )
+    {
+        this.namespace = namespace;
+    }
+
+    @Override
+    public String getComment()
+    {
+        return comment;
+    }
+
+    public void setComment( String comment )
+    {
+        this.comment = comment;
+    }
+
+    @Override
+    public <T extends Node> T addChild( T child ) throws InvalidTypeException
+    {
+        if ( child == null || child.getName() == null )
         {
-            return nodeHints.get( type );
+            return null;
         }
 
-        return null;
+        children.add( child );
+        return child;
     }
 
     @Override
-    public boolean haveHint( NodeHint.Type type )
+    public <T extends Node> void addChildren( Iterable<T> children )
     {
-        return nodeHints.containsKey( type );
+        for ( Node child : children )
+        {
+            addChild( child );
+        }
+    }
+
+    @Override
+    public List<Node> getChildren()
+    {
+        List<Node> clone = Lists.newArrayList( children );
+        Collections.sort( clone, OrderComparator.INSTANCE );
+        return clone;
+    }
+
+    @Override
+    public int getOrder()
+    {
+        if ( isSimple() )
+        {
+            if ( ((SimpleNode) this).isAttribute() )
+            {
+                return 10;
+            }
+
+            return 20;
+        }
+        else if ( isComplex() )
+        {
+            return 30;
+        }
+        else if ( isCollection() )
+        {
+            return 40;
+        }
+
+        return Ordered.LOWEST_PRECEDENCE;
+    }
+
+    @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        AbstractNode that = (AbstractNode) o;
+
+        if ( name != null ? !name.equals( that.name ) : that.name != null ) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return name != null ? name.hashCode() : 0;
+    }
+
+    @Override
+    public String toString()
+    {
+        return "Node{" +
+            "name='" + name + '\'' +
+            ", nodeType=" + nodeType +
+            ", namespace='" + namespace + '\'' +
+            ", comment='" + comment + '\'' +
+            ", children=" + children +
+            '}';
     }
 }

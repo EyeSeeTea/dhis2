@@ -28,8 +28,11 @@ package org.hisp.dhis.node.serializers;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeSerializer;
 import org.hisp.dhis.node.types.CollectionNode;
@@ -40,6 +43,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -49,33 +53,37 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
 {
     public static final String CONTENT_TYPE = "application/json";
 
-    private final JsonFactory jsonFactory = new JsonFactory();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
-    public String contentType()
+    public List<String> contentTypes()
     {
-        return CONTENT_TYPE;
+        return Lists.newArrayList( CONTENT_TYPE );
     }
 
     public JacksonJsonNodeSerializer()
     {
-
+        objectMapper.setSerializationInclusion( JsonInclude.Include.NON_NULL );
+        objectMapper.configure( SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false );
+        objectMapper.configure( SerializationFeature.WRITE_EMPTY_JSON_ARRAYS, false );
+        objectMapper.configure( SerializationFeature.WRAP_EXCEPTIONS, true );
+        objectMapper.getFactory().enable( JsonGenerator.Feature.QUOTE_FIELD_NAMES );
     }
 
     @Override
     public void serialize( RootNode rootNode, OutputStream outputStream ) throws IOException
     {
-        JsonGenerator generator = jsonFactory.createGenerator( outputStream );
+        JsonGenerator generator = objectMapper.getFactory().createGenerator( outputStream );
 
-        renderRootNode( rootNode, generator );
+        writeRootNode( rootNode, generator );
         generator.flush();
     }
 
-    private void renderRootNode( RootNode rootNode, JsonGenerator generator ) throws IOException
+    private void writeRootNode( RootNode rootNode, JsonGenerator generator ) throws IOException
     {
         generator.writeStartObject();
 
-        for ( Node node : rootNode.getNodes() )
+        for ( Node node : rootNode.getChildren() )
         {
             dispatcher( node, generator, true );
             generator.flush();
@@ -84,8 +92,13 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
         generator.writeEndObject();
     }
 
-    private void renderSimpleNode( SimpleNode simpleNode, JsonGenerator generator, boolean writeKey ) throws IOException
+    private void writeSimpleNode( SimpleNode simpleNode, JsonGenerator generator, boolean writeKey ) throws IOException
     {
+        if ( simpleNode.getValue() == null ) // add hint for this, exclude if null
+        {
+            return;
+        }
+
         if ( writeKey )
         {
             generator.writeObjectField( simpleNode.getName(), simpleNode.getValue() );
@@ -96,7 +109,7 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
         }
     }
 
-    private void renderComplexNode( ComplexNode complexNode, JsonGenerator generator, boolean writeKey ) throws IOException
+    private void writeComplexNode( ComplexNode complexNode, JsonGenerator generator, boolean writeKey ) throws IOException
     {
         if ( writeKey )
         {
@@ -107,7 +120,7 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
             generator.writeStartObject();
         }
 
-        for ( Node node : complexNode.getNodes() )
+        for ( Node node : complexNode.getChildren() )
         {
             dispatcher( node, generator, true );
         }
@@ -115,7 +128,7 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
         generator.writeEndObject();
     }
 
-    private void renderCollectionNode( CollectionNode collectionNode, JsonGenerator generator, boolean writeKey ) throws IOException
+    private void writeCollectionNode( CollectionNode collectionNode, JsonGenerator generator, boolean writeKey ) throws IOException
     {
         if ( writeKey )
         {
@@ -126,7 +139,7 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
             generator.writeStartArray();
         }
 
-        for ( Node node : collectionNode.getNodes() )
+        for ( Node node : collectionNode.getChildren() )
         {
             dispatcher( node, generator, false );
         }
@@ -139,13 +152,13 @@ public class JacksonJsonNodeSerializer implements NodeSerializer
         switch ( node.getType() )
         {
             case SIMPLE:
-                renderSimpleNode( (SimpleNode) node, generator, writeKey );
+                writeSimpleNode( (SimpleNode) node, generator, writeKey );
                 break;
             case COMPLEX:
-                renderComplexNode( (ComplexNode) node, generator, writeKey );
+                writeComplexNode( (ComplexNode) node, generator, writeKey );
                 break;
             case COLLECTION:
-                renderCollectionNode( (CollectionNode) node, generator, writeKey );
+                writeCollectionNode( (CollectionNode) node, generator, writeKey );
                 break;
         }
     }

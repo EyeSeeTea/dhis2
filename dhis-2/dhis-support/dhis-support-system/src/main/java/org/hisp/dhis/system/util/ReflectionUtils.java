@@ -28,6 +28,8 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import javassist.util.proxy.ProxyFactory;
+import org.hibernate.collection.spi.PersistentCollection;
 import org.hisp.dhis.system.util.functional.Function1;
 import org.hisp.dhis.system.util.functional.Predicate;
 import org.springframework.util.StringUtils;
@@ -400,6 +402,11 @@ public class ReflectionUtils
     @SuppressWarnings("unchecked")
     public static <T> T invokeMethod( Object target, Method method, Object... args )
     {
+        if ( target == null || method == null )
+        {
+            return null;
+        }
+
         if ( Modifier.isProtected( method.getModifiers() ) || Modifier.isPrivate( method.getModifiers() ) )
         {
             return null;
@@ -419,7 +426,7 @@ public class ReflectionUtils
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public static <T> T getFieldObject( Field field, T target )
     {
         return (T) invokeGetterMethod( field.getName(), target );
@@ -496,5 +503,20 @@ public class ReflectionUtils
         {
             throw new RuntimeException( "Unknown Collection type." );
         }
+    }
+
+    public static Class<?> getRealClass( Class<?> klass )
+    {
+        if ( ProxyFactory.isProxyClass( klass ) )
+        {
+            klass = klass.getSuperclass();
+        }
+
+        while ( PersistentCollection.class.isAssignableFrom( klass ) )
+        {
+            klass = klass.getSuperclass();
+        }
+
+        return klass;
     }
 }

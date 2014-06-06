@@ -28,10 +28,13 @@ package org.hisp.dhis.node.types;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeType;
 import org.hisp.dhis.node.exception.InvalidTypeException;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -40,10 +43,19 @@ public class SimpleNode extends AbstractNode
 {
     private final Object value;
 
+    private boolean attribute;
+
     public SimpleNode( String name, Object value )
     {
         super( name, NodeType.SIMPLE );
         this.value = value;
+        this.attribute = false;
+    }
+
+    public SimpleNode( String name, Object value, boolean attribute )
+    {
+        this( name, value );
+        this.attribute = attribute;
     }
 
     public Object getValue()
@@ -51,9 +63,25 @@ public class SimpleNode extends AbstractNode
         return value;
     }
 
-    @Override
-    public <T extends Node> T addNode( T node ) throws InvalidTypeException
+    public boolean isAttribute()
     {
-        throw new InvalidTypeException( "Adding nodes to a node of type simple is not allowed." );
+        return attribute;
+    }
+
+    public void setAttribute( boolean attribute )
+    {
+        this.attribute = attribute;
+    }
+
+    @Override
+    public <T extends Node> T addChild( T child ) throws InvalidTypeException
+    {
+        throw new InvalidTypeException();
+    }
+
+    @Override
+    public <T extends Node> void addChildren( Iterable<T> children )
+    {
+        throw new InvalidTypeException();
     }
 }

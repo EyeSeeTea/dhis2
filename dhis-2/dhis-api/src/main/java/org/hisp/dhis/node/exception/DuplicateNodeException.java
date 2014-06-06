@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.types;
+package org.hisp.dhis.node.exception;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,31 +28,13 @@ package org.hisp.dhis.node.types;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import org.hisp.dhis.node.AbstractNode;
-import org.hisp.dhis.node.NodeType;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CollectionNode extends AbstractNode
+public class DuplicateNodeException extends RuntimeException
 {
-    /**
-     * Should this collection act as a wrapper around its children.
-     */
-    boolean wrapping = true;
-
-    public CollectionNode( String name )
+    public DuplicateNodeException()
     {
-        super( name, NodeType.COLLECTION );
-    }
-
-    public boolean isWrapping()
-    {
-        return wrapping;
-    }
-
-    public void setWrapping( boolean wrapping )
-    {
-        this.wrapping = wrapping;
+        super( "A node with that name already exists in the child list." );
     }
 }

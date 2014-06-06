@@ -1,4 +1,4 @@
-package org.hisp.dhis.node;
+package org.hisp.dhis.node.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,35 +28,27 @@ package org.hisp.dhis.node;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-final public class NodeHint
+@Target( { ElementType.FIELD, ElementType.METHOD } )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface ExportCollection
 {
-    public enum Type
-    {
-        XML_NAMESPACE,
-        XML_ATTRIBUTE,
-        XML_COLLECTION_WRAPPING
-    }
+    String value() default "";
 
-    private final Type type;
+    String namespace() default "";
 
-    private final Object value;
+    String itemName() default "";
 
-    public NodeHint( Type type, Object value )
-    {
-        this.type = type;
-        this.value = value;
-    }
+    String itemNamespace() default "";
 
-    public Type getType()
-    {
-        return type;
-    }
+    boolean owner() default false;
 
-    public Object getValue()
-    {
-        return value;
-    }
+    boolean useWrapping() default true;
 }

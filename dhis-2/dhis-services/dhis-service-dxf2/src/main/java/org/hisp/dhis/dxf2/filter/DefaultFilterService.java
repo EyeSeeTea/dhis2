@@ -28,12 +28,18 @@ package org.hisp.dhis.dxf2.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dxf2.filter.ops.Op;
+import org.hisp.dhis.node.types.CollectionNode;
+import org.hisp.dhis.node.types.ComplexNode;
+import org.hisp.dhis.node.types.SimpleNode;
 import org.hisp.dhis.schema.Property;
-import org.hisp.dhis.schema.PropertyIntrospectorService;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,10 +56,10 @@ public class DefaultFilterService implements FilterService
     private ParserService parserService;
 
     @Autowired
-    private PropertyIntrospectorService propertyIntrospectorService;
+    private SchemaService schemaService;
 
     @Override
-    public <T extends IdentifiableObject> List<T> filterObjects( List<T> objects, List<String> filters )
+    public <T extends IdentifiableObject> List<T> objectFilter( List<T> objects, List<String> filters )
     {
         if ( objects == null || objects.isEmpty() )
         {
@@ -76,206 +82,275 @@ public class DefaultFilterService implements FilterService
     }
 
     @Override
-    public <T extends IdentifiableObject> List<Object> filterProperties( List<T> objects, String include, String exclude )
+    public <T extends IdentifiableObject> CollectionNode fieldFilter( Class<?> klass, List<T> objects,
+        List<String> fieldList )
     {
-        List<Object> output = Lists.newArrayList();
+        String fields = fieldList == null ? "" : Joiner.on( "," ).join( fieldList );
 
-        if ( objects.isEmpty() )
-        {
-            return output;
-        }
+        Schema rootSchema = schemaService.getDynamicSchema( klass );
 
         Map<String, Map> fieldMap = Maps.newHashMap();
+        Schema schema = schemaService.getDynamicSchema( objects.get( 0 ).getClass() );
 
-        if ( include == null && exclude == null )
+        if ( fields == null )
         {
-            List<Property> properties = propertyIntrospectorService.getProperties( objects.get( 0 ).getClass() );
-
-            for ( Property property : properties )
+            for ( Property property : schema.getProperties() )
             {
                 fieldMap.put( property.getName(), Maps.newHashMap() );
             }
         }
-        else if ( include != null )
-        {
-            fieldMap = parserService.parsePropertyFilter( include );
-        }
         else
         {
-            List<Property> properties = propertyIntrospectorService.getProperties( objects.get( 0 ).getClass() );
-            Map<String, Map> excludeMap = parserService.parsePropertyFilter( exclude );
+            fieldMap = parserService.parsePropertyFilter( fields );
+        }
 
-            for ( Property property : properties )
-            {
-                if ( !excludeMap.containsKey( property.getName() ) )
-                {
-                    fieldMap.put( property.getName(), Maps.newHashMap() );
-                }
-            }
+        CollectionNode collectionNode = new CollectionNode( rootSchema.getPlural() ); // replace with 'xml' collection name
+        collectionNode.setNamespace( rootSchema.getNamespaceURI() );
+
+        if ( objects.isEmpty() )
+        {
+            return collectionNode;
         }
 
         for ( Object object : objects )
         {
-            output.add( buildObjectOutput( object, fieldMap ) );
+            collectionNode.addChild( buildObjectOutput( fieldMap, object ) );
         }
 
-        return output;
+        return collectionNode;
     }
 
     @SuppressWarnings( "unchecked" )
-    private Map<String, Object> buildObjectOutput( Object object, Map<String, Map> fieldMap )
+    private ComplexNode buildObjectOutput( Map<String, Map> fieldMap, Object object )
     {
         if ( object == null )
         {
             return null;
         }
 
-        Map<String, Object> output = Maps.newHashMap();
-        Map<String, Property> propertiesMap = propertyIntrospectorService.getPropertiesMap( object.getClass() );
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
+        ComplexNode complexNode = new ComplexNode( schema.getName() );
+        complexNode.setNamespace( schema.getNamespaceURI() );
 
-        for ( String key : fieldMap.keySet() )
+        updateFields( fieldMap, object );
+
+        for ( String fieldKey : fieldMap.keySet() )
         {
-            if ( !propertiesMap.containsKey( key ) )
+            if ( !schema.getPropertyMap().containsKey( fieldKey ) )
             {
                 continue;
             }
 
-            Map value = fieldMap.get( key );
-            Property descriptor = propertiesMap.get( key );
+            Property property = schema.getPropertyMap().get( fieldKey );
+            Object returnValue = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
+            Schema propertySchema = schemaService.getDynamicSchema( property.getKlass() );
 
-            Object returned = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
-
-            if ( returned == null )
+            if ( returnValue == null )
             {
                 continue;
             }
 
-            if ( value.isEmpty() )
+            Map fieldValue = fieldMap.get( fieldKey );
+
+            if ( fieldValue.isEmpty() )
             {
-                if ( !descriptor.isIdentifiableObject() )
+                if ( !property.isIdentifiableObject() )
                 {
-                    output.put( key, returned );
+                    if ( propertySchema.getProperties().isEmpty() )
+                    {
+                        SimpleNode simpleNode = new SimpleNode( fieldKey, returnValue );
+                        simpleNode.setAttribute( property.isAttribute() );
+                        simpleNode.setNamespace( property.getNamespaceURI() );
+
+                        complexNode.addChild( simpleNode );
+                    }
+                    else
+                    {
+                        complexNode.addChild( buildObjectOutput( getFullFieldMap( propertySchema ), returnValue ) );
+                    }
                 }
-                else if ( !descriptor.isCollection() )
+                else if ( !property.isCollection() )
                 {
-                    Map<String, Object> properties = getIdentifiableObjectProperties( returned );
-                    output.put( key, properties );
+                    complexNode.addChild( getProperties( returnValue, FilterService.FIELD_PRESETS.get( "identifiable" ) ) );
                 }
                 else
                 {
-                    List<Map<String, Object>> properties = getIdentifiableObjectCollectionProperties( returned );
-                    output.put( key, properties );
+                    complexNode.addChild( getCollectionProperties( returnValue, FilterService.FIELD_PRESETS.get( "identifiable" ), property ) );
                 }
             }
             else
             {
-                if ( descriptor.isCollection() )
+                if ( property.isCollection() )
                 {
-                    Collection<?> objects = (Collection<?>) returned;
-                    List<Object> arrayList = Lists.newArrayList();
-                    output.put( key, arrayList );
+                    CollectionNode collectionNode = complexNode.addChild( new CollectionNode( property.getCollectionName() ) );
+                    collectionNode.setNamespace( property.getNamespaceURI() );
 
-                    for ( Object obj : objects )
+                    for ( Object collectionObject : (Collection<?>) returnValue )
                     {
-                        Map<String, Object> properties = buildObjectOutput( obj, value );
+                        ComplexNode node = buildObjectOutput( fieldValue, collectionObject );
 
-                        if ( !properties.isEmpty() )
+                        if ( !node.getChildren().isEmpty() )
                         {
-                            arrayList.add( properties );
+                            collectionNode.addChild( node );
                         }
                     }
                 }
                 else
                 {
-                    Map<String, Object> properties = buildObjectOutput( returned, value );
+                    ComplexNode node = buildObjectOutput( fieldValue, returnValue );
 
-                    if ( !properties.isEmpty() )
+                    if ( !node.getChildren().isEmpty() )
                     {
-                        output.put( key, properties );
+                        complexNode.addChild( node );
                     }
                 }
             }
         }
 
-        return output;
+        return complexNode;
     }
 
-    private List<Map<String, Object>> getIdentifiableObjectCollectionProperties( Object object )
+    private void updateFields( Map<String, Map> fieldMap, Object object )
     {
-        List<String> fields = Lists.newArrayList( "id", "name", "code", "created", "lastUpdated" );
-        return getIdentifiableObjectCollectionProperties( object, fields );
+        // we need two run this (at least) two times, since some of the presets might contain other presets
+        _updateFields( fieldMap, object );
+        _updateFields( fieldMap, object );
+    }
+
+    private void _updateFields( Map<String, Map> fieldMap, Object object )
+    {
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
+
+        List<String> cleanupFields = Lists.newArrayList();
+
+        for ( String fieldKey : Sets.newHashSet( fieldMap.keySet() ) )
+        {
+            if ( fieldKey.equals( "*" ) )
+            {
+                for ( String mapKey : schema.getPropertyMap().keySet() )
+                {
+                    if ( !fieldMap.containsKey( mapKey ) )
+                    {
+                        fieldMap.put( mapKey, Maps.newHashMap() );
+                    }
+                }
+
+                cleanupFields.add( fieldKey );
+            }
+            else if ( fieldKey.startsWith( ":" ) )
+            {
+                List<String> fields = FilterService.FIELD_PRESETS.get( fieldKey.substring( 1 ) );
+
+                for ( String field : fields )
+                {
+                    if ( !fieldMap.containsKey( field ) )
+                    {
+                        fieldMap.put( field, Maps.newHashMap() );
+                    }
+                }
+
+                cleanupFields.add( fieldKey );
+            }
+            else if ( fieldKey.startsWith( "!" ) )
+            {
+                cleanupFields.add( fieldKey );
+            }
+        }
+
+        for ( String ignore : cleanupFields )
+        {
+            fieldMap.remove( ignore );
+            fieldMap.remove( ignore.substring( 1 ) );
+        }
+    }
+
+    private Map<String, Map> getFullFieldMap( Schema schema )
+    {
+        Map<String, Map> map = Maps.newHashMap();
+
+        for ( String mapKey : schema.getPropertyMap().keySet() )
+        {
+            map.put( mapKey, Maps.newHashMap() );
+        }
+
+        return map;
     }
 
     @SuppressWarnings( "unchecked" )
-    private List<Map<String, Object>> getIdentifiableObjectCollectionProperties( Object object, List<String> fields )
+    private CollectionNode getCollectionProperties( Object object, List<String> fields, Property property )
     {
-        List<Map<String, Object>> output = Lists.newArrayList();
-        Collection<IdentifiableObject> identifiableObjects;
-
-        try
+        if ( object == null )
         {
-            identifiableObjects = (Collection<IdentifiableObject>) object;
-        }
-        catch ( ClassCastException ex )
-        {
-            ex.printStackTrace();
-            return output;
+            return null;
         }
 
-        for ( IdentifiableObject identifiableObject : identifiableObjects )
+        if ( !Collection.class.isInstance( object ) )
         {
-            Map<String, Object> properties = getIdentifiableObjectProperties( identifiableObject, fields );
-            output.add( properties );
+            return null;
         }
 
-        return output;
+        CollectionNode collectionNode = new CollectionNode( property.getCollectionName() );
+        collectionNode.setNamespace( property.getNamespaceURI() );
+
+        Collection<?> collection = (Collection<?>) object;
+
+        for ( Object collectionObject : collection )
+        {
+            collectionNode.addChild( getProperties( collectionObject, fields ) );
+        }
+
+        return collectionNode;
     }
 
-    private Map<String, Object> getIdentifiableObjectProperties( Object object )
+    private ComplexNode getProperties( Object object, List<String> fields )
     {
-        List<String> fields = Lists.newArrayList( "id", "name", "code", "created", "lastUpdated" );
-        return getIdentifiableObjectProperties( object, fields );
-    }
+        if ( object == null )
+        {
+            return null;
+        }
 
-    private Map<String, Object> getIdentifiableObjectProperties( Object object, List<String> fields )
-    {
-        Map<String, Object> idProps = Maps.newLinkedHashMap();
-        Map<String, Property> propertiesMap = propertyIntrospectorService.getPropertiesMap( object.getClass() );
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
+
+        ComplexNode complexNode = new ComplexNode( schema.getSingular() );
+        complexNode.setNamespace( schema.getNamespaceURI() );
 
         for ( String field : fields )
         {
-            Property descriptor = propertiesMap.get( field );
+            Property property = schema.getPropertyMap().get( field );
 
-            if ( descriptor == null )
+            if ( property == null )
             {
                 continue;
             }
 
-            Object o = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
+            Object o = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
 
             if ( o != null )
             {
-                idProps.put( field, o );
+                SimpleNode simpleNode = new SimpleNode( field, o );
+                simpleNode.setAttribute( property.isAttribute() );
+                simpleNode.setNamespace( property.getNamespaceURI() );
+
+                complexNode.addChild( simpleNode );
             }
         }
 
-        return idProps;
+        return complexNode;
     }
 
     @SuppressWarnings( "unchecked" )
     private <T> boolean evaluateWithFilters( T object, Filters filters )
     {
-        Map<String, Property> propertiesMap = propertyIntrospectorService.getPropertiesMap( object.getClass() );
+        Schema schema = schemaService.getDynamicSchema( object.getClass() );
 
         for ( String field : filters.getFilters().keySet() )
         {
-            if ( !propertiesMap.containsKey( field ) )
+            if ( !schema.getPropertyMap().containsKey( field ) )
             {
-                System.err.println( "Skipping non-existent field: " + field );
                 continue;
             }
 
-            Property descriptor = propertiesMap.get( field );
+            Property descriptor = schema.getPropertyMap().get( field );
 
             if ( descriptor == null )
             {

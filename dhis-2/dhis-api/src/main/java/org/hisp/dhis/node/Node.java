@@ -28,28 +28,99 @@ package org.hisp.dhis.node;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import org.hisp.dhis.node.exception.InvalidTypeException;
+import org.springframework.core.Ordered;
 
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface Node
+public interface Node extends Ordered
 {
+    /**
+     * Name of this node.
+     *
+     * @return current name of node
+     */
     String getName();
 
+    /**
+     * Type specifier for this node.
+     *
+     * @return Node type
+     * @see org.hisp.dhis.node.NodeType
+     */
     NodeType getType();
 
-    <T extends Node> T addNode( T node ) throws InvalidTypeException;
+    /**
+     * @param type Type to check for
+     * @return True if node is of this type
+     */
+    boolean is( NodeType type );
 
-    List<Node> getNodes();
+    /**
+     * Helper that checks if node is of simple type, useful to checking if
+     * you are allowed to add children to this node.
+     *
+     * @return true if type is simple
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isSimple();
 
-    NodeHint addHint( NodeHint.Type type, Object value );
+    /**
+     * Helper that checks if node is of complex type.
+     *
+     * @return true if type is complex
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isComplex();
 
-    NodeHint addHint( NodeHint nodeHint );
+    /**
+     * Helper that checks if node is of collection type.
+     *
+     * @return true if type is collection
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isCollection();
 
-    NodeHint getHint( NodeHint.Type type );
+    /**
+     * Namespace for this node. Not all serializers support this, and its up to the
+     * NodeSerializer implementation to decide what to do with this.
+     *
+     * @return namespace
+     * @see org.hisp.dhis.node.NodeSerializer
+     */
+    String getNamespace();
 
-    boolean haveHint( NodeHint.Type type );
+    /**
+     * Comment for this node. Not all serializers support this, and its up to the
+     * NodeSerializer implementation to decide what to do with this.
+     *
+     * @return namespace
+     * @see org.hisp.dhis.node.NodeSerializer
+     */
+    String getComment();
+
+    /**
+     * Adds a child to this node.
+     *
+     * @param child Child node to add
+     * @return Child node that was added
+     */
+    <T extends Node> T addChild( T child );
+
+    /**
+     * Adds a collection of children to this node.
+     *
+     * @param children Child nodes to add
+     */
+    <T extends Node> void addChildren( Iterable<T> children );
+
+    /**
+     * Get all child notes associated with this node. Please note that the returned list is a copy
+     * of the internal list, and changes to the list will not be reflected in the node.
+     *
+     * @return List of child nodes associated with this node
+     */
+    List<Node> getChildren();
 }

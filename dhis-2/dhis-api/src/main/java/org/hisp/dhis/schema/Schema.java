@@ -45,7 +45,7 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement(localName = "schema", namespace = DxfNamespaces.DXF_2_0)
 public class Schema implements Ordered
 {
     /**
@@ -78,6 +78,23 @@ public class Schema implements Ordered
     private String plural;
 
     /**
+     * Namespace URI to be used for this class.
+     */
+    private String namespaceURI;
+
+    /**
+     * This will normally be set to equal singular, but in certain cases it might be useful to have another name
+     * for when this class is used as an item inside a collection.
+     */
+    private String name;
+
+    /**
+     * This will normally be set to equal plural, and is normally used as a wrapper for a collection of
+     * instances of this klass type.
+     */
+    private String collectionName;
+
+    /**
      * Is sharing supported for instances of this class.
      */
     private boolean shareable;
@@ -98,9 +115,12 @@ public class Schema implements Ordered
     private List<Authority> authorities = Lists.newArrayList();
 
     /**
-     * List of all exposed properties on this class.
+     * Map of all exposed properties on this class, where key is property
+     * name, and value is instance of Property class.
+     *
+     * @see org.hisp.dhis.schema.Property
      */
-    private List<Property> properties = Lists.newArrayList();
+    private Map<String, Property> propertyMap = Maps.newHashMap();
 
     /**
      * Used for sorting of schema list when doing metadata import/export.
@@ -130,14 +150,14 @@ public class Schema implements Ordered
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isIdentifiableObject()
     {
         return identifiableObject;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isNameableObject()
     {
         return nameableObject;
@@ -165,6 +185,42 @@ public class Schema implements Ordered
     public void setPlural( String plural )
     {
         this.plural = plural;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getNamespaceURI()
+    {
+        return namespaceURI;
+    }
+
+    public void setNamespaceURI( String namespaceURI )
+    {
+        this.namespaceURI = namespaceURI;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getCollectionName()
+    {
+        return collectionName == null ? plural : collectionName;
+    }
+
+    public void setCollectionName( String collectionName )
+    {
+        this.collectionName = collectionName;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getName()
+    {
+        return name == null ? singular : name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
     }
 
     @JsonProperty
@@ -226,12 +282,17 @@ public class Schema implements Ordered
     @JacksonXmlProperty( localName = "property", namespace = DxfNamespaces.DXF_2_0 )
     public List<Property> getProperties()
     {
-        return properties;
+        return Lists.newArrayList( propertyMap.values() );
     }
 
-    public void setProperties( List<Property> properties )
+    public Map<String, Property> getPropertyMap()
     {
-        this.properties = properties;
+        return propertyMap;
+    }
+
+    public void setPropertyMap( Map<String, Property> propertyMap )
+    {
+        this.propertyMap = propertyMap;
     }
 
     private Map<AuthorityType, List<String>> authorityMap = Maps.newHashMap();
@@ -277,9 +338,16 @@ public class Schema implements Ordered
             ", nameableObject=" + nameableObject +
             ", singular='" + singular + '\'' +
             ", plural='" + plural + '\'' +
+            ", namespaceURI='" + namespaceURI + '\'' +
+            ", name='" + name + '\'' +
+            ", collectionName='" + collectionName + '\'' +
             ", shareable=" + shareable +
+            ", apiEndpoint='" + apiEndpoint + '\'' +
+            ", metadata=" + metadata +
             ", authorities=" + authorities +
-            ", properties=" + properties +
+            ", propertyMap=" + propertyMap +
+            ", order=" + order +
+            ", authorityMap=" + authorityMap +
             '}';
     }
 }

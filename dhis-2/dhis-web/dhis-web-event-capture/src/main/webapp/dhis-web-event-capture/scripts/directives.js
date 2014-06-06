@@ -22,13 +22,62 @@ var eventCaptureDirectives = angular.module('eventCaptureDirectives', [])
     return {        
         restrict: 'A',        
         link: function(scope, element, attrs){ 
+           
+            dhis2.ec.store = new dhis2.storage.Store({
+                name: EC_STORE_NAME,
+                adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
+            });
+            
+            //when tree has loaded, get selected orgunit - if there is any - and inform angular           
+            $(function() {                 
+                
+                var adapters = [];
+                var partial_adapters = [];
+
+                if( dhis2.ou.memoryOnly ) {
+                    adapters = [ dhis2.storage.InMemoryAdapter ];
+                    partial_adapters = [ dhis2.storage.InMemoryAdapter ];
+                } else {
+                    adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomLocalStorageAdapter, dhis2.storage.InMemoryAdapter ];
+                    partial_adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter ];
+                }
+
+                dhis2.ou.store = new dhis2.storage.Store({
+                    name: OU_STORE_NAME,
+                    objectStores: [
+                        {
+                            name: OU_KEY,
+                            adapters: adapters
+                        },
+                        {
+                            name: OU_PARTIAL_KEY,
+                            adapters: partial_adapters
+                        }
+                    ]
+                });
+
+                dhis2.ou.store.open().done( function() {
+                    selection.load();
+                    $( "#orgUnitTree" ).one( "ouwtLoaded", function() {
+                        var selected = selection.getSelected()[0];
+                        selection.getOrganisationUnit(selected).done(function(data){                            
+                            if( data ){
+                                scope.selectedOrgUnit = {id: selected, name: data[selected].n, programs: []};
+                                scope.$apply();                                                              
+                            }                        
+                        });
+                    });
+                    
+                });
+            });
             
             //listen to user selection, and inform angular         
             selection.setListenerFunction( organisationUnitSelected );            
             selection.responseReceived();
             
             function organisationUnitSelected( orgUnits, orgUnitNames ) {
-                scope.selectedOrgUnit = {id: orgUnits[0], name: orgUnitNames[0]};    
+                scope.selectedOrgUnit = {id: orgUnits[0], name: orgUnitNames[0], programs: []};    
                 scope.$apply();                
             }
         }  

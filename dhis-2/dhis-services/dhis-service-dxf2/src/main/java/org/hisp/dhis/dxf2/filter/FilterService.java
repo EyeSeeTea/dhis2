@@ -28,7 +28,10 @@ package org.hisp.dhis.dxf2.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.node.types.CollectionNode;
 
 import java.util.List;
 
@@ -37,6 +40,12 @@ import java.util.List;
  */
 public interface FilterService
 {
+    static final ImmutableMap<String, List<String>> FIELD_PRESETS = ImmutableMap.<String, List<String>>builder()
+        .put( "all", Lists.newArrayList( "*" ) )
+        .put( "identifiable", Lists.newArrayList( "id", "name", "code", "created", "lastUpdated" ) )
+        .put( "nameable", Lists.newArrayList( "id", "name", "shortName", "description", "code", "created", "lastUpdated" ) )
+        .build();
+
     /**
      * Filter a list of objects based on un-parsed filter string.
      *
@@ -44,15 +53,15 @@ public interface FilterService
      * @param filters Filter string
      * @return Filtered object list
      */
-    <T extends IdentifiableObject> List<T> filterObjects( List<T> objects, List<String> filters );
+    <T extends IdentifiableObject> List<T> objectFilter( List<T> objects, List<String> filters );
 
     /**
      * Perform inclusion/exclusion on a list of objects.
      *
-     * @param objects List to filter
-     * @param include Inclusion filter
-     * @param exclude Exclusion filter
+     * @param objects   List to filter
+     * @param fieldList Field filter
      * @return List of objects with only wanted properties
      */
-    <T extends IdentifiableObject> List<Object> filterProperties( List<T> objects, String include, String exclude );
+    <T extends IdentifiableObject> CollectionNode fieldFilter( Class<?> klass, List<T> objects,
+        List<String> fieldList );
 }

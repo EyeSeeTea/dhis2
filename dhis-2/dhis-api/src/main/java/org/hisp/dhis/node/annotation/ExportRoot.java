@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.types;
+package org.hisp.dhis.node.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,31 +28,19 @@ package org.hisp.dhis.node.types;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import org.hisp.dhis.node.AbstractNode;
-import org.hisp.dhis.node.NodeType;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CollectionNode extends AbstractNode
+@Target( { ElementType.TYPE } )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface ExportRoot
 {
-    /**
-     * Should this collection act as a wrapper around its children.
-     */
-    boolean wrapping = true;
+    String value() default "";
 
-    public CollectionNode( String name )
-    {
-        super( name, NodeType.COLLECTION );
-    }
-
-    public boolean isWrapping()
-    {
-        return wrapping;
-    }
-
-    public void setWrapping( boolean wrapping )
-    {
-        this.wrapping = wrapping;
-    }
+    String namespace() default "";
 }

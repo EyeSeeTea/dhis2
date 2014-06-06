@@ -28,11 +28,14 @@ package org.hisp.dhis.webapi.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import com.google.common.collect.Sets;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -91,5 +94,20 @@ public class DefaultContextService implements ContextService
     public HttpServletRequest getRequest()
     {
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+    }
+
+    @Override
+    public Set<String> getParameterValues( String name )
+    {
+        if ( getRequest().getParameterValues( name ) == null )
+        {
+            return Sets.newHashSet();
+        }
+
+        Set<String> parameter = Sets.newHashSet();
+        String[] parameterValues = getRequest().getParameterValues( name );
+        Collections.addAll( parameter, parameterValues );
+
+        return parameter;
     }
 }

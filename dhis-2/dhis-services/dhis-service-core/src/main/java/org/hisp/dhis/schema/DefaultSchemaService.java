@@ -30,7 +30,7 @@ package org.hisp.dhis.schema;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import javassist.util.proxy.ProxyFactory;
+import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.OrderComparator;
 
@@ -64,11 +64,13 @@ public class DefaultSchemaService implements SchemaService
 
             if ( schema.getProperties().isEmpty() )
             {
-                schema.setProperties( propertyIntrospectorService.getProperties( schema.getKlass() ) );
+                schema.setPropertyMap( Maps.newHashMap( propertyIntrospectorService.getPropertiesMap( schema.getKlass() ) ) );
             }
 
             classSchemaMap.put( schema.getKlass(), schema );
             singularSchemaMap.put( schema.getSingular(), schema );
+
+            updateSelf( schema );
         }
     }
 
@@ -80,10 +82,7 @@ public class DefaultSchemaService implements SchemaService
             return null;
         }
 
-        if ( ProxyFactory.isProxyClass( klass ) )
-        {
-            klass = klass.getSuperclass();
-        }
+        klass = ReflectionUtils.getRealClass( klass );
 
         if ( classSchemaMap.containsKey( klass ) )
         {
@@ -108,8 +107,12 @@ public class DefaultSchemaService implements SchemaService
             return schema;
         }
 
+        klass = ReflectionUtils.getRealClass( klass );
+
         schema = new Schema( klass, klass.getName(), klass.getName() );
-        schema.setProperties( propertyIntrospectorService.getProperties( schema.getKlass() ) );
+        schema.setPropertyMap( Maps.newHashMap( propertyIntrospectorService.getPropertiesMap( schema.getKlass() ) ) );
+
+        updateSelf( schema );
 
         return schema;
     }
@@ -146,5 +149,17 @@ public class DefaultSchemaService implements SchemaService
         Collections.sort( schemas, OrderComparator.INSTANCE );
 
         return schemas;
+    }
+
+    private void updateSelf( Schema schema )
+    {
+        if ( schema.getPropertyMap().containsKey( "__self__" ) )
+        {
+            Property property = schema.getPropertyMap().get( "__self__" );
+            schema.setName( property.getName() );
+            schema.setNamespaceURI( property.getNamespaceURI() );
+
+            schema.getPropertyMap().remove( "__self__" );
+        }
     }
 }
