@@ -4852,6 +4852,32 @@ Ext.onReady( function() {
 			}
 		}());
 
+        // support
+		(function() {
+
+			// svg
+			support.svg = support.svg || {};
+
+			support.svg.submitForm = function(type) {
+				var svg = Ext.query('svg'),
+					form = Ext.query('#exportForm')[0];
+
+				if (!(Ext.isArray(svg) && svg.length)) {
+					alert('Browser does not support SVG');
+					return;
+				}
+
+				svg = Ext.get(svg[0]);
+				svg = svg.parent().dom.innerHTML;
+
+				Ext.query('#svgField')[0].value = svg;
+				Ext.query('#filenameField')[0].value = 'test';
+
+				form.action = ns.core.init.contextPath + '/api/svg.' + type;
+				form.submit();
+			};
+		}());
+
 		// web
 		(function() {
 
@@ -5862,6 +5888,25 @@ Ext.onReady( function() {
 				shadow: false,
 				showSeparator: false,
 				items: [
+                    {
+                        xtype: 'label',
+                        text: NS.i18n.graphics,
+                        style: 'padding:7px 5px 5px 7px; font-weight:bold'
+                    },
+                    {
+                        text: 'PNG (.png)',
+                        iconCls: 'ns-menu-item-image',
+                        handler: function() {
+                            ns.core.support.svg.submitForm('png');
+                        }
+                    },
+                    {
+                        text: 'PDF (.pdf)',
+                        iconCls: 'ns-menu-item-image',
+                        handler: function() {
+                            ns.core.support.svg.submitForm('pdf');
+                        }
+                    },
 					{
 						xtype: 'label',
 						text: NS.i18n.plain_data_sources,
