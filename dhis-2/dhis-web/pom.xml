@@ -34,6 +34,7 @@
     <module>dhis-web-event-reports</module>
     <module>dhis-web-event-visualizer</module>
     <module>dhis-web-tracker-capture</module>
+    <module>dhis-web-hrhr</module>
     <module>dhis-web-portal</module>
   </modules>
   <build>
