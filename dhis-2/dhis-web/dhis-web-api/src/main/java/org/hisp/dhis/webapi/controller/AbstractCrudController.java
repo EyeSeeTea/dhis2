@@ -41,7 +41,6 @@ import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.render.RenderService;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
@@ -129,7 +128,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( fields.isEmpty() )
         {
-            fields = FilterService.FIELD_PRESETS.get( "identifiable" );
+            fields.add( ":identifiable" );
         }
 
         boolean hasPaging = options.hasPaging();
@@ -164,12 +163,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
-        if ( fields != null && fields.contains( "access" ) )
+        if ( fields.contains( "access" ) )
         {
             options.getOptions().put( "viewClass", "sharing" );
         }
 
-        handleLinksAndAccess( options, metaData, entityList );
+        handleLinksAndAccess( options, entityList );
 
         RootNode rootNode = new RootNode( "metadata" );
         rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
@@ -199,7 +198,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( fields.isEmpty() )
         {
-            fields.add( "*" );
+            fields.add( ":all" );
         }
 
         WebOptions options = new WebOptions( parameters );
@@ -441,16 +440,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) object).setAccess( access );
     }
 
-    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList )
+    protected void handleLinksAndAccess( WebOptions options, List<T> entityList )
     {
         if ( options != null && options.hasLinks() )
         {
-            linkService.generateLinks( metaData );
-        }
-
-        if ( !JacksonUtils.isSharingView( options.getViewClass( "basic" ) ) )
-        {
-            return;
+            linkService.generateLinks( entityList );
         }
 
         if ( entityList != null && aclService.isSupported( getEntityClass() ) )

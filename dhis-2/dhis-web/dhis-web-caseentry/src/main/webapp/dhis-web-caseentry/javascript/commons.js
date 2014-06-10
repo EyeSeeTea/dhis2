@@ -220,20 +220,6 @@ function getSearchParams(page) {
 	return params;
 }
 
-// ----------------------------------------------------------------------------
-// Show death field in person re form
-// ----------------------------------------------------------------------------
-
-function isDeathOnChange() {
-	var isDeath = byId('isDead').checked;
-	setFieldValue('deathDate', '');
-	if (isDeath) {
-		showById('deathDateTR');
-	} else {
-		hideById('deathDateTR');
-	}
-}
-
 // ----------------------------------------------------------------
 // Get Params form Div
 // ----------------------------------------------------------------
@@ -994,23 +980,25 @@ function removeDisabledIdentifier() {
 // -----------------------------------------------------------------------------
 // Show representative form
 // -----------------------------------------------------------------------------
+
 function toggleUnderAge(this_) {
 	if ($(this_).is(":checked")) {
 		$('#representativeDiv').dialog('destroy').remove();
 		$('<div id="representativeDiv">').load('showAddRepresentative.action',
-				{}, function() {
-				}).dialog({
-			title : i18n_tracker_associate,
-			maximize : true,
-			closable : true,
-			modal : true,
-			overlay : {
-				background : '#000000',
-				opacity : 0.1
-			},
-			width : 800,
-			height : 450
-		});
+			{
+				related:true
+			}, function() {}).dialog({
+				title : i18n_tracker_associate,
+				maximize : true,
+				closable : true,
+				modal : true,
+				overlay : {
+					background : '#000000',
+					opacity : 0.1
+				},
+				width : 800,
+				height : 450
+			});
 	} else {
 		$("#representativeDiv :input.idfield").each(function() {
 			if ($(this).is(":disabled")) {
@@ -1565,7 +1553,7 @@ function getEventMessages(programInstanceId) {
 function dashboardHistoryToggle(evt) {
 	$('#dashboardHistoryDiv').toggle();
 }
-function viewPersonProgram(displayedDiv, hidedDiv) {
+function viewTEIProgram(displayedDiv, hidedDiv) {
 	showById(displayedDiv);
 	hideById(hidedDiv);
 }
@@ -1902,7 +1890,7 @@ function saveComment(programInstanceId) {
 }
 
 // --------------------------------------------------------------------------
-// Advanced-search person
+// Advanced-search TEI
 // --------------------------------------------------------------------------
 
 function advancedSearchOnclick() {

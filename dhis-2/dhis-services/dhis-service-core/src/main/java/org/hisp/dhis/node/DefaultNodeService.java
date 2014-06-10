@@ -31,10 +31,10 @@ package org.hisp.dhis.node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
@@ -45,10 +45,10 @@ import java.util.Map;
  */
 public class DefaultNodeService implements NodeService
 {
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<NodeSerializer> nodeSerializers = Lists.newArrayList();
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<NodeDeserializer> nodeDeserializers = Lists.newArrayList();
 
     private Map<String, NodeSerializer> nodeSerializerMap = Maps.newHashMap();
@@ -87,7 +87,7 @@ public class DefaultNodeService implements NodeService
     }
 
     @Override
-    public void serialize( RootNode rootNode, String contentType, OutputStream outputStream ) throws IOException
+    public void serialize( RootNode rootNode, String contentType, OutputStream outputStream )
     {
         NodeSerializer nodeSerializer = getNodeSerializer( contentType );
 
@@ -96,7 +96,14 @@ public class DefaultNodeService implements NodeService
             return; // TODO throw exception?
         }
 
-        nodeSerializer.serialize( rootNode, outputStream );
+        try
+        {
+            nodeSerializer.serialize( rootNode, outputStream );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -111,7 +118,7 @@ public class DefaultNodeService implements NodeService
     }
 
     @Override
-    public RootNode deserialize( String contentType, InputStream inputStream ) throws IOException
+    public RootNode deserialize( String contentType, InputStream inputStream )
     {
         NodeDeserializer nodeDeserializer = getNodeDeserializer( contentType );
 
@@ -120,6 +127,15 @@ public class DefaultNodeService implements NodeService
             return null; // TODO throw exception?
         }
 
-        return nodeDeserializer.deserialize( inputStream );
+        try
+        {
+            return nodeDeserializer.deserialize( inputStream );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

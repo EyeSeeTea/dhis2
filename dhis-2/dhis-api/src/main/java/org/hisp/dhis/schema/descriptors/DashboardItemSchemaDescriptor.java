@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,48 +28,37 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
+import org.hisp.dhis.dashboard.DashboardItem;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
+
 /**
- * "Base", or simplified, state of data approval for a given data selection.
- *
- * @author Jim Grace
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum DataApprovalBaseState
+@Component
+public class DashboardItemSchemaDescriptor implements SchemaDescriptor
 {
-    /**
-     * Data approval does not apply to this selection. (Data is neither
-     * "approved" nor "unapproved".)
-     */
-    UNAPPROVABLE,
+    public static final String SINGULAR = "dashboardItem";
 
-    /**
-     * Data is unapproved, and is not ready to be approved for this selection.
-     */
-    UNAPPROVED_NOT_READY,
+    public static final String PLURAL = "dashboardItems";
 
-    /**
-     * Data is unapproved, and is ready to be approved for this selection.
-     */
-    UNAPPROVED_READY,
+    public static final String API_ENDPOINT = "/" + PLURAL;
 
-    /**
-     * Data is approved for some but not all periods inside this longer period
-     * and is ready for approval in all periods inside this containing period.
-     */
-    PARTIALLY_APPROVED,
+    @Override
+    public Schema getSchema()
+    {
+        Schema schema = new Schema( DashboardItem.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setMetadata( false );
+        schema.setShareable( true );
+        schema.setOrder( 1380 );
 
-    /**
-     * Data is approved (either here or elsewhere).
-     */
-    APPROVED,
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DASHBOARD_PUBLIC_ADD" ) ) );
 
-    /**
-     * Data is accepted for some but not all periods inside this longer period
-     * and is ready for accepting in all periods inside this containing period.
-     */
-    PARTIALLY_ACCEPTED,
-
-    /**
-     * Data is approved and accepted (either here or elsewhere).
-     */
-    ACCEPTED;
+        return schema;
+    }
 }

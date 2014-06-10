@@ -38,7 +38,8 @@ import java.lang.annotation.Target;
  */
 @Target( { ElementType.TYPE } )
 @Retention( RetentionPolicy.RUNTIME )
-public @interface ExportRoot
+@NodeAnnotation
+public @interface NodeRoot
 {
     String value() default "";
 
