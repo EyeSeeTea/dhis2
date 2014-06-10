@@ -5431,11 +5431,9 @@ Ext.onReady( function() {
                     xColAxis,
                     xRowAxis,
                     chart,
-                    //getHtml,
                     getXLayout = service.layout.getExtendedLayout,
                     getSXLayout = service.layout.getSyncronizedXLayout,
                     getXResponse = service.response.aggregate.getExtendedResponse;
-                    //getXAxis = service.layout.getExtendedAxis;
 
                 response = response || ns.app.response;
 
