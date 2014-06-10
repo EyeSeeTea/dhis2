@@ -500,10 +500,6 @@ function setSuggestedDueDate(programInstanceId) {
 	$('#dueDateNewEncounter_' + programInstanceId).val(sdate);
 }
 
-function closeDueDateDiv(programInstanceId) {
-	$('#createNewEncounterDiv_' + programInstanceId).dialog('close');
-}
-
 // ------------------------------------------------------
 // Register Irregular-encounter
 // ------------------------------------------------------
@@ -645,7 +641,7 @@ function registerIrregularEncounter(programInstanceId, programStageId,
 						disable('newEncounterBtn_' + programInstanceId);
 					}
 
-					closeDueDateDiv(programInstanceId);
+					$('#createNewEncounterDiv_' + programInstanceId).dialog('close');
 					showSuccessMessage(i18n_create_event_success);
 				});
 	}
@@ -752,7 +748,7 @@ function DateDueSaver(programStageInstanceId_, dueDate_, resultColor_) {
 // Cosmetic UI
 // -----------------------------------------------------------------------------
 function resize() {
-	var width = 400;
+	var width = 500;
 	var w = $(window).width();
 	if ($(".entity-instance-object").length > 1) {
 		width += 150;
@@ -761,7 +757,7 @@ function resize() {
 		width += 150;
 	}
 	$('.stage-flow').each(
-	function() {
+	  function() {
 		var programInstanceId = this.id.split('_')[1];
 		if ($(this).find(".table-flow").outerWidth() > $(this)
 				.width()) {
