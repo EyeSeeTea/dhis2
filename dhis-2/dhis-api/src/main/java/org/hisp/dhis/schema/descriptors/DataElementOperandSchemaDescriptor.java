@@ -39,9 +39,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataElementOperandSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "dataElementOperand";
+
+    public static final String PLURAL = "dataElementOperands";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        return new Schema( DataElementOperand.class, "dataElementOperand", "dataElementOperands" );
+        Schema schema = new Schema( DataElementOperand.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setMetadata( false );
+        schema.setOrder( 1230 );
+
+        return schema;
     }
 }

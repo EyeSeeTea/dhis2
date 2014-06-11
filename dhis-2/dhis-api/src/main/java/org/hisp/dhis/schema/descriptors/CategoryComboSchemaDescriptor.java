@@ -42,12 +42,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class CategoryComboSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "categoryCombo";
+
+    public static final String PLURAL = "categoryCombos";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( DataElementCategoryCombo.class, "categoryCombo", "categoryCombos" );
-
+        Schema schema = new Schema( DataElementCategoryCombo.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
         schema.setShareable( true );
+        schema.setOrder( 1180 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_CATEGORY_COMBO_PUBLIC_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_CATEGORY_COMBO_PRIVATE_ADD" ) ) );

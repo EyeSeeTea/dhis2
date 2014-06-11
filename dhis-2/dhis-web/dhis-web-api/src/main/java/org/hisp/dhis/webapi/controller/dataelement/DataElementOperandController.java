@@ -29,14 +29,15 @@ package org.hisp.dhis.webapi.controller.dataelement;
  */
 
 import com.google.common.collect.Lists;
-import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
+import org.hisp.dhis.schema.descriptors.DataElementOperandSchemaDescriptor;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.hisp.dhis.webapi.controller.WebMetaData;
+import org.hisp.dhis.webapi.controller.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -55,11 +56,9 @@ import java.util.Map;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = DataElementOperandController.RESOURCE_PATH)
+@RequestMapping( value = DataElementOperandSchemaDescriptor.API_ENDPOINT )
 public class DataElementOperandController extends AbstractCrudController<DataElementOperand>
 {
-    public static final String RESOURCE_PATH = "/dataElementOperands";
-
     private DataElementOperandService dataElementOperandService;
 
     @Autowired
@@ -82,11 +81,11 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
 
             if ( dataElementGroup == null )
             {
-                entityList = new ArrayList<DataElementOperand>();
+                entityList = new ArrayList<>();
             }
             else
             {
-                entityList = new ArrayList<DataElementOperand>( dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) );
+                entityList = new ArrayList<>( dataElementOperandService.getDataElementOperandByDataElementGroup( dataElementGroup ) );
             }
         }
         else if ( options.hasPaging() )
@@ -96,12 +95,12 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<DataElementOperand>( dataElementOperandService.getAllDataElementOperands(
+            entityList = new ArrayList<>( dataElementOperandService.getAllDataElementOperands(
                 pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
-            entityList = new ArrayList<DataElementOperand>( dataElementOperandService.getAllDataElementOperands() );
+            entityList = new ArrayList<>( dataElementOperandService.getAllDataElementOperands() );
         }
 
         return entityList;
@@ -134,14 +133,7 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
 
         String viewClass = options.getViewClass( "basic" );
 
-        if ( viewClass.equals( "basic" ) || viewClass.equals( "sharingBasic" ) )
-        {
-            handleLinksAndAccess( options, metaData, dataElementOperands, false );
-        }
-        else
-        {
-            handleLinksAndAccess( options, metaData, dataElementOperands, true );
-        }
+        handleLinksAndAccess( options, metaData, dataElementOperands );
 
         postProcessEntities( dataElementOperands );
         postProcessEntities( dataElementOperands, options, parameters );

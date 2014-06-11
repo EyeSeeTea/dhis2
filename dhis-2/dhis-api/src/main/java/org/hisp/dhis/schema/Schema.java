@@ -37,6 +37,7 @@ import com.google.common.collect.Maps;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.springframework.core.Ordered;
 
 import java.util.List;
 import java.util.Map;
@@ -44,24 +45,87 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
-public class Schema
+@JacksonXmlRootElement(localName = "schema", namespace = DxfNamespaces.DXF_2_0)
+public class Schema implements Ordered
 {
+    /**
+     * Class that is described in this schema.
+     */
     private Class<?> klass;
 
+    /**
+     * Is this class a sub-class of IdentifiableObject
+     *
+     * @see org.hisp.dhis.common.IdentifiableObject
+     */
     private boolean identifiableObject;
 
+    /**
+     * Is this class a sub-class of NameableObject
+     *
+     * @see org.hisp.dhis.common.NameableObject
+     */
     private boolean nameableObject;
 
+    /**
+     * Singular name.
+     */
     private String singular;
 
+    /**
+     * Plural name.
+     */
     private String plural;
 
+    /**
+     * Namespace URI to be used for this class.
+     */
+    private String namespaceURI;
+
+    /**
+     * This will normally be set to equal singular, but in certain cases it might be useful to have another name
+     * for when this class is used as an item inside a collection.
+     */
+    private String name;
+
+    /**
+     * This will normally be set to equal plural, and is normally used as a wrapper for a collection of
+     * instances of this klass type.
+     */
+    private String collectionName;
+
+    /**
+     * Is sharing supported for instances of this class.
+     */
     private boolean shareable;
 
+    /**
+     * Points to Web-API endpoint (if exposed).
+     */
+    private String apiEndpoint;
+
+    /**
+     * Is this class considered metadata, this is mainly used for our metadata importer/exporter.
+     */
+    private boolean metadata;
+
+    /**
+     * List of authorities required for doing operations on this class.
+     */
     private List<Authority> authorities = Lists.newArrayList();
 
-    private List<Property> properties = Lists.newArrayList();
+    /**
+     * Map of all exposed properties on this class, where key is property
+     * name, and value is instance of Property class.
+     *
+     * @see org.hisp.dhis.schema.Property
+     */
+    private Map<String, Property> propertyMap = Maps.newHashMap();
+
+    /**
+     * Used for sorting of schema list when doing metadata import/export.
+     */
+    private int order = Ordered.LOWEST_PRECEDENCE;
 
     public Schema( Class<?> klass, String singular, String plural )
     {
@@ -70,6 +134,7 @@ public class Schema
         this.nameableObject = NameableObject.class.isAssignableFrom( klass );
         this.singular = singular;
         this.plural = plural;
+        this.metadata = true;
     }
 
     @JsonProperty
@@ -85,14 +150,14 @@ public class Schema
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isIdentifiableObject()
     {
         return identifiableObject;
     }
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
     public boolean isNameableObject()
     {
         return nameableObject;
@@ -124,6 +189,42 @@ public class Schema
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getNamespaceURI()
+    {
+        return namespaceURI;
+    }
+
+    public void setNamespaceURI( String namespaceURI )
+    {
+        this.namespaceURI = namespaceURI;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getCollectionName()
+    {
+        return collectionName == null ? plural : collectionName;
+    }
+
+    public void setCollectionName( String collectionName )
+    {
+        this.collectionName = collectionName;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getName()
+    {
+        return name == null ? singular : name;
+    }
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isShareable()
     {
         return shareable;
@@ -132,6 +233,35 @@ public class Schema
     public void setShareable( boolean shareable )
     {
         this.shareable = shareable;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getApiEndpoint()
+    {
+        return apiEndpoint;
+    }
+
+    public void setApiEndpoint( String apiEndpoint )
+    {
+        this.apiEndpoint = apiEndpoint;
+    }
+
+    public boolean haveEndpoint()
+    {
+        return getApiEndpoint() != null;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isMetadata()
+    {
+        return metadata;
+    }
+
+    public void setMetadata( boolean metadata )
+    {
+        this.metadata = metadata;
     }
 
     @JsonProperty
@@ -152,12 +282,17 @@ public class Schema
     @JacksonXmlProperty( localName = "property", namespace = DxfNamespaces.DXF_2_0 )
     public List<Property> getProperties()
     {
-        return properties;
+        return Lists.newArrayList( propertyMap.values() );
     }
 
-    public void setProperties( List<Property> properties )
+    public Map<String, Property> getPropertyMap()
     {
-        this.properties = properties;
+        return propertyMap;
+    }
+
+    public void setPropertyMap( Map<String, Property> propertyMap )
+    {
+        this.propertyMap = propertyMap;
     }
 
     private Map<AuthorityType, List<String>> authorityMap = Maps.newHashMap();
@@ -182,6 +317,18 @@ public class Schema
         return authorityMap.get( type );
     }
 
+    // TODO not exposed right now, should we?
+    @Override
+    public int getOrder()
+    {
+        return order;
+    }
+
+    public void setOrder( int order )
+    {
+        this.order = order;
+    }
+
     @Override
     public String toString()
     {
@@ -191,9 +338,16 @@ public class Schema
             ", nameableObject=" + nameableObject +
             ", singular='" + singular + '\'' +
             ", plural='" + plural + '\'' +
+            ", namespaceURI='" + namespaceURI + '\'' +
+            ", name='" + name + '\'' +
+            ", collectionName='" + collectionName + '\'' +
             ", shareable=" + shareable +
+            ", apiEndpoint='" + apiEndpoint + '\'' +
+            ", metadata=" + metadata +
             ", authorities=" + authorities +
-            ", properties=" + properties +
+            ", propertyMap=" + propertyMap +
+            ", order=" + order +
+            ", authorityMap=" + authorityMap +
             '}';
     }
 }

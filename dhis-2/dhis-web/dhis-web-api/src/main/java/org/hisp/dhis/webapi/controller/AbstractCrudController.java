@@ -28,20 +28,16 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.hisp.dhis.acl.Access;
 import org.hisp.dhis.acl.AclService;
-import org.hisp.dhis.webapi.controller.exception.NotFoundException;
-import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.WebUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.filter.FilterService;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.render.RenderService;
@@ -50,10 +46,16 @@ import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.node.NodeService;
+import org.hisp.dhis.node.types.ComplexNode;
+import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.node.types.SimpleNode;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.webapi.controller.exception.NotFoundException;
+import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.LinkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -79,6 +81,8 @@ import java.util.Map;
  */
 public abstract class AbstractCrudController<T extends IdentifiableObject>
 {
+    private static final String DEFAULT_LIST_INCLUDE = Joiner.on( "," ).join( FilterService.IDENTIFIABLE_PROPERTIES );
+
     //--------------------------------------------------------------------------
     // Dependencies
     //--------------------------------------------------------------------------
@@ -99,10 +103,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected SchemaService schemaService;
 
     @Autowired
+    protected LinkService linkService;
+
+    @Autowired
     protected RenderService renderService;
 
     @Autowired
     protected ImportService importService;
+
+    @Autowired
+    protected NodeService nodeService;
 
     //--------------------------------------------------------------------------
     // GET
@@ -120,16 +130,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
-        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
+        ReflectionUtils.invokeSetterMethod( schemaService.getSchema( getEntityClass() ).getPlural(), metaData, entityList );
 
-        if ( viewClass.equals( "basic" ) )
-        {
-            handleLinksAndAccess( options, metaData, entityList, false );
-        }
-        else
-        {
-            handleLinksAndAccess( options, metaData, entityList, true );
-        }
+        handleLinksAndAccess( options, metaData, entityList );
 
         model.addAttribute( "model", metaData );
         model.addAttribute( "viewClass", viewClass );
@@ -147,7 +150,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
 
-        Schema schema = schemaService.getSchema( getEntityClass() );
+        if ( include == null && exclude == null )
+        {
+            include = DEFAULT_LIST_INCLUDE;
+        }
 
         boolean hasPaging = options.hasPaging();
 
@@ -183,48 +189,32 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8" );
 
-        ReflectionUtils.invokeSetterMethod( ExchangeClasses.getAllExportMap().get( getEntityClass() ), metaData, entityList );
+        ReflectionUtils.invokeSetterMethod( schemaService.getSchema( getEntityClass() ).getPlural(), metaData, entityList );
 
         if ( include != null && include.contains( "access" ) )
         {
             options.getOptions().put( "viewClass", "sharing" );
         }
 
-        if ( options.getViewClass( "basic" ).equals( "basic" ) )
+        handleLinksAndAccess( options, metaData, entityList );
+
+        RootNode rootNode = new RootNode( "metadata" );
+
+        if ( hasPaging )
         {
-            handleLinksAndAccess( options, metaData, entityList, false );
-        }
-        else
-        {
-            handleLinksAndAccess( options, metaData, entityList, true );
+            ComplexNode pagerNode = rootNode.addChild( new ComplexNode( "pager" ) );
+            pagerNode.addChild( new SimpleNode( "page", metaData.getPager().getPage() ) );
+            pagerNode.addChild( new SimpleNode( "pageCount", metaData.getPager().getPageCount() ) );
+            pagerNode.addChild( new SimpleNode( "total", metaData.getPager().getTotal() ) );
+            pagerNode.addChild( new SimpleNode( "nextPage", metaData.getPager().getNextPage() ) );
+            pagerNode.addChild( new SimpleNode( "prevPage", metaData.getPager().getPrevPage() ) );
         }
 
-        // enable property filter
-        if ( include != null || exclude != null )
-        {
-            List<Object> objects = filterService.filterProperties( entityList, include, exclude );
-            Map<String, Object> output = Maps.newLinkedHashMap();
+        rootNode.addChild( filterService.filterProperties( getEntityClass(), entityList, include, exclude ) );
 
-            if ( hasPaging )
-            {
-                output.put( "pager", metaData.getPager() );
-            }
-
-            if ( schema != null )
-            {
-                output.put( schema.getPlural(), objects );
-            }
-            else
-            {
-                output.put( "objects", objects );
-            }
-
-            renderService.toJson( response.getOutputStream(), output );
-        }
-        else
-        {
-            renderService.toJson( response.getOutputStream(), metaData, JacksonUtils.getViewClass( options.getViewClass( "basic" ) ) );
-        }
+        // response.setContentType( MediaType.APPLICATION_XML_VALUE );
+        // nodeService.serialize( rootNode, MediaType.APPLICATION_XML_VALUE, response.getOutputStream() );
+        nodeService.serialize( rootNode, MediaType.APPLICATION_JSON_VALUE, response.getOutputStream() );
     }
 
 
@@ -242,7 +232,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( options.hasLinks() )
         {
-            WebUtils.generateLinks( entity );
+            linkService.generateLinks( entity );
         }
 
         if ( aclService.isSupported( getEntityClass() ) )
@@ -449,11 +439,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) object).setAccess( access );
     }
 
-    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList, boolean deep )
+    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList )
     {
         if ( options != null && options.hasLinks() )
         {
-            WebUtils.generateLinks( metaData, deep );
+            linkService.generateLinks( metaData );
         }
 
         if ( !JacksonUtils.isSharingView( options.getViewClass( "basic" ) ) )

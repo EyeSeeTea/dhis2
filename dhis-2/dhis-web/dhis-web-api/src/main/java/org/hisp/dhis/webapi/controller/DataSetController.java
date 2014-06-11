@@ -28,27 +28,6 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
-import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.FormUtils;
-import org.hisp.dhis.webapi.view.ClassPathUriResolver;
-import org.hisp.dhis.webapi.webdomain.form.Form;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
@@ -61,13 +40,18 @@ import org.hisp.dhis.dxf2.metadata.ExportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.schema.descriptors.DataSetSchemaDescriptor;
+import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.FormUtils;
+import org.hisp.dhis.webapi.view.ClassPathUriResolver;
+import org.hisp.dhis.webapi.webdomain.form.Form;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,16 +59,30 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = DataSetController.RESOURCE_PATH )
+@RequestMapping( value = DataSetSchemaDescriptor.API_ENDPOINT )
 public class DataSetController
     extends AbstractCrudController<DataSet>
 {
-    public static final String RESOURCE_PATH = "/dataSets";
     public static final String DSD_TRANSFORM = "/templates/metadata2dsd.xsl";
 
     // -------------------------------------------------------------------------
@@ -102,10 +100,10 @@ public class DataSetController
 
     @Autowired
     private DataValueService dataValueService;
-    
+
     @Autowired
     private DataValueSetService dataValueSetService;
-    
+
     @Autowired
     private PeriodService periodService;
 
@@ -118,7 +116,7 @@ public class DataSetController
 
     @RequestMapping( produces = "application/dsd+xml" )
     public void getStructureDefinition( @RequestParam Map<String, String> parameters, HttpServletResponse response )
-        throws IOException, TransformerConfigurationException, TransformerException
+        throws IOException, TransformerException
     {
         WebOptions options = filterMetadataOptions();
 
@@ -140,7 +138,7 @@ public class DataSetController
     {
         DataSet dataSet = manager.get( DataSet.class, uid );
 
-        Map<String, Integer> versionMap = new HashMap<String, Integer>();
+        Map<String, Integer> versionMap = new HashMap<>();
         versionMap.put( "version", dataSet.getVersion() );
 
         JacksonUtils.toJson( response.getOutputStream(), versionMap );
@@ -177,8 +175,8 @@ public class DataSetController
         JacksonUtils.toJson( response.getOutputStream(), form );
     }
 
-    @RequestMapping( value = "/{uid}/dataValueSet", method = RequestMethod.GET, produces = { "application/xml", "text/xml" } )
-    public void getDvs( @PathVariable( "uid" ) String uid,
+    @RequestMapping( value = "/{uid}/dataValueSet", method = RequestMethod.GET )
+    public @ResponseBody RootNode getDvs( @PathVariable( "uid" ) String uid,
         @RequestParam( value = "orgUnitIdScheme", defaultValue = "ID", required = false ) String orgUnitIdScheme,
         @RequestParam( value = "dataElementIdScheme", defaultValue = "ID", required = false ) String dataElementIdScheme,
         @RequestParam( value = "period", defaultValue = "", required = false ) String period,
@@ -191,14 +189,11 @@ public class DataSetController
         if ( dataSet == null )
         {
             ContextUtils.notFoundResponse( response, "Object not found for uid: " + uid );
-            return;
+            return null;
         }
 
         Period pe = periodService.getPeriod( period );
-        
-        response.setContentType( MediaType.APPLICATION_XML_VALUE );
-
-        dataValueSetService.writeDataValueSetTemplate( response.getOutputStream(), dataSet, pe, orgUnits, comment, orgUnitIdScheme, dataElementIdScheme );
+        return dataValueSetService.getDataValueSetTemplate( dataSet, pe, orgUnits, comment, orgUnitIdScheme, dataElementIdScheme );
     }
 
     @RequestMapping( value = "/{uid}/form", method = RequestMethod.GET, produces = { "application/xml", "text/xml" } )
@@ -232,16 +227,6 @@ public class DataSetController
         }
 
         JacksonUtils.toXml( response.getOutputStream(), form );
-    }
-
-    @RequestMapping( value = "/{uid}/form", method = RequestMethod.POST, consumes = "application/json" )
-    public void postFormJson( @PathVariable( "uid" ) String uid, HttpServletRequest request, HttpServletResponse response )
-    {
-    }
-
-    @RequestMapping( value = "/{uid}/form", method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postFormXml( @PathVariable( "uid" ) String uid, HttpServletRequest request, HttpServletResponse response )
-    {
     }
 
     @RequestMapping( value = "/{uid}/customDataEntryForm", method = { RequestMethod.PUT, RequestMethod.POST }, consumes = "text/html" )

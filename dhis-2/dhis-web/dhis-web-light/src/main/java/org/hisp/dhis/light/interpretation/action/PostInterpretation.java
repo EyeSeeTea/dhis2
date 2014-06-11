@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.program;
+package org.hisp.dhis.light.interpretation.action;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,79 +28,76 @@ package org.hisp.dhis.trackedentity.action.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
+import org.hisp.dhis.interpretation.Interpretation;
+import org.hisp.dhis.interpretation.InterpretationService;
+import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Chau Thu Tran
- * 
- * @version ShowProgramUserroleFormAction.java 12:44:19 PM Feb 19, 2013 $
- */
-public class ShowProgramUserroleFormAction
+public class PostInterpretation
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    
-    private UserService userService;
 
-    public void setUserService( UserService userService )
+    private InterpretationService interpretationService;
+
+    public void setInterpretationService( InterpretationService interpretationService )
     {
-        this.userService = userService;
+        this.interpretationService = interpretationService;
     }
 
-    private ProgramService programService;
+    private CurrentUserService currentUserService;
 
-    public void setProgramService( ProgramService programService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.programService = programService;
+        this.currentUserService = currentUserService;
+    }
+
+    private ChartService chartService;
+
+    public void setChartService( ChartService chartService )
+    {
+        this.chartService = chartService;
     }
 
     // -------------------------------------------------------------------------
-    // Input/output
+    // Input & Output
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private int id;
 
-    public void setId( Integer id )
+    public void setId( int id )
     {
         this.id = id;
     }
 
-    private Collection<UserAuthorityGroup> userRoles;
+    private String interpretation;
 
-    public Collection<UserAuthorityGroup> getUserRoles()
+    public void setInterpretation( String interpretation )
     {
-        return userRoles;
-    }
-
-    private Program program;
-
-    public Program getProgram()
-    {
-        return program;
+        this.interpretation = interpretation;
     }
 
     // -------------------------------------------------------------------------
-    // Action implementation
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
+        throws Exception
     {
-        program = programService.getProgram( id );
+        Chart c = chartService.getChart( id );
 
-        userRoles = userService.getAllUserAuthorityGroups();
-        userRoles.removeAll( program.getUserRoles() );
+        Interpretation i = new Interpretation( c, null, interpretation );
+
+        i.setUser( currentUserService.getCurrentUser() );
+
+        interpretationService.saveInterpretation( i );
 
         return SUCCESS;
     }
-
 }

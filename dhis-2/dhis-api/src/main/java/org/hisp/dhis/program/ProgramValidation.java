@@ -35,6 +35,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.expression.Operator;
@@ -51,6 +52,7 @@ public class ProgramValidation
      * Determines if a de-serialized file is compatible with this class.
      */
     private static final long serialVersionUID = 4785165717118297802L;
+
     public static String OBJECT_PROGRAM_STAGE_DATAELEMENT = "DE";
 
     // -------------------------------------------------------------------------
@@ -81,80 +83,6 @@ public class ProgramValidation
         this.leftSide = leftSide;
         this.rightSide = rightSide;
         this.program = program;
-    }
-
-    // -------------------------------------------------------------------------
-    // hashCode() and equals()
-    // -------------------------------------------------------------------------
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((leftSide == null) ? 0 : leftSide.hashCode());
-        result = prime * result + ((program == null) ? 0 : program.hashCode());
-        result = prime * result + ((rightSide == null) ? 0 : rightSide.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals( Object object )
-    {
-        if ( this == object )
-        {
-            return true;
-        }
-
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( !getClass().isAssignableFrom( object.getClass() ) )
-        {
-            return false;
-        }
-
-        ProgramValidation other = (ProgramValidation) object;
-
-        if ( leftSide == null )
-        {
-            if ( other.leftSide != null )
-            {
-                return false;
-            }
-        }
-        else if ( !leftSide.equals( other.leftSide ) )
-        {
-            return false;
-        }
-
-        if ( program == null )
-        {
-            if ( other.program != null )
-            {
-                return false;
-            }
-        }
-        else if ( !program.equals( other.program ) )
-        {
-            return false;
-        }
-
-        if ( rightSide == null )
-        {
-            if ( other.rightSide != null )
-            {
-                return false;
-            }
-        }
-        else if ( !rightSide.equals( other.rightSide ) )
-        {
-            return false;
-        }
-
-        return true;
     }
 
     // -------------------------------------------------------------------------
@@ -212,5 +140,21 @@ public class ProgramValidation
     public void setOperator( Operator operator )
     {
         this.operator = operator;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other )
+    {
+        super.mergeWith( other );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            ProgramValidation programValidation = (ProgramValidation) other;
+
+            leftSide = programValidation.getLeftSide();
+            operator = programValidation.getOperator();
+            rightSide = programValidation.getRightSide();
+            program = programValidation.getProgram();
+        }
     }
 }

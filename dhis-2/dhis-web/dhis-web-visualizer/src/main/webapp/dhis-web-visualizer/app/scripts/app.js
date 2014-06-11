@@ -4918,13 +4918,15 @@ Ext.onReady( function() {
 					text = '';
 
 				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/chart.js"></script>\n';
+				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v215/ext/resources/css/ext-plugin-gray.css" />\n';
+				text += '<script src="http://dhis2-cdn.org/v215/ext/ext-all.js"></script>\n';
+				text += '<script src="http://dhis2-cdn.org/v215/plugin/chart.js"></script>\n';
 				text += '</head>\n\n<body>\n';
 				text += '<div id="chart1" style="width:700px; height:400px"></div>\n\n';
 				text += '<script>\n\n';
+				text += 'Ext.onReady(function() {\n\n';
 				text += 'DHIS.getChart(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'chart1'), null, 2) + ');\n\n';
+				text += '});\n\n';
 				text += '</script>\n\n';
 				text += '</body>\n</html>';
 
@@ -5478,7 +5480,7 @@ Ext.onReady( function() {
 						var i18nArray = Ext.decode(r.responseText);
 
 						Ext.Ajax.request({
-							url: init.contextPath + '/api/system/context.json',
+							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
 								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
@@ -5499,7 +5501,7 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&include=id,name,children[id,name]',
+									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&include=id,name,children[id,name]',
 									success: function(r) {
 										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();
@@ -5511,6 +5513,11 @@ Ext.onReady( function() {
 									url: init.contextPath + '/api/organisationUnitLevels.json?include=id,name,level&paging=false',
 									success: function(r) {
 										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+										if (!init.organisationUnitLevels.length) {
+											alert('No organisation unit levels');
+										}
+
 										fn();
 									}
 								});
@@ -5531,10 +5538,9 @@ Ext.onReady( function() {
 												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
 											}
 
-											init.user = {
-												ou: ou,
-												ouc: ouc
-											}
+											init.user = init.user || {};
+											init.user.ou = ou;
+											init.user.ouc = ouc;
 										}
 										else {
 											alert('User is not assigned to any organisation units');

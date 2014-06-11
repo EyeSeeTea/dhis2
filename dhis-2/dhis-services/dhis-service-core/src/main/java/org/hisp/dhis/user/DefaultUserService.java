@@ -37,12 +37,18 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.AuditLogUtil;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
@@ -316,6 +322,56 @@ public class DefaultUserService
         return users;
     }
 
+    public Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials )
+    {
+        Set<CategoryOptionGroup> groups = null;
+
+        Set<CategoryOptionGroupSet> cogsConstraints = userCredentials.getCogsDimensionConstraints();
+
+        if ( cogsConstraints != null && !cogsConstraints.isEmpty() )
+        {
+            groups = new HashSet<CategoryOptionGroup>();
+
+            for ( CategoryOptionGroupSet set : cogsConstraints )
+            {
+                for ( CategoryOptionGroup g : set.getMembers() )
+                {
+                    if ( securityService.canRead( g ) )
+                    {
+                        groups.add( g );
+                    }
+                }
+            }
+        }
+
+        return groups;
+    }
+
+    public Set<DataElementCategoryOption> getCoDimensionConstraints( UserCredentials userCredentials )
+    {
+        Set<DataElementCategoryOption> options = null;
+
+        Set<DataElementCategory> catConstraints = userCredentials.getCatDimensionConstraints();
+
+        if ( catConstraints != null && !catConstraints.isEmpty() )
+        {
+            options = new HashSet<DataElementCategoryOption>();
+
+            for ( DataElementCategory cat : catConstraints )
+            {
+                for ( DataElementCategoryOption o : cat.getCategoryOptions() )
+                {
+                    if ( securityService.canRead( o ) )
+                    {
+                        options.add( o );
+                    }
+                }
+            }
+        }
+
+        return options;
+    }
+
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -529,6 +585,19 @@ public class DefaultUserService
         return userCredentialsStore.getActiveUsersCount( since );
     }
 
+    public void canUpdateUsersFilter( Collection<User> users )
+    {
+        FilterUtils.filter( users,
+            new Filter<User>()
+            {
+                public boolean retain( User object )
+                {
+                    return canUpdate( object.getUserCredentials() );
+                }
+            }
+        );
+    }
+
     public void canUpdateFilter( Collection<UserCredentials> userCredentials )
     {
         FilterUtils.filter( userCredentials,
@@ -536,10 +605,15 @@ public class DefaultUserService
             {
                 public boolean retain( UserCredentials object )
                 {
-                    return hasAuthorityToUpdateUser( object ) && hasGroupsToUpdateUser( object );
+                    return canUpdate( object );
                 }
             }
         );
+    }
+
+    public boolean canUpdate( UserCredentials userCredentials )
+    {
+        return hasAuthorityToUpdateUser( userCredentials ) && hasGroupsToUpdateUser( userCredentials );
     }
 
     // -------------------------------------------------------------------------

@@ -54,7 +54,7 @@ import com.opensymphony.xwork2.config.entities.PackageConfig;
 public class DefaultModuleManager
     implements ModuleManager
 {
-    private static final Log LOG = LogFactory.getLog( DefaultModuleManager.class );
+    private static final Log log = LogFactory.getLog( DefaultModuleManager.class );
 
     private boolean modulesDetected = false;
 
@@ -64,10 +64,6 @@ public class DefaultModuleManager
 
     private List<Module> menuModules = new ArrayList<Module>();
     
-    private List<Module> maintenanceMenuModules = new ArrayList<Module>();
-    
-    private List<Module> serviceMenuModules = new ArrayList<Module>();
-
     private ThreadLocal<Module> currentModule = new ThreadLocal<Module>();
 
     // -------------------------------------------------------------------------
@@ -96,13 +92,6 @@ public class DefaultModuleManager
     public void setDefaultActionName( String defaultActionName )
     {
         this.defaultActionName = defaultActionName;
-    }
-
-    private String maintenanceModuleIdentifier;
-
-    public void setMaintenanceModuleIdentifier( String maintenanceModuleIdentifier )
-    {
-        this.maintenanceModuleIdentifier = maintenanceModuleIdentifier;
     }
     
     // -------------------------------------------------------------------------
@@ -156,48 +145,6 @@ public class DefaultModuleManager
         return modules;
     }
 
-    public List<Module> getMaintenanceMenuModules()
-    {
-        detectModules();
-        
-        return maintenanceMenuModules;
-    }
-
-    public List<Module> getAccessibleMaintenanceModules()
-    {
-        detectModules();
-        
-        return getAccessibleModules( maintenanceMenuModules );
-    }
-    
-    public List<Module> getServiceMenuModules()
-    {
-        detectModules();
-        
-        return serviceMenuModules;
-    }
-
-    public List<Module> getAccessibleServiceModules()
-    {
-        detectModules();
-        
-        return getAccessibleModules( serviceMenuModules );
-    }
-
-    public List<Module> getAccessibleServiceModulesAndApps()
-    {
-        List<Module> modules = getAccessibleServiceModules();
-
-        List<App> apps = appManager.getApps();
-        
-        for ( App app : apps )
-        {   
-            modules.add( Module.getModule( app ) );
-        }
-        
-        return modules;
-    }
-    
     public Collection<Module> getAllModules()
     {
         detectModules();
@@ -227,13 +174,15 @@ public class DefaultModuleManager
         }
 
         for ( PackageConfig packageConfig : getPackageConfigs() )
-        {
+        {            
             String name = packageConfig.getName();
             String namespace = packageConfig.getNamespace();
 
+            log.debug( "Package config: " + name + ", " + namespace );
+            
             if ( packageConfig.getAllActionConfigs().size() == 0 )
             {
-                LOG.debug( "Ignoring action package with no actions: " + name );
+                log.warn( "Ignoring action package with no actions: " + name );
 
                 continue;
             }
@@ -252,8 +201,8 @@ public class DefaultModuleManager
             {
                 Module module = modulesByNamespace.get( namespace );
 
-                throw new RuntimeException( "These action packages have the same namespace: " + name + " and "
-                    + module.getName() );
+                throw new RuntimeException( "These action packages have the same namespace: " + 
+                    name + " and " + module.getName() );
             }
 
             Module module = new Module( name, namespace );
@@ -266,27 +215,18 @@ public class DefaultModuleManager
 
                 menuModules.add( module );
 
-                LOG.debug( "Has default action: " + name );
-                
-                if ( name.toLowerCase().contains( maintenanceModuleIdentifier ) )
-                {
-                    maintenanceMenuModules.add( module );
-                }
-                else
-                {
-                    serviceMenuModules.add( module );
-                }
+                log.debug( "Has default action: " + name );
             }
             else
             {
-                LOG.debug( "Doesn't have default action: " + name );
+                log.debug( "Doesn't have default action: " + name );
             }
         }
 
         Collections.sort( menuModules, moduleComparator );
-        Collections.sort( maintenanceMenuModules, moduleComparator );
-        Collections.sort( serviceMenuModules, moduleComparator );
 
+        log.info( "Menu modules detected: " + menuModules );
+        
         modulesDetected = true;
     }
 

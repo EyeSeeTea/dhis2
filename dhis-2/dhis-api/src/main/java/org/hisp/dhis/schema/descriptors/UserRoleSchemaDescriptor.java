@@ -42,12 +42,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserRoleSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "userRole";
+
+    public static final String PLURAL = "userRoles";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( UserAuthorityGroup.class, "userRole", "userRoles" );
-
+        Schema schema = new Schema( UserAuthorityGroup.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
         schema.setShareable( true );
+        schema.setOrder( 1330 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_USERROLE_PUBLIC_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_USERROLE_PRIVATE_ADD" ) ) );

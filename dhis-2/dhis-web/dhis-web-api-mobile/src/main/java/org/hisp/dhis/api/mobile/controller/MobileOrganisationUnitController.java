@@ -54,6 +54,7 @@ import org.hisp.dhis.api.mobile.model.SMSCommand;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.LostEvent;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Notification;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientList;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientIdentifierAndAttribute;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage;
@@ -365,6 +366,16 @@ public class MobileOrganisationUnitController
         return activityReportingService.findPatient( Integer.parseInt( patientId ) );
     }
 
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findPatients" )
+    @ResponseBody
+    public PatientList findPatientsById( @PathVariable
+    int id, @RequestHeader( "patientIds" )
+    String patientIds )
+        throws NotAllowedException
+    {
+        return activityReportingService.findPatients( patientIds );
+    }
+
     @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findPatientInAdvanced/{programId}" )
     @ResponseBody
     public String findPatientInAdvanced( @PathVariable
@@ -626,6 +637,39 @@ public class MobileOrganisationUnitController
     {
         return activityReportingService.replyMessage( message );
 
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/sendFeedback" )
+    @ResponseBody
+    public String sendFeedbackTracker( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.sendFeedback( message );
+
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/LWUIT/orgUnits/{id}/findUser" )
+    @ResponseBody
+    public Recipient findUserTracker( String clientVersion, @PathVariable
+    int id, @RequestHeader( "name" )
+    String keyword )
+        throws NotAllowedException
+    {
+        Recipient recipient = new Recipient();
+        recipient.setUsers( activityReportingService.findUser( keyword ) );
+        return recipient;
+    }
+
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/sendMessage" )
+    @ResponseBody
+    public String sendMessageTracker( @PathVariable
+    int id, @RequestBody
+    Message message )
+        throws NotAllowedException
+    {
+        return activityReportingService.sendMessage( message );
     }
 
 }

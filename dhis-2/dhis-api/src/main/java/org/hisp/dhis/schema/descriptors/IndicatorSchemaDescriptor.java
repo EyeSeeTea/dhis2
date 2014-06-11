@@ -42,12 +42,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class IndicatorSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "indicator";
+
+    public static final String PLURAL = "indicators";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Indicator.class, "indicator", "indicators" );
-
+        Schema schema = new Schema( Indicator.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
         schema.setShareable( true );
+        schema.setOrder( 1250 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_INDICATOR_PUBLIC_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_INDICATOR_PRIVATE_ADD" ) ) );

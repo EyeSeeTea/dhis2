@@ -5120,6 +5120,34 @@ Ext.onReady( function() {
 							}
 						}
 					}
+                    //{
+                        //text: 'export',
+                        //handler: function() {
+                            //var myWin = window.open(),
+                                //tableId = 'datatable',
+                                //text = '';
+
+                            ////text += '<a id="csvlink" href="" download="datatable.csv" onclick="javascript:this.download()">Download CSV</a><br/><br/>';
+                            //text += '<a href="" download="data.csv">download</a>';
+
+                            //text += '<table id="datatable">';
+
+                            //text += '<tr><th>indicator</th><th>period</th><th>orgunit</th><th>value</th></tr>';
+
+                            //text += '<tr><td>anc1</td><td>jan</td><td>telemark</td><td>8</td></tr>';
+                            //text += '<tr><td>anc1</td><td>jan</td><td>oslo</td><td>2</td></tr>';
+                            //text += '<tr><td>anc1</td><td>feb</td><td>telemark</td><td>11</td></tr>';
+                            //text += '<tr><td>anc1</td><td>feb</td><td>oslo</td><td>12</td></tr>';
+
+                            //text += '</table>';
+
+                            //myWin.document.write(text);
+
+                            //myWin.document.getElementById('csvlink').download = function() {
+                                //return ExcellentExport.csv(window, 'datatable');
+                            //};
+                        //}
+                    //}
 				],
 				listeners: {
 					added: function() {
@@ -5173,13 +5201,15 @@ Ext.onReady( function() {
 					text = '';
 
 				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
+				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v215/ext/resources/css/ext-plugin-gray.css" />\n';
+				text += '<script src="http://dhis2-cdn.org/v215/ext/ext-all.js"></script>\n';
+				text += '<script src="http://dhis2-cdn.org/v215/plugin/table.js"></script>\n';
 				text += '</head>\n\n<body>\n';
 				text += '<div id="table1"></div>\n\n';
 				text += '<script>\n\n';
+				text += 'Ext.onReady(function() {\n\n';
 				text += 'DHIS.getTable(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'table1'), null, 2) + ');\n\n';
+				text += '});\n\n';
 				text += '</script>\n\n';
 				text += '</body>\n</html>';
 
@@ -5795,7 +5825,7 @@ Ext.onReady( function() {
 						var i18nArray = Ext.decode(r.responseText);
 
 						Ext.Ajax.request({
-							url: init.contextPath + '/api/system/context.json',
+							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
 								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
@@ -5816,7 +5846,7 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&include=id,name,children[id,name]',
+									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&include=id,name,children[id,name]',
 									success: function(r) {
 										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();
@@ -5828,6 +5858,11 @@ Ext.onReady( function() {
 									url: init.contextPath + '/api/organisationUnitLevels.json?include=id,name,level&paging=false',
 									success: function(r) {
 										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+										if (!init.organisationUnitLevels.length) {
+											alert('No organisation unit levels');
+										}
+
 										fn();
 									}
 								});
@@ -5848,10 +5883,9 @@ Ext.onReady( function() {
 												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
 											}
 
-											init.user = {
-												ou: ou,
-												ouc: ouc
-											}
+											init.user = init.user || {};
+											init.user.ou = ou;
+											init.user.ouc = ouc;
 										}
 										else {
 											alert('User is not assigned to any organisation units');

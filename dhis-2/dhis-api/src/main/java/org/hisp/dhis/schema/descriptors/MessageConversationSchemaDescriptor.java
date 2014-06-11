@@ -39,9 +39,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class MessageConversationSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "messageConversation";
+
+    public static final String PLURAL = "messageConversations";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        return new Schema( MessageConversation.class, "messageConversation", "messageConversations" );
+        Schema schema = new Schema( MessageConversation.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setMetadata( false );
+        schema.setOrder( 1430 );
+
+        return schema;
     }
 }

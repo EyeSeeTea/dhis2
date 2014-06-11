@@ -42,10 +42,18 @@ import org.springframework.stereotype.Component;
 @Component
 public class ConstantSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "constant";
+
+    public static final String PLURAL = "constants";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Constant.class, "constant", "constants" );
+        Schema schema = new Schema( Constant.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setOrder( 1030 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE, Lists.newArrayList( "F_CONSTANT_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_CONSTANT_DELETE" ) ) );

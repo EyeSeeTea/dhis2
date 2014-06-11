@@ -93,6 +93,7 @@ public class PBFInvoiceReportFormAction
         for ( Period period : periods )
         {
             period.setName( format.formatPeriod( period ) );
+            
         }
 
         return SUCCESS;

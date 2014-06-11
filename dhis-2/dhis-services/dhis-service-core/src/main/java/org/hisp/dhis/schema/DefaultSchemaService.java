@@ -30,9 +30,13 @@ package org.hisp.dhis.schema;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.OrderComparator;
 
 import javax.annotation.PostConstruct;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -60,11 +64,18 @@ public class DefaultSchemaService implements SchemaService
 
             if ( schema.getProperties().isEmpty() )
             {
-                schema.setProperties( propertyIntrospectorService.getProperties( schema.getKlass() ) );
+                schema.setPropertyMap( propertyIntrospectorService.getPropertiesMap( schema.getKlass() ) );
             }
 
             classSchemaMap.put( schema.getKlass(), schema );
             singularSchemaMap.put( schema.getSingular(), schema );
+
+            if ( schema.getPropertyMap().containsKey( "__self__" ) )
+            {
+                Property property = schema.getPropertyMap().get( "__self__" );
+                schema.setName( property.getName() );
+                schema.setNamespaceURI( property.getNamespaceURI() );
+            }
         }
     }
 
@@ -76,24 +87,37 @@ public class DefaultSchemaService implements SchemaService
             return null;
         }
 
-        /*
-        if ( ProxyFactory.isProxyClass( klass ) )
-        {
-            klass = klass.getSuperclass();
-        }
-        */
+        klass = ReflectionUtils.getRealClass( klass );
 
         if ( classSchemaMap.containsKey( klass ) )
         {
             return classSchemaMap.get( klass );
         }
 
-        if ( classSchemaMap.containsKey( klass.getSuperclass() ) )
+        return null;
+    }
+
+    @Override
+    public Schema getDynamicSchema( Class<?> klass )
+    {
+        if ( klass == null )
         {
-            return classSchemaMap.get( klass.getSuperclass() );
+            return null;
         }
 
-        return null;
+        Schema schema = getSchema( klass );
+
+        if ( schema != null )
+        {
+            return schema;
+        }
+
+        klass = ReflectionUtils.getRealClass( klass );
+
+        schema = new Schema( klass, klass.getName(), klass.getName() );
+        schema.setPropertyMap( propertyIntrospectorService.getPropertiesMap( schema.getKlass() ) );
+
+        return schema;
     }
 
     @Override
@@ -106,5 +130,27 @@ public class DefaultSchemaService implements SchemaService
     public List<Schema> getSchemas()
     {
         return Lists.newArrayList( classSchemaMap.values() );
+    }
+
+    @Override
+    public List<Schema> getMetadataSchemas()
+    {
+        List<Schema> schemas = getSchemas();
+
+        Iterator<Schema> iterator = schemas.iterator();
+
+        while ( iterator.hasNext() )
+        {
+            Schema schema = iterator.next();
+
+            if ( !schema.isMetadata() )
+            {
+                iterator.remove();
+            }
+        }
+
+        Collections.sort( schemas, OrderComparator.INSTANCE );
+
+        return schemas;
     }
 }

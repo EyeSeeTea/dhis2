@@ -41,12 +41,12 @@
 			}
 			
 		});
-	checkValueIsExist( "name", "validateProgram.action",{id:getFieldValue('id')} );
+	checkValueIsExist( "name", "validateProgram.action",{id:getFieldValue('id')} );	
 });
 
 </script>
 
-<h3>$i18n.getString( "edit_program" )</h3>
+<h3>$i18n.getString( "edit_program" ) #openHelp( "program_information" )</h3>
 
 <form id="updateProgramForm" name="updateProgramForm" action="updateProgram.action" method="post" onsubmit="selectAllById('selectedPropertyIds');" class="inputForm">
  
@@ -82,18 +82,7 @@
 			<td></td>
 		</tr>
 		
-		<tr>
-			<td><label for="dataEntryMethod">$i18n.getString( "data_entry_method_for_option_sets" ) </label></td>
-			<td>
-                <select id='dataEntryMethod' name='dataEntryMethod' style="width: 335px;">
-					<option value='false' #if( $program.dataEntryMethod=='false' ) selected #end>$i18n.getString('drop_down_lists')</option>
-					<option value='true' #if( $program.dataEntryMethod=='true' ) selected #end>$i18n.getString('radio_buttons')</option>
-				</select>
-			</td>
-			<td></td>
-		</tr>
-		
-		<tr name='nonAnonymous'>
+		<tr name='nonAnonymous' class='multiEvents'>
 			<td><label for="trackedEntityId">$i18n.getString( "tracked_entity" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td>
 				<select id='trackedEntityId' name='trackedEntityId' style="width: 335px;" class="{validate:{required:true}}">
@@ -109,6 +98,17 @@
 		<tr>
 			<td><label for="version">$i18n.getString( "version" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
 			<td><input type="text" id="version" name="version" style="width: 330px;" value="$program.version" class="{validate:{required:true,integer:true}}"></td>
+			<td></td>
+		</tr>
+		
+		<tr name='advanced'>
+			<td><label for="dataEntryMethod">$i18n.getString( "data_entry_method_for_option_sets" ) </label></td>
+			<td>
+                <select id='dataEntryMethod' name='dataEntryMethod' style="width: 335px;">
+					<option value='false' #if( $program.dataEntryMethod=='false' ) selected #end>$i18n.getString('drop_down_lists')</option>
+					<option value='true' #if( $program.dataEntryMethod=='true' ) selected #end>$i18n.getString('radio_buttons')</option>
+				</select>
+			</td>
 			<td></td>
 		</tr>
 		
@@ -228,7 +228,7 @@
 
   <br />
 
-	<table name='nonAnonymous'>
+	<table name='nonAnonymous' class='multiEvents'>
 		<colgroup>
 			<col style="width:400px;"/>
 			<col/>
@@ -295,7 +295,10 @@
 	  </tr>
     </tbody>
   </table>  
-  	
+ 
+	<p><a href='javascript:showAdvancedOptions()' id='showAdvancedOptionLink'>$i18n.getString('show_advanced_options') <img src='../images/asc.gif'><a></p>
+	<p><a href='javascript:hideAdvancedOptions()' id='hideAdvancedOptionLink' style="display:none;">$i18n.getString('hide_advanced_options') <img src='../images/desc.gif'><a></p>
+	
   <table>
 	 <tr>
       	<td colspan='3'>
@@ -305,40 +308,8 @@
       </tr>
   </table>
 </form>
-<script>
-	var i18n_reminder = '$encoder.jsEscape( $i18n.getString( "reminder" ) , "'")';   
-	var i18n_remove_reminder = '$encoder.jsEscape( $i18n.getString( "remove_reminder" ) , "'")';   
-	var i18n_days_before_after_comparison_date = '$encoder.jsEscape( $i18n.getString( "days_before_after_comparison_date" ) , "'")';   
-	var i18n_params = '$encoder.jsEscape( $i18n.getString( "params" ) , "'")';   
-	var i18n_tracked_entity_name = '$encoder.jsEscape( $i18n.getString( "tracked_entity_name" ) , "'")';   
-	var i18n_program_name = '$encoder.jsEscape( $i18n.getString( "program_name" ) , "'")';   
-	var i18n_incident_date = '$encoder.jsEscape( $i18n.getString( "incident_date" ) , "'")';   
-	var i18n_days_since_incident_date = '$encoder.jsEscape( $i18n.getString( "days_since_incident_date" ) , "'")';   
-	var i18n_orgunit_name = '$encoder.jsEscape( $i18n.getString( "orgunit_name" ) , "'")';   
-	var i18n_enrollment_date = '$encoder.jsEscape( $i18n.getString( "enrollement_date" ) , "'")';   
-	var i18n_days_since_enrollment_date = '$encoder.jsEscape( $i18n.getString( "days_since_enrollment_date" ) , "'")';   
-	var i18n_name_exists = '$encoder.jsEscape( $i18n.getString( "name_exists" ) , "'")';
-	var i18n_date_to_compare = '$encoder.jsEscape( $i18n.getString( "date_to_compare" ) , "'")'; 
-	var i18n_recipients = '$encoder.jsEscape( $i18n.getString( "recipients" ) , "'")'; 
-	var i18n_tracked_entity_sms_only = '$encoder.jsEscape( $i18n.getString( "tracked_entity_sms_only" ) , "'")'; 
-	var i18n_attribute_users = '$encoder.jsEscape( $i18n.getString( "attribute_users" ) , "'")'; 
-	var i18n_orgunit_phone_number_sms_only = '$encoder.jsEscape( $i18n.getString( "orgunit_phone_number_sms_only" ) , "'")'; 
-	var i18n_all_users_at_orgunit = '$encoder.jsEscape( $i18n.getString( "all_users_at_orgunit" ) , "'")'; 
-	var i18n_send_when_to = '$encoder.jsEscape( $i18n.getString( "send_base_on" ) , "'")';
-	var i18n_days_scheduled = '$encoder.jsEscape( $i18n.getString( "days_scheduled" ) , "'")';
-	var i18n_complete_program = '$encoder.jsEscape( $i18n.getString( "complete_program" ) , "'")';
-	var i18n_program_enrollment = '$encoder.jsEscape( $i18n.getString( "program_enrollment" ) , "'")';
-	var i18n_complete_program_stage = '$encoder.jsEscape( $i18n.getString( "complete_program_stage" ) , "'")';
-	var i18n_user_group = '$encoder.jsEscape( $i18n.getString( "user_group" ) , "'")';
-	var i18n_days = '$encoder.jsEscape( $i18n.getString( "days" ) , "'")';
-    var i18n_before = '$encoder.jsEscape( $i18n.getString( "before" ) , "'")';
-    var i18n_after = '$encoder.jsEscape( $i18n.getString( "after" ) , "'")';
-    var i18n_scheduled_date = '$encoder.jsEscape( $i18n.getString( "scheduled_date" ) , "'")';
-    var i18n_message_type = '$encoder.jsEscape( $i18n.getString( "message_type" ) , "'")';
-    var i18n_direct_sms = '$encoder.jsEscape( $i18n.getString( "direct_sms" ) , "'")';
-    var i18n_send_message = '$encoder.jsEscape( $i18n.getString( "send_message" ) , "'")';
-    var i18n_message = '$encoder.jsEscape( $i18n.getString( "message" ) , "'")';
-	var i18n_both = '$encoder.jsEscape( $i18n.getString( "both" ) , "'")';
 
+<script>
+	var i18n_characters_without_params = '$encoder.jsEscape( $i18n.getString( "characters_without_params" ) , "'")';
 	programOnChange();
 </script>

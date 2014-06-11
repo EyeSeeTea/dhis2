@@ -2571,6 +2571,11 @@ Ext.onReady( function() {
 						success: function(r) {
 							var id = r.getAllResponseHeaders().location.split('/').pop();
 
+                            gis.map = {
+                                id: id,
+                                name: name
+                            };
+
 							gis.store.maps.loadStore();
 
 							gis.viewport.shareButton.enable();
@@ -3952,7 +3957,7 @@ Ext.onReady( function() {
 			validateView,
 
         // constants
-            baseWidth = 442,
+            baseWidth = 444,
             toolWidth = 36,
 
             accBaseWidth = baseWidth - 2;
@@ -4038,7 +4043,7 @@ Ext.onReady( function() {
 			forceSelection: true,
 			queryMode: 'remote',
 			columnWidth: 0.5,
-			style: 'margin:1px 1px 2px 0',
+			style: 'margin:1px 1px 1px 0',
 			storage: {},
 			store: programStore,
             getRecord: function() {
@@ -4090,7 +4095,7 @@ Ext.onReady( function() {
 			queryMode: 'remote',
 			forceSelection: true,
 			columnWidth: 0.5,
-			style: 'margin:1px 0 2px 1px',
+			style: 'margin:1px 0 1px 0',
 			disabled: true,
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
@@ -4171,10 +4176,10 @@ Ext.onReady( function() {
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: accBaseWidth,
-            height: 112,
+            height: 118,
 			valueField: 'id',
 			displayField: 'name',
-            style: 'margin-bottom:2px',
+            style: 'margin-bottom:1px',
 			store: dataElementsByStageStore,
 			tbar: [
 				{
@@ -4220,7 +4225,7 @@ Ext.onReady( function() {
         dataElementSelected = Ext.create('Ext.panel.Panel', {
 			width: accBaseWidth,
             height: 204,
-            bodyStyle: 'padding:2px 0 5px 3px; overflow-y: scroll',
+            bodyStyle: 'padding:2px 0 1px 3px; overflow-y: scroll',
             tbar: {
                 height: 27,
                 items: {
@@ -4329,7 +4334,7 @@ Ext.onReady( function() {
 
         dataElement = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-data">Data</div>',
-            bodyStyle: 'padding:2px',
+            bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
                 {
@@ -7993,13 +7998,15 @@ Ext.onReady( function() {
                 }
 
 				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
+				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v215/ext/resources/css/ext-plugin-gray.css" />\n';
+				text += '<script src="http://dhis2-cdn.org/v215/ext/ext-all.js"></script>\n';
+				text += '<script src="http://dhis2-cdn.org/v215/plugin/table.js"></script>\n';
 				text += '</head>\n\n<body>\n';
 				text += '<div id="' + el + '"></div>\n\n';
 				text += '<script>\n\n';
+				text += 'Ext.onReady(function() {\n\n';
 				text += 'DHIS.getMap(' + JSON.stringify(layout, null, 2) + ');\n\n';
+				text += '});\n\n';
 				text += '</script>\n\n';
 				text += '</body>\n</html>';
 
@@ -8552,7 +8559,6 @@ Ext.onReady( function() {
 
 		fn = function() {
 			if (++callbacks === requests.length) {
-
 				gis = GIS.core.getInstance(init);
 
 				GIS.app.createExtensions();
@@ -8574,7 +8580,7 @@ Ext.onReady( function() {
 						var i18nArray = Ext.decode(r.responseText);
 
 						Ext.Ajax.request({
-							url: init.contextPath + '/api/system/context.json',
+							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
 								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
@@ -8595,7 +8601,7 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&include=id,name,children[id,name]',
+									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&include=id,name,children[id,name]',
 									success: function(r) {
 										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();
@@ -8607,6 +8613,11 @@ Ext.onReady( function() {
 									url: init.contextPath + '/api/organisationUnitLevels.json?include=id,name,level&paging=false',
 									success: function(r) {
 										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+										if (!init.organisationUnitLevels.length) {
+											alert('No organisation unit levels');
+										}
+
 										fn();
 									}
 								});
@@ -8627,10 +8638,8 @@ Ext.onReady( function() {
 												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
 											}
 
-											init.user = {
-												ou: ou,
-												ouc: ouc
-											}
+											init.user.ou = ou;
+                                            init.user.ouc = ouc;
 										}
 										else {
 											alert('User is not assigned to any organisation units');
@@ -8644,7 +8653,7 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/me/authorization/F_GIS_ADMIN',
 									success: function(r) {
-										init.user.isAdmin = Ext.decode(r.responseText);
+										init.user.isAdmin = (r.responseText === 'true');
 										fn();
 									}
 								});

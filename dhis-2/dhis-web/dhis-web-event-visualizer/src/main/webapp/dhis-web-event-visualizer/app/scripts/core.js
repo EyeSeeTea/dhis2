@@ -93,9 +93,37 @@ Ext.onReady( function() {
 						value: 'value'
 					}
 				},
-				root: {
-					id: 'root'
-				}
+                chart: {
+                    series: 'series',
+                    category: 'category',
+                    filter: 'filter',
+                    column: 'column',
+                    stackedcolumn: 'stackedcolumn',
+                    bar: 'bar',
+                    stackedbar: 'stackedbar',
+                    line: 'line',
+                    area: 'area',
+                    pie: 'pie',
+                    radar: 'radar'
+                },
+                data: {
+                    domain: 'domain_',
+                    targetLine: 'targetline_',
+                    baseLine: 'baseline_',
+                    trendLine: 'trendline_'
+                },
+                image: {
+                    png: 'png',
+                    pdf: 'pdf'
+                },
+                cmd: {
+                    init: 'init_',
+                    none: 'none_',
+                    urlparam: 'id'
+                },
+                root: {
+                    id: 'root'
+                }
 			};
 
 			dimConf = conf.finals.dimension;
@@ -1794,15 +1822,11 @@ Ext.onReady( function() {
                 var paramString,
                     dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
                     ignoreKeys = ['longitude', 'latitude'],
-                    dataTypeMap = {
-                        'aggregated_values': 'aggregate',
-                        'individual_cases': 'query'
-                    },
                     nameItemsMap;
 
                 format = format || 'json';
 
-                paramString = '/api/analytics/events/' + dataTypeMap[view.dataType] + '/' + view.program.id + '.' + format + '?';
+                paramString = '/api/analytics/events/aggregate/' + view.program.id + '.' + format + '?';
 
 				// stage
 				paramString += 'stage=' + view.programStage.id;

@@ -192,33 +192,38 @@ public class ProgramStageDataElement
     // -------------------------------------------------------------------------
 
     @Override
+    public boolean equals( Object o )
+    {
+        if ( this == o ) return true;
+        if ( o == null || getClass() != o.getClass() ) return false;
+
+        ProgramStageDataElement that = (ProgramStageDataElement) o;
+
+        if ( dataElement != null ? !dataElement.equals( that.dataElement ) : that.dataElement != null ) return false;
+        if ( programStage != null ? !programStage.equals( that.programStage ) : that.programStage != null ) return false;
+
+        return true;
+    }
+
+    @Override
     public int hashCode()
     {
-        final int prime = 31;
-        int result = 1;
-
-        result = result * prime + programStage.hashCode();
-        result = result * prime + dataElement.hashCode();
-
+        int result = programStage != null ? programStage.hashCode() : 0;
+        result = 31 * result + (dataElement != null ? dataElement.hashCode() : 0);
         return result;
     }
 
     @Override
-    public boolean equals( Object object )
+    public String toString()
     {
-        if ( object == null )
-        {
-            return false;
-        }
-
-        if ( getClass() != object.getClass() )
-        {
-            return false;
-        }
-
-        final ProgramStageDataElement other = (ProgramStageDataElement) object;
-
-        return dataElement.getId() == other.getDataElement().getId()
-            && programStage.getId() == other.getProgramStage().getId();
+        return "ProgramStageDataElement{" +
+            "programStage=" + programStage +
+            ", dataElement=" + dataElement +
+            ", compulsory=" + compulsory +
+            ", allowProvidedElsewhere=" + allowProvidedElsewhere +
+            ", sortOrder=" + sortOrder +
+            ", displayInReports=" + displayInReports +
+            ", allowDateInFuture=" + allowDateInFuture +
+            '}';
     }
 }

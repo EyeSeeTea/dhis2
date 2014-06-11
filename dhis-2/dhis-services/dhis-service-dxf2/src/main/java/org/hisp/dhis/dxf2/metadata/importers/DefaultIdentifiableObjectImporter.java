@@ -28,6 +28,8 @@ package org.hisp.dhis.dxf2.metadata.importers;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -43,7 +45,6 @@ import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.metadata.ImportUtils;
@@ -51,22 +52,27 @@ import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandlerUtils;
+import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.CollectionUtils;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageDataElementService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
+import org.hisp.dhis.program.ProgramValidation;
+import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
-import org.hisp.dhis.system.util.functional.Function1;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -104,6 +110,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     private DataElementOperandService dataElementOperandService;
 
     @Autowired
+    private ProgramStageDataElementService programStageDataElementService;
+
+    @Autowired
     private ObjectBridge objectBridge;
 
     @Autowired
@@ -111,6 +120,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     @Autowired
     private AclService aclService;
+
+    @Autowired
+    private SchemaService schemaService;
 
     @Autowired( required = false )
     private List<ObjectHandler<T>> objectHandlers;
@@ -137,15 +149,18 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     // keeping this internal for now, might be split into several classes
     private class NonIdentifiableObjects
     {
-        private Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
+        private Set<AttributeValue> attributeValues = Sets.newHashSet();
 
         private Expression leftSide;
         private Expression rightSide;
 
-        private Set<DataElementOperand> compulsoryDataElementOperands = new HashSet<DataElementOperand>();
-        private Set<DataElementOperand> greyedFields = new HashSet<DataElementOperand>();
+        private Set<DataElementOperand> compulsoryDataElementOperands = Sets.newHashSet();
+        private Set<DataElementOperand> greyedFields = Sets.newHashSet();
 
         private DataEntryForm dataEntryForm;
+
+        private Set<ProgramStageDataElement> programStageDataElements = Sets.newHashSet();
+        private Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = Sets.newHashSet();
 
         public void extract( T object )
         {
@@ -155,6 +170,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             dataEntryForm = extractDataEntryForm( object, "dataEntryForm" );
             compulsoryDataElementOperands = extractDataElementOperands( object, "compulsoryDataElementOperands" );
             greyedFields = extractDataElementOperands( object, "greyedFields" );
+            programStageDataElements = extractProgramStageDataElements( object );
+            programTrackedEntityAttributes = extractProgramTrackedEntityAttributes( object );
         }
 
         public void delete( T object )
@@ -172,6 +189,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
 
                 deleteDataElementOperands( object, "greyedFields" );
+                deleteProgramStageDataElements( object );
+                deleteProgramTrackedEntityAttributes( object );
             }
         }
 
@@ -183,6 +202,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             saveDataEntryForm( object, "dataEntryForm", dataEntryForm );
             saveDataElementOperands( object, "compulsoryDataElementOperands", compulsoryDataElementOperands );
             saveDataElementOperands( object, "greyedFields", greyedFields );
+            saveProgramStageDataElements( object, programStageDataElements );
+            saveProgramTrackedEntityAttributes( object, programTrackedEntityAttributes );
         }
 
         private void saveDataEntryForm( T object, String fieldName, DataEntryForm dataEntryForm )
@@ -229,34 +250,32 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Expression extractExpression( T object, String fieldName )
         {
-            Expression expression = null;
-
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
             {
-                expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
+                Object expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
 
-                if ( expression != null )
+                if ( expression != null && Expression.class.isAssignableFrom( expression.getClass() ) )
                 {
                     ReflectionUtils.invokeSetterMethod( fieldName, object, new Object[]{ null } );
                 }
             }
 
-            return expression;
+            return null;
         }
 
         private Set<DataElementOperand> extractDataElementOperands( T object, String fieldName )
         {
-            Set<DataElementOperand> dataElementOperands = new HashSet<DataElementOperand>();
+            Set<DataElementOperand> dataElementOperands = Sets.newHashSet();
 
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
             {
                 Set<DataElementOperand> detachedDataElementOperands = ReflectionUtils.invokeGetterMethod( fieldName, object );
-                dataElementOperands = new HashSet<DataElementOperand>( detachedDataElementOperands );
+                dataElementOperands = Sets.newHashSet( detachedDataElementOperands );
 
                 if ( detachedDataElementOperands.size() > 0 )
                 {
                     detachedDataElementOperands.clear();
-                    ReflectionUtils.invokeSetterMethod( fieldName, object, new HashSet<DataElementOperand>() );
+                    ReflectionUtils.invokeSetterMethod( fieldName, object, Sets.newHashSet() );
                 }
             }
 
@@ -265,7 +284,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Set<AttributeValue> extractAttributeValues( T object )
         {
-            Set<AttributeValue> attributeValues = new HashSet<AttributeValue>();
+            Set<AttributeValue> attributeValues = Sets.newHashSet();
 
             if ( ReflectionUtils.findGetterMethod( "attributeValues", object ) != null )
             {
@@ -273,7 +292,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
                 if ( attributeValues.size() > 0 )
                 {
-                    ReflectionUtils.invokeSetterMethod( "attributeValues", object, new HashSet<AttributeValue>() );
+                    ReflectionUtils.invokeSetterMethod( "attributeValues", object, Sets.newHashSet() );
                 }
             }
 
@@ -328,27 +347,36 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
         }
 
+        private void deleteAttributeValues( T object )
+        {
+            if ( !Attribute.class.isAssignableFrom( object.getClass() ) )
+            {
+                Set<AttributeValue> attributeValues = extractAttributeValues( object );
+
+                for ( AttributeValue attributeValue : attributeValues )
+                {
+                    attributeService.deleteAttributeValue( attributeValue );
+                }
+            }
+        }
+
         private void saveAttributeValues( T object, Set<AttributeValue> attributeValues )
         {
             if ( attributeValues.size() > 0 )
             {
-                CollectionUtils.forEach( attributeValues, new Function1<AttributeValue>()
+                for ( AttributeValue attributeValue : attributeValues )
                 {
-                    @Override
-                    public void apply( AttributeValue attributeValue )
+                    Attribute attribute = objectBridge.getObject( attributeValue.getAttribute() );
+
+                    if ( attribute == null )
                     {
-                        Attribute attribute = objectBridge.getObject( attributeValue.getAttribute() );
-
-                        if ( attribute == null )
-                        {
-                            log.debug( "Unknown reference to " + attributeValue.getAttribute() + " on object " + attributeValue );
-                            return;
-                        }
-
-                        attributeValue.setId( 0 );
-                        attributeValue.setAttribute( attribute );
+                        log.debug( "Unknown reference to " + attributeValue.getAttribute() + " on object " + attributeValue );
+                        return;
                     }
-                } );
+
+                    attributeValue.setId( 0 );
+                    attributeValue.setAttribute( attribute );
+                }
 
                 for ( AttributeValue attributeValue : attributeValues )
                 {
@@ -373,31 +401,101 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         {
             Set<DataElementOperand> dataElementOperands = extractDataElementOperands( object, fieldName );
 
-            CollectionUtils.forEach( dataElementOperands, new Function1<DataElementOperand>()
+            for ( DataElementOperand dataElementOperand : dataElementOperands )
             {
-                @Override
-                public void apply( DataElementOperand dataElementOperand )
-                {
-                    dataElementOperandService.deleteDataElementOperand( dataElementOperand );
-                }
-            } );
+                dataElementOperandService.deleteDataElementOperand( dataElementOperand );
+            }
         }
 
-        private void deleteAttributeValues( T object )
+        private Set<ProgramTrackedEntityAttribute> extractProgramTrackedEntityAttributes( T object )
         {
-            if ( !Attribute.class.isAssignableFrom( object.getClass() ) )
-            {
-                Set<AttributeValue> attributeValues = extractAttributeValues( object );
+            Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributeSet = Sets.newHashSet();
 
-                CollectionUtils.forEach( attributeValues, new Function1<AttributeValue>()
+            if ( ReflectionUtils.isCollection( "attributes", object, ProgramTrackedEntityAttribute.class ) )
+            {
+                Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = ReflectionUtils.invokeGetterMethod( "attributes", object );
+
+                for ( ProgramTrackedEntityAttribute trackedEntityAttribute : programTrackedEntityAttributes )
                 {
-                    @Override
-                    public void apply( AttributeValue attributeValue )
+                    if ( sessionFactory.getCurrentSession().contains( trackedEntityAttribute ) )
                     {
-                        attributeService.deleteAttributeValue( attributeValue );
+                        sessionFactory.getCurrentSession().delete( trackedEntityAttribute );
                     }
-                } );
+
+                    programTrackedEntityAttributeSet.add( trackedEntityAttribute );
+                }
+
+                sessionFactory.getCurrentSession().flush();
+                programTrackedEntityAttributes.clear();
+                sessionFactory.getCurrentSession().flush();
             }
+
+            return programTrackedEntityAttributeSet;
+        }
+
+        private void deleteProgramTrackedEntityAttributes( T object )
+        {
+            extractProgramTrackedEntityAttributes( object );
+        }
+
+        private void saveProgramTrackedEntityAttributes( T object, Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes )
+        {
+            for ( ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes )
+            {
+                Map<Field, Object> identifiableObjects = detachFields( programTrackedEntityAttribute );
+                reattachFields( programTrackedEntityAttribute, identifiableObjects );
+                sessionFactory.getCurrentSession().persist( programTrackedEntityAttribute );
+            }
+
+            ReflectionUtils.invokeSetterMethod( "programTrackedEntityAttributes", object, programTrackedEntityAttributes );
+        }
+
+        private Set<ProgramStageDataElement> extractProgramStageDataElements( T object )
+        {
+            Set<ProgramStageDataElement> programStageDataElements = Sets.newHashSet();
+
+            if ( ReflectionUtils.findGetterMethod( "programStageDataElements", object ) != null )
+            {
+                programStageDataElements = ReflectionUtils.invokeGetterMethod( "programStageDataElements", object );
+
+                for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
+                {
+                    if ( sessionFactory.getCurrentSession().contains( programStageDataElement ) )
+                    {
+                        programStageDataElementService.deleteProgramStageDataElement( programStageDataElement );
+                    }
+                }
+
+                sessionFactory.getCurrentSession().flush();
+                ReflectionUtils.invokeSetterMethod( "programStageDataElements", object, Sets.newHashSet() );
+                sessionFactory.getCurrentSession().flush();
+            }
+
+            return programStageDataElements;
+        }
+
+        private void saveProgramStageDataElements( T object, Set<ProgramStageDataElement> programStageDataElements )
+        {
+            for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
+            {
+                Map<Field, Object> identifiableObjects = detachFields( programStageDataElement );
+                reattachFields( programStageDataElement, identifiableObjects );
+
+                if ( ProgramStage.class.isAssignableFrom( object.getClass() ) )
+                {
+                    programStageDataElement.setProgramStage( (ProgramStage) object );
+                }
+
+                programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+            }
+
+            ReflectionUtils.invokeSetterMethod( "programStageDataElements", object, programStageDataElements );
+        }
+
+        private void deleteProgramStageDataElements( T object )
+        {
+            // deletion will be done in extractProgramStageDataElements
+            extractProgramStageDataElements( object );
         }
     }
 
@@ -544,6 +642,14 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return false;
         }
 
+        // for now, don't support ProgramStage, ProgramValidation and EventReport for dryRun
+        if ( (ProgramStage.class.isAssignableFrom( persistedObject.getClass() )
+            || ProgramValidation.class.isAssignableFrom( persistedObject.getClass() )
+            || EventReport.class.isAssignableFrom( persistedObject.getClass() )) && options.isDryRun() )
+        {
+            return true;
+        }
+
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
         nonIdentifiableObjects.extract( object );
         nonIdentifiableObjects.delete( persistedObject );
@@ -569,6 +675,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         reattachFields( object, fields );
 
         persistedObject.mergeWith( object );
+
         updatePeriodTypes( persistedObject );
 
         reattachCollectionFields( persistedObject, collectionFields );
@@ -762,7 +869,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         {
             NameableObject nameableObject = (NameableObject) object;
 
-            if ( nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0 )
+            if ( (nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0)
+                // this is nasty, but we have types in the system which have shortName, but which do -not- require not-null )
+                && !TrackedEntityAttribute.class.isAssignableFrom( object.getClass() )
+                && !TrackedEntity.class.isAssignableFrom( object.getClass() ) )
             {
                 conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty shortName for object " + object );
             }
@@ -885,23 +995,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private Map<Field, Object> detachFields( final Object object )
     {
-        final Map<Field, Object> fieldMap = new HashMap<Field, Object>();
+        final Map<Field, Object> fieldMap = Maps.newHashMap();
         final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjects );
 
-        CollectionUtils.forEach( fieldCollection, new Function1<Field>()
+        for ( Field field : fieldCollection )
         {
-            @Override
-            public void apply( Field field )
-            {
-                Object ref = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+            Object ref = ReflectionUtils.invokeGetterMethod( field.getName(), object );
 
-                if ( ref != null )
-                {
-                    fieldMap.put( field, ref );
-                    ReflectionUtils.invokeSetterMethod( field.getName(), object, new Object[]{ null } );
-                }
+            if ( ref != null )
+            {
+                fieldMap.put( field, ref );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, new Object[]{ null } );
             }
-        } );
+        }
 
         return fieldMap;
     }
@@ -915,14 +1021,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             if ( reference == null )
             {
-                if ( ExchangeClasses.getImportMap().get( idObject.getClass() ) != null )
+                if ( schemaService.getSchema( idObject.getClass() ) != null )
                 {
                     reportReferenceError( object, idObject );
                 }
             }
 
-            // if ( !options.isDryRun() ) { }
-            // TODO why do we have to invoke the setter on dryRun?
             if ( !options.isDryRun() )
             {
                 ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
@@ -932,24 +1036,20 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     private Map<Field, Collection<Object>> detachCollectionFields( final Object object )
     {
-        final Map<Field, Collection<Object>> collectionFields = new HashMap<Field, Collection<Object>>();
+        final Map<Field, Collection<Object>> collectionFields = Maps.newHashMap();
         final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjectCollectionsWithScanned );
 
-        CollectionUtils.forEach( fieldCollection, new Function1<Field>()
+        for ( Field field : fieldCollection )
         {
-            @Override
-            public void apply( Field field )
-            {
-                Collection<Object> objects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+            Collection<Object> objects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
 
-                if ( objects != null && !objects.isEmpty() )
-                {
-                    collectionFields.put( field, objects );
-                    Collection<Object> emptyCollection = ReflectionUtils.newCollectionInstance( field.getType() );
-                    ReflectionUtils.invokeSetterMethod( field.getName(), object, emptyCollection );
-                }
+            if ( objects != null && !objects.isEmpty() )
+            {
+                collectionFields.put( field, objects );
+                Collection<Object> emptyCollection = ReflectionUtils.newCollectionInstance( field.getType() );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, emptyCollection );
             }
-        } );
+        }
 
         return collectionFields;
     }
@@ -961,26 +1061,22 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             Collection<Object> collection = collectionFields.get( field );
             final Collection<Object> objects = ReflectionUtils.newCollectionInstance( field.getType() );
 
-            CollectionUtils.forEach( collection, new Function1<Object>()
+            for ( Object object : collection )
             {
-                @Override
-                public void apply( Object object )
-                {
-                    IdentifiableObject ref = findObjectByReference( (IdentifiableObject) object );
+                IdentifiableObject ref = findObjectByReference( (IdentifiableObject) object );
 
-                    if ( ref != null )
+                if ( ref != null )
+                {
+                    objects.add( ref );
+                }
+                else
+                {
+                    if ( schemaService.getSchema( idObject.getClass() ) != null || UserCredentials.class.isAssignableFrom( idObject.getClass() ) )
                     {
-                        objects.add( ref );
-                    }
-                    else
-                    {
-                        if ( ExchangeClasses.getImportMap().get( idObject.getClass() ) != null || UserCredentials.class.isAssignableFrom( idObject.getClass() ) )
-                        {
-                            reportReferenceError( idObject, object );
-                        }
+                        reportReferenceError( idObject, object );
                     }
                 }
-            } );
+            }
 
             if ( !options.isDryRun() )
             {

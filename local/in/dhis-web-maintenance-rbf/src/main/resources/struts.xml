@@ -33,7 +33,7 @@
 		<action name="deleteTariffData" class="org.hisp.dhis.rbf.action.DeleteTariffDataAction">
 			<result name="success" type="velocity-json">/dhis-web-maintenance-rbf/tariffStatus.vm</result>
 			<param name="onExceptionReturn">plainTextError</param>
-			<param name="requiredAuthorities">F_TARIFFDATAVALUE_UPDATE</param>					
+			<param name="requiredAuthorities">F_TARIFFDATAVALUE_UPDATE</param>
 		</action>
 		
 		<action name="validateTariffData" class="org.hisp.dhis.rbf.action.ValidateTariffDataAction">
@@ -287,6 +287,7 @@
    		<param name="page">/dhis-web-maintenance-rbf/qualityScorePaymentList.vm</param>
    		<param name="javascripts">javascript/qualityScorePayment.js</param>
    		<param name="menu">/dhis-web-maintenance-rbf/menu.vm</param>
+   		<param name="anyAuthorities">F_QUALITY_SCORE_PAYMENT</param>
    </action>
 
 
@@ -384,21 +385,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <!-- Reports -->
     <action name="PBFInvoiceReportForm" class="org.hisp.dhis.rbf.report.action.PBFInvoiceReportFormAction">
         <result name="success" type="velocity">/main.vm</result>
@@ -406,6 +392,19 @@
         <param name="javascripts">javascript/prevNextPeriods.js</param>
         <param name="menu">/dhis-web-maintenance-rbf/menu.vm</param>
    </action>
+	
+	
+    <!-- PBF Reports -->
+    <action name="pbfReportForm" class="org.hisp.dhis.rbf.report.action.PBFReportFormAction">
+        <result name="success" type="velocity">/main.vm</result>
+        <param name="page">/dhis-web-maintenance-rbf/pbfReportForm.vm</param>
+        <param name="javascripts">javascript/prevNextPeriods.js</param>
+        <param name="menu">/dhis-web-maintenance-rbf/menu.vm</param>
+   </action>	
+	
+	
+	
+	
 	
 	</package>
 </struts>

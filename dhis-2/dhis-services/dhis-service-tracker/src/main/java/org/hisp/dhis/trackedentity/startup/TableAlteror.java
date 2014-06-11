@@ -266,9 +266,11 @@ public class TableAlteror
         
         executeSql( "DROP TABLE orgunitgroupprograms" ); 
         
-        executeSql( "UPDATE trackedentityattribute SET valuetype='combo' WHERE valuetype='optionSet'" );
+        executeSql( "UPDATE trackedentityattribute SET valuetype='optionSet' WHERE valuetype='combo'" );
         
         updateAggregateQueryBuilder();
+        
+        executeSql( "UPDATE trackedentityaudit SET accessedmodule='tracked_entity_instance_dashboard' WHERE accessedmodule='instance_dashboard' or accessedmodule='patient_dashboard'" );
     }
 
     // -------------------------------------------------------------------------

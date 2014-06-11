@@ -426,6 +426,7 @@ function ExecutionDateSaver( programId_, programStageInstanceId_, executionDate_
 					jQuery('#executionDate').val(executionDate);
 					jQuery("#org_" + programStageInstanceId ).html(getFieldValue("orgunitName"));
 					showById('inputCriteriaDiv');
+					hideById('removeProgram');
 					handleResponse (json);
 			   },
 			   error: function(request,status,errorThrown) {
@@ -1097,7 +1098,7 @@ function autocompletedField( idField )
 					$( this ).val( "" );
 					if(!unSave)
 						saveVal( dataElementUid );
-					input.data( "autocomplete" ).term = "";
+					input.data( "uiAutocomplete" ).term = "";
 					return false;
 				}
 			}
@@ -1105,7 +1106,7 @@ function autocompletedField( idField )
 	})
 	.addClass( "ui-widget" );
 	
-	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+	input.data( "uiAutocomplete" )._renderItem = function( ul, item ) {
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
 			.append( "<a>" + item.label + "</a>" )
@@ -1224,7 +1225,7 @@ function autocompletedUsernameField( idField )
 					$( this ).val( "" );
 					if(!unSave)
 						saveVal( dataElementUid );
-					input.data( "autocomplete" ).term = "";
+					input.data( "uiAutocomplete" ).term = "";
 					return false;
 				}
 			}
@@ -1232,7 +1233,7 @@ function autocompletedUsernameField( idField )
 	})
 	.addClass( "ui-widget" );
 	
-	input.data( "autocomplete" )._renderItem = function( ul, item ) {
+	input.data( "uiAutocomplete" )._renderItem = function( ul, item ) {
 		return $( "<li></li>" )
 			.data( "item.autocomplete", item )
 			.append( "<a>" + item.label + "</a>" )

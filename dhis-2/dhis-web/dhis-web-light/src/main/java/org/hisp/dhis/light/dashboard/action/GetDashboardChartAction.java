@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.light.dashboard.action;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,47 +28,39 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.webdomain.Resource;
-import org.hisp.dhis.webapi.webdomain.Resources;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import com.opensymphony.xwork2.Action;
 
-import java.util.Map;
-
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-@Controller
-@RequestMapping( value = ResourceController.RESOURCE_PATH )
-public class ResourceController
+public class GetDashboardChartAction
+    implements Action
 {
-    public static final String RESOURCE_PATH = "/resources";
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------------------------------
-    // GET
-    //-------------------------------------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // Input & Output
+    // -------------------------------------------------------------------------
 
-    @RequestMapping( method = RequestMethod.GET )
-    public String getResources( @RequestParam Map<String, String> parameters, Model model )
+    private int id;
+
+    public void setId( int id )
     {
-        WebOptions options = new WebOptions( parameters );
-        Resources resources = new Resources();
+        this.id = id;
+    }
 
-        if ( options.hasLinks() )
-        {
-            for ( Resource resource : resources.getResources() )
-            {
-                resource.setHref( ContextUtils.getPath( resource.getClazz() ) );
-            }
-        }
+    public int getId()
+    {
+        return id;
+    }
 
-        model.addAttribute( "model", resources );
-        model.addAttribute( "viewClass", "detailed" );
+    // -------------------------------------------------------------------------
+    // Action Implementation
+    // -------------------------------------------------------------------------
 
-        return "resources";
+    @Override
+    public String execute()
+        throws Exception
+    {
+        return SUCCESS;
     }
 }

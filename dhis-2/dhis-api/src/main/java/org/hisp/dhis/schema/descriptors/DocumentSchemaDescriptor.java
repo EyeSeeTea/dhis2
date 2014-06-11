@@ -42,12 +42,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class DocumentSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "document";
+
+    public static final String PLURAL = "documents";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Document.class, "document", "documents" );
-
+        Schema schema = new Schema( Document.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
         schema.setShareable( true );
+        schema.setOrder( 1040 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DOCUMENT_PUBLIC_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_DOCUMENT_PRIVATE_ADD" ) ) );

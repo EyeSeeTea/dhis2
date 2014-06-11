@@ -1,4 +1,4 @@
-<h3>$i18n.getString( "validation_criteria_management" ) #openHelp( "validation_criteria" )</h3>
+<h3>$i18n.getString( "validation_criteria_management" )  #openHelp( "validation_criteria" )</h3>
 <h5>$program.displayName</h5>
 
 <div id="contextMenu" class="contextMenu" style="width: 210px;">
@@ -17,7 +17,9 @@
 			<table width="100%">
 				<tr>
 					<td>
-						$i18n.getString( "filter_by_name" ): <input type="text" onkeyup="filterValues( this.value , 1)" style="width:250px"/>
+						<input type="text" id='keySearch' onchange="filterValues( this.value , 1)" style="width:250px" placeholder="$i18n.getString( 'filter_by_name' )" />
+						<input type='button' value="$i18n.getString('filter')" onclick="filterValues( getFieldValue('keySearch' , 1)"/>
+						<input type='button' value="$i18n.getString('cancel')" onclick="setFieldValue('keySearch',''), filterValues('', 1)"/>
 					</td>
 					
 					<td style="text-align:right" >			

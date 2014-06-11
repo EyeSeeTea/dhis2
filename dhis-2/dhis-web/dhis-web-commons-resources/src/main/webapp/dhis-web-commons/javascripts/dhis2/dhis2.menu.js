@@ -67,7 +67,7 @@
          * @param iconUrl
          * @returns {String}
          */
-            fixUrlIfNeeded = function (iconUrl) {
+         fixUrlIfNeeded = function (iconUrl) {
             if (iconUrl.substring(0, 2) === "..") {
                 return getBaseUrl() + iconUrl.substring(2, iconUrl.length);
             }
@@ -390,7 +390,7 @@
 
         that.search = function (searchFor) {
             //Get all the apps
-            var menuItems = menu.getApps(),
+            var menuItems = that.getApps(),
                 searchMatches = [];
 
             //Find the matches
@@ -404,7 +404,7 @@
                 }
             });
 
-            //Order the search matches on occurance
+            //Order the search matches on occurrence
             searchMatches.sort(function (a, b) {
                 if (a.searchScore < b.searchScore)
                     return -1;
@@ -412,6 +412,8 @@
                     return 1;
                 return 0;
             });
+
+            return searchMatches;
         }
 
         if (typeof preLoadedData === 'object') {
@@ -420,4 +422,7 @@
 
         return that;
     };
+
+    //Expose the fixUrl method so we can use externally
+    dhis2.menu.fixUrlIfNeeded = fixUrlIfNeeded;
 })(dhis2 = dhis2 || {});

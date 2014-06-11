@@ -42,12 +42,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataElementGroupSchemaDescriptor implements SchemaDescriptor
 {
+    public static final String SINGULAR = "dataElementGroup";
+
+    public static final String PLURAL = "dataElementGroups";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( DataElementGroup.class, "dataElementGroup", "dataElementGroups" );
-
+        Schema schema = new Schema( DataElementGroup.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
         schema.setShareable( true );
+        schema.setOrder( 1210 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DATAELEMENTGROUP_PUBLIC_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_DATAELEMENTGROUP_PRIVATE_ADD" ) ) );

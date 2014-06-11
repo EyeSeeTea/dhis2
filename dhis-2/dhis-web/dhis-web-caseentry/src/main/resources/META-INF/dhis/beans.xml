@@ -553,8 +553,6 @@
 		<property name="attributeValueService"
 			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-		<property name="attributeService"
-			ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
 	</bean>
 
 	<bean
@@ -650,12 +648,6 @@
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="relationshipService"
 			ref="org.hisp.dhis.relationship.RelationshipService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.caseentry.action.trackedentity.ValidateSearchRelationshipAction"
-		class="org.hisp.dhis.caseentry.action.trackedentity.ValidateSearchRelationshipAction"
-		scope="prototype">
 	</bean>
 
 	<!-- Reminder -->

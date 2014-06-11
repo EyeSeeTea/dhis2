@@ -1,5 +1,7 @@
 package org.hisp.dhis.user;
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
@@ -8,6 +10,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -150,6 +153,24 @@ public interface UserService
 
     List<User> queryForUsers( String query );
 
+    /**
+     * Returns a set of CategoryOptionGroups that may be seen by the current
+     * user, if the current user has any CategoryOptionGroupSet constraint(s).
+     *
+     * @param userCredentials User credentials to check restrictions for.
+     * @return Set of CategoryOptionGroups if constrained, else null.
+     */
+    public Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials );
+
+    /**
+     * Returns a set of CategoryOptions that may be seen by the current
+     * user, if the current user has any Category constraint(s).
+     *
+     * @param userCredentials User credentials to check restrictions for.
+     * @return Set of CategoryOptions if constrained, else null.
+     */
+    public Set<DataElementCategoryOption> getCoDimensionConstraints( UserCredentials userCredentials );
+
     // -------------------------------------------------------------------------
     // UserCredentials
     // -------------------------------------------------------------------------
@@ -241,13 +262,29 @@ public interface UserService
     int getActiveUsersCount( Date since );
 
     /**
+     * Filters the given list of users based on whether the current
+     * user is allowed to update.
+     *
+     * @param users the list of users.
+     */
+    void canUpdateUsersFilter( Collection<User> users );
+
+    /**
      * Filters the given list of user credentials based on whether the current
      * user is allowed to update.
-     * 
+     *
      * @param userCredentials the list of user credentials.
      */
     void canUpdateFilter( Collection<UserCredentials> userCredentials );
-    
+
+    /**
+     * Is the current user allowed to update this user?
+     *
+     * @param userCredentials credentials to check for allowing update.
+     * @return true if current user can update this user, else false.
+     */
+    boolean canUpdate( UserCredentials userCredentials );
+
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
