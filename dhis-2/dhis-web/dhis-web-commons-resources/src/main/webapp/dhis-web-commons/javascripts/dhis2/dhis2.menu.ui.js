@@ -533,7 +533,12 @@
         defaultMenu.menuItems.subscribe(defaultMenu.render, true);
         defaultMenu.menuItems.subscribe(function (menu) {
             var menuElementList = document.querySelector("#" + defaultMenu.name + "_button ul.menuDropDownBox"),
-                menuItemsHtml =defaultMenu.renderMenuItems(menu.getApps());
+                menuItemsHtml;
+
+            if (menuElementList === null)
+                return;
+
+            menuItemsHtml = defaultMenu.renderMenuItems(menu.getApps());
 
             jqLite(menuElementList.querySelectorAll("li")).remove();
             jqLite(menuElementList).append(menuItemsHtml);
