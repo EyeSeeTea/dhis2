@@ -1,11 +1,34 @@
-<div class="panel panel-default" ng-controller="NotesController">
+<div class="panel panel-primary" ng-controller="NotesController">
     <div class="panel-heading">
-        {{notesWidget.title| translate}}
-        <span class="pull-right">
-            <a href ng-click="removeWidget(notesWidget)" title="{{'remove'| translate}}"><span class='black'><i class="fa fa-times-circle"></i></span></a>            
-        </span>        
+        {{'notes'| translate}}
+        <span class="btn-group-sm right">
+            <span ng-show="currentEvent.notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
+            &nbsp;&nbsp;
+            <a href ng-click="showAddNote()" title="{{'add_note'| translate}}"><i class="fa fa-plus fa-lg"></i></a>   
+        </span>
     </div>
-    <div class="panel-body dashboard-element-container">
-        This is notes.
+    <div ng-show="searchNoteField">
+        <div class="list-group">
+            <input class="form-control" ng-model="noteSearchText" ng-blur="searchNote()" placeholder="{{'type_for_search'| translate}}">            
+        </div>
     </div>
+
+    <div ng-show="addNoteField">
+        <div class="list-group">
+            <textarea class="form-control" rows="3" ng-model="note" placeholder="{{'enter_your_note_here'| translate}}"></textarea>                          
+        </div>
+        <button ng-click="addNote()" class="big-button lightblue">
+            {{'add'| translate}}
+        </button>
+        <button ng-click="closeAddNote()" class="big-button grey">
+            {{'cancel'| translate}}
+        </button>
+    </div>
+
+    <div class="list-group" ng-repeat="note in currentEvent.notes| filter:noteSearchText">
+        <div class="over-flow-hidden">
+            <a href ng-click="displayNote(note)" title="{{'details'| translate}}" class="list-group-item"><i>{{note.storedDate}}</i> - {{note.value}}</a> 
+        </div>
+    </div>  
+
 </div>

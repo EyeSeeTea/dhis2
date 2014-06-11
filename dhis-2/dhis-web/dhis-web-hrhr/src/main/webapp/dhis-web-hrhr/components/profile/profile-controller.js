@@ -1,8 +1,13 @@
 trackerCapture.controller('ProfileController',
-        function($scope,                
+        function($scope,       
+                $location,
+                $filter,
+                orderByFilter,
                 storage,
-                CurrentSelection,
+                DHIS2EventFactory,
                 TEIService,
+                DialogService,
+                CurrentSelection,
                 AttributesFactory,
                 TranslationService) {
 
@@ -10,104 +15,151 @@ trackerCapture.controller('ProfileController',
     
     //attributes for profile    
     $scope.attributes = {};    
-    $scope.editProfile = false;    
+    $scope.editProfile = false;  
     
-    AttributesFactory.getAll().then(function(atts){
-        angular.forEach(atts, function(att){
-            $scope.attributes[att.id] = att;
-        }); 
-    }); 
+    //profile view mode
+    $scope.minimal = true; 
     
-    //listen for the selected entity       
-    $scope.$on('dashboard', function(event, args) { 
-        var selections = CurrentSelection.get();
-        $scope.selectedEntity = selections.tei; 
-        $scope.selectedProgram = selections.pr; 
+    //selections
+    $scope.pregnantWomanId = null;
+    $scope.selectedProgramId = null;
+    
+    $scope.pregnantWomanId = ($location.search()).tei; 
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+    $scope.gestationalAge = {displayName: 'Gestational Age', value: 'UNKNOWN', code: 'UNKNOWN'};
+    
+    $scope.$on('selectedEntity', function(event, args) {  
 
-        $scope.processTeiAttributes();
+        var selections = CurrentSelection.get();                  
+        $scope.pregnantWoman = selections.tei;      
+        $scope.selectedProgram = selections.pr;     
+
+        AttributesFactory.getAll().then(function(atts){
+            angular.forEach(atts, function(att){
+                $scope.attributes[att.id] = att;
+                $scope.attributes[att.code] = att;
+            }); 
+            $scope.processTeiAttributes();
+        });
         
-    });
+        //Fetch available events for the selected person
+        DHIS2EventFactory.getByEntity($scope.pregnantWoman, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {
+            $scope.dhis2Events = data;        
+
+            if(!angular.isUndefined(data)){
+                angular.forEach(data, function(dhis2Event){
+                    dhis2Event.eventDate = moment(dhis2Event.eventDate, 'YYYY-MM-DD')._d;
+                    dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
+                    dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+                });
+
+                $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
+                $scope.dhis2Events.reverse();
+
+                for(var i=0; i<$scope.dhis2Events.length; i++){
+                    if(angular.isObject($scope.dhis2Events[i].dataValues)){
+                        for(var j=0; j<$scope.dhis2Events[i].dataValues.length; j++){
+                            var dv = $scope.dhis2Events[i].dataValues[j];
+
+                            if(!angular.isUndefined(dv.dataElement)){                                
+                                var de = storage.get(dv.dataElement);
+
+                                if(angular.isObject(de)){
+                                    //get gestational age - first try ultrasound
+                                    if(de.code == 'MMD_GES_WK3'){
+                                        $scope.gestationalAge.value = Math.floor( dv.value / 7 ) + '+' + dv.value % 7;
+                                        $scope.gestationalAge.displayName = de.name + ' (weeks + days)';
+                                        $scope.gestationalAge.code = de.code;                                
+                                    }
+
+                                    //if no ultrasound, try LMP
+                                    if(de.code == 'MMD_LMP_DAT' && $scope.gestationalAge.code != 'MMD_GES_WK3'){
+
+                                        var age = moment().diff(moment(dv.value, 'YYYY-MM-DD'),'days');               
+                                        $scope.gestationalAge.value = Math.floor( age / 7 ) + '+' + age % 7;
+                                        $scope.gestationalAge.displayName = storage.get('MMD_GES_WK2').name + ' (weeks + days)';
+                                        $scope.gestationalAge.code = de.code;                                
+                                    }
+
+                                    //if no LMP, try clinical estimation
+                                    if(de.code == 'MMD_GES_WK1' && $scope.gestationalAge.code != 'MMD_GES_WK3' && $scope.gestationalAge.code != 'MMD_LMP_DAT'){
+                                        $scope.gestationalAge.value = Math.floor( dv.value / 7 ) + '+' + dv.value % 7;
+                                        $scope.gestationalAge.displayName = de.name + ' (weeks + days)';
+                                        $scope.gestationalAge.code = de.code;                                
+                                    }
+                                }                            
+                            }                            
+                        }
+                    }                    
+                }
+            }
+        });
+    });       
     
     //display only those attributes that belong the selected program
     //if no program, display attributesInNoProgram
     $scope.processTeiAttributes = function(){
        
         angular.forEach(storage.get('TRACKED_ENTITIES'), function(te){
-            if($scope.selectedEntity.trackedEntity === te.id){
+            if($scope.pregnantWoman.trackedEntity === te.id){
                 $scope.trackedEntity = te;
             }
         });
         
-        angular.forEach($scope.selectedEntity.attributes, function(att){
+        angular.forEach($scope.pregnantWoman.attributes, function(att){
             if(att.type === 'number' && !isNaN(parseInt(att.value))){
                 att.value = parseInt(att.value);
             }
-        });
+        });        
         
-        if($scope.selectedProgram){
-            //show only those attributes in selected program            
-            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                for(var i=0; i<$scope.selectedEntity.attributes.length; i++){
-                    $scope.selectedEntity.attributes[i].show = false;
-                    var processed = false;
-                    for(var j=0; j<atts.length && !processed; j++){
-                        if($scope.selectedEntity.attributes[i].attribute === atts[j].id){
-                            processed = true;
-                            $scope.selectedEntity.attributes[i].show = true;
-                        }
-                    }                                   
-                }
+        AttributesFactory.getLocalAttributes().then(function(localAttributes){ 
+                
+            //assume every tei has values for the attributes - initially all are empty values
+            var newAttributes = [];
+            angular.forEach(localAttributes.pregnantWoman, function(localAttribute){   
+                var att = $scope.attributes[localAttribute.code];                    
+                var newAttribute = {attribute: att.id,
+                                    code: att.code, 
+                                    displayName: att.name, 
+                                    mandatoryToDisplay: localAttribute.mandatoryToDisplay,
+                                    type: att.valueType,
+                                    value: ''};
+                angular.forEach($scope.pregnantWoman.attributes, function(attribute){
+                    if(attribute.attribute === newAttribute.attribute){
+                        newAttribute.value = attribute.value;
+                    }                               
+                });                                            
+                newAttributes.push(newAttribute);
             }); 
-        }
-        else{
-            //show attributes in no program
-            AttributesFactory.getWithoutProgram().then(function(atts){
-                for(var i=0; i<$scope.selectedEntity.attributes.length; i++){
-                    $scope.selectedEntity.attributes[i].show = false;
-                    var processed = false;
-                    for(var j=0; j<atts.length && !processed; j++){
-                        if($scope.selectedEntity.attributes[i].attribute === atts[j].id){
-                            processed = true;
-                            $scope.selectedEntity.attributes[i].show = true;
-                        }
-                    }                                   
-                }
-            });
-        }              
-    };
-    
-    $scope.enableEdit = function(){
-        $scope.entityAttributes = angular.copy($scope.selectedEntity.attributes);
-        $scope.editProfile = !$scope.editProfile; 
-    };
-    
-    $scope.save = function(){
-        
-        var tei = angular.copy($scope.selectedEntity);
-        tei.attributes = [];
-        //prepare to update the tei on the server side 
-        angular.forEach($scope.selectedEntity.attributes, function(attribute){
-            if(!angular.isUndefined(attribute.value)){
-                tei.attributes.push({attribute: attribute.attribute, value: attribute.value});
-            } 
-        });
-        
-        TEIService.update(tei).then(function(updateResponse){
-            
-            if(updateResponse.status !== 'SUCCESS'){//update has failed
-                var dialogOptions = {
-                        headerText: 'registration_error',
-                        bodyText: updateResponse.description
-                    };
-                DialogService.showDialog({}, dialogOptions);
-                return;
-            }            
-        });
-        $scope.editProfile = !$scope.editProfile;
+
+            $scope.pregnantWoman.attributes = newAttributes;                
+
+            for(var i=0; i<$scope.pregnantWoman.attributes.length; i++){
+                $scope.pregnantWoman.attributes[i].show = false;
+                var processedForDisplay = false;
+                for(var j=0; j<newAttributes.length && !processedForDisplay; j++){
+                    if($scope.pregnantWoman.attributes[i].attribute === newAttributes[j].attribute){
+                        processedForDisplay = true;
+                        $scope.pregnantWoman.attributes[i].show = true;
+                    }
+                }                                   
+            }
+        }); 
     };
     
     $scope.cancel = function(){
-        $scope.selectedEntity.attributes = $scope.entityAttributes;  
+        $scope.pregnantWoman.attributes = $scope.entityAttributes;  
         $scope.editProfile = !$scope.editProfile;
+    };   
+       
+    $scope.personDetails = function(pregnantWoman) {        
+        $scope.minimal = !$scope.minimal;
+        if(angular.isObject( pregnantWoman.relationships) ){
+            $scope.contact = pregnantWoman.relationships[0].displayName;
+            
+            PersonService.getContactPerson(pregnantWoman.relationships[0].person).then(function(contactPerson){
+                $scope.contactPerson = contactPerson;
+            });            
+        }        
     };
 });

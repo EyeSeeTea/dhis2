@@ -1,8 +1,8 @@
 trackerCapture.controller('RegistrationController', 
         function($scope,
                 $location,
+                $filter,
                 AttributesFactory,
-                TEService,
                 TEIService,
                 EnrollmentService,
                 DialogService,
@@ -13,102 +13,135 @@ trackerCapture.controller('RegistrationController',
     TranslationService.translate();   
     
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-    $scope.enrollment = {enrollmentDate: '', incidentDate: ''};   
+    $scope.selectedProgram = storage.get('SELECTED_PROGRAM');
+    $scope.selectedRelationship = storage.get('RELATIONSHIP_TYPES')[0];
+
+    $scope.enrollment = {enrollmentDate: $filter('date')(new Date(), 'yyyy-MM-dd'), incidentDate: $filter('date')(new Date(), 'yyyy-MM-dd')};   
     
-    AttributesFactory.getWithoutProgram().then(function(atts){
-        $scope.attributes = atts;
-    });
+    if($scope.selectedProgram && $scope.selectedOrgUnit){
+        
+        AttributesFactory.getAttributesForPregnantWoman().then(function(attributes){            
+            $scope.pregnantWomanAttributes = attributes;
+        });
+        
+        AttributesFactory.getAttributesForContactPerson().then(function(attributes){            
+            $scope.contactPersonAttributes = attributes;
+        });
+    }
+    
+    $scope.registerEntity = function(showDashboard){       
+        
+        if($scope.selectedProgram && $scope.selectedOrgUnit && $scope.selectedRelationship){
+            //check for form validity
+            $scope.outerForm.submitted = true;        
+            if( $scope.outerForm.$invalid ){
+                return false;
+            }            
             
-    $scope.trackedEntities = {available: []};
-    TEService.getAll().then(function(entities){
-        $scope.trackedEntities.available = entities;   
-        $scope.trackedEntities.selected = $scope.trackedEntities.available[0];
-    });
-    
-    //watch for selection of org unit from tree
-    $scope.$watch('selectedProgram', function() {        
-        if( angular.isObject($scope.selectedProgram)){
-            $scope.trackedEntityList = [];
-            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                $scope.attributes = atts;
+            //form is valid, continue the registration
+            //get selected entity
+            var selectedTrackedEntity = $scope.selectedProgram.trackedEntity.id;
+            
+            //get registration attributes for pregnant woman
+            var pwAttributes = [];
+            angular.forEach($scope.pregnantWomanAttributes, function(pwAttribute) {
+                if (!angular.isUndefined(pwAttribute.value)) {
+                    var attribute = {attribute: pwAttribute.id, value: pwAttribute.value};
+                    if(pwAttribute.valueType === "date"){
+                        attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
+                        attribute.value = Date.parse(attribute.value);            
+                        attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                    }
+                    pwAttributes.push(attribute);
+                }
             });
-        }
-    });    
-    
-    $scope.registerEntity = function(showDashboard){
-        
-        //get selected entity
-        var selectedTrackedEntity = '';        
-        if($scope.selectedProgram){
-            selectedTrackedEntity = $scope.selectedProgram.trackedEntity.id;
-        }
-        else{
-            selectedTrackedEntity = $scope.trackedEntities.selected.id;
-        }
-        
-        //get tei attributes and their values
-        var registrationAttributes = [];    
-        angular.forEach($scope.attributes, function(attribute){
-            if(!angular.isUndefined(attribute.value)){
-                var att = {attribute: attribute.id, value: attribute.value};
-                registrationAttributes.push(att);
-            } 
-        });       
-        
-        //prepare tei model and do registration
-        $scope.tei = {trackedEntity: selectedTrackedEntity, orgUnit: $scope.selectedOrgUnit.id, attributes: registrationAttributes };   
-        var teiId = '';
-    
-        TEIService.register($scope.tei).then(function(tei){
-            
-            if(tei.status === 'SUCCESS'){
-                
-                teiId = tei.reference;
-                
-                //registration is successful and check for enrollment
-                if($scope.selectedProgram){    
-                    //enroll TEI
-                    var enrollment = {trackedEntityInstance: teiId,
-                                program: $scope.selectedProgram.id,
-                                status: 'ACTIVE',
-                                dateOfEnrollment: $scope.enrollment.enrollmentDate,
-                                dateOfIncident: $scope.enrollment.incidentDate
-                            };
-                    EnrollmentService.enroll(enrollment).then(function(data){
-                        if(data.status != 'SUCCESS'){
-                            //enrollment has failed
+            $scope.pregnantWoman = {trackedEntity: selectedTrackedEntity, attributes: pwAttributes, orgUnit: $scope.selectedOrgUnit.id};         
+
+            //get registration attributes for contact person
+            var cpAttributes = [];
+            angular.forEach($scope.contactPersonAttributes, function(cpAttribute) {
+                if (!angular.isUndefined(cpAttribute.value)) {
+                    var attribute = {attribute: cpAttribute.id, value: cpAttribute.value};
+                    if(cpAttribute.valueType === "date"){
+                        attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
+                        attribute.value = Date.parse(attribute.value);            
+                        attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                    }
+                    cpAttributes.push(attribute);
+                }
+            });            
+            $scope.contactPerson = {trackedEntity: selectedTrackedEntity, attributes: cpAttributes, orgUnit: $scope.selectedOrgUnit.id}; 
+
+            //first register contact person (as it is needed for relationship)
+            TEIService.register($scope.contactPerson).then(function(cp){
+
+                if(cp.status === 'SUCCESS'){
+                    
+                    //assign relationship for pregnant woman
+                    var relationship = [{relationship: $scope.selectedRelationship.id, trackedEntityInstance: cp.reference}];
+                    $scope.pregnantWoman.relationships = relationship;
+                    
+                    //register pregnant woman
+                    TEIService.register($scope.pregnantWoman).then(function(pw){
+                        if(pw.status === 'SUCCESS'){
+                            //enroll pregnant woman
+                            var enrollment = {trackedEntityInstance: pw.reference,
+                                        program: $scope.selectedProgram.id,
+                                        status: 'ACTIVE',
+                                        dateOfEnrollment: $scope.enrollment.enrollmentDate,
+                                        dateOfIncident: $scope.enrollment.incidentDate
+                                    };
+                            EnrollmentService.enroll(enrollment).then(function(data){
+                                if(data.status != 'SUCCESS'){
+                                    //enrollment has failed
+                                    console.log('the error is:  ', data.description);
+                                    var dialogOptions = {
+                                            headerText: 'enrollment_error',
+                                            bodyText: data.description
+                                        };
+                                    DialogService.showDialog({}, dialogOptions);
+                                    return;
+                                }
+                            });
+                        }
+                        else{
+                            //registration has failed
                             var dialogOptions = {
-                                    headerText: 'enrollment_error',
-                                    bodyText: data.description
+                                    headerText: 'registration_error',
+                                    bodyText: pw.description
                                 };
                             DialogService.showDialog({}, dialogOptions);
                             return;
                         }
+                        
+                        if(showDashboard){
+                            $location.path('/dashboard').search({tei: pw.reference});
+                        }
+                        else{
+                            angular.forEach($scope.pregnantWomanAttributes, function(attribute){
+                                attribute.value = ''; 
+                            });
+
+                            angular.forEach($scope.contactPersonAttributes, function(attribute){
+                                attribute.value = ''; 
+                            });
+                        }                        
                     });
                 }
-            }
-            else{
-                //registration has failed
-                var dialogOptions = {
-                        headerText: 'registration_error',
-                        bodyText: tei.description
-                    };
-                DialogService.showDialog({}, dialogOptions);
-                return;
-            }
-            
-            if(showDashboard){
-                $location.path('/dashboard').search({selectedEntityId: teiId,
-                                                selectedProgramId: $scope.selectedProgram ? $scope.selectedProgram.id : null});
-            }
-            else{            
-                
-                angular.forEach($scope.attributes, function(attribute){
-                    attribute.value = ''; 
-                });
-                $scope.enrollment.enrollmentDate = '';
-                $scope.enrollment.incidentDate =  '';
-            }
-        });
+                else{
+                    //registration has failed
+                    var dialogOptions = {
+                            headerText: 'registration_error',
+                            bodyText: cp.description
+                        };
+                    DialogService.showDialog({}, dialogOptions);
+                    return;
+                }
+            });            
+        }        
+    };
+    
+    $scope.cancel = function(){
+        $location.path('/anc');
     };
 });

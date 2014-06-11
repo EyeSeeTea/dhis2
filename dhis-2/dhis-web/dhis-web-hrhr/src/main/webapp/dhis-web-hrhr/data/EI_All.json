@@ -1,0 +1,2852 @@
+[
+    {
+        "code": "MMD_ALL",
+        "name": "Allergies (drugs and/or severe food allergies)",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "None",
+                "value": 0
+            },
+            {
+                "label": "Penicillin allergy",
+                "value": 1
+            },
+            {
+                "label": "Other medicine - please specify",
+                "value": 2
+            },
+            {
+                "label": "Other severe allergy - please specify",
+                "value": 3
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "13",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_ALL# != \"None\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": ["#MMD_ALL#"],
+                    "summary": ["#MMD_ALL#"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_CON",
+        "name": "Chronic conditions ",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "None",
+                "value": 0
+            },
+            {
+                "label": "Chronic hypertension",
+                "value": 1
+            },
+            {
+                "label": "Autoimmune disease",
+                "value": 2
+            },
+            {
+                "label": "Diabetes",
+                "value": 3
+            },
+            {
+                "label": "HIV",
+                "value": 4
+            },
+            {
+                "label": "Renal disease",
+                "value": 5
+            },
+            {
+                "label": "Other - please specify",
+                "value": 6
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "14",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_CON# == \"Chronic hypertension\" || #MMD_CON# == \"Autoimmune disease\" || #MMD_CON# == \"Diabetes\" || #MMD_CON# == \"Renal disease\"",
+                "task": {
+                    "dependencies": ["EA8b_TRE_ASP"],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#MMD_CON# == \"HIV\"",
+                "task": {
+                    "dependencies": ["EA7_TRE_HIV1", "EA7_TRE_HIV2"],
+                    "conditionsComplications": ["Pre-pregnancy HIV POSITIVE"],
+                    "summary": ["Pre-pregnancy HIV POSITIVE"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#MMD_CON# != \"HIV\" && #MMD_CON# != \"None\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": ["#MMD_CON#"],
+                    "summary": ["#MMD_CON#"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS_GRA",
+        "name": "Previous pregnancies",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "15",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS_GRA_DAT",
+        "name": "Previous pregnancies (date)",
+        "type": "string",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "15",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS_PAR",
+        "name": "Previous deliveries",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "16",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS_OUT",
+        "name": "Previous pregnancy outcomes",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Live born",
+                "value": 0
+            },
+            {
+                "label": "Antepartum stillbirth",
+                "value": 1
+            },
+            {
+                "label": "Intrapartum stillbirth",
+                "value": 2
+            },
+            {
+                "label": "Stillbirth of unknown timing",
+                "value": 3
+            },
+            {
+                "label": "Neonatal death",
+                "value": 4
+            },
+            {
+                "label": "Miscarriage",
+                "value": 5
+            },
+            {
+                "label": "Termination of pregnancy",
+                "value": 6
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "17",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS_DEL",
+        "name": "Previous modes of delivery",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Spontaneous vaginal",
+                "value": 0
+            },
+            {
+                "label": "Assisted vaginal",
+                "value": 1
+            },
+            {
+                "label": "CS",
+                "value": 2
+            }
+        ],
+        "id": "W4zW3aPyS0G",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "18",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_OBS",
+        "name": "Conditions in previous pregnancies",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "None",
+                "value": 0
+            },
+            {
+                "label": "Pre eclampsia",
+                "value": 1
+            },
+            {
+                "label": "Eclampsia",
+                "value": 2
+            },
+            {
+                "label": "Previous sibling required phototherapy",
+                "value": 3
+            },
+            {
+                "label": "Other - please specify",
+                "value": 4
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "19",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_OBS# == \"Pre eclampsia\" || #MMD_OBS# == \"Eclampsia\"",
+                "task": {
+                    "dependencies": [
+                        "EA8b_TRE_ASP"
+                    ],
+                    "conditionsComplications": ["#MMD_OBS#"],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#MMD_OBS# != \"None\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": ["#MMD_OBS#"],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_LMP_DAT",
+        "name": "Date of last menstrual period (LMP)",
+        "type": "date",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "20",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_ULS_DAT",
+        "name": "Estimated date of delivery ultrasound",
+        "type": "date",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "21",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_GES_WK1",
+        "name": "Gestational age based on clinical estimation",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "22",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_GES_WK2",
+        "name": "Gestational age based on LMP",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": "true",
+        "calculatedFrom": "#MMD_LMP_DAT#",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_GES_WK3",
+        "name": "Gestational age based on ultrasound",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "23",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_KG",
+        "name": "Weight",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "24",
+        "trailingUnit": "kg",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "MMD_CM",
+        "name": "Height",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "25",
+        "trailingUnit": "cm",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA5_CLI_SMO1",
+        "name": "Smoking at first ANC visit?",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "26",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA5_CLI_SMO1# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA5_TRE_SMO"
+                    ],
+                    "conditionsComplications": [
+                        "Smoking at ANC1"
+                    ],
+                    "summary": [
+                        "Smoking at ANC1"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA5_CLI_SMO1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Smoking information missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "MMD_BP_SYS",
+        "name": "Blood pressure, systolic mm Hg",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "27",
+        "trailingUnit": "mm Hg",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_BP_SYS# >= 160",
+                "task": {
+                    "dependencies": ["EA8c_TRE_HYP"],
+                    "conditionsComplications": ["Severe Hypertension"],
+                    "summary": ["Severe Hypertension"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "MMD_BP_DIA",
+        "name": "Blood pressure, diastolic mmHg",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "28",
+        "trailingUnit": "mm Hg",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_BP_DIA# >=105",
+                "task": {
+                    "dependencies": ["EA8c_TRE_HYP"],
+                    "conditionsComplications": ["Severe Hypertension"],
+                    "summary": ["Severe Hypertension"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                },
+                "value": "#MMD_BP_DIA# >=90 && #MMD_BP_DIA# < 105 && ( #MMD_GES_WK1# < 20 || #MMD_GES_WK2# < 20 || #MMD_GES_WK3# < 20 )",
+                "task": {
+                    "dependencies": ["EA8b_TRE_ASP"],
+                    "conditionsComplications": ["Chronic Hypertension"],
+                    "summary": ["Chronic Hypertension"],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "name": "Number of fetuses (plurality)",
+        "code": "MMD_PLU",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "29",
+        "trailingUnit": "",
+        "dependency": false,
+        "optionSet": "",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_PLU# >= 2",
+                "task": {
+                    "dependencies": ["EA8b_TRE_ASP"],
+                    "conditionsComplications": ["#MMD_PLU#"],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA3_STA_TET",
+        "name": "Tetanus Immunization Status",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Unknown status or unimmunized",
+                "value": 0
+            },
+            {
+                "label": "Sufficiently immunized",
+                "value": 1
+            },
+            {
+                "label": ">=28 days since TT1",
+                "value": 2
+            },
+            {
+                "label": ">=180 days since TT2",
+                "value": 3
+            },
+            {
+                "label": ">1 year since TT3",
+                "value": 4
+            },
+            {
+                "label": ">1 year since TT4",
+                "value": 5
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "30",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA3_STA_TET# == 0",
+                "task": {
+                    "dependencies": [
+                        "EA3_TRE_TET1"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA3_STA_TET# == 2",
+                "task": {
+                    "dependencies": [
+                        "EA3_TRE_TET2"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": [
+                        "EA3_TRE_TET2 due in 28 days"
+                    ]
+                }
+            },
+            {
+                "value": "#EA3_STA_TET# == 3",
+                "task": {
+                    "dependencies": [
+                        "EA3_TRE_TET3"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": [
+                        "EA3_TRE_TET3 due in 180 days"
+                    ]
+                }
+            },
+            {
+                "value": "#EA3_STA_TET# == 4",
+                "task": {
+                    "dependencies": [
+                        "EA3_TRE_TET4"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": [
+                        "EA3_TRE_TET4 due in 365 days"
+                    ]
+                }
+            },
+            {
+                "value": "#EA3_STA_TET# == 5",
+                "task": {
+                    "dependencies": [
+                        "EA3_TRE_TET5"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": [
+                        "EA3_TRE_TET5 due in 365 days"
+                    ]
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA4b_PRE_MAL",
+        "name": "Sleeping under mosquito nets",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "31",
+        "trailingUnit": "",
+        "dependency": "#EA4b_PRE_MAL# == 0",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA4b_PRE_MAL# == 1",
+                "task": {
+                    "dependencies": [
+                        "what should I do?"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Promotion of preventive bednets given"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA4b_PRE_MAL# == 0",
+                "task": {
+                    "dependencies": [
+                        "what should I do?"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "\"Sleeping under mosquito nets\" information missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA4b_PRE_MAL# == -1",
+                "task": {
+                    "dependencies": [
+                        "what should I do?"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "\"Sleeping under mosquito nets\" information missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8a_TRE_CAL",
+        "name": "Pre-eclampsia prevention",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "32",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8a_TRE_CAL# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Calcium supplementation to prevent pre-eclampsia prescribed"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8a_TRE_CAL# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "EA8a_SUP_CA not initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8a_TRE_CAL# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "EA8a_SUP_CA missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA2_LAB_HB",
+        "name": "Hemoglobin",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "33",
+        "trailingUnit": "g/dL",
+        "dependency": "#EA2_LAB_HB# < 11",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_LAB_HB# <= 7",
+                "task": {
+                    "dependencies": [
+                        "EA2_LAB_HB",
+                        "EA2_TRE_ANE_SEV"
+                    ],
+                    "conditionsComplications": [
+                        "Severe anemia"
+                    ],
+                    "summary": [
+                        "Severe anemia"
+                    ],
+                    "reminders": [
+                        "Hemoglobin screening follow up (EA2_LAB_HB) at next ANC visit"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_LAB_HB# > 7 && #EA2_LAB_HB# < 11",
+                "task": {
+                    "dependencies": [
+                        "EA2_LAB_HB",
+                        "EA2_TRE_ANE_MOD"
+                    ],
+                    "conditionsComplications": [
+                        "Moderate anemia"
+                    ],
+                    "summary": [
+                        "Moderate anemia"
+                    ],
+                    "reminders": [
+                        "Hemoglobin screening follow up at next ANC visit"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_LAB_HB# >= 11",
+                "task": {
+                    "dependencies": [
+                        "EA2_TRE_SUPP"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "No anemia"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA2_LAB_HCR",
+        "name": "Hematocrit",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "%",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_LAB_HCR# <= 20",
+                "task": {
+                    "dependencies": [
+                        "EA2_LAB_HB",
+                        "EA2_TRE_ANE_SEV"
+                    ],
+                    "conditionsComplications": [
+                        "Severe anemia"
+                    ],
+                    "summary": [
+                        "Severe anemia"
+                    ],
+                    "reminders": [
+                        "Hemoglobin screening follow up at ANC_nn"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_LAB_HCR# > 20 && #EA2_LAB_HCR# < 33",
+                "task": {
+                    "dependencies": [
+                        "EA2_LAB_HB",
+                        "EA2_TRE_ANE_MOD"
+                    ],
+                    "conditionsComplications": [
+                        "Moderate anemia"
+                    ],
+                    "summary": [
+                        "Moderate anemia"
+                    ],
+                    "reminders": [
+                        "Hemoglobin screening follow up at ANC_nn"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_LAB_HCR# >= 33",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "No anemia"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA2_CLI_PAL",
+        "name": "Extreme pallor (Conjunctival AND palmar)",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_CLI_PAL# == 1 && (#EA2_LAB_HB# <= 7 || #EA2_LAB_HB# == -1 || #EA2_LAB_HB# <= 7 || #EA2_LAB_HB# == -1 || #EA2_LAB_CHR# <= 20)",
+                "task": {
+                    "dependencies": [
+                        "EA2_TRE_ANE_SEV"
+                    ],
+                    "conditionsComplications": [
+                        "Severe anemia"
+                    ],
+                    "summary": [
+                        "Severe anemia"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_CLI_PAL# == 1 && (#EA2_LAB_HCR# <= 20 || #EA2_LAB_HCR# == -1)",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Check Hemoglobin AND/OR Hematocrit to confirm anemia"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_CLI_PAL# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Check Hemoglobin AND/OR Hematocrit to confirm anemia"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA2_TRE_SUPP",
+        "name": "Iron and folic acid supplementation",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "((#EA2_LAB_HB# > 11 || #EA2_LAB_HCR > 33) && #EA2_CLI_PAL# == 0 ) || #EA2_TRE_ANE_MOD# == 1 || #EA2_TRE_ANE_SEV# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_TRE_SUPP# == 1 && PREVALANCE_OF_ANEMIA_MORE_THAN_40_PERCENT_IN_THE_AREA",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Iron and folic acid supplementation for 6 months"
+                    ],
+                    "reminders": [
+                        "Iron and folic acid supplementation 3 months PostPartum"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA2_TRE_SUPP# == 1 && PREVALANCE_OF_ANEMIA_LESS_THAN_40_PERCENT_IN_THE_AREA",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Iron and folic acid supplementation for 6 months"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA2_TRE_ANE_MOD",
+        "name": "Treatment for moderate anemia",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "((#EA2_LAB_HB# > 7 && #EA2_LAB_HB# < 11) || (#EA2_LAB_HCR > 20 && #EA2_LAB_HCR# < 33)) && #EA2_TRE_ANE_MOD# == 0 && #EA2_TRE_ANE_SEV# == 0",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_TRE_ANE_MOD# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Medical treatment for moderate anemia"
+                    ],
+                    "summary": [
+                        "Medical treatment for moderate anemia"
+                    ],
+                    "reminders": [
+                        "Moderate anemia, medication prescribed. If anemia persists, refer to hospital, if not continue with (EA2_TRE_SUPP) after 3 months of medical treatment."
+                    ],
+                    "messaging": [],
+                    "scheduling": [
+                        "In 4-6 weeks; reassess moderate anemia AND check clinical progress and compliance with treatment."
+                    ]
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA2_TRE_ANE_SEV",
+        "name": "Treatment for severe anemia",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "((#EA2_LAB_HB# < 7 || #EA2_LAB_HCR < 20) && #EA2_TRE_ANE_MOD# == 0 && #EA2_TRE_ANE_SEV# == 0",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA2_TRE_ANE_SEV# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Medical treatment for severe anemia"
+                    ],
+                    "summary": [
+                        "Medical treatment for severe anemia"
+                    ],
+                    "reminders": [
+                        "Severe anemia, medication prescribed. If anemia persists, refer urgently to hospital, if not continue with (EA2_TRE_SUPP) after 3 months of medical treatment."
+                    ],
+                    "messaging": [],
+                    "scheduling": [
+                        "In 2 weeks; check for Heamoglobin AND Hematocrit AND check clinical progress and compliance with treatment."
+                    ]
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA3_STA_TET_DAT",
+        "name": "Date of latest immunization",
+        "type": "date",
+        "pageOfEntry": [
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA3_STA_TET_DAT# == ",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Cathegoric label"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA4a_TRE_MAL",
+        "name": "Malaria treatment",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "(#EA4a_LAB_MAL1# == 1 || #EA4a_LAB_MAL2# == 1) && #MMD_LMP_DAT# >= 98",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA4a_TRE_MAL# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Antimalarial medicaton prescribed"
+                    ],
+                    "summary": [
+                        "Antimalarial medicaton prescribed"
+                    ],
+                    "reminders": [
+                        "Dependent on national antimalarial policies, medication might be repeated twice"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA3_TRE_TET",
+        "name": "Tetanus immunization",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Dose 1",
+                "value": 0
+            },
+            {
+                "label": "Does 2",
+                "value": 1
+            },
+            {
+                "label": "Does 3",
+                "value": 2
+            },
+            {
+                "label": "Does 4",
+                "value": 3
+            },
+            {
+                "label": "Does 5",
+                "value": 4
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANC1_DEP",
+            "ANCnn_GEN",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA4a_LAB_MAL1",
+        "name": "Microscopy screening for malaria",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "34",
+        "trailingUnit": "",
+        "dependency": "#EA4a_LAB_MAL1# == 1 || #EA4a_LAB_MAL2# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA4a_LAB_MAL1# == \"Positive\"",
+                "task": {
+                    "dependencies": [
+                        "EA4a_TRE_MAL",
+                        "EA4a_LAB_MAL1",
+                        "EA4a_LAB_MAL2"
+                    ],
+                    "conditionsComplications": [
+                        "Malaria confirmed"
+                    ],
+                    "summary": [
+                        "Malaria confirmed with parasitological microscopy"
+                    ],
+                    "reminders": [
+                        "Malaria confirmed with parasitological microscopy, prescribe antimalarial"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA4a_LAB_MAL1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Microscopy screening for malaria test is missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA4a_LAB_MAL2",
+        "name": "RDT screening for malaria",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "35",
+        "trailingUnit": "",
+        "dependency": "#EA4a_LAB_MAL1# == 1 || #EA4a_LAB_MAL2# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA4a_LAB_MAL2# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA4a_TRE_MAL",
+                        "EA4a_LAB_MAL1",
+                        "EA4a_LAB_MAL2"
+                    ],
+                    "conditionsComplications": [
+                        "Malaria confirmed"
+                    ],
+                    "summary": [
+                        "Malaria confirmed with RDT test"
+                    ],
+                    "reminders": [
+                        "Malaria confirmed with RDT test, prescribe antimalarial"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA4a_LAB_MAL2# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Microscopy screening for malaria test missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA5_TRE_SMO",
+        "name": "Smoking cessation treatment",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA5_CLI_SMO# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA5_TRE_SMO# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Counseling and behavioral interventions on smoking cessation performed"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA6_TRE_SYP2",
+        "name": "Syphilis counseling",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA6_LAB_SYP1# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA6_TRE_SYP2# == 1 && #EA6_TRE_SYP1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Syphilis counseling given"
+                    ],
+                    "reminders": [
+                        "Syphilis confirmed with RPR-test, prescribe medication"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA6_TRE_SYP2# == 0 && #EA6_TRE_SYP1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Syphilis counseling missing or not performed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA6_TRE_SYP2# == -1 && #EA6_TRE_SYP1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Syphilis counseling missing or not performed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA6_LAB_SYP",
+        "name": "Syphilis Rapid Plasma Reagin (RPR) serology screening",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Negative",
+                "value": 0
+            },
+            {
+                "label": "Positive",
+                "value": 1
+            },
+            {
+                "label": "Indeterminate",
+                "value": 2
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "36",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA6_LAB_SYP# == \"Positive\"",
+                "task": {
+                    "dependencies": [
+                        "EA6_TRE_SYP1",
+                        "EA6_TRE_SYP2"
+                    ],
+                    "conditionsComplications": [
+                        "Syphilis confirmed"
+                    ],
+                    "summary": [
+                        "Syphilis confirmed with RPR-test"
+                    ],
+                    "reminders": [
+                        "Syphilis confirmed with RPR-test, prescribe medication"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA6_LAB_SYP# == \"Negative\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Counsel on safe sex inc correct and consistent use of condoms to prevent infection"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA6_LAB_SYP# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Syphilis Rapid Plasma Reagin (RPR) serology screening result missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA6_TRE_SYP1",
+        "name": "Syphilis treatment",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA6_LAB_SYP# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA6_TRE_SYP1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Syphilis treatment given"
+                    ],
+                    "summary": [
+                        "Syphilis treatment given"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA7_LAB_HIV",
+        "name": "HIV rapid test screening",
+        "type": "string",
+        "optionSet": [
+            {
+                "label": "Negative",
+                "value": 0
+            },
+            {
+                "label": "Positive",
+                "value": 1
+            },
+            {
+                "label": "Indeterminate",
+                "value": 2
+            }
+        ],
+        "pageOfEntry": [
+            "ANC1_GEN"
+        ],
+        "sequenceOnPage": "37",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA7_LAB_HIV# == \"Positive\"",
+                "task": {
+                    "dependencies": [
+                        "EA7_TRE_HIV1",
+                        "EA7_TRE_HIV2"
+                    ],
+                    "conditionsComplications": [
+                        "HIV positive, confirmed by rapid HIV-test"
+                    ],
+                    "summary": [
+                        "HIV positive, confirmed by rapid HIV-test"
+                    ],
+                    "reminders": [
+                        "HIV confirmed with rapid HIV-test, prescribe antiviral medication accoring to local protocol"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_LAB_HIV# == \"Negative\"",
+                "task": {
+                    "dependencies": [
+                        "EA7_TRE_HIV3"
+                    ],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_LAB_HIV# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "HIV rapid test screening result missing"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "MMD_PRT_US",
+        "name": "Proteinuria, Urine stix",
+        "type": "int",
+        "pageOfEntry": [
+            "ANC1_GEN",
+            "ANCnn_GEN"
+        ],
+        "sequenceOnPage": "38",
+        "trailingUnit": "mg/dl",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#MMD_PRT_US# >= 3",
+                "task": {
+                    "dependencies": ["EA8d_TRE_ECL1"],
+                    "conditionsComplications": ["Proteinuria proved, risk factor for eclampsia"],
+                    "summary": ["Proteinuria proved, risk factor for eclampsia"],
+                    "reminders": ["Proteinuria proved, risk factor for eclampsia"],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA7_TRE_HIV1",
+        "name": "HIV treatment",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA7_LAB_HIV# == 1 || #MMD_CON4# == \"HIV\"",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA7_TRE_HIV1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Anteretroviral HIV-medication initiated"
+                    ],
+                    "summary": [
+                        "Anteretroviral HIV-medication initiated"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV1# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "reminders": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "reminders": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA7_TRE_HIV2",
+        "name": "HIV counseling - when positive",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA7_LAB_HIV# == 1 || #MMD_CON4# == \"HIV\"",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA7_TRE_HIV2# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "HIV-counseling conducted"
+                    ],
+                    "summary": [
+                        "HIV-counseling conducted"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV2# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "HIV-counseling not conducted"
+                    ],
+                    "reminders": [
+                        "HIV-counseling not yet initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV2# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "reminders": [
+                        "Anteretroviral HIV-medication not yet initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA7_TRE_HIV3",
+        "name": "HIV counseling - when negative",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA7_LAB_HIV# == 0",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA7_TRE_HIV3# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Coundeling on safe sex conducted"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV3# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Coundeling on safe sex not yet conducted"
+                    ],
+                    "reminders": [
+                        "Coundeling on safe sex not yet conducted"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA7_TRE_HIV3# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Coundeling on safe sex not yet conducted"
+                    ],
+                    "reminders": [
+                        "Coundeling on safe sex not yet conducted"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8b_TRE_ASP",
+        "name": "Pre-eclampsia high risk",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#MMD_OBS# == \"pre eclampsia\" || #MMD_OBS# == \"Eclampsia\" || #MMD_PLU# >= 2 || #MMD_CON4# == \"HIV\"",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8b_TRE_ASP# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "75mg Aspirin daily to prevent pre-eclampsia in high risk pregnancy"
+                    ],
+                    "summary": [
+                        "75mg Aspirin daily to prevent pre-eclampsia in high risk pregnancy"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8b_TRE_ASP# == 0 && (#MMD_CON# == \"Autoimmune disease\" || #MMD_CON# == \"Diabetes\" || #MMD_CON# == \"Renal disease\")",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Identified as high risk of pre-eclampsia. Low-dose aspirin not yet prescribed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8b_TRE_ASP# == -1 && (#MMD_CON# == \"Autoimmune disease\" || #MMD_CON# == \"Diabetes\" || #MMD_CON# == \"Renal disease\")",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Identified as high risk of pre-eclampsia. Low-dose aspirin not yet prescribed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8c_TRE_HYP",
+        "name": "Severe hypertension",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8c_TRE_HYP# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Severe hypertension, antihypertensive treatment initiated according to guidelines"
+                    ],
+                    "summary": [
+                        "Severe hypertension, antihypertensive treatment initiated according to guidelines"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8c_TRE_HYP# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe hypertension, antihypertensive treatment not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8c_TRE_HYP# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe hypertension, antihypertensive treatment not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8d_TRE_ECL1",
+        "name": "Severe pre-eclampsia prevention",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8d_TRE_ECL1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Severe pre-eclampsia, treatment with Magnesiumsulfat initiated to prevent Eclampsia according to guidelines"
+                    ],
+                    "summary": [
+                        "Severe pre-eclampsia, treatment with Magnesiumsulfat initiated to prevent Eclampsia according to guidelines"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8d_TRE_ECL1# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe pre-eclampsia, eclampsia prevention with Magnesium-sulfat not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8d_TRE_ECL1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe pre-eclampsia, eclampsia prevention with Magnesium-sulfat not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8d_CLI_ECL",
+        "name": "Eclampsia generalized seizures ",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8d_CLI_ECL# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA8d_TRE_ECL2"
+                    ],
+                    "conditionsComplications": [
+                        "Eclampsia convulsions"
+                    ],
+                    "summary": [
+                        "Eclampsia convulsions"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA8d_TRE_ECL2",
+        "name": "Eclampsia treatment",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA8d_TRE_ECL2# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "Eclampsia, treatment with Magnesiumsulfat initiated"
+                    ],
+                    "summary": [
+                        "Eclampsia, treatment with Magnesiumsulfat initiated"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8d_TRE_ECL2# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe eclampsia, treatment with Magnesium-sulfat not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA8d_TRE_ECL2# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Severe eclampsia, treatment with Magnesium-sulfat not initiated according to guidelines"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA9_CLI_BRE",
+        "name": "Breech presentation (>=37 weeks) confirmed by skilled health personnel",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA9_CLI_BRE# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA9_TRE_BRE1"
+                    ],
+                    "conditionsComplications": [
+                        "Breech presentation (>=37 weeks) confirmed by skilled health personnel"
+                    ],
+                    "summary": [
+                        "Breech presentation (>=37 weeks) confirmed by skilled health personnel"
+                    ],
+                    "reminders": [
+                        "Breech presentation (>=37 weeks) confirmed, consider to perform External Cephalic version"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA9_CLI_BRE# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA9_CLI_BRE# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA9_TRE_BRE1",
+        "name": "Breech presentation (>=37 weeks), External Cephalic Version (ECV) performed",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA9_TRE_BRE1# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA9_TRE_BRE2"
+                    ],
+                    "conditionsComplications": [
+                        "External Cephalic Version performed"
+                    ],
+                    "summary": [
+                        "External Cephalic Version performed"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": [
+                        "Schedule new appointment in one week"
+                    ]
+                }
+            },
+            {
+                "value": "#EA9_TRE_BRE1# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA9_TRE_BRE1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA9_TRE_BRE2",
+        "name": "External Cephalic Version (ECV) >=37 weeks performed conversion remaining after 1 week",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": false,
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA9_TRE_BRE2# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "Successful ECV after 1 week"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA9_TRE_BRE2# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "ECV performed, the conversion to cephalic presentation did not persist"
+                    ],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA9_TRE_BRE2# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "name": "Suspected PROM at term_speculum examination test result",
+        "code": "EA10a_CLI_PROM1",
+        "type": "string",
+        "id": "DwWIh6D3fSr",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#MMD_GES_WK1# >= 37 || #MMD_GES_WK2# >= 37 || #MMD_GES_WK3# >= 37",
+        "optionSet": [
+            {
+                "label": "Negative",
+                "value": 0
+            },
+            {
+                "label": "Positive",
+                "value": 1
+            },
+            {
+                "label": "Not performed",
+                "value": 2
+            }
+        ],
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_CLI_PROM1# == \"Positive\"",
+                "task": {
+                    "dependencies": [
+                        "EA10a_TRE_PROM1",
+                        "EA10a_CLI_PROM2"
+                    ],
+                    "conditionsComplications": [
+                        "PROM at term, speculum examination positive"
+                    ],
+                    "summary": [
+                        "PROM at term, speculum examination positive"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_CLI_PROM1# == \"Negative\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_CLI_PROM1# == \"Not performed\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Suspected PROM at term, speculum examination not performed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "name": "PROM at term, woman offered a choice of induction of labour or expectant managment",
+        "code": "EA10a_TRE_PROM1",
+        "type": "string",
+        "id": "SeXllT5ypsh",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA10a_CLI_PROM1# == 1",
+        "optionSet": [
+            {
+                "label": "Not offered a choice of management",
+                "value": 0
+            },
+            {
+                "label": "Offered a choice of management a chooses induction with vaginal PGE2",
+                "value": 1
+            },
+            {
+                "label": "Offered a choice of management and chooses expectant management",
+                "value": 2
+            }
+        ],
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_TRE_PROM1# == \"Offered a choice of management a chooses induction with vaginal PGE2\"",
+                "task": {
+                    "dependencies": [
+                        "EA10a_TRE_PROM2"
+                    ],
+                    "conditionsComplications": [
+                        "PROM at term, speculum examination positive"
+                    ],
+                    "summary": [
+                        "PROM at term, speculum examination positive"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PROM1# == \"Not offered a choice of management\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "PROM at term, woman has not been offered a choice of managment"
+                    ],
+                    "summary": [
+                        "PROM at term, woman has not been offered a choice of managment"
+                    ],
+                    "reminders": [
+                        "PROM at term, woman has not been offered a choice of managment"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PROM1# == \"Offered a choice of management and chooses expectant management\"",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "PROM at term, woman has chosen expectant management"
+                    ],
+                    "summary": [],
+                    "reminders": [
+                        "Suspected PROM at term, speculum examination not performed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA10a_TRE_PROM2",
+        "name": "PROM at term, induction of labour with vaginal PGE2  initiated",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA10a_TRE_PROM1# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_TRE_PROM2# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA10a_TRE_PROM3"
+                    ],
+                    "conditionsComplications": [
+                        "PROM at term, induction of labour initiated with vaginal PGE2"
+                    ],
+                    "summary": [
+                        "PROM at term, induction of labour initiated with vaginal PGE2"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PROM2# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [
+                        "PROM at term, induction of labour not initiated"
+                    ],
+                    "reminders": [
+                        "PROM at term, induction of labour not initiated, despite the woman prefer induction"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PROM2# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA10a_TRE_PROM3",
+        "name": "PROM at term, induction of labour with PGE2 initiated, converted to caesarean section",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA10a_TRE_PROM2# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_TRE_PROM3# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "PROM at term, induction of labour with PGE2 initiated, converted to caesarean section"
+                    ],
+                    "summary": [
+                        "PROM at term, induction of labour with PGE2 initiated, converted to caesarean section"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "code": "EA10a_CLI_PROM2",
+        "name": "PROM at term and severe systemic infection or sepsis",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA10a_CLI_PROM1# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_CLI_PROM2# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "PROM at term and confirmed severe systemic infection or sepsis"
+                    ],
+                    "summary": [
+                        "PROM at term and confirmed severe systemic infection or sepsis"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    },
+    {
+        "name": "Suspected PROM_speculum examination test result",
+        "code": "EA10a_CLI_PPROM1",
+        "type": "string",
+        "id": "yV91JsUXuju",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#MMD_GES_WK1# >= 37 || #MMD_GES_WK2# >= 37 || #MMD_GES_WK3# >= 37",
+        "optionSet": [
+            {
+                "label": "Negative",
+                "value": 0
+            },
+            {
+                "label": "Positive",
+                "value": 1
+            },
+            {
+                "label": "Not performed",
+                "value": 2
+            }
+        ],
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_CLI_PPROM1# == 1",
+                "task": {
+                    "dependencies": [
+                        "EA10a_TRE_PPROM1"
+                    ],
+                    "conditionsComplications": [
+                        "PPROM, speculum examination positive"
+                    ],
+                    "summary": [
+                        "PPROM, speculum examination positive"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_CLI_PPROM1# == 2",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "Suspected PPROM, speculum examination not performed"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": "true"
+    },
+    {
+        "code": "EA10a_TRE_PPROM1",
+        "name": "pPROM receiving erythromycin for 10 days",
+        "type": "bool",
+        "pageOfEntry": [
+            "ANC1_DEP",
+            "ANCnn_DEP"
+        ],
+        "sequenceOnPage": "",
+        "trailingUnit": "",
+        "dependency": "#EA10a_CLI_PPROM1# == 1",
+        "calculated": false,
+        "calculatedFrom": "",
+        "showGuideline": false,
+        "actions": [
+            {
+                "value": "#EA10a_TRE_PPROM1# == 1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [
+                        "PPROM, erythromycin treatment for 10 days initiated"
+                    ],
+                    "summary": [
+                        "PPROM, erythromycin treatment for 10 days initiated"
+                    ],
+                    "reminders": [],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PPROM1# == 0",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "PPROM confirmed, ensure that erythromycin treament will be initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            },
+            {
+                "value": "#EA10a_TRE_PPROM1# == -1",
+                "task": {
+                    "dependencies": [],
+                    "conditionsComplications": [],
+                    "summary": [],
+                    "reminders": [
+                        "PPROM confirmed, ensure that erythromycin treament will be initiated"
+                    ],
+                    "messaging": [],
+                    "scheduling": []
+                }
+            }
+        ],
+        "labResults": ""
+    }
+]

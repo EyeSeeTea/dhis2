@@ -58,6 +58,7 @@ $(document).ready(function()
         
         promise = promise.then( dhis2.tc.store.open );
         promise = promise.then( getUserProfile );
+        promise = promise.then( getRelationships );
         promise = promise.then( getAttributes );
         promise = promise.then( getOptionSetsForAttributes );
         promise = promise.then( getTrackedEntities );
@@ -174,6 +175,21 @@ function getUserProfile()
     var def = $.Deferred();
 
     $.ajax({
+        url: '../api/relationshipTypes.json',
+        type: 'GET'
+    }).done(function(response) {
+        localStorage['RELATIONSHIP_TYPES'] = JSON.stringify(response.relationshipTypes);
+        def.resolve();
+    });
+
+    return def.promise();
+}
+
+function getRelationships()
+{
+    var def = $.Deferred();
+
+    $.ajax({
         url: '../api/me/profile',
         type: 'GET'
     }).done(function(response) {
@@ -191,7 +207,7 @@ function getAttributes()
     $.ajax({
         url: '../api/trackedEntityAttributes.json',
         type: 'GET',
-        data: 'paging=false&fields=id,name,version,description,valueType,inherit,displayOnVisitSchedule,displayInListNoProgram,unique,optionSet[id,version]'
+        data: 'paging=false&fields=id,name,code,version,description,valueType,inherit,displayOnVisitSchedule,displayInListNoProgram,unique,optionSet[id,version]'
     }).done(function(response) {
         dhis2.tc.store.setAll( 'attributes', response.trackedEntityAttributes );        
         def.resolve(response.trackedEntityAttributes);        
@@ -415,7 +431,7 @@ function getProgramStage( id )
         return $.ajax( {
             url: '../api/programStages.json',
             type: 'GET',
-            data: 'filter=id:eq:' + id +'&fields=id,name,dataEntryForm,description,minDaysFromStart,repeatable,programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,type,optionSet[id]]]'
+            data: 'filter=id:eq:' + id +'&fields=id,name,dataEntryForm,description,minDaysFromStart,repeatable,programStageSections[name,programStageDataElements[dataElement[id,code]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,code,name,type,optionSet[id]]]'
         }).done( function( response ){            
             _.each( _.values( response.programStages ), function( programStage ) {                
                 dhis2.tc.store.set( 'programStages', programStage );

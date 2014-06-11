@@ -26,9 +26,18 @@ var trackerCapture = angular.module('trackerCapture',
     $routeProvider.when('/', {
         templateUrl:'views/home.html',
         controller: 'SelectionController'
+    }).when('/registration',{
+        templateUrl:'components/registration/registration.html',
+        controller: 'RegistrationController'
     }).when('/dashboard',{
-        templateUrl:'views/dashboard.html',
+        templateUrl:'components/dashboard/dashboard.html',
         controller: 'DashboardController'
+    }).when('/ancvisit',{
+        templateUrl:'components/ancvisit/ancvisit.html',
+        controller: 'AncVisitController'
+    }).when('/profile',{
+        templateUrl:'components/profile/profile.html',
+        controller: 'ProfileController'
     }).otherwise({
         redirectTo : '/'
     });  

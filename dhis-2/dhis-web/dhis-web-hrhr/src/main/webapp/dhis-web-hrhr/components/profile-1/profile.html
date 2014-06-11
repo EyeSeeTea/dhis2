@@ -1,67 +1,5 @@
-<div class="panel panel-primary" ng-controller="ProfileController">
 
-    <div class="panel-heading">
-        {{'person_profile'| translate}}
-        <span class="btn-group-sm right">
-            <a ng-show="minimal" href ng-click="personDetails(person)" title="{{'details'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>
-            <a ng-show="!minimal" href ng-click="personDetails(person)" title="{{'minimal'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
-        </span>
-    </div>
-
-    <div ng-show='minimal'>
-        <table class="table table-condensed table-bordered">
-            <thead>
-                <tr> 
-                    <th ng-show="attribute.mandatoryToDisplay" ng-repeat="attribute in pregnantWoman.attributes">{{attribute.displayName}}</th>
-                    <th>{{gestationalAge.displayName}}</th>
-                </tr>
-            </thead>
-            <tr>
-                <td ng-show="attribute.mandatoryToDisplay" ng-repeat="attribute in pregnantWoman.attributes">{{attribute.value}}</td> 
-                <td>{{gestationalAge.value}}</td>
-            </tr>
-        </table>
-    </div>
-
-    <div ng-show='!minimal'>
-
-        <table class="table table-condensed table-bordered">
-            <thead>
-                <tr> 
-                    <th ng-repeat="attribute in pregnantWoman.attributes">{{attribute.displayName}}</th>
-                </tr>
-            </thead>
-            <tr>
-                <td ng-repeat="attribute in pregnantWoman.attributes">{{attribute.value}}</td> 
-            </tr>
-        </table>
-    </div>
-
-    <div ng-show='!minimal' class='white-div'>
-        <li class="list-group-item lightblue-no-hover">{{gestationalAge.displayName}}: {{gestationalAge.value}}</li> 
-        <li class="list-group-item"></li> 
-    </div>
-
-    <div ng-show='!minimal' class='white-div'>
-        <li class="list-group-item lightblue-no-hover">{{contact}}</li> 
-    </div>
-    <div ng-show='!minimal'>
-        <table class="table table-condensed table-bordered">
-            <thead>
-                <tr> 
-                    <th ng-repeat="attribute in contactPerson.attributes">{{attribute.displayName}}</th>
-                </tr>
-            </thead>
-            <tr>
-                <td ng-repeat="attribute in contactPerson.attributes">{{attribute.value}}</td> 
-            </tr>
-        </table>
-    </div>
-
-</div>
-
-
-<!--<div class="panel panel-default" ng-controller="ProfileController">
+<div class="panel panel-default" ng-controller="ProfileController">
     <div class="panel-heading">
         {{trackedEntity.name|| 'entity' | translate}} {{profileWidget.title| translate}}
         <span class="nav-pills" ng-show="selectedEntity.attributes.length">
@@ -125,4 +63,4 @@
 
     </div>
 
-</div>-->
+</div>

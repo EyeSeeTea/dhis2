@@ -1,14 +1,16 @@
 <div class="paging-container">
-    <table style="background-color: #ebf0f6;" width='100%'>
+    <table style="background-color: #ebf0f6;table-layout:fixed" width='100%'>
         <tr>
             <td>
-                {{'total_number_of_pages'| translate}}: {{paginator.pageCount()}}
+                {{'total_number_of_pages'| translate}}: <input type="text" style="width:40px;" ng-disabled=true value="{{paginator.pageCount()}}">
             </td>
             <td>
-                <span>{{'rows_per_page'| translate}}:</span> <input type="text" class="form-control" style="width:50px;" ng-model="rowsPerPage"> 
+                {{'rows_per_page'| translate}}: <input type="text" style="width:40px;" ng-model="rowsPerPage"> 
             </td>
             <td>
-                <span>{{'jump_to_page'| translate}}:</span> <input type="text" class="form-control" style="width:50px;" ng-model="currentPage" value="{{paginator.page + 1}}" ng-blur="jumpToPage(currentPage)"> 
+                <div class="row">
+                    {{'jump_to_page'| translate}}: <input type="text" style="width:40px;" ng-model="currentPage" value="{{paginator.page + 1}}" ng-blur="jumpToPage(currentPage)"> 
+                </div>                
             </td>
         </tr>
         <tr>

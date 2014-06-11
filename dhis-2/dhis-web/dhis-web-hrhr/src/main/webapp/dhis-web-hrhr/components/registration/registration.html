@@ -1,90 +1,115 @@
-<div class="bordered-div col-md-12" ng-controller="RegistrationController">    
-    <div class="registration-container">
-        <form name="outerForm" novalidate>
-            
-            <div ng-if='!selectedProgram'>
-                <h3>{{'category' | translate}}</h3>
-                 <table class="table-borderless table-striped">
-                    <tr>
+<div class="row">    
+    <div class="col-md-6">
+        <form name="outerForm" novalidate>        
+
+            <div class="bordered-div ">
+                <h3> <strong>{{'pregnant_woman'| translate}} </strong></h3>
+                <table class="table-borderless table-striped">            
+                    <tr ng-repeat="pw in pregnantWomanAttributes track by $index">
                         <td>
-                            {{'entity_type' | translate}}
+                            {{pw.name}}
                         </td>
                         <td>
-                            <select class="form-control" ng-model="trackedEntities.selected" ng-options="trackedEntity.name for trackedEntity in trackedEntities.available | orderBy: 'name'">                                
-                            </select>                            
+                            <ng-form name="innerFormPregnantWoman">       
+                                <div ng-switch="pw.valueType">
+                                    <div ng-switch-when="date">
+                                        <input type="text" name="foo" class="form-control" ng-date ng-required="pw.mandatory" ng-model="pw.value" />
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="trueOnly">
+                                        <input type="checkbox" name="foo" class="form-control" ng-required="pw.mandatory" ng-model="pw.value" />
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="bool">
+                                        <select name="foo" ng-required="pw.mandatory" ng-model="pw.value" class="form-control">
+                                            <option value="">{{'please_select'| translate}}</option>                        
+                                            <option value="0">{{'no'| translate}}</option>
+                                            <option value="1">{{'yes'| translate}}</option>
+                                        </select>
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="optionSet">
+                                        <input type="text"
+                                               name="foo"
+                                               class="form-control"
+                                               ng-required="pw.mandatory"
+                                               ng-model="pw.value"                                                 
+                                               typeahead="option for option in pw.optionSet.options | filter:$viewValue | limitTo:20" 
+                                               typeahead-open-on-focus 
+                                               />
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="number">
+                                        <input type="number" name="foo" class="form-control" ng-required="pw.mandatory" ng-model="pw.value"/>
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-default>
+                                        <input type="text" name="foo" class="form-control" ng-required="pw.mandatory" ng-model="pw.value" />
+                                        <span ng-show="outerForm.submitted && innerFormPregnantWoman.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                </div>   
+                            </ng-form>
                         </td>
-                    </tr>                   
+                    </tr>  
                 </table>
-                <hr>
             </div>
-            
-            <h3>{{'profile' | translate}}</h3>
-            <table class="table-borderless table-striped">
-                <tr ng-repeat="attribute in attributes">
-                    <td>
-                        {{attribute.name}}
-                    </td>
-                    <td>
-                        <div ng-switch="attribute.valueType">
-                            <div ng-switch-when="date">
-                                <input type="text" class="form-control" ng-date ng-model="attribute.value" />
-                            </div>
-                            <div ng-switch-when="trueOnly">
-                                <input type="checkbox" class="form-control" ng-model="attribute.value" />
-                            </div>
-                            <div ng-switch-when="bool">
-                                <select ng-model="attribute.value" class="form-control">
-                                    <option value="">{{'please_select'| translate}}</option>                        
-                                    <option value="0">{{'no'| translate}}</option>
-                                    <option value="1">{{'yes'| translate}}</option>
-                                </select>
-                            </div>
-                            <div ng-switch-when="optionSet">
-                                <input type="text" 
-                                       class="form-control"
-                                       ng-model="attribute.value"                                                 
-                                       typeahead="option for option in attribute.optionSet.options | filter:$viewValue | limitTo:20" 
-                                       typeahead-open-on-focus 
-                                       />
-                            </div>
-                            <div ng-switch-when="number">
-                                <input type="number" class="form-control" ng-model="attribute.value"/>
-                            </div>
-                            <div ng-switch-default>
-                                <input type="text" class="form-control" ng-model="attribute.value" />                                        
-                            </div>
-                        </div>                                                                                                    
-                    </td>
-                </tr>                        
-            </table>
-            
-            <div ng-if='selectedProgram'>
-                <hr>
-                <h3>{{'enrollment' | translate}}</h3>
-                <table class="dhis2-list-table-striped dhis2-table-hover">
-                    <tr>
+
+            <div class="bordered-div ">
+                <h3> <strong>{{'contact_person'| translate}} </strong></h3>
+                <table class="table-borderless table-striped">
+                    <tr ng-repeat="cp in contactPersonAttributes track by $index">
                         <td>
-                            {{selectedProgram.dateOfEnrollmentDescription}}
+                            {{cp.name}}
                         </td>
                         <td>
-                            <input type="text" class="form-control" ng-date ng-model="enrollment.incidentDate" />
-                        </td>
-                    </tr>     
-                    <tr ng-if="selectedProgram.displayIncidentDate">
-                        <td>
-                            {{selectedProgram.dateOfIncidentDescription}}
-                        </td>
-                        <td>
-                            <input type="text" class="form-control" ng-date ng-model="enrollment.enrollmentDate" />
+                            <ng-form name="innerFormContactPerson">       
+                                <div ng-switch="cp.valueType">
+                                    <div ng-switch-when="date">
+                                        <input type="text" name="foo" ng-required="cp.mandatory" class="form-control" ng-date ng-model="cp.value" />
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="trueOnly">
+                                        <input type="checkbox" name="foo" ng-required="cp.mandatory" class="form-control" ng-model="cp.value" />
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="bool">
+                                        <select name="foo" ng-required="cp.mandatory" ng-model="cp.value" class="form-control">
+                                            <option value="">{{'please_select'| translate}}</option>                        
+                                            <option value="0">{{'no'| translate}}</option>
+                                            <option value="1">{{'yes'| translate}}</option>
+                                        </select>
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="optionSet">
+                                        <input type="text" 
+                                               name="foo"
+                                               class="form-control"
+                                               ng-required="cp.mandatory"
+                                               ng-model="cp.value"                                                 
+                                               typeahead="option for option in cp.optionSet.options | filter:$viewValue | limitTo:20" 
+                                               typeahead-open-on-focus 
+                                               />
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-when="number">
+                                        <input type="number" name="foo" class="form-control" ng-required="cp.mandatory" ng-model="cp.value"/>
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                    <div ng-switch-default>
+                                        <input type="text" name="foo" class="form-control" ng-required="cp.mandatory" ng-model="cp.value" />  
+                                        <span ng-show="outerForm.submitted && innerFormContactPerson.foo.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                                    </div>
+                                </div>
+                            </ng-form>    
                         </td>
                     </tr>
                 </table>
             </div>
-            
+
             <div class="vertical-spacing">                
                 <button type="button" class="btn btn-default" ng-click="registerEntity(true)">{{'save_and_continue'| translate}}</button>
                 <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="registerEntity(false)">{{'save_and_add_new'| translate}}</button>
-                <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="showRegistration()">{{'cancel'| translate}}</button>
+                <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="cancel()">{{'cancel'| translate}}</button>
             </div>
         </form>
     </div>

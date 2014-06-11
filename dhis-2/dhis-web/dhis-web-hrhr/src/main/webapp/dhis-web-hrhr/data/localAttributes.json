@@ -1,0 +1,90 @@
+{
+  "pregnantWoman": [
+    {
+      "code": "MMD_PER_ID",
+      "name": "Unique ID",
+      "order": "1",
+      "mandatoryToDisplay": true,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_NAM",
+      "name": "Name",
+      "order": "2",
+      "mandatoryToDisplay": true,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_DOB",
+      "name": "Date of birth",
+      "order": "3",
+      "mandatoryToDisplay": true,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_ADR1",
+      "name": "Address",
+      "order": "4",
+      "mandatoryToDisplay": false,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_STA",
+      "name": "Civil Status",
+      "order": "5",
+      "mandatoryToDisplay": false,
+      "mandatory": false
+    },
+    {
+      "code": "MMD_PER_MOB",
+      "name": "Mobile number",
+      "order": "6",
+      "mandatoryToDisplay": false,
+      "mandatory": false
+    }
+  ],
+  "contactPerson": [
+    {
+      "code": "MMD_PER_ID",
+      "name": "Unique ID",
+      "order": "1",
+      "mandatoryToDisplay": false,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_NAM",
+      "name": "Name",
+      "order": "2",
+      "mandatoryToDisplay": false,
+      "mandatory": true
+    },
+    {
+      "code": "MMD_PER_ADR1",
+      "name": "Address",
+      "order": "3",
+      "mandatoryToDisplay": false,
+      "mandatory": true
+    },    
+    {
+      "code": "MMD_PER_FSTA",
+      "name": "Father of the child",
+      "order": "4",
+      "mandatoryToDisplay": false,
+      "mandatory": false
+    },    
+    {
+      "code": "MMD_PER_REL",
+      "name": "Relationship with the mother",
+      "order": "5",
+      "mandatoryToDisplay": false,
+      "mandatory": false
+    },
+    {
+      "code": "MMD_PER_MOB",
+      "name": "Mobile number",
+      "order": "6",
+      "mandatoryToDisplay": false,
+      "mandatory": false
+    }
+  ]
+}

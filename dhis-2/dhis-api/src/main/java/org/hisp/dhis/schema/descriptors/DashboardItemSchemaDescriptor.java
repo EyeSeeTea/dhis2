@@ -1,4 +1,4 @@
-package org.hisp.dhis.node;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,20 +25,40 @@ package org.hisp.dhis.node;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.node.types.RootNode;
-
-import java.io.InputStream;
-import java.util.List;
+import com.google.common.collect.Lists;
+import org.hisp.dhis.dashboard.DashboardItem;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface NodeDeserializer extends Deserializer<RootNode>
+@Component
+public class DashboardItemSchemaDescriptor implements SchemaDescriptor
 {
-    List<String> contentTypes();
+    public static final String SINGULAR = "dashboardItem";
 
-    RootNode deserialize( InputStream inputStream ) throws Exception;
+    public static final String PLURAL = "dashboardItems";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
+    @Override
+    public Schema getSchema()
+    {
+        Schema schema = new Schema( DashboardItem.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setMetadata( false );
+        schema.setShareable( true );
+        schema.setOrder( 1380 );
+
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DASHBOARD_PUBLIC_ADD" ) ) );
+
+        return schema;
+    }
 }

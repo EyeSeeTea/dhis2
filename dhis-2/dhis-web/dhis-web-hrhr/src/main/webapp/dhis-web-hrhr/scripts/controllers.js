@@ -12,9 +12,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 Paginator,
                 TranslationService, 
                 storage,
+                EIFactory,
                 ProgramFactory,
+                ProgramStageFactory,
                 AttributesFactory,
                 EntityQueryFactory,
+                ContextMenuSelectedItem,
+                CurrentSelection,
                 TEIService) {   
    
     //Selection
@@ -59,11 +63,14 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.trackedEntityList = [];
             $scope.selectedProgram = '';
             
-            //apply translation - by now user's profile is fetched from server.
-            TranslationService.translate();
             
-            $scope.loadPrograms($scope.selectedOrgUnit);             
-        
+            AttributesFactory.getLocalAttributes().then(function(localAttributes){
+                storage.set('LOCAL_ATTRIBUTES', localAttributes);                
+                //apply translation
+                TranslationService.translate();
+
+                $scope.loadPrograms($scope.selectedOrgUnit); 
+            });
         }
     });
     
@@ -87,36 +94,40 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 if(angular.isObject($scope.programs) && $scope.programs.length === 1){
                     $scope.selectedProgram = $scope.programs[0];
                     
-                    AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                        $scope.attributes = atts;
-                        $scope.search($scope.searchMode.listAll);
+                    storage.set('SELECTED_PROGRAM', $scope.selectedProgram);
+                    
+                    //Load EIs
+                    EIFactory.getEI().then(function(data) {
+                        angular.forEach(data, function(ei) {
+                            storage.set(ei.code, ei);
+                        });
+                    
+                        //save program stage dataelements
+                        angular.forEach($scope.selectedProgram.programStages, function(pst){
+
+                            ProgramStageFactory.get(pst.id).then(function(data){
+                                var programStage = data; 
+                                angular.forEach(programStage.programStageDataElements, function(prDataElement) {                            
+                                    var de = storage.get(prDataElement.dataElement.code);
+                                    if(angular.isObject(de)){
+                                        de.id = prDataElement.dataElement.id;
+                                        de.name = prDataElement.dataElement.name;
+                                        de.description = prDataElement.dataElement.description;
+                                        storage.set(de.id, de);
+                                        storage.set(de.code, de); 
+                                    }                                                               
+                                });                        
+                            });  
+                        });
+                                        
+                        AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
+                            $scope.attributes = atts;
+                            $scope.search($scope.searchMode.listAll);
+                        });
                     });
                 }                
             });
         }        
-    };
-    
-    $scope.getProgramAttributes = function(program, doSearch){ 
-        $scope.trackedEntityList = null; 
-        $scope.selectedProgram = program;
-       
-        if($scope.selectedProgram){
-            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                $scope.attributes = atts;
-                console.log('the attributes are:  ', $scope.attributes);
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
-            });           
-        }
-        else{
-            AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributes = atts;
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
-            });
-        }
-        
-        if(doSearch){
-            $scope.search($scope.searchMode);
-        }       
     };
     
     $scope.search = function(mode){ 
@@ -158,8 +169,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         else if( mode === $scope.searchMode.listAll ){   
             $scope.showTrackedEntityDiv = true;    
         }      
-
-        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+        
+        $scope.generateGridColumns($scope.attributes);
 
         //get events for the specified parameters
         TEIService.search($scope.selectedOrgUnit.id, 
@@ -173,45 +184,32 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     //generate grid columns from teilist attributes
     $scope.generateGridColumns = function(attributes){
-        var columns = attributes ? angular.copy(attributes) : [];
-       
-        //also add extra columns which are not part of attributes (orgunit for example)
-        columns.push({id: 'orgUnitName', name: 'Organisation unit', type: 'string', displayInListNoProgram: false});
-        columns.push({id: 'created', name: 'Registration date', type: 'string', displayInListNoProgram: false});
-        
-        //generate grid column for the selected program/attributes
-        angular.forEach(columns, function(column){
-            if(column.id === 'orgUnitName' && $scope.ouMode.name !== 'SELECTED'){
-                column.show = true;    
-            }
-            
-            if(column.displayInListNoProgram){
-                column.show = true;
-            }           
-           
-            if(column.type === 'date'){
-                 $scope.filterText[column.id]= {start: '', end: ''};
-            }
+        $scope.gridColumns = [];        
+        var atts = {};
+        angular.forEach(attributes, function(att){
+            atts[att.code] = att;
         });        
-        return columns;        
+        AttributesFactory.getLocalAttributes().then(function(localAttributes){ 
+            
+            angular.forEach(localAttributes.pregnantWoman, function(localAttribute){   
+                var att = atts[localAttribute.code];                    
+                $scope.gridColumns.push({id: att.id, name: att.name, type: att.valueType, show: true});
+            });       
+            return $scope.gridColumns; 
+        });               
+    };
+    
+    $scope.jumpToPage = function(){
+        $scope.search($scope.searchMode.listAll);
     };
     
     $scope.clearEntities = function(){
         $scope.trackedEntityList = null;
     };
     
-    $scope.showRegistration = function(){
-        console.log('the attributes are:  ', $scope.attributes);
-        $scope.showRegistrationDiv = !$scope.showRegistrationDiv;
-        $scope.showTrackedEntityDiv = false;
-        $scope.showSearchDiv = false;
-    };  
-    
     $scope.showSearch = function(){   
-        console.log('the attributes are:  ', $scope.attributes);
         $scope.showSearchDiv = !$scope.showSearchDiv;
         $scope.showRegistrationDiv = false;
-        //$scope.showTrackedEntityDiv = false;   
         $scope.selectedProgram = '';
         $scope.emptySearchAttribute = false;
     };
@@ -225,174 +223,25 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.showSearchDiv = !$scope.showSearchDiv;
     };
     
-    $scope.showHideColumns = function(){
-        
-        $scope.hiddenGridColumns = 0;
-        
-        angular.forEach($scope.gridColumns, function(gridColumn){
-            if(!gridColumn.show){
-                $scope.hiddenGridColumns++;
-            }
-        });
-        
-        var modalInstance = $modal.open({
-            templateUrl: 'views/column-modal.html',
-            controller: 'ColumnDisplayController',
-            resolve: {
-                gridColumns: function () {
-                    return $scope.gridColumns;
-                },
-                hiddenGridColumns: function(){
-                    return $scope.hiddenGridColumns;
-                }
-            }
-        });
-
-        modalInstance.result.then(function (gridColumns) {
-            $scope.gridColumns = gridColumns;
-        }, function () {
-        });
+    $scope.showDashboard = function(){
+        var tei = ContextMenuSelectedItem.getSelectedItem();  
+        CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});
+        $location.path('/dashboard').search({tei: tei.id});                                    
     };
     
-    $scope.showDashboard = function(currentEntity){   
-        $location.path('/dashboard').search({selectedEntityId: currentEntity.id,                                            
-                                            selectedProgramId: $scope.selectedProgram ? $scope.selectedProgram.id: null});                                    
+    $scope.showRegistration = function(){        
+        $location.path('/registration').search({});  
+    }; 
+    
+    $scope.showPersonProfile = function(){
+        var tei = ContextMenuSelectedItem.getSelectedItem();  
+        CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});
+        $location.path('/profile').search({tei: tei.id});                                    
     };
        
     $scope.getHelpContent = function(){
         console.log('I will get help content');
     };    
-})
-
-//Controller for column show/hide
-.controller('ColumnDisplayController', 
-    function($scope, 
-            $modalInstance, 
-            hiddenGridColumns,
-            gridColumns){
-    
-    $scope.gridColumns = gridColumns;
-    $scope.hiddenGridColumns = hiddenGridColumns;
-    
-    $scope.close = function () {
-      $modalInstance.close($scope.gridColumns);
-    };
-    
-    $scope.showHideColumns = function(gridColumn){
-       
-        if(gridColumn.show){                
-            $scope.hiddenGridColumns--;            
-        }
-        else{
-            $scope.hiddenGridColumns++;            
-        }      
-    };    
-})
-
-//Controller for registration section
-
-
-//Controller for dashboard
-.controller('DashboardController',
-        function($rootScope,
-                $scope,
-                $location,
-                $modal,
-                $timeout,
-                storage,
-                TEIService,  
-                ProgramFactory,
-                CurrentSelection,
-                TranslationService) {
-
-    //do translation of the dashboard page
-    TranslationService.translate();    
-    
-    //dashboard items   
-    $rootScope.dashboardWidgets = {bigger: [], smaller: []};       
-    $rootScope.enrollmentWidget = {title: 'program', view: "components/enrollment/enrollment.html", show: true};
-    $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true};
-    $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false};
-    $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true};
-    $rootScope.relationshipWidget = {title: 'relationship', view: "components/relationship/relationship.html", show: true};
-    $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true};    
-   
-    $rootScope.dashboardWidgets.bigger.push($rootScope.enrollmentWidget);
-    $rootScope.dashboardWidgets.bigger.push($rootScope.dataentryWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.selectedWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.profileWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.relationshipWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.notesWidget);
-    
-    //selections
-    $scope.selectedEntityId = null;
-    $scope.selectedProgramId = null;
-    
-    $scope.selectedEntityId = ($location.search()).selectedEntityId; 
-    $scope.selectedProgramId = ($location.search()).selectedProgramId; 
-    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-        
-    if( $scope.selectedEntityId ){
-      
-        //Fetch the selected entity
-        TEIService.get($scope.selectedEntityId).then(function(data){     
-            
-            if($scope.selectedProgramId){
-                ProgramFactory.get($scope.selectedProgramId).then(function(program){
-                    $scope.selectedProgram = program;   
-                    
-                    //broadcast selected items for dashboard controllers
-                    CurrentSelection.set({tei: data, pr: $scope.selectedProgram});
-                    $timeout(function() { 
-                        $rootScope.$broadcast('selectedEntity', {});
-                    }, 100);
-                });
-            }
-            else{                
-                //broadcast selected items for dashboard controllers
-                CurrentSelection.set({tei: data, pr: ''});
-                $timeout(function() { 
-                    $rootScope.$broadcast('selectedEntity', {});
-                }, 100);
-            }
-        });       
-    }   
-    
-    $scope.back = function(){
-        $location.path('/');
-    };
-    
-    $scope.displayEnrollment = false;
-    $scope.showEnrollment = function(){
-        $scope.displayEnrollment = true;
-    };
-    
-    $scope.removeWidget = function(widget){        
-        widget.show = false;
-    };
-    
-    $scope.showHideWidgets = function(){
-        var modalInstance = $modal.open({
-            templateUrl: "views/widgets.html",
-            controller: "DashboardWidgetsController"
-        });
-
-        modalInstance.result.then(function () {
-        });
-    };
-})
-
-//Controller for the dashboard widgets
-.controller('DashboardWidgetsController', 
-    function($scope, 
-            $modalInstance,
-            TranslationService){
-    
-    TranslationService.translate();
-    
-    $scope.close = function () {
-        $modalInstance.close($scope.eventGridColumns);
-    };       
 })
 
 //Controller for the header section

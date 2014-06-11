@@ -153,7 +153,8 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
             element.datepicker({
                 changeYear: true,
                 changeMonth: true,
-                dateFormat: 'yy-mm-dd',
+                //dateFormat: 'yy-mm-dd',
+                dateFormat: 'dd.mm.yy',
                 onSelect: function(date) {
                     //scope.date = date;
                     ctrl.$setViewValue(date);
@@ -164,8 +165,8 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
             .change(function() {
                 //var rawDate = $filter('date')(this.value, 'yyyy-MM-dd'); 
                 var rawDate = this.value;
-                var convertedDate = moment(this.value, 'YYYY-MM-DD')._d;
-                convertedDate = $filter('date')(convertedDate, 'yyyy-MM-dd');       
+                var convertedDate = moment(this.value, 'DD.MM.YYYY')._d;
+                convertedDate = $filter('date')(convertedDate, 'dd.MM.yyyy');       
 
                 if(rawDate != convertedDate){
                     scope.invalidDate = true;

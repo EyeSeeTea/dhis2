@@ -1,4 +1,4 @@
-<div id="listDiv" ng-switch="trackedEntityList">                    
+<div ng-switch="trackedEntityList">                    
     <div ng-switch-when=""></div>
     <div ng-switch-default>        
         <div ng-switch="trackedEntityList.rows.length">
@@ -14,17 +14,21 @@
             </div>
             <div ng-switch-default>
 
-                <!-- show/hide grid colum begins-->
-                <div class="row" style="margin-right: 0;">
-                    <button class="btn btn-default pull-right" ng-click="showHideColumns()">
-                        {{'show_hide_columns'| translate}}
-                    </button>
+                <!-- context menu for event grid -->
+                <div id="contextMenu" class="contextMenu" style="width: 180px;">
+                    <ul id="contextMenuItems" class="contextMenuItems">
+                        <li><a href ng-click="showDashboard()"><i class="fa fa-user-md"></i>&nbsp;&nbsp;{{'consultation'| translate}}</a></li>
+                        <li><a href ng-click="showLabReport()"><i class="fa fa-file-text-o"></i>&nbsp;&nbsp;{{'lab_report'| translate}}</a></li>
+                        <li><a href ng-click="showSummaryReport()"><i class="fa fa-list-alt"></i>&nbsp;&nbsp;{{'summary_report'| translate}}</a></li>    
+                        <li><a href ng-click="showPersonProfile()"><i class="fa fa-pencil-square-o"></i>&nbsp;&nbsp;{{'edit_profile'| translate}}</a></li>
+                        <li><a href ng-click="removePerson()"><i class="fa fa-trash-o"></i>&nbsp;&nbsp;{{'remove'| translate}}</a></li> 
+                    </ul>
                 </div>
-                <!-- show/hide grid colum ends-->
+                <!-- context menu ends -->   
 
                 <!-- entity begins -->
                 <div class="vertical-spacing">
-                    <table class="table table-striped table-hover">               
+                    <table class="table table-striped dhis2-table-hover">               
                         <thead>                        
                             <tr>
                                 <th ng-show="gridColumn.show" ng-repeat="gridColumn in gridColumns">
@@ -33,17 +37,20 @@
                             </tr>                        
                         </thead>
                         <tbody id="list">
-                            <tr ng-repeat="trackedEntity in trackedEntityList.rows| paginate:rowsPerPage" 
-                                ng-click="showDashboard(trackedEntity)">
+                            <tr ng-repeat="trackedEntity in trackedEntityList.rows| paginate:rowsPerPage"
+                                dhis-context-menu 
+                                selected-item={{trackedEntity}} >
                                 <td ng-show="gridColumn.show"                                            
                                     ng-repeat="gridColumn in gridColumns">                                                
                                     {{trackedEntity[gridColumn.id]}}                                                
                                 </td>
                             </tr>
                         </tbody>        
-                    </table>
+                    </table>                                        
+                </div>      
+                <div class="container-1-1">
+                    <paginator></paginator>
                 </div>
-                <paginator></paginator>
                 <!-- entity ends -->                            
             </div>
         </div>                        

@@ -1,0 +1,17 @@
+<div class="modal-header">
+    <h2>{{dialogOptions.headerText | translate}}</h2>
+</div>
+
+<div class="modal-body">    
+    <div class="wrapping-div">
+        <strong>{{dialogOptions.note | translate }}:</strong>  {{dialogOptions.bodyText.value}}</p>
+    </div>
+    <p><strong>{{dialogOptions.created_by | translate }}:</strong> {{dialogOptions.bodyText.storedBy}}</p>
+    <p><strong>{{dialogOptions.date | translate }}:</strong>  {{dialogOptions.bodyText.storedDate | date:'yyyy-MM-dd @ h:mma'}}</p>
+</div>
+
+
+<div class="modal-footer">
+    <button class="big-button grey" 
+            data-ng-click="dialogOptions.ok();">{{dialogOptions.closeButtonText | translate}}</button>
+</div> 

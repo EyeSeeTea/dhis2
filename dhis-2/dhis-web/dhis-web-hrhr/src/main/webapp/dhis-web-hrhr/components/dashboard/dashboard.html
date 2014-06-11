@@ -18,13 +18,13 @@
         </div>
         <div class="list-group">
             <div ng-repeat="event in dhis2Events">	
-                <a href="#/anc/visit?eventUid={{event.event}}&personUid={{event.person}}" class="list-group-item" >{{event.name}} ({{event.eventDate}})</a>
+                <a href="#/ancvisit?eventUid={{event.event}}&tei={{event.trackedEntityInstance}}" class="list-group-item" >{{event.name}} ({{event.eventDate}})</a>
             </div>
         </div>			
     </div>
 
     <div class="margin-top">
-        <button ng-click="createNewANCVisit(isFirstEvent)" class="big-button lightblue">
+        <button ng-click="createNewANCVisit()" class="big-button lightblue">
             {{'new_anc_visit'| translate}}
         </button>
         <button ng-click="cancel()" class="big-button grey">
