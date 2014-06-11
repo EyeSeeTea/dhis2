@@ -1,4 +1,4 @@
-package org.hisp.dhis.reporting.dataapproval.action;
+package org.hisp.dhis.dd.action.category;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,50 +28,26 @@ package org.hisp.dhis.reporting.dataapproval.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
 
-import static org.hisp.dhis.period.PeriodType.getAvailablePeriodTypes;
-
-public class GetDataApprovalOptionsAction
+/**
+ * @author Jim Grace
+ * @version $Id$
+ */
+public class ShowAddDataElementCategoryOptionAction
     implements Action
 {
-    @Autowired
-    private DataElementCategoryService categoryService;
-
-    @Autowired
-    private DataSetService dataSetService;
-    
     // -------------------------------------------------------------------------
-    // Output
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    private List<DataSet> dataSets;
-
-    public List<DataSet> getDataSets()
-    {
-        return dataSets;
-    }
-
-    private List<PeriodType> periodTypes;
-
-    public List<PeriodType> getPeriodTypes()
-    {
-        return periodTypes;
-    }
+    @Autowired
+    private OrganisationUnitSelectionManager selectionManager;
 
     // -------------------------------------------------------------------------
     // Action implementation
@@ -79,25 +55,10 @@ public class GetDataApprovalOptionsAction
 
     @Override
     public String execute()
-        throws Exception
+            throws Exception
     {
-        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
-        periodTypes = getAvailablePeriodTypes();
+        selectionManager.setSelectedOrganisationUnits( new ArrayList<OrganisationUnit>() );
 
-        FilterUtils.filter( dataSets, new DataSetApproveDataFilter() );
-        
-        Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
-        
         return SUCCESS;
-    }
-
-    class DataSetApproveDataFilter
-        implements Filter<DataSet>
-    {
-        @Override
-        public boolean retain( DataSet dataSet )
-        {
-            return dataSet != null && dataSet.isApproveData();
-        }        
     }
 }
