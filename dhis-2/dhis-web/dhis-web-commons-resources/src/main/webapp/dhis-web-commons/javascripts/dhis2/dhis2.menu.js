@@ -159,7 +159,7 @@
             //Execute the single time callbacks
             while (onceCallBacks.length !== 0) {
                 onceCallBack = onceCallBacks.pop();
-                onceCallBack(menuItems);
+                onceCallBack.apply(that, [that]);
             }
             callBacks.forEach(function (callback, index, callBacks) {
                 callback.apply(that, [that]);
