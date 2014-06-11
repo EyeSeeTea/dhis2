@@ -19,6 +19,7 @@ function organisationUnitSelected(orgUnits, orgUnitNames) {
 	setInnerHTML('entityInstanceDashboard', '');
 	setInnerHTML('editEntityInstanceDiv', '');
 	setFieldValue("orgunitName", orgUnitNames[0]);
+	setFieldValue("orgunitForSearch", orgUnitNames[0]);
 	setFieldValue("orgunitId", orgUnits[0]);
 	clearListById('program');
 	jQuery.get("getAllPrograms.action", {}, function(json) {
@@ -608,4 +609,26 @@ function loadDataEntry(programStageInstanceId) {
 				}
 				registrationProgress = false;
 			});
+}
+
+function searchByIdsOnclick()
+{
+	if( getFieldValue('searchPatientByAttributes')==''){
+		return;
+	}
+	
+	jQuery('#listEntityInstanceDiv').load(
+		'searchTrackedEntityInstance.action', {
+			orgunitId: getFieldValue('orgunitId'),
+			attributeValue: getFieldValue('searchPatientByAttributes'),
+			programId: getFieldValue('program')
+		}, function() {
+			setInnerHTML('orgunitInfor', getFieldValue('orgunitName'));
+			if( getFieldValue('program')!= ''){
+				var programName = jQuery('#programIdAddTrackedEntity option:selected').text();
+				setInnerHTML('enrollmentInfor', i18n_enrollments_in + " " + programName + " " + i18n_program);
+			}
+			showById('listEntityInstanceDiv');
+			jQuery('#loaderDiv').hide();
+		});
 }
