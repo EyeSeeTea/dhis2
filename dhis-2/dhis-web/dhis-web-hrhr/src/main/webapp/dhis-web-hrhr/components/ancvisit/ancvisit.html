@@ -17,103 +17,94 @@
             <accordion-heading>
                 <a href="" class="big-button-accordion">{{section.name}}</a>
             </accordion-heading>
-            <div ng-repeat="dataElement in section.dataElements">
-                <div class="data-entry-row-1-1 list-group-item" ng-hide="(
-                                        dataElement.code == MMD_OBS ||
-                                        dataElement.code == MMD_OBS_PAR ||
-                                        dataElement.code == MMD_OBS_OUT ||
-                                        dataElement.code == MMD_OBS_DEL ||
-                                        dataElement.code == MMD_OBS_GRA_DAT
-                                        )">
-                    <div class="data-entry-row-1-3">   
-                        {{dataElement.name}}                      
-                    </div>
-                    <div ng-switch="dataElement.type">
-                        <div ng-switch-when="int">
-                            <div class="data-entry-row-2-3">
-                                <input type="number" class="form-control" ng-model="dataElement.value" value="{{dataElement.value}}" ng-blur="saveValue(dataElement, true)">                                
-                                {{dataElement.trailingUnit}}
-                                <span class="btn-group-sm ">
-                                    <a ng-show="!dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
-                                    <a ng-show="dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
-                                </span>  
-                            </div>                              
-                        </div>
-                        <div ng-switch-when="string">
-                            <div class="data-entry-row-2-3">
-                                <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, true)" required ng-options='option.label as option.label for option in dataElement.optionSet'>
-                                    <option value="">{{'please_select'| translate}}</option>
-                                </select>
-                                <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"></span>		                
-                                {{dataElement.trailingUnit}}   
+            <div class="data-entry-container">
+                <table class="table table-striped">
+                    <tr ng-repeat="dataElement in section.dataElements"
+                        ng-hide="(dataElement.code == MMD_OBS ||
+                                                        dataElement.code == MMD_OBS_PAR ||
+                                                        dataElement.code == MMD_OBS_OUT ||
+                                                        dataElement.code == MMD_OBS_DEL ||
+                                                        dataElement.code == MMD_OBS_GRA_DAT
+                                                        )">
+                        <td>
+                            {{dataElement.name}} 
+                        </td>
+                        <td>
+                            <div ng-switch="dataElement.type">
+                                <div ng-switch-when="int">
+                                    <input type="number" class="form-control" ng-model="dataElement.value" value="{{dataElement.value}}" ng-blur="saveValue(dataElement, true)">                                                                 
+                                </div>
+                                <div ng-switch-when="string">
+                                    <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, true)" required ng-options='option.label as option.label for option in dataElement.optionSet'>
+                                        <option value="">{{'please_select'| translate}}</option>
+                                    </select>
+                                    <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"></span>		                
+                                </div>
+                                <div ng-switch-when="date">
+                                    <input ng-show="dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"/>   
+                                    <input ng-show="!dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, true)" readonly="readonly"/>
+                                    <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
+                                    <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>                               
+                                </div>
+                                <div ng-switch-when="bool">
+                                    <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, true)" required>
+                                        <option value="">{{'please_select'| translate}}</option>                        
+                                        <option value="0">{{'no'| translate}}</option>
+                                        <option value="1">{{'yes'| translate}}</option>
+                                    </select>                                  
+                                </div>                                                     
                             </div>
-                        </div>
-                        <div ng-switch-when="date">
-                            <div class="data-entry-row-2-3">    
-                                <input ng-show="dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"/>   
-                                <input ng-show="!dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, true)" readonly="readonly"/>
-                                <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
-                                <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>                               
-                                {{dataElement.trailingUnit}}   
-                            </div>                            
-                        </div>
-                        <div ng-switch-when="bool">
-                            <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, true)" required>
-                                <option value="">{{'please_select'| translate}}</option>                        
-                                <option value="0">{{'no'| translate}}</option>
-                                <option value="1">{{'yes'| translate}}</option>
-                            </select>   
-                            {{dataElement.trailingUnit}}   
-                        </div>                                                     
-                    </div>
-                    <div class="panel panel-info" ng-show='dataElement.showGuideline'>
-                        <div class="panel-body">
-                            {{dataElement.description}}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!--previous pregenancy details -->
-            <div ng-show="previousPregnancy.exists && section.name == 'History'">
-                <div class="data-entry-row-1-1 list-group-item">
-                    <table class="table table-condensed table-bordered">
-                        <thead>
-                            <tr> 
-                                <th ng-repeat="pregnancyHeading in pregnancyTableHeadings">{{pregnancyHeading}}</th>                            
+                        </td>
+                        <td>
+                            {{dataElement.trailingUnit}}
+                            <span class="btn-group-sm ">
+                                <a ng-show="!dataElement.showGuideline && dataElement.description" href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
+                                <a ng-show="dataElement.showGuideline && dataElement.description" href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
+                            </span> 
+                        </td>
+                    </tr>
+                </table>
+                <!--previous pregenancy details -->
+                <div ng-show="previousPregnancy.exists && section.name == 'History'">
+                    <div class="data-entry-row-1-1 list-group-item">
+                        <table class="table table-condensed table-bordered">
+                            <thead>
+                                <tr> 
+                                    <th ng-repeat="pregnancyHeading in pregnancyTableHeadings">{{pregnancyHeading}}</th>                            
+                                </tr>
+                            </thead>
+                            <tr ng-repeat="g in gra track by $index">
+                                <td>
+                                    <input type="text" placeholder="yyyy-mm-dd" data-ng-model="gra[$index].value" ng-blur="savePreviousPregnancy(gra[$index], $index, previousPregnancy.count, true)"/>                            
+                                </td>
+                                <td>
+                                    <input type="text" placeholder="yyyy-mm-dd" data-ng-model="par[$index].value" ng-blur="savePreviousPregnancy(par[$index], $index, previousPregnancy.count, true)"/>                            
+                                </td>
+                                <td>
+                                    <select ng-model="out[$index].value" ng-change="savePreviousPregnancy(out[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in out[$index].optionSet'>
+                                        <option value="">{{'please_select'| translate}}</option>
+                                    </select>                            
+                                </td>
+                                <td>
+                                    <select ng-model="del[$index].value" ng-change="savePreviousPregnancy(del[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in del[$index].optionSet'>
+                                        <option value="">{{'please_select'| translate}}</option>
+                                    </select>                            
+                                </td>
                             </tr>
-                        </thead>
-                        <tr ng-repeat="g in gra track by $index">
-                            <td>
-                                <input type="text" placeholder="yyyy-mm-dd" data-ng-model="gra[$index].value" ng-blur="savePreviousPregnancy(gra[$index], $index, previousPregnancy.count, true)"/>                            
-                            </td>
-                            <td>
-                                <input type="text" placeholder="yyyy-mm-dd" data-ng-model="par[$index].value" ng-blur="savePreviousPregnancy(par[$index], $index, previousPregnancy.count, true)"/>                            
-                            </td>
-                            <td>
-                                <select ng-model="out[$index].value" ng-change="savePreviousPregnancy(out[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in out[$index].optionSet'>
-                                    <option value="">{{'please_select'| translate}}</option>
-                                </select>                            
-                            </td>
-                            <td>
-                                <select ng-model="del[$index].value" ng-change="savePreviousPregnancy(del[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in del[$index].optionSet'>
-                                    <option value="">{{'please_select'| translate}}</option>
-                                </select>                            
-                            </td>
-                        </tr>
-                    </table>
+                        </table>
+                    </div>
+                    <div class="data-entry-row-1-1 list-group-item">
+                        <div class="data-entry-row-1-3">
+                            {{mmdObs.name}}
+                        </div>
+                        <div class="data-entry-row-2-3">
+                            <select ng-model='mmdObs.value' ng-change="saveValue(mmdObs, true)" required ng-options='option.label as option.label for option in mmdObs.optionSet'>
+                                <option value="">{{'please_select'| translate}}</option>
+                            </select>
+                            <span ng-show="otherPleaseSpecify && currentDataElement == mmdObs.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="mmdObs.value" ng-blur="saveValue(mmdObs, true)"></span>                        
+                        </div>
+                    </div>    
                 </div>
-                <div class="data-entry-row-1-1 list-group-item">
-                    <div class="data-entry-row-1-3">
-                        {{mmdObs.name}}
-                    </div>
-                    <div class="data-entry-row-2-3">
-                        <select ng-model='mmdObs.value' ng-change="saveValue(mmdObs, true)" required ng-options='option.label as option.label for option in mmdObs.optionSet'>
-                            <option value="">{{'please_select'| translate}}</option>
-                        </select>
-                        <span ng-show="otherPleaseSpecify && currentDataElement == mmdObs.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="mmdObs.value" ng-blur="saveValue(mmdObs, true)"></span>                        
-                    </div>
-                </div>    
             </div>
 
         </accordion-group>
@@ -123,70 +114,58 @@
             <accordion-heading>
                 <a href="" class="big-button-accordion">{{depSection.name}}</a>
             </accordion-heading>
-            <div ng-repeat="dataElement in depSection.dataElements">
-                <div class="data-entry-row-1-1 list-group-item">
-                    <div class="data-entry-row-1-3">
-                        {{dataElement.name}}              
-                    </div>
-                    <div class="data-entry-row-2-3"> 
-                    <div ng-switch="dataElement.type">
-                        <div ng-switch-when="int">
-                            <div class="data-entry-row-2-3">
-                                <input type="number" ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)">
-                                {{dataElement.trailingUnit}} 
-                                <span class="btn-group-sm ">
-                                    <a ng-show="!dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
-                                    <a ng-show="dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
-                                </span>
+            <div class="data-entry-container">
+                <table class="table table-striped">
+                    <tr ng-repeat="dataElement in depSection.dataElements">
+                        <td>
+                            {{dataElement.name}}
+                        </td>
+                        <td>
+                            <div ng-switch="dataElement.type">
+                                <div ng-switch-when="int">
+                                    <div class="data-entry-row-2-3">
+                                        <input type="number" class="form-control" ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)">
+                                    </div>
+                                </div>
+                                <div ng-switch-when="string">
+                                    <div class="data-entry-row-2-3">
+                                        <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, false)" required ng-options='option.label as option.label for option in dataElement.optionSet'>
+                                            <option value="">{{'please_select'| translate}}</option>
+                                        </select>
+                                        <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"></span>		                
+                                    </div>
+                                </div>
+                                <div ng-switch-when="date">
+                                    <div class="data-entry-row-2-3">    
+                                        <input ng-show="dateTyping" class="form-control" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"/>   
+                                        <input ng-show="!dateTyping" class="form-control" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, false)" readonly="readonly"/>
+                                        <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
+                                        <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>
+                                    </div>
+                                </div>
+                                <div ng-switch-when="bool">
+                                    <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, false)" required>
+                                        <option value="">{{'please_select'| translate}}</option>                        
+                                        <option value="0">{{'no'| translate}}</option>
+                                        <option value="1">{{'yes'| translate}}</option>
+                                    </select>  
+                                </div>
                             </div>
-                        </div>
-                        <div ng-switch-when="string">
-                            <div class="data-entry-row-2-3">
-                                <select ng-model='dataElement.value' ng-change="saveValue(dataElement, false)" required ng-options='option.label as option.label for option in dataElement.optionSet'>
-                                    <option value="">{{'please_select'| translate}}</option>
-                                </select>
-                                <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"></span>		                
-                                {{dataElement.trailingUnit}}
-                                <span class="btn-group-sm ">
-                                    <a ng-show="!dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
-                                    <a ng-show="dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
-                                </span>
-                            </div>
-                        </div>
-                        <div ng-switch-when="date">
-                            <div class="data-entry-row-2-3">    
-                                <input ng-show="dateTyping" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"/>   
-                                <input ng-show="!dateTyping" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, false)" readonly="readonly"/>
-                                <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
-                                <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>
-                                {{dataElement.trailingUnit}}
-                                <span class="btn-group-sm ">
-                                    <a ng-show="!dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
-                                    <a ng-show="dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
-                                </span>
-                            </div>
-                        </div>
-                        <div ng-switch-when="bool">
-                            <select ng-model='dataElement.value' ng-change="saveValue(dataElement, false)" required>
-                                <option value="">{{'please_select'| translate}}</option>                        
-                                <option value="0">{{'no'| translate}}</option>
-                                <option value="1">{{'yes'| translate}}</option>
-                            </select>  
+                        </td>
+                        <td>
+                            {{dataElement.trailingUnit}}
                             <span class="btn-group-sm ">
-                                <a ng-show="!dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
-                                <a ng-show="dataElement.showGuideline && dataElement.description " href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
+                                <a ng-show="!dataElement.showGuideline && dataElement.description" href ng-click="displayGuideline(dataElement)" title="{{'guideline'| translate}}"><i class="fa fa-info-circle fa-lg"></i></a>                            
+                                <a ng-show="dataElement.showGuideline && dataElement.description" href ng-click="displayGuideline(dataElement)" title="{{'close'| translate}}"><i class="fa fa-minus-circle fa-lg"></i></a>
                             </span>
-                        </div>
+                            <div ng-show='dataElement.showGuideline' class="panel-body">
+                                {{dataElement.description}}
+                            </div>
+                        </td>
+                    </tr>
 
-                    </div>
-                    </div>
-                    <div class="panel panel-info" ng-show='dataElement.showGuideline'>
-                        <div class="panel-body">
-                            {{dataElement.description}}
-                        </div>
-                    </div>
-                </div>
-            </div>            
+                </table>
+            </div>
         </accordion-group>
 
     </accordion>

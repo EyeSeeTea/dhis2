@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -45,7 +46,7 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement(localName = "schema", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "schema", namespace = DxfNamespaces.DXF_2_0 )
 public class Schema implements Ordered
 {
     /**
@@ -80,7 +81,7 @@ public class Schema implements Ordered
     /**
      * Namespace URI to be used for this class.
      */
-    private String namespaceURI;
+    private String namespace;
 
     /**
      * This will normally be set to equal singular, but in certain cases it might be useful to have another name
@@ -150,14 +151,14 @@ public class Schema implements Ordered
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isIdentifiableObject()
     {
         return identifiableObject;
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isNameableObject()
     {
         return nameableObject;
@@ -189,14 +190,14 @@ public class Schema implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getNamespaceURI()
+    public String getNamespace()
     {
-        return namespaceURI;
+        return namespace;
     }
 
-    public void setNamespaceURI( String namespaceURI )
+    public void setNamespace( String namespace )
     {
-        this.namespaceURI = namespaceURI;
+        this.namespace = namespace;
     }
 
     @JsonProperty
@@ -329,25 +330,56 @@ public class Schema implements Ordered
         this.order = order;
     }
 
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hashCode( klass, identifiableObject, nameableObject, singular, plural, namespace, name,
+            collectionName, shareable, apiEndpoint, metadata, authorities, propertyMap, order, authorityMap );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null || getClass() != obj.getClass() )
+        {
+            return false;
+        }
+
+        final Schema other = (Schema) obj;
+
+        return Objects.equal( this.klass, other.klass ) && Objects.equal( this.identifiableObject, other.identifiableObject )
+            && Objects.equal( this.nameableObject, other.nameableObject ) && Objects.equal( this.singular, other.singular )
+            && Objects.equal( this.plural, other.plural ) && Objects.equal( this.namespace, other.namespace )
+            && Objects.equal( this.name, other.name ) && Objects.equal( this.collectionName, other.collectionName )
+            && Objects.equal( this.shareable, other.shareable ) && Objects.equal( this.apiEndpoint, other.apiEndpoint )
+            && Objects.equal( this.metadata, other.metadata ) && Objects.equal( this.authorities, other.authorities )
+            && Objects.equal( this.propertyMap, other.propertyMap ) && Objects.equal( this.order, other.order )
+            && Objects.equal( this.authorityMap, other.authorityMap );
+    }
+
     @Override
     public String toString()
     {
-        return "Schema{" +
-            "klass=" + klass +
-            ", identifiableObject=" + identifiableObject +
-            ", nameableObject=" + nameableObject +
-            ", singular='" + singular + '\'' +
-            ", plural='" + plural + '\'' +
-            ", namespaceURI='" + namespaceURI + '\'' +
-            ", name='" + name + '\'' +
-            ", collectionName='" + collectionName + '\'' +
-            ", shareable=" + shareable +
-            ", apiEndpoint='" + apiEndpoint + '\'' +
-            ", metadata=" + metadata +
-            ", authorities=" + authorities +
-            ", propertyMap=" + propertyMap +
-            ", order=" + order +
-            ", authorityMap=" + authorityMap +
-            '}';
+        return Objects.toStringHelper( this )
+            .add( "klass", klass )
+            .add( "identifiableObject", identifiableObject )
+            .add( "nameableObject", nameableObject )
+            .add( "singular", singular )
+            .add( "plural", plural )
+            .add( "namespace", namespace )
+            .add( "name", name )
+            .add( "collectionName", collectionName )
+            .add( "shareable", shareable )
+            .add( "apiEndpoint", apiEndpoint )
+            .add( "metadata", metadata )
+            .add( "authorities", authorities )
+            .add( "propertyMap", propertyMap )
+            .add( "authorityMap", authorityMap )
+            .toString();
     }
 }

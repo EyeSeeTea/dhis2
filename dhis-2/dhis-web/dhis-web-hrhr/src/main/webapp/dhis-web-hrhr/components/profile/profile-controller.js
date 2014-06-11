@@ -31,8 +31,10 @@ trackerCapture.controller('ProfileController',
     $scope.$on('selectedEntity', function(event, args) {  
 
         var selections = CurrentSelection.get();                  
-        $scope.pregnantWoman = selections.tei;      
-        $scope.selectedProgram = selections.pr;     
+        $scope.pregnantWoman = selections.tei;     
+        $scope.contactPerson = selections.contact ? selections.contact : null;
+        $scope.selectedProgram = selections.pr;
+
 
         AttributesFactory.getAll().then(function(atts){
             angular.forEach(atts, function(att){
@@ -113,10 +115,11 @@ trackerCapture.controller('ProfileController',
         });        
         
         AttributesFactory.getLocalAttributes().then(function(localAttributes){ 
-                
+            
+            $scope.localAttributes = localAttributes;
             //assume every tei has values for the attributes - initially all are empty values
             var newAttributes = [];
-            angular.forEach(localAttributes.pregnantWoman, function(localAttribute){   
+            angular.forEach($scope.localAttributes.pregnantWoman, function(localAttribute){   
                 var att = $scope.attributes[localAttribute.code];                    
                 var newAttribute = {attribute: att.id,
                                     code: att.code, 
@@ -143,7 +146,7 @@ trackerCapture.controller('ProfileController',
                         $scope.pregnantWoman.attributes[i].show = true;
                     }
                 }                                   
-            }
+            }                       
         }); 
     };
     
@@ -152,14 +155,42 @@ trackerCapture.controller('ProfileController',
         $scope.editProfile = !$scope.editProfile;
     };   
        
-    $scope.personDetails = function(pregnantWoman) {        
+    $scope.personDetails = function() {        
         $scope.minimal = !$scope.minimal;
-        if(angular.isObject( pregnantWoman.relationships) ){
-            $scope.contact = pregnantWoman.relationships[0].displayName;
+        if(angular.isObject( $scope.pregnantWoman.relationships) && $scope.contactPerson){
             
-            PersonService.getContactPerson(pregnantWoman.relationships[0].person).then(function(contactPerson){
-                $scope.contactPerson = contactPerson;
-            });            
+            $scope.contact = $scope.pregnantWoman.relationships[0].displayName;
+            
+            //assume every tei has values for the attributes - initially all are empty values
+            var newAttributes = [];
+            angular.forEach($scope.localAttributes.contactPerson, function(localAttribute){   
+                var att = $scope.attributes[localAttribute.code];                    
+                var newAttribute = {attribute: att.id,
+                                    code: att.code, 
+                                    displayName: att.name, 
+                                    mandatoryToDisplay: localAttribute.mandatoryToDisplay,
+                                    type: att.valueType,
+                                    value: ''};
+                angular.forEach($scope.pregnantWoman.attributes, function(attribute){
+                    if(attribute.attribute === newAttribute.attribute){
+                        newAttribute.value = attribute.value;
+                    }                               
+                });                                            
+                newAttributes.push(newAttribute);
+            }); 
+            
+            $scope.contactPerson.attributes = newAttributes;   
+            
+            for(var i=0; i<$scope.contactPerson.attributes.length; i++){
+                $scope.contactPerson.attributes[i].show = false;
+                var processedForDisplay = false;
+                for(var j=0; j<newAttributes.length && !processedForDisplay; j++){
+                    if($scope.contactPerson.attributes[i].attribute === newAttributes[j].attribute){
+                        processedForDisplay = true;
+                        $scope.contactPerson.attributes[i].show = true;
+                    }
+                }                                   
+            } 
         }        
     };
 });

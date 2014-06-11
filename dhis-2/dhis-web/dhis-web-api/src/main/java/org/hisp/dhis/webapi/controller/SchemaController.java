@@ -28,6 +28,9 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.schema.NodePropertyIntrospectorService;
+import org.hisp.dhis.schema.Property;
+import org.hisp.dhis.schema.PropertyIntrospectorService;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.schema.Schemas;
@@ -37,6 +40,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -58,5 +63,18 @@ public class SchemaController
     public @ResponseBody Schema getSchema( @PathVariable String type )
     {
         return schemaService.getSchemaBySingularName( type );
+    }
+
+    @RequestMapping( value = "/{type}/{property}" )
+    public @ResponseBody Property getSchemaProperty( @PathVariable String type, @PathVariable String property )
+    {
+        Schema schema = schemaService.getSchemaBySingularName( type );
+
+        if ( schema.getPropertyMap().containsKey( property ) )
+        {
+            return schema.getPropertyMap().get( property );
+        }
+
+        return null;
     }
 }

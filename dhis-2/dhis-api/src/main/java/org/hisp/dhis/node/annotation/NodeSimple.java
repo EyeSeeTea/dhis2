@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.filter;
+package org.hisp.dhis.node.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,35 +25,27 @@ package org.hisp.dhis.dxf2.filter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.node.types.CollectionNode;
-
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface FilterService
+@Target( { ElementType.FIELD } )
+@Retention( RetentionPolicy.RUNTIME )
+@NodeAnnotation
+public @interface NodeSimple
 {
-    /**
-     * Filter a list of objects based on un-parsed filter string.
-     *
-     * @param objects List to filter
-     * @param filters Filter string
-     * @return Filtered object list
-     */
-    <T extends IdentifiableObject> List<T> objectFilter( List<T> objects, List<String> filters );
+    String value() default "";
 
-    /**
-     * Perform inclusion/exclusion on a list of objects.
-     *
-     * @param objects   List to filter
-     * @param fieldList Field filter
-     * @return List of objects with only wanted properties
-     */
-    <T extends IdentifiableObject> CollectionNode fieldFilter( Class<?> klass, List<T> objects,
-        List<String> fieldList );
+    boolean isAttribute() default false;
+
+    boolean isPersisted() default true;
+
+    String namespace() default "";
 }

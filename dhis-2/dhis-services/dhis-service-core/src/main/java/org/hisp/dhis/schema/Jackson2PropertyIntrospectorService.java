@@ -53,33 +53,10 @@ import java.util.Map;
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DefaultPropertyIntrospectorService implements PropertyIntrospectorService
+public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrospectorService
 {
-    @Override
-    public List<Property> getProperties( Class<?> klass )
+    protected Map<String, Property> scanClass( Class<?> clazz )
     {
-        return Lists.newArrayList( scanClass( klass ).values() );
-    }
-
-    @Override
-    public Map<String, Property> getPropertiesMap( Class<?> klass )
-    {
-        return scanClass( klass );
-    }
-
-    // -------------------------------------------------------------------------
-    // Scanning Helpers
-    // -------------------------------------------------------------------------
-
-    private static Map<Class<?>, Map<String, Property>> classMapCache = Maps.newHashMap();
-
-    private static Map<String, Property> scanClass( Class<?> clazz )
-    {
-        if ( classMapCache.containsKey( clazz ) )
-        {
-            return classMapCache.get( clazz );
-        }
-
         Map<String, Property> propertyMap = Maps.newHashMap();
 
         // TODO this is quite nasty, should find a better way of exposing properties at class-level
@@ -96,7 +73,7 @@ public class DefaultPropertyIntrospectorService implements PropertyIntrospectorS
 
             if ( !StringUtils.isEmpty( jacksonXmlRootElement.namespace() ) )
             {
-                property.setNamespaceURI( jacksonXmlRootElement.namespace() );
+                property.setNamespace( jacksonXmlRootElement.namespace() );
             }
 
             propertyMap.put( "__self__", property );
@@ -153,7 +130,7 @@ public class DefaultPropertyIntrospectorService implements PropertyIntrospectorS
 
                 if ( !StringUtils.isEmpty( jacksonXmlProperty.namespace() ) )
                 {
-                    property.setNamespaceURI( jacksonXmlProperty.namespace() );
+                    property.setNamespace( jacksonXmlProperty.namespace() );
                 }
 
                 property.setAttribute( jacksonXmlProperty.isAttribute() );
@@ -212,21 +189,22 @@ public class DefaultPropertyIntrospectorService implements PropertyIntrospectorS
             }
         }
 
-        classMapCache.put( clazz, propertyMap );
-
         return propertyMap;
     }
 
-    private static List<Property> collectProperties( Class<?> clazz )
+    private static List<Property> collectProperties( Class<?> klass )
     {
-        List<Method> allMethods = ReflectionUtils.getAllMethods( clazz );
+        List<Method> allMethods = ReflectionUtils.getAllMethods( klass );
         List<Property> properties = Lists.newArrayList();
 
         for ( Method method : allMethods )
         {
             if ( method.isAnnotationPresent( JsonProperty.class ) )
             {
-                properties.add( new Property( method ) );
+                if ( method.getGenericParameterTypes().length == 0 )
+                {
+                    properties.add( new Property( klass, method, null ) );
+                }
             }
         }
 

@@ -510,6 +510,11 @@ img {
     overflow: auto;
 }
 
+.data-entry-container {
+    max-height: 400px;
+    overflow: scroll;
+}
+
 .main_content_left {
     min-height: 600px;
     float: left;

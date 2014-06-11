@@ -28,9 +28,8 @@ package org.hisp.dhis.webapi.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.organisationunit.comparator.OrganisationUnitByLevelComparator;
@@ -40,23 +39,13 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.controller.WebMetaData;
 import org.hisp.dhis.webapi.controller.WebOptions;
-import org.hisp.dhis.webapi.controller.exception.NotFoundException;
-import org.hisp.dhis.webapi.utils.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -105,11 +94,11 @@ public class OrganisationUnitController
 
         if ( "true".equals( options.getOptions().get( "userOnly" ) ) )
         {
-            entityList = new ArrayList<OrganisationUnit>( currentUserService.getCurrentUser().getOrganisationUnits() );
+            entityList = new ArrayList<>( currentUserService.getCurrentUser().getOrganisationUnits() );
         }
         else if ( "true".equals( options.getOptions().get( "userDataViewOnly" ) ) )
         {
-            entityList = new ArrayList<OrganisationUnit>( currentUserService.getCurrentUser().getDataViewOrganisationUnits() );
+            entityList = new ArrayList<>( currentUserService.getCurrentUser().getDataViewOrganisationUnits() );
         }
         else if ( "true".equals( options.getOptions().get( "userDataViewFallback" ) ) )
         {
@@ -117,16 +106,16 @@ public class OrganisationUnitController
 
             if ( user != null && user.hasDataViewOrganisationUnit() )
             {
-                entityList = new ArrayList<OrganisationUnit>( user.getDataViewOrganisationUnits() );
+                entityList = new ArrayList<>( user.getDataViewOrganisationUnits() );
             }
             else
             {
-                entityList = new ArrayList<OrganisationUnit>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
+                entityList = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( 1 ) );
             }
         }
         else if ( options.getOptions().containsKey( "query" ) )
         {
-            entityList = new ArrayList<OrganisationUnit>( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
+            entityList = new ArrayList<>( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
 
             if ( levelSorted )
             {
@@ -135,7 +124,7 @@ public class OrganisationUnitController
         }
         else if ( maxLevel != null || level != null )
         {
-            entityList = new ArrayList<OrganisationUnit>();
+            entityList = new ArrayList<>();
 
             if ( maxLevel == null )
             {
@@ -153,7 +142,7 @@ public class OrganisationUnitController
         }
         else if ( levelSorted )
         {
-            entityList = new ArrayList<OrganisationUnit>( manager.getAll( getEntityClass() ) );
+            entityList = new ArrayList<>( manager.getAll( getEntityClass() ) );
             Collections.sort( entityList, OrganisationUnitByLevelComparator.INSTANCE );
         }
         else if ( options.hasPaging() )
@@ -163,106 +152,44 @@ public class OrganisationUnitController
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<OrganisationUnit>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+            entityList = new ArrayList<>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
-            entityList = new ArrayList<OrganisationUnit>( manager.getAllSorted( getEntityClass() ) );
+            entityList = new ArrayList<>( manager.getAllSorted( getEntityClass() ) );
         }
 
         return entityList;
     }
 
-
-    /* TODO can this be replaced by inclusion/filter?
     @Override
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    protected List<OrganisationUnit> getEntity( String uid, WebOptions options )
     {
-        WebOptions options = new WebOptions( parameters );
-        OrganisationUnit entity = getEntity( uid );
+        OrganisationUnit organisationUnit = manager.get( getEntityClass(), uid );
 
-        if ( entity == null )
+        if ( organisationUnit == null )
         {
-            throw new NotFoundException( uid );
+            return Lists.newArrayList();
         }
 
-        Integer maxLevel = null;
+        List<OrganisationUnit> organisationUnits = Lists.newArrayList();
 
-        if ( options.getOptions().containsKey( "maxLevel" ) )
+        if ( options.getOptions().containsKey( "includeChildren" ) )
         {
-            try
-            {
-                maxLevel = Integer.parseInt( options.getOptions().get( "maxLevel" ) );
-            }
-            catch ( NumberFormatException ignored )
-            {
-            }
-
-            if ( maxLevel != null && (organisationUnitService.getOrganisationUnitLevelByLevel( maxLevel ) == null
-                || maxLevel > organisationUnitService.getNumberOfOrganisationalLevels()) )
-            {
-                maxLevel = organisationUnitService.getNumberOfOrganisationalLevels();
-            }
+            options.getOptions().put( "useWrapper", "true" );
+            organisationUnits.add( organisationUnit );
+            organisationUnits.addAll( organisationUnit.getChildren() );
         }
-
-        if ( maxLevel != null )
+        else if ( options.getOptions().containsKey( "includeDescendants" ) )
         {
-            List<OrganisationUnit> entities = new ArrayList<OrganisationUnit>();
-            entities.add( entity );
-
-            int level = entity.getOrganisationUnitLevel();
-
-            while ( maxLevel > level )
-            {
-                entities.addAll( organisationUnitService.getOrganisationUnitsAtLevel( ++level, entity ) );
-            }
-
-            MetaData metaData = new MetaData();
-            metaData.setOrganisationUnits( entities );
-
-            model.addAttribute( "model", metaData );
-
-            return StringUtils.uncapitalize( getEntitySimpleName() );
-        }
-        else if ( options.getOptions().containsKey( "includeDescendants" ) && Boolean.parseBoolean( options.getOptions().get( "includeDescendants" ) ) )
-        {
-            List<OrganisationUnit> entities = new ArrayList<OrganisationUnit>(
-                organisationUnitService.getOrganisationUnitsWithChildren( uid ) );
-
-            MetaData metaData = new MetaData();
-            metaData.setOrganisationUnits( entities );
-
-            model.addAttribute( "model", metaData );
-        }
-        else if ( options.getOptions().containsKey( "includeChildren" ) && Boolean.parseBoolean( options.getOptions().get( "includeChildren" ) ) )
-        {
-            List<OrganisationUnit> entities = new ArrayList<OrganisationUnit>();
-            entities.add( entity );
-            entities.addAll( entity.getChildren() );
-
-            MetaData metaData = new MetaData();
-            metaData.setOrganisationUnits( entities );
-
-            model.addAttribute( "model", metaData );
+            options.getOptions().put( "useWrapper", "true" );
+            organisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( uid ) );
         }
         else
         {
-            model.addAttribute( "model", entity );
+            organisationUnits.add( organisationUnit );
         }
 
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( entity );
-        }
-
-        postProcessEntity( entity );
-        postProcessEntity( entity, options, parameters );
-
-        model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
+        return organisationUnits;
     }
-    */
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.dd.action.category;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,22 +25,40 @@ package org.hisp.dhis.node.annotation;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jim Grace
+ * @version $Id$
  */
-@Target( { ElementType.TYPE } )
-@Retention( RetentionPolicy.RUNTIME )
-public @interface ExportRoot
+public class ShowAddDataElementCategoryOptionAction
+    implements Action
 {
-    String value() default "";
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    String namespace() default "";
+    @Autowired
+    private OrganisationUnitSelectionManager selectionManager;
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+            throws Exception
+    {
+        selectionManager.setSelectedOrganisationUnits( new ArrayList<OrganisationUnit>() );
+
+        return SUCCESS;
+    }
 }

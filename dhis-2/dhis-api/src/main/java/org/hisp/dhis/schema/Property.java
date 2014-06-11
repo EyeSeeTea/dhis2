@@ -31,26 +31,32 @@ package org.hisp.dhis.schema;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.Objects;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.node.annotation.NodeRoot;
+import org.hisp.dhis.node.annotation.NodeSimple;
 
 import java.lang.reflect.Method;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement(localName = "property", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "property", namespace = DxfNamespaces.DXF_2_0 )
+@NodeRoot
 public class Property
 {
     /**
      * Class for property.
      */
+    @NodeSimple( isPersisted = false )
     private Class<?> klass;
 
     /**
      * If this property is a collection, this is the class of the items inside the collection.
      */
+    @NodeSimple( isPersisted = false )
     private Class<?> itemKlass;
 
     /**
@@ -59,31 +65,60 @@ public class Property
     private Method getterMethod;
 
     /**
+     * Direct link to setter for this property.
+     */
+    private Method setterMethod;
+
+    /**
      * Name for this property, if this class is a collection, it is the name of the items -inside- the collection
      * and not the collection wrapper itself.
      */
+    @NodeSimple( isPersisted = false )
     private String name;
+
+    /**
+     * Name for actual field, used to persistence operations and getting setter/getter.
+     */
+    @NodeSimple( isPersisted = false )
+    private String fieldName;
+
+    /**
+     * Is this property persisted somewhere. This property will be used to create criteria queries
+     * on demand (default: true)
+     */
+    @NodeSimple( isPersisted = false )
+    private boolean persisted = true;
 
     /**
      * Name of collection wrapper.
      */
+    @NodeSimple( isPersisted = false )
     private String collectionName;
+
+    /**
+     * If this Property is a collection, should it be wrapped with collectionName?
+     */
+    @NodeSimple( isPersisted = false )
+    private boolean collectionWrapping;
 
     /**
      * Description if provided, will be fetched from @Description annotation.
      *
      * @see org.hisp.dhis.common.annotation.Description
      */
+    @NodeSimple( isPersisted = false )
     private String description;
 
     /**
-     * XML-Namespace used for this property.
+     * Namespace used for this property.
      */
-    private String namespaceURI;
+    @NodeSimple( isPersisted = false )
+    private String namespace;
 
     /**
      * Usually only used for XML. Is this property considered an attribute.
      */
+    @NodeSimple( isPersisted = false )
     private boolean attribute;
 
     /**
@@ -92,6 +127,7 @@ public class Property
      * of the collection, e.g. List<String> would set simple to be true, but List<DataElement> would set it
      * to false.
      */
+    @NodeSimple( isPersisted = false )
     private boolean simple;
 
     /**
@@ -99,6 +135,7 @@ public class Property
      *
      * @see java.util.Collection
      */
+    @NodeSimple( isPersisted = false )
     private boolean collection;
 
     /**
@@ -106,6 +143,7 @@ public class Property
      *
      * @see org.hisp.dhis.common.IdentifiableObject
      */
+    @NodeSimple( isPersisted = false )
     private boolean identifiableObject;
 
     /**
@@ -113,25 +151,27 @@ public class Property
      *
      * @see org.hisp.dhis.common.NameableObject
      */
+    @NodeSimple( isPersisted = false )
     private boolean nameableObject;
 
     public Property()
     {
     }
 
-    public Property( Method getterMethod )
+    public Property( Class<?> klass )
     {
-        this.getterMethod = getterMethod;
+        this.klass = klass;
     }
 
-    public Property( Method getterMethod, Class<?> klass )
+    public Property( Class<?> klass, Method getter, Method setter )
     {
-        this.getterMethod = getterMethod;
-        setKlass( klass );
+        this( klass );
+        this.getterMethod = getter;
+        this.setterMethod = setter;
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Class<?> getKlass()
     {
         return klass;
@@ -145,7 +185,7 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Class<?> getItemKlass()
     {
         return itemKlass;
@@ -161,8 +201,18 @@ public class Property
         return getterMethod;
     }
 
+    public Method getSetterMethod()
+    {
+        return setterMethod;
+    }
+
+    public void setSetterMethod( Method setterMethod )
+    {
+        this.setterMethod = setterMethod;
+    }
+
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getName()
     {
         return name;
@@ -174,7 +224,31 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getFieldName()
+    {
+        return fieldName;
+    }
+
+    public void setFieldName( String fieldName )
+    {
+        this.fieldName = fieldName;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isPersisted()
+    {
+        return persisted;
+    }
+
+    public void setPersisted( boolean persisted )
+    {
+        this.persisted = persisted;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getCollectionName()
     {
         return collectionName == null ? name : collectionName;
@@ -186,7 +260,19 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isCollectionWrapping()
+    {
+        return collectionWrapping;
+    }
+
+    public void setCollectionWrapping( boolean collectionWrapping )
+    {
+        this.collectionWrapping = collectionWrapping;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDescription()
     {
         return description;
@@ -198,19 +284,19 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
-    public String getNamespaceURI()
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getNamespace()
     {
-        return namespaceURI;
+        return namespace;
     }
 
-    public void setNamespaceURI( String namespaceURI )
+    public void setNamespace( String namespace )
     {
-        this.namespaceURI = namespaceURI;
+        this.namespace = namespace;
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isAttribute()
     {
         return attribute;
@@ -234,7 +320,7 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isCollection()
     {
         return collection;
@@ -246,7 +332,7 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isIdentifiableObject()
     {
         return identifiableObject;
@@ -258,7 +344,7 @@ public class Property
     }
 
     @JsonProperty
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isNameableObject()
     {
         return nameableObject;
@@ -270,57 +356,54 @@ public class Property
     }
 
     @Override
-    public boolean equals( Object o )
+    public int hashCode()
     {
-        if ( this == o ) return true;
-        if ( o == null || getClass() != o.getClass() ) return false;
-
-        Property property = (Property) o;
-
-        if ( attribute != property.attribute ) return false;
-        if ( collection != property.collection ) return false;
-        if ( identifiableObject != property.identifiableObject ) return false;
-        if ( nameableObject != property.nameableObject ) return false;
-        if ( collectionName != null ? !collectionName.equals( property.collectionName ) : property.collectionName != null ) return false;
-        if ( description != null ? !description.equals( property.description ) : property.description != null ) return false;
-        if ( getterMethod != null ? !getterMethod.equals( property.getterMethod ) : property.getterMethod != null ) return false;
-        if ( klass != null ? !klass.equals( property.klass ) : property.klass != null ) return false;
-        if ( name != null ? !name.equals( property.name ) : property.name != null ) return false;
-        if ( namespaceURI != null ? !namespaceURI.equals( property.namespaceURI ) : property.namespaceURI != null ) return false;
-
-        return true;
+        return Objects.hashCode( klass, itemKlass, getterMethod, name, fieldName, persisted, collectionName, description,
+            namespace, attribute, simple, collection, identifiableObject, nameableObject );
     }
 
     @Override
-    public int hashCode()
+    public boolean equals( Object obj )
     {
-        int result = klass != null ? klass.hashCode() : 0;
-        result = 31 * result + (getterMethod != null ? getterMethod.hashCode() : 0);
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (collectionName != null ? collectionName.hashCode() : 0);
-        result = 31 * result + (description != null ? description.hashCode() : 0);
-        result = 31 * result + (namespaceURI != null ? namespaceURI.hashCode() : 0);
-        result = 31 * result + (attribute ? 1 : 0);
-        result = 31 * result + (collection ? 1 : 0);
-        result = 31 * result + (identifiableObject ? 1 : 0);
-        result = 31 * result + (nameableObject ? 1 : 0);
-        return result;
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null || getClass() != obj.getClass() )
+        {
+            return false;
+        }
+
+        final Property other = (Property) obj;
+
+        return Objects.equal( this.klass, other.klass ) && Objects.equal( this.itemKlass, other.itemKlass )
+            && Objects.equal( this.getterMethod, other.getterMethod ) && Objects.equal( this.setterMethod, other.setterMethod )
+            && Objects.equal( this.name, other.name ) && Objects.equal( this.fieldName, other.fieldName )
+            && Objects.equal( this.persisted, other.persisted ) && Objects.equal( this.collectionName, other.collectionName )
+            && Objects.equal( this.description, other.description ) && Objects.equal( this.namespace, other.namespace )
+            && Objects.equal( this.attribute, other.attribute ) && Objects.equal( this.simple, other.simple )
+            && Objects.equal( this.collection, other.collection ) && Objects.equal( this.identifiableObject, other.identifiableObject )
+            && Objects.equal( this.nameableObject, other.nameableObject );
     }
 
     @Override
     public String toString()
     {
-        return "Property{" +
-            "klass=" + klass +
-            ", getterMethod=" + getterMethod +
-            ", name='" + name + '\'' +
-            ", collectionName='" + collectionName + '\'' +
-            ", description='" + description + '\'' +
-            ", namespaceURI='" + namespaceURI + '\'' +
-            ", attribute=" + attribute +
-            ", collection=" + collection +
-            ", identifiableObject=" + identifiableObject +
-            ", nameableObject=" + nameableObject +
-            '}';
+        return Objects.toStringHelper( this )
+            .add( "klass", klass )
+            .add( "itemKlass", itemKlass )
+            .add( "getterMethod", getterMethod )
+            .add( "name", name )
+            .add( "fieldName", fieldName )
+            .add( "persisted", persisted )
+            .add( "collectionName", collectionName )
+            .add( "description", description )
+            .add( "namespace", namespace )
+            .add( "attribute", attribute )
+            .add( "simple", simple )
+            .add( "collection", collection )
+            .add( "identifiableObject", identifiableObject )
+            .add( "nameableObject", nameableObject )
+            .toString();
     }
 }

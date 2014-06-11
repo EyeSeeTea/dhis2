@@ -31,10 +31,21 @@ trackerCapture.controller('DashboardController',
         TEIService.get($scope.selectedEntityId).then(function(tei){     
             
             $scope.selectedEntity = tei;
-            CurrentSelection.set({tei: tei, pr: $scope.selectedProgram});
-            $timeout(function() { 
-                $rootScope.$broadcast('selectedEntity', {});
-            }, 100);
+            
+            if(!angular.isUndefined($scope.selectedEntity.relationships)){
+                TEIService.get($scope.selectedEntity.relationships[0].trackedEntityInstance).then(function(contact){
+                    CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram});
+                    $timeout(function() { 
+                        $rootScope.$broadcast('selectedEntity', {});
+                    }, 100);
+                });
+            }
+            else{
+                CurrentSelection.set({tei: tei, pr: $scope.selectedProgram});
+                $timeout(function() { 
+                    $rootScope.$broadcast('selectedEntity', {});
+                }, 100);
+            }
             
             //Fetch available events for the selected person
             DHIS2EventFactory.getByEntity($scope.selectedEntity, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {
