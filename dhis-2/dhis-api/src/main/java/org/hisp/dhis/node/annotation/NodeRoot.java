@@ -36,13 +36,12 @@ import java.lang.annotation.Target;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD, ElementType.METHOD } )
+@Target( { ElementType.TYPE } )
 @Retention( RetentionPolicy.RUNTIME )
-public @interface ExportSimple
+@NodeAnnotation
+public @interface NodeRoot
 {
     String value() default "";
-
-    boolean isAttribute() default false;
 
     String namespace() default "";
 }

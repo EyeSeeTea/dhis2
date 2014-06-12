@@ -33,7 +33,9 @@ import java.util.List;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
 import org.hisp.dhis.paging.ActionPagingSupport;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Chau Thu Tran
@@ -54,8 +56,11 @@ public class GetDataElementCategoryOptionAction
         this.dataElementCategoryService = dataElementCategoryService;
     }
 
+    @Autowired
+    private OrganisationUnitSelectionManager selectionManager;
+
     // -------------------------------------------------------------------------
-    // Getters & Setters
+    // Input
     // -------------------------------------------------------------------------
 
     private Integer id;
@@ -65,11 +70,22 @@ public class GetDataElementCategoryOptionAction
         this.id = id;
     }
 
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
     private DataElementCategoryOption dataElementCategoryOption;
 
     public DataElementCategoryOption getDataElementCategoryOption()
     {
         return dataElementCategoryOption;
+    }
+
+    private boolean moreOptionsPresent;
+
+    public boolean isMoreOptionsPresent()
+    {
+        return moreOptionsPresent;
     }
 
     private List<Concept> concepts;
@@ -86,6 +102,12 @@ public class GetDataElementCategoryOptionAction
     public String execute()
     {
         dataElementCategoryOption = dataElementCategoryService.getDataElementCategoryOption( id );
+
+        selectionManager.setSelectedOrganisationUnits( dataElementCategoryOption.getOrganisationUnits() );
+
+        moreOptionsPresent = dataElementCategoryOption.getStartDate() != null
+                || dataElementCategoryOption.getEndDate() != null
+                || !dataElementCategoryOption.getOrganisationUnits().isEmpty();
 
         return SUCCESS;
     }

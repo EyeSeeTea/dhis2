@@ -84,14 +84,14 @@ public class DefaultParserService implements ParserService
                 continue;
             }
 
-            if ( c.equals( "[" ) )
+            if ( c.equals( "[" ) || c.equals( "(" ) || c.equals( "{" ) )
             {
                 prefixList.add( builder.toString() );
                 builder = new StringBuilder();
                 continue;
             }
 
-            if ( c.equals( "]" ) )
+            if ( c.equals( "]" ) || c.equals( ")" ) || c.equals( "}" ) )
             {
                 if ( !builder.toString().isEmpty() )
                 {
@@ -103,7 +103,7 @@ public class DefaultParserService implements ParserService
                 continue;
             }
 
-            if ( StringUtils.isAlpha( c ) )
+            if ( StringUtils.isAlpha( c ) || c.equals( "*" ) || c.equals( ":" ) || c.equals( "!" ) )
             {
                 builder.append( c );
             }
@@ -127,6 +127,11 @@ public class DefaultParserService implements ParserService
     @SuppressWarnings( "unchecked" )
     private void putInMap( Map<String, Map> map, String path )
     {
+        if ( StringUtils.isEmpty( path ) )
+        {
+            return;
+        }
+
         for ( String p : path.split( "\\." ) )
         {
             if ( map.get( p ) == null )

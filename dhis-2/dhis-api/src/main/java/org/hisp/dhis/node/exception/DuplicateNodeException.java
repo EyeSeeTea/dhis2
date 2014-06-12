@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.node.exception;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,19 +28,13 @@ package org.hisp.dhis.node.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.TYPE } )
-@Retention( RetentionPolicy.RUNTIME )
-public @interface ExportRoot
+public class DuplicateNodeException extends RuntimeException
 {
-    String value() default "";
-
-    String namespace() default "";
+    public DuplicateNodeException()
+    {
+        super( "A node with that name already exists in the child list." );
+    }
 }

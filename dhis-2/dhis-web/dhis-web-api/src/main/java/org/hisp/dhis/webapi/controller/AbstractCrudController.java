@@ -28,11 +28,12 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Joiner;
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.acl.Access;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
@@ -41,38 +42,42 @@ import org.hisp.dhis.dxf2.filter.FilterService;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.render.RenderService;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.node.NodeService;
+import org.hisp.dhis.node.config.SerializationFeature;
+import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
-import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.controller.exception.NotFoundException;
+import org.hisp.dhis.webapi.utils.ContextService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.LinkService;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -81,8 +86,6 @@ import java.util.Map;
  */
 public abstract class AbstractCrudController<T extends IdentifiableObject>
 {
-    private static final String DEFAULT_LIST_INCLUDE = Joiner.on( "," ).join( FilterService.IDENTIFIABLE_PROPERTIES );
-
     //--------------------------------------------------------------------------
     // Dependencies
     //--------------------------------------------------------------------------
@@ -112,47 +115,25 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected ImportService importService;
 
     @Autowired
-    protected NodeService nodeService;
+    protected ContextService contextService;
 
     //--------------------------------------------------------------------------
     // GET
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getObjectList(
-        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
+    public @ResponseBody RootNode getObjectList(
+        @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
     {
-        WebOptions options = new WebOptions( parameters );
-        WebMetaData metaData = new WebMetaData();
-        List<T> entityList = getEntityList( metaData, options );
-        String viewClass = options.getViewClass( "basic" );
+        List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
+        List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
 
-        postProcessEntities( entityList );
-        postProcessEntities( entityList, options, parameters );
-
-        ReflectionUtils.invokeSetterMethod( schemaService.getSchema( getEntityClass() ).getPlural(), metaData, entityList );
-
-        handleLinksAndAccess( options, metaData, entityList );
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", viewClass );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() ) + "List";
-    }
-
-    @RequestMapping( method = RequestMethod.GET, produces = { MediaType.APPLICATION_JSON_VALUE } )
-    public void getObjectListJson(
-        @RequestParam( required = false ) String include,
-        @RequestParam( required = false ) String exclude,
-        @RequestParam( value = "filter", required = false ) List<String> filters,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
-    {
         WebOptions options = new WebOptions( parameters );
         WebMetaData metaData = new WebMetaData();
 
-        if ( include == null && exclude == null )
+        if ( fields.isEmpty() )
         {
-            include = DEFAULT_LIST_INCLUDE;
+            fields.add( ":identifiable" );
         }
 
         boolean hasPaging = options.hasPaging();
@@ -170,16 +151,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         List<T> entityList = getEntityList( metaData, options );
+        Pager pager = metaData.getPager();
 
         // enable object filter
-        if ( filters != null && !filters.isEmpty() )
+        if ( !filters.isEmpty() )
         {
-            entityList = filterService.filterObjects( entityList, filters );
+            entityList = filterService.objectFilter( entityList, filters );
 
             if ( hasPaging )
             {
-                Pager pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
-                metaData.setPager( pager );
+                pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
                 entityList = PagerUtils.pageCollection( entityList, pager );
             }
         }
@@ -187,66 +168,123 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         postProcessEntities( entityList );
         postProcessEntities( entityList, options, parameters );
 
-        response.setContentType( MediaType.APPLICATION_JSON_VALUE + "; charset=UTF-8" );
-
-        ReflectionUtils.invokeSetterMethod( schemaService.getSchema( getEntityClass() ).getPlural(), metaData, entityList );
-
-        if ( include != null && include.contains( "access" ) )
+        if ( fields.contains( "access" ) )
         {
             options.getOptions().put( "viewClass", "sharing" );
         }
 
-        handleLinksAndAccess( options, metaData, entityList );
+        handleLinksAndAccess( options, entityList );
 
         RootNode rootNode = new RootNode( "metadata" );
+        rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
+        rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
 
-        if ( hasPaging )
+        if ( pager != null )
         {
             ComplexNode pagerNode = rootNode.addChild( new ComplexNode( "pager" ) );
-            pagerNode.addChild( new SimpleNode( "page", metaData.getPager().getPage() ) );
-            pagerNode.addChild( new SimpleNode( "pageCount", metaData.getPager().getPageCount() ) );
-            pagerNode.addChild( new SimpleNode( "total", metaData.getPager().getTotal() ) );
-            pagerNode.addChild( new SimpleNode( "nextPage", metaData.getPager().getNextPage() ) );
-            pagerNode.addChild( new SimpleNode( "prevPage", metaData.getPager().getPrevPage() ) );
+            pagerNode.addChild( new SimpleNode( "page", pager.getPage() ) );
+            pagerNode.addChild( new SimpleNode( "pageCount", pager.getPageCount() ) );
+            pagerNode.addChild( new SimpleNode( "total", pager.getTotal() ) );
+            pagerNode.addChild( new SimpleNode( "nextPage", pager.getNextPage() ) );
+            pagerNode.addChild( new SimpleNode( "prevPage", pager.getPrevPage() ) );
         }
 
-        rootNode.addChild( filterService.filterProperties( getEntityClass(), entityList, include, exclude ) );
+        rootNode.addChild( filterService.fieldFilter( getEntityClass(), entityList, fields ) );
 
-        // response.setContentType( MediaType.APPLICATION_XML_VALUE );
-        // nodeService.serialize( rootNode, MediaType.APPLICATION_XML_VALUE, response.getOutputStream() );
-        nodeService.serialize( rootNode, MediaType.APPLICATION_JSON_VALUE, response.getOutputStream() );
+        return rootNode;
     }
 
+    @RequestMapping( value = "/{uid}/**", method = RequestMethod.GET )
+    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid,
+        @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        String requestUrl = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
+        String[] fields = requestUrl.split( "/" );
+
+        String field = "";
+        String postfix = "";
+
+        for ( int i = 3; i < fields.length; i++ )
+        {
+            if ( i > 3 )
+            {
+                field += "[" + fields[i];
+                postfix += "]";
+            }
+            else
+            {
+                field = fields[i];
+            }
+        }
+
+        field += postfix;
+
+        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( field ) );
+    }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public @ResponseBody RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
+        List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
+
+        if ( fields.isEmpty() )
+        {
+            fields.add( ":all" );
+        }
+
+        return getObjectInternal( uid, parameters, filters, fields );
+    }
+
+    private RootNode getObjectInternal( String uid, Map<String, String> parameters,
+        List<String> filters, List<String> fields ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
-        T entity = getEntity( uid );
+        List<T> entities = getEntity( uid, options );
 
-        if ( entity == null )
+        if ( entities.isEmpty() )
         {
             throw new NotFoundException( uid );
         }
 
+        entities = filterService.objectFilter( entities, filters );
+
         if ( options.hasLinks() )
         {
-            linkService.generateLinks( entity );
+            linkService.generateLinks( entities );
         }
 
         if ( aclService.isSupported( getEntityClass() ) )
         {
-            addAccessProperties( entity );
+            addAccessProperties( entities );
         }
 
-        postProcessEntity( entity );
-        postProcessEntity( entity, options, parameters );
+        for ( T entity : entities )
+        {
+            postProcessEntity( entity );
+            postProcessEntity( entity, options, parameters );
+        }
 
-        model.addAttribute( "model", entity );
-        model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
+        CollectionNode collectionNode = filterService.fieldFilter( getEntityClass(), entities, fields );
 
-        return StringUtils.uncapitalize( getEntitySimpleName() );
+        if ( options.booleanTrue( "useWrapper" ) || entities.size() > 1 )
+        {
+            RootNode rootNode = new RootNode( "metadata" );
+            rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
+            rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+            rootNode.addChild( collectionNode );
+
+            return rootNode;
+        }
+        else
+        {
+            RootNode rootNode = new RootNode( collectionNode.getChildren().get( 0 ) );
+            rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
+            rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+
+            return rootNode;
+        }
     }
 
     //--------------------------------------------------------------------------
@@ -288,15 +326,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
-        T object = getEntity( uid );
+        List<T> objects = getEntity( uid );
 
-        if ( object == null )
+        if ( objects.isEmpty() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
-        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
         }
@@ -313,15 +351,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
-        T object = getEntity( uid );
+        List<T> objects = getEntity( uid );
 
-        if ( object == null )
+        if ( objects.isEmpty() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
-        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
         }
@@ -342,14 +380,20 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws
         Exception
     {
-        T object = getEntity( uid );
+        List<T> objects = getEntity( uid );
 
-        if ( !aclService.canDelete( currentUserService.getCurrentUser(), object ) )
+        if ( objects.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            return;
+        }
+
+        if ( !aclService.canDelete( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
         {
             throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
         }
 
-        manager.delete( object );
+        manager.delete( objects.get( 0 ) );
     }
 
     //--------------------------------------------------------------------------
@@ -421,42 +465,55 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return entityList;
     }
 
-    protected T getEntity( String uid )
+    protected List<T> getEntity( String uid )
     {
-        return manager.getNoAcl( getEntityClass(), uid ); //TODO consider ACL
+        return getEntity( uid, new WebOptions( new HashMap<String, String>() ) );
     }
 
-    protected void addAccessProperties( T object )
+    protected List<T> getEntity( String uid, WebOptions options )
     {
-        Access access = new Access();
-        access.setManage( aclService.canManage( currentUserService.getCurrentUser(), object ) );
-        access.setExternalize( aclService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
-        access.setWrite( aclService.canWrite( currentUserService.getCurrentUser(), object ) );
-        access.setRead( aclService.canRead( currentUserService.getCurrentUser(), object ) );
-        access.setUpdate( aclService.canUpdate( currentUserService.getCurrentUser(), object ) );
-        access.setDelete( aclService.canDelete( currentUserService.getCurrentUser(), object ) );
+        ArrayList<T> list = new ArrayList<>();
+        Optional<T> identifiableObject = Optional.of( manager.getNoAcl( getEntityClass(), uid ) );
 
-        ((BaseIdentifiableObject) object).setAccess( access );
+        if ( identifiableObject.isPresent() )
+        {
+            list.add( identifiableObject.get() );
+        }
+
+        return list; //TODO consider ACL
     }
 
-    protected void handleLinksAndAccess( WebOptions options, WebMetaData metaData, List<T> entityList )
+    protected Schema getSchema()
+    {
+        return schemaService.getDynamicSchema( getEntityClass() );
+    }
+
+    protected void addAccessProperties( List<T> objects )
+    {
+        for ( T object : objects )
+        {
+            Access access = new Access();
+            access.setManage( aclService.canManage( currentUserService.getCurrentUser(), object ) );
+            access.setExternalize( aclService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
+            access.setWrite( aclService.canWrite( currentUserService.getCurrentUser(), object ) );
+            access.setRead( aclService.canRead( currentUserService.getCurrentUser(), object ) );
+            access.setUpdate( aclService.canUpdate( currentUserService.getCurrentUser(), object ) );
+            access.setDelete( aclService.canDelete( currentUserService.getCurrentUser(), object ) );
+
+            ((BaseIdentifiableObject) object).setAccess( access );
+        }
+    }
+
+    protected void handleLinksAndAccess( WebOptions options, List<T> entityList )
     {
         if ( options != null && options.hasLinks() )
         {
-            linkService.generateLinks( metaData );
-        }
-
-        if ( !JacksonUtils.isSharingView( options.getViewClass( "basic" ) ) )
-        {
-            return;
+            linkService.generateLinks( entityList );
         }
 
         if ( entityList != null && aclService.isSupported( getEntityClass() ) )
         {
-            for ( T object : entityList )
-            {
-                addAccessProperties( object );
-            }
+            addAccessProperties( entityList );
         }
     }
 
@@ -509,15 +566,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             return (T) Class.forName( getEntityName() ).newInstance();
         }
-        catch ( InstantiationException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-        catch ( IllegalAccessException ex )
-        {
-            throw new RuntimeException( ex );
-        }
-        catch ( ClassNotFoundException ex )
+        catch ( InstantiationException | IllegalAccessException | ClassNotFoundException ex )
         {
             throw new RuntimeException( ex );
         }

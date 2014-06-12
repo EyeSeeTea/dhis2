@@ -36,8 +36,8 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.schema.descriptors.DataElementOperandSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -133,7 +133,7 @@ public class DataElementOperandController extends AbstractCrudController<DataEle
 
         String viewClass = options.getViewClass( "basic" );
 
-        handleLinksAndAccess( options, metaData, dataElementOperands );
+        handleLinksAndAccess( options, dataElementOperands );
 
         postProcessEntities( dataElementOperands );
         postProcessEntities( dataElementOperands, options, parameters );

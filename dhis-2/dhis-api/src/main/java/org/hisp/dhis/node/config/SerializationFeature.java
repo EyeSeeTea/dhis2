@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.exception;
+package org.hisp.dhis.node.config;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,21 +25,29 @@ package org.hisp.dhis.webapi.controller.exception;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class NotFoundForQueryException extends Exception
+public enum SerializationFeature implements Feature
 {
-    public NotFoundForQueryException()
+    /**
+     * Enable pretty printing for serializers that support it.
+     */
+    PRETTY_PRINT( false );
+
+    private boolean state;
+
+    SerializationFeature( boolean state )
     {
-        super( "Object not found." );
+        this.state = state;
     }
 
-    public NotFoundForQueryException( String query )
+    @Override
+    public boolean defaultState()
     {
-        super( "Object not found for query: " + query );
+        return state;
     }
 }

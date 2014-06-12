@@ -28,6 +28,7 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.common.Pager;
@@ -35,6 +36,7 @@ import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.schema.descriptors.UserSchemaDescriptor;
 import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.security.RestoreOptions;
@@ -45,14 +47,13 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
 import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -95,17 +96,17 @@ public class UserController
 
     @Override
     @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
-    public String getObjectList( @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
+    public RootNode getObjectList( @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
     {
-        return super.getObjectList( parameters, model, response, request );
+        return super.getObjectList( parameters, response, request );
     }
 
     @Override
     @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
-    public String getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters, Model model,
+    public RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        return super.getObject( uid, parameters, model, request, response );
+        return super.getObject( uid, parameters, request, response );
     }
 
     @Override
@@ -135,9 +136,17 @@ public class UserController
     }
 
     @Override
-    protected User getEntity( String uid )
+    protected List<User> getEntity( String uid )
     {
-        return userService.getUser( uid );
+        List<User> users = Lists.newArrayList();
+        Optional<User> user = Optional.of( userService.getUser( uid ) );
+
+        if ( user.isPresent() )
+        {
+            users.add( user.get() );
+        }
+
+        return users;
     }
 
     //--------------------------------------------------------------------------
@@ -187,15 +196,15 @@ public class UserController
     public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
-        User object = getEntity( uid );
+        List<User> users = getEntity( uid );
 
-        if ( object == null )
+        if ( users.isEmpty() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
-        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), users.get( 0 ) ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
         }
@@ -218,15 +227,15 @@ public class UserController
     public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
-        User object = getEntity( uid );
+        List<User> users = getEntity( uid );
 
-        if ( object == null )
+        if ( users.isEmpty() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
-        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), object ) )
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), users.get( 0 ) ) )
         {
             throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
         }

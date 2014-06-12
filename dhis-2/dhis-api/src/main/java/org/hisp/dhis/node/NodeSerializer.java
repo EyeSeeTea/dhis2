@@ -30,15 +30,15 @@ package org.hisp.dhis.node;
 
 import org.hisp.dhis.node.types.RootNode;
 
-import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface NodeSerializer
+public interface NodeSerializer extends Serializer<RootNode>
 {
-    void serialize( RootNode rootNode, OutputStream outputStream ) throws IOException;
+    List<String> contentTypes();
 
-    String contentType();
+    void serialize( RootNode rootNode, OutputStream outputStream ) throws Exception;
 }

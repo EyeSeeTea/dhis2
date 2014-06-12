@@ -37,11 +37,14 @@ import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
+
+import static org.hisp.dhis.period.PeriodType.getAvailablePeriodTypes;
 
 public class GetDataApprovalOptionsAction
     implements Action
@@ -56,20 +59,20 @@ public class GetDataApprovalOptionsAction
     // Output
     // -------------------------------------------------------------------------
 
-    private List<CategoryOptionGroup> categoryOptionGroups;
-    
-    public List<CategoryOptionGroup> getCategoryOptionGroups()
-    {
-        return categoryOptionGroups;
-    }
-
     private List<DataSet> dataSets;
 
     public List<DataSet> getDataSets()
     {
         return dataSets;
     }
-    
+
+    private List<PeriodType> periodTypes;
+
+    public List<PeriodType> getPeriodTypes()
+    {
+        return periodTypes;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -78,12 +81,11 @@ public class GetDataApprovalOptionsAction
     public String execute()
         throws Exception
     {
-        categoryOptionGroups = new ArrayList<CategoryOptionGroup>( categoryService.getAllCategoryOptionGroups() );
-        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );        
-        
+        dataSets = new ArrayList<DataSet>( dataSetService.getAllDataSets() );
+        periodTypes = getAvailablePeriodTypes();
+
         FilterUtils.filter( dataSets, new DataSetApproveDataFilter() );
         
-        Collections.sort( categoryOptionGroups, IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );
         
         return SUCCESS;

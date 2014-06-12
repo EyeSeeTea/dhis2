@@ -28,12 +28,14 @@ package org.hisp.dhis.node;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import org.springframework.core.Ordered;
+
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface Node
+public interface Node extends Ordered
 {
     /**
      * Name of this node.
@@ -49,6 +51,43 @@ public interface Node
      * @see org.hisp.dhis.node.NodeType
      */
     NodeType getType();
+
+    /**
+     * Get parent node, or null if this is a top-level node.
+     * @return parent or null if node does not have parent
+     */
+    Node getParent();
+
+    /**
+     * @param type Type to check for
+     * @return True if node is of this type
+     */
+    boolean is( NodeType type );
+
+    /**
+     * Helper that checks if node is of simple type, useful to checking if
+     * you are allowed to add children to this node.
+     *
+     * @return true if type is simple
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isSimple();
+
+    /**
+     * Helper that checks if node is of complex type.
+     *
+     * @return true if type is complex
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isComplex();
+
+    /**
+     * Helper that checks if node is of collection type.
+     *
+     * @return true if type is collection
+     * @see org.hisp.dhis.node.NodeType
+     */
+    boolean isCollection();
 
     /**
      * Namespace for this node. Not all serializers support this, and its up to the
@@ -83,5 +122,11 @@ public interface Node
      */
     <T extends Node> void addChildren( Iterable<T> children );
 
+    /**
+     * Get all child notes associated with this node. Please note that the returned list is a copy
+     * of the internal list, and changes to the list will not be reflected in the node.
+     *
+     * @return List of child nodes associated with this node
+     */
     List<Node> getChildren();
 }

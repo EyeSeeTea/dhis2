@@ -31,10 +31,11 @@ package org.hisp.dhis.node;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -44,35 +45,97 @@ import java.util.Map;
  */
 public class DefaultNodeService implements NodeService
 {
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<NodeSerializer> nodeSerializers = Lists.newArrayList();
 
+    @Autowired(required = false)
+    private List<NodeDeserializer> nodeDeserializers = Lists.newArrayList();
+
     private Map<String, NodeSerializer> nodeSerializerMap = Maps.newHashMap();
+
+    private Map<String, NodeDeserializer> nodeDeserializerMap = Maps.newHashMap();
 
     @PostConstruct
     private void init()
     {
         for ( NodeSerializer nodeSerializer : nodeSerializers )
         {
-            nodeSerializerMap.put( nodeSerializer.contentType(), nodeSerializer );
+            for ( String contentType : nodeSerializer.contentTypes() )
+            {
+                nodeSerializerMap.put( contentType, nodeSerializer );
+            }
         }
-    }
 
-    @Override
-    public List<NodeSerializer> getSerializers()
-    {
-        return nodeSerializers;
-    }
-
-    @Override
-    public void serialize( RootNode rootNode, String contentType, OutputStream outputStream ) throws IOException
-    {
-        if ( !nodeSerializerMap.containsKey( contentType ) )
+        for ( NodeDeserializer nodeDeserializer : nodeDeserializers )
         {
-            return;
+            for ( String contentType : nodeDeserializer.contentTypes() )
+            {
+                nodeDeserializerMap.put( contentType, nodeDeserializer );
+            }
+        }
+    }
+
+    @Override
+    public NodeSerializer getNodeSerializer( String contentType )
+    {
+        if ( nodeSerializerMap.containsKey( contentType ) )
+        {
+            return nodeSerializerMap.get( contentType );
         }
 
-        NodeSerializer nodeSerializer = nodeSerializerMap.get( contentType );
-        nodeSerializer.serialize( rootNode, outputStream );
+        return null;
+    }
+
+    @Override
+    public void serialize( RootNode rootNode, String contentType, OutputStream outputStream )
+    {
+        NodeSerializer nodeSerializer = getNodeSerializer( contentType );
+
+        if ( nodeSerializer == null )
+        {
+            return; // TODO throw exception?
+        }
+
+        try
+        {
+            nodeSerializer.serialize( rootNode, outputStream );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public NodeDeserializer getNodeDeserializer( String contentType )
+    {
+        if ( nodeDeserializerMap.containsKey( contentType ) )
+        {
+            return nodeDeserializerMap.get( contentType );
+        }
+
+        return null;
+    }
+
+    @Override
+    public RootNode deserialize( String contentType, InputStream inputStream )
+    {
+        NodeDeserializer nodeDeserializer = getNodeDeserializer( contentType );
+
+        if ( nodeDeserializer == null )
+        {
+            return null; // TODO throw exception?
+        }
+
+        try
+        {
+            return nodeDeserializer.deserialize( inputStream );
+        }
+        catch ( Exception e )
+        {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }

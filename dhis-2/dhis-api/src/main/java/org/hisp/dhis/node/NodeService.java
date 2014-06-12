@@ -30,16 +30,45 @@ package org.hisp.dhis.node;
 
 import org.hisp.dhis.node.types.RootNode;
 
-import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface NodeService
 {
-    List<NodeSerializer> getSerializers();
+    /**
+     * Find a nodeSerializer that supports contentType or return null.
+     *
+     * @param contentType NodeSerializer contentType
+     * @return NodeSerializer that support contentType, or null if not match was found
+     * @see org.hisp.dhis.node.NodeSerializer
+     */
+    NodeSerializer getNodeSerializer( String contentType );
 
-    void serialize( RootNode rootNode, String contentType, OutputStream outputStream ) throws IOException;
+    /**
+     * Write out rootNode to a nodeSerializer that matches the contentType.
+     *
+     * @param rootNode     RootNode to write
+     * @param contentType  NodeSerializer contentType
+     * @param outputStream Write to this outputStream
+     */
+    void serialize( RootNode rootNode, String contentType, OutputStream outputStream );
+
+    /**
+     * Find a nodeDeserializer that supports contentType or return null.
+     *
+     * @param contentType NodeDeserializer contentType
+     * @return NodeDeserializer that support contentType, or null if not match was found
+     * @see org.hisp.dhis.node.NodeDeserializer
+     */
+    NodeDeserializer getNodeDeserializer( String contentType );
+
+    /**
+     * @param contentType NodeDeserializer contentType
+     * @param inputStream Read RootNode from this stream
+     * @return RootNode deserialized from inputStream
+     */
+    RootNode deserialize( String contentType, InputStream inputStream );
 }
