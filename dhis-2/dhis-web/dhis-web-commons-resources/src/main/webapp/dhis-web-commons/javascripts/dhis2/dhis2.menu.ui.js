@@ -115,6 +115,7 @@
     var template, defaultMenuUi, searchUi, linkButtonUi, scrollUi, shortCutUi, keys;
 
     keys = {
+        alt: 18,
         enter: 13,
         slash: 191,
         backslash: 220,
@@ -407,19 +408,26 @@
             return ! defaultMenu.isOpen();
         }
 
-        defaultMenu.open = function () {
+        defaultMenu.open = function (hover) {
             var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap"));
 
+            //Set the dropdown position
+            jqLite(dropdownElement).css('left', defaultMenu.getDropDownPosition() + 'px');
             dropdownElement.css('display', 'block');
-            dropdownElement.attr("data-display-clicked", "true");
+
+            if (! hover) {
+                dropdownElement.attr("data-display-clicked", "true");
+            }
             defaultMenu.hooks.call('open');
         }
 
-        defaultMenu.close = function () {
+        defaultMenu.close = function (hover) {
             var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap"));
 
             dropdownElement.css('display', 'none');
-            dropdownElement.attr("data-display-clicked", "false");
+            if ( ! hover) {
+                dropdownElement.attr("data-display-clicked", "false");
+            }
             defaultMenu.hooks.call('close');
         }
 
@@ -466,9 +474,28 @@
             return result;
         }
 
+        defaultMenu.getDropDownPosition = function () {
+            var menuElement = document.querySelector("#" + defaultMenu.name  + "_button"),
+                dropdownElement = jqLite(menuElement.querySelector("div.app-menu-dropdown-wrap")),
+                dropdownPosition;
+
+            dropdownElement.css('display', 'block');
+
+            // Get the dropdown width and position
+            defaultMenu.dropdownWidth = dropdownElement[0].offsetWidth;
+            defaultMenu.linkPositionX = menuElement.offsetLeft;
+
+            // Calculate the dropdown position x
+            dropdownPosition = defaultMenu.linkPositionX - (defaultMenu.dropdownWidth - menuElement.offsetWidth);
+
+            //Hide the dropdown element
+            dropdownElement.css('display', 'none');
+
+            return dropdownPosition;
+        }
+
         defaultMenu.renderers.push(function (menuData) {
-            var linkItem,
-                menuItems = '';
+            var linkItem, menuItems;
 
             menuItems = defaultMenu.renderMenuItems(menuData.getApps());
 
@@ -493,40 +520,31 @@
         });
 
         defaultMenu.eventsHandlers.push(function (menuElement) {
-            var dropdownElement = jqLite(menuElement.querySelector("div.app-menu-dropdown-wrap")),
-                dropdownPosition;
-
-            //Get the dropdown width and position before hiding
-            defaultMenu.dropdownWidth = dropdownElement[0].offsetWidth;
-            defaultMenu.linkPositionX = menuElement.offsetLeft;
-
-            dropdownElement.css('display', 'none');
-
-            //Set the dropdown position based on the menuLink location
-            dropdownPosition = defaultMenu.linkPositionX - (defaultMenu.dropdownWidth - menuElement.offsetWidth);
-            jqLite(dropdownElement).css('left', dropdownPosition + 'px');
+            var dropdownElement = jqLite(menuElement.querySelector("div.app-menu-dropdown-wrap"));
 
             //Add click to show dropdown event
             jqLite(menuElement.querySelector("a.drop-down-menu-link")).on("click", function () {
                 if (dropdownElement.attr("data-display-clicked") === "true") {
                     defaultMenu.close();
                 } else {
-                    defaultMenu.closeAll(menuElement);
+                    defaultMenu.closeAll();
                     defaultMenu.open();
                 }
             });
 
             //Hover event
             jqLite(menuElement).on('mouseenter', function() {
-                dropdownElement.css('display', 'block');
-                defaultMenu.hooks.call('open');
+                defaultMenu.open(true);
             });
             jqLite(menuElement).on('mouseleave', function() {
                 if (dropdownElement.attr('data-display-clicked') === "true") {
                     return;
                 }
-                dropdownElement.css('display', 'none');
-                defaultMenu.hooks.call('close');
+                defaultMenu.close(true);
+            });
+
+            jqLite(window).on('resize', function () {
+                defaultMenu.closeAll();
             });
         });
 
@@ -641,7 +659,9 @@
 
             jqLite(searchBoxElement).on('keyup', function (event) {
                 //Filter the menu items
-                if ( ! keys.isArrowKey(event.which) && ! (event.which === keys.enter)) {
+                if ( ! keys.isArrowKey(event.which) &&
+                     ! (event.which === keys.enter) &&
+                     ! (event.which === keys.alt)) {
                     performSearch(menuElement);
                 }
             });
@@ -693,7 +713,7 @@
             function changeCurrentSelected(currentElement) {
 
                 function animateScrollTo(scrollable, scrollto) {
-                    var modifier = 1;
+                    var modifier = 2;
                     scrollto = scrollto - 49;
 
                     function scrollDown() {
@@ -828,6 +848,7 @@
                         return;
                     }
 
+                    //TODO: Clean up this code a bit as it's very confusing to what it does now.
                     if (event.which === keys.arrowUp) {
                         currentElement = currentElement - 3;
                         if (shortCutElements[currentElement] === undefined) {
@@ -923,71 +944,82 @@
 /**
  * End of menu ui code. The code below creates the menu with the default profile and apps menus
  */
-try {
-    dhis2.menu.ui.createMenu("profile", [
-           {
-               name: "settings",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-about/userSettings.action",
-               icon: "../icons/usersettings.png",
-               description: ""
-           },
-           {
-               name: "profile",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-about/showUpdateUserProfileForm.action",
-               icon: "../icons/function-profile.png",
-               description: ""
-           },
-           {
-               name: "account",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-about/showUpdateUserAccountForm.action",
-               icon: "../icons/function-account.png",
-               description: ""
-           },
-           {
-               name: "help",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-about/help.action",
-               icon: "../icons/function-account.png",
-               description: ""
-           },
-           {
-               name: "log_out",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-security/logout.action",
-               icon: "../icons/function-log-out.png",
-               description: ""
-           },
-           {
-               name: "about_dhis2",
-               namespace: "/dhis-web-commons-about",
-               defaultAction: "../dhis-web-commons-about/about.action",
-               icon: "../icons/function-about-dhis2.png",
-               description: ""
-           }
-        ],
-        {
-            icon: "user",
-            shortCut: "backslash"
-        }
-    );
+(function () {
+    dhis2.menu.ui.initMenu = function () {
+        try {
+            dhis2.menu.ui.createMenu("profile", [
+                {
+                    name: "settings",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-about/userSettings.action",
+                    icon: "../icons/usersettings.png",
+                    description: ""
+                },
+                {
+                    name: "profile",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-about/showUpdateUserProfileForm.action",
+                    icon: "../icons/function-profile.png",
+                    description: ""
+                },
+                {
+                    name: "account",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-about/showUpdateUserAccountForm.action",
+                    icon: "../icons/function-account.png",
+                    description: ""
+                },
+                {
+                    name: "help",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-about/help.action",
+                    icon: "../icons/function-account.png",
+                    description: ""
+                },
+                {
+                    name: "log_out",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-security/logout.action",
+                    icon: "../icons/function-log-out.png",
+                    description: ""
+                },
+                {
+                    name: "about_dhis2",
+                    namespace: "/dhis-web-commons-about",
+                    defaultAction: "../dhis-web-commons-about/about.action",
+                    icon: "../icons/function-about-dhis2.png",
+                    description: ""
+                }
+            ],
+                {
+                    icon: "user",
+                    shortCut: "backslash"
+                }
+            );
 
-    dhis2.menu.mainAppMenu = dhis2.menu.ui.createMenu("applications",
-        "/dhis-web-commons/menu/getModules.action",
-        {
-            searchable: true,
-            scrollable: true,
-            extraLink: {
-                text: 'more_applications',
-                url: '../dhis-web-commons-about/modules.action'
-            },
-            shortCut: "slash"
-        }
-    );
+            dhis2.menu.mainAppMenu = dhis2.menu.ui.createMenu("applications",
+                "/dhis-web-commons/menu/getModules.action",
+                {
+                    searchable: true,
+                    scrollable: true,
+                    extraLink: {
+                        text: 'more_applications',
+                        url: '../dhis-web-commons-about/modules.action'
+                    },
+                    shortCut: "slash"
+                }
+            );
 
-} catch (e) {
-    if (console && console.error)
-        console.error(e.message, e.stack);
-}
+        } catch (e) {
+            if (console && console.error)
+                console.error(e.message, e.stack);
+        }
+    }
+
+    if (window['angular']) {
+        return;
+    } else {
+        dhis2.menu.ui.initMenu();
+    }
+
+})();
