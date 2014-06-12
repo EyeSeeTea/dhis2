@@ -592,8 +592,16 @@
             });
 
             jqLite(scrollDownElement).on('click', function (event) {
+                var scrollDistance = 330;
                 event.preventDefault();
-                scrollElement.scrollTop = scrollElement.scrollTop + 330;
+
+                //TODO: We should only have to do this when there is a scrollbar
+                //Compensate on first scroll for searchbar
+                if (scrollElement.scrollTop === 0) {
+                    scrollDistance += 40;
+                }
+
+                scrollElement.scrollTop = scrollElement.scrollTop + scrollDistance;
             });
         });
 
