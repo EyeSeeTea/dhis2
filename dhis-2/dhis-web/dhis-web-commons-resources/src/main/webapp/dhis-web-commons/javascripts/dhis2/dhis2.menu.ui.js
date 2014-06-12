@@ -115,7 +115,7 @@
     var template, defaultMenuUi, searchUi, linkButtonUi, scrollUi, shortCutUi, keys;
 
     keys = {
-        alt: 18,
+        ctrl: 17,
         enter: 13,
         slash: 191,
         backslash: 220,
@@ -123,6 +123,9 @@
         arrowUp: 38,
         arrowRight: 39,
         arrowDown: 40,
+        m: 77,
+        comma: 188,
+        dot: 190,
         isArrowKey: function (keyCode) {
             return (keyCode === keys.arrowRight ||
                 keyCode === keys.arrowLeft ||
@@ -669,7 +672,7 @@
                 //Filter the menu items
                 if ( ! keys.isArrowKey(event.which) &&
                      ! (event.which === keys.enter) &&
-                     ! (event.which === keys.alt)) {
+                     ! (event.which === keys.ctrl)) {
                     performSearch(menuElement);
                 }
             });
@@ -765,7 +768,7 @@
                 /**
                  * Key combination using alt to control opening and closing
                  */
-                if (event.which === shortCutMenu.shortCutKey && event.altKey) {
+                if (event.which === shortCutMenu.shortCutKey && event.ctrlKey) {
                     event.preventDefault();
 
                     if (shortCutMenu.isOpen()) {
@@ -1001,7 +1004,7 @@
             ],
                 {
                     icon: "user",
-                    shortCut: "backslash"
+                    shortCut: "comma"
                 }
             );
 
@@ -1014,7 +1017,7 @@
                         text: 'more_applications',
                         url: '../dhis-web-commons-about/modules.action'
                     },
-                    shortCut: "slash"
+                    shortCut: "m"
                 }
             );
 
