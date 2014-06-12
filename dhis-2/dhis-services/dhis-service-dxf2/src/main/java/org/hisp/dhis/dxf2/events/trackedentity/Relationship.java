@@ -43,7 +43,7 @@ public class Relationship
 
     private String trackedEntityInstance;
 
-    private String type;
+    private String relationship;
 
     public Relationship()
     {
@@ -75,14 +75,14 @@ public class Relationship
 
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
-    public String getType()
+    public String getRelationship()
     {
-        return type;
+        return relationship;
     }
 
-    public void setType( String type )
+    public void setRelationship( String relationship )
     {
-        this.type = type;
+        this.relationship = relationship;
     }
 
     @Override
@@ -96,7 +96,7 @@ public class Relationship
         if ( displayName != null ? !displayName.equals( that.displayName ) : that.displayName != null ) return false;
         if ( trackedEntityInstance != null ? !trackedEntityInstance.equals( that.trackedEntityInstance ) : that.trackedEntityInstance != null )
             return false;
-        if ( type != null ? !type.equals( that.type ) : that.type != null ) return false;
+        if ( relationship != null ? !relationship.equals( that.relationship ) : that.relationship != null ) return false;
 
         return true;
     }
@@ -106,7 +106,7 @@ public class Relationship
     {
         int result = displayName != null ? displayName.hashCode() : 0;
         result = 31 * result + (trackedEntityInstance != null ? trackedEntityInstance.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (relationship != null ? relationship.hashCode() : 0);
         return result;
     }
 
@@ -116,7 +116,7 @@ public class Relationship
         return "Relationship{" +
             "displayName='" + displayName + '\'' +
             ", trackedEntityInstance='" + trackedEntityInstance + '\'' +
-            ", type='" + type + '\'' +
+            ", relationship='" + relationship + '\'' +
             '}';
     }
 }

@@ -132,7 +132,7 @@ public class DefaultFilterService implements FilterService
         return collectionNode;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private ComplexNode buildObjectOutput( Map<String, Map> fieldMap, Object object )
     {
         if ( object == null )
@@ -144,7 +144,7 @@ public class DefaultFilterService implements FilterService
         ComplexNode complexNode = new ComplexNode( schema.getName() );
         complexNode.setNamespace( schema.getNamespace() );
 
-        updateFields( fieldMap, object );
+        updateFields( fieldMap, schema.getKlass() );
 
         for ( String fieldKey : fieldMap.keySet() )
         {
@@ -157,12 +157,22 @@ public class DefaultFilterService implements FilterService
             Object returnValue = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
             Schema propertySchema = schemaService.getDynamicSchema( property.getKlass() );
 
+            // TODO should we include nulls?
             if ( returnValue == null )
             {
                 continue;
             }
 
             Map fieldValue = fieldMap.get( fieldKey );
+
+            if ( property.isCollection() )
+            {
+                updateFields( fieldValue, property.getItemKlass() );
+            }
+            else
+            {
+                updateFields( fieldValue, property.getKlass() );
+            }
 
             if ( fieldValue.isEmpty() )
             {
@@ -256,22 +266,21 @@ public class DefaultFilterService implements FilterService
         return complexNode;
     }
 
-    private void updateFields( Map<String, Map> fieldMap, Object object )
+    private void updateFields( Map<String, Map> fieldMap, Class<?> klass )
     {
         // we need two run this (at least) two times, since some of the presets might contain other presets
-        _updateFields( fieldMap, object, true );
-        _updateFields( fieldMap, object, false );
+        _updateFields( fieldMap, klass, true );
+        _updateFields( fieldMap, klass, false );
     }
 
-    private void _updateFields( Map<String, Map> fieldMap, Object object, boolean expandOnly )
+    private void _updateFields( Map<String, Map> fieldMap, Class<?> klass, boolean expandOnly )
     {
-        Schema schema = schemaService.getDynamicSchema( object.getClass() );
-
+        Schema schema = schemaService.getDynamicSchema( klass );
         List<String> cleanupFields = Lists.newArrayList();
 
         for ( String fieldKey : Sets.newHashSet( fieldMap.keySet() ) )
         {
-            if ( fieldKey.equals( "*" ) )
+            if ( "*".equals( fieldKey ) )
             {
                 for ( String mapKey : schema.getPropertyMap().keySet() )
                 {
@@ -286,6 +295,11 @@ public class DefaultFilterService implements FilterService
             else if ( fieldKey.startsWith( ":" ) )
             {
                 List<String> fields = FIELD_PRESETS.get( fieldKey.substring( 1 ) );
+
+                if ( fields == null )
+                {
+                    continue;
+                }
 
                 for ( String field : fields )
                 {
@@ -362,7 +376,7 @@ public class DefaultFilterService implements FilterService
         return complexNode;
     }
 
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     private <T> boolean evaluateWithFilters( T object, Filters filters )
     {
         Schema schema = schemaService.getDynamicSchema( object.getClass() );

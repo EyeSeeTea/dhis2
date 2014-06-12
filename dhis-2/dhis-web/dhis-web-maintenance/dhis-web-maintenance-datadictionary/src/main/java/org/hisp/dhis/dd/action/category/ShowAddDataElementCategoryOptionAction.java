@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.dd.action.category;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,58 +28,37 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.Options;
+import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jim Grace
+ * @version $Id$
  */
-public class WebOptions
-    extends Options
+public class ShowAddDataElementCategoryOptionAction
+    implements Action
 {
-    public WebOptions( Map<String, String> options )
-    {
-        super( options );
-    }
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    //--------------------------------------------------------------------------
-    // Getters for standard web options
-    //--------------------------------------------------------------------------
+    @Autowired
+    private OrganisationUnitSelectionManager selectionManager;
 
-    public boolean hasLinks( boolean defaultValue )
-    {
-        return stringAsBoolean( options.get( "links" ), defaultValue );
-    }
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
-    public boolean hasLinks()
+    @Override
+    public String execute()
+            throws Exception
     {
-        return stringAsBoolean( options.get( "links" ), true );
-    }
+        selectionManager.setSelectedOrganisationUnits( new ArrayList<OrganisationUnit>() );
 
-    public boolean hasPaging()
-    {
-        return stringAsBoolean( options.get( "paging" ), true );
-    }
-
-    public int getPage()
-    {
-        return stringAsInt( options.get( "page" ), 1 );
-    }
-
-    public String getViewClass()
-    {
-        return stringAsString( options.get( "viewClass" ), null );
-    }
-    
-    public String getViewClass( String defaultValue )
-    {
-        return stringAsString( options.get( "viewClass" ), defaultValue );
-    }
-
-    public int getPageSize()
-    {
-        return stringAsInt( options.get( "pageSize" ), Pager.DEFAULT_PAGE_SIZE );
+        return SUCCESS;
     }
 }

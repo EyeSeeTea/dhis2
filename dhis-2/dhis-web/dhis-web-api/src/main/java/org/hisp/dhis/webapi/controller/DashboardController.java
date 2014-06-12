@@ -36,6 +36,7 @@ import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.schema.descriptors.DashboardSchemaDescriptor;
 import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -83,7 +84,6 @@ public class DashboardController
         Dashboard dashboard = JacksonUtils.fromJson( input, Dashboard.class );
 
         dashboardService.mergeDashboard( dashboard );
-
         dashboardService.saveDashboard( dashboard );
 
         ContextUtils.createdResponse( response, "Dashboard created", DashboardSchemaDescriptor.API_ENDPOINT + "/" + dashboard.getUid() );
@@ -107,24 +107,6 @@ public class DashboardController
         dashboard.setName( newDashboard.getName() ); // TODO Name only for now
 
         dashboardService.updateDashboard( dashboard );
-    }
-
-    @Override
-    @RequestMapping(value = "/{uid}", method = RequestMethod.DELETE)
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid ) throws Exception
-    {
-        Dashboard dashboard = dashboardService.getDashboard( uid );
-
-        if ( dashboard == null )
-        {
-            ContextUtils.notFoundResponse( response, "Dashboard does not exist: " + uid );
-            return;
-        }
-
-        dashboardService.deleteDashboard( dashboard );
-
-        ContextUtils.okResponse( response, "Dashboard deleted" );
     }
 
     @RequestMapping(value = "/{uid}/items", method = RequestMethod.POST, consumes = "application/json")

@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.user;
+package org.hisp.dhis.webapi.webdomain;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,39 +28,58 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.descriptors.UserRoleSchemaDescriptor;
-import org.hisp.dhis.user.UserAuthorityGroup;
-import org.hisp.dhis.user.UserService;
-import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
-import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dxf2.metadata.Options;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = UserRoleSchemaDescriptor.API_ENDPOINT )
-public class UserRoleController
-    extends AbstractCrudController<UserAuthorityGroup>
+public class WebOptions
+    extends Options
 {
-    @Autowired
-    private UserService userService;
-
-    @Override
-    protected List<UserAuthorityGroup> getEntityList( WebMetaData metaData, WebOptions options )
+    public WebOptions( Map<String, String> options )
     {
-        List<UserAuthorityGroup> entityList = super.getEntityList( metaData, options );
+        super( options );
+    }
 
-        if ( options.getOptions().containsKey( "canIssue" ) && Boolean.parseBoolean( options.getOptions().get( "canIssue" ) ) )
-        {
-            userService.canIssueFilter( entityList );
-        }
+    //--------------------------------------------------------------------------
+    // Getters for standard web options
+    //--------------------------------------------------------------------------
 
-        return entityList;
+    public boolean hasLinks( boolean defaultValue )
+    {
+        return stringAsBoolean( options.get( "links" ), defaultValue );
+    }
+
+    public boolean hasLinks()
+    {
+        return stringAsBoolean( options.get( "links" ), true );
+    }
+
+    public boolean hasPaging()
+    {
+        return stringAsBoolean( options.get( "paging" ), true );
+    }
+
+    public int getPage()
+    {
+        return stringAsInt( options.get( "page" ), 1 );
+    }
+
+    public String getViewClass()
+    {
+        return stringAsString( options.get( "viewClass" ), null );
+    }
+    
+    public String getViewClass( String defaultValue )
+    {
+        return stringAsString( options.get( "viewClass" ), defaultValue );
+    }
+
+    public int getPageSize()
+    {
+        return stringAsInt( options.get( "pageSize" ), Pager.DEFAULT_PAGE_SIZE );
     }
 }

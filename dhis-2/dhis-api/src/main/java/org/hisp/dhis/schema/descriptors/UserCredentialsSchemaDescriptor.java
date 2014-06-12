@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.exception;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,21 +25,30 @@ package org.hisp.dhis.webapi.controller.exception;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
+
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.hisp.dhis.user.UserCredentials;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class NotFoundForQueryException extends Exception
+@Component
+public class UserCredentialsSchemaDescriptor implements SchemaDescriptor
 {
-    public NotFoundForQueryException()
-    {
-        super( "Object not found." );
-    }
+    public static final String SINGULAR = "userCredentials";
 
-    public NotFoundForQueryException( String query )
+    public static final String PLURAL = "userCredentials";
+
+    @Override
+    public Schema getSchema()
     {
-        super( "Object not found for query: " + query );
+        Schema schema = new Schema( UserCredentials.class, SINGULAR, PLURAL );
+        schema.setOrder( 2000 );
+
+        return schema;
     }
 }

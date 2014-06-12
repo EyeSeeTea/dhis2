@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.webapi.webdomain;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -46,7 +46,7 @@ public class WebMetaData
     private LinkableObject linkableObject;
 
     @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Pager getPager()
     {
         return pager;
@@ -58,7 +58,7 @@ public class WebMetaData
     }
 
     @JsonProperty
-    @JacksonXmlProperty( isAttribute = true, namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlProperty( isAttribute = true, namespace = DxfNamespaces.DXF_2_0 )
     public String getLink()
     {
         if ( linkableObject == null )
