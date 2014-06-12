@@ -1017,8 +1017,29 @@
     }
 
     if (window['angular']) {
-        return;
+
+        /**
+         * Angular directive for the menu.
+         */
+        angular.module('d2Menu', [])
+            /**
+             * The directive places a div element with the dhisDropDownMenu id and then calls the normal menu
+             * init method to run all the normal javascript code.
+            */
+            .directive('d2Menu', [function () {
+                return {
+                    restrict: 'A',
+                    replace: true,
+                    template: '<div id="dhisDropDownMenu"></div>',
+                    //TODO: This might not be proper use of a controller
+                    controller: function () {
+                        dhis2.menu.ui.initMenu();
+                    }
+                }
+            }]);
+
     } else {
+        //If there is no angular we just run our normal init function to find tags ourselves
         dhis2.menu.ui.initMenu();
     }
 
