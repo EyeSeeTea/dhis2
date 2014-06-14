@@ -428,14 +428,17 @@ public class DefaultTrackedEntityInstanceService
         return params;
     }
 
+    /**
+     * Creates a QueryItem from the given item string. Item is on format
+     * {attribute-id}:{operator}:{filter-value}. Only the attribute-id is mandatory.
+     */
     private QueryItem getQueryItem( String item )
     {
         if ( !item.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
         {
             return getItem( item, null, null );
         }
-        else
-        // Filter
+        else // Filter
         {
             String[] split = item.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
 
@@ -448,6 +451,9 @@ public class DefaultTrackedEntityInstanceService
         }
     }
 
+    /**
+     * Creates a QueryItem from the given item, operator and filter strings.
+     */
     private QueryItem getItem( String item, String operator, String filter )
     {
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
@@ -494,6 +500,7 @@ public class DefaultTrackedEntityInstanceService
         if ( representativeId != null )
         {
             TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
+            
             if ( representative != null )
             {
                 instance.setRepresentative( representative );
@@ -505,6 +512,7 @@ public class DefaultTrackedEntityInstanceService
                 if ( relationshipTypeId != null )
                 {
                     RelationshipType relType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+                    
                     if ( relType != null )
                     {
                         rel.setRelationshipType( relType );

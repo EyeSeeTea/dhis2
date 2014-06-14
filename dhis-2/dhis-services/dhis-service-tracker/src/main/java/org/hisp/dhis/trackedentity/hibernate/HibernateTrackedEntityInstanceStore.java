@@ -215,6 +215,7 @@ public class HibernateTrackedEntityInstanceStore
         final String regexp = statementBuilder.getRegexpMatch();
         final String wordStart = statementBuilder.getRegexpWordStart();
         final String wordEnd = statementBuilder.getRegexpWordEnd();
+        final String anyChar = "\\.*?";
 
         String sql = "from trackedentityinstance tei " + 
             "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
