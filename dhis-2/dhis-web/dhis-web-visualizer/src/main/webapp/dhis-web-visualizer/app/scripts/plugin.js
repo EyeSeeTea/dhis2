@@ -633,7 +633,7 @@ Ext.onReady(function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-                    layout.legendPosition = config.legendPosition && Ext.isString(config.legendPosition) ? config.legendPosition : null;
+                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
 
 					if (!validateSpecialCases()) {
 						return;
@@ -2181,6 +2181,7 @@ Ext.onReady(function() {
                         width,
                         isVertical = false,
                         position = 'top',
+                        fontSize = 12,
                         padding = 0,
                         positions = ['top', 'right', 'bottom', 'left'];
 
@@ -2219,15 +2220,20 @@ Ext.onReady(function() {
                         padding = 5;
                     }
 
-                    // position
-                    if (Ext.Array.contains(positions, xLayout.legendPosition)) {
-                        position = xLayout.legendPosition;
+                    // legend
+                    if (xLayout.legend) {
+                        if (Ext.Array.contains(positions, xLayout.legend.position)) {
+                            position = xLayout.legend.position;
+                        }
+
+                        fontSize = parseInt(xLayout.legend.fontSize) || fontSize;
+                        fontSize = fontSize + 'px';
                     }
 
                     return Ext.create('Ext.chart.Legend', {
                         position: position,
                         isVertical: isVertical,
-                        labelFont: '13px ' + conf.chart.style.fontFamily,
+                        labelFont: fontSize + ' ' + conf.chart.style.fontFamily,
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding
@@ -2882,7 +2888,7 @@ Ext.onReady(function() {
 
 			web.chart = web.chart || {};
 
-            web.chart.loadChart = function(id) {
+            web.chart.loadChart = function(id, config) {
 				if (!Ext.isString(id)) {
 					alert('Invalid chart id');
 					return;
@@ -2894,6 +2900,8 @@ Ext.onReady(function() {
 						window.open(init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false', '_blank');
 					},
 					success: function(r) {
+                        Ext.apply(r, config);
+                        
 						var layout = api.layout.Layout(r);
 
 						if (layout) {
@@ -3034,7 +3042,7 @@ Ext.onReady(function() {
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
 			if (config.id) {
-				ns.core.web.chart.loadChart(config.id);
+				ns.core.web.chart.loadChart(config.id, config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);

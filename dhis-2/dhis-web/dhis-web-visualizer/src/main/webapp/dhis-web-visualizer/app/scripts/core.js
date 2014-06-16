@@ -574,6 +574,8 @@ Ext.onReady( function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
+                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
+
 					if (!validateSpecialCases()) {
 						return;
 					}
@@ -2150,7 +2152,9 @@ Ext.onReady( function() {
                         width,
                         isVertical = false,
                         position = 'top',
-                        padding = 0;
+                        fontSize = 12,
+                        padding = 0,
+                        positions = ['top', 'right', 'bottom', 'left'];
 
                     if (xLayout.type === conf.finals.chart.pie) {
                         numberOfItems = store.getCount();
@@ -2187,10 +2191,20 @@ Ext.onReady( function() {
                         padding = 5;
                     }
 
+                    // legend
+                    if (xLayout.legend) {
+                        if (Ext.Array.contains(positions, xLayout.legend.position)) {
+                            position = xLayout.legend.position;
+                        }
+
+                        fontSize = parseInt(xLayout.legend.fontSize) || fontSize;
+                        fontSize = fontSize + 'px';
+                    }
+
                     return Ext.create('Ext.chart.Legend', {
                         position: position,
                         isVertical: isVertical,
-                        labelFont: '13px ' + conf.chart.style.fontFamily,
+                        labelFont: fontSize + ' ' + conf.chart.style.fontFamily,
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding
