@@ -15,8 +15,17 @@
 			});
 		});
 		
-		jQuery( '#smtpHostName' ).blur();
+    jQuery( '#smtpHostName' ).blur();
+
+    jQuery( "#sendTestEmail" ).click( function ( e ){
+        e.preventDefault();
+        jQuery.post( '/api/email/sendTestEmail',
+        function( reply ) {
+          setHeaderDelayMessage ( reply );
+        });
+    });
 	});
+
 </script>
 
 <h3>$i18n.getString( "smtp_settings" ) #openHelp( "systemEmailSettings" )</h3>
@@ -57,3 +66,5 @@
 <div class="setting"><input type="button" value="$i18n.getString( 'save' )" style="width:10em"></div>
 
 </form>
+
+<div><a id="sendTestEmail" href="send-test-email" title="Send an automatically generated email using the supplied SMTP settings to your email address">Send me a test email</a></div>
