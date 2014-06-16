@@ -52,6 +52,7 @@ import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.event.EventStatus;
@@ -68,6 +69,7 @@ import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
+import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -139,6 +141,13 @@ public class DefaultTrackedEntityInstanceService
     {
         this.organisationUnitService = organisationUnitService;
     }
+    
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
 
     // -------------------------------------------------------------------------
     // Implementation methods
@@ -149,6 +158,8 @@ public class DefaultTrackedEntityInstanceService
     @Override
     public Grid getTrackedEntityInstances( TrackedEntityInstanceQueryParams params )
     {
+        decideAccess( params );
+        
         validate( params );
 
         // ---------------------------------------------------------------------
@@ -265,6 +276,15 @@ public class DefaultTrackedEntityInstanceService
         return grid;
     }
 
+    public void decideAccess( TrackedEntityInstanceQueryParams params )
+    {
+        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) &&
+            !currentUserService.currenUserIsAuthorized( F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS ) )
+        {
+            throw new IllegalQueryException( "Current user is not authorized to query across all organisation units" );
+        }
+    }
+    
     @Override
     public void validate( TrackedEntityInstanceQueryParams params )
         throws IllegalQueryException
@@ -342,6 +362,8 @@ public class DefaultTrackedEntityInstanceService
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
+        QueryFilter queryFilter = getQueryFilter( query );
+        
         if ( attribute != null )
         {
             for ( String attr : attribute )
@@ -391,7 +413,7 @@ public class DefaultTrackedEntityInstanceService
             throw new IllegalQueryException( "Tracked entity does not exist: " + program );
         }
 
-        params.setQuery( query );
+        params.setQuery( queryFilter );
         params.setProgram( pr );
         params.setProgramStatus( programStatus );
         params.setFollowUp( followUp );
@@ -409,14 +431,17 @@ public class DefaultTrackedEntityInstanceService
         return params;
     }
 
+    /**
+     * Creates a QueryItem from the given item string. Item is on format
+     * {attribute-id}:{operator}:{filter-value}. Only the attribute-id is mandatory.
+     */
     private QueryItem getQueryItem( String item )
     {
         if ( !item.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
         {
             return getItem( item, null, null );
         }
-        else
-        // Filter
+        else // Filter
         {
             String[] split = item.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
 
@@ -429,6 +454,9 @@ public class DefaultTrackedEntityInstanceService
         }
     }
 
+    /**
+     * Creates a QueryItem from the given item, operator and filter strings.
+     */
     private QueryItem getItem( String item, String operator, String filter )
     {
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
@@ -447,6 +475,37 @@ public class DefaultTrackedEntityInstanceService
         else
         {
             return new QueryItem( at, at.isNumericType() );
+        }
+    }
+    
+    /**
+     * Creates a QueryFilter from the given query string. Query is on format
+     * {operator}:{filter-value}. Only the filter-value is mandatory. The EQ
+     * QueryOperator is used as operator if not specified.
+     */
+    private QueryFilter getQueryFilter( String query )
+    {
+        if ( query == null || query.isEmpty() )
+        {
+            return null;
+        }
+        
+        if ( !query.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
+        {
+            return new QueryFilter( QueryOperator.EQ, query );
+        }
+        else
+        {
+            String[] split = query.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
+            
+            if ( split == null || split.length != 2 )
+            {
+                throw new IllegalQueryException( "Query has invalid format: " + query );
+            }
+            
+            QueryOperator op = QueryOperator.fromString( split[0] );
+            
+            return new QueryFilter( op, split[1] );
         }
     }
 
@@ -475,6 +534,7 @@ public class DefaultTrackedEntityInstanceService
         if ( representativeId != null )
         {
             TrackedEntityInstance representative = trackedEntityInstanceStore.getByUid( representativeId );
+            
             if ( representative != null )
             {
                 instance.setRepresentative( representative );
@@ -486,6 +546,7 @@ public class DefaultTrackedEntityInstanceService
                 if ( relationshipTypeId != null )
                 {
                     RelationshipType relType = relationshipTypeService.getRelationshipType( relationshipTypeId );
+                    
                     if ( relType != null )
                     {
                         rel.setRelationshipType( relType );
@@ -495,8 +556,7 @@ public class DefaultTrackedEntityInstanceService
             }
         }
 
-        updateTrackedEntityInstance( instance ); // Save instance to update
-                                                 // associations
+        updateTrackedEntityInstance( instance ); // Update associations
 
         return id;
     }
@@ -616,18 +676,14 @@ public class DefaultTrackedEntityInstanceService
     public ValidationCriteria validateEnrollment( TrackedEntityInstance instance, Program program, I18nFormat format )
     {
         for ( ValidationCriteria criteria : program.getValidationCriteria() )
-        {
-            String value = "";
-            
+        {            
             for ( TrackedEntityAttributeValue attributeValue : instance.getAttributeValues() )
             {
                 if ( attributeValue.getAttribute().getUid().equals( criteria.getProperty() ) )
                 {
-                    value = attributeValue.getValue();
-
+                    String value = attributeValue.getValue();
                     String type = attributeValue.getAttribute().getValueType();
                     
-                    // For integer type
                     if ( type.equals( TrackedEntityAttribute.TYPE_NUMBER ) )
                     {
                         int value1 = Integer.parseInt( value );
@@ -640,7 +696,6 @@ public class DefaultTrackedEntityInstanceService
                             return criteria;
                         }
                     }
-                    // For Date type
                     else if ( type.equals( TrackedEntityAttribute.TYPE_DATE ) )
                     {
                         Date value1 = format.parseDate( value );
@@ -652,7 +707,6 @@ public class DefaultTrackedEntityInstanceService
                             return criteria;
                         }
                     }
-                    // For other types
                     else
                     {
                         if ( criteria.getOperator() == ValidationCriteria.OPERATOR_EQUAL_TO
@@ -672,19 +726,4 @@ public class DefaultTrackedEntityInstanceService
 
         return null;
     }
-
-    @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityByAttribute( OrganisationUnit orgunit,
-        String attributeValue, Program program, Integer min, Integer max )
-    {
-        return trackedEntityInstanceStore.searchTrackedEntityByAttribute(orgunit, attributeValue, program, min, max);
-    }
-
-    @Override
-    public int countTrackedEntityByAttribute( OrganisationUnit orgunit, String attributeValue, Program program )
-    {
-        return trackedEntityInstanceStore.countTrackedEntityByAttribute( orgunit, attributeValue, program );
-    }
-    
- 
 }

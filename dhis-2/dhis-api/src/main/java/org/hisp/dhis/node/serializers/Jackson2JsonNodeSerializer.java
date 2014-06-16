@@ -86,8 +86,15 @@ public class Jackson2JsonNodeSerializer extends AbstractNodeSerializer
     }
 
     @Override
+    protected void endSerialize( RootNode rootNode, OutputStream outputStream ) throws Exception
+    {
+        generator = null;
+    }
+
+    @Override
     protected void startWriteRootNode( RootNode rootNode ) throws Exception
     {
+        //generator.writeRaw( "callback(" );
         generator.writeStartObject();
     }
 
@@ -95,6 +102,7 @@ public class Jackson2JsonNodeSerializer extends AbstractNodeSerializer
     protected void endWriteRootNode( RootNode rootNode ) throws Exception
     {
         generator.writeEndObject();
+        //generator.writeRaw( ")" );
     }
 
     @Override

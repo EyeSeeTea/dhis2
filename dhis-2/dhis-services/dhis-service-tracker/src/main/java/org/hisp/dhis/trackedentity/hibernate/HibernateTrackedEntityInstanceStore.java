@@ -45,20 +45,18 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceService.ERROR_DUP
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceService.SEPARATOR;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.CriteriaSpecification;
-import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.event.EventStatus;
@@ -218,6 +216,7 @@ public class HibernateTrackedEntityInstanceStore
         final String regexp = statementBuilder.getRegexpMatch();
         final String wordStart = statementBuilder.getRegexpWordStart();
         final String wordEnd = statementBuilder.getRegexpWordEnd();
+        final String anyChar = "\\.*?";
 
         String sql = "from trackedentityinstance tei " + 
             "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
@@ -325,9 +324,12 @@ public class HibernateTrackedEntityInstanceStore
 
         if ( params.isOrQuery() && params.hasAttributesOrFilters() )
         {
+            final String start = params.getQuery().isOperator( QueryOperator.LIKE ) ? anyChar : wordStart;
+            final String end = params.getQuery().isOperator( QueryOperator.LIKE ) ? anyChar : wordEnd;
+            
             sql += hlp.whereAnd() + " (";
 
-            List<String> queryTokens = getTokens( params.getQuery() );
+            List<String> queryTokens = getTokens( params.getQuery().getFilter() );
 
             for ( String queryToken : queryTokens )
             {
@@ -340,8 +342,8 @@ public class HibernateTrackedEntityInstanceStore
                     final String col = statementBuilder.columnQuote( item.getItemId() );
 
                     sql += 
-                        "lower(" + col + ".value) " + regexp + " '" + wordStart + 
-                        StringUtils.lowerCase( query ) + wordEnd + "' or ";
+                        col + ".value " + regexp + " '" + start + 
+                        StringUtils.lowerCase( query ) + end + "' or ";
                 }
 
                 sql = removeLastOr( sql ) + ") and ";
@@ -434,53 +436,5 @@ public class HibernateTrackedEntityInstanceStore
         }
         
         return null;
-    }
-    
-    
-    @SuppressWarnings( "unchecked" )
-    @Override
-    public Collection<TrackedEntityInstance> searchTrackedEntityByAttribute( OrganisationUnit orgunit, String attributeValue, Program program, Integer min , Integer max )
-    {
-        Criteria criteria = getCriteria();
-        criteria.createAlias( "attributeValues", "attributeValue" );
-        criteria.add( Restrictions.ilike( "attributeValue.value", "%" + attributeValue + "%" ) );
-        criteria.add( Restrictions.eq( "organisationUnit", orgunit ) );
-
-        if( program!= null)
-        {
-            criteria.createAlias( "programInstances", "programInstance" );
-            criteria.createAlias( "programInstance.program", "program" );
-            criteria.add( Restrictions.eq( "program", program ) );
-        }
-        
-        if( min!= null && max != null )
-        {
-            criteria.setFirstResult( min );
-            criteria.setMaxResults( max );
-        }
-        criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        criteria.addOrder( Order.asc( "lastUpdated" ));
-        
-        return criteria.list();
-    }
-    
-    @Override
-    public int countTrackedEntityByAttribute( OrganisationUnit orgunit, String attributeValue, Program program )
-    {
-        Criteria criteria = getCriteria();
-        criteria.createAlias( "attributeValues", "attributeValue" );
-        criteria.add( Restrictions.eq( "organisationUnit", orgunit ) );
-         
-        if( program!= null)
-        {
-            criteria.createAlias( "programInstances", "programInstance" );
-            criteria.createAlias( "programInstance.program", "program" );
-            criteria.add( Restrictions.eq( "program", program ) );
-        }
-        
-        criteria.setResultTransformer(CriteriaSpecification.DISTINCT_ROOT_ENTITY);
-        Number rs = (Number) criteria.setProjection(Projections.rowCount()).uniqueResult();
-
-        return ( rs != null && rs.intValue() > 0 ) ? rs.intValue() : 0;
     }
 }

@@ -98,7 +98,7 @@ function showDataElementDetails( context ) {
 
       var domainTypeMap = {
         'aggregate': i18n_aggregate,
-        'patient': i18n_patient
+        'tracker': i18n_tracker
       };
       var domainType = json.dataElement.domainType;
       setInnerHTML('domainTypeField', domainTypeMap[domainType]);
@@ -122,6 +122,8 @@ function showDataElementDetails( context ) {
 
       var dataSets = joinNameableObjects(json.dataElement.dataSets);
       setInnerHTML('dataSetsField', dataSets ? dataSets : '[' + i18n_none + ']');
+
+	  setInnerHTML('idField', json.dataElement.uid);
 
       showDetails();
     });
