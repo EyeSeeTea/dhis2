@@ -139,7 +139,7 @@ public class EmailMessageSender
         {
             log.warn( "Could not send email: " + ex.getMessage() );
         }
-        
+
         return null;
     }
 
@@ -150,7 +150,7 @@ public class EmailMessageSender
         email.setHostName( hostName );
         email.setFrom( defaultIfEmpty( sender, FROM_ADDRESS ), FROM_NAME );
         email.setSmtpPort( port );
-        email.setTLS( tls ); // email.setTLS( true ); <-- Should probably be patched this way
+        email.setTLS( tls );
         
         if ( username != null && password != null )
         {
