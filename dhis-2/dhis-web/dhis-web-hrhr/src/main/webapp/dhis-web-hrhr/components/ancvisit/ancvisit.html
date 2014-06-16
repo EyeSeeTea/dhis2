@@ -38,12 +38,10 @@
                                     <select ng-model='dataElement.value' class="form-control" ng-change="saveValue(dataElement, true)" required ng-options='option.label as option.label for option in dataElement.optionSet'>
                                         <option value="">{{'please_select'| translate}}</option>
                                     </select>
-                                    <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"></span>		                
+                                    <span ng-show="otherPleaseSpecify && currentDataElement == dataElement.id"><input type="text" class="form-control" placeholder="{{'please_specify'| translate}}" ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"></span>		                
                                 </div>
                                 <div ng-switch-when="date">
-                                    <input ng-show="dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"/>   
-                                    <input ng-show="!dateTyping" type="text" class="form-control" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, true)" readonly="readonly"/>
-                                    <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
+                                    <input type="text" class="form-control" placeholder="dd.mm.yyyy" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, true)"/>   
                                     <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>                               
                                 </div>
                                 <div ng-switch-when="bool">
@@ -64,10 +62,11 @@
                         </td>
                     </tr>
                 </table>
+                
                 <!--previous pregenancy details -->
                 <div ng-show="previousPregnancy.exists && section.name == 'History'">
-                    <div class="data-entry-row-1-1 list-group-item">
-                        <table class="table table-condensed table-bordered">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
                             <thead>
                                 <tr> 
                                     <th ng-repeat="pregnancyHeading in pregnancyTableHeadings">{{pregnancyHeading}}</th>                            
@@ -75,35 +74,37 @@
                             </thead>
                             <tr ng-repeat="g in gra track by $index">
                                 <td>
-                                    <input type="text" placeholder="yyyy-mm-dd" data-ng-model="gra[$index].value" ng-blur="savePreviousPregnancy(gra[$index], $index, previousPregnancy.count, true)"/>                            
+                                    <input type="text" class="form-control" placeholder="dd.mm.yyyy" data-ng-model="gra[$index].value" ng-blur="savePreviousPregnancy(gra[$index], $index, previousPregnancy.count, true)"/>                            
                                 </td>
                                 <td>
-                                    <input type="text" placeholder="yyyy-mm-dd" data-ng-model="par[$index].value" ng-blur="savePreviousPregnancy(par[$index], $index, previousPregnancy.count, true)"/>                            
+                                    <input type="text" class="form-control" placeholder="dd.mm.yyyy" data-ng-model="par[$index].value" ng-blur="savePreviousPregnancy(par[$index], $index, previousPregnancy.count, true)"/>                            
                                 </td>
                                 <td>
-                                    <select ng-model="out[$index].value" ng-change="savePreviousPregnancy(out[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in out[$index].optionSet'>
+                                    <select class="form-control" ng-model="out[$index].value" ng-change="savePreviousPregnancy(out[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in out[$index].optionSet'>
                                         <option value="">{{'please_select'| translate}}</option>
                                     </select>                            
                                 </td>
                                 <td>
-                                    <select ng-model="del[$index].value" ng-change="savePreviousPregnancy(del[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in del[$index].optionSet'>
+                                    <select class="form-control" ng-model="del[$index].value" ng-change="savePreviousPregnancy(del[$index], $index, previousPregnancy.count, true)" ng-options='option.label as option.label for option in del[$index].optionSet'>
                                         <option value="">{{'please_select'| translate}}</option>
                                     </select>                            
                                 </td>
                             </tr>
                         </table>
                     </div>
-                    <div class="data-entry-row-1-1 list-group-item">
-                        <div class="data-entry-row-1-3">
-                            {{mmdObs.name}}
-                        </div>
-                        <div class="data-entry-row-2-3">
-                            <select ng-model='mmdObs.value' ng-change="saveValue(mmdObs, true)" required ng-options='option.label as option.label for option in mmdObs.optionSet'>
-                                <option value="">{{'please_select'| translate}}</option>
-                            </select>
-                            <span ng-show="otherPleaseSpecify && currentDataElement == mmdObs.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="mmdObs.value" ng-blur="saveValue(mmdObs, true)"></span>                        
-                        </div>
-                    </div>    
+                    <table class="table">
+                        <tr>
+                            <td>
+                                {{mmdObs.name}}
+                            </td>
+                            <td>
+                                <select class="form-control" ng-model='mmdObs.value' ng-change="saveValue(mmdObs, true)" required ng-options='option.label as option.label for option in mmdObs.optionSet'>
+                                    <option value="">{{'please_select'| translate}}</option>
+                                </select>
+                                <span ng-show="otherPleaseSpecify && currentDataElement == mmdObs.id"><input type="text" placeholder="{{'please_specify'| translate}}" ng-model="mmdObs.value" ng-blur="saveValue(mmdObs, true)"></span>                        
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             </div>
 
@@ -137,9 +138,7 @@
                                 </div>
                                 <div ng-switch-when="date">
                                     <div class="data-entry-row-2-3">    
-                                        <input ng-show="dateTyping" class="form-control" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"/>   
-                                        <input ng-show="!dateTyping" class="form-control" type="text" placeholder="yyyy-mm-dd" data-ng-model="dataElement.value" data-ng-date='' ng-change="saveValue(dataElement, false)" readonly="readonly"/>
-                                        <button ng-click="disableDateType()" type="button"><i class="fa fa-calendar"></i></button>
+                                        <input class="form-control" type="text" placeholder="dd.mm.yyyy" data-ng-model="dataElement.value" ng-blur="saveValue(dataElement, false)"/>   
                                         <span ng-show="invalidDate" class="error">{{'invalid_date'| translate}}</span>
                                     </div>
                                 </div>
@@ -171,7 +170,7 @@
     </accordion>
 
     <div class="margin-top">
-        <a href="#/dashboard?tei={{pregnantWoman.trackedEntityInstance}}" class="big-button grey">{{'close'| translate}}</a>
+        <a href="#/dashboard?tei={{pregnantWoman.trackedEntityInstance}}" class="big-button grey">{{'complete_consultation'| translate}}</a>
     </div>
 
 </div>

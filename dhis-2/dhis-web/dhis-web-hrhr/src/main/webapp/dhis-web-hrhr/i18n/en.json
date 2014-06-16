@@ -69,7 +69,7 @@
     "enrollment": "Enrollment",
     "enroll": "Enroll",
     "unenroll": "Remove Enrollment",
-    "are_you_sure_to_unenroll": "Are you sure you want to remove the enrollment?",
+    "are_you_sure_to_remove": "Are you sure you want to remove the selected item?",
     "consultation": "Consultation",
     "new_note": "New Note",
     "add_note": "Add Note",
@@ -139,9 +139,6 @@
     "intervention_error": "Intervention - ERROR",
     "intervention_error_text": "The value you just recorded depends on other values not yet recorded",
     "app_footer": "Folkehelseinstituttet | Health Information Systems Programme | UiO",
-    
-    
-    
     "tracked_entity_management": "Tracked Entity Management",
     "registering_unit": "Registering unit",
     "program": "Program",

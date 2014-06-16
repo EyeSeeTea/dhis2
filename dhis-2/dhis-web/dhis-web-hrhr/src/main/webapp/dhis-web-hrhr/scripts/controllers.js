@@ -7,7 +7,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
 .controller('SelectionController',
         function($rootScope,
                 $scope,
-                $modal,
+                ModalService,
                 $location,
                 Paginator,
                 TranslationService, 
@@ -120,7 +120,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                             });  
                         });
                                         
-                        AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
+                        AttributesFactory.getAttributesForPregnantWoman().then(function(atts){
                             $scope.attributes = atts;
                             $scope.search($scope.searchMode.listAll);
                         });
@@ -233,10 +233,36 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $location.path('/registration').search({});  
     }; 
     
-    $scope.showPersonProfile = function(){
+    $scope.editPersonProfile = function(){
         var tei = ContextMenuSelectedItem.getSelectedItem();  
         CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});
-        $location.path('/profile').search({tei: tei.id});                                    
+        $location.path('/registration').search({tei: tei.id});                                    
+    };
+    
+    $scope.removePerson = function(){
+        var tei = ContextMenuSelectedItem.getSelectedItem();  
+        
+        var modalOptions = {
+            closeButtonText: 'cancel',
+            actionButtonText: 'remove',
+            headerText: 'remove',
+            bodyText: 'are_you_sure_to_remove'
+        };
+
+        ModalService.showModal({}, modalOptions).then(function(result){
+
+            TEIService.delete(tei.id).then(function(data){
+                
+                var continueLoop = true, index = -1;
+                for(var i=0; i< $scope.trackedEntityList.length && continueLoop; i++){                    
+                    if($scope.trackedEntityList[i].id === tei.id ){                        
+                        continueLoop = false;
+                        index = i;
+                    }
+                }
+                $scope.trackedEntityList.splice(index,1);
+            });
+        });                               
     };
        
     $scope.getHelpContent = function(){
@@ -254,6 +280,5 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.home = function(){        
         window.location = DHIS2URL;
-    };
-    
+    };    
 });

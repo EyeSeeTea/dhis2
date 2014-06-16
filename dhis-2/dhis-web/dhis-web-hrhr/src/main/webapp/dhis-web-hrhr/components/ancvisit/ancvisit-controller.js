@@ -57,10 +57,20 @@ trackerCapture.controller('AncVisitController',
         TEIService.get($scope.selectedEntityId).then(function(tei){     
 
             $scope.pregnantWoman = tei;
-            CurrentSelection.set({tei: tei, pr: $scope.selectedProgram});
-            $timeout(function() { 
-                $rootScope.$broadcast('selectedEntity', {});
-            }, 100);
+            if(!angular.isUndefined($scope.pregnantWoman.relationships)){
+                TEIService.get($scope.pregnantWoman.relationships[0].trackedEntityInstance).then(function(contact){
+                    CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram});
+                    $timeout(function() { 
+                        $rootScope.$broadcast('selectedEntity', {});
+                    }, 100);
+                });
+            }
+            else{
+                CurrentSelection.set({tei: tei, pr: $scope.selectedProgram});
+                $timeout(function() { 
+                    $rootScope.$broadcast('selectedEntity', {});
+                }, 100);
+            }
             
             //fetch events for the selected person
             DHIS2EventFactory.getByEntity($scope.pregnantWoman, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {   
@@ -215,9 +225,9 @@ trackerCapture.controller('AncVisitController',
 
             if(dataElement.type == 'date') {
                 
-                var rawDate = $filter('date')(dataElement.value, 'yyyy-MM-dd'); 
-                var convertedDate = moment(dataElement.value, 'YYYY-MM-DD')._d;
-                convertedDate = $filter('date')(convertedDate, 'yyyy-MM-dd'); 
+                var rawDate = $filter('date')(dataElement.value, 'dd.MM.yyyy'); 
+                var convertedDate = moment(dataElement.value, 'DD.MM.YYYY')._d;
+                convertedDate = $filter('date')(convertedDate, 'dd.MM.yyyy'); 
                 
                 if(rawDate !== convertedDate){
                     $scope.invalidDate = true;
@@ -256,10 +266,10 @@ trackerCapture.controller('AncVisitController',
             }            
             
             else{                
-                if($scope.otherPleaseSpecify && dataElement.type == 'string'){
+                /*if($scope.otherPleaseSpecify && dataElement.type == 'string'){
                     var option = {label: dataElement.value};
                     dataElement.optionSet.push(option);
-                }
+                }*/
                 $scope.otherPleaseSpecify = false;
                 
                 if(angular.isUndefined($scope.currentEvent.dataValues)){

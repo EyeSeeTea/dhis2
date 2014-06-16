@@ -1,11 +1,12 @@
+
 <div ng-show="interventions.conResult.length > 0">
     <div class="panel panel-primary">
         <div class="panel-heading">
             {{'conditions_complications'| translate}}
         </div>  
-        <div class="list-group" ng-repeat="con in interventions.conResult">
-            <div class="list-group-item">{{con}}</div>
-        </div>
+
+            <div class="list-group-item" ng-repeat="con in interventions.conResult">{{con}}</div>
+
     </div>
 </div> 
 
@@ -14,8 +15,8 @@
         <div class="panel-heading">
             {{'reminders'| translate}}
         </div>
-        <div class="list-group" ng-repeat="rem in interventions.remResult">            
-            <div class="list-group-item">{{rem}}</div>
-        </div>        
+         
+            <div class="list-group-item" ng-repeat="rem in interventions.remResult"> {{rem}}</div>
+    
     </div>
 </div>

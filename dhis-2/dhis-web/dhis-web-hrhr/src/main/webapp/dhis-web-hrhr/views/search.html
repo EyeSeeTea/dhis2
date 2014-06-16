@@ -1,15 +1,8 @@
 <div class="search-container">
-    <table data-stop-propagation="true" class="table-borderless table-striped">        
-        <tr>
-            <td>{{'registration_date'| translate}}</td>
-            <td>
-                <input type="text" class="form-control" ng-date ng-model="attribute.value" />
-            </td>
-        </tr>
-        
+    <table data-stop-propagation="true" class="table-borderless table-striped">  
         <tr ng-repeat="attribute in attributes">
             <td>
-                {{attribute.name}} - {{attribute.valueType}}
+                {{attribute.name}}
             </td>
             <td>
                 <div ng-switch="attribute.valueType">

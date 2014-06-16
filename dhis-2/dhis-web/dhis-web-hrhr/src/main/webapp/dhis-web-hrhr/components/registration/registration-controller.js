@@ -12,11 +12,11 @@ trackerCapture.controller('RegistrationController',
     //do translation of the registration page
     TranslationService.translate();   
     
+    $scope.showRegistration = true;
+    
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.selectedProgram = storage.get('SELECTED_PROGRAM');
     $scope.selectedRelationship = storage.get('RELATIONSHIP_TYPES')[0];
-
-    $scope.enrollment = {enrollmentDate: $filter('date')(new Date(), 'yyyy-MM-dd'), incidentDate: $filter('date')(new Date(), 'yyyy-MM-dd')};   
     
     if($scope.selectedProgram && $scope.selectedOrgUnit){
         
@@ -29,12 +29,46 @@ trackerCapture.controller('RegistrationController',
         });
     }
     
-    $scope.registerEntity = function(showDashboard){       
+    $scope.selectedEntityId = ($location.search()).tei;   
+    
+    if($scope.selectedEntityId){
+        
+        $scope.showRegistration = !$scope.showRegistration;
+        
+        TEIService.get($scope.selectedEntityId).then(function(tei){     
+            
+            $scope.pregnantWoman = tei;
+            
+            AttributesFactory.formatPregnantWomanAttributes($scope.pregnantWoman).then(function(pw){
+                $scope.pregnantWoman = pw;
+                angular.forEach($scope.pregnantWoman.attributes, function(att){
+                    $scope.pregnantWoman.attributes[att.attribute] = {value: att.value, attribute: att.attribute, type: att.type};
+                });
+            });
+            
+            if(!angular.isUndefined($scope.pregnantWoman.relationships)){
+                TEIService.get($scope.pregnantWoman.relationships[0].trackedEntityInstance).then(function(contact){
+                    $scope.contactPerson = contact;
+                    AttributesFactory.formatContactPersonAttributes($scope.contactPerson).then(function(cp){
+                        $scope.contactPerson = cp;
+                        angular.forEach($scope.contactPerson.attributes, function(att){
+                            $scope.contactPerson.attributes[att.attribute] = {value: att.value, attribute: att.attribute, type: att.type};
+                        });
+                    });
+                });
+            }
+        });
+    }
+    
+    
+    $scope.registerEntity = function(showDashboard){   
+        
+        $scope.enrollment = {enrollmentDate: $filter('date')(new Date(), 'yyyy-MM-dd'), incidentDate: $filter('date')(new Date(), 'yyyy-MM-dd')};   
         
         if($scope.selectedProgram && $scope.selectedOrgUnit && $scope.selectedRelationship){
             //check for form validity
-            $scope.outerForm.submitted = true;        
-            if( $scope.outerForm.$invalid ){
+            $scope.outerFormRegistration.submitted = true;        
+            if( $scope.outerFormRegistration.$invalid ){
                 return false;
             }            
             
@@ -137,8 +171,82 @@ trackerCapture.controller('RegistrationController',
                     DialogService.showDialog({}, dialogOptions);
                     return;
                 }
-            });            
+            });
+        }
+    };
+    
+    $scope.updateProfile = function(){
+        
+        //check for form validity
+        $scope.outerFormUpdate.submitted = true;        
+        if( $scope.outerFormUpdate.$invalid ){
+            return false;
         }        
+            
+        //get registration attributes for pregnant woman
+        var pwAttributes = [];
+        angular.forEach($scope.pregnantWomanAttributes, function(pa) {                
+            if (!angular.isUndefined($scope.pregnantWoman.attributes[pa.id].value)) {
+                var attribute = {attribute: pa.id, value: $scope.pregnantWoman.attributes[pa.id].value};
+                if(pa.valueType === "date"){
+                    attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
+                    attribute.value = Date.parse(attribute.value);            
+                    attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                }
+                pwAttributes.push(attribute);
+            }
+        });
+        var pregnantWoman = {trackedEntity: $scope.pregnantWoman.trackedEntity, 
+                            attributes: pwAttributes, 
+                            orgUnit: $scope.selectedOrgUnit.id,
+                            trackedEntityInstance: $scope.pregnantWoman.trackedEntityInstance,
+                            relationships: $scope.pregnantWoman.relationships ? $scope.pregnantWoman.relationships : []
+                            }; 
+
+        //get registration attributes for contact person
+        var cpAttributes = [];
+        angular.forEach($scope.contactPersonAttributes, function(cp) {  
+            if (!angular.isUndefined($scope.contactPerson.attributes[cp.id].value)) {
+                var attribute = {attribute: cp.id, value: $scope.contactPerson.attributes[cp.id].value};
+                if(cp.valueType === "date"){
+                    attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
+                    attribute.value = Date.parse(attribute.value);            
+                    attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                }
+                cpAttributes.push(attribute);
+            }
+        });
+        var contactPerson = {trackedEntity: $scope.contactPerson.trackedEntity, 
+                            attributes: cpAttributes, 
+                            orgUnit: $scope.selectedOrgUnit.id,
+                            trackedEntityInstance: $scope.contactPerson.trackedEntityInstance,
+                            relationships: $scope.contactPerson.relationships ? $scope.contactPerson.relationships : []
+                            };
+       
+        TEIService.update(pregnantWoman).then(function(updateResponse){
+
+            if(updateResponse.status !== 'SUCCESS'){//update has failed
+                var dialogOptions = {
+                        headerText: 'update_error',
+                        bodyText: updateResponse.description
+                    };
+                DialogService.showDialog({}, dialogOptions);
+                return;
+            }
+            
+            TEIService.update(contactPerson).then(function(updateResponse){
+
+                if(updateResponse.status !== 'SUCCESS'){//update has failed
+                    var dialogOptions = {
+                            headerText: 'update_error',
+                            bodyText: updateResponse.description
+                        };
+                    DialogService.showDialog({}, dialogOptions);
+                    return;
+                }                
+                $scope.cancel();                
+            });
+        });   
     };
     
     $scope.cancel = function(){

@@ -15,22 +15,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         currentStore: store
     };
 })
-/* factory for loading logged in user profiles from DHIS2 */
-.factory('CurrentUserProfile', function($http) { 
-           
-    var profile, promise;
-    return {
-        get: function() {
-            if( !promise ){
-                promise = $http.get( '../api/me/profile').then(function(response){
-                   profile = response.data;
-                   return profile;
-                });
-            }
-            return promise;         
-        }
-    };  
-})
+
 
 /* Factory to fetch programs */
 .factory('ProgramFactory', function($q, $rootScope, StorageService, ProgramStageFactory) { 
@@ -210,8 +195,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TEIService', function($http, $filter, EntityService) {
     
     var promise;
-    return {
-        
+    return {        
         get: function(entityUid) {
             promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){     
                 var tei = response.data;
@@ -267,10 +251,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return promise;
         },                
         update: function(tei){
-            
-            var url = '../api/trackedEntityInstances';
-            
-            var promise = $http.put( url + '/' + tei.trackedEntityInstance , tei).then(function(response){
+  
+            var promise = $http.put( '../api/trackedEntityInstances/' + tei.trackedEntityInstance , tei).then(function(response){
                 return response.data;
             });
             return promise;
@@ -293,12 +275,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             
             return tei;
+        },
+        delete: function(tei){
+            var url = '../api/trackedEntityInstances';
+            
+            var promise = $http.delete(url + '/' + tei).then(function(response){
+                return response.data;
+            });
+            return promise;
         }
     };
 })
 
 /* Factory for getting tracked entity attributes */
-.factory('AttributesFactory', function($http, $q, storage, $rootScope, StorageService) {      
+.factory('AttributesFactory', function($http, $q, $filter, storage, $rootScope, StorageService) {      
     var atts, promise;
     return {
         getAll: function(){
@@ -428,6 +418,113 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     });                    
                 });                     
                 def.resolve(contactPersonAttributes); 
+            });
+            
+            return def.promise;
+        },
+        formatPregnantWomanAttributes: function(pregnantWoman){
+            var def = $q.defer();
+            var attributes = [];
+            this.getAll().then(function(atts){
+                angular.forEach(atts, function(att){
+                    attributes[att.code] = att;
+                });
+                
+                var localAttributes = storage.get('LOCAL_ATTRIBUTES');
+                var newAttributes = [];
+                angular.forEach(localAttributes.pregnantWoman, function(localAttribute){   
+                    var att = attributes[localAttribute.code];                    
+                    var newAttribute = {attribute: att.id,
+                                        code: att.code, 
+                                        displayName: att.name, 
+                                        mandatoryToDisplay: localAttribute.mandatoryToDisplay,
+                                        type: att.valueType,
+                                        value: ''};
+                    angular.forEach(pregnantWoman.attributes, function(attribute){
+                        if(attribute.attribute === newAttribute.attribute){
+                            if(attribute.type === 'number' && !isNaN(parseInt(attribute.value))){
+                                attribute.value = parseInt(attribute.value);
+                            }
+                            if(attribute.type === 'date' && attribute.value !== ""){
+                                attribute.value = moment(attribute.value, 'YYYY.MM.DD')._d;
+                                attribute.value = Date.parse(attribute.value);     
+                                attribute.value = $filter('date')(attribute.value, 'dd.MM.yyyy');  
+                            }
+                            
+                            newAttribute.value = attribute.value;
+                        }                               
+                    });                                            
+                    newAttributes.push(newAttribute);
+                }); 
+
+                pregnantWoman.attributes = newAttributes;                
+
+                for(var i=0; i<pregnantWoman.attributes.length; i++){
+                    pregnantWoman.attributes[i].show = false;
+                    var processedForDisplay = false;
+                    for(var j=0; j<newAttributes.length && !processedForDisplay; j++){
+                        if(pregnantWoman.attributes[i].attribute === newAttributes[j].attribute){
+                            processedForDisplay = true;
+                            pregnantWoman.attributes[i].show = true;
+                        }
+                    }                                   
+                }                     
+                def.resolve(pregnantWoman); 
+            });
+            
+            return def.promise;
+        },
+        formatContactPersonAttributes: function(contactPerson){
+            var def = $q.defer();
+            var attributes = [];
+            this.getAll().then(function(atts){
+                angular.forEach(atts, function(att){
+                    attributes[att.code] = att;
+                });
+                
+                var localAttributes = storage.get('LOCAL_ATTRIBUTES');
+                var newAttributes = [];
+                angular.forEach(localAttributes.contactPerson, function(localAttribute){   
+                    var att = attributes[localAttribute.code];                    
+                    var newAttribute = {attribute: att.id,
+                                        code: att.code, 
+                                        displayName: att.name, 
+                                        mandatoryToDisplay: localAttribute.mandatoryToDisplay,
+                                        type: att.valueType,
+                                        value: ''};
+                    angular.forEach(contactPerson.attributes, function(attribute){
+                        if(attribute.attribute === newAttribute.attribute){
+                            if(attribute.type === 'number' && !isNaN(parseInt(attribute.value))){
+                                attribute.value = parseInt(attribute.value);
+                            }
+                            
+                            if(attribute.type === 'date' && attribute.value !== ""){
+                                attribute.value = moment(attribute.value, 'yyyy-MM-dd')._d;
+                                attribute.value = Date.parse(attribute.value);            
+                                attribute.value = $filter('date')(attribute.value, 'DD.MM.YYYY');  
+                                
+                                console.log('the value is:  ', attribute.value);
+                            }
+                            
+                            newAttribute.value = attribute.value;
+                        }                               
+                    });                                            
+                    newAttributes.push(newAttribute);
+                }); 
+
+                contactPerson.attributes = newAttributes;                
+
+                for(var i=0; i<contactPerson.attributes.length; i++){
+                    contactPerson.attributes[i].show = false;
+                    var processedForDisplay = false;
+                    for(var j=0; j<newAttributes.length && !processedForDisplay; j++){
+                        if(contactPerson.attributes[i].attribute === newAttributes[j].attribute){
+                            processedForDisplay = true;
+                            contactPerson.attributes[i].show = true;
+                        }
+                    }                                   
+                }                     
+                def.resolve(contactPerson); 
             });
             
             return def.promise;

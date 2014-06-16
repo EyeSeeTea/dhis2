@@ -87,10 +87,10 @@ trackerCapture.controller('DependencyController',
                 //populate dep page
                 if(angular.isObject($scope.depSection) && $scope.intervention ){
                     for(var i=0; i < dep.length; i++){
-                        $scope.depSection.dataElements.push(storage.get(dep[i]))
+                        $scope.depSection.dataElements.push(storage.get(dep[i]));
                     }
                 }
             });            
         }                
     });   
-})
+});
