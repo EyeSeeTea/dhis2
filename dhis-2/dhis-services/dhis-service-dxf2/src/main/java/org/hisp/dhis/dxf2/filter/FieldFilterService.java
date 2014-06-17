@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.config;
+package org.hisp.dhis.dxf2.filter;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,67 +28,22 @@ package org.hisp.dhis.node.config;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import org.springframework.util.StringUtils;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.node.types.CollectionNode;
 
-import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface InclusionStrategy
+public interface FieldFilterService
 {
-    <T> boolean include( T object );
-
-    enum Include implements InclusionStrategy
-    {
-        /**
-         * Inclusion strategy that includes all objects.
-         */
-        ALWAYS,
-
-        /**
-         * Inclusion strategy that only includes non null objects.
-         */
-        NON_NULL
-            {
-                @Override
-                public <T> boolean include( T object )
-                {
-                    return object != null;
-                }
-            },
-
-        /**
-         * Inclusion strategy that only includes non empty objects:
-         * -
-         */
-        NON_EMPTY
-            {
-                @Override
-                public <T> boolean include( T object )
-                {
-                    if ( object == null )
-                    {
-                        return false;
-                    }
-
-                    if ( Collection.class.isAssignableFrom( object.getClass() ) )
-                    {
-                        return !((Collection<?>) object).isEmpty();
-                    }
-                    else if ( String.class.isAssignableFrom( object.getClass() ) )
-                    {
-                        return !StringUtils.isEmpty( object );
-                    }
-
-                    return true;
-                }
-            };
-
-        @Override
-        public <T> boolean include( T object )
-        {
-            return true;
-        }
-    }
+    /**
+     * Perform inclusion/exclusion on a list of objects.
+     *
+     * @param objects   List to filter
+     * @param fieldList Field filter
+     * @return List of objects with only wanted properties
+     */
+    <T extends IdentifiableObject> CollectionNode filter( Class<?> klass, List<T> objects, List<String> fieldList );
 }

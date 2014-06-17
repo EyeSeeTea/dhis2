@@ -25,7 +25,7 @@ package org.hisp.dhis.dxf2.filter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
 import com.google.common.base.Joiner;
@@ -34,7 +34,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dxf2.filter.ops.Op;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.SimpleNode;
@@ -51,7 +50,7 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class DefaultFilterService implements FilterService
+public class DefaultFieldFilterService implements FieldFilterService
 {
     static final ImmutableMap<String, List<String>> FIELD_PRESETS = ImmutableMap.<String, List<String>>builder()
         .put( "all", Lists.newArrayList( "*" ) )
@@ -66,31 +65,7 @@ public class DefaultFilterService implements FilterService
     private SchemaService schemaService;
 
     @Override
-    public <T extends IdentifiableObject> List<T> objectFilter( List<T> objects, List<String> filters )
-    {
-        if ( objects == null || objects.isEmpty() )
-        {
-            return Lists.newArrayList();
-        }
-
-        Filters parsed = parserService.parseObjectFilter( filters );
-
-        List<T> list = Lists.newArrayList();
-
-        for ( T object : objects )
-        {
-            if ( evaluateWithFilters( object, parsed ) )
-            {
-                list.add( object );
-            }
-        }
-
-        return list;
-    }
-
-    @Override
-    public <T extends IdentifiableObject> CollectionNode fieldFilter( Class<?> klass, List<T> objects,
-        List<String> fieldList )
+    public <T extends IdentifiableObject> CollectionNode filter( Class<?> klass, List<T> objects, List<String> fieldList )
     {
         if ( objects == null )
         {
@@ -121,14 +96,14 @@ public class DefaultFilterService implements FilterService
 
         for ( Object object : objects )
         {
-            collectionNode.addChild( buildObjectOutput( fieldMap, klass, object ) );
+            collectionNode.addChild( buildComplexNode( fieldMap, klass, object ) );
         }
 
         return collectionNode;
     }
 
     @SuppressWarnings( "unchecked" )
-    private ComplexNode buildObjectOutput( Map<String, Map> fieldMap, Class<?> klass, Object object )
+    private ComplexNode buildComplexNode( Map<String, Map> fieldMap, Class<?> klass, Object object )
     {
         Schema schema = schemaService.getDynamicSchema( klass );
 
@@ -150,6 +125,7 @@ public class DefaultFilterService implements FilterService
             }
 
             Property property = schema.getPropertyMap().get( fieldKey );
+
             Object returnValue = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
             Schema propertySchema = schemaService.getDynamicSchema( property.getKlass() );
 
@@ -179,7 +155,7 @@ public class DefaultFilterService implements FilterService
                     {
                         for ( Object collectionObject : collection )
                         {
-                            collectionNode.addChild( getProperties( property.getItemKlass(), collectionObject, fields ) );
+                            collectionNode.addChild( getProperties( property, collectionObject, fields ) );
                         }
                     }
                     else if ( !property.isSimple() )
@@ -188,7 +164,7 @@ public class DefaultFilterService implements FilterService
 
                         for ( Object collectionObject : collection )
                         {
-                            ComplexNode node = buildObjectOutput( map, property.getItemKlass(), collectionObject );
+                            ComplexNode node = buildComplexNode( map, property.getItemKlass(), collectionObject );
 
                             if ( !node.getChildren().isEmpty() )
                             {
@@ -206,7 +182,7 @@ public class DefaultFilterService implements FilterService
                 }
                 else if ( property.isIdentifiableObject() )
                 {
-                    complexNode.addChild( getProperties( property.getKlass(), returnValue, fields ) );
+                    complexNode.addChild( getProperties( property, returnValue, fields ) );
                 }
                 else
                 {
@@ -220,7 +196,7 @@ public class DefaultFilterService implements FilterService
                     }
                     else
                     {
-                        complexNode.addChild( buildObjectOutput( getFullFieldMap( propertySchema ), property.getKlass(),
+                        complexNode.addChild( buildComplexNode( getFullFieldMap( propertySchema ), property.getKlass(),
                             returnValue ) );
                     }
                 }
@@ -234,7 +210,7 @@ public class DefaultFilterService implements FilterService
 
                     for ( Object collectionObject : (Collection<?>) returnValue )
                     {
-                        ComplexNode node = buildObjectOutput( fieldValue, property.getItemKlass(), collectionObject );
+                        ComplexNode node = buildComplexNode( fieldValue, property.getItemKlass(), collectionObject );
 
                         if ( !node.getChildren().isEmpty() )
                         {
@@ -244,7 +220,7 @@ public class DefaultFilterService implements FilterService
                 }
                 else
                 {
-                    ComplexNode node = buildObjectOutput( fieldValue, property.getKlass(), returnValue );
+                    ComplexNode node = buildComplexNode( fieldValue, property.getKlass(), returnValue );
 
                     if ( !node.getChildren().isEmpty() )
                     {
@@ -331,16 +307,26 @@ public class DefaultFilterService implements FilterService
         return map;
     }
 
-    private ComplexNode getProperties( Class<?> klass, Object object, List<String> fields )
+    private ComplexNode getProperties( Property currentProperty, Object object, List<String> fields )
     {
-        Schema schema = schemaService.getDynamicSchema( klass );
-
-        ComplexNode complexNode = new ComplexNode( schema.getSingular() );
-        complexNode.setNamespace( schema.getNamespace() );
-
         if ( object == null )
         {
             return null;
+        }
+
+        ComplexNode complexNode = new ComplexNode( currentProperty.getName() );
+        complexNode.setNamespace( currentProperty.getNamespace() );
+
+        Schema schema;
+
+        if ( currentProperty.isCollection() )
+        {
+            schema = schemaService.getDynamicSchema( currentProperty.getItemKlass() );
+
+        }
+        else
+        {
+            schema = schemaService.getDynamicSchema( currentProperty.getKlass() );
         }
 
         for ( String field : fields )
@@ -352,9 +338,9 @@ public class DefaultFilterService implements FilterService
                 continue;
             }
 
-            Object o = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
+            Object returnValue = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
 
-            SimpleNode simpleNode = new SimpleNode( field, o );
+            SimpleNode simpleNode = new SimpleNode( field, returnValue );
             simpleNode.setAttribute( property.isAttribute() );
             simpleNode.setNamespace( property.getNamespace() );
 
@@ -362,117 +348,5 @@ public class DefaultFilterService implements FilterService
         }
 
         return complexNode;
-    }
-
-    @SuppressWarnings( "unchecked" )
-    private <T> boolean evaluateWithFilters( T object, Filters filters )
-    {
-        Schema schema = schemaService.getDynamicSchema( object.getClass() );
-
-        for ( String field : filters.getFilters().keySet() )
-        {
-            if ( !schema.getPropertyMap().containsKey( field ) )
-            {
-                continue;
-            }
-
-            Property descriptor = schema.getPropertyMap().get( field );
-
-            if ( descriptor == null )
-            {
-                continue;
-            }
-
-            Object value = ReflectionUtils.invokeMethod( object, descriptor.getGetterMethod() );
-
-            Object filter = filters.getFilters().get( field );
-
-            if ( FilterOps.class.isInstance( filter ) )
-            {
-                if ( evaluateFilterOps( value, (FilterOps) filter ) )
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                Map<String, Object> map = (Map<String, Object>) filters.getFilters().get( field );
-                Filters f = new Filters();
-                f.setFilters( map );
-
-                if ( map.containsKey( "__self__" ) )
-                {
-                    if ( evaluateFilterOps( value, (FilterOps) map.get( "__self__" ) ) )
-                    {
-                        return false;
-                    }
-
-                    map.remove( "__self__" );
-                }
-
-                if ( !descriptor.isCollection() )
-                {
-                    if ( !evaluateWithFilters( value, f ) )
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    Collection<?> objectCollection = (Collection<?>) value;
-
-                    if ( objectCollection.isEmpty() )
-                    {
-                        return false;
-                    }
-
-                    boolean include = false;
-
-                    for ( Object idObject : objectCollection )
-                    {
-                        if ( evaluateWithFilters( idObject, f ) )
-                        {
-                            include = true;
-                        }
-                    }
-
-                    if ( !include )
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        return true;
-    }
-
-    private boolean evaluateFilterOps( Object value, FilterOps filterOps )
-    {
-        // filter through every operator treating multiple of same operator as OR
-        for ( String operator : filterOps.getFilters().keySet() )
-        {
-            boolean include = false;
-
-            List<Op> ops = filterOps.getFilters().get( operator );
-
-            for ( Op op : ops )
-            {
-                switch ( op.evaluate( value ) )
-                {
-                    case INCLUDE:
-                    {
-                        include = true;
-                    }
-                }
-            }
-
-            if ( !include )
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }
