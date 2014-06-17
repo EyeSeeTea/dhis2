@@ -497,7 +497,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					if (!config.rows) {
+					if (!config.rows && !config.startDate && !config.endDate) {
 						alert('No category items selected');
 						return;
 					}
@@ -527,15 +527,15 @@ Ext.onReady( function() {
 					}
 
 					// layout
-                    layout.type = config.type;
-
-                    layout.program = config.program;
-                    layout.programStage = config.programStage;
-                    
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
+                    
+                    layout.type = config.type;
+                    layout.program = config.program;
+                    layout.programStage = config.programStage;
 
+                    // dates
                     if (config.startDate && config.endDate) {
                         layout.startDate = config.startDate;
                         layout.endDate = config.endDate;
@@ -1850,16 +1850,16 @@ Ext.onReady( function() {
 			// analytics
 			web.analytics = {};
 
-			web.analytics.getParamString = function(view, format) {
+			web.analytics.getParamString = function(layout, format) {
                 var paramString,
-                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
+                    dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [])),
                     ignoreKeys = ['longitude', 'latitude'],
                     nameItemsMap;
 
-                paramString = '/api/analytics/events/aggregate/' + view.program.id + '.' + (format || 'json') + '?';
+                paramString = '/api/analytics/events/aggregate/' + layout.program.id + '.' + (format || 'json') + '?';
 
 				// stage
-				paramString += 'stage=' + view.programStage.id;
+				paramString += 'stage=' + layout.programStage.id;
 
                 // dimensions
                 if (dimensions) {
@@ -1888,9 +1888,9 @@ Ext.onReady( function() {
 				}
 
                 // filters
-                if (view.filters) {                    
-					for (var i = 0, dim; i < view.filters.length; i++) {
-						dim = view.filters[i];
+                if (layout.filters) {                    
+					for (var i = 0, dim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
 
                         paramString += '&filter=' + dim.dimension;
 
@@ -1909,29 +1909,8 @@ Ext.onReady( function() {
 				}
 
                 // dates
-                if (view.startDate && view.endDate) {
-                    paramString += '&startDate=' + view.startDate + '&endDate=' + view.endDate;
-                }
-
-				// hierarchy
-				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
-
-                // limit
-                if (view.dataType === 'aggregated_values' && (view.sortOrder && view.topLimit)) {
-                    paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
-                }
-
-                // sorting
-                if (view.dataType === 'individual_cases' && view.sorting) {
-                    if (view.sorting.id && view.sorting.direction) {
-                        paramString += '&' + view.sorting.direction.toLowerCase() + '=' + view.sorting.id;
-                    }
-                }
-
-                // paging
-                if (view.dataType === 'individual_cases' && view.paging) {
-                    paramString += view.paging.pageSize ? '&pageSize=' + view.paging.pageSize : '';
-                    paramString += view.paging.page ? '&page=' + view.paging.page : '';
+                if (layout.startDate && layout.endDate) {
+                    paramString += '&startDate=' + layout.startDate + '&endDate=' + layout.endDate;
                 }
 
                 return paramString;
@@ -2004,9 +1983,9 @@ Ext.onReady( function() {
 			};
 
 			web.report.aggregate.createChart = function(layout, xLayout, xResponse, centerRegion) {
-                var columnIds = xLayout.columns[0].ids,
+                var columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
                     replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
-                    rowIds = xLayout.rows[0].ids,
+                    rowIds = xLayout.rows[0] ? xLayout.rows[0].ids : [],
                     replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
                     filterIds = function() {
                         var ids = [];

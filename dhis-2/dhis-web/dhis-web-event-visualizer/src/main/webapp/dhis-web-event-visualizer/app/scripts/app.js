@@ -4654,6 +4654,8 @@ Ext.onReady( function() {
                 if (!(view.startDate && view.endDate)) {
                     return;
                 }
+
+                map['pe'] = [{dimension: 'pe'}];
             }
             else if (periodMode.getValue() === 'periods') {
 				map['pe'] = [periods.getDimension()];
@@ -4675,8 +4677,8 @@ Ext.onReady( function() {
 
             // other
 
-            map['longitude'] = [{dimension: 'longitude'}];
-            map['latitude'] = [{dimension: 'latitude'}];
+            //map['longitude'] = [{dimension: 'longitude'}];
+            //map['latitude'] = [{dimension: 'latitude'}];
 
             // dimensions
 
@@ -5371,8 +5373,8 @@ Ext.onReady( function() {
 				});
 			};
 
-			web.report.getData = function(view, isUpdateGui) {
-				var paramString = web.analytics.getParamString(view);
+			web.report.getData = function(layout, isUpdateGui) {
+				var paramString = web.analytics.getParamString(layout);
 
 				// show mask
 				web.mask.show(ns.app.centerRegion);
@@ -5402,11 +5404,11 @@ Ext.onReady( function() {
 							return;
 						}
 
-                        web.mask.show(ns.app.centerRegion, 'Creating table..');
+                        web.mask.show(ns.app.centerRegion, 'Error while creating table..');
 
                         ns.app.paramString = paramString;
 
-                        web.report.createReport(view, response, isUpdateGui);
+                        web.report.createReport(layout, response, isUpdateGui);
 					}
 				});
 			};
@@ -5426,6 +5428,8 @@ Ext.onReady( function() {
                 xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
                 xLayout = getSXLayout(xLayout, xResponse);
 
+                web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
+                
                 chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
 
                 //if (layout.sorting) {
@@ -5433,8 +5437,6 @@ Ext.onReady( function() {
                     //xLayout = getSXLayout(xLayout, xResponse);
                     //table = getHtml(xLayout, xResponse);
                 //}
-
-                web.mask.show(ns.app.centerRegion, 'Rendering chart..');
 
                 // timing
                 ns.app.dateRender = new Date();
