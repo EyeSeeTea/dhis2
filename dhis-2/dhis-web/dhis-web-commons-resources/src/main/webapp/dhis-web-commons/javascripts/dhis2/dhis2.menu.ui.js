@@ -855,35 +855,20 @@
                     }
 
                     if (event.which === keys.arrowDown) {
-                        currentElement = currentElement + 3;
-                        if (shortCutElements[currentElement] === undefined) {
-                            if (currentElement >= shortCutElements.length) {
-                                currentElement = currentElement % 3;
-                            } else {
-                                currentElement = currentElement - shortCutElements.length;
-                            }
+                        if (shortCutElements[currentElement + 3] === undefined) {
+                            return;
                         }
+                        currentElement = currentElement + 3;
                         changeCurrentSelected(currentElement);
                         return;
                     }
 
                     //TODO: Clean up this code a bit as it's very confusing to what it does now.
                     if (event.which === keys.arrowUp) {
-                        currentElement = currentElement - 3;
-                        if (shortCutElements[currentElement] === undefined) {
-                            //Jump to the last
-                            if (!((shortCutElements.length % 3) === 0)) {
-                                currentElement = getPositionsNumber() - (-currentElement);
-                                if (shortCutElements[currentElement] === undefined) {
-                                    if (currentElement === -1)
-                                        currentElement = 0;
-                                    else
-                                        currentElement = currentElement - 3;
-                                }
-                            } else {
-                                currentElement = shortCutElements.length - (-currentElement);
-                            }
+                        if (shortCutElements[currentElement - 3] === undefined) {
+                            return;
                         }
+                        currentElement = currentElement - 3;
                         changeCurrentSelected(currentElement);
                         return;
                     }
