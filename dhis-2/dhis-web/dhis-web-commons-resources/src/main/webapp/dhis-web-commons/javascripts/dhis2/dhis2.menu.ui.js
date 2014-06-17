@@ -804,14 +804,6 @@
             jqLite(document).on("keyup", function (event) {
                 var goToElement;
 
-                /**
-                 * Calculate the number of positions we have available if we fill all the rows
-                 * @returns {number}
-                 */
-                function getPositionsNumber() {
-                        return Math.ceil(shortCutElements.length / 3) * 3;
-                }
-
                 //Don't run anything when the menu is not open
                 if (shortCutMenu.isClosed()) {
                     return;
@@ -839,19 +831,19 @@
                     }
 
                     if (event.which === keys.arrowRight) {
-                        currentElement = currentElement + 1;
-                        if (shortCutElements[currentElement] === undefined) {
-                            currentElement = 0;
+                        if (shortCutElements[currentElement + 1] === undefined) {
+                            return;
                         }
+                        currentElement = currentElement + 1;
                         changeCurrentSelected(currentElement);
                         return;
                     }
 
                     if (event.which === keys.arrowLeft) {
-                        currentElement = currentElement - 1;
-                        if (shortCutElements[currentElement] === undefined) {
-                            currentElement = shortCutElements.length - 1;
+                        if (shortCutElements[currentElement - 1] === undefined) {
+                            return;
                         }
+                        currentElement = currentElement - 1;
                         changeCurrentSelected(currentElement);
                         return;
                     }
