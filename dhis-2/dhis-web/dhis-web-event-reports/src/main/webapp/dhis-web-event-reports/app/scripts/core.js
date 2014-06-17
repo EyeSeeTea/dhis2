@@ -1619,7 +1619,7 @@ Ext.onReady( function() {
 								// number sorting
                                 objects.push({
                                     id: fullId,
-                                    sortingId: parsedId || Number.MAX_VALUE
+                                    sortingId: Ext.isNumber(parsedId) ? parsedId : Number.MAX_VALUE
                                 });
                             }
 
@@ -1652,7 +1652,7 @@ Ext.onReady( function() {
 
 								objects.push({
 									id: fullId,
-									sortingId: name
+									sortingId: header.name === 'pe' ? fullId : name
 								});
                             }
 
@@ -1867,9 +1867,9 @@ Ext.onReady( function() {
                         if (dim.items) {
                             paramString += ':';
 
-                            for (var i = 0; i < dim.items.length; i++) {
-                                paramString += encodeURIComponent(dim.items[i].id);
-                                paramString += i < dim.items.length - 1 ? ';' : '';
+                            for (var j = 0; j < dim.items.length; j++) {
+                                paramString += encodeURIComponent(dim.items[j].id);
+                                paramString += j < dim.items.length - 1 ? ';' : '';
                             }
                         }
                         else {

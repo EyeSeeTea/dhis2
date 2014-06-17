@@ -28,23 +28,64 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
+import java.util.List;
 
 /**
  * @author Lars Helge Overland
  */
 @Controller
-@RequestMapping( value = IdentifiableObjectController.RESOURCE_PATH )
+@RequestMapping(value = IdentifiableObjectController.RESOURCE_PATH)
 public class IdentifiableObjectController
-    extends AbstractCrudController<BaseIdentifiableObject>
+    extends AbstractCrudController<IdentifiableObject>
 {
     public static final String RESOURCE_PATH = "/identifiableObjects";
-    
+
     @Override
-    public BaseIdentifiableObject getEntity( String uid )
+    public List<IdentifiableObject> getEntity( String uid )
     {
-        return manager.get( uid );
+        List<IdentifiableObject> identifiableObjects = Lists.newArrayList();
+        Optional<IdentifiableObject> optional = Optional.of( manager.get( uid ) );
+
+        if ( optional.isPresent() )
+        {
+            identifiableObjects.add( optional.get() );
+        }
+
+        return identifiableObjects;
+    }
+
+    @Override
+    public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( "POST" );
+    }
+
+    @Override
+    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( "POST" );
+    }
+
+    @Override
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( "PUT" );
+    }
+
+    @Override
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    {
+        throw new HttpRequestMethodNotSupportedException( "PUT" );
     }
 }

@@ -30,6 +30,7 @@ package org.hisp.dhis.program;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -45,11 +46,13 @@ import java.util.List;
 /**
  * @author Chau Thu Tran
  */
-@JacksonXmlRootElement( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
+@JacksonXmlRootElement(localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0)
 public class ProgramStageSection
     extends BaseIdentifiableObject
 {
     private static final long serialVersionUID = 3141607927546197116L;
+
+    private ProgramStage programStage;
 
     private List<ProgramStageDataElement> programStageDataElements = new ArrayList<ProgramStageDataElement>();
 
@@ -61,34 +64,40 @@ public class ProgramStageSection
 
     public ProgramStageSection()
     {
-
+        setAutoFields();
     }
 
     public ProgramStageSection( String name, List<ProgramStageDataElement> programStageDataElements )
     {
+        setAutoFields();
         this.name = name;
         this.programStageDataElements = programStageDataElements;
     }
 
     public ProgramStageSection( String name, List<ProgramStageDataElement> programStageDataElements, Integer sortOrder )
     {
+        setAutoFields();
         this.name = name;
         this.programStageDataElements = programStageDataElements;
         this.sortOrder = sortOrder;
     }
 
     // -------------------------------------------------------------------------
-    // Constructors
+    // Getters and setters
     // -------------------------------------------------------------------------
 
-    public Integer getSortOrder()
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ProgramStage getProgramStage()
     {
-        return sortOrder;
+        return programStage;
     }
 
-    public void setSortOrder( Integer sortOrder )
+    public void setProgramStage( ProgramStage programStage )
     {
-        this.sortOrder = sortOrder;
+        this.programStage = programStage;
     }
 
     @JsonProperty
@@ -105,6 +114,19 @@ public class ProgramStageSection
         this.programStageDataElements = programStageDataElements;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder( Integer sortOrder )
+    {
+        this.sortOrder = sortOrder;
+    }
+
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -113,6 +135,9 @@ public class ProgramStageSection
         if ( other.getClass().isInstance( this ) )
         {
             ProgramStageSection programStageSection = (ProgramStageSection) other;
+
+            programStage = programStageSection.getProgramStage();
+            sortOrder = programStageSection.getSortOrder();
 
             programStageDataElements.clear();
             programStageDataElements.addAll( programStageSection.getProgramStageDataElements() );

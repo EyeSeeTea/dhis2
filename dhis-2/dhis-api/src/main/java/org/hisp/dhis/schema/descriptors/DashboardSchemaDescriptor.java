@@ -51,7 +51,7 @@ public class DashboardSchemaDescriptor implements SchemaDescriptor
     @Override
     public Schema getSchema()
     {
-        Schema schema = new Schema( Dashboard.class, "dashboard", "dashboards" );
+        Schema schema = new Schema( Dashboard.class, SINGULAR, PLURAL );
         schema.setApiEndpoint( API_ENDPOINT );
         schema.setMetadata( false );
         schema.setShareable( true );

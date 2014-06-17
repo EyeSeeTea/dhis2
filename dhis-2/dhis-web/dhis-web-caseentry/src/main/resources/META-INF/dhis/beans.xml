@@ -456,9 +456,11 @@
 	<bean id="org.hisp.dhis.caseentry.action.trackedentity.AddRepresentativeAction"
 		class="org.hisp.dhis.caseentry.action.trackedentity.AddRepresentativeAction"
 		scope="prototype">
+		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="selectionManager"
 			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
-		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
+		<property name="attributeService"
+			ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.caseentry.action.trackedentity.GetTrackedEntityInstanceHistoryAction"
@@ -491,7 +493,7 @@
 		<property name="selectionTreeManager"
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 	</bean>
-
+	
 	<!-- Program Enrollment -->
 
 	<bean
@@ -613,19 +615,6 @@
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="attributeValueService"
 			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.caseentry.action.trackedentity.SearchRelationshipEntityInstanceAction"
-		class="org.hisp.dhis.caseentry.action.trackedentity.SearchRelationshipEntityInstanceAction"
-		scope="prototype">
-		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
-		<property name="attributeService"
-			ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
-		<property name="attributeValueService"
-			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
-		<property name="relationshipService"
-			ref="org.hisp.dhis.relationship.RelationshipService" />
 	</bean>
 
 	<bean

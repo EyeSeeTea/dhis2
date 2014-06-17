@@ -58,6 +58,9 @@ dhis2.de.currentCategories = null;
 // Current offset, next or previous corresponding to increasing or decreasing value
 dhis2.de.currentPeriodOffset = 0;
 
+// Associative array with currently-displayed period choices, keyed by iso
+dhis2.de.periodChoices = [];
+
 // Username of user who marked the current data set as complete if any
 dhis2.de.currentCompletedByUser = null;
 
@@ -689,21 +692,6 @@ function splitFieldId( id )
     return split;
 }
 
-/**
- * Creates an associative array with values of the current period.
- */
-function currentPeriod()
-{
-    var period = {};
-    var part = ( $( '#selectedPeriodId' ).val() || "" ).split( ',' );
-
-    period.iso = part[0];
-    period.startDate = part[1];
-    period.endDate = part[2];
-
-    return period;
-}
-
 function refreshZebraStripes( $tbody )
 {
     $tbody.find( 'tr:not([colspan]):visible:even' ).find( 'td:first-child' ).removeClass( 'reg alt' ).addClass( 'alt' );
@@ -772,7 +760,7 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     $( '#selectedDataSetId' ).removeAttr( 'disabled' );
 
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodId = currentPeriod().iso;
+    var periodId = $( '#selectedPeriodId').val();
 
     clearListById( 'selectedDataSetId' );
     addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
@@ -912,7 +900,6 @@ function dataSetSelected()
     var x = dhis2.de.currentDataSetId;
     
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodVal = $( '#selectedPeriodId' ).val();
 
     var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
     var previousPeriodType = previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
@@ -1042,11 +1029,13 @@ function displayPeriods()
     {
     	addOptionById( 'selectedPeriodId', "", i18n_no_periods_click_prev_year_button );
     }
-    
+
+    dhis2.de.periodChoices = [];
+
     $.safeEach( periods, function( idx, item ) 
     {
-        var periodInfo = item.iso + ',' + item.startDate + ',' + item.endDate;
-        addOptionById( 'selectedPeriodId', periodInfo, item.name );
+        addOptionById( 'selectedPeriodId', item.iso, item.name );
+        dhis2.de.periodChoices[ item.iso ] = item;
     } );
 }
 
@@ -1195,8 +1184,8 @@ dhis2.de.getCurrentCategoryOptionsQueryValue = function()
  */
 dhis2.de.optionValidWithinPeriod = function( option, period )
 {
-    return ( option.startDate == null || option.startDate <= period.endDate )
-        && ( option.endDate == null || option.endDate >= period.startDate )
+    return ( option.startDate == null || option.startDate <= dhis2.periodChoices[ period ].endDate )
+        && ( option.endDate == null || option.endDate >= dhis2.periodChoices[ period ].startDate )
 }
 
 /**
@@ -1207,7 +1196,7 @@ dhis2.de.getAttributesMarkup = function()
 {
 	var html = '';
 
-    var period = currentPeriod();
+    var period = $( '#selectedPeriodId' ).val();
 
     var options = dhis2.de.getCurrentCategoryOptions();
 
@@ -1277,7 +1266,7 @@ dhis2.de.attributeSelected = function( categoryId )
 dhis2.de.inputSelected = function()
 {
     var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodId = currentPeriod().iso;
+    var periodId = $( '#selectedPeriodId').val();
 
 	if (
 	    dhis2.de.currentOrganisationUnitId &&
@@ -1304,7 +1293,7 @@ function loadDataValues()
 
 function getAndInsertDataValues()
 {
-    var periodId = currentPeriod().iso;
+    var periodId = $( '#selectedPeriodId').val();
     var dataSetId = $( '#selectedDataSetId' ).val();
 
     // Clear existing values and colors, grey disabled fields
@@ -1615,9 +1604,11 @@ function registerCompleteDataSet()
 	if ( !confirm( i18n_confirm_complete ) )
 	{
 		return false;
-	}
+  }
 	
-	validate( true, function() {	
+  $( document ).trigger('dhis2.de.event.completed');
+
+	validate( true, function() {
 	    var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
 
         var cc = dhis2.de.getCurrentCategoryCombo();
@@ -1638,6 +1629,7 @@ function registerCompleteDataSet()
 	        type: 'post',
 	    	success: function( data, textStatus, xhr )
 	        {
+          $( document ).trigger('dhis2.de.event.completed');
 	    		disableCompleteButton();
 	    		dhis2.de.storageManager.clearCompleteDataSet( params );
 	        },
@@ -1649,6 +1641,7 @@ function registerCompleteDataSet()
 	        	}
 	        	else // Offline, keep local value
 	        	{
+              $( document ).trigger('dhis2.de.event.completed');
 	        		disableCompleteButton();
 	        		setHeaderMessage( i18n_offline_notification );
 	        	}
@@ -1663,7 +1656,7 @@ function undoCompleteDataSet()
 	{
 		return false;
 	}
-	
+
     var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
 
     var cc = dhis2.de.getCurrentCategoryCombo();
@@ -1687,8 +1680,9 @@ function undoCompleteDataSet()
     	type: 'delete',
     	success: function( data, textStatus, xhr )
         {
-    		disableUndoButton();
-            dhis2.de.storageManager.clearCompleteDataSet( params );
+          $( document ).trigger('dhis2.de.event.uncompleted');
+          disableUndoButton();
+          dhis2.de.storageManager.clearCompleteDataSet( params );
         },
         error: function( xhr, textStatus, errorThrown )
         {
@@ -1698,6 +1692,7 @@ function undoCompleteDataSet()
         	}
         	else // Offline, keep local value
         	{
+            $( document ).trigger('dhis2.de.event.uncompleted');
         		disableUndoButton();
         		setHeaderMessage( i18n_offline_notification );
         	}
@@ -1884,7 +1879,7 @@ function displayHistoryDialog( operandName )
 
 function viewHist( dataElementId, optionComboId )
 {
-    var periodId = currentPeriod().iso;
+    var periodId = $( '#selectedPeriodId').val();
 
 	if ( dataElementId && optionComboId && periodId && periodId != -1 )
 	{
@@ -2437,7 +2432,7 @@ function StorageManager()
     {
         var params = {
             'ds': $( '#selectedDataSetId' ).val(),
-            'pe': currentPeriod().iso,
+            'pe': $( '#selectedPeriodId').val(),
             'ou': getCurrentOrganisationUnit(),
             'multiOu': dhis2.de.multiOrganisationUnit
         };

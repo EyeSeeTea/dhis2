@@ -39,16 +39,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 
-import javassist.util.proxy.ProxyObject;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.hisp.dhis.common.BaseDimensionalObject;
-import org.hisp.dhis.common.DimensionalObject;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dxf2.metadata.ExchangeClasses;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,40 +211,13 @@ public class ContextUtils
         return ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
     }
 
-    public static String getPathWithUid( IdentifiableObject identifiableObject )
-    {
-        return getPath( identifiableObject.getClass() ) + "/" + identifiableObject.getUid();
-    }
-
-    public static String getPath( Class<?> clazz )
-    {
-        if ( ProxyObject.class.isAssignableFrom( clazz ) )
-        {
-            clazz = clazz.getSuperclass();
-        }
-
-        String resourcePath;
-
-        // special case
-        if ( DimensionalObject.class.isAssignableFrom( clazz ) )
-        {
-            resourcePath = ExchangeClasses.getAllExportMap().get( BaseDimensionalObject.class );
-        }
-        else
-        {
-            resourcePath = ExchangeClasses.getAllExportMap().get( clazz );
-        }
-
-        return getRootPath( getRequest() ) + "/" + resourcePath;
-    }
-
     public static String getContextPath( HttpServletRequest request )
     {
         StringBuilder builder = new StringBuilder();
         String xForwardedProto = request.getHeader( "X-Forwarded-Proto" );
         String xForwardedPort = request.getHeader( "X-Forwarded-Port" );
 
-        if ( xForwardedProto != null && (xForwardedProto.equalsIgnoreCase( "http" ) || xForwardedProto.equalsIgnoreCase( "https" )) )
+        if ( xForwardedProto != null && ( xForwardedProto.equalsIgnoreCase( "http" ) || xForwardedProto.equalsIgnoreCase( "https" ) ) )
         {
             builder.append( xForwardedProto );
         }

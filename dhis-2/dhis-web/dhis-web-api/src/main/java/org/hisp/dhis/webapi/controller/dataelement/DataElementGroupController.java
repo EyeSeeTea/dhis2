@@ -32,16 +32,14 @@ import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.schema.descriptors.DataElementGroupSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.WebUtils;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -53,7 +51,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -69,105 +66,21 @@ public class DataElementGroupController
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
 
-    @RequestMapping( value = "/{uid}/members", method = RequestMethod.GET )
-    public String getMembers( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        DataElementGroup dataElementGroup = getEntity( uid );
-
-        if ( dataElementGroup == null )
-        {
-            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
-            return null;
-        }
-
-        WebMetaData metaData = new WebMetaData();
-        List<DataElement> dataElements = new ArrayList<DataElement>( dataElementGroup.getMembers() );
-        Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), dataElements.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            dataElements = PagerUtils.pageCollection( dataElements, pager );
-        }
-
-        metaData.setDataElements( dataElements );
-
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
-    }
-
-    @RequestMapping( value = "/{uid}/members/query/{q}", method = RequestMethod.GET )
-    public String getMembersByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
-        HttpServletResponse response ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        DataElementGroup dataElementGroup = getEntity( uid );
-
-        if ( dataElementGroup == null )
-        {
-            ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
-            return null;
-        }
-
-        WebMetaData metaData = new WebMetaData();
-        List<DataElement> dataElements = new ArrayList<DataElement>();
-        List<DataElement> members = new ArrayList<DataElement>( dataElementGroup.getMembers() );
-        Collections.sort( members, IdentifiableObjectNameComparator.INSTANCE );
-
-        for ( DataElement dataElement : members )
-        {
-            if ( dataElement.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
-            {
-                dataElements.add( dataElement );
-            }
-        }
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), dataElements.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            dataElements = PagerUtils.pageCollection( dataElements, pager );
-        }
-
-        metaData.setDataElements( dataElements );
-
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
-    }
-
     @RequestMapping( value = "/{uid}/operands", method = RequestMethod.GET )
     public String getOperands( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
         Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
-        DataElementGroup dataElementGroup = getEntity( uid );
+        List<DataElementGroup> dataElementGroups = getEntity( uid );
 
-        if ( dataElementGroup == null )
+        if ( dataElementGroups.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
             return null;
         }
 
         WebMetaData metaData = new WebMetaData();
-        List<DataElementOperand> dataElementOperands = Lists.newArrayList( dataElementCategoryService.getOperands( dataElementGroup.getMembers() ) );
+        List<DataElementOperand> dataElementOperands = Lists.newArrayList( dataElementCategoryService.getOperands( dataElementGroups.get( 0 ).getMembers() ) );
 
         Collections.sort( dataElementOperands, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -186,7 +99,7 @@ public class DataElementGroupController
 
         if ( options.hasLinks() )
         {
-            WebUtils.generateLinks( metaData );
+            linkService.generateLinks( metaData );
         }
 
         model.addAttribute( "model", metaData );
@@ -201,9 +114,9 @@ public class DataElementGroupController
         HttpServletResponse response ) throws Exception
     {
         WebOptions options = new WebOptions( parameters );
-        DataElementGroup dataElementGroup = getEntity( uid );
+        List<DataElementGroup> dataElementGroups = getEntity( uid );
 
-        if ( dataElementGroup == null )
+        if ( dataElementGroups.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, "DataElementGroup not found for uid: " + uid );
             return null;
@@ -212,7 +125,7 @@ public class DataElementGroupController
         WebMetaData metaData = new WebMetaData();
         List<DataElementOperand> dataElementOperands = Lists.newArrayList();
 
-        for ( DataElementOperand dataElementOperand : dataElementCategoryService.getOperands( dataElementGroup.getMembers() ) )
+        for ( DataElementOperand dataElementOperand : dataElementCategoryService.getOperands( dataElementGroups.get( 0 ).getMembers() ) )
         {
             if ( dataElementOperand.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
             {
@@ -233,7 +146,7 @@ public class DataElementGroupController
 
         if ( options.hasLinks() )
         {
-            WebUtils.generateLinks( metaData );
+            linkService.generateLinks( metaData );
         }
 
         model.addAttribute( "model", metaData );

@@ -19,6 +19,7 @@ function organisationUnitSelected(orgUnits, orgUnitNames) {
 	setInnerHTML('entityInstanceDashboard', '');
 	setInnerHTML('editEntityInstanceDiv', '');
 	setFieldValue("orgunitName", orgUnitNames[0]);
+	setInnerHTML("orgunitForSearch", orgUnitNames[0]);
 	setFieldValue("orgunitId", orgUnits[0]);
 	clearListById('program');
 	jQuery.get("getAllPrograms.action", {}, function(json) {
@@ -608,4 +609,37 @@ function loadDataEntry(programStageInstanceId) {
 				}
 				registrationProgress = false;
 			});
+}
+
+function searchByIdsOnclick()
+{
+	if( getFieldValue('searchTeiByAttributes')==''){
+		return;
+	}
+	var params = "ou=" + getFieldValue("orgunitId");
+	params += "&page=1";
+	if (getFieldValue('program') != '') {
+		params += "&program=" + getFieldValue('program');
+		if( getFieldValue('programStatus')!=""){
+			params += "&programStatus=" + getFieldValue('programStatus');
+		}
+	}
+	
+	params += "&query=LIKE:" + getFieldValue('searchTeiByAttributes');
+	
+	$('#attributeIds option').each(function(i, item) {
+		params += "&attribute=" + item.value;
+	}); 
+	
+	$.ajax({
+		url : '../api/trackedEntityInstances.json',
+		type : "GET",
+		data : params,
+		success : function(json) {
+			setInnerHTML('listEntityInstanceDiv', displayTEIList(json, 1));
+			showById('listEntityInstanceDiv');
+			jQuery('#loaderDiv').hide();
+			setTableStyles();
+		}
+	});
 }

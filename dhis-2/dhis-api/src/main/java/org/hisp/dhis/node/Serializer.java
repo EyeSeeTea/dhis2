@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.node;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,27 +28,15 @@ package org.hisp.dhis.node.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.io.OutputStream;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD, ElementType.METHOD } )
-@Retention( RetentionPolicy.RUNTIME )
-public @interface ExportCollection
+public interface Serializer<T>
 {
-    String value() default "";
+    List<String> contentTypes();
 
-    String namespace() default "";
-
-    String itemName() default "";
-
-    String itemNamespace() default "";
-
-    boolean owner() default false;
-
-    boolean useWrapping() default true;
+    void serialize( T object, OutputStream outputStream ) throws Exception;
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.eventchart;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,58 +28,56 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.Options;
+import java.util.List;
 
-import java.util.Map;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public class WebOptions
-    extends Options
+* @author Lars Helge Overland
+*/
+@Transactional
+public class DefaultEventChartService
+    implements EventChartService
 {
-    public WebOptions( Map<String, String> options )
+    private HibernateIdentifiableObjectStore<EventChart> eventChartStore;
+
+    public void setEventChartStore( HibernateIdentifiableObjectStore<EventChart> eventChartStore )
     {
-        super( options );
+        this.eventChartStore = eventChartStore;
     }
 
-    //--------------------------------------------------------------------------
-    // Getters for standard web options
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // EventReportService implementation
+    // -------------------------------------------------------------------------
 
-    public boolean hasLinks( boolean defaultValue )
+    public int saveEventChart( EventChart eventChart )
     {
-        return stringAsBoolean( options.get( "links" ), defaultValue );
-    }
-
-    public boolean hasLinks()
-    {
-        return stringAsBoolean( options.get( "links" ), true );
-    }
-
-    public boolean hasPaging()
-    {
-        return stringAsBoolean( options.get( "paging" ), true );
-    }
-
-    public int getPage()
-    {
-        return stringAsInt( options.get( "page" ), 1 );
-    }
-
-    public String getViewClass()
-    {
-        return stringAsString( options.get( "viewClass" ), null );
+        return eventChartStore.save( eventChart );
     }
     
-    public String getViewClass( String defaultValue )
+    public void updateEventChart( EventChart eventChart )
     {
-        return stringAsString( options.get( "viewClass" ), defaultValue );
+        eventChartStore.update( eventChart );
     }
-
-    public int getPageSize()
+    
+    public EventChart getEventChart( int id )
     {
-        return stringAsInt( options.get( "pageSize" ), Pager.DEFAULT_PAGE_SIZE );
+        return eventChartStore.get( id );
+    }
+    
+    public EventChart getEventChart( String uid )
+    {
+        return eventChartStore.getByUid( uid );
+    }
+    
+    public void deleteEventChart( EventChart eventChart )
+    {
+        eventChartStore.delete( eventChart );
+    }
+    
+    public List<EventChart> getAllEventCharts()
+    {
+        return eventChartStore.getAll();
     }
 }

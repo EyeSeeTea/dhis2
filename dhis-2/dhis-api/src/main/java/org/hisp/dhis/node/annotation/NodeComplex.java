@@ -36,11 +36,20 @@ import java.lang.annotation.Target;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD, ElementType.METHOD } )
+@Target( { ElementType.FIELD } )
 @Retention( RetentionPolicy.RUNTIME )
-public @interface ExportComplex
+@NodeAnnotation
+public @interface NodeComplex
 {
     String value() default "";
 
     String namespace() default "";
+
+    boolean isPersisted() default true;
+
+    boolean isOwner() default false;
+
+    boolean isWritable() default true;
+
+    boolean isReadable() default true;
 }

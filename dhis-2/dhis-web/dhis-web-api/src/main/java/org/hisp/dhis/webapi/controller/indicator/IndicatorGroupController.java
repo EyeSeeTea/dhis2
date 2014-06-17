@@ -28,32 +28,11 @@ package org.hisp.dhis.webapi.controller.indicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import org.hisp.dhis.indicator.IndicatorGroup;
 import org.hisp.dhis.schema.descriptors.IndicatorGroupSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.controller.WebMetaData;
-import org.hisp.dhis.webapi.controller.WebOptions;
-import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.WebUtils;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.PagerUtils;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -63,87 +42,4 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class IndicatorGroupController
     extends AbstractCrudController<IndicatorGroup>
 {
-    @RequestMapping( value = "/{uid}/members", method = RequestMethod.GET )
-    public String getMembers( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        IndicatorGroup indicatorGroup = getEntity( uid );
-
-        if ( indicatorGroup == null )
-        {
-            ContextUtils.notFoundResponse( response, "IndicatorGroup not found for uid: " + uid );
-            return null;
-        }
-
-        WebMetaData metaData = new WebMetaData();
-        List<Indicator> indicators = new ArrayList<Indicator>( indicatorGroup.getMembers() );
-        Collections.sort( indicators, IdentifiableObjectNameComparator.INSTANCE );
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), indicators.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            indicators = PagerUtils.pageCollection( indicators, pager );
-        }
-
-        metaData.setIndicators( indicators );
-
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
-    }
-
-    @RequestMapping( value = "/{uid}/members/query/{q}", method = RequestMethod.GET )
-    public String getMembersByQuery( @PathVariable( "uid" ) String uid, @PathVariable( "q" ) String q,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request,
-        HttpServletResponse response ) throws Exception
-    {
-        WebOptions options = new WebOptions( parameters );
-        IndicatorGroup indicatorGroup = getEntity( uid );
-
-        if ( indicatorGroup == null )
-        {
-            ContextUtils.notFoundResponse( response, "IndicatorGroup not found for uid: " + uid );
-            return null;
-        }
-
-        WebMetaData metaData = new WebMetaData();
-        List<Indicator> indicators = new ArrayList<Indicator>();
-        List<Indicator> members = new ArrayList<Indicator>( indicatorGroup.getMembers() );
-        Collections.sort( members, IdentifiableObjectNameComparator.INSTANCE );
-
-        for ( Indicator indicator : members )
-        {
-            if ( indicator.getDisplayName().toLowerCase().contains( q.toLowerCase() ) )
-            {
-                indicators.add( indicator );
-            }
-        }
-
-        if ( options.hasPaging() )
-        {
-            Pager pager = new Pager( options.getPage(), indicators.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            indicators = PagerUtils.pageCollection( indicators, pager );
-        }
-
-        metaData.setIndicators( indicators );
-
-        if ( options.hasLinks() )
-        {
-            WebUtils.generateLinks( metaData );
-        }
-
-        model.addAttribute( "model", metaData );
-        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
-
-        return StringUtils.uncapitalize( getEntitySimpleName() );
-    }
 }

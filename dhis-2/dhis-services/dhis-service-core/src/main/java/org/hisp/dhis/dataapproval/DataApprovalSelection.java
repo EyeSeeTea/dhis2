@@ -59,6 +59,7 @@ import org.springframework.util.CollectionUtils;
  * between methods.
  *
  * @author Jim Grace
+ * @version $Id$
  */
 class DataApprovalSelection
 {
@@ -101,6 +102,8 @@ class DataApprovalSelection
     private int organisationUnitLevel;
 
     private Map<CategoryOptionGroupSet, Set<CategoryOptionGroup>> selectionGroups = null;
+
+    private Set<CategoryOptionGroup> allSelectionGroups = new HashSet<CategoryOptionGroup>();
 
     private List<DataApprovalLevel> allApprovalLevels;
 
@@ -189,7 +192,7 @@ class DataApprovalSelection
         {
             if ( period.getPeriodType().getFrequencyOrder() > dataSet.getPeriodType().getFrequencyOrder() )
             {
-                findStatusForLongerPeriodType();
+                findStatusForCompositePeriod();
             }
             else
             {
@@ -250,19 +253,8 @@ class DataApprovalSelection
      * Handles the case where the selected period type is longer than the
      * data set period type. The selected period is broken down into data
      * set type periods. The approval status of the selected period is
-     * constructed by logic that combines the approval statuses of the
-     * constituent periods.
-     * <p>
-     * If the data is unapproved for any time segment, returns
-     * UNAPPROVED_ELSEWHERE.
-     * <p>
-     * If the data is accepted for all time segments, returns
-     * ACCEPTED_ELSEWHERE.
-     * <p>
-     * If the data is approved for all time segments (and maybe accepted for
-     * some but not all), returns APPROVED_ELSEWHERE.
-     * <p>
-     * Note that the dataApproval object always returns null.
+     * constructed by state transition logic that combines the approval
+     * statuses of the constituent periods.
      * <p>
      * If data is accepted and/or approved in all time periods, the
      * dataApprovalLevel object reference points to the lowest level of
@@ -272,8 +264,10 @@ class DataApprovalSelection
      *
      * @return status status of the longer period
      */
-    private void findStatusForLongerPeriodType()
+    private void findStatusForCompositePeriod()
     {
+        Period longerPeriod = period;
+
         Collection<Period> testPeriods = periodService.getPeriodsBetweenDates( dataSet.getPeriodType(), period.getStartDate(), period.getEndDate() );
 
         DataApprovalLevel lowestApprovalLevel = null;
@@ -282,65 +276,44 @@ class DataApprovalSelection
         {
             period = testPeriod;
 
-            DataApprovalState s = getState();
+            state = DataApprovalPeriodAggregator.nextState( state, getState() );
 
-            switch ( s )
+            switch ( state )
             {
+                case PARTIALLY_APPROVED_HERE:
                 case APPROVED_HERE:
                 case APPROVED_ELSEWHERE:
-
-                    state = DataApprovalState.APPROVED_ELSEWHERE;
-
-                    dataApproval = null;
-
-                    if ( lowestApprovalLevel == null || dataApprovalLevel.getLevel() > lowestApprovalLevel.getLevel() )
-                    {
-                        lowestApprovalLevel = dataApprovalLevel;
-                    }
-
-                    break;
-
+                case PARTIALLY_ACCEPTED_HERE:
                 case ACCEPTED_HERE:
                 case ACCEPTED_ELSEWHERE:
+                case UNAPPROVED_READY:
 
-                    if ( state == null )
-                    {
-                        state = DataApprovalState.ACCEPTED_ELSEWHERE;
-                    }
-
-                    dataApproval = null;
-
-                    if ( lowestApprovalLevel == null || dataApprovalLevel.getLevel() > lowestApprovalLevel.getLevel() )
+                    if ( lowestApprovalLevel == null || ( dataApprovalLevel != null
+                            && dataApprovalLevel.getLevel() > lowestApprovalLevel.getLevel() ) )
                     {
                         lowestApprovalLevel = dataApprovalLevel;
                     }
 
                     break;
 
-                case UNAPPROVED_READY:
                 case UNAPPROVED_WAITING:
                 case UNAPPROVED_ELSEWHERE:
-
-                    dataApproval = null;
-                    dataApprovalLevel = null;
-
-                    state = DataApprovalState.UNAPPROVED_ELSEWHERE;
-
-                    return;
-
                 case UNAPPROVABLE:
                 default: // (Not expected)
 
-                    state = s;
-
                     dataApproval = null;
                     dataApprovalLevel = null;
 
-                    return;
+                    return; // No further state transitions are possible from these three states.
             }
         }
 
         dataApprovalLevel = lowestApprovalLevel;
+        if ( dataApproval != null )
+        {
+            dataApproval = new DataApproval( dataApproval ); // (clone, so we don't modify a Hibernate object.)
+            dataApproval.setPeriod( longerPeriod );
+        }
     }
 
     /**
@@ -527,7 +500,7 @@ class DataApprovalSelection
     }
 
     /**
-     * Adds a category option group set and associated category option group
+     * Adds a category option group set and associated category option groups
      * to the set of these pairs referenced by the selected data.
      *
      * @param groupSet category option group set to add
@@ -545,6 +518,8 @@ class DataApprovalSelection
         }
 
         groups.add( group );
+
+        allSelectionGroups.add( group );
     }
 
     /**
@@ -725,16 +700,7 @@ class DataApprovalSelection
     {
         DataApproval da = null;
 
-        Set<CategoryOptionGroup> groups = null;
-
-        if ( index < lowerIndex )
-        {
-            groups = categoryOptionGroupsByLevel.get( index );
-        }
-        else if ( allApprovalLevels.get( index ).getCategoryOptionGroupSet() != null )
-        {
-            groups = new HashSet<CategoryOptionGroup>( allApprovalLevels.get( index ).getCategoryOptionGroupSet().getMembers() );
-        }
+        Set<CategoryOptionGroup> groups = categoryOptionGroupsByLevel.get( index );
 
         if ( groups == null || groups.isEmpty() )
         {
@@ -751,16 +717,9 @@ class DataApprovalSelection
 
             log.debug( "getDataApproval( " + orgUnit.getName() + " ) = " + ( da != null ) + " (group: " + group.getName() + ")" );
 
-            if ( index < lowerIndex )
+            if ( da != null )
             {
-                if ( da != null )
-                {
-                    return da;
-                }
-            }
-            else if ( da == null )
-            {
-                return null;
+                return da;
             }
         }
 
@@ -801,11 +760,24 @@ class DataApprovalSelection
             {
                 log.debug( "isUnapprovedBelow() orgUnit level " + orgUnitLevel + " matches approval level." );
 
-                DataApproval da = getDataApproval( lowerIndex, orgUnit );
+                CategoryOptionGroupSet cogs = allApprovalLevels.get( lowerIndex ).getCategoryOptionGroupSet();
 
-                log.debug( "isUnapprovedBelow() returns " + ( da == null ) + " after looking for approval for this orgUnit." );
+                if ( cogs == null )
+                {
+                    DataApproval da = dataApprovalStore.getDataApproval( dataSet, period, orgUnit, null );
 
-                return ( da == null );
+                    log.debug( "isUnapprovedBelow() returns " + ( da == null ) + " after looking for approval for this orgUnit." );
+
+                    return ( da == null );
+                }
+                else
+                {
+                    boolean isUnapproved = isGroupSetUnapprovedBelow( orgUnit, cogs );
+
+                    log.debug( "isUnapprovedBelow() returns " + ( isUnapproved ) + " from group set." );
+
+                    return isUnapproved;
+                }
             }
         }
         else if ( dataSetAssignedAtOrBelowLevel )
@@ -835,6 +807,79 @@ class DataApprovalSelection
         }
 
         log.debug( "isUnapprovedBelow( " + orgUnit.getName() + " ) returns false after recursing." );
+
+        return false;
+    }
+
+    /**
+     * Tests to see if any required category option group is unapproved below
+     * this level.
+     * <p>
+     * A category option group is unapproved if *all* of the following are true:
+     * <ul>
+     * <li>There is no approval object for this group within the selection.</li>
+     * <li>The group has category options that apply to this period and org unit.</li>
+     * <li>At least one of these options apply to the category option group
+     * (if any) at this level</li>
+     * </ul>
+     *
+     * @param orgUnit organisation unit to test.
+     * @param cogs category option group set containing category option
+     *             groups to test.
+     * @return true if some category option group is unapproved, else false.
+     */
+    private boolean isGroupSetUnapprovedBelow ( OrganisationUnit orgUnit, CategoryOptionGroupSet cogs )
+    {
+        Set<DataElementCategoryOption> selectedGroupsOptions = new HashSet<DataElementCategoryOption>();
+
+        for ( CategoryOptionGroup group : allSelectionGroups )
+        {
+            selectedGroupsOptions.addAll( group.getMembers() );
+        }
+
+        for ( CategoryOptionGroup group : cogs.getMembers() )
+        {
+            DataApproval da = dataApprovalStore.getDataApproval( dataSet, period, orgUnit, group );
+
+            if ( da == null )
+            {
+                for ( DataElementCategoryOption option : group.getMembers() )
+                {
+                    if ( selectedGroupsOptions.isEmpty() || selectedGroupsOptions.contains( option ) )
+                    {
+                        if ( ( option.getStartDate() == null || option.getStartDate().before( period.getEndDate() ) )
+                                && ( option.getEndDate() == null || option.getEndDate().after( period.getStartDate() ) ) )
+                        {
+                            if ( option.getOrganisationUnits().isEmpty() || orgUnit.isEqualOrChildOf( option.getOrganisationUnits() ) )
+                            {
+                                log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) returns true for group " + group.getName() + ", option " + option.getName() );
+
+                                return true;
+                            }
+                            else
+                            {
+                                log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) group " + group.getName() + ", option " + option.getName()
+                                        + " org unit " + option.getOrganisationUnits().iterator().next().getName() + " not valid in org unit " + orgUnit.getName() );
+                            }
+                        }
+                        else
+                        {
+                            log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) group " + group.getName() + ", option " + option.getName() + " not valid in period " + period.getName() );
+                        }
+                    }
+                    else
+                    {
+                        log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) selectedGroupsOptions does not contain option " + option.getName() );
+                    }
+                }
+            }
+            else
+            {
+                log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) found approval for group " + group.getName() );
+            }
+        }
+
+        log.debug( "isGroupSetUnapprovedBelow( " + orgUnit.getName() + ", " + cogs.getName() + " ) returns false" );
 
         return false;
     }

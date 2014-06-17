@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.exception;
+package org.hisp.dhis.node.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,21 +25,29 @@ package org.hisp.dhis.webapi.controller.exception;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class NotFoundForQueryException extends Exception
+@Target( { ElementType.TYPE } )
+@Retention( RetentionPolicy.RUNTIME )
+@NodeAnnotation
+public @interface NodeRoot
 {
-    public NotFoundForQueryException()
-    {
-        super( "Object not found." );
-    }
+    String value() default "";
 
-    public NotFoundForQueryException( String query )
-    {
-        super( "Object not found for query: " + query );
-    }
+    String namespace() default "";
+
+    boolean isPersisted() default true;
+
+    boolean isWritable() default true;
+
+    boolean isReadable() default true;
 }

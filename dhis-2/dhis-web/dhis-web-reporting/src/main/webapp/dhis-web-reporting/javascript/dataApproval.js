@@ -12,9 +12,36 @@ $( function() {
 // Report
 //------------------------------------------------------------------------------
 
+/**
+ * Callback for changes in data set. Displays a list of period types starting
+ * with the data set's period as the shortest type, and including all longer
+ * types so that approvals can be made for multiple periods. If there is a
+ * current period type selection, and it is still on the new list of period
+ * types, keep it. Otherwise choose the period type for the data set.
+ */
 dhis2.appr.dataSetSelected = function()
 {
-	dhis2.appr.displayPeriods();
+    var dataSetPeriodType = $( "#dataSetId :selected" ).data( "pt" );
+
+    if ( $( "#periodType" ).val() != dataSetPeriodType ) {
+        var periodTypeToSelect = $( "#periodType" ).val() || dataSetPeriodType;
+        var foundDataSetPeriodType = false;
+        var html = "<option value=''>[ " + i18n_select_period_type + " ]</option>";
+
+        $.each( dhis2.appr.metaData.periodTypes, function () {
+            if ( foundDataSetPeriodType || this == dataSetPeriodType ) {
+                var selected = ( this == periodTypeToSelect ) ? " selected" : "";
+                html += "<option value='" + this + "'" + selected + ">" + this + "</option>";
+                foundDataSetPeriodType = true;
+            } else if ( this == periodTypeToSelect ) {
+                periodTypeToSelect = dataSetPeriodType;
+            }
+        } );
+
+        $( "#periodType" ).html( html );
+        $( "#periodType" ).removeAttr( "disabled" );
+        dhis2.appr.displayPeriods();
+    }
 }
 
 dhis2.appr.orgUnitSelected = function( orgUnits, orgUnitNames, children )
@@ -24,8 +51,9 @@ dhis2.appr.orgUnitSelected = function( orgUnits, orgUnitNames, children )
 
 dhis2.appr.displayPeriods = function()
 {
-	var pt = $( '#dataSetId :selected' ).data( "pt" );
-	dhis2.dsr.displayPeriodsInternal( pt, dhis2.appr.currentPeriodOffset );
+    var periodType = $( "#periodType" ).val();
+    dhis2.dsr.displayPeriodsInternal( periodType, dhis2.appr.currentPeriodOffset );
+    dhis2.appr.displayCategoryOptionGroups();
 }
 
 dhis2.appr.displayNextPeriods = function()
@@ -43,18 +71,24 @@ dhis2.appr.displayPreviousPeriods = function()
     dhis2.appr.displayPeriods();
 }
 
+dhis2.appr.periodSelected = function()
+{
+    dhis2.appr.displayCategoryOptionGroups();
+}
+
 dhis2.appr.displayCategoryOptionGroups = function()
 {
 	var ou = selection.getSelected()[0];
+	var pe = $( "#periodId" ).val();
 	
-	if ( !ou ) {
+	if ( !ou || !pe ) {
 		return;
 	}
 	
 	var url = "getCategoryOptionGroups.action";
 	
-	$.getJSON( url, {ou:ou}, function( json ) {
-		if ( json.categoryOptionGroups && json.categoryOptionGroups.length ) {
+	$.getJSON( url, {ou:ou, pe:pe}, function( json ) {
+		if ( json.categoryOptionGroups && json.categoryOptionGroups.length > 1 ) {
 			var html = "";
 			$.each( json.categoryOptionGroups, function( index, group ) {
 				html += "<option value=\"" + group.uid + "\" data-dimension=\"" + group.groupSet + "\">" + group.name + "</option>";
@@ -164,7 +198,22 @@ dhis2.appr.setApprovalState = function()
 		        }
 		        
 		        break;
-		
+
+            case "PARTIALLY_APPROVED_HERE":
+                $( "#approvalNotification" ).html( i18n_approved_for_part_of_this_period );
+
+                if ( json.mayApprove ) {
+                    $( "#approvalDiv" ).show();
+                    $( "#approveButton" ).show();
+                }
+
+                if ( json.mayUnapprove )  {
+                    $( "#approvalDiv" ).show();
+                    $( "#unapproveButton" ).show();
+                }
+
+                break;
+
 		    case "APPROVED_HERE":
 		        $( "#approvalNotification" ).html( i18n_approved );
 		        
@@ -179,11 +228,35 @@ dhis2.appr.setApprovalState = function()
 		        }
 		        
 		        break;
-		
+
+            case "PARTIALLY_APPROVED_ELSEWHERE":
+                $( "#approvalNotification" ).html( i18n_approved_elsewhere_for_part_of_this_period );
+                break;
+
 		    case "APPROVED_ELSEWHERE":
 		        $( "#approvalNotification" ).html( i18n_approved_elsewhere );
 		        break;
-		        
+
+            case "PARTIALLY_ACCEPTED_HERE":
+                $( "#approvalNotification" ).html( i18n_accepted_for_part_of_this_period );
+
+                if ( json.mayUnapprove )  {
+                    $( "#approvalDiv" ).show();
+                    $( "#unapproveButton" ).show();
+                }
+
+                if ( json.mayAccept )  {
+                    $( "#approvalDiv" ).show();
+                    $( "#acceptButton" ).show();
+                }
+
+                if ( json.mayUnaccept )  {
+                    $( "#approvalDiv" ).show();
+                    $( "#unacceptButton" ).show();
+                }
+
+                break;
+
 		    case "ACCEPTED_HERE":
 		        $( "#approvalNotification" ).html( i18n_approved_and_accepted );
 		        
@@ -192,12 +265,16 @@ dhis2.appr.setApprovalState = function()
 		            $( "#unapproveButton" ).show();
 		        }
 		        
-		        if ( json.mayUnccept )  {
+		        if ( json.mayUnaccept )  {
 		            $( "#approvalDiv" ).show();
 		            $( "#unacceptButton" ).show();
 		        }
 		        
 		        break;
+
+            case "PARTIALLY_ACCEPTED_ELSEWHERE":
+                $( "#approvalNotification" ).html( i18n_accepted_elsewhere_for_part_of_this_period );
+                break;
 
 	        case "ACCEPTED_ELSEWHERE":
 		        $( "#approvalNotification" ).html( i18n_accepted_elsewhere );
@@ -217,18 +294,8 @@ dhis2.appr.approveData = function()
 		url: dhis2.appr.getApprovalUrl(),
 		type: "post",
 		success: function() {
-            $( "#approvalNotification" ).show().html( i18n_approved );
-            $( "#approvalDiv" ).hide();
-			$( "#approveButton" ).hide();
-            if ( dhis2.appr.permissions.mayUnapprove ) {
-                $( "#approvalDiv" ).show();
-                $( "#unapproveButton" ).show();
-            }
-            if ( dhis2.appr.permissions.mayAccept ) {
-                $( "#approvalDiv" ).show();
-                $( "#acceptButton" ).show();
-            }
-		},
+            dhis2.appr.setApprovalState();
+        },
 		error: function( xhr, status, error ) {
 			alert( xhr.responseText );
 		}
@@ -245,17 +312,8 @@ dhis2.appr.unapproveData = function()
 		url: dhis2.appr.getApprovalUrl(),
 		type: "delete",
 		success: function() {
-            $( "#approvalNotification" ).show().html( i18n_ready_for_approval );
-            $( "#approvalDiv" ).hide();
-            $( "#unapproveButton" ).hide();
-            $( "#acceptButton" ).hide();
-            $( "#unacceptButton" ).hide();
-            
-            if ( dhis2.appr.permissions.mayApprove ) {
-                $( "#approvalDiv" ).show();
-                $( "#approveButton" ).show();
-            }
-		},
+            dhis2.appr.setApprovalState();
+        },
 		error: function( xhr, status, error ) {
 			alert( xhr.responseText );
 		}
@@ -272,19 +330,7 @@ dhis2.appr.acceptData = function()
 		url: dhis2.appr.getAcceptanceUrl(),
         type: "post",
         success: function() {
-            $( "#approvalNotification" ).show().html( i18n_approved_and_accepted );
-            $( "#approvalDiv" ).hide();
-            $( "#acceptButton" ).hide();
-          
-            if ( dhis2.appr.permissions.mayUnapprove ) {
-                $( "#approvalDiv" ).show();
-                $( "#unapproveButton" ).show();
-            }
-          
-            if ( dhis2.appr.permissions.mayUnaccept ) {
-                $( "#approvalDiv" ).show();
-                $( "#unacceptButton" ).show();
-            }
+            dhis2.appr.setApprovalState();
         },
         error: function( xhr, status, error ) {
             alert( xhr.responseText );
@@ -302,17 +348,7 @@ dhis2.appr.unacceptData = function()
 		url: dhis2.appr.getAcceptanceUrl(),
         type: "delete",
         success: function() {
-            $( "#approvalNotification" ).show().html( i18n_approved );
-            $( "#approvalDiv" ).hide();
-            $( "#unacceptButton" ).hide();
-            if ( dhis2.appr.permissions.mayUnapprove ) {
-                $( "#approvalDiv" ).show();
-                $( "#unapproveButton" ).show();
-            }
-            if ( dhis2.appr.permissions.mayAccept ) {
-                $( "#approvalDiv" ).show();
-                $( "#acceptButton" ).show();
-            }
+            dhis2.appr.setApprovalState();
         },
         error: function( xhr, status, error ) {
             alert( xhr.responseText );
@@ -323,13 +359,13 @@ dhis2.appr.unacceptData = function()
 dhis2.appr.getApprovalUrl = function()
 {
 	var data = dhis2.appr.getDataReport();
-	var url = "../api/dataApprovals?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;	
+	var url = "../api/dataApprovals?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;
 	return url;
 }
 
 dhis2.appr.getAcceptanceUrl = function()
 {
 	var data = dhis2.appr.getDataReport();
-	var url = "../api/dataApprovals/acceptances?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;	
+	var url = "../api/dataApprovals/acceptances?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;
 	return url;
 }

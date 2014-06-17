@@ -25,6 +25,7 @@ function showValidationCriteriaDetails( context ) {
   jQuery.getJSON('getValidationCriteria.action', { id: context.id, programId: getFieldValue('programId')  }, function( json ) {
     setInnerHTML('nameField', json.validationCriteria.name);
     setInnerHTML('descriptionField', json.validationCriteria.description);
+	setInnerHTML('idField', json.validationCriteria.uid);
 
     var property = json.validationCriteria.property;
     var operator = json.validationCriteria.operator;
@@ -78,13 +79,13 @@ function showDivValue() {
 		valueField += "</select>";
 	}
 	else if( type == "phoneNumber" ){
-		valueField = "<select id='value' name='value' class=\"{validate:{phone:true,required:true}}\" style=\"width:140px;\">";
+		valueField = "<input id='value' name='value' class=\"{validate:{phone:true,required:true}}\" style=\"width:140px;\" />";
 	}
 	else if( type == "age" || type == "number" ){
-		valueField = "<input id='value' name='value' class=\"{validate:{number:true,required:true}}\" style=\"width:140px;\"/>";
+		valueField = "<input id='value' name='value' class=\"{validate:{number:true,required:true}}\" style=\"width:140px;\" />";
 	}
 	else if( type == "letter" ){
-		valueField = "<select id='value' name='value' class=\"{validate:{letterswithbasicpunc:true,required:true}}\" style=\"width:140px;\">";
+		valueField = "<input id='value' name='value' class=\"{validate:{letterswithbasicpunc:true,required:true}}\" style=\"width:140px;\" />";
 	}
 	else{
 		valueField = "<input id='value' name='value' class=\"{validate:{required:true}}\" style=\"width:140px;\"/>";

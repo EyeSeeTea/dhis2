@@ -28,6 +28,7 @@ package org.hisp.dhis.dxf2.metadata.importers;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.apache.commons.logging.Log;
@@ -72,6 +73,7 @@ import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -154,12 +156,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         private Expression leftSide;
         private Expression rightSide;
 
+        private DataEntryForm dataEntryForm;
+
         private Set<DataElementOperand> compulsoryDataElementOperands = Sets.newHashSet();
         private Set<DataElementOperand> greyedFields = Sets.newHashSet();
 
-        private DataEntryForm dataEntryForm;
-
-        private Set<ProgramStageDataElement> programStageDataElements = Sets.newHashSet();
+        private Collection<ProgramStageDataElement> programStageDataElements = Lists.newArrayList();
         private Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = Sets.newHashSet();
 
         public void extract( T object )
@@ -450,13 +452,13 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             ReflectionUtils.invokeSetterMethod( "programTrackedEntityAttributes", object, programTrackedEntityAttributes );
         }
 
-        private Set<ProgramStageDataElement> extractProgramStageDataElements( T object )
+        private Collection<ProgramStageDataElement> extractProgramStageDataElements( T object )
         {
-            Set<ProgramStageDataElement> programStageDataElements = Sets.newHashSet();
+            Method method = ReflectionUtils.findGetterMethod( "programStageDataElements", object );
 
-            if ( ReflectionUtils.findGetterMethod( "programStageDataElements", object ) != null )
+            if ( method != null )
             {
-                programStageDataElements = ReflectionUtils.invokeGetterMethod( "programStageDataElements", object );
+                Collection<ProgramStageDataElement> programStageDataElements = ReflectionUtils.invokeGetterMethod( "programStageDataElements", object );
 
                 for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
                 {
@@ -467,15 +469,26 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
 
                 sessionFactory.getCurrentSession().flush();
-                ReflectionUtils.invokeSetterMethod( "programStageDataElements", object, Sets.newHashSet() );
+                ReflectionUtils.invokeSetterMethod( "programStageDataElements", object,
+                    ReflectionUtils.newCollectionInstance( method.getReturnType() ) );
                 sessionFactory.getCurrentSession().flush();
+
+                return programStageDataElements;
             }
 
-            return programStageDataElements;
+            return null;
         }
 
-        private void saveProgramStageDataElements( T object, Set<ProgramStageDataElement> programStageDataElements )
+        private void saveProgramStageDataElements( T object, Collection<ProgramStageDataElement> programStageDataElements )
         {
+            if ( programStageDataElements == null )
+            {
+                return;
+            }
+
+            Collection<ProgramStageDataElement> programStageDataElementCollection =
+                ReflectionUtils.newCollectionInstance( programStageDataElements.getClass() );
+
             for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
             {
                 Map<Field, Object> identifiableObjects = detachFields( programStageDataElement );
@@ -486,10 +499,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                     programStageDataElement.setProgramStage( (ProgramStage) object );
                 }
 
-                programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+                ProgramStageDataElement persisted = programStageDataElementService.get( programStageDataElement.getProgramStage(), programStageDataElement.getDataElement() );
+
+                if ( persisted == null )
+                {
+                    programStageDataElementService.addProgramStageDataElement( programStageDataElement );
+                }
+                else
+                {
+                    programStageDataElementCollection.add( persisted );
+                }
             }
 
-            ReflectionUtils.invokeSetterMethod( "programStageDataElements", object, programStageDataElements );
+            ReflectionUtils.invokeSetterMethod( "programStageDataElements", object, programStageDataElementCollection );
         }
 
         private void deleteProgramStageDataElements( T object )
