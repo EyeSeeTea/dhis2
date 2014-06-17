@@ -314,6 +314,8 @@ a.menu-link:hover
     padding-right: 36px;
     padding-top: 15px;
     padding-bottom: 5px;
+    max-height: 48px;
+    max-width: 48px;
 }
 
 .app-menu-dropdown span
@@ -322,6 +324,7 @@ a.menu-link:hover
     display: block;
     font-family: LiberationSans, arial, sans-serif;
     height: 30px;
+    overflow: hidden;
     padding-left: 10px;
     padding-right: 10px;
     text-align: center;
