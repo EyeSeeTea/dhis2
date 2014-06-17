@@ -28,6 +28,7 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Enums;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.acl.Access;
@@ -38,7 +39,8 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
-import org.hisp.dhis.dxf2.filter.FilterService;
+import org.hisp.dhis.dxf2.filter.FieldFilterService;
+import org.hisp.dhis.dxf2.filter.ObjectFilterService;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.dxf2.render.RenderService;
@@ -46,6 +48,7 @@ import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
@@ -95,7 +98,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected CurrentUserService currentUserService;
 
     @Autowired
-    protected FilterService filterService;
+    protected ObjectFilterService objectFilterService;
+
+    @Autowired
+    protected FieldFilterService fieldFilterService;
 
     @Autowired
     protected AclService aclService;
@@ -154,7 +160,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         // enable object filter
         if ( !filters.isEmpty() )
         {
-            entityList = filterService.objectFilter( entityList, filters );
+            entityList = objectFilterService.filter( entityList, filters );
 
             if ( hasPaging )
             {
@@ -173,9 +179,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         handleLinksAndAccess( options, entityList );
 
+        linkService.generatePagerLinks( pager, getEntityClass() );
+
         RootNode rootNode = new RootNode( "metadata" );
         rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
         rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+
+        rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
 
         if ( pager != null )
         {
@@ -187,7 +197,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             pagerNode.addChild( new SimpleNode( "prevPage", pager.getPrevPage() ) );
         }
 
-        rootNode.addChild( filterService.fieldFilter( getEntityClass(), entityList, fields ) );
+        rootNode.addChild( fieldFilterService.filter( getEntityClass(), entityList, fields ) );
 
         return rootNode;
     }
@@ -225,7 +235,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new NotFoundException( uid );
         }
 
-        entities = filterService.objectFilter( entities, filters );
+        entities = objectFilterService.filter( entities, filters );
 
         if ( options.hasLinks() )
         {
@@ -243,7 +253,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             postProcessEntity( entity, options, parameters );
         }
 
-        CollectionNode collectionNode = filterService.fieldFilter( getEntityClass(), entities, fields );
+        CollectionNode collectionNode = fieldFilterService.filter( getEntityClass(), entities, fields );
 
         if ( options.booleanTrue( "useWrapper" ) || entities.size() > 1 )
         {
@@ -252,6 +262,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
             rootNode.addChild( collectionNode );
 
+            rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
+
             return rootNode;
         }
         else
@@ -259,6 +271,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             RootNode rootNode = new RootNode( collectionNode.getChildren().get( 0 ) );
             rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
             rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+
+            rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
 
             return rootNode;
         }
@@ -450,7 +464,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected List<T> getEntity( String uid, WebOptions options )
     {
         ArrayList<T> list = new ArrayList<>();
-        Optional<T> identifiableObject = Optional.of( manager.getNoAcl( getEntityClass(), uid ) );
+        Optional<T> identifiableObject = Optional.fromNullable( manager.getNoAcl( getEntityClass(), uid ) );
 
         if ( identifiableObject.isPresent() )
         {
@@ -547,5 +561,20 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             throw new RuntimeException( ex );
         }
+    }
+
+    private InclusionStrategy.Include getInclusionStrategy( String inclusionStrategy )
+    {
+        if ( inclusionStrategy != null )
+        {
+            Optional<InclusionStrategy.Include> optional = Enums.getIfPresent( InclusionStrategy.Include.class, inclusionStrategy );
+
+            if ( optional.isPresent() )
+            {
+                return optional.get();
+            }
+        }
+
+        return InclusionStrategy.Include.NON_NULL;
     }
 }

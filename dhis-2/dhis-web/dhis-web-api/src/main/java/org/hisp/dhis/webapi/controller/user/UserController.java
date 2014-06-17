@@ -139,7 +139,7 @@ public class UserController
     protected List<User> getEntity( String uid )
     {
         List<User> users = Lists.newArrayList();
-        Optional<User> user = Optional.of( userService.getUser( uid ) );
+        Optional<User> user = Optional.fromNullable( userService.getUser( uid ) );
 
         if ( user.isPresent() )
         {
@@ -211,6 +211,7 @@ public class UserController
 
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
+
         if ( parsed.getUserCredentials().getPassword() != null )
         {
             String encodePassword = passwordManager.encodePassword( parsed.getUsername(),
@@ -219,7 +220,7 @@ public class UserController
         }
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
-        renderService.toJson( response.getOutputStream(), summary );
+        renderService.toXml( response.getOutputStream(), summary );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )

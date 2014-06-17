@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.node.config;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,28 +28,29 @@ package org.hisp.dhis.node.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD } )
-@Retention( RetentionPolicy.RUNTIME )
-@NodeAnnotation
-public @interface NodeComplex
+public class Config
 {
-    String value() default "";
+    /**
+     * Inclusion strategy to use. There are a few already defined inclusions in the Inclusions enum.
+     *
+     * @see org.hisp.dhis.node.config.InclusionStrategy.Include
+     */
+    private InclusionStrategy inclusionStrategy = InclusionStrategy.Include.NON_NULL;
 
-    String namespace() default "";
+    public Config()
+    {
+    }
 
-    boolean isPersisted() default true;
+    public InclusionStrategy getInclusionStrategy()
+    {
+        return inclusionStrategy;
+    }
 
-    boolean isOwner() default false;
-
-    boolean isWritable() default true;
-
-    boolean isReadable() default true;
+    public void setInclusionStrategy( InclusionStrategy inclusionStrategy )
+    {
+        this.inclusionStrategy = inclusionStrategy;
+    }
 }

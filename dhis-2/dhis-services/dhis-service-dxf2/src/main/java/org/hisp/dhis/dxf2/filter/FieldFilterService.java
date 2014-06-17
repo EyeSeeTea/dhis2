@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.dxf2.filter;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,28 +28,22 @@ package org.hisp.dhis.node.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.node.types.CollectionNode;
+
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD } )
-@Retention( RetentionPolicy.RUNTIME )
-@NodeAnnotation
-public @interface NodeComplex
+public interface FieldFilterService
 {
-    String value() default "";
-
-    String namespace() default "";
-
-    boolean isPersisted() default true;
-
-    boolean isOwner() default false;
-
-    boolean isWritable() default true;
-
-    boolean isReadable() default true;
+    /**
+     * Perform inclusion/exclusion on a list of objects.
+     *
+     * @param objects   List to filter
+     * @param fieldList Field filter
+     * @return List of objects with only wanted properties
+     */
+    <T extends IdentifiableObject> CollectionNode filter( Class<?> klass, List<T> objects, List<String> fieldList );
 }
