@@ -408,8 +408,10 @@
 
         defaultMenu.isOpen = function () {
             var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap")),
-            display = jqLite(dropdownElement).css("display");
-            if (display === 'none') {
+                display = jqLite(dropdownElement).css("display"),
+                outOfView = parseInt(jqLite(dropdownElement).css("left"), 10) < 0; //TODO: This is a kind of funky check
+
+            if (display === 'none' || outOfView) {
                 return false;
             }
             return true;
