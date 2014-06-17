@@ -445,7 +445,7 @@
         }
 
         defaultMenu.closeAll = function () {
-            var menuDropDowns = document.querySelectorAll(defaultMenu.getDropdownSelector());
+            var menuDropDowns = document.querySelectorAll("#" + defaultMenu.container + " div.app-menu-dropdown-wrap");
             jqLite(menuDropDowns).css('display', 'none');
             jqLite(menuDropDowns).attr("data-display-clicked", "false");
         }
@@ -786,7 +786,7 @@
                 /**
                  * Key combination using alt to control opening and closing
                  */
-                if (event.which === shortCutMenu.shortCutKey && event.ctrlKey) {
+                if (event.which === shortCutMenu.shortCutKey && (event.ctrlKey || event.altKey)) {
                     event.preventDefault();
 
                     if (shortCutMenu.isOpen()) {
