@@ -1783,17 +1783,28 @@ Ext.onReady( function() {
 
 			if (ns.app.layout) {
 				favorite = Ext.clone(ns.app.layout);
+                
+				// server sync
+				favorite.showData = favorite.showValues;
+				delete favorite.showValues;
 
-				// sync
-				favorite.totals = favorite.showTotals;
-				delete favorite.showTotals;
+				favorite.regression = favorite.showTrendLine;
+				delete favorite.showTrendLine;
 
-				favorite.subtotals = favorite.showSubTotals;
-				delete favorite.showSubTotals;
+				favorite.targetLineLabel = favorite.targetLineTitle;
+				delete favorite.targetLineTitle;
 
-				delete favorite.type;
+				favorite.baseLineLabel = favorite.baseLineTitle;
+				delete favorite.baseLineTitle;
+
+				favorite.domainAxisLabel = favorite.domainAxisTitle;
+				delete favorite.domainAxisTitle;
+
+				favorite.rangeAxisLabel = favorite.rangeAxisTitle;
+				delete favorite.rangeAxisTitle;
+
+				delete favorite.id;
 				delete favorite.parentGraphMap;
-                delete favorite.id;
                 delete favorite.displayName;
                 delete favorite.access;
                 delete favorite.lastUpdated;
@@ -1865,7 +1876,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/eventCharts/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/eventCharts/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();
@@ -2145,7 +2156,7 @@ Ext.onReady( function() {
 											url: ns.core.init.contextPath + '/api/eventCharts/' + record.data.id,
 											method: 'DELETE',
 											success: function() {
-												ns.app.stores.eventReport.loadStore();
+												ns.app.stores.eventChart.loadStore();
 											}
 										});
 									}
@@ -5346,42 +5357,16 @@ Ext.onReady( function() {
 				}
 
 				Ext.Ajax.request({
-					url: init.contextPath + '/api/eventCharts/' + id + '.json?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/eventCharts/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
 					},
 					success: function(r) {
-						var config = Ext.decode(r.responseText);
+						var layoutConfig = Ext.decode(r.responseText),
+							layout = api.layout.Layout(layoutConfig);
 
-						// sync
-						config.showTotals = config.totals;
-						delete config.totals;
-
-						config.showSubTotals = config.subtotals;
-						delete config.subtotals;
-
-						if (config.startDate) {
-							config.startDate = config.startDate.substr(0,10);
-						}
-
-						if (config.endDate) {
-							config.endDate = config.endDate.substr(0,10);
-						}
-
-						config.paging = {
-							page: 1,
-							pageSize: 100
-						};
-
-						if (config.topLimit && config.sortOrder) {
-							config.sorting = {
-								id: 1,
-								direction: config.sortOrder == 1 ? 'DESC' : 'ASC'
-							};
-						}
-
-						web.report.getData(config, true);
+						web.report.getData(layout, true);
 					}
 				});
 			};

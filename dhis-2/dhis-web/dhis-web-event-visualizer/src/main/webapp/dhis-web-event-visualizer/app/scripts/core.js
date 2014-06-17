@@ -203,6 +203,43 @@ Ext.onReady( function() {
                     dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                 }
             };
+
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,name]]',
+                    'rows[dimension,filter,items[id,name]]',
+                    'filters[dimension,filter,items[id,name]]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
+            };
 		}());
 
 		// api
@@ -529,6 +566,8 @@ Ext.onReady( function() {
                     layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
 
 					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
@@ -2325,7 +2364,7 @@ Ext.onReady( function() {
                             field: store.rangeFields,
                             font: conf.chart.style.fontFamily,
                             renderer: function(n) {
-                                return n === '0.0' ? '-' : n;                                    
+                                return n === '0.0' ? '' : n;                                    
                             }
                         };
                     }
