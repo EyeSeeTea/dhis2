@@ -2,7 +2,8 @@ trackerCapture.controller('DashboardController',
         function($rootScope,
                 $scope,
                 $timeout,
-                CurrentSelection,                
+                CurrentSelection,  
+                DateFormatService,
                 DHIS2EventFactory,
                 TEIService,
                 storage,
@@ -25,8 +26,10 @@ trackerCapture.controller('DashboardController',
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.selectedProgram = storage.get('SELECTED_PROGRAM');
     
+    //get dashboard for the selected entities
     if($scope.selectedEntityId && $scope.selectedProgram && $scope.selectedOrgUnit){  
         
+        console.log('dashboard is called');
         //Fetch the selected entity
         TEIService.get($scope.selectedEntityId).then(function(tei){     
             
@@ -57,10 +60,8 @@ trackerCapture.controller('DashboardController',
                 else{            
                     $scope.isFirstEvent = false;    
 
-                    angular.forEach($scope.dhis2Events, function(dhis2Event){
-                        dhis2Event.eventDate = moment(dhis2Event.eventDate, 'YYYY-MM-DD')._d;
-                        dhis2Event.eventDate = Date.parse(dhis2Event.eventDate);
-                        dhis2Event.eventDate = $filter('date')(dhis2Event.eventDate, 'yyyy-MM-dd');                    
+                    angular.forEach($scope.dhis2Events, function(dhis2Event){                        
+                        dhis2Event.eventDate = DateFormatService.convertFromApi(dhis2Event.eventDate);
                     });
 
                     $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
@@ -113,7 +114,7 @@ trackerCapture.controller('DashboardController',
                 $scope.DHIS2Event.name = $scope.selectedProgramStage.name;
                 storage.set(data.importSummaries[0].reference, $scope.DHIS2Event);                  
                
-                $location.path('/ancvisit').search({tei: $scope.selectedEntityId, eventUid: data.importSummaries[0].reference});                
+                $location.path('/visit').search({tei: $scope.selectedEntityId, eventUid: data.importSummaries[0].reference});                
             }
         });
     };

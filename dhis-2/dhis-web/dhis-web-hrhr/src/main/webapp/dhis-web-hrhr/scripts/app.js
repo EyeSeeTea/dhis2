@@ -12,7 +12,6 @@ var trackerCapture = angular.module('trackerCapture',
                   'trackerCaptureControllers',
 		  'angularLocalStorage',
                   'ui.select2',
-                  'd2Menu',
 		  'pascalprecht.translate'])
               
 .value('DHIS2URL', '..')
@@ -26,16 +25,16 @@ var trackerCapture = angular.module('trackerCapture',
         templateUrl:'views/home.html',
         controller: 'SelectionController'
     }).when('/registration',{
-        templateUrl:'components/registration/registration.html',
+        templateUrl:'anc/registration/registration.html',
         controller: 'RegistrationController'
     }).when('/dashboard',{
-        templateUrl:'components/dashboard/dashboard.html',
+        templateUrl:'anc/dashboard/dashboard.html',
         controller: 'DashboardController'
-    }).when('/ancvisit',{
-        templateUrl:'components/ancvisit/ancvisit.html',
-        controller: 'AncVisitController'
+    }).when('/visit',{
+        templateUrl:'anc/visit/visit.html',
+        controller: 'VisitController'
     }).when('/profile',{
-        templateUrl:'components/profile/profile.html',
+        templateUrl:'anc/profile/profile.html',
         controller: 'ProfileController'
     }).otherwise({
         redirectTo : '/'

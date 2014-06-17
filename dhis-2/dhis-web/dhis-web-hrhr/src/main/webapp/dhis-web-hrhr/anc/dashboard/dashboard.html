@@ -1,10 +1,10 @@
 <div class="information_bar">
-    <div ng-include="'components/profile/profile.html'"></div>	
+    <div ng-include="'anc/profile/profile.html'"></div>	
 </div>
 
 <div class="side_bar">
-    <div ng-include="'components/intervention/interventions.html'"></div>
-    <div ng-include="'components/notes/notes.html'"></div>
+    <div ng-include="'anc/intervention/interventions.html'"></div>
+    <div ng-include="'anc/notes/notes.html'"></div>
 </div>
 
 <div class="main_content">
@@ -18,7 +18,7 @@
         </div>
         <div class="list-group">
             <div ng-repeat="event in dhis2Events">	
-                <a href="#/ancvisit?eventUid={{event.event}}&tei={{event.trackedEntityInstance}}" class="list-group-item" >{{event.name}} ({{event.eventDate}})</a>
+                <a href="#/visit?eventUid={{event.event}}&tei={{event.trackedEntityInstance}}" class="list-group-item" >{{event.name}} - {{event.eventDate}}</a>
             </div>
         </div>			
     </div>
@@ -28,7 +28,7 @@
             {{'new_consultation'| translate}}
         </button>
         <button ng-click="cancel()" class="big-button grey">
-            {{'complete_consultation'| translate}}
+            {{'back'| translate}}
         </button>
     </div>
 

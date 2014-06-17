@@ -18,7 +18,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($q, $rootScope, StorageService, ProgramStageFactory) { 
+.factory('ProgramFactory', function($q, $rootScope, StorageService) { 
     return {
         getAll: function(){
             
@@ -213,25 +213,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return promise;
         },        
-        getByOrgUnitAndProgram: function(orgUnitUid, programUid) {
+        getByOrgUnitAndProgram: function(orgUnitUid, programUid, attributeTypes) {
 
             var url = '../api/trackedEntityInstances.json?ou=' + orgUnitUid + '&program=' + programUid;
             
             promise = $http.get( url ).then(function(response){               
-                return EntityService.formatter(response.data);
+                return EntityService.formatter(response.data, attributeTypes);
             });            
             return promise;
         },
-        getByOrgUnit: function(orgUnitUid) {           
+        getByOrgUnit: function(orgUnitUid, attributeTypes) {           
             
             var url =  '../api/trackedEntityInstances.json?ou=' + orgUnitUid;
             
             promise = $http.get( url ).then(function(response){                                
-                return EntityService.formatter(response.data);
+                return EntityService.formatter(response.data, attributeTypes);
             });            
             return promise;
         },        
-        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl) {           
+        search: function(ouId, ouMode, queryUrl, programUrl, attributeUrl, attributeTypes) {           
             
             var url =  '../api/trackedEntityInstances.json?ou=' + ouId + '&ouMode='+ ouMode;
             
@@ -246,7 +246,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             
             promise = $http.get( url ).then(function(response){                                
-                return EntityService.formatter(response.data);
+                return EntityService.formatter(response.data, attributeTypes);
             });            
             return promise;
         },                
@@ -288,7 +288,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Factory for getting tracked entity attributes */
-.factory('AttributesFactory', function($http, $q, $filter, storage, $rootScope, StorageService) {      
+.factory('AttributesFactory', function($http, $q, $filter, storage, $rootScope, StorageService, DateFormatService) {      
     var atts, promise;
     return {
         getAll: function(){
@@ -441,20 +441,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                         type: att.valueType,
                                         value: ''};
                     angular.forEach(pregnantWoman.attributes, function(attribute){
+                        
                         if(attribute.attribute === newAttribute.attribute){
-                            if(attribute.type === 'number' && !isNaN(parseInt(attribute.value))){
+                            if(attribute.type == 'number' && !isNaN(parseInt(attribute.value))){
                                 attribute.value = parseInt(attribute.value);
                             }
-                            if(attribute.type === 'date' && attribute.value !== ""){
-                                attribute.value = moment(attribute.value, 'YYYY.MM.DD')._d;
-                                attribute.value = Date.parse(attribute.value);     
-                                attribute.value = $filter('date')(attribute.value, 'dd.MM.yyyy');  
+                            if(attribute.type == 'date' && attribute.value != ""){
+                                attribute.value = DateFormatService.convertFromApi(attribute.value); 
                             }
                             
                             newAttribute.value = attribute.value;
+                            newAttributes.push(newAttribute);
                         }                               
-                    });                                            
-                    newAttributes.push(newAttribute);
+                    });                    
                 }); 
 
                 pregnantWoman.attributes = newAttributes;                
@@ -499,17 +498,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             }
                             
                             if(attribute.type === 'date' && attribute.value !== ""){
-                                attribute.value = moment(attribute.value, 'yyyy-MM-dd')._d;
-                                attribute.value = Date.parse(attribute.value);            
-                                attribute.value = $filter('date')(attribute.value, 'DD.MM.YYYY');  
-                                
-                                console.log('the value is:  ', attribute.value);
+                                attribute.value = DateFormatService.convertFromApi(attribute.value); 
                             }
                             
                             newAttribute.value = attribute.value;
+                            newAttributes.push(newAttribute);
                         }                               
-                    });                                            
-                    newAttributes.push(newAttribute);
+                    });                    
                 }); 
 
                 contactPerson.attributes = newAttributes;                
@@ -926,10 +921,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
 })
 
-.service('EntityService', function(OrgUnitService, $filter){
+.service('EntityService', function(OrgUnitService, DateFormatService, $filter){
     
     return {
-        formatter: function(grid){
+        formatter: function(grid, attributeTypes){
             if(!grid || !grid.rows){
                 return;
             }
@@ -964,10 +959,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         }                                                       
                     });
 
-                    for(var i=5; i<row.length; i++){
+                    for(var i=5; i<row.length; i++){                        
                         if(row[i] && row[i] !== ''){
                             isEmpty = false;
-                            entity[grid.headers[i].name] = row[i];
+                            var val = row[i];
+                            if(attributeTypes[grid.headers[i].name] && attributeTypes[grid.headers[i].name] == 'date'){
+                                val = DateFormatService.convertFromApi(val);
+                            }                            
+                            entity[grid.headers[i].name] = val;
                         }
                     }
 
@@ -995,6 +994,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var checked = [];
             
             var dep = [], con = [], smr = [], rem = [], mes = [], sch = [];
+            
             //Fetch available events for the selected person
             angular.forEach(dhis2Events, function(dhis2Event){         
 
@@ -1067,7 +1067,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service for evaluating intervention rules */
-.service('ExpressionService', function(storage) {
+.service('ExpressionService', function(storage, $q, orderByFilter, DHIS2EventFactory) {
     
     return {
         getDataElementExpression: function(val, dhis2Events) {
@@ -1092,24 +1092,98 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 var loopThrough = true;
                 var de = storage.get(matches[k]);
                 for(var i=0; i<dhis2Events.length && loopThrough; i++){
-                    for(var j=0; j<dhis2Events[i].dataValues.length && loopThrough; j++){
-                        if( de.id == dhis2Events[i].dataValues[j].dataElement ){                            
-                            var dv = dhis2Events[i].dataValues[j].value;
-                            if( de.type == 'string'){                                
-                                dv = '"' + dv + '"';                                
-                            }
-                            val = val.replace(new RegExp('#'+de.code+'#','g'), dv);
-                            
-                            loopThrough = false;
-                        }                            
-                    }
+                    if(dhis2Events[i].dataValues){
+                        for(var j=0; j<dhis2Events[i].dataValues.length && loopThrough; j++){
+                            if( de.id == dhis2Events[i].dataValues[j].dataElement ){                            
+                                var dv = dhis2Events[i].dataValues[j].value;
+                                if( de.type == 'string'){                                
+                                    dv = '"' + dv + '"';                                
+                                }
+                                val = val.replace(new RegExp('#'+de.code+'#','g'), dv);
+
+                                loopThrough = false;
+                            }                            
+                        }
+                    }                    
                 }
             }
             
             val = val.replace(/#[^#]*#/g, null);
             return val;
+        },
+        getGestationalAge: function(tei, ou, pr){
+            var def = $q.defer();
+            DHIS2EventFactory.getByEntity(tei, ou, pr).then(function(dhis2Events) {
+                var gestationalAge = {displayName: 'Gestational Age', label: 'UNKNOWN', value: 'UNKNOWN', code: 'UNKNOWN'};
+                
+                if(!angular.isUndefined(dhis2Events)){
+                    
+                    var dhis2Events = orderByFilter(dhis2Events, '-eventDate');
+                    dhis2Events.reverse();
+
+                    for(var i=0; i<dhis2Events.length; i++){
+                        if(angular.isObject(dhis2Events[i].dataValues)){
+                            for(var j=0; j<dhis2Events[i].dataValues.length; j++){
+                                var dv = dhis2Events[i].dataValues[j];
+
+                                if(!angular.isUndefined(dv.dataElement) && dv.value != ""){                                
+                                    var de = storage.get(dv.dataElement);
+
+                                    if(angular.isObject(de)){
+
+                                        //get gestational age - first try ultrasound
+                                        if(de.code == 'MMD_ULS_DAT'){
+                                            var age = moment(dv.value, 'DD.MM.YYYY').diff(moment(), 'days');
+                                            age = 283 - age; //283 is the standard duration of pregnancy in days
+                                            gestationalAge.value = Math.floor( age / 7 ) + '+' + age % 7;                                        
+                                            gestationalAge.code = 'MMD_GES_WK3';   
+                                            gestationalAge.label = 'ultrasound';
+                                        }
+
+                                        //if no ultrasound, try LMP
+                                        if(de.code == 'MMD_LMP_DAT' && gestationalAge.code != 'MMD_GES_WK3'){
+
+                                            var age = moment().diff(moment(dv.value, 'DD.MM.YYYY'),'days');               
+                                            gestationalAge.value = Math.floor( age / 7 ) + '+' + age % 7;                                        
+                                            gestationalAge.code = de.code;   
+                                            gestationalAge.label = 'LMP';
+                                        }
+
+                                        //if no LMP, try clinical estimation
+                                        if(de.code == 'MMD_GES_WK1' && (gestationalAge.code != 'MMD_GES_WK3' || gestationalAge.code != 'MMD_LMP_DAT')){
+                                            gestationalAge.value = Math.floor( dv.value / 7 ) + '+' + dv.value % 7;
+                                            gestationalAge.code = de.code;   
+                                            gestationalAge.label = 'clinical';
+                                        }
+                                    }                            
+                                }                            
+                            }
+                        }                    
+                    }
+                }                
+                def.resolve(gestationalAge);                
+            });  
+            return def.promise;
         }
     };
+})
+
+.service('DateFormatService', function($filter){
+    
+    return {
+        convertFromApi: function(value) {            
+            value = moment(value, 'YYYY-MM-DD')._d;
+            value = Date.parse(value);     
+            value = $filter('date')(value, 'dd.MM.yyyy'); 
+            return value;
+        },
+        convertToApi: function(value) {
+            value = moment(value, 'DD.MM.YYYY')._d;
+            value = Date.parse(value);            
+            value = $filter('date')(value, 'yyyy-MM-dd'); 
+            return value;
+        }
+    };            
 })
 
 /* Service for handling outcomes of interventions */

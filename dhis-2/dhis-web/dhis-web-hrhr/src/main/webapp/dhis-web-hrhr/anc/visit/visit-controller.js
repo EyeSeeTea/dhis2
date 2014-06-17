@@ -1,10 +1,11 @@
 //Controller for managing visits
-trackerCapture.controller('AncVisitController',
+trackerCapture.controller('VisitController',
         function($rootScope,
                 $scope,
                 $timeout,
                 $location,
                 TranslationService,
+                DateFormatService,
                 InterventionService,
                 CurrentSelection,
                 TEIService,
@@ -35,10 +36,6 @@ trackerCapture.controller('AncVisitController',
     
     //by default use datepicker, on change and what is selected from there is always valid
     $scope.invalidDate = false;
-    $scope.dateTyping = true;    
-    $scope.disableDateType = function(){
-        $scope.dateTyping = !$scope.dateTyping;
-    };
     
     //get the selected event and person
     $scope.eventUid = ($location.search()).eventUid;   
@@ -53,6 +50,7 @@ trackerCapture.controller('AncVisitController',
     
     if($scope.selectedEntityId && $scope.selectedOrgUnit && $scope.eventUid && $scope.selectedProgram){
         
+        console.log('visit is called');
         //Fetch the selected entity
         TEIService.get($scope.selectedEntityId).then(function(tei){     
 
@@ -76,9 +74,7 @@ trackerCapture.controller('AncVisitController',
             DHIS2EventFactory.getByEntity($scope.pregnantWoman, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {   
 
                 angular.forEach(data, function(ev){
-                    ev.eventDate = moment(ev.eventDate, 'YYYY-MM-DD')._d;
-                    ev.eventDate = Date.parse(ev.eventDate);
-                    ev.eventDate = $filter('date')(ev.eventDate, 'yyyy-MM-dd');         
+                    ev.eventDate = DateFormatService.convertFromApi(ev.eventDate);                             
                     if(ev.event == $scope.eventUid){
                         $scope.currentEvent = ev;
                     }            
@@ -105,9 +101,10 @@ trackerCapture.controller('AncVisitController',
                     $scope.sections = [];      
 
                     //get interventions from the current visit
-                    var interventions = InterventionService.getResults([$scope.currentEvent]);               
+                    var interventions = InterventionService.getResults([$scope.currentEvent]);     
                     angular.forEach($scope.programStage.programStageSections, function(section){            
-                        //prepare dep page
+                        
+                        //fill dep section
                         if(section.name == 'Management'){                
 
                             if(angular.isObject(interventions.depResult)){
@@ -136,7 +133,9 @@ trackerCapture.controller('AncVisitController',
                                     }                                    
                                 });                  
                             }                
-                        }            
+                        } 
+                        
+                        //fill the other sections
                         else{                
                             var dataElements = [];
                             angular.forEach(section.programStageDataElements, function(de) {
@@ -221,10 +220,10 @@ trackerCapture.controller('AncVisitController',
     $scope.currentDataElement = '';       
     $scope.saveValue = function(dataElement, intervention) {
 
+        $scope.currentDataElement = dataElement.id;
         if( !angular.isUndefined(dataElement.value) ){
 
-            if(dataElement.type == 'date') {
-                
+            if(dataElement.type == 'date' && dataElement.value != "") {
                 var rawDate = $filter('date')(dataElement.value, 'dd.MM.yyyy'); 
                 var convertedDate = moment(dataElement.value, 'DD.MM.YYYY')._d;
                 convertedDate = $filter('date')(convertedDate, 'dd.MM.yyyy'); 
@@ -232,10 +231,9 @@ trackerCapture.controller('AncVisitController',
                 if(rawDate !== convertedDate){
                     $scope.invalidDate = true;
                     return false;
-                }
+                }                
+                $scope.invalidDate = false;
             }
-            
-            $scope.invalidDate = false;
             
             if( dataElement.code == 'MMD_OBS_GRA'){
                 if(dataElement.value > 0){
@@ -261,7 +259,6 @@ trackerCapture.controller('AncVisitController',
             
             if( dataElement.type == 'string' && dataElement.value.indexOf('- please specify') != -1){
                 $scope.otherPleaseSpecify = true;
-                $scope.currentDataElement = dataElement.id;
                 dataElement.value = '';
             }            
             
@@ -296,9 +293,14 @@ trackerCapture.controller('AncVisitController',
 
                 DHIS2EventFactory.update($scope.currentEvent).then(function(data){  
 
+                    //immediately update gestational age
+                    if(dataElement.code == 'MMD_LMP_DAT' || dataElement.code == 'MMD_GES_WK1' || dataElement.code == 'MMD_ULS_DAT'){
+                        $timeout(function() { 
+                            $rootScope.$broadcast('selectedEntity', {forGa: true});
+                        }, 100);
+                    }
                     
-                    $rootScope.$broadcast('currentPerson', {currentPerson: $scope.person, forGa: true});
-                    
+                    //immediately update interventions
                     $rootScope.$broadcast('sharedData', 
                                         {currentPerson: $scope.currentEvent.person, 
                                          currentEvent: $scope.currentEvent, 
@@ -367,5 +369,6 @@ trackerCapture.controller('AncVisitController',
             }); */                        
         }
                
-    };
-})
+    };    
+
+});

@@ -5,12 +5,14 @@
         <form name="outerFormRegistration" novalidate>
             <div class="bordered-div ">
                 <h3> <strong>{{'pregnant_woman'| translate}} </strong></h3>
-                <table class="table-borderless table-striped">            
-                    <tr ng-repeat="pw in pregnantWomanAttributes">
-                        <td>
-                            {{pw.name}}
+                <table class="table">            
+                    <tr class="col-md-12" ng-repeat="pw in pregnantWomanAttributes">
+                        <td class="col-md-6 vertical-center-container">
+                            <div class="vertical-center-content">
+                                {{pw.name}}
+                            </div>                            
                         </td>
-                        <td>
+                        <td class="col-md-6">
                             <ng-form name="innerFormPregnantWomanRegistration">       
                                 <div ng-switch="pw.valueType">
                                     <div ng-switch-when="date">
@@ -57,12 +59,14 @@
 
             <div class="bordered-div ">
                 <h3> <strong>{{'contact_person'| translate}} </strong></h3>
-                <table class="table-borderless table-striped">
-                    <tr ng-repeat="cp in contactPersonAttributes">
-                        <td>
-                            {{cp.name}}
+                <table class="table">
+                    <tr class="col-md-12" ng-repeat="cp in contactPersonAttributes">
+                        <td class="col-md-6 vertical-center-container">
+                            <div class="vertical-center-content">
+                                {{cp.name}}
+                            </div>                            
                         </td>
-                        <td>
+                        <td class="col-md-6">
                             <ng-form name="innerFormContactPersonRegistration">       
                                 <div ng-switch="cp.valueType">
                                     <div ng-switch-when="date">
@@ -122,12 +126,14 @@
         <form name="outerFormUpdate" novalidate>
             <div class="bordered-div ">
                 <h3> <strong>{{'pregnant_woman'| translate}} </strong></h3>
-                <table class="table-borderless table-striped">            
-                    <tr ng-repeat="pw in pregnantWomanAttributes">
-                        <td>
-                            {{pw.name}}
+                <table class="table">
+                    <tr class="col-md-12" ng-repeat="pw in pregnantWomanAttributes">
+                        <td class="col-md-6 vertical-center-container">
+                            <div class="vertical-center-content">
+                                {{pw.name}}
+                            </div>                            
                         </td>
-                        <td>
+                        <td class="col-md-6">
                             <ng-form name="innerFormPregnantWomanUpdate">       
                                 <div ng-switch="pw.valueType">
                                     <div ng-switch-when="date">
@@ -175,11 +181,13 @@
             <div class="bordered-div ">
                 <h3> <strong>{{'contact_person'| translate}} </strong></h3>
                 <table class="table-borderless table-striped">
-                    <tr ng-repeat="cp in contactPersonAttributes">
-                        <td>
-                            {{cp.name}}
+                    <tr class="col-md-12" ng-repeat="cp in contactPersonAttributes">
+                        <td class="col-md-6 vertical-center-container">
+                            <div class="vertical-center-content">
+                                {{cp.name}}
+                            </div>                            
                         </td>
-                        <td>
+                        <td class="col-md-6">
                             <ng-form name="innerFormContactPersonUpdate">       
                                 <div ng-switch="cp.valueType">
                                     <div ng-switch-when="date">
@@ -224,7 +232,7 @@
                 </table>
             </div>
             <div class="vertical-spacing">                
-                <button type="button" class="btn btn-default" ng-click="updateProfile()">{{'update'| translate}}</button>
+                <button type="button" class="btn btn-default" ng-click="updateEntity()">{{'update'| translate}}</button>
                 <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="cancel()">{{'cancel'| translate}}</button>
             </div>
         </form>

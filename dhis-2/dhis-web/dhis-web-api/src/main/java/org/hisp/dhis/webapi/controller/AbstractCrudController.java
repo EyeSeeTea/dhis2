@@ -57,16 +57,18 @@ import org.hisp.dhis.webapi.controller.exception.NotFoundException;
 import org.hisp.dhis.webapi.utils.ContextService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.LinkService;
+import org.hisp.dhis.webapi.webdomain.WebMetaData;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -120,7 +122,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @RequestMapping( method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectList(
-        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
+        @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -191,9 +193,37 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return rootNode;
     }
 
+    @RequestMapping( value = "/{uid}/**", method = RequestMethod.GET )
+    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid,
+        @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        String requestUrl = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
+        String[] fields = requestUrl.split( "/" );
+
+        String field = "";
+        String postfix = "";
+
+        for ( int i = 3; i < fields.length; i++ )
+        {
+            if ( i > 3 )
+            {
+                field += "[" + fields[i];
+                postfix += "]";
+            }
+            else
+            {
+                field = fields[i];
+            }
+        }
+
+        field += postfix;
+
+        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( field ) );
+    }
+
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     public @ResponseBody RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response ) throws Exception
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -203,6 +233,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             fields.add( ":all" );
         }
 
+        return getObjectInternal( uid, parameters, filters, fields );
+    }
+
+    private RootNode getObjectInternal( String uid, Map<String, String> parameters,
+        List<String> filters, List<String> fields ) throws Exception
+    {
         WebOptions options = new WebOptions( parameters );
         List<T> entities = getEntity( uid, options );
 

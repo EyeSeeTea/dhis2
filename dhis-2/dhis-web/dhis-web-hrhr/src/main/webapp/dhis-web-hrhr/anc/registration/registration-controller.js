@@ -5,6 +5,7 @@ trackerCapture.controller('RegistrationController',
                 AttributesFactory,
                 TEIService,
                 EnrollmentService,
+                DateFormatService,
                 DialogService,
                 storage,
                 TranslationService) {
@@ -82,9 +83,7 @@ trackerCapture.controller('RegistrationController',
                 if (!angular.isUndefined(pwAttribute.value)) {
                     var attribute = {attribute: pwAttribute.id, value: pwAttribute.value};
                     if(pwAttribute.valueType === "date"){
-                        attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
-                        attribute.value = Date.parse(attribute.value);            
-                        attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                        attribute.value = DateFormatService.convertToApi(attribute.value);
                     }
                     pwAttributes.push(attribute);
                 }
@@ -97,9 +96,7 @@ trackerCapture.controller('RegistrationController',
                 if (!angular.isUndefined(cpAttribute.value)) {
                     var attribute = {attribute: cpAttribute.id, value: cpAttribute.value};
                     if(cpAttribute.valueType === "date"){
-                        attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
-                        attribute.value = Date.parse(attribute.value);            
-                        attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                        attribute.value = DateFormatService.convertToApi(attribute.value);
                     }
                     cpAttributes.push(attribute);
                 }
@@ -175,7 +172,7 @@ trackerCapture.controller('RegistrationController',
         }
     };
     
-    $scope.updateProfile = function(){
+    $scope.updateEntity = function(){
         
         //check for form validity
         $scope.outerFormUpdate.submitted = true;        
@@ -189,9 +186,7 @@ trackerCapture.controller('RegistrationController',
             if (!angular.isUndefined($scope.pregnantWoman.attributes[pa.id].value)) {
                 var attribute = {attribute: pa.id, value: $scope.pregnantWoman.attributes[pa.id].value};
                 if(pa.valueType === "date"){
-                    attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
-                    attribute.value = Date.parse(attribute.value);            
-                    attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                    attribute.value = DateFormatService.convertToApi(attribute.value);
                 }
                 pwAttributes.push(attribute);
             }
@@ -209,9 +204,7 @@ trackerCapture.controller('RegistrationController',
             if (!angular.isUndefined($scope.contactPerson.attributes[cp.id].value)) {
                 var attribute = {attribute: cp.id, value: $scope.contactPerson.attributes[cp.id].value};
                 if(cp.valueType === "date"){
-                    attribute.value = moment(attribute.value, 'DD.MM.YYYY')._d;
-                    attribute.value = Date.parse(attribute.value);            
-                    attribute.value = $filter('date')(attribute.value, 'yyyy-MM-dd');    
+                    attribute.value = DateFormatService.convertToApi(attribute.value);
                 }
                 cpAttributes.push(attribute);
             }

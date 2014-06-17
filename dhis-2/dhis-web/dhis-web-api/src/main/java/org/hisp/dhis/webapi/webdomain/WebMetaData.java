@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.exception;
+package org.hisp.dhis.webapi.webdomain;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,18 +28,52 @@ package org.hisp.dhis.webapi.controller.exception;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.LinkableObject;
+import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class NotFoundForQueryException extends Exception
+public class WebMetaData
+    extends MetaData
 {
-    public NotFoundForQueryException()
+    private Pager pager;
+
+    private LinkableObject linkableObject;
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Pager getPager()
     {
-        super( "Object not found." );
+        return pager;
     }
 
-    public NotFoundForQueryException( String query )
+    public void setPager( Pager pager )
     {
-        super( "Object not found for query: " + query );
+        this.pager = pager;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true, namespace = DxfNamespaces.DXF_2_0 )
+    public String getLink()
+    {
+        if ( linkableObject == null )
+        {
+            return null;
+        }
+
+        return linkableObject.getHref();
+    }
+
+    public void setLink( String link )
+    {
+        if ( linkableObject != null )
+        {
+            linkableObject.setHref( link );
+        }
     }
 }

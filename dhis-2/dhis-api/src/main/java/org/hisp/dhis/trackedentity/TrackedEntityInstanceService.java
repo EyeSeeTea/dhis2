@@ -38,7 +38,6 @@ import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
@@ -95,13 +94,13 @@ public interface TrackedEntityInstanceService
 {
     String ID = TrackedEntityInstanceService.class.getName();
 
-    public static final int ERROR_NONE = 0;
-
-    public static final int ERROR_DUPLICATE_IDENTIFIER = 1;
-
-    public static final int ERROR_ENROLLMENT = 2;
-
-    public static final String SEPARATOR = "_";
+    final int ERROR_NONE = 0;
+    final int ERROR_DUPLICATE_IDENTIFIER = 1;
+    final int ERROR_ENROLLMENT = 2;
+    
+    final String SEPARATOR = "_";
+    
+    final String F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS = "F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS";
 
     /**
      * Returns a grid with tracked entity instance values based on the given
@@ -140,6 +139,14 @@ public interface TrackedEntityInstanceService
         Boolean followUp, Date programStartDate, Date programEndDate, String trackedEntity, EventStatus eventStatus,
         Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize );
 
+    /**
+     * Decides whether current user is authorized to perform the given query.
+     * IllegalQueryException is thrown if not.
+     * 
+     * @param params the TrackedEntityInstanceQueryParams.
+     */
+    void decideAccess( TrackedEntityInstanceQueryParams params );
+    
     /**
      * Validates the given TrackedEntityInstanceQueryParams. The params is
      * considered valid if no exception are thrown and the method returns
@@ -246,30 +253,4 @@ public interface TrackedEntityInstanceService
      * @return ValidationCriteria object which is violated
      */
     ValidationCriteria validateEnrollment( TrackedEntityInstance entityInstance, Program program, I18nFormat format );
-    
-    /**
-     * Search tracked entity instances by a certain attribute- value
-     * 
-     * @param orgunit OrganisationUnit
-     * @param attributeValue Attribute value
-     * @param program Program
-     * @param min First result
-     * @param max Maximum results
-     * 
-     * @return TrackedEntityInstance list
-     */
-     Collection<TrackedEntityInstance> searchTrackedEntityByAttribute( OrganisationUnit orgunit, String attributeValue, Program program, Integer min , Integer max);
-     
-     /**
-      * Get the number of tracked entity instances who has a certain attribute-value
-      * 
-      * @param orgunit OrganisationUnit
-      * @param attributeValue Attribute value
-      * @param program Program
-      * @param min First result
-      * @param max Maximum results
-      * 
-      * @return The number of TEIs
-      */
-     int countTrackedEntityByAttribute( OrganisationUnit orgunit, String attributeValue, Program program );
 }

@@ -498,7 +498,7 @@
         "sequenceOnPage": "23",
         "trailingUnit": "",
         "dependency": false,
-        "calculated": false,
+        "calculated": true,
         "calculatedFrom": "",
         "showGuideline": false,
         "actions": [

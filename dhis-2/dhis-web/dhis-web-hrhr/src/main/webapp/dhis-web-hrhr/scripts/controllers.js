@@ -75,7 +75,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     });
     
     //load programs associated with the selected org unit.
-    $scope.loadPrograms = function(orgUnit) {        
+    $scope.loadPrograms = function(orgUnit) {
 
         $scope.selectedOrgUnit = orgUnit;
         $scope.selectedProgram = null;
@@ -171,13 +171,19 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         }      
         
         $scope.generateGridColumns($scope.attributes);
-
+        
+        var attributeTypes = [];
+        angular.forEach($scope.attributes, function(attribute){
+            attributeTypes[attribute.id] = attribute.valueType;
+        });
+        
         //get events for the specified parameters
         TEIService.search($scope.selectedOrgUnit.id, 
                                             $scope.ouMode.name,
                                             queryUrl,
                                             programUrl,
-                                            attributeUrl.url).then(function(data){
+                                            attributeUrl.url,
+                                            attributeTypes).then(function(data){
             $scope.trackedEntityList = data;            
         });
     };
@@ -233,7 +239,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $location.path('/registration').search({});  
     }; 
     
-    $scope.editPersonProfile = function(){
+    $scope.editEntity = function(){
         var tei = ContextMenuSelectedItem.getSelectedItem();  
         CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});
         $location.path('/registration').search({tei: tei.id});                                    

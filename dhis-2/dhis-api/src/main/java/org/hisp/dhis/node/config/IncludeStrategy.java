@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.node.config;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,61 +25,13 @@ package org.hisp.dhis.webapi.controller;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.metadata.Options;
-
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class WebOptions
-    extends Options
+public interface IncludeStrategy
 {
-    public WebOptions( Map<String, String> options )
-    {
-        super( options );
-    }
-
-    //--------------------------------------------------------------------------
-    // Getters for standard web options
-    //--------------------------------------------------------------------------
-
-    public boolean hasLinks( boolean defaultValue )
-    {
-        return stringAsBoolean( options.get( "links" ), defaultValue );
-    }
-
-    public boolean hasLinks()
-    {
-        return stringAsBoolean( options.get( "links" ), true );
-    }
-
-    public boolean hasPaging()
-    {
-        return stringAsBoolean( options.get( "paging" ), true );
-    }
-
-    public int getPage()
-    {
-        return stringAsInt( options.get( "page" ), 1 );
-    }
-
-    public String getViewClass()
-    {
-        return stringAsString( options.get( "viewClass" ), null );
-    }
-    
-    public String getViewClass( String defaultValue )
-    {
-        return stringAsString( options.get( "viewClass" ), defaultValue );
-    }
-
-    public int getPageSize()
-    {
-        return stringAsInt( options.get( "pageSize" ), Pager.DEFAULT_PAGE_SIZE );
-    }
+    <T> boolean include( T object );
 }

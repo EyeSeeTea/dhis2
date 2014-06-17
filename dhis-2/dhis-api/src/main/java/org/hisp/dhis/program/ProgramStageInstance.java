@@ -64,7 +64,7 @@ public class ProgramStageInstance
     private boolean completed;
     private List<OutboundSms> outboundSms = new ArrayList<OutboundSms>();
     private List<MessageConversation> messageConversations = new ArrayList<MessageConversation>();
-    private TrackedEntityComment comment;
+    private List<TrackedEntityComment> comments = new ArrayList<TrackedEntityComment>();
     private Double longitude;
 
     private Double latitude;
@@ -252,14 +252,14 @@ public class ProgramStageInstance
         this.latitude = latitude;
     }
 
-    public TrackedEntityComment getComment()
+    public List<TrackedEntityComment> getComments()
     {
-        return comment;
+        return comments;
     }
 
-    public void setComment( TrackedEntityComment comment )
+    public void setComments( List<TrackedEntityComment> comments )
     {
-        this.comment = comment;
+        this.comments = comments;
     }
 
     public Integer getEventStatus()
