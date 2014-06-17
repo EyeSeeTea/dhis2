@@ -1887,7 +1887,7 @@ Ext.onReady( function() {
 								eventChart.name = name;
 
 								Ext.Ajax.request({
-									url: ns.core.init.contextPath + '/api/eventCharts/' + eventReport.id,
+									url: ns.core.init.contextPath + '/api/eventCharts/' + eventChart.id,
 									method: 'PUT',
 									headers: {'Content-Type': 'application/json'},
 									params: Ext.encode(eventChart),
@@ -2619,7 +2619,7 @@ Ext.onReady( function() {
 				handler: function() {
 					if (textArea.getValue()) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/interpretations/eventReports/' + ns.app.layout.id,
+							url: ns.core.init.contextPath + '/api/interpretations/eventCharts/' + ns.app.layout.id,
 							method: 'POST',
 							params: textArea.getValue(),
 							headers: {'Content-Type': 'text/html'},
