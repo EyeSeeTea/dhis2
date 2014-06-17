@@ -9,7 +9,7 @@ Ext.onReady( function() {
 
 	NS.instances = [];
 	NS.i18n = {};
-	NS.isDebug = false;
+	NS.isDebug = true;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
 	NS.getCore = function(init) {
@@ -2077,8 +2077,9 @@ Ext.onReady( function() {
                             regression = new SimpleRegression();
                             key = conf.finals.data.trendLine + replacedColumnIds[i];
 
-                            for (var j = 0; j < data.length; j++) {
-                                regression.addData(j, data[j][replacedColumnIds[i]]);
+                            for (var j = 0, value; j < data.length; j++) {
+                                value = data[j][replacedColumnIds[i]];
+                                regression.addData(j, parseFloat(value));
                             }
 
                             for (var j = 0; j < data.length; j++) {
