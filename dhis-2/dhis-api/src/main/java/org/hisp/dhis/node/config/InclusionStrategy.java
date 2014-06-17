@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.annotation;
+package org.hisp.dhis.node.config;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,28 +28,67 @@ package org.hisp.dhis.node.annotation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.springframework.util.StringUtils;
+
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Target( { ElementType.FIELD } )
-@Retention( RetentionPolicy.RUNTIME )
-@NodeAnnotation
-public @interface NodeComplex
+public interface InclusionStrategy
 {
-    String value() default "";
+    <T> boolean include( T object );
 
-    String namespace() default "";
+    enum Include implements InclusionStrategy
+    {
+        /**
+         * Inclusion strategy that includes all objects.
+         */
+        ALWAYS,
 
-    boolean isPersisted() default true;
+        /**
+         * Inclusion strategy that only includes non null objects.
+         */
+        NON_NULL
+        {
+            @Override
+            public <T> boolean include( T object )
+            {
+                return object != null;
+            }
+        },
 
-    boolean isOwner() default false;
+        /**
+         * Inclusion strategy that only includes non empty objects:
+         * -
+         */
+        NON_EMPTY
+        {
+            @Override
+            public <T> boolean include( T object )
+            {
+                if ( object == null )
+                {
+                    return false;
+                }
 
-    boolean isWritable() default true;
+                if ( Collection.class.isAssignableFrom( object.getClass() ) )
+                {
+                    return !((Collection<?>) object).isEmpty();
+                }
+                else if ( String.class.isAssignableFrom( object.getClass() ) )
+                {
+                    return !StringUtils.isEmpty( object );
+                }
 
-    boolean isReadable() default true;
+                return true;
+            }
+        };
+
+        @Override
+        public <T> boolean include( T object )
+        {
+            return true;
+        }
+    }
 }

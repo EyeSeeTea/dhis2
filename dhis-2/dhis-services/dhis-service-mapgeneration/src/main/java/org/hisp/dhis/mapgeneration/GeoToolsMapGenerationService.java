@@ -161,7 +161,7 @@ public class GeoToolsMapGenerationService
             // Build the legend set, then render it to an image            
             LegendSet legendSet = new LegendSet( dataLayer );
             
-            BufferedImage titleImage = MapUtils.renderTitle( map.getName(), width );
+            BufferedImage titleImage = MapUtils.renderTitle( map.getName(), width, height );
             
             BufferedImage legendImage = legendSet.render( i18nManager.getI18nFormat() );
     
@@ -366,9 +366,12 @@ public class GeoToolsMapGenerationService
         Assert.isTrue( mapImage != null );
         Assert.isTrue( legendImage.getType() == mapImage.getType() );
 
-        // Create a new image with dimension (legend.width + map.width,
-        // max(legend.height, map.height))
-        BufferedImage finalImage = new BufferedImage( legendImage.getWidth() + mapImage.getWidth(), titleImage.getHeight() + mapImage.getHeight(), mapImage.getType() );
+        // Create image, note that image height cannot be less than legend
+        
+        int width = legendImage.getWidth() + mapImage.getWidth();
+        int height = Math.max( titleImage.getHeight() + mapImage.getHeight(), ( legendImage.getHeight() + 1 ) );
+        
+        BufferedImage finalImage = new BufferedImage( width, height, mapImage.getType() );
 
         // Draw the two images onto the final image with the legend to the left
         // and the map to the right
