@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.config;
+package org.hisp.dhis.eventchart;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,29 +25,59 @@ package org.hisp.dhis.node.config;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import java.util.List;
+
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public enum SerializationFeature implements Feature
+* @author Lars Helge Overland
+*/
+@Transactional
+public class DefaultEventChartService
+    implements EventChartService
 {
-    /**
-     * Enable pretty printing for serializers that support it.
-     */
-    PRETTY_PRINT( false );
+    private HibernateIdentifiableObjectStore<EventChart> eventChartStore;
 
-    private boolean state;
-
-    SerializationFeature( boolean state )
+    public void setEventChartStore( HibernateIdentifiableObjectStore<EventChart> eventChartStore )
     {
-        this.state = state;
+        this.eventChartStore = eventChartStore;
     }
 
-    @Override
-    public boolean defaultState()
+    // -------------------------------------------------------------------------
+    // EventReportService implementation
+    // -------------------------------------------------------------------------
+
+    public int saveEventChart( EventChart eventChart )
     {
-        return state;
+        return eventChartStore.save( eventChart );
+    }
+    
+    public void updateEventChart( EventChart eventChart )
+    {
+        eventChartStore.update( eventChart );
+    }
+    
+    public EventChart getEventChart( int id )
+    {
+        return eventChartStore.get( id );
+    }
+    
+    public EventChart getEventChart( String uid )
+    {
+        return eventChartStore.getByUid( uid );
+    }
+    
+    public void deleteEventChart( EventChart eventChart )
+    {
+        eventChartStore.delete( eventChart );
+    }
+    
+    public List<EventChart> getAllEventCharts()
+    {
+        return eventChartStore.getAll();
     }
 }

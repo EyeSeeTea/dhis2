@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.config;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,42 +25,41 @@ package org.hisp.dhis.node.config;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.ForwardingMap;
-import com.google.common.collect.Maps;
+import org.hisp.dhis.eventchart.EventChart;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
 
-import java.util.Map;
+import com.google.common.collect.Lists;
 
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public class Configuration extends ForwardingMap<Feature, Boolean>
+@Component
+public class EventChartSchemaDescriptor
+    implements SchemaDescriptor
 {
+    public static final String SINGULAR = "eventChart";
+
+    public static final String PLURAL = "eventCharts";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
     @Override
-    protected Map<Feature, Boolean> delegate()
+    public Schema getSchema()
     {
-        return Maps.newHashMap();
-    }
+        Schema schema = new Schema( EventChart.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setShareable( true );
+        schema.setOrder( 1540 );
 
-    public void enable( Feature feature )
-    {
-        delegate().put( feature, true );
-    }
+        schema.getAuthorities().add(
+            new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_EVENTCHART_PUBLIC_ADD" ) ) );
+        schema.getAuthorities().add(
+            new Authority( AuthorityType.EXTERNALIZE, Lists.newArrayList( "F_EVENTCHART_EXTERNAL" ) ) );
 
-    public void disable( Feature feature )
-    {
-        delegate().put( feature, false );
-    }
-
-    public boolean isEnabled( Feature feature )
-    {
-        if ( delegate().containsKey( feature ) )
-        {
-            return delegate().get( feature );
-        }
-
-        return feature.defaultState();
+        return schema;
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.config;
+package org.hisp.dhis.eventchart;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,13 +25,25 @@ package org.hisp.dhis.node.config;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
+
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-public interface Feature
+* @author Lars Helge Overland
+*/
+public interface EventChartService
 {
-    boolean defaultState();
+    int saveEventChart( EventChart eventChart );
+    
+    void updateEventChart( EventChart eventChart );
+    
+    EventChart getEventChart( int id );
+    
+    EventChart getEventChart( String uid );
+    
+    void deleteEventChart( EventChart eventChart );
+    
+    List<EventChart> getAllEventCharts();
 }

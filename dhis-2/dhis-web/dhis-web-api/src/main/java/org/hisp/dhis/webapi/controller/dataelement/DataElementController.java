@@ -9,7 +9,7 @@ package org.hisp.dhis.webapi.controller.dataelement;
  * Redistributions of source code must retain the above copyright notice, this
  * list of conditions and the following disclaimer.
  *
- * Redistributions in binary form must reproduce the above copyright notice,
+ * Redistributions in binary form must reproduce the above copyright notice,	
  * this list of conditions and the following disclaimer in the documentation
  * and/or other materials provided with the distribution.
  * Neither the name of the HISP project nor the names of its contributors may
@@ -29,9 +29,11 @@ package org.hisp.dhis.webapi.controller.dataelement;
  */
 
 import com.google.common.collect.Lists;
+
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.schema.descriptors.DataElementSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
@@ -66,23 +68,23 @@ public class DataElementController
         {
             entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
         }
-        else if ( DataElement.DOMAIN_TYPE_AGGREGATE.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) )
-            || DataElement.DOMAIN_TYPE_PATIENT.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) ) )
+        else if ( DataElementDomain.AGGREGATE.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) )
+            || DataElementDomain.TRACKER.equals( options.getOptions().get( KEY_DOMAIN_TYPE ) ) )
         {
             String domainType = options.getOptions().get( KEY_DOMAIN_TYPE );
 
             if ( options.hasPaging() )
             {
-                int count = dataElementService.getDataElementCountByDomainType( domainType );
+                int count = dataElementService.getDataElementCountByDomainType( DataElementDomain.fromValue( domainType ) );
 
                 Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
                 metaData.setPager( pager );
 
-                entityList = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( domainType, pager.getOffset(), pager.getPageSize() ) );
+                entityList = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( DataElementDomain.fromValue( domainType ), pager.getOffset(), pager.getPageSize() ) );
             }
             else
             {
-                entityList = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( domainType ) );
+                entityList = new ArrayList<DataElement>( dataElementService.getDataElementsByDomainType( DataElementDomain.fromValue( domainType ) ) );
                 Collections.sort( entityList, IdentifiableObjectNameComparator.INSTANCE );
             }
         }

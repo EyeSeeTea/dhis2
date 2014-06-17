@@ -46,7 +46,6 @@ import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.node.config.SerializationFeature;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
@@ -69,7 +68,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -194,32 +192,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return rootNode;
     }
 
-    @RequestMapping( value = "/{uid}/**", method = RequestMethod.GET )
-    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid,
+    @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
+    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid, @PathVariable( "property" ) String property,
         @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        String requestUrl = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-        String[] fields = requestUrl.split( "/" );
-
-        String field = "";
-        String postfix = "";
-
-        for ( int i = 3; i < fields.length; i++ )
-        {
-            if ( i > 3 )
-            {
-                field += "[" + fields[i];
-                postfix += "]";
-            }
-            else
-            {
-                field = fields[i];
-            }
-        }
-
-        field += postfix;
-
-        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( field ) );
+        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( property ) );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
@@ -301,7 +278,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
-        renderService.toJson( response.getOutputStream(), summary );
+        renderService.toXml( response.getOutputStream(), summary );
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
@@ -343,7 +320,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
-        renderService.toJson( response.getOutputStream(), summary );
+        renderService.toXml( response.getOutputStream(), summary );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )

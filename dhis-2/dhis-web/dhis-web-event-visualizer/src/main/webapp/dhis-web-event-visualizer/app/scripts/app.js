@@ -452,7 +452,7 @@ Ext.onReady( function() {
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText),
+								var options = Ext.decode(r.responseText).options,
 									data = [];
 
 								Ext.each(options, function(option) {
@@ -537,7 +537,7 @@ Ext.onReady( function() {
                                     'max': 14
                                 },
                                 success: function(r) {
-                                    var options = Ext.decode(r.responseText),
+                                    var options = Ext.decode(r.responseText).options,
                                         data = [];
 
                                     Ext.each(options, function(option) {
@@ -6347,7 +6347,10 @@ Ext.onReady( function() {
 												org = organisationUnits[i];
 
 												ou.push(org.id);
-												ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+
+                                                if (org.children) {
+                                                    ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                                }
 											}
 
 											init.user = {
