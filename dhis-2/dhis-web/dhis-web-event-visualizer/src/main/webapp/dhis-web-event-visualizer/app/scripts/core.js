@@ -9,7 +9,7 @@ Ext.onReady( function() {
 
 	NS.instances = [];
 	NS.i18n = {};
-	NS.isDebug = true;
+	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
 	NS.getCore = function(init) {
