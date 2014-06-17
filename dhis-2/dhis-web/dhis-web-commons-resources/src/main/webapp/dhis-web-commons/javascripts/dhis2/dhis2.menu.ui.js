@@ -84,10 +84,10 @@
         '</li>';
 
 
-    templates.menuLink = '<li id="{{id}}_button">' +
+    templates.menuLink = '<li id="{{id}}Button">' +
                             '<a id="{{id}}Link" class="{{classes}}"><i class="fa fa-{{iconName}}"></i>{{menuItemName}}</a>' +
                             '<div class="app-menu-dropdown-wrap">' +
-                                '<div class="menuDropDownArea app-menu-dropdown appsMenuLink_menu ui-front">' +
+                                '<div class="app-menu-dropdown">' +
                                     '<div class="caret-up-border"></div><div class="caret-up-background"></div>' +
                                     '<ul class="menuDropDownBox">{{menuItems}}</ul>' +
                                     '<div class="menu-drop-down-buttons"></div>' +
@@ -95,10 +95,10 @@
                             '</div>' +
                          '</li>';
 
-    templates.menuLinkWithScroll = '<li id="{{id}}_button">' +
+    templates.menuLinkWithScroll = '<li id="{{id}}Button">' +
                                         '<a id="{{id}}Link" class="{{classes}}"><i class="fa fa-{{iconName}}"></i>{{menuItemName}}</a>' +
                                         '<div class="app-menu-dropdown-wrap">' +
-                                            '<div class="menuDropDownArea app-menu-dropdown appsMenuLink_menu ui-front">' +
+                                            '<div class="app-menu-dropdown">' +
                                                 '<div class="caret-up-border"></div><div class="caret-up-background"></div>' +
                                                 '<div class="menu-drop-down-wrap">' +
                                                     '<div class="menu-drop-down-scroll">' +
@@ -367,7 +367,7 @@
                 //Add the event handlers only once
                 menuBase.eventsHandlers.forEach(function (eventFunction) {
                     if (isFunction(eventFunction)) {
-                        eventFunction(document.querySelector('#' + menu.name + "_button"));
+                        eventFunction(document.querySelector('#' + menu.name + "Button"));
                     }
                 });
             });
@@ -407,7 +407,7 @@
         defaultMenu.template.add('menuItem', templates.itemItemplate);
 
         defaultMenu.isOpen = function () {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap")),
+            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap")),
                 display = jqLite(dropdownElement).css("display"),
                 outOfView = parseInt(jqLite(dropdownElement).css("left"), 10) < 0; //TODO: This is a kind of funky check
 
@@ -422,7 +422,7 @@
         }
 
         defaultMenu.open = function (hover) {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap"));
+            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap"));
 
             //Set the dropdown position
             jqLite(dropdownElement).css('left', defaultMenu.getDropDownPosition() + 'px');
@@ -435,7 +435,7 @@
         }
 
         defaultMenu.close = function (hover) {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "_button div.app-menu-dropdown-wrap"));
+            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap"));
 
             dropdownElement.css('display', 'none');
             if ( ! hover) {
@@ -488,7 +488,7 @@
         }
 
         defaultMenu.getDropDownPosition = function () {
-            var menuElement = document.querySelector("#" + defaultMenu.name  + "_button"),
+            var menuElement = document.querySelector("#" + defaultMenu.name  + "Button"),
                 dropdownElement = jqLite(menuElement.querySelector("div.app-menu-dropdown-wrap")),
                 dropdownPosition;
 
@@ -563,7 +563,7 @@
 
         defaultMenu.menuItems.subscribe(defaultMenu.render, true);
         defaultMenu.menuItems.subscribe(function (menu) {
-            var menuElementList = document.querySelector("#" + defaultMenu.name + "_button ul.menuDropDownBox"),
+            var menuElementList = document.querySelector("#" + defaultMenu.name + "Button ul.menuDropDownBox"),
                 menuItemsHtml;
 
             if (menuElementList === null)
@@ -657,7 +657,7 @@
 
         //Translate the search apps name
         dhis2.translate.get(['app_search_placeholder'], function (translations) {
-            var searchBoxElement = document.querySelector('#' + searchMenu.name + "_button input.apps-search");
+            var searchBoxElement = document.querySelector('#' + searchMenu.name + "Button input.apps-search");
 
             searchAppsText = translations.get('app_search_placeholder');
             if (rendered === true) {
@@ -666,7 +666,7 @@
         });
 
         searchMenu.renderers.push(function () {
-            var dropdownWrap = document.querySelector('#' + searchMenu.name + "_button div.menu-drop-down-scroll");
+            var dropdownWrap = document.querySelector('#' + searchMenu.name + "Button div.menu-drop-down-scroll");
             jqLite(dropdownWrap).prepend(searchMenu.template.parse('search', { search_apps: searchAppsText }));
             rendered = true;
         });
@@ -714,7 +714,7 @@
         });
 
         linkButtonMenu.renderers.push(function () {
-            var buttonContainer = document.querySelector('#' + linkButtonMenu.name + "_button div.menu-drop-down-buttons");
+            var buttonContainer = document.querySelector('#' + linkButtonMenu.name + "Button div.menu-drop-down-buttons");
             menu.extraLink.url = dhis2.menu.fixUrlIfNeeded(menu.extraLink.url);
             jqLite(buttonContainer).prepend(linkButtonMenu.template.parse('extraLink', menu.extraLink));
             rendered = true;

@@ -285,7 +285,7 @@ a.menu-link:hover
     top: 10px;
     position: relative;
     width: 360px;
-    z-index: 10;
+    z-index: 100000; /* Quite high for any other elements that might have high z-indexes  */
 }
 
 .app-menu-dropdown-wrap {
