@@ -407,7 +407,7 @@
         defaultMenu.template.add('menuItem', templates.itemItemplate);
 
         defaultMenu.isOpen = function () {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap")),
+            var dropdownElement = jqLite(document.querySelector(defaultMenu.getDropdownSelector())),
                 display = jqLite(dropdownElement).css("display"),
                 outOfView = parseInt(jqLite(dropdownElement).css("left"), 10) < 0; //TODO: This is a kind of funky check
 
@@ -422,7 +422,7 @@
         }
 
         defaultMenu.open = function (hover) {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap"));
+            var dropdownElement = jqLite(document.querySelector(defaultMenu.getDropdownSelector()));
 
             //Set the dropdown position
             jqLite(dropdownElement).css('left', defaultMenu.getDropDownPosition() + 'px');
@@ -435,7 +435,7 @@
         }
 
         defaultMenu.close = function (hover) {
-            var dropdownElement = jqLite(document.querySelector("#" + defaultMenu.name + "Button div.app-menu-dropdown-wrap"));
+            var dropdownElement = jqLite(document.querySelector(defaultMenu.getDropdownSelector()));
 
             dropdownElement.css('display', 'none');
             if ( ! hover) {
@@ -445,7 +445,7 @@
         }
 
         defaultMenu.closeAll = function () {
-            var menuDropDowns = document.querySelectorAll("#" + defaultMenu.container + " div.app-menu-dropdown-wrap");
+            var menuDropDowns = document.querySelectorAll(defaultMenu.getDropdownSelector());
             jqLite(menuDropDowns).css('display', 'none');
             jqLite(menuDropDowns).attr("data-display-clicked", "false");
         }
@@ -487,8 +487,16 @@
             return result;
         }
 
+        defaultMenu.getButtonId = function () {
+            return "#" + defaultMenu.name + "Button";
+        }
+
+        defaultMenu.getDropdownSelector = function () {
+            return defaultMenu.getButtonId() + " div.app-menu-dropdown-wrap";
+        }
+
         defaultMenu.getDropDownPosition = function () {
-            var menuElement = document.querySelector("#" + defaultMenu.name  + "Button"),
+            var menuElement = document.querySelector(defaultMenu.getButtonId()),
                 dropdownElement = jqLite(menuElement.querySelector("div.app-menu-dropdown-wrap")),
                 dropdownPosition;
 
@@ -563,7 +571,7 @@
 
         defaultMenu.menuItems.subscribe(defaultMenu.render, true);
         defaultMenu.menuItems.subscribe(function (menu) {
-            var menuElementList = document.querySelector("#" + defaultMenu.name + "Button ul.menuDropDownBox"),
+            var menuElementList = document.querySelector(defaultMenu.getButtonId() + " ul.menuDropDownBox"),
                 menuItemsHtml;
 
             if (menuElementList === null)
