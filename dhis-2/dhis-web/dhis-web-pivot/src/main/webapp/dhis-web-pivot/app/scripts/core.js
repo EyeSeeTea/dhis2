@@ -223,6 +223,11 @@ Ext.onReady( function() {
                     '!periods',
                     '!organisationUnitLevels',
                     '!organisationUnits'
+                ],
+                sharingFields: [
+                    'id',
+                    'name',
+                    'access'
                 ]
             };
 		}());
