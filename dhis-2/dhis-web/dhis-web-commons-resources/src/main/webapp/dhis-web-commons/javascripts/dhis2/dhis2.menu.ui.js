@@ -741,30 +741,19 @@
 
             function changeCurrentSelected(currentElement) {
 
-                function animateScrollTo(scrollable, scrollto) {
-                    var modifier = 2;
-                    scrollto = scrollto - 49;
+                function scrollTo(element, to, duration) {
+                    var difference, perTick;
 
-                    function scrollDown() {
-                        if (scrollable.scrollTop >= scrollto || scrollable.offsetHeight + 49 === scrollable.scrollTop) {
-                            return;
-                        }
-                        scrollable.scrollTop = scrollable.scrollTop + modifier;
-                        setTimeout(scrollDown, 1);
-                    }
+                    if (duration <= 0) return;
 
-                    function scrollUp() {
-                        if (scrollable.scrollTop <= scrollto || 0 === scrollable.scrollTop)
-                            return;
-                        scrollable.scrollTop = scrollable.scrollTop - modifier;
-                        setTimeout(scrollUp, 1);
-                    }
+                    difference = to - element.scrollTop - 49;
+                    perTick = difference / duration * 10;
 
-                    if (scrollable.scrollTop > scrollto) {
-                        scrollUp();
-                    } else {
-                        scrollDown();
-                    }
+                    setTimeout(function () {
+                        element.scrollTop = element.scrollTop + perTick;
+                        if (element.scrollTop === to || perTick === Infinity) return;
+                        scrollTo(element, to, (duration - 10));
+                    }, 10);
                 }
 
                 jqLite(shortCutMenu.selectedElement).toggleClass("selected");
@@ -772,7 +761,7 @@
                 jqLite(shortCutMenu.selectedElement).toggleClass("selected");
 
                 if (menuElement.querySelector("div.menu-drop-down-scroll")) {
-                    animateScrollTo(menuElement.querySelector("div.menu-drop-down-scroll"), shortCutMenu.selectedElement.offsetTop);
+                    scrollTo(menuElement.querySelector("div.menu-drop-down-scroll"), shortCutMenu.selectedElement.offsetTop, 50);
                 }
 
                 shortCutMenu.setCurrentId(currentElement);
