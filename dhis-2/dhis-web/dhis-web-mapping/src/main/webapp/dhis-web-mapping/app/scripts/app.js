@@ -514,7 +514,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitGroupSets.json?paging=false&links=false',
+					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroupSets'
@@ -547,7 +547,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,name&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -559,7 +559,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?links=false&paging=false',
+					url: gis.init.contextPath + '/api/mapLegendSets.json?fields=id,name&paging=false',
 					reader: {
 						type: 'json',
 						root: 'mapLegendSets'
@@ -585,7 +585,7 @@ Ext.onReady( function() {
 			});
 
 			store.maps = Ext.create('Ext.data.Store', {
-				fields: ['id', 'name', 'lastUpdated', 'access'],
+				fields: ['id', 'name', 'access'],
 				proxy: {
 					type: 'ajax',
 					reader: {
@@ -596,7 +596,7 @@ Ext.onReady( function() {
 				isLoaded: false,
 				pageSize: 10,
 				page: 1,
-				defaultUrl: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps.json?viewClass=sharing&fields=id,name,access',
+				defaultUrl: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps.json?fields=id,name,access',
 				loadStore: function(url) {
 					this.proxy.url = url || this.defaultUrl;
 
@@ -6518,10 +6518,10 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '.json?domainType=aggregate&links=false&paging=false';
+                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid;
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?domainType=aggregate&paging=false&links=false';
+					path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false';
 				}
 
 				if (!path) {
@@ -6555,7 +6555,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.init.contextPath + '/api/generatedDataElementOperands.json?links=false&dataElementGroup=' + uid,
+						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,name&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -6597,7 +6597,7 @@ Ext.onReady( function() {
             fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: gis.init.contextPath + '/api/dataSets.json?paging=false&links=false',
+                url: gis.init.contextPath + '/api/dataSets.json?fields=id,name&paging=false',
                 reader: {
                     type: 'json',
                     root: 'dataSets'
@@ -6745,7 +6745,7 @@ Ext.onReady( function() {
 				select: function() {
 					indicator.clearValue();
 
-					indicator.store.proxy.url = gis.init.contextPath + gis.conf.finals.url.path_api +  'indicatorGroups/' + this.getValue() + '.json?links=false&paging=false';
+					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,name&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
 					indicator.store.load();
 				}
 			}
@@ -6765,19 +6765,19 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicators/' + this.getValue() + '.json?links=false',
+						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicators.json?fields=legendSet[id]&paging=false&filter=id:eq:' + this.getValue(),
 						success: function(r) {
 							r = Ext.decode(r.responseText);
 
-							if (Ext.isDefined(r.legendSet) && r.legendSet && r.legendSet.id) {
+							if (Ext.isObject(r.mapLegendSet) && r.mapLegendSet.id) {
 								legendType.setValue(gis.conf.finals.widget.legendtype_predefined);
 								legendTypeToggler(gis.conf.finals.widget.legendtype_predefined);
 								if (gis.store.legendSets.isLoaded) {
-									legendSet.setValue(r.legendSet.id);
+									legendSet.setValue(r.mapLegendSet.id);
 								}
 								else {
 									gis.store.legendSets.loadFn( function() {
-										legendSet.setValue(r.legendSet.id);
+										legendSet.setValue(r.mapLegendSet.id);
 									});
 								}
 							}
@@ -8641,6 +8641,7 @@ Ext.onReady( function() {
                                                 }
 											}
 
+											init.user = init.user || {};
 											init.user.ou = ou;
                                             init.user.ouc = ouc;
 										}
