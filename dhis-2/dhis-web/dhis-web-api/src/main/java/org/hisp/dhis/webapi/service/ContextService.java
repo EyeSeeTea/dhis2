@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.utils;
+package org.hisp.dhis.webapi.service;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,28 +28,43 @@ package org.hisp.dhis.webapi.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Set;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface LinkService
+public interface ContextService
 {
     /**
-     * Generate HREF and set it using reflection, required a setHref(String) method in your class.
+     * Get full path of servlet.
      *
-     * Uses hrefBase from ContextService.getServletPath().
-     *
-     * @param object   Object (can be collection) to set HREFs on
+     * @return Full HREF to servlet
      * @see javax.servlet.http.HttpServletRequest
-     * @see org.hisp.dhis.webapi.utils.ContextService
      */
-    <T> void generateLinks( T object );
+    String getServletPath();
 
     /**
-     * Generate HREF and set it using reflection, required a setHref(String) method in your class.
+     * Get HREF to context.
      *
-     * @param object   Object (can be collection) to set HREFs on
-     * @param hrefBase Used as starting point of HREF
+     * @return Full HREF to context (context root)
      * @see javax.servlet.http.HttpServletRequest
      */
-    <T> void generateLinks( T object, String hrefBase );
+    String getContextPath();
+
+    /**
+     * Get active HttpServletRequest
+     *
+     * @return HttpServletRequest
+     */
+    HttpServletRequest getRequest();
+
+    /**
+     * Returns a list of values from a parameter, if the parameter doesn't exist, it will
+     * return a empty list.
+     *
+     * @param name Parameter to get
+     * @return List of parameter values, or empty if not found
+     */
+    Set<String> getParameterValues( String name );
 }
