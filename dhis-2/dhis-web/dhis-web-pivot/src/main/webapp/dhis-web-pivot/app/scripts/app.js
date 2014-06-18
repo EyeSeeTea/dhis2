@@ -930,8 +930,6 @@ Ext.onReady( function() {
 
 								ns.app.stores.reportTable.loadStore();
 
-								ns.app.shareButton.enable();
-
 								window.destroy();
 							}
 						});
@@ -947,7 +945,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.hide(ns.app.centerRegion);
@@ -1170,8 +1168,6 @@ Ext.onReady( function() {
 													ns.app.xLayout.name = true;
 
 													ns.app.stores.reportTable.loadStore();
-
-													ns.app.shareButton.enable();
 												}
 											});
 										}
@@ -5259,6 +5255,7 @@ Ext.onReady( function() {
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
+            disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
 				pluginItem.xable();
@@ -5504,10 +5501,7 @@ Ext.onReady( function() {
 
 			// State
 			downloadButton.enable();
-
-			if (layout.id) {
-				shareButton.enable();
-			}
+            shareButton.enable();
 
 			// Set gui
 			if (!updateGui) {
