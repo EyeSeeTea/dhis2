@@ -2707,10 +2707,11 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
+					//path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
+					path = '/dataElementOperands.json?fields=id,name&filter=dataElement.dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/generatedDataElementOperands.json?fields=id,name' + (filter ? '&filter=name:like:' + filter : '');
+					path = '/dataElementOperands.json?fields=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {

@@ -2521,10 +2521,11 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
+					//path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
+					path = '/dataElementOperands.json?fields=id,name&filter=dataElement.dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
-					path = '/generatedDataElementOperands.json?fields=id,name' + (filter ? '&filter=name:like:' + filter : '');
+					path = '/dataElementOperands.json?fields=id,name' + (filter ? '&filter=name:like:' + filter : '');
 				}
 
 				if (!path) {
@@ -2537,8 +2538,6 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
                     params: {
-                        viewClass: 'basic',
-                        links: 'false',
                         page: store.nextPage,
                         pageSize: 50
                     },
