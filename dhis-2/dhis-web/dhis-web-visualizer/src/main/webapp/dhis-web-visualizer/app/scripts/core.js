@@ -1298,6 +1298,10 @@ Ext.onReady( function() {
 					}
 				}
 
+				if (!layout.hideEmptyRows) {
+					delete layout.hideEmptyRows;
+				}
+
 				if (!layout.showTrendLine) {
 					delete layout.showTrendLine;
 				}
@@ -1316,10 +1320,6 @@ Ext.onReady( function() {
 
 				if (!layout.baseLineTitle) {
 					delete layout.baseLineTitle;
-				}
-
-				if (layout.showValues) {
-					delete layout.showValues;
 				}
 
 				if (!layout.hideLegend) {
@@ -1342,8 +1342,34 @@ Ext.onReady( function() {
 					delete layout.rangeAxisTitle;
 				}
 
+				if (!layout.rangeAxisMaxValue) {
+					delete layout.rangeAxisMaxValue;
+				}
+
+				if (!layout.rangeAxisMinValue) {
+					delete layout.rangeAxisMinValue;
+				}
+
+				if (!layout.rangeAxisSteps) {
+					delete layout.rangeAxisSteps;
+				}
+
+				if (!layout.rangeAxisDecimals) {
+					delete layout.rangeAxisDecimals;
+				}
+
 				if (!layout.sorting) {
 					delete layout.sorting;
+				}
+
+				if (!layout.legend) {
+					delete layout.legend;
+				}
+
+                // default true
+
+				if (layout.showValues) {
+					delete layout.showValues;
 				}
 
 				delete layout.parentGraphMap;
