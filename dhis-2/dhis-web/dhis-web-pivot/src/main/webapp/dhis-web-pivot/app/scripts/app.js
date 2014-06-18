@@ -930,8 +930,6 @@ Ext.onReady( function() {
 
 								ns.app.stores.reportTable.loadStore();
 
-								ns.app.shareButton.enable();
-
 								window.destroy();
 							}
 						});
@@ -947,7 +945,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+							url: ns.core.init.contextPath + '/api/reportTables/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.hide(ns.app.centerRegion);
@@ -1049,7 +1047,7 @@ Ext.onReady( function() {
 							this.currentValue = this.getValue();
 
 							var value = this.getValue(),
-								url = value ? ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
+								url = value ? ns.core.init.contextPath + '/api/reportTables.json?fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 								store = ns.app.stores.reportTable;
 
 							store.page = 1;
@@ -1065,7 +1063,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
+					url = value ? ns.core.init.contextPath + '/api/reportTables.json?fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.reportTable;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -1077,7 +1075,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
+					url = value ? ns.core.init.contextPath + '/api/reportTables.json?fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null;
 					store = ns.app.stores.reportTable;
 
 				store.page = store.page + 1;
@@ -1170,8 +1168,6 @@ Ext.onReady( function() {
 													ns.app.xLayout.name = true;
 
 													ns.app.stores.reportTable.loadStore();
-
-													ns.app.shareButton.enable();
 												}
 											});
 										}
@@ -2274,7 +2270,7 @@ Ext.onReady( function() {
 				}
 
 				Ext.Ajax.request({
-					url: init.contextPath + '/api/reportTables/' + id + '.json?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/reportTables/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
@@ -2466,6 +2462,9 @@ Ext.onReady( function() {
             dataElementGroup,
             dataElementDetailLevel,
             dataElement,
+            dataSetLabel,
+            dataSetSearch,
+            dataSetFilter,
             dataSetAvailable,
             dataSetSelected,
             dataSet,
@@ -2798,29 +2797,67 @@ Ext.onReady( function() {
 
 		dataSetAvailableStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			proxy: {
-				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataSets.json?fields=id,name',
-				reader: {
-					type: 'json',
-					root: 'dataSets'
-				},
-				pageParam: false,
-				startParam: false,
-				limitParam: false
-			},
+            lastPage: null,
+            nextPage: 1,
+            isPending: false,
+            reset: function() {
+                this.removeAll();
+                this.lastPage = null;
+                this.nextPage = 1;
+                this.isPending = false;
+                dataSetSearch.hideFilter();
+            },
+            loadPage: function(filter, append) {
+                var store = this,
+                    path = '/dataSets.json?fields=id,name' + (filter ? '&filter=name:like:' + filter : '');
+
+                filter = filter || dataSetFilter.getValue() || null;
+
+                if (!append) {
+                    this.lastPage = null;
+                    this.nextPage = 1;
+                }
+
+                if (store.nextPage === store.lastPage) {
+                    return;
+                }
+
+                store.isPending = true;
+
+                Ext.Ajax.request({
+                    url: ns.core.init.contextPath + '/api' + path,
+                    params: {
+                        page: store.nextPage,
+                        pageSize: 15
+                    },
+                    failure: function() {
+                        store.isPending = false;
+                    },
+                    success: function(r) {
+                        var response = Ext.decode(r.responseText),
+                            data = response.dataSets || [],
+                            pager = response.pager;
+
+                        store.loadStore(data, pager, append);
+                    }
+                });
+            },
+            loadStore: function(data, pager, append) {
+                this.loadData(data, append);
+                this.lastPage = this.nextPage;
+
+                if (pager.pageCount > this.nextPage) {
+                    this.nextPage++;
+                }
+
+                this.isPending = false;
+                ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+            },
 			storage: {},
+			parent: null,
+            isLoaded: false,
 			sortStore: function() {
 				this.sort('name', 'ASC');
-			},
-			isLoaded: false,
-			listeners: {
-				load: function(s) {
-					this.isLoaded = true;
-
-					ns.core.web.storage.internal.add(s);
-					ns.core.web.multiSelect.filterAvailable({store: s}, {store: dataSetSelectedStore});
-				}
 			}
 		});
 		ns.app.stores.dataSetAvailable = dataSetAvailableStore;
@@ -2871,7 +2908,7 @@ Ext.onReady( function() {
 			isLoaded: false,
 			pageSize: 10,
 			page: 1,
-			defaultUrl: ns.core.init.contextPath + '/api/reportTables.json?viewClass=sharing&fields=id,name,access',
+			defaultUrl: ns.core.init.contextPath + '/api/reportTables.json?fields=id,name,access',
 			loadStore: function(url) {
 				this.proxy.url = url || this.defaultUrl;
 
@@ -3453,6 +3490,71 @@ Ext.onReady( function() {
 			}
 		};
 
+        dataSetLabel = Ext.create('Ext.form.Label', {
+            text: NS.i18n.available,
+            cls: 'ns-toolbar-multiselect-left-label',
+            style: 'margin-right:5px'
+        });
+
+        dataSetSearch = Ext.create('Ext.button.Button', {
+            width: 22,
+            height: 22,
+            cls: 'ns-button-icon',
+            style: 'background: url(images/search_14.png) 3px 3px no-repeat',
+            showFilter: function() {
+                dataSetLabel.hide();
+                this.hide();
+                dataSetFilter.show();
+                dataSetFilter.reset();
+            },
+            hideFilter: function() {
+                dataSetLabel.show();
+                this.show();
+                dataSetFilter.hide();
+                dataSetFilter.reset();
+            },
+            handler: function() {
+                this.showFilter();
+            }
+        });
+
+        dataSetFilter = Ext.create('Ext.form.field.Trigger', {
+            cls: 'ns-trigger-filter',
+            emptyText: 'Filter available..',
+            height: 22,
+            hidden: true,
+            enableKeyEvents: true,
+            fieldStyle: 'height:22px; border-right:0 none',
+            style: 'height:22px',
+            onTriggerClick: function() {
+				if (this.getValue()) {
+					this.reset();
+					this.onKeyUp();
+				}
+            },
+            onKeyUp: function() {
+                var store = dataSetAvailableStore;
+                store.loadPage(this.getValue(), false);
+            },
+            listeners: {
+                keyup: {
+                    fn: function(cmp) {
+                        cmp.onKeyUp();
+                    },
+                    buffer: 100
+                },
+                show: function(cmp) {
+                    cmp.focus(false, 50);
+                },
+                focus: function(cmp) {
+                    cmp.addCls('ns-trigger-filter-focused');
+                },
+                blur: function(cmp) {
+                    cmp.removeCls('ns-trigger-filter-focused');
+                }
+            }
+        });
+
 		dataSetAvailable = Ext.create('Ext.ux.form.MultiSelect', {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -3460,11 +3562,9 @@ Ext.onReady( function() {
 			displayField: 'name',
 			store: dataSetAvailableStore,
 			tbar: [
-				{
-					xtype: 'label',
-					text: NS.i18n.available,
-					cls: 'ns-toolbar-multiselect-left-label'
-				},
+				dataSetLabel,
+                dataSetSearch,
+                dataSetFilter,
 				'->',
 				{
 					xtype: 'button',
@@ -3484,7 +3584,15 @@ Ext.onReady( function() {
 				}
 			],
 			listeners: {
-				afterrender: function() {
+				render: function(ms) {
+                    var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
+                    el.addEventListener('scroll', function(e) {
+                        if (isScrolled(e) && !dataSetAvailableStore.isPending) {
+                            dataSetAvailableStore.loadPage(null, true);
+                        }
+                    });
+
 					this.boundList.on('itemdblclick', function() {
 						ns.core.web.multiSelect.select(this, dataSetSelected);
 					}, this);
@@ -3562,8 +3670,9 @@ Ext.onReady( function() {
 				);
 
 				if (!dataSetAvailableStore.isLoaded) {
-					dataSetAvailableStore.load();
-				}
+                    dataSetAvailableStore.isLoaded = true;
+					dataSetAvailableStore.loadPage(null, false);
+                }
 			},
 			items: [
 				{
@@ -5259,6 +5368,7 @@ Ext.onReady( function() {
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
+            disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
 				pluginItem.xable();
@@ -5504,10 +5614,7 @@ Ext.onReady( function() {
 
 			// State
 			downloadButton.enable();
-
-			if (layout.id) {
-				shareButton.enable();
-			}
+            shareButton.enable();
 
 			// Set gui
 			if (!updateGui) {
