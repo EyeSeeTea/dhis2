@@ -6765,13 +6765,14 @@ Ext.onReady( function() {
 			listeners: {
 				select: function(cb) {
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'indicators.json?fields=legendSet[id]&paging=false&filter=id:eq:' + this.getValue(),
+						url: gis.init.contextPath + '/api/indicators.json?fields=legendSet[id]&paging=false&filter=id:eq:' + this.getValue(),
 						success: function(r) {
 							r = Ext.decode(r.responseText);
 
 							if (Ext.isObject(r.mapLegendSet) && r.mapLegendSet.id) {
 								legendType.setValue(gis.conf.finals.widget.legendtype_predefined);
 								legendTypeToggler(gis.conf.finals.widget.legendtype_predefined);
+
 								if (gis.store.legendSets.isLoaded) {
 									legendSet.setValue(r.mapLegendSet.id);
 								}
@@ -6850,20 +6851,20 @@ Ext.onReady( function() {
 					}
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'dataElements/' + id + '.json?links=false',
+						url: gis.init.contextPath + '/api/dataElements.json?fields=legendSet[id]&paging=false&filter=id:eq:' + this.getValue(),
 						success: function(r) {
 							r = Ext.decode(r.responseText);
 
-							if (Ext.isDefined(r.legendSet) && r.legendSet && r.legendSet.id) {
+							if (Ext.isObject(r.mapLegendSet) && r.mapLegendSet.id) {
 								legendType.setValue(gis.conf.finals.widget.legendtype_predefined);
 								legendTypeToggler(gis.conf.finals.widget.legendtype_predefined);
 
 								if (gis.store.legendSets.isLoaded) {
-									legendSet.setValue(r.legendSet.id);
+									legendSet.setValue(r.mapLegendSet.id);
 								}
 								else {
 									gis.store.legendSets.loadFn( function() {
-										legendSet.setValue(r.legendSet.id);
+										legendSet.setValue(r.mapLegendSet.id);
 									});
 								}
 							}
