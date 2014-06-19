@@ -1323,7 +1323,7 @@ Ext.onReady( function() {
 						}
 
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
@@ -1395,8 +1395,8 @@ Ext.onReady( function() {
                 });
 
                 this.triggerCmp = Ext.create('Ext.button.Button', {
-                    cls: 'ns-button-combotrigger',
-                    disabledCls: 'ns-button-combotrigger-disabled',
+                    cls: 'gis-button-combotrigger',
+                    disabledCls: 'gis-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
                     storage: [],
@@ -1407,7 +1407,7 @@ Ext.onReady( function() {
                         }
                         else {
                             Ext.Ajax.request({
-                                url: ns.core.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
+                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
                                 params: {
                                     'max': 14
                                 },
@@ -4006,7 +4006,12 @@ Ext.onReady( function() {
 		// stores
 		var programStore,
 			stagesByProgramStore,
-            dataElementsByStageStore,
+            //dataElementsByStageStore,
+
+        // cache
+            stageStorage = {},
+            attributeStorage = {},
+            dataElementStorage = {},
 
 		// components
 			program,
@@ -4020,8 +4025,36 @@ Ext.onReady( function() {
             selectDataElements,
             dataElement,
 
+            periodMode,
+            onPeriodModeSelect,
+            getDateLink,
 			startDate,
 			endDate,
+            startEndDate,
+
+            onPeriodChange,
+            onCheckboxAdd,
+            intervalListeners,
+            relativePeriodCmpMap = {},
+            weeks,
+            months,
+            biMonths,
+            quarters,
+            sixMonths,
+            financialYears,
+            years,
+            relativePeriod,
+            checkboxes = [],
+
+            fixedPeriodAvailable,
+            fixedPeriodSelected,
+            onPeriodTypeSelect,
+            periodType,
+            prevYear,
+            nextYear,
+            fixedPeriodSettings,
+            fixedPeriodAvailableSelected,
+            periods,
 			period,
 
 			treePanel,
@@ -4030,6 +4063,7 @@ Ext.onReady( function() {
 			userOrganisationUnitGrandChildren,
 			organisationUnitLevel,
 			organisationUnitGroup,
+            organisationUnitPanel,
 			toolMenu,
 			tool,
 			toolPanel,
@@ -4137,10 +4171,10 @@ Ext.onReady( function() {
 			storage: {},
 			store: programStore,
             getRecord: function() {
-                return {
+                return this.getValue ? {
                     id: this.getValue(),
                     name: this.getRawValue()
-                };
+                } : null;
             },
 			listeners: {
 				select: function(cb) {
@@ -4149,27 +4183,67 @@ Ext.onReady( function() {
 			}
 		});
 
-		onProgramSelect = function(programId) {
+		onProgramSelect = function(programId, layout) {
+            var load;
+
+            programId = layout ? layout.program.id : programId;
 			stage.clearValue();
 
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAll();
 
-			stagesByProgramStore.proxy.url = gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false&paging=false';
-			stagesByProgramStore.load({
-				callback: function(records) {
-					stage.enable();
-					stage.clearValue();
-					stage.queryMode = 'local';
+            load = function(stages) {
+                stage.enable();
+                stage.clearValue();
 
-					if (records.length === 1) {
-						stage.setValue(records[0].data.id);
+                stagesByProgramStore.removeAll();
+                stagesByProgramStore.loadData(stages);
 
-						onStageSelect(records[0].data.id);
-					}
-				}
-			});
+                //ns.app.aggregateLayoutWindow.resetData();
+				//ns.app.queryLayoutWindow.resetData();
 
+                stageId = (layout ? layout.programStage.id : null) || (stages.length === 1 ? stages[0].id : null);
+
+                if (stageId) {
+                    stage.setValue(stageId);
+                    onStageSelect(stageId, layout);
+                }
+            };
+
+            if (stageStorage.hasOwnProperty(programId)) {
+                load(stageStorage[programId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: gis.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[attribute[id,name,valueType,optionSet[id,name]]]&paging=false',
+                    success: function(r) {
+                        var program = Ext.decode(r.responseText).programs[0],
+                            stages,
+                            attributes,
+                            stageId;
+
+                        if (!program) {
+                            return;
+                        }
+
+                        stages = program.programStages;
+                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'attribute');
+
+                        // attributes cache
+                        if (Ext.isArray(attributes) && attributes.length) {
+                            attributeStorage[programId] = attributes;
+                        }
+
+                        if (Ext.isArray(stages) && stages.length) {
+
+                            // stages cache
+                            stageStorage[programId] = stages;
+
+                            load(stages);
+                        }
+                    }
+                });
+            }
 		};
 
 		stage = Ext.create('Ext.form.field.ComboBox', {
@@ -4182,7 +4256,7 @@ Ext.onReady( function() {
 			labelCls: 'gis-form-item-label-top',
 			labelSeparator: '',
 			emptyText: 'Select stage',
-			queryMode: 'remote',
+			queryMode: 'local',
 			forceSelection: true,
 			columnWidth: 0.5,
 			style: 'margin:1px 0 1px 0',
@@ -4190,10 +4264,10 @@ Ext.onReady( function() {
 			listConfig: {loadMask: false},
 			store: stagesByProgramStore,
             getRecord: function() {
-                return {
+                return this.getValue() ? {
                     id: this.getValue(),
                     name: this.getRawValue()
-                };
+                } : null;
             },
 			listeners: {
 				select: function(cb) {
@@ -4202,65 +4276,68 @@ Ext.onReady( function() {
 			}
 		});
 
-		onStageSelect = function(stageId) {
-			dataElementSelected.removeAll();
+		onStageSelect = function(stageId, layout) {
+            if (!layout) {
+				dataElementSelected.removeAll();
+			}
 
-			loadDataElements(stageId);
+			loadDataElements(stageId, layout);
 		};
 
-		loadDataElements = function(item, programId) {
-			var dataElements,
-				load,
-				fn;
+		loadDataElements = function(stageId, layout) {
+			var programId = layout ? layout.program.id : (program.getValue() || null),
+                load;
 
-			programId = programId || program.getValue() || null;
+            stageId = stageId || layout.programStage.id;
 
-			load = function(attributes, dataElements) {
-				var data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
-				dataElementsByStageStore.loadData(data);
+			load = function(dataElements) {
+                var attributes = attributeStorage[programId],
+                    data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
+
+				dataElementsByStageStore.loadData(dataElements);
+
+                if (layout) {
+                    var dataDimensions = gis.util.layout.getDataDimensionsFromLayout(layout),
+                        records = [];
+
+                    for (var i = 0, dim, row; i < dataDimensions.length; i++) {
+                        dim = dataDimensions[i];
+                        row = dataElementsByStageStore.getById(dim.dimension);
+
+                        if (row) {
+                            records.push(Ext.applyIf(dim, row.data));
+                        }
+                    }
+
+                    selectDataElements(records, layout);
+                }
 			};
 
-			fn = function(attributes) {
+            // data elements
+            if (dataElementStorage.hasOwnProperty(stageId)) {
+                load(dataElementStorage[stageId]);
+            }
+            else {
+                Ext.Ajax.request({
+                    url: gis.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    success: function(r) {
+                        var objects = Ext.decode(r.responseText).programStages,
+                            dataElements;
 
-				// data elements
-				if (Ext.isString(item)) {
-					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/programStages/' + item + '.json?links=false&paging=false',
-						success: function(r) {
-							var dataElements = Ext.Array.pluck(Ext.decode(r.responseText).programStageDataElements, 'dataElement');
-							load(attributes, dataElements);
-						}
-					});
-				}
-				else if (Ext.isArray(item)) {
-					load(attributes, item);
-				}
-			};
+                        if (!objects.length) {
+                            load();
+                            return;
+                        }
 
-			// attributes
-			if (programId) {
-				if (program.storage[programId]) {
-					fn(program.storage[programId]);
-				}
-				else {
-					Ext.Ajax.request({
-						url: gis.init.contextPath + '/api/programs/' + programId + '.json?viewClass=withoutOrganisationUnits&links=false',
-						success: function(r) {
-							var attributes = Ext.decode(r.responseText).attributes;
+                        dataElements = Ext.Array.pluck(objects[0].programStageDataElements, 'dataElement');
 
-							if (attributes) {
-								for (var i = 0; i < attributes.length; i++) {
-									attributes[i].type = attributes[i].valueType;
-								}
+                        // data elements cache
+                        dataElementStorage[stageId] = dataElements;
 
-								program.storage[programId] = attributes;
-							}
-
-							fn(attributes);
-						}
-					});
-				}
-			}
+                        load(dataElements);
+                    }
+                });
+            }
 		};
 
 		dataElementAvailable = Ext.create('Ext.ux.form.MultiSelect', {
@@ -4318,19 +4395,35 @@ Ext.onReady( function() {
             bodyStyle: 'padding:2px 0 1px 3px; overflow-y: scroll',
             tbar: {
                 height: 27,
-                items: {
-					xtype: 'label',
-                    text: 'Selected data items',
-                    style: 'padding-left:6px; color:#222',
-					cls: 'ns-toolbar-multiselect-left-label'
-				}
+                items: [
+					{
+						xtype: 'label',
+						text: 'Selected data items',
+						style: 'padding-left:6px; color:#222',
+						cls: 'ns-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowupdouble.png',
+						width: 22,
+						height: 22,
+						handler: function() {
+							dataElementSelected.removeAllDataElements();
+						}
+					}
+				]
             },
             getChildIndex: function(child) {
-				this.items.each(function(item, index) {
-					if (item.id === child.id) {
-						return index;
+				var items = this.items.items;
+
+				for (var i = 0; i < items.length; i++) {
+					if (items[i].id === child.id) {
+						return i;
 					}
-				});
+				}
+
+				return items.length;
 			},
 			hasDataElement: function(dataElementId) {
 				var hasDataElement = false;
@@ -4342,12 +4435,22 @@ Ext.onReady( function() {
 				});
 
 				return hasDataElement;
+			},
+			removeAllDataElements: function() {
+				var items = this.items.items,
+					len = items.length;
+
+				for (var i = 0; i < len; i++) {
+					items[0].removeDataElement();
+				}
 			}
         });
 
         addUxFromDataElement = function(element, index) {
 			var getUxType,
 				ux;
+
+            element.type = element.type || element.valueType;
 
 			index = index || dataElementSelected.items.items.length;
 
@@ -4356,7 +4459,7 @@ Ext.onReady( function() {
 					return 'Ext.ux.panel.DataElementOptionContainer';
 				}
 
-				if (element.type === 'int') {
+				if (element.type === 'int' || element.type === 'number') {
 					return 'Ext.ux.panel.DataElementIntegerContainer';
 				}
 
@@ -4382,16 +4485,20 @@ Ext.onReady( function() {
 				if (!dataElementSelected.hasDataElement(element.id)) {
 					dataElementsByStageStore.add(element);
 					dataElementsByStageStore.sort();
+
+                    //ns.app.aggregateLayoutWindow.removeDimension(element.id);
+                    //ns.app.queryLayoutWindow.removeDimension(element.id);
 				}
 			};
 
 			ux.duplicateDataElement = function() {
 				var index = dataElementSelected.getChildIndex(ux) + 1;
-
 				addUxFromDataElement(element, index);
 			};
 
 			dataElementsByStageStore.removeAt(dataElementsByStageStore.findExact('id', element.id));
+
+            return ux;
 		};
 
         selectDataElements = function(items) {
