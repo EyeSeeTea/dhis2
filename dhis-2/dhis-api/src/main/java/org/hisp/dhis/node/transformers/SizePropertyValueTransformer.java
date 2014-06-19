@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.filter;
+package org.hisp.dhis.node.transformers;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,30 +25,45 @@ package org.hisp.dhis.dxf2.filter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.util.List;
+import org.hisp.dhis.node.Node;
+import org.hisp.dhis.node.PropertyValueTransformer;
+import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.schema.Property;
+
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface ParserService
+public class SizePropertyValueTransformer implements PropertyValueTransformer
 {
-    /**
-     * Parses and generates Ops based on filter string, used for object filtering.
-     *
-     * @param filters One or more filter strings to parse
-     * @return Filters object
-     */
-    Filters parseObjectFilter( List<String> filters );
+    @Override
+    public String name()
+    {
+        return "size";
+    }
 
-    /**
-     * Parses and writes out fieldMap with included/excluded properties.
-     *
-     * @param filter String to parse, can be used for both inclusion/exclusion
-     * @return FieldMap with property name as key, and another FieldMap as value (recursive)
-     * @see org.hisp.dhis.dxf2.filter.FieldMap
-     */
-    FieldMap parseFieldFilter( String filter );
+    @Override
+    public Node transform( Property property, Object value )
+    {
+        if ( property.isCollection() )
+        {
+            return new SimpleNode( property.getCollectionName(), ((Collection<?>) value).size(), property.isAttribute() );
+        }
+        else if ( String.class.isInstance( value ) )
+        {
+            return new SimpleNode( property.getName(), ((String) value).length(), property.isAttribute() );
+        }
+
+        throw new IllegalStateException( "Should never get here, this property/value is not supported by this transformer." );
+    }
+
+    @Override
+    public boolean canTransform( Property property, Object value )
+    {
+        return property.isCollection() || String.class.isInstance( value );
+    }
 }

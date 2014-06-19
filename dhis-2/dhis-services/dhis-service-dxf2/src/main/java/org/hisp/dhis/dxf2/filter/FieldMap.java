@@ -25,30 +25,54 @@ package org.hisp.dhis.dxf2.filter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.util.List;
+import com.google.common.base.Objects;
+import com.google.common.collect.ForwardingMap;
+import com.google.common.collect.Maps;
+import org.springframework.util.StringUtils;
+
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface ParserService
+public class FieldMap extends ForwardingMap<String, FieldMap>
 {
-    /**
-     * Parses and generates Ops based on filter string, used for object filtering.
-     *
-     * @param filters One or more filter strings to parse
-     * @return Filters object
-     */
-    Filters parseObjectFilter( List<String> filters );
+    private final Map<String, FieldMap> delegate = Maps.newHashMap();
 
-    /**
-     * Parses and writes out fieldMap with included/excluded properties.
-     *
-     * @param filter String to parse, can be used for both inclusion/exclusion
-     * @return FieldMap with property name as key, and another FieldMap as value (recursive)
-     * @see org.hisp.dhis.dxf2.filter.FieldMap
-     */
-    FieldMap parseFieldFilter( String filter );
+    private String transform;
+
+    private String preset;
+
+    @Override
+    protected Map<String, FieldMap> delegate()
+    {
+        return delegate;
+    }
+
+    public String getTransform()
+    {
+        return transform;
+    }
+
+    public void setTransform( String transform )
+    {
+        this.transform = transform;
+    }
+
+    public boolean isTransform()
+    {
+        return !StringUtils.isEmpty( transform );
+    }
+
+    @Override
+    public String toString()
+    {
+        return Objects.toStringHelper( this )
+            .add( "map", standardToString() )
+            .add( "transform", transform )
+            .toString();
+    }
 }

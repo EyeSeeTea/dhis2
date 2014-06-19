@@ -31,9 +31,9 @@ package org.hisp.dhis.dxf2.filter;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.node.transformers.SizePropertyValueTransformer;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.SimpleNode;
@@ -45,7 +45,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -76,19 +75,19 @@ public class DefaultFieldFilterService implements FieldFilterService
 
         Schema rootSchema = schemaService.getDynamicSchema( klass );
 
-        Map<String, Map> fieldMap = Maps.newHashMap();
+        FieldMap fieldMap = new FieldMap();
         Schema schema = schemaService.getDynamicSchema( objects.get( 0 ).getClass() );
 
         if ( fields == null )
         {
             for ( Property property : schema.getProperties() )
             {
-                fieldMap.put( property.getName(), Maps.newHashMap() );
+                fieldMap.put( property.getName(), new FieldMap() );
             }
         }
         else
         {
-            fieldMap = parserService.parsePropertyFilter( fields );
+            fieldMap = parserService.parseFieldFilter( fields );
         }
 
         CollectionNode collectionNode = new CollectionNode( rootSchema.getCollectionName() );
@@ -103,7 +102,7 @@ public class DefaultFieldFilterService implements FieldFilterService
     }
 
     @SuppressWarnings( "unchecked" )
-    private ComplexNode buildComplexNode( Map<String, Map> fieldMap, Class<?> klass, Object object )
+    private ComplexNode buildComplexNode( FieldMap fieldMap, Class<?> klass, Object object )
     {
         Schema schema = schemaService.getDynamicSchema( klass );
 
@@ -129,7 +128,7 @@ public class DefaultFieldFilterService implements FieldFilterService
             Object returnValue = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
             Schema propertySchema = schemaService.getDynamicSchema( property.getKlass() );
 
-            Map fieldValue = fieldMap.get( fieldKey );
+            FieldMap fieldValue = fieldMap.get( fieldKey );
 
             if ( property.isCollection() )
             {
@@ -140,7 +139,12 @@ public class DefaultFieldFilterService implements FieldFilterService
                 updateFields( fieldValue, property.getKlass() );
             }
 
-            if ( fieldValue.isEmpty() )
+            if ( fieldValue.isTransform() )
+            {
+                SizePropertyValueTransformer size = new SizePropertyValueTransformer();
+                complexNode.addChild( size.transform( property, returnValue ) );
+            }
+            else if ( fieldValue.isEmpty() )
             {
                 List<String> fields = FIELD_PRESETS.get( "identifiable" );
 
@@ -160,7 +164,7 @@ public class DefaultFieldFilterService implements FieldFilterService
                     }
                     else if ( !property.isSimple() )
                     {
-                        Map<String, Map> map = getFullFieldMap( schemaService.getDynamicSchema( property.getItemKlass() ) );
+                        FieldMap map = getFullFieldMap( schemaService.getDynamicSchema( property.getItemKlass() ) );
 
                         for ( Object collectionObject : collection )
                         {
@@ -233,14 +237,14 @@ public class DefaultFieldFilterService implements FieldFilterService
         return complexNode;
     }
 
-    private void updateFields( Map<String, Map> fieldMap, Class<?> klass )
+    private void updateFields( FieldMap fieldMap, Class<?> klass )
     {
         // we need two run this (at least) two times, since some of the presets might contain other presets
         _updateFields( fieldMap, klass, true );
         _updateFields( fieldMap, klass, false );
     }
 
-    private void _updateFields( Map<String, Map> fieldMap, Class<?> klass, boolean expandOnly )
+    private void _updateFields( FieldMap fieldMap, Class<?> klass, boolean expandOnly )
     {
         Schema schema = schemaService.getDynamicSchema( klass );
         List<String> cleanupFields = Lists.newArrayList();
@@ -253,7 +257,7 @@ public class DefaultFieldFilterService implements FieldFilterService
                 {
                     if ( !fieldMap.containsKey( mapKey ) )
                     {
-                        fieldMap.put( mapKey, Maps.newHashMap() );
+                        fieldMap.put( mapKey, new FieldMap() );
                     }
                 }
 
@@ -272,7 +276,7 @@ public class DefaultFieldFilterService implements FieldFilterService
                 {
                     if ( !fieldMap.containsKey( field ) )
                     {
-                        fieldMap.put( field, Maps.newHashMap() );
+                        fieldMap.put( field, new FieldMap() );
                     }
                 }
 
@@ -280,6 +284,19 @@ public class DefaultFieldFilterService implements FieldFilterService
             }
             else if ( fieldKey.startsWith( "!" ) && !expandOnly )
             {
+                cleanupFields.add( fieldKey );
+            }
+            else if ( fieldKey.contains( "::" ) )
+            {
+                String[] split = fieldKey.split( "::" );
+
+                if ( split.length == 2 )
+                {
+                    FieldMap value = new FieldMap();
+                    value.setTransform( split[1] );
+                    fieldMap.put( split[0], value );
+                }
+
                 cleanupFields.add( fieldKey );
             }
         }
@@ -295,16 +312,16 @@ public class DefaultFieldFilterService implements FieldFilterService
         }
     }
 
-    private Map<String, Map> getFullFieldMap( Schema schema )
+    private FieldMap getFullFieldMap( Schema schema )
     {
-        Map<String, Map> map = Maps.newHashMap();
+        FieldMap fieldMap = new FieldMap();
 
         for ( String mapKey : schema.getPropertyMap().keySet() )
         {
-            map.put( mapKey, Maps.newHashMap() );
+            fieldMap.put( mapKey, new FieldMap() );
         }
 
-        return map;
+        return fieldMap;
     }
 
     private ComplexNode getProperties( Property currentProperty, Object object, List<String> fields )

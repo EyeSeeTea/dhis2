@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.filter;
+package org.hisp.dhis.node;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,30 +25,36 @@ package org.hisp.dhis.dxf2.filter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.util.List;
+import org.hisp.dhis.schema.Property;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface ParserService
+public interface PropertyValueTransformer
 {
     /**
-     * Parses and generates Ops based on filter string, used for object filtering.
-     *
-     * @param filters One or more filter strings to parse
-     * @return Filters object
+     * @return Public/external name of this transformer.
      */
-    Filters parseObjectFilter( List<String> filters );
+    String name();
 
     /**
-     * Parses and writes out fieldMap with included/excluded properties.
+     * Transform value. Value can be null.
      *
-     * @param filter String to parse, can be used for both inclusion/exclusion
-     * @return FieldMap with property name as key, and another FieldMap as value (recursive)
-     * @see org.hisp.dhis.dxf2.filter.FieldMap
+     * @param property Property instance belonging to value
+     * @param value    Actual value to transform
+     * @return Value transformed to a Node
      */
-    FieldMap parseFieldFilter( String filter );
+    Node transform( Property property, Object value );
+
+    /**
+     * Is this property/value supported by this transformer. Value can be null.
+     *
+     * @param property Property instance belonging to value
+     * @param value    Actual value to transform
+     * @return true of false depending on support
+     */
+    boolean canTransform( Property property, Object value );
 }
