@@ -3159,7 +3159,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?fields=id,name&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitGroups'

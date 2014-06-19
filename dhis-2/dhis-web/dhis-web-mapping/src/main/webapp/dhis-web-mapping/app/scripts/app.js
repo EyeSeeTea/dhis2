@@ -3968,11 +3968,14 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + '/api/programs.json?links=false',
+				url: gis.init.contextPath + '/api/programs.json?fields=id,name&paging=false',
 				reader: {
 					type: 'json',
 					root: 'programs'
-				}
+				},
+				pageParam: false,
+				startParam: false,
+				limitParam: false
 			},
 			sortInfo: {field: 'name', direction: 'ASC'},
 			isLoaded: false,
@@ -8490,7 +8493,7 @@ Ext.onReady( function() {
 			if (base.length) {
 
 				// hide base layer
-				if (base === 'false') {
+				if (Ext.Array.contains(['false', 'none', 'no', 'off'], base)) {
 					for (var i = 0, item; i < layersPanel.layerItems.length; i++) {
 						item = layersPanel.layerItems[i];
 
