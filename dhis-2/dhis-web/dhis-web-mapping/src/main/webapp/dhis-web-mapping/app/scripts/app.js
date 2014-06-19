@@ -915,25 +915,46 @@ Ext.onReady( function() {
 		});
 
         var operatorCmpWidth = 70,
-            valueCmpWidth = 304,
+            valueCmpWidth = 306,
             buttonCmpWidth = 20,
-            nameCmpWidth = 400;
+            nameCmpWidth = 400,
+            namePadding = '2px 3px',
+            margin = '3px 0 1px';
 
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
 			extend: 'Ext.container.Container',
 			alias: 'widget.dataelementintegerpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    id: this.dataElement.id,
-                    name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getValue()
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+				}
+
+				return record;
             },
+            setRecord: function(record) {
+				if (record.filter) {
+					var a = record.filter.split(':');
+
+					this.operatorCmp.setValue(a[0]);
+					this.valueCmp.setValue(a[1]);
+				}
+			},
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -941,6 +962,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth,
+					style: 'margin-bottom:0',
                     value: 'EQ',
                     store: {
                         fields: ['id', 'name'],
@@ -957,7 +979,7 @@ Ext.onReady( function() {
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
                     width: valueCmpWidth,
-                    value: 0
+					style: 'margin-bottom:0'
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
@@ -976,12 +998,6 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
-                });
-
                 this.items = [
                     this.nameCmp,
                     this.operatorCmp,
@@ -996,19 +1012,34 @@ Ext.onReady( function() {
 
         Ext.define('Ext.ux.panel.DataElementStringContainer', {
 			extend: 'Ext.container.Container',
-			alias: 'widget.dataelementintegerpanel',
+			alias: 'widget.dataelementstringpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    id: this.dataElement.id,
-                    name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getValue()
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+				}
+
+				return record;
+            },
+            setRecord: function(record) {
+                this.operatorCmp.setValue(record.operator);
+                this.valueCmp.setValue(record.filter);
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1016,6 +1047,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth,
+					style: 'margin-bottom:0',
                     value: 'LIKE',
                     store: {
                         fields: ['id', 'name'],
@@ -1027,12 +1059,16 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-                    width: valueCmpWidth
+                    width: valueCmpWidth,
+					style: 'margin-bottom:0'
                 });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -1041,12 +1077,6 @@ Ext.onReady( function() {
                     handler: function() {
                         container.removeDataElement();
                     }
-                });
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -1066,16 +1096,35 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementdatepanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    id: this.dataElement.id,
-                    name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    value: this.valueCmp.getSubmitValue()
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getSubmitValue();
+				}
+
+				return record;
+            },
+            setRecord: function(record) {
+				if (record.filter && Ext.isString(record.filter)) {
+					var a = record.filter.split(':');
+
+					this.operatorCmp.setValue(a[0]);
+					this.valueCmp.setValue(a[1]);
+				}
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1083,6 +1132,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth,
+                    style: 'margin-bottom:0',
                     value: 'EQ',
                     store: {
                         fields: ['id', 'name'],
@@ -1099,12 +1149,16 @@ Ext.onReady( function() {
 
                 this.valueCmp = Ext.create('Ext.form.field.Date', {
 					width: valueCmpWidth,
+					style: 'margin-bottom:0',
 					format: 'Y-m-d'
 				});
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -1113,12 +1167,6 @@ Ext.onReady( function() {
                     handler: function() {
                         container.removeDataElement();
                     }
-                });
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -1138,15 +1186,30 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementbooleanpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
             getRecord: function() {
-                return {
-                    id: this.dataElement.id,
-                    name: this.dataElement.name,
-                    value: this.valueCmp.getValue()
-                };
+                var record = {};
+
+                record.dimension = this.dataElement.id;
+                record.name = this.dataElement.name;
+
+                if (this.valueCmp.getValue()) {
+					record.filter = 'EQ:' + this.valueCmp.getValue();
+				}
+
+				return record;
+            },
+            setRecord: function(record) {
+                this.valueCmp.setValue(record.filter);
             },
             initComponent: function() {
                 var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -1154,6 +1217,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth + valueCmpWidth,
+                    style: 'margin-bottom:0',
                     value: 'false',
                     store: {
                         fields: ['id', 'name'],
@@ -1166,7 +1230,10 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
-                    width: buttonCmpWidth
+                    width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -1175,12 +1242,6 @@ Ext.onReady( function() {
                     handler: function() {
                         container.removeDataElement();
                     }
-                });
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:2px'
                 });
 
                 this.items = [
@@ -1199,19 +1260,29 @@ Ext.onReady( function() {
 			alias: 'widget.dataelementoptionpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
             getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';');
+				var valueArray = this.valueCmp.getValue().split(';'),
+					record = {};
 
 				for (var i = 0; i < valueArray.length; i++) {
 					valueArray[i] = Ext.String.trim(valueArray[i]);
 				}
 
-                return {
-                    id: this.dataElement.id,
-                    name: this.dataElement.name,
-                    operator: this.operatorCmp.getValue(),
-                    value: valueArray.join(';')
-                };
+				record.dimension = this.dataElement.id;
+				record.name = this.dataElement.name;
+
+				if (Ext.Array.clean(valueArray).length) {
+					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
+				}
+
+				return record;
+            },
+            setRecord: function(record) {
+				if (Ext.isString(record.filter) && record.filter) {
+					var a = record.filter.split(':');
+					this.valueCmp.setOptionValues(a[1].split(';'));
+				}
             },
             initComponent: function() {
                 var container = this;
@@ -1219,7 +1290,7 @@ Ext.onReady( function() {
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
                     width: nameCmpWidth,
-                    style: 'padding:2px 2px 2px 1px'
+                    style: 'padding:' + namePadding
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -1227,6 +1298,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
+                    style: 'margin-bottom:0',
                     width: operatorCmpWidth,
                     value: 'IN',
                     store: {
@@ -1251,11 +1323,11 @@ Ext.onReady( function() {
 						}
 
 						Ext.Ajax.request({
-							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText),
+								var options = Ext.decode(r.responseText).options,
 									data = [];
 
 								Ext.each(options, function(option) {
@@ -1281,6 +1353,7 @@ Ext.onReady( function() {
 
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
                     width: 62,
+                    style: 'margin-bottom:0',
                     emptyText: 'Search..',
                     valueField: 'id',
                     displayField: 'name',
@@ -1289,7 +1362,7 @@ Ext.onReady( function() {
                     enableKeyEvents: true,
                     queryMode: 'local',
                     listConfig: {
-                        minWidth: 300
+                        minWidth: 304
                     },
                     store: this.valueStore,
                     listeners: {
@@ -1322,8 +1395,8 @@ Ext.onReady( function() {
                 });
 
                 this.triggerCmp = Ext.create('Ext.button.Button', {
-                    cls: 'gis-button-combotrigger',
-                    disabledCls: 'gis-button-combotrigger-disabled',
+                    cls: 'ns-button-combotrigger',
+                    disabledCls: 'ns-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
                     storage: [],
@@ -1334,12 +1407,12 @@ Ext.onReady( function() {
                         }
                         else {
                             Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
+                                url: ns.core.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
                                 params: {
-                                    'max': 15
+                                    'max': 14
                                 },
                                 success: function(r) {
-                                    var options = Ext.decode(r.responseText),
+                                    var options = Ext.decode(r.responseText).options,
                                         data = [];
 
                                     Ext.each(options, function(option) {
@@ -1359,7 +1432,8 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 224,
+					width: 226,
+                    style: 'margin-bottom:0',
 					addOptionValue: function(option) {
 						var value = this.getValue();
 
@@ -1377,13 +1451,25 @@ Ext.onReady( function() {
 						}
 
 						this.setValue(value += option);
-					}
+					},
+                    setOptionValues: function(optionArray) {
+                        var value = '';
+
+                        for (var i = 0; i < optionArray.length; i++) {
+                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                        }
+
+                        this.setValue(value);
+                    }
 				});
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
                     width: buttonCmpWidth,
-                    style: 'font-weight:bold'
+                    style: 'font-weight:bold',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
                 });
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
@@ -1407,6 +1493,7 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
+
     };
 
     // Objects

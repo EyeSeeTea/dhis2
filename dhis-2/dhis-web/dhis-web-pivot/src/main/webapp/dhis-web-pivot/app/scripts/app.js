@@ -4358,13 +4358,14 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						links: 'false'
+						fields: 'id,name,children[id,name,children::size]'
 					},
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
 						type: 'json',
 						root: 'children'
-					}
+					},
+					sortParam: false
 				},
 				sorters: [{
 					property: 'name',
@@ -4378,7 +4379,7 @@ Ext.onReady( function() {
 				listeners: {
 					load: function(store, node, records) {
 						Ext.Array.each(records, function(record) {
-							record.set('leaf', !record.raw.hasChildren);
+							record.set('leaf', parseInt(record.raw.children) === 0);
 						});
 					}
 				}
