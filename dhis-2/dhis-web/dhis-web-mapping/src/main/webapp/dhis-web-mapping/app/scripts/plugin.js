@@ -2683,7 +2683,10 @@ Ext.onReady( function() {
                 '!dataSets',
                 '!periods',
                 '!organisationUnitLevels',
-                '!organisationUnits'
+                '!organisationUnits',
+
+                '!sortOrder',
+                '!topLimit'
             ];
 
             conf.url.mapFields = [
