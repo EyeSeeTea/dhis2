@@ -4358,7 +4358,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'id,name,children[id,name,children::isEmpty]'
+						fields: 'children[id,name,children::isNotEmpty]'
 					},
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -4378,22 +4378,12 @@ Ext.onReady( function() {
 				},
 				listeners: {
 					load: function(store, node, records) {
-						//var hasChildren;
 
 						Ext.Array.each(records, function(record) {
-							//hasChildren = !record.raw.children;
-
-							//if (record.raw.children) {
-								//record.set('hasChildren', false);
-							//}
-							//else {
-								//record.set('expandable', true);
-							//}
-
-							//record.set('leaf', parseInt(record.raw.children) === 0);
-							//record.set('expandable', hasChildren);
-							//record.set('leaf', !hasChildren);
-						});
+                            if (Ext.isBoolean(record.data.hasChildren)) {
+                                record.set('leaf', !record.data.hasChildren);
+                            }
+                        });
 					}
 				}
 			}),
