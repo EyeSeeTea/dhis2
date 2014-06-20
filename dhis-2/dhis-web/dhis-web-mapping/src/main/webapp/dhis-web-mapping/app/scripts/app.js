@@ -2680,7 +2680,7 @@ Ext.onReady( function() {
                         map;
 
                     Ext.Ajax.request({
-                        url: gis.init.contextPath + '/api/maps/' + id + '.json?viewClass=dimensional&links=false',
+                        url: gis.init.contextPath + '/api/maps/' + id + '.json?fields=' + gis.conf.url.mapFields.join(','),
                         success: function(r) {
                             map = Ext.decode(r.responseText);
 

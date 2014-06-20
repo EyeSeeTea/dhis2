@@ -878,7 +878,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?viewClass=dimensional&links=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?fields=' + gis.conf.url.mapFields.join(','),
 				success: function(r) {
 
 					// Operand
@@ -2056,7 +2056,7 @@ Ext.onReady( function() {
 					legends = [];
 
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?links=false&paging=false',
+					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
 					scope: this,
 					success: function(r) {
 						legends = Ext.decode(r.responseText).mapLegends;
@@ -2344,7 +2344,61 @@ Ext.onReady( function() {
 					'LAST_5_YEARS': 'LAST_YEAR'
 				}
 			};
-		}());
+
+            conf.url = {};
+
+            conf.url.analysisFields = [
+                '*',
+                'columns[dimension,filter,items[id,name]]',
+                'rows[dimension,filter,items[id,name]]',
+                'filters[dimension,filter,items[id,name]]',
+                '!lastUpdated',
+                '!href',
+                '!created',
+                '!publicAccess',
+                '!rewindRelativePeriods',
+                '!userOrganisationUnit',
+                '!userOrganisationUnitChildren',
+                '!userOrganisationUnitGrandChildren',
+                '!externalAccess',
+                '!access',
+                '!relativePeriods',
+                '!columnDimensions',
+                '!rowDimensions',
+                '!filterDimensions',
+                '!user',
+                '!organisationUnitGroups',
+                '!itemOrganisationUnitGroups',
+                '!userGroupAccesses',
+                '!indicators',
+                '!dataElements',
+                '!dataElementOperands',
+                '!dataElementGroups',
+                '!dataSets',
+                '!periods',
+                '!organisationUnitLevels',
+                '!organisationUnits'
+            ];
+
+            conf.url.mapFields = [
+                conf.url.analysisFields.join(','),
+                'mapViews[' + conf.url.analysisFields.join(',') + ']'
+            ];
+
+            conf.url.mapLegendFields = [
+                '*',
+                '!created',
+                '!lastUpdated',
+                '!displayName',
+                '!externalAccess',
+                '!access',
+                '!userGroupAccesses'
+            ];
+
+            conf.url.mapLegendSetFields = [
+                'id,name,mapLegends[' + conf.url.mapLegendFields.join(',') + ']'
+            ];
+        }());
 
 		// util
 		(function() {
