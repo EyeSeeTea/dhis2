@@ -114,13 +114,15 @@ public class JdbcEventStore
 
                 event.setEvent( rowSet.getString( "psi_uid" ) );
                 event.setTrackedEntityInstance( rowSet.getString( "pa_uid" ) );
-                event.setStatus( EventStatus.fromInt( rowSet.getInt( "psi_status" ) ) );
+                event.setStatus( EventStatus.valueOf( rowSet.getString( "psi_status" ) ) );
                 event.setProgram( rowSet.getString( "p_uid" ) );
                 event.setProgramStage( rowSet.getString( "ps_uid" ) );
                 event.setStoredBy( rowSet.getString( "psi_completeduser" ) );
                 event.setOrgUnit( rowSet.getString( "ou_uid" ) );
+                event.setDueDate( StringUtils.defaultIfEmpty( 
+                    rowSet.getString( "psi_duedate" ), rowSet.getString( "psi_duedate" ) ) );
                 event.setEventDate( StringUtils.defaultIfEmpty( 
-                    rowSet.getString( "psi_executiondate" ), rowSet.getString( "psi_duedate" ) ) );
+                    rowSet.getString( "psi_executiondate" ), rowSet.getString( "psi_executiondate" ) ) );
 
                 if ( rowSet.getBoolean( "ps_capturecoordinates" ) )
                 {
@@ -263,17 +265,17 @@ public class JdbcEventStore
             
             if ( status == EventStatus.VISITED )
             {
-                sql = "and psi.completed = false and psi.status = 0 ";
+                sql = "and psi.status = " +  + EventStatus.ACTIVE.getValue() + " and psi.executiondate is not null ";
             }
             else if ( status == EventStatus.COMPLETED )
             {
-                sql = "and psi.completed = true and psi.status = 0 ";
+                sql = "and psi.status = " + EventStatus.COMPLETED.getValue();
             }
-            else if ( status == EventStatus.FUTURE_VISIT )
+            else if ( status == EventStatus.SCHEDULE )
             {
                 sql += "and psi.executiondate is null and date(now()) <= date(psi.duedate) and psi.status = 0 ";
             }
-            else  if ( status == EventStatus.LATE_VISIT )
+            else  if ( status == EventStatus.OVERDUE )
             {
                 sql += "and psi.executiondate is null and date(now()) > date(psi.duedate) and psi.status = 0 ";
             }
