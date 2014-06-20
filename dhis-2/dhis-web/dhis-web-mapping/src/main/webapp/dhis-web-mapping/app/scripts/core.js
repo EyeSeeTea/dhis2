@@ -627,12 +627,7 @@ Ext.onReady( function() {
 				defaults: {
 					bodyStyle: 'padding-right:6px'
 				},
-				items: menuItems,
-				listeners: {
-					afterrender: function() {
-						//this.getEl().addCls('gis-toolbar-btn-menu');
-					}
-				}
+				items: menuItems
 			});
 
 			menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
@@ -709,7 +704,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'level'],
 			proxy: {
 				type: 'jsonp',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitLevels.jsonp?viewClass=detailed&links=false&paging=false',
+				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitLevels.jsonp?fields=id,name,level&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitLevels'
@@ -878,7 +873,7 @@ Ext.onReady( function() {
 
 		getMap = function() {
 			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + gis.map.id + '.jsonp?fields=' + gis.conf.url.mapFields.join(','),
+				url: gis.init.contextPath + '/api/maps/' + gis.map.id + '.jsonp?fields=' + gis.conf.url.mapFields.join(','),
 				success: function(r) {
 
 					// Operand
