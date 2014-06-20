@@ -2665,8 +2665,6 @@ Ext.onReady( function() {
 
 							gis.store.maps.loadStore();
 
-							gis.viewport.shareButton.enable();
-
 							window.destroy();
 						}
 					});
@@ -2902,7 +2900,6 @@ Ext.onReady( function() {
 												params: Ext.encode(map),
 												success: function() {
 													gis.map = map;
-													gis.viewport.shareButton.enable();
 													gis.store.maps.loadStore();
 												}
 											});

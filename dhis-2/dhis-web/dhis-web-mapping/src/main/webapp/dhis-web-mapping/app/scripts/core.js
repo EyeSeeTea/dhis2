@@ -975,7 +975,7 @@ Ext.onReady( function() {
 			}
 
 			// interpretation button
-			if (gis.map.id && gis.viewport.shareButton) {
+			if (gis.viewport.shareButton) {
 				gis.viewport.shareButton.enable();
 			}
 
