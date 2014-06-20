@@ -621,7 +621,7 @@ Ext.onReady( function() {
             }
 
 			menu = new Ext.menu.Menu({
-				baseCls: 'gis-plugin',
+				baseCls: 'gis-plugin gis-popupmenu',
 				shadow: false,
 				showSeparator: false,
 				defaults: {
@@ -630,7 +630,7 @@ Ext.onReady( function() {
 				items: menuItems,
 				listeners: {
 					afterrender: function() {
-						this.getEl().addCls('gis-toolbar-btn-menu');
+						//this.getEl().addCls('gis-toolbar-btn-menu');
 					}
 				}
 			});
