@@ -283,7 +283,7 @@ public class DefaultTrackedEntityFormService
         {
             ProgramTrackedEntityAttribute programAttribute = program.getAttribute( attribute );
             mandatory = programAttribute.isMandatory();
-            allowDateInFuture = programAttribute.getAllowDateInFuture();
+            allowDateInFuture = programAttribute.getAllowFutureDate();
         }
 
         inputHtml = TAG_OPEN + "input id=\"attr" + attribute.getId() + "\" name=\"attr" + attribute.getId()
@@ -294,9 +294,18 @@ public class DefaultTrackedEntityFormService
         {
             inputHtml += ",number:true";
         }
+        else   if ( TrackedEntityAttribute.TYPE_PHONE_NUMBER.equals( attribute.getValueType() ) )
+        {
+            inputHtml += ",phone:true";
+        }
         inputHtml += "}}\" ";
 
-        if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_TRUE_ONLY ) )
+
+        if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_PHONE_NUMBER ) )
+        {
+            inputHtml += " phoneNumber ";
+        }
+        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_TRUE_ONLY ) )
         {
             inputHtml += " type='checkbox' value='true' ";
             if ( value.equals( "true" ) )

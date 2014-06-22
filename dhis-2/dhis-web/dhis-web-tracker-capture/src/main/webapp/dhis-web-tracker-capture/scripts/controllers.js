@@ -38,7 +38,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.showSearchDiv = false;
     $scope.searchText = null;
     $scope.emptySearchText = false;
-    $scope.searchFilterExists = false;    
+    $scope.searchFilterExists = false;   
     
     $scope.searchMode = { 
                             listAll: 'LIST_ALL', 
@@ -65,8 +65,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.loadPrograms($scope.selectedOrgUnit); 
             
             AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributes = atts;
-                $scope.search($scope.searchMode.listAll);
+                setTimeout(function () {
+                    $scope.$apply(function () {
+                        $scope.attributes = atts;   
+                        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                        $scope.search($scope.searchMode.listAll);
+                    });
+                }, 100);
             });           
         }
     });
@@ -90,10 +95,13 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 
                 if(angular.isObject($scope.programs) && $scope.programs.length === 1){
                     $scope.selectedProgram = $scope.programs[0];
-                    
                     AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                        $scope.attributes = atts;
-                        $scope.generateGridColumns($scope.attributes);
+                        setTimeout(function () {
+                            $scope.$apply(function () {
+                                $scope.attributes = atts;    
+                                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                            });
+                        }, 100);
                     });
                 }                
             });
@@ -106,16 +114,24 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
        
         if($scope.selectedProgram){
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                $scope.attributes = atts;
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                setTimeout(function () {
+                    $scope.$apply(function () {
+                        $scope.attributes = atts; 
+                        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                    });
+                }, 100);
             });           
         }
         else{
             AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributes = atts;
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                setTimeout(function () {
+                    $scope.$apply(function () {
+                        $scope.attributes = atts;    
+                        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+                    });
+                }, 100);
             });
-        }
+        }        
         
         if(doSearch){
             $scope.search($scope.searchMode);
@@ -209,14 +225,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $scope.showSearchDiv = false;
     };  
     
-    $scope.showSearch = function(){        
-        $scope.showSearchDiv = !$scope.showSearchDiv;
-        $scope.showRegistrationDiv = false;
-        //$scope.showTrackedEntityDiv = false;   
-        $scope.selectedProgram = '';
-        $scope.emptySearchAttribute = false;
-    };
-    
     $scope.hideSearch = function(){        
         $scope.showSearchDiv = false;
         $rootScope.showAdvancedSearchDiv = false;
@@ -288,112 +296,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             $scope.hiddenGridColumns++;            
         }      
     };    
-})
-
-//Controller for registration section
-
-
-//Controller for dashboard
-.controller('DashboardController',
-        function($rootScope,
-                $scope,
-                $location,
-                $modal,
-                $timeout,
-                storage,
-                TEIService,  
-                ProgramFactory,
-                CurrentSelection,
-                TranslationService) {
-
-    //do translation of the dashboard page
-    TranslationService.translate();    
-    
-    //dashboard items   
-    $rootScope.dashboardWidgets = {bigger: [], smaller: []};       
-    $rootScope.enrollmentWidget = {title: 'program', view: "components/enrollment/enrollment.html", show: true};
-    $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true};
-    $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false};
-    $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true};
-    $rootScope.relationshipWidget = {title: 'relationship', view: "components/relationship/relationship.html", show: true};
-    $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true};    
-   
-    $rootScope.dashboardWidgets.bigger.push($rootScope.enrollmentWidget);
-    $rootScope.dashboardWidgets.bigger.push($rootScope.dataentryWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.selectedWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.profileWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.relationshipWidget);
-    $rootScope.dashboardWidgets.smaller.push($rootScope.notesWidget);
-    
-    //selections
-    $scope.selectedEntityId = null;
-    $scope.selectedProgramId = null;
-    
-    $scope.selectedEntityId = ($location.search()).selectedEntityId; 
-    $scope.selectedProgramId = ($location.search()).selectedProgramId; 
-    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-        
-    if( $scope.selectedEntityId ){
-      
-        //Fetch the selected entity
-        TEIService.get($scope.selectedEntityId).then(function(data){     
-            
-            if($scope.selectedProgramId){
-                ProgramFactory.get($scope.selectedProgramId).then(function(program){
-                    $scope.selectedProgram = program;   
-                    
-                    //broadcast selected items for dashboard controllers
-                    CurrentSelection.set({tei: data, pr: $scope.selectedProgram});
-                    $timeout(function() { 
-                        $rootScope.$broadcast('selectedEntity', {});
-                    }, 100);
-                });
-            }
-            else{                
-                //broadcast selected items for dashboard controllers
-                CurrentSelection.set({tei: data, pr: ''});
-                $timeout(function() { 
-                    $rootScope.$broadcast('selectedEntity', {});
-                }, 100);
-            }
-        });       
-    }   
-    
-    $scope.back = function(){
-        $location.path('/');
-    };
-    
-    $scope.displayEnrollment = false;
-    $scope.showEnrollment = function(){
-        $scope.displayEnrollment = true;
-    };
-    
-    $scope.removeWidget = function(widget){        
-        widget.show = false;
-    };
-    
-    $scope.showHideWidgets = function(){
-        var modalInstance = $modal.open({
-            templateUrl: "views/widgets.html",
-            controller: "DashboardWidgetsController"
-        });
-
-        modalInstance.result.then(function () {
-        });
-    };
-})
-
-//Controller for the dashboard widgets
-.controller('DashboardWidgetsController', 
-    function($scope, 
-            $modalInstance,
-            TranslationService){
-    
-    TranslationService.translate();
-    
-    $scope.close = function () {
-        $modalInstance.close($scope.eventGridColumns);
-    };       
 })
 
 //Controller for the header section

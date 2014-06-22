@@ -1,7 +1,7 @@
 trackerCapture.controller('ProfileController',
         function($scope,                
-                storage,
                 CurrentSelection,
+                TEService,
                 TEIService,
                 AttributesFactory,
                 TranslationService) {
@@ -19,30 +19,28 @@ trackerCapture.controller('ProfileController',
     }); 
     
     //listen for the selected entity       
-    $scope.$on('dashboard', function(event, args) { 
+    $scope.$on('selectedEntity', function(event, args) { 
         var selections = CurrentSelection.get();
         $scope.selectedEntity = selections.tei; 
         $scope.selectedProgram = selections.pr; 
-
-        $scope.processTeiAttributes();
-        
+        if($scope.selectedEntity){
+            TEService.get($scope.selectedEntity.trackedEntity).then(function(te){
+                $scope.trackedEntity = te;
+            });
+            
+            $scope.processTeiAttributes();
+        }        
     });
     
     //display only those attributes that belong the selected program
     //if no program, display attributesInNoProgram
-    $scope.processTeiAttributes = function(){
-       
-        angular.forEach(storage.get('TRACKED_ENTITIES'), function(te){
-            if($scope.selectedEntity.trackedEntity === te.id){
-                $scope.trackedEntity = te;
-            }
-        });
+    $scope.processTeiAttributes = function(){        
         
         angular.forEach($scope.selectedEntity.attributes, function(att){
             if(att.type === 'number' && !isNaN(parseInt(att.value))){
                 att.value = parseInt(att.value);
             }
-        });
+        });        
         
         if($scope.selectedProgram){
             //show only those attributes in selected program            

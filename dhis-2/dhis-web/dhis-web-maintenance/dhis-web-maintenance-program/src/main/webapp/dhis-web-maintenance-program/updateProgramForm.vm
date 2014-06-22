@@ -14,8 +14,8 @@
 			compulsaryIdentifier.empty();
 			var mandatorySelector = jQuery( "#mandatory" );
 			mandatorySelector.empty();		
-			var allowDateInFutureSelector = jQuery( "#allowDateInFuture" );
-			allowDateInFutureSelector.empty();
+			var allowFutureDateSelector = jQuery( "#allowFutureDate" );
+			allowFutureDateSelector.empty();
 			
 			if( getFieldValue('type') != 3 ){
 				var isDisplayed = false;
@@ -33,10 +33,10 @@
 					checked = mandatory.attr('checked') ? true : false;
 					mandatorySelector.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
 					
-					// allowDateInFuture
-					var allowDateInFuture = jQuery( item ).find( "input[name='allowDateInFuture']:first");
-					checked = allowDateInFuture.attr('checked') ? true : false;
-					allowDateInFutureSelector.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
+					// allowFutureDate
+					var allowFutureDate = jQuery( item ).find( "input[name='allowFutureDate']:first");
+					checked = allowFutureDate.attr('checked') ? true : false;
+					allowFutureDateSelector.append( "<option value='" + checked + "' selected='true'>" + checked + "</option>" );
 				});
 				if( jQuery("#selectedList").find("tr").length > 0 && isDisplayed ){
 					compulsaryIdentifier.append( "<option value='0' selected='true'></option>");
@@ -248,7 +248,7 @@
 				<select style='display:none;' multiple id="selectedPropertyIds" name="selectedPropertyIds" ></select>
 				<select style='display:none;' multiple id="personDisplayNames" name="personDisplayNames" ></select>
 				<select style='display:none;' multiple id="mandatory" name="mandatory" ></select>
-				<select style='display:none;' multiple id="allowDateInFuture" name="allowDateInFuture" ></select>
+				<select style='display:none;' multiple id="allowFutureDate" name="allowFutureDate" ></select>
 				<select id='compulsaryIdentifier' name="compulsaryIdentifier" multiple="multiple" class="hidden {validate:{required:true}}" title="$i18n.getString('please_select_at_least_attribute_for_displaying_in_list')"></select>
 			</th>
 		  </tr>
@@ -292,9 +292,9 @@
 									<td align="center"><input type="checkbox" name="mandatory" #if($programAttribute.mandatory == "true" ) checked #end #if($program.type==3) disabled #end  /></td>
 									<td align="center">
 										#if($attribute.valueType=='date')
-											<input type="checkbox" name="allowDateInFuture" #if($programAttribute.allowDateInFuture == "true" ) checked #end #if($program.type==3) disabled #end />
+											<input type="checkbox" name="allowFutureDate" #if($programAttribute.allowFutureDate == "true" ) checked #end #if($program.type==3) disabled #end />
 										#else
-											<input type="hidden" name="allowDateInFuture" />
+											<input type="hidden" name="allowFutureDate" />
 										#end
 									</td>
 								</tr>
@@ -311,8 +311,8 @@
     </tbody>
   </table>  
  
-	<p><a href='javascript:showAdvancedOptions()' id='showAdvancedOptionLink'>$i18n.getString('show_advanced_options') <img src='../images/asc.gif'><a></p>
-	<p><a href='javascript:hideAdvancedOptions()' id='hideAdvancedOptionLink' style="display:none;">$i18n.getString('hide_advanced_options') <img src='../images/desc.gif'><a></p>
+	<p><a href='javascript:showAdvancedOptions()' id='showAdvancedOptionLink'>$i18n.getString('show_advanced_options')</p>
+	<p><a href='javascript:hideAdvancedOptions()' id='hideAdvancedOptionLink' style="display:none;">$i18n.getString('hide_advanced_options')</p>
 	
   <table>
 	 <tr>

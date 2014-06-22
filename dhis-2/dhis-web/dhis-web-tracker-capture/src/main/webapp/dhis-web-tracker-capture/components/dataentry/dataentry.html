@@ -9,45 +9,87 @@
         </span>        
     </div>
 
-    <div ng-show="dhis2Events">            
-        <table class="table-borderless">
-            <tbody>
-                <tr>
-                    <td class="inline-block" ng-repeat="dhis2Event in dhis2Events">
-                        <span class="block align-center">{{dhis2Event.orgUnitName}}</span>                                              
-                        <span class="stage-container"                                                     
-                              ng-class="{'current-stage': currentEvent && currentEvent.event == dhis2Event.event, '{{dhis2Event.statusColor}}': true}"                                                      
-                              ng-click="showDataEntry(dhis2Event)">
-                            {{dhis2Event.name}}<br/>
-                            {{dhis2Event.eventDate}}         
-                        </span>
-                        <i class="fa fa-arrow-right" ng-show="$index < dhis2Events.length-1"></i>
-                    </td>                        
-                </tr>
-            </tbody>                
-        </table>
-        <hr>
-        <div ng-show="currentEvent">
-            <table class="table-borderless table-striped">
-                <thead class="align-center">
+    <div class="panel-body dashboard-widget-container">
+        <div ng-show="dhis2Events">            
+            <table class="table-borderless">
+                <tbody>
                     <tr>
-                        <th class="align-center">
-                            {{'data_element' | translate}}
+                        <td class="inline-block" ng-repeat="dhis2Event in dhis2Events">
+                            <span class="block align-center">{{dhis2Event.orgUnitName}}</span>                                              
+                            <span class="stage-container"                                                     
+                                  ng-class="{'current-stage': currentEvent && currentEvent.event == dhis2Event.event, '{{dhis2Event.statusColor}}': true}"                                                      
+                                  ng-click="showDataEntry(dhis2Event)">
+                                {{dhis2Event.name}}<br/>
+                                {{dhis2Event.eventDate}}         
+                            </span>
+                            <i class="fa fa-arrow-right" ng-show="$index < dhis2Events.length - 1"></i>
+                        </td>                        
+                    </tr>
+                </tbody>                
+            </table>
+        </div>
+        <div ng-show="!dhis2Events && selectedEnrollment">            
+            <div ng-show="dummyEvents">
+                <div class="alert alert-warning">{{'no_event_is_yet_created'| translate}}</div>
+                <table class="table-borderless">
+                    <tbody>
+                        <tr>
+                            <td class="inline-block" ng-repeat="dummyEvent in dummyEvents">
+                                <span class="block align-center">{{dhis2Event.orgUnitName}}</span>                                              
+                                <span class="stage-container"                                                     
+                                      ng-class="{'current-stage': currentDummyEvent && currentDummyEvent.programStage == dummyEvent.programStage, '{{dummyEvent.statusColor}}': true}"                                                      
+                                      ng-click="showEventCreation(dummyEvent)">
+                                    {{dummyEvent.name}}<br/>
+                                    {{dummyEvent.dueDate}}         
+                                </span>
+                                <i class="fa fa-arrow-right" ng-show="$index < dummyEvents.length - 1"></i>
+                            </td>                        
+                        </tr>                        
+                    </tbody>                
+                </table>
+                <form name="eventCreationForm" novalidate ng-show="currentDummyEvent">
+                    <div class="row">
+                        <div class="col-md-6">
+                            {{currentDummyEvent.reportDateDescription}}
+                            <input type="text" name="eventDate" class="form-control" ng-date ng-model="currentDummyEvent.eventDate" ng-required="true"/>
+                            <span ng-show="eventCreationForm.submitted && eventCreationForm.eventDate.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                        </div>
+                        <div class="col-md-6">
+                            {{'due_date'| translate}}
+                            <input type="text" name="dueDate" class="form-control" ng-date ng-model="currentDummyEvent.dueDate" />
+                            <span ng-show="eventCreationForm.submitted && eventCreationForm.dueDate.$invalid" style="color:red;font-size:12px">{{'required'| translate}}</span>
+                        </div>                        
+                    </div>
+                    <div class="row vertical-spacing">   
+                        <div class="col-md-6">
+                            <button type="button" class="btn btn-default" ng-click="createEvent()">{{'create'| translate}}</button>
+                        </div>                        
+                    </div>
+                </form>
+                <hr>
+            </div>
+        </div>        
+        <div ng-show="currentEvent">
+            <hr>
+            <table class="table-borderless table-striped">
+                <thead>
+                    <tr class="col-md-12">
+                        <th class="col-md-5">
+                            {{'data_element'| translate}}
                         </th>
-                        <th class="align-center">
-                            {{'value' | translate}}
+                        <th class="col-md-5 align-center">
+                            {{'value'| translate}}
                         </th>
-                        <th class="align-center">
-                            {{'provided_elsewhere' | translate}}
+                        <th class="col-md-2 align-center" ng-if="allowProvidedElsewhereExists">
+                            {{'provided_elsewhere'| translate}}
                         </th>
                     </tr>
                 </thead>
-                    
-                <tr ng-repeat="prStDe in currentStage.programStageDataElements">
-                    <td>
+                <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements">
+                    <td class="col-md-5">
                         {{prStDe.dataElement.name}}
                     </td>
-                    <td>
+                    <td class="col-md-5">
                         <div ng-switch="prStDe.dataElement.type">
                             <div ng-switch-when="int">
                                 <input type="number"
@@ -91,19 +133,19 @@
                             </div>
                         </div>
                     </td>
-                    <td>                        
-                        <div class="align-center" ng-if="prStDe.allowProvidedElsewhere">
+                    <td class="col-md-2" ng-if="allowProvidedElsewhereExists">                    
+                        <div class="align-center" ng-show="prStDe.allowProvidedElsewhere">
                             <input type="checkbox" 
                                    ng-model="currentEvent.providedElsewhere[prStDe.dataElement.id]"
                                    ng-change="saveDatavalueLocation(prStDe)"/>
                         </div>
                     </td>
                 </tr>
-            </table>    
-            
+            </table>
             <hr>
-
+        </div>
+        <div ng-show="!selectedEnrollment">
+            <div class="alert alert-warning">{{'not_yet_enrolled'| translate}}</div> 
         </div>
     </div>
-
 </div>

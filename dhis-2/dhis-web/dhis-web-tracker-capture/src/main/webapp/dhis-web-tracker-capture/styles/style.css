@@ -31,6 +31,18 @@ div#orgUnitTree {
     height: 75%;
 }
 
+.top-bar {
+    font-size: 16pt;
+    font-weight: normal;
+    color: #585D61;
+}
+
+.dashboard-top-bar {
+    padding-right: 15px;
+    padding-left: 15px;
+    margin-right: auto;
+    margin-left: auto;
+}
 
 /*----------------------------------------------------------------------------*/
 /* Form
@@ -108,11 +120,6 @@ div.actions
     width: 10px;
 }
 
-.stage-container {
-    width:100%;
-    height:100px;
-}
-
 .stage-flow {
     height:100px;
     overflow: scroll;
@@ -151,7 +158,6 @@ div.orgunit-object {
     height: 60px;
     cursor: pointer;
     opacity: 1.0;
-    margin: 5px;
     white-space: normal;
     padding-top: 5px;
     text-align: center;
@@ -399,7 +405,6 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .table-borderless>tbody>tr>td, 
 .table-borderless>tfoot>tr>td {
     border-top: none; 
-    padding: 5px;
 }
 
 .dhis2-table>thead>tr>th, 
@@ -538,9 +543,9 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     margin-bottom: 10px;
 }
 
-.dashboard-element-container {
-    max-height: 250px !important;
-    height: 250px !important;
+.dashboard-widget-container {
+    max-height: 400px !important;
+    height: auto;
     overflow-x:auto;
     overflow-y:auto;
 }
@@ -554,17 +559,21 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     margin-right: 10px;    
 }
 
+.row-with-margin {
+    padding-left: 30px;
+    padding-right: 30px;
+}
 .vertical-spacing{
     margin-top: 10px;   
     margin-bottom: 10px;
 }
 
 .small-horizonal-spacing{
-    margin-left: 5px;    
+    margin-left: 2px;    
 }
 
 .small-vertical-spacing{
-    margin-top: 5px;    
+    margin-top: 2px;    
 }
 
 .search-container{
@@ -714,25 +723,11 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     padding: 6px 12px;
     font-size: 14px;
 }
-/*input[type=number], input[type=text], input[type=password], textarea {
+input[type=number], input[type=text], input[type=password], textarea {
     border: 1px solid #aaa;
     padding: 6px 12px;
     font-size: 14px;
 }
-
-input[type=number] {
-    border: 1px solid #aaa;
-    padding: 4px 1px;
-    border-radius: 3px;
-}
-
-input[type=text], input[type=password], textarea, select {
-    border: 1px solid #aaa;
-    padding: 6px 12px;
-    font-size: 14px;
-    border-radius: 3px;
-}*/
-
 
 /*----------------------------------------------------------------------------*/
 /* Search filters
@@ -804,9 +799,9 @@ input[type=text], input[type=password], textarea, select {
     border-color:red;
 }
 
-.alert {
+/*.alert {
     padding: 5px;
-}
+}*/
 
 .input-field {
     border: 1px solid #aaa;
@@ -829,6 +824,26 @@ input[type=text], input[type=password], textarea, select {
 .form-control {
     display: block;
     width: 100%;
+    height: 34px;
+    padding: 6px 6px;
+    font-size: 14px;
+    line-height: 1.0;
+    color: #555;
+    margin-bottom: 5px;
+    margin-top: 5px;
+    vertical-align: middle;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    -webkit-transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s;
+    transition: border-color ease-in-out .15s, box-shadow ease-in-out .15s
+}
+
+.form-control-program {    
+    width: 40%;
     height: 34px;
     padding: 6px 6px;
     font-size: 14px;
