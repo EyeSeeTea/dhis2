@@ -469,6 +469,10 @@ Ext.onReady( function() {
 					layout.rows = config.rows;
 					layout.filters = config.filters;
 
+                    layout.dataType = Ext.isString(config.dataType) ? config.dataType : 'aggregated_values';
+                    layout.program = config.program;
+                    layout.programStage = config.programStage;
+
                     // dates
                     if (config.startDate && config.endDate) {
                         layout.startDate = config.startDate;

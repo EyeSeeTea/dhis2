@@ -4827,6 +4827,7 @@ Ext.onReady( function() {
 
 			accordionBody: accordionBody,
 			accordionPanels: accordionPanels,
+            treePanel: treePanel,
 
 			reset: reset,
 			setGui: setGui,
@@ -6116,6 +6117,18 @@ Ext.onReady( function() {
             //}
         //});
 
+		defaultButton = Ext.create('Ext.button.Button', {
+			text: NS.i18n.chart,
+			iconCls: 'ns-button-icon-chart',
+			toggleGroup: 'module',
+			pressed: true,
+			handler: function() {
+				if (!this.pressed) {
+					this.toggle();
+				}
+			}
+		});
+
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
@@ -6152,6 +6165,68 @@ Ext.onReady( function() {
 					downloadButton,
 					shareButton,
 					'->',
+					{
+						text: NS.i18n.table,
+						iconCls: 'ns-button-icon-table',
+						toggleGroup: 'module',
+						menu: {},
+						handler: function(b) {
+							b.menu = Ext.create('Ext.menu.Menu', {
+								closeAction: 'destroy',
+								shadow: false,
+								showSeparator: false,
+								items: [
+									{
+										text: NS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
+										cls: 'ns-menu-item-noicon',
+										handler: function() {
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html';
+										}
+									},
+									'-',
+									{
+										text: NS.i18n.open_this_chart_as_pivot_table + '&nbsp;&nbsp;', //i18n
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && ns.app.layout),
+										handler: function() {
+											if (NS.isSessionStorage) {
+												ns.app.layout.parentGraphMap = ns.app.widget.treePanel.getParentGraphMap();
+												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?s=eventanalytical');
+											}
+										}
+									},
+									{
+										text: NS.i18n.open_last_pivot_table + '&nbsp;&nbsp;', //i18n
+										cls: 'ns-menu-item-noicon',
+										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['eventtable']),
+										handler: function() {
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?s=eventtable';
+										}
+									}
+								],
+								listeners: {
+									show: function() {
+										ns.core.web.window.setAnchorPosition(b.menu, b);
+									},
+									hide: function() {
+										b.menu.destroy();
+										defaultButton.toggle();
+									},
+									destroy: function(m) {
+										b.menu = null;
+									}
+								}
+							});
+
+							b.menu.show();
+						}
+					},
+					defaultButton,
+					{
+						xtype: 'tbseparator',
+						height: 18,
+						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
+					},
 					{
 						xtype: 'button',
 						text: NS.i18n.home,
