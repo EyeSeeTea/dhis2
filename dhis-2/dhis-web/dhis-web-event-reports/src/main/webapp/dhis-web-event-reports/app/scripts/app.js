@@ -6636,7 +6636,7 @@ Ext.onReady( function() {
 
 								// root nodes
 								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,name,children[id,name]',
+									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&fields=id,name,children[id,name]&paging=false',
 									success: function(r) {
 										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
 										fn();

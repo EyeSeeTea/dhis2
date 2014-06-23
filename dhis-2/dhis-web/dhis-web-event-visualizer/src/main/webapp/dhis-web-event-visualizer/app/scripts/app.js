@@ -1859,7 +1859,7 @@ Ext.onReady( function() {
 
 								ns.app.stores.eventChart.loadStore();
 
-								//ns.app.shareButton.enable();
+								ns.app.shareButton.enable();
 
 								window.destroy();
 							}
@@ -2103,7 +2103,7 @@ Ext.onReady( function() {
 
 													ns.app.stores.eventChart.loadStore();
 
-													//ns.app.shareButton.enable();
+													ns.app.shareButton.enable();
 												}
 											});
 										}
@@ -4624,7 +4624,7 @@ Ext.onReady( function() {
 			ns.app.downloadButton.enable();
 
 			if (layout.id) {
-				//ns.app.shareButton.enable();
+				ns.app.shareButton.enable();
 			}
 
             //ns.app.statusBar.setStatus(layout, response);
@@ -6069,7 +6069,7 @@ Ext.onReady( function() {
 			disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
-				pluginItem.xable();
+				//pluginItem.xable();
 			},
 			//menu: {
 				//cls: 'ns-menu',
