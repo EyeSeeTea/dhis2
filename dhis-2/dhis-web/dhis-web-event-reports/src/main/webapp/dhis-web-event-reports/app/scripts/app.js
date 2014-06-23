@@ -6471,7 +6471,7 @@ Ext.onReady( function() {
 								showSeparator: false,
 								items: [
 									{
-										text: NS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
+										text: NS.i18n.go_to_event_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
 											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html';
