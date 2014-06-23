@@ -531,7 +531,7 @@ Ext.onReady( function() {
 					layout.rows = config.rows;
 					layout.filters = config.filters;
                     
-                    layout.type = config.type;
+                    layout.type = Ext.isString(config.type) ? config.type : 'column';
                     layout.program = config.program;
                     layout.programStage = config.programStage;
 

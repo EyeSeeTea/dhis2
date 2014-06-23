@@ -5174,6 +5174,7 @@ Ext.onReady( function() {
 
 			accordionBody: accordionBody,
 			accordionPanels: accordionPanels,
+            treePanel: treePanel,
 
 			reset: reset,
 			setGui: setGui,
@@ -6483,8 +6484,8 @@ Ext.onReady( function() {
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
 											if (NS.isSessionStorage) {
-												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?s=eventanalyticalanalytical');
+												ns.app.layout.parentGraphMap = ns.app.widget.treePanel.getParentGraphMap();
+												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?s=eventanalytical');
 											}
 										}
 									},
