@@ -2198,8 +2198,6 @@ Ext.onReady( function() {
 
 								ns.app.stores.eventReport.loadStore();
 
-								ns.app.shareButton.enable();
-
 								window.destroy();
 							}
 						});
@@ -2215,7 +2213,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/eventReports/' + id + '.json?viewClass=dimensional&links=false',
+                            url: init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();
@@ -2336,7 +2334,7 @@ Ext.onReady( function() {
 			text: NS.i18n.prev,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports.json?fields=id,name,access&filter=name:like:' + value : null;
+					url = value ? ns.core.init.contextPath + '/api/eventReports?fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null,
 					store = ns.app.stores.eventReport;
 
 				store.page = store.page <= 1 ? 1 : store.page - 1;
@@ -2348,7 +2346,7 @@ Ext.onReady( function() {
 			text: NS.i18n.next,
 			handler: function() {
 				var value = searchTextfield.getValue(),
-					url = value ? ns.core.init.contextPath + '/api/eventReports/query/' + value + '.json?viewClass=sharing&links=false' : null,
+					url = value ? ns.core.init.contextPath + '/api/eventReports.json?fields=id,name,access' + (value ? '&filter=name:like:' + value : '') : null,
 					store = ns.app.stores.eventReport;
 
 				store.page = store.page + 1;
@@ -2441,8 +2439,6 @@ Ext.onReady( function() {
 													ns.app.xLayout.name = true;
 
 													ns.app.stores.eventReport.loadStore();
-
-													ns.app.shareButton.enable();
 												}
 											});
 										}
@@ -5704,7 +5700,7 @@ Ext.onReady( function() {
 				}
 
 				Ext.Ajax.request({
-					url: init.contextPath + '/api/eventReports/' + id + '.json?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 						alert(r.responseText);
@@ -6365,7 +6361,7 @@ Ext.onReady( function() {
 			disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
-				pluginItem.xable();
+				//pluginItem.xable();
 			},
 			//menu: {
 				//cls: 'ns-menu',
@@ -6692,15 +6688,6 @@ Ext.onReady( function() {
 										fn();
 									}
 								});
-
-								// legend sets
-								//requests.push({
-									//url: init.contextPath + '/api/mapLegendSets.json?viewClass=detailed&links=false&paging=false',
-									//success: function(r) {
-										//init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
-										//fn();
-									//}
-								//});
 
 								// dimensions
 								requests.push({

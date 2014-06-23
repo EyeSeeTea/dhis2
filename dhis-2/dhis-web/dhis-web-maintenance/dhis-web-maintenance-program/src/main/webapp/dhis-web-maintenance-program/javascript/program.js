@@ -109,7 +109,6 @@ function relationshipTypeOnchange() {
 
 function programOnChange() {
   var type = getFieldValue('type');
-  var isShowAdvancedOptions = jQuery('#showAdvancedOptionLink').is(':hidden');
   
   // anonymous
   if( type == "3" ) {
@@ -128,6 +127,7 @@ function programOnChange() {
     jQuery("[name=displayed]").removeAttr("checked");
 
     jQuery("[name=nonAnonymous]").hide();
+    jQuery('.multiEvents').hide();
   }
   else {
     enable('onlyEnrollOnce');
@@ -154,13 +154,7 @@ function programOnChange() {
     else {
       disable("dateOfIncidentDescription");
     }
-  }
-  
-  if( isShowAdvancedOptions ){
-	showAdvancedOptions();
-  }
-  else{
-	hideAdvancedOptions();
+	jQuery('.multiEvents').show();
   }
 }
 
@@ -177,10 +171,10 @@ function selectProperties() {
       html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'></td>"
 	  html += "<td align='center'><input type='checkbox' name='mandatory'></td>";
 	  if( jQuery(item).attr('valuetype') =='date'){
-		html += "<td align='center'><input type='checkbox' name='allowDateInFuture'></td>";
+		html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
 	  }
 	  else{
-		html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
+		html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
 	  }
 	  html += "</tr>";
 		
@@ -202,10 +196,10 @@ function selectAllProperties() {
     html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'></td>";
     html += "<td align='center'><input type='checkbox' name='mandatory'></td>";
     if( jQuery(item).attr('valuetype') =='date'){
-		html += "<td align='center'><input type='checkbox' name='allowDateInFuture'></td>";
+		html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
 	}
 	else{
-		html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
+		html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
 	}
 	html += "</tr>";
 	
@@ -300,33 +294,4 @@ function moveDownPropertyList() {
       }
     }
   }
-}
-
-function showAdvancedOptions()
-{
-	jQuery('[name=advanced]').show();
-	if( getFieldValue('type')!=3){
-		jQuery('[name=nonAnonymous]').show();
-		jQuery('.multiEvents').show();
-	}
-	else{
-		jQuery('.multiEvents').hide();
-	}
-	hideById('showAdvancedOptionLink');
-	showById('hideAdvancedOptionLink');
-}
-
-function hideAdvancedOptions()
-{
-	jQuery('[name=advanced]').hide();
-	if( getFieldValue('type')!=3){
-		jQuery('[name=nonAnonymous]').hide();
-		jQuery('.multiEvents').show();
-	}
-	else{
-		jQuery('.multiEvents').hide();
-	}
-	
-	hideById('hideAdvancedOptionLink');
-	showById('showAdvancedOptionLink');
 }
