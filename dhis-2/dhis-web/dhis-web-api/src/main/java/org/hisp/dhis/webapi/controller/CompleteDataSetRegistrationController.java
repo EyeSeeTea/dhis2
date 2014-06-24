@@ -224,7 +224,7 @@ public class CompleteDataSetRegistrationController
 
         if ( !multiOu )
         {
-            registerCompleteDataSet( dataSet, period, organisationUnit, storedBy );
+            registerCompleteDataSet( dataSet, period, organisationUnit, attributeOptionCombo, storedBy );
         }
         else
         {
@@ -232,7 +232,7 @@ public class CompleteDataSetRegistrationController
             {
                 if ( unit.getDataSets().contains( dataSet ) )
                 {
-                    registerCompleteDataSet( dataSet, period, unit, storedBy );
+                    registerCompleteDataSet( dataSet, period, unit, attributeOptionCombo, storedBy );
                 }
             }
         }
@@ -296,7 +296,7 @@ public class CompleteDataSetRegistrationController
 
         if ( !multiOu )
         {
-            unRegisterCompleteDataSet( dataSet, period, organisationUnit );
+            unRegisterCompleteDataSet( dataSet, period, organisationUnit, attributeOptionCombo );
         }
         else
         {
@@ -304,7 +304,7 @@ public class CompleteDataSetRegistrationController
             {
                 if ( unit.getDataSets().contains( dataSet ) )
                 {
-                    unRegisterCompleteDataSet( dataSet, period, unit );
+                    unRegisterCompleteDataSet( dataSet, period, unit, attributeOptionCombo );
                 }
             }
         }
@@ -314,17 +314,19 @@ public class CompleteDataSetRegistrationController
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private void registerCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit, String storedBy )
+    private void registerCompleteDataSet( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo, String storedBy )
     {
         I18nFormat format = i18nManager.getI18nFormat();
         
         CompleteDataSetRegistration registration = new CompleteDataSetRegistration();
 
-        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit ) == null )
+        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit, attributeOptionCombo ) == null )
         {
             registration.setDataSet( dataSet );
             registration.setPeriod( period );
             registration.setSource( organisationUnit );
+            registration.setAttributeOptionCombo( attributeOptionCombo );
             registration.setDate( new Date() );
             registration.setStoredBy( storedBy );
 
@@ -334,9 +336,10 @@ public class CompleteDataSetRegistrationController
         }
     }
 
-    private void unRegisterCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit )
+    private void unRegisterCompleteDataSet( DataSet dataSet, Period period, 
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit );
+        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit, attributeOptionCombo );
 
         if ( registration != null )
         {
