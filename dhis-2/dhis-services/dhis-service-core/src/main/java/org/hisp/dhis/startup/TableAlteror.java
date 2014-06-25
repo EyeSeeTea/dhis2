@@ -722,6 +722,9 @@ public class TableAlteror
         // validation rule group, new column alertbyorgunits
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
 
+        // correct wrong column type for datavalue_audit.lastupdated
+        executeSql( "ALTER TABLE datavalue_audit ALTER COLUMN lastupdated TYPE timestamp without time zone" );
+
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
         upgradeTranslations();
