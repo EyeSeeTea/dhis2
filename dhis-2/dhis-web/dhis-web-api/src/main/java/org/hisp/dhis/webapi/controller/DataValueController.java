@@ -29,6 +29,8 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.datavalue.DataValueAudit;
+import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.InputUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -83,6 +85,9 @@ public class DataValueController
 
     @Autowired
     private DataSetService dataSetService;
+
+    @Autowired
+    private DataValueAuditService dataValueAuditService;
 
     @Autowired
     private InputUtils inputUtils;
@@ -215,6 +220,18 @@ public class DataValueController
         }
         else
         {
+            // ---------------------------------------------------------------------
+            // Audit trail
+            // ---------------------------------------------------------------------
+            DataValue originalDataValue = dataValueService.getDataValue( dataValue.getDataElement(), dataValue.getPeriod(),
+                dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo() );
+
+            DataValueAudit dataValueAudit = new DataValueAudit( originalDataValue, originalDataValue.getValue(),
+                storedBy, now, originalDataValue.getComment());
+
+            // ---------------------------------------------------------------------
+            // Update DataValue
+            // ---------------------------------------------------------------------
             if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
             {
                 if ( comment == null )
@@ -246,6 +263,7 @@ public class DataValueController
             dataValue.setTimestamp( now );
             dataValue.setStoredBy( storedBy );
 
+            dataValueAuditService.addDataValueAudit( dataValueAudit );
             dataValueService.updateDataValue( dataValue );
         }
     }
