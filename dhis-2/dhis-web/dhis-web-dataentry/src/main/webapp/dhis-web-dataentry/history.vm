@@ -92,10 +92,10 @@ $( document ).ready( function() {
 	<tr>
 		<!-- Data Value History -->
 		<td colspan="2">
-			<<div class="historyHeader">>$encoder.htmlEncode( $i18n.getString( "datavalue_history" ) )</div>
+			<div class="historyHeader">$encoder.htmlEncode( $i18n.getString( "datavalue_history" ) )</div>
 			#foreach( $eachDataValueAudit in $dataValueAudits )
 				<p>
-					$encoder.htmlEncode( $i18n.getString( "on" ) ) $eachDataValueAudit.timeStamp, 
+					$encoder.htmlEncode( $i18n.getString( "on" ) ) $eachDataValueAudit.timestamp,
 					$eachDataValueAudit.storedBy 
 					$encoder.htmlEncode( $i18n.getString( "change_from" ) ) $eachDataValueAudit.value
 				</p>
