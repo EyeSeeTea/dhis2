@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.node;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,15 +25,13 @@ package org.hisp.dhis.dataelement;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-
-import org.hisp.dhis.common.GenericNameableObjectStore;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface DataElementGroupSetStore
-    extends GenericNameableObjectStore<DataElementGroupSet>
+public interface Pipeline<T>
 {
+    T process( T object );
 }

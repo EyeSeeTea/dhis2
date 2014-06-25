@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.node.transformers;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,31 +25,38 @@ package org.hisp.dhis.common;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
+
+import org.hisp.dhis.node.AbstractNode;
+import org.hisp.dhis.node.Node;
+import org.hisp.dhis.node.NodeTransformer;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import org.hisp.dhis.user.User;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface DimensionService
+@Component
+public class RenameNodeTransformer implements NodeTransformer
 {
-    DimensionalObject getDimension( String uid );
-    
-    List<NameableObject> getCanReadDimensionItems( String uid );
-    
-    <T extends IdentifiableObject> List<T> filterCanRead( User user, List<T> objects );
-    
-    DimensionType getDimensionType( String uid );
-    
-    List<DimensionalObject> getAllDimensions();
-    
-    List<DimensionalObject> getDimensionConstraints();
-    
-    DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead );
-    
-    void mergeAnalyticalObject( BaseAnalyticalObject object );
+    @Override
+    public String name()
+    {
+        return "rename";
+    }
+
+    @Override
+    public Node transform( Node node, List<String> args )
+    {
+        checkNotNull( node );
+        checkArgument( args.size() > 0, "rename requires a name parameter, .e.g: property|rename(newName)" );
+        ((AbstractNode) node).setName( args.get( 0 ) );
+
+        return node;
+    }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.node;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,31 +25,54 @@ package org.hisp.dhis.common;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
+
+import com.google.common.collect.Lists;
 
 import java.util.List;
 
-import org.hisp.dhis.user.User;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * @author Lars Helge Overland
+ * Simple linear pipeline that run transformers sequentially.
+ *
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface DimensionService
+public class LinearNodePipeline implements NodePipeline
 {
-    DimensionalObject getDimension( String uid );
-    
-    List<NameableObject> getCanReadDimensionItems( String uid );
-    
-    <T extends IdentifiableObject> List<T> filterCanRead( User user, List<T> objects );
-    
-    DimensionType getDimensionType( String uid );
-    
-    List<DimensionalObject> getAllDimensions();
-    
-    List<DimensionalObject> getDimensionConstraints();
-    
-    DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead );
-    
-    void mergeAnalyticalObject( BaseAnalyticalObject object );
+    private class NodeTransformerWithArgs
+    {
+        NodeTransformer transformer;
+        List<String> args;
+
+        private NodeTransformerWithArgs( NodeTransformer transformer, List<String> args )
+        {
+            this.transformer = transformer;
+            this.args = args;
+        }
+    }
+
+    private List<NodeTransformerWithArgs> nodeTransformers = Lists.newArrayList();
+
+    @Override
+    public Node process( Node node )
+    {
+        for ( NodeTransformerWithArgs nodeTransformerWithArgs : nodeTransformers )
+        {
+            node = nodeTransformerWithArgs.transformer.transform( node, nodeTransformerWithArgs.args );
+        }
+
+        return node;
+    }
+
+    public void addTransformer( NodeTransformer nodeTransformer )
+    {
+        nodeTransformers.add( new NodeTransformerWithArgs( checkNotNull( nodeTransformer ), Lists.<String>newArrayList() ) );
+    }
+
+    public void addTransformer( NodeTransformer nodeTransformer, List<String> args )
+    {
+        nodeTransformers.add( new NodeTransformerWithArgs( checkNotNull( nodeTransformer ), args ) );
+    }
 }

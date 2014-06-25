@@ -32,7 +32,6 @@ import static org.hisp.dhis.dataset.DataSet.TYPE_CUSTOM;
 import static org.hisp.dhis.dataset.DataSet.TYPE_SECTION;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,12 +39,9 @@ import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.struts2.ServletActionContext;
-import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.InputUtils;
-import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
-import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
@@ -58,6 +54,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -107,6 +105,13 @@ public class GenerateDataSetReportAction
     {
         this.periodService = periodService;
     }
+    
+    private DataElementCategoryService categoryService;
+    
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
+    }
 
     private I18nFormat format;
 
@@ -124,9 +129,6 @@ public class GenerateDataSetReportAction
     
     @Autowired
     private ContextUtils contextUtils;
-
-    @Autowired
-    private InputUtils inputUtils;
 
     // -------------------------------------------------------------------------
     // Input
@@ -152,21 +154,7 @@ public class GenerateDataSetReportAction
     {
         this.ou = ou;
     }
-    
-    private String cc;
-    
-    public void setCc( String cc )
-    {
-        this.cc = cc;
-    }
-    
-    private String cp;
-    
-    public void setCp( String cp )
-    {
-        this.cp = cp;
-    }
-    
+        
     private Set<String> dimension;
 
     public void setDimension( Set<String> dimension )
@@ -269,24 +257,11 @@ public class GenerateDataSetReportAction
      
         selectedOrgunit = organisationUnitService.getOrganisationUnit( ou );
 
-        Map<String, String> dimensions = new HashMap<String, String>();
-        
-        if ( dimension != null )
-        {
-            for ( String dim : dimension )
-            {
-                String[] dims = dim.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
-                
-                if ( dims.length == 2 && dims[0] != null && dims[1] != null )
-                {
-                    dimensions.put( dims[0], dims[1] );
-                }
-            }
-        }
+        Map<String, String> dimensions = ContextUtils.getDimensionsAndOptions( dimension );
         
         String dataSetType = selectedDataSet.getDataSetType();
 
-        DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( response, cc, cp );
+        DataElementCategoryOptionCombo attributeOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         registration = registrationService.getCompleteDataSetRegistration( selectedDataSet, selectedPeriod, selectedOrgunit, attributeOptionCombo );
         

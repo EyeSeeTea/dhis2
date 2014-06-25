@@ -37,7 +37,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.PresetProvider;
 import org.hisp.dhis.dxf2.parser.ParserService;
+import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.NodePropertyConverter;
+import org.hisp.dhis.node.NodeTransformer;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.SimpleNode;
@@ -51,6 +53,8 @@ import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -65,15 +69,20 @@ public class DefaultFieldFilterService implements FieldFilterService
     @Autowired
     private SchemaService schemaService;
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private Set<PresetProvider> presetProviders = Sets.newHashSet();
 
     @Autowired( required = false )
     private Set<NodePropertyConverter> nodePropertyConverters = Sets.newHashSet();
 
+    @Autowired( required = false )
+    private Set<NodeTransformer> nodeTransformers = Sets.newHashSet();
+
     private ImmutableMap<String, PresetProvider> presets = ImmutableMap.of();
 
     private ImmutableMap<String, NodePropertyConverter> converters = ImmutableMap.of();
+
+    private ImmutableMap<String, NodeTransformer> transformers = ImmutableMap.of();
 
     @PostConstruct
     public void init()
@@ -95,6 +104,15 @@ public class DefaultFieldFilterService implements FieldFilterService
         }
 
         converters = converterBuilder.build();
+
+        ImmutableMap.Builder<String, NodeTransformer> transformerBuilder = ImmutableMap.builder();
+
+        for ( NodeTransformer transformer : nodeTransformers )
+        {
+            transformerBuilder.put( transformer.name(), transformer );
+        }
+
+        transformers = transformerBuilder.build();
     }
 
     @Override
@@ -152,6 +170,8 @@ public class DefaultFieldFilterService implements FieldFilterService
 
         for ( String fieldKey : fieldMap.keySet() )
         {
+            AbstractNode child = null;
+
             if ( !schema.getPropertyMap().containsKey( fieldKey ) )
             {
                 continue;
@@ -179,9 +199,8 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                 if ( converter.canConvertTo( property, returnValue ) )
                 {
-                    complexNode.addChild( converter.convertTo( property, returnValue ) );
+                    child = (AbstractNode) converter.convertTo( property, returnValue );
                 }
-
             }
             else if ( fieldValue.isEmpty() )
             {
@@ -191,14 +210,14 @@ public class DefaultFieldFilterService implements FieldFilterService
                 {
                     Collection<?> collection = (Collection<?>) returnValue;
 
-                    CollectionNode collectionNode = complexNode.addChild( new CollectionNode( property.getCollectionName() ) );
-                    collectionNode.setNamespace( property.getNamespace() );
+                    child = complexNode.addChild( new CollectionNode( property.getCollectionName() ) );
+                    child.setNamespace( property.getNamespace() );
 
                     if ( property.isIdentifiableObject() )
                     {
                         for ( Object collectionObject : collection )
                         {
-                            collectionNode.addChild( getProperties( property, collectionObject, fields ) );
+                            child.addChild( getProperties( property, collectionObject, fields ) );
                         }
                     }
                     else if ( !property.isSimple() )
@@ -211,7 +230,7 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                             if ( !node.getChildren().isEmpty() )
                             {
-                                collectionNode.addChild( node );
+                                child.addChild( node );
                             }
                         }
                     }
@@ -219,13 +238,13 @@ public class DefaultFieldFilterService implements FieldFilterService
                     {
                         for ( Object collectionObject : collection )
                         {
-                            collectionNode.addChild( new SimpleNode( property.getName(), collectionObject ) );
+                            child.addChild( new SimpleNode( property.getName(), collectionObject ) );
                         }
                     }
                 }
                 else if ( property.isIdentifiableObject() )
                 {
-                    complexNode.addChild( getProperties( property, returnValue, fields ) );
+                    child = getProperties( property, returnValue, fields );
                 }
                 else
                 {
@@ -235,12 +254,11 @@ public class DefaultFieldFilterService implements FieldFilterService
                         simpleNode.setAttribute( property.isAttribute() );
                         simpleNode.setNamespace( property.getNamespace() );
 
-                        complexNode.addChild( simpleNode );
+                        child = simpleNode;
                     }
                     else
                     {
-                        complexNode.addChild( buildComplexNode( getFullFieldMap( propertySchema ), property.getKlass(),
-                            returnValue ) );
+                        child = buildComplexNode( getFullFieldMap( propertySchema ), property.getKlass(), returnValue );
                     }
                 }
             }
@@ -248,8 +266,8 @@ public class DefaultFieldFilterService implements FieldFilterService
             {
                 if ( property.isCollection() )
                 {
-                    CollectionNode collectionNode = complexNode.addChild( new CollectionNode( property.getCollectionName() ) );
-                    collectionNode.setNamespace( property.getNamespace() );
+                    child = complexNode.addChild( new CollectionNode( property.getCollectionName() ) );
+                    child.setNamespace( property.getNamespace() );
 
                     for ( Object collectionObject : (Collection<?>) returnValue )
                     {
@@ -257,19 +275,19 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                         if ( !node.getChildren().isEmpty() )
                         {
-                            collectionNode.addChild( node );
+                            child.addChild( node );
                         }
                     }
                 }
                 else
                 {
-                    ComplexNode node = buildComplexNode( fieldValue, property.getKlass(), returnValue );
-
-                    if ( !node.getChildren().isEmpty() )
-                    {
-                        complexNode.addChild( node );
-                    }
+                    child = buildComplexNode( fieldValue, property.getKlass(), returnValue );
                 }
+            }
+
+            if ( child != null )
+            {
+                complexNode.addChild( fieldValue.getPipeline().process( child ) );
             }
         }
 
@@ -287,6 +305,8 @@ public class DefaultFieldFilterService implements FieldFilterService
     {
         Schema schema = schemaService.getDynamicSchema( klass );
         List<String> cleanupFields = Lists.newArrayList();
+
+        Pattern pattern = Pattern.compile( "(\\w+)(?:::(\\w+))?(?:\\|rename\\((\\w+)\\))?" );
 
         for ( String fieldKey : Sets.newHashSet( fieldMap.keySet() ) )
         {
@@ -327,20 +347,32 @@ public class DefaultFieldFilterService implements FieldFilterService
             {
                 cleanupFields.add( fieldKey );
             }
-            else if ( fieldKey.contains( "::" ) )
+            else if ( fieldKey.contains( "::" ) || fieldKey.contains( "|rename(" ) )
             {
-                String[] split = fieldKey.split( "::" );
+                Matcher matcher = pattern.matcher( fieldKey );
 
-                if ( split.length == 2 )
+                if ( !matcher.find() )
                 {
-                    FieldMap value = new FieldMap();
+                    continue;
+                }
 
-                    if ( converters.containsKey( split[1] ) )
+                FieldMap value = new FieldMap();
+
+                if ( matcher.group( 2 ) != null )
+                {
+                    if ( converters.containsKey( matcher.group( 2 ) ) )
                     {
-                        value.setNodePropertyConverter( converters.get( split[1] ) );
-                        fieldMap.put( split[0], value );
+                        value.setNodePropertyConverter( converters.get( matcher.group( 2 ) ) );
                     }
                 }
+
+                if ( matcher.group( 3 ) != null )
+                {
+                    NodeTransformer transformer = transformers.get( "rename" );
+                    value.getPipeline().addTransformer( transformer, Lists.newArrayList( matcher.group( 3 ) ) );
+                }
+
+                fieldMap.put( matcher.group( 1 ), value );
 
                 cleanupFields.add( fieldKey );
             }

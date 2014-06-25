@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement.hibernate;
+package org.hisp.dhis.node;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,18 +25,12 @@ package org.hisp.dhis.dataelement.hibernate;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
-
-import org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore;
-import org.hisp.dhis.dataelement.DataElementGroupSet;
-import org.hisp.dhis.dataelement.DataElementGroupSetStore;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class HibernateDataElementGroupSetStore
-    extends HibernateDimensionalObjectStore<DataElementGroupSet>
-    implements DataElementGroupSetStore
+public interface NodeTransformer extends Transformer<Node>
 {
 }
