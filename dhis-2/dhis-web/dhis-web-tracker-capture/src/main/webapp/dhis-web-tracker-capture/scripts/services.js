@@ -442,37 +442,53 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
-.service('EntityQueryFactory', function(){  
+.factory('OperatorFactory', function(){
+    
+    var defaultOperators = ['IS', 'RANGE' ];
+    var boolOperators = ['yes', 'no'];
+    return{
+        defaultOperators: defaultOperators,
+        boolOperators: boolOperators
+    };  
+})
+
+.service('EntityQueryFactory', function(OperatorFactory){  
     
     this.getQueryForAttributes = function(attributes, enrollment){
-        
+
         var query = {url: null, hasValue: false};
         
         angular.forEach(attributes, function(attribute){           
 
-            if(attribute.valueType === 'date'){
+            if(attribute.valueType === 'date' || attribute.valueType === 'number'){
                 var q = '';
                 
-                if(attribute.startDate && attribute.startDate !== ''){
-                    query.hasValue = true;    
-                    q += 'GE:' + attribute.startDate + ':';
-                }
-                
-                if(attribute.endDate && attribute.endDate !== ''){
-                    query.hasValue = true;    
-                    q += 'GE:' + attribute.endDate + ':';
-                }
-                
+                if(attribute.operator === OperatorFactory.defaultOperators[0]){
+                    if(attribute.exactValue && attribute.exactValue !== ''){
+                        query.hasValue = true;    
+                        q += 'EQ:' + attribute.exactValue + ':';
+                    }
+                }                
+                if(attribute.operator === OperatorFactory.defaultOperators[1]){
+                    if(attribute.startValue && attribute.startValue !== ''){
+                        query.hasValue = true;    
+                        q += 'GT:' + attribute.startValue + ':';
+                    }
+                    if(attribute.endValue && attribute.endValue !== ''){
+                        query.hasValue = true;    
+                        q += 'LT:' + attribute.endValue + ':';
+                    }
+                }                
                 if(query.url){
                     if(q){
                         q = q.substr(0,q.length-1);
-                        query.url = query.url + '&filter=' + attribute.id + q;
+                        query.url = query.url + '&filter=' + attribute.id + ':' + q;
                     }
                 }
                 else{
                     if(q){
                         q = q.substr(0,q.length-1);
-                        query.url = 'filter=' + attribute.id + q;
+                        query.url = 'filter=' + attribute.id + ':' + q;
                     }
                 }
             }
@@ -507,46 +523,28 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             query.url = 'filter=' + attribute.id + ':LIKE:' + attribute.value;
                         }
                     }
-
                 }
-
-                if(attribute.filters){
-                    var q = '';
-                    angular.forEach(attribute.filters, function(filter){
-                        if(filter.value !== ''){
-                            q += filter.operand + ':' + filter.value + ':';
-                        }
-                    });
-                    q = q.substr(0,q.length-1);
-
-                    if(query.url){
-                        if(q){
-                            query.url = query.url + '&filter=' + attribute.id + ':' + q;
-                        }
-                    }
-                    else{
-                        if(q){
-                            query.url = 'filter=' + attribute.id + ':' + q;
-                        }
-                    }
-                }
-            }
-            
-            
+            }            
         });
         
         if(enrollment){
-            console.log('there is enrollment is:  ', enrollment);
             var q = '';
-            if(enrollment.programStartDate && enrollment.programStartDate !== ''){                
-                query.hasValue = true;
-                q += '&programStartDate=' + enrollment.programStartDate;
+            if(enrollment.operator === OperatorFactory.defaultOperators[0]){
+                if(enrollment.programExactDate && enrollment.programExactDate !== ''){
+                    query.hasValue = true;
+                    q += '&programStartDate=' + enrollment.programExactDate + '&programEndDate=' + enrollment.programExactDate;
+                }
             }
-            if(enrollment.programEndDate && enrollment.programEndDate !== ''){
-                query.hasValue = true;
-                q += '&programEndDate=' + enrollment.programEndDate;
-            }
-            
+            if(enrollment.operator === OperatorFactory.defaultOperators[1]){
+                if(enrollment.programStartDate && enrollment.programStartDate !== ''){                
+                    query.hasValue = true;
+                    q += '&programStartDate=' + enrollment.programStartDate;
+                }
+                if(enrollment.programEndDate && enrollment.programEndDate !== ''){
+                    query.hasValue = true;
+                    q += '&programEndDate=' + enrollment.programEndDate;
+                }
+            }            
             if(q){
                 if(query.url){
                     query.url = query.url + q;

@@ -2351,7 +2351,7 @@ Ext.onReady( function() {
 				widget: {
 					item_width: 288,
 					itemlabel_width: 95,
-					window_width: 310
+					window_width: 306
 				},
 				tool: {
 					item_width: 228,
