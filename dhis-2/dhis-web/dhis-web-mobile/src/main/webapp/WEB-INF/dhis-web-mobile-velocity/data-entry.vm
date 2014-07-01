@@ -59,8 +59,21 @@ function loadDataSetsPage() {
   var organisationUnit = fm.organisationUnit(Selected.orgUnit);
   var tmpl = $('#data-sets-template').html();
 
+  var dataSets = organisationUnit.dataSets.sort(function(a, b) {
+      var labelA = a.label.toLowerCase();
+      var labelB = b.label.toLowerCase();
+
+      if( labelA < labelB ) {
+          return -1;
+      } else if( labelA > labelB ) {
+          return 1;
+      }
+
+      return 0;
+  });
+
   $('#data-sets-page section[data-role="content"]').html(
-      _.template(tmpl, { 'dataSets': organisationUnit.dataSets })
+      _.template(tmpl, { 'dataSets': dataSets })
   );
 
   $('#data-set-list').listview();
@@ -163,6 +176,7 @@ function loadDataEntryPage() {
         _.template(tmpl, {
           'form': form,
           'valueMap': valueMap,
+          optionSets: fm.optionSets(),
           periodName: Selected.periodName,
           orgUnitName: Selected.orgUnitName
         })
@@ -363,7 +377,15 @@ $(document).bind('pagechange', function( event, data ) {
                     <label for='<%= fieldId %>'><%= field.label %></label>
 
                     <% if( field.type == 'TEXT' ) { %>
-                        <input type="text" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
+                        <% if( field.optionSet ) { %>
+                            <select type="" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255">
+                            <% for( var i=0,len=optionSets[field.optionSet].length; i<len; i++) { %>
+                                <option value="<%= optionSets[field.optionSet][i] %>" <% if( value == optionSets[field.optionSet][i] ) { %> selected="selected" <% } %>> <%= optionSets[field.optionSet][i] %></option>
+                            <% } %>
+                            </select>
+                        <% } else { %>
+                            <input type="text" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
+                        <% } %>
                     <% } else if( field.type == 'LONG_TEXT' ) { %>
                         <input type="text" id='<%= fieldId %>' name='<%= fieldId %>' data-dataElement='<%= field.dataElement %>' data-categoryOptionCombo='<%= field.categoryOptionCombo %>' maxlength="255" value="<%= value %>" />
                     <% } else if( field.type == 'DATE' ) { %>

@@ -162,7 +162,9 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
         }
 
-        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_ );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
+        
+        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
@@ -193,7 +195,9 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
         }
 
-        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_ );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
+        
+        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
@@ -427,6 +431,8 @@ public class DefaultDataValueSetService
 
         OrganisationUnit outerOrgUnit;
 
+        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+
         if ( orgUnitIdScheme.equals( IdentifiableProperty.UUID ) )
         {
             outerOrgUnit = dataValueSet.getOrgUnit() == null ? null : organisationUnitService.getOrganisationUnitByUuid( dataValueSet.getOrgUnit() );
@@ -439,14 +445,12 @@ public class DefaultDataValueSetService
         if ( dataSet != null && completeDate != null )
         {
             notifier.notify( id, "Completing data set" );
-            handleComplete( dataSet, completeDate, outerOrgUnit, outerPeriod, summary );
+            handleComplete( dataSet, completeDate, outerPeriod, outerOrgUnit, fallbackCategoryOptionCombo, summary ); //TODO
         }
         else
         {
             summary.setDataSetComplete( Boolean.FALSE.toString() );
         }
-
-        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         String currentUser = currentUserService.getCurrentUsername();
 
@@ -542,7 +546,8 @@ public class DefaultDataValueSetService
                 internalValue.setStoredBy( dataValue.getStoredBy() );
             }
 
-            internalValue.setTimestamp( parseDate( dataValue.getLastUpdated() ) );
+            internalValue.setCreated( parseDate( dataValue.getCreated() ) );
+            internalValue.setLastUpdated( parseDate( dataValue.getLastUpdated() ) );
             internalValue.setComment( trimToNull( dataValue.getComment() ) );
             internalValue.setFollowup( dataValue.getFollowup() );
 
@@ -591,7 +596,8 @@ public class DefaultDataValueSetService
     // Supportive methods
     //--------------------------------------------------------------------------
 
-    private void handleComplete( DataSet dataSet, Date completeDate, OrganisationUnit orgUnit, Period period, ImportSummary summary )
+    private void handleComplete( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
+        DataElementCategoryOptionCombo attributeOptionCombo, ImportSummary summary )
     {
         if ( orgUnit == null )
         {
@@ -607,7 +613,7 @@ public class DefaultDataValueSetService
 
         period = periodService.reloadPeriod( period );
 
-        CompleteDataSetRegistration completeAlready = registrationService.getCompleteDataSetRegistration( dataSet, period, orgUnit );
+        CompleteDataSetRegistration completeAlready = registrationService.getCompleteDataSetRegistration( dataSet, period, orgUnit, attributeOptionCombo );
 
         String username = currentUserService.getCurrentUsername();
 
@@ -620,7 +626,7 @@ public class DefaultDataValueSetService
         }
         else
         {
-            CompleteDataSetRegistration registration = new CompleteDataSetRegistration( dataSet, period, orgUnit, completeDate, username );
+            CompleteDataSetRegistration registration = new CompleteDataSetRegistration( dataSet, period, orgUnit, attributeOptionCombo, completeDate, username );
 
             registrationService.saveCompleteDataSetRegistration( registration );
         }

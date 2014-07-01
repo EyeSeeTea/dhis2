@@ -6,7 +6,8 @@ trackerCapture.controller('DashboardController',
                 $modal,
                 $timeout,
                 storage,
-                TEIService,  
+                TEIService, 
+                TEService,
                 ProgramFactory,
                 CurrentSelection,
                 TranslationService) {
@@ -16,12 +17,12 @@ trackerCapture.controller('DashboardController',
     
     //dashboard items   
     $rootScope.dashboardWidgets = {bigger: [], smaller: []};       
-    $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true};
-    $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true};
-    $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false};
-    $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true};
-    $rootScope.relationshipWidget = {title: 'relationship', view: "components/relationship/relationship.html", show: true};
-    $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true};    
+    $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true};
+    $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true};
+    $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true};
+    $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true};
+    $rootScope.relationshipWidget = {title: 'relationship', view: "components/relationship/relationship.html", show: true, expand: true};
+    $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true};    
    
     $rootScope.dashboardWidgets.bigger.push($rootScope.enrollmentWidget);
     $rootScope.dashboardWidgets.bigger.push($rootScope.dataentryWidget);
@@ -31,45 +32,57 @@ trackerCapture.controller('DashboardController',
     $rootScope.dashboardWidgets.smaller.push($rootScope.notesWidget);
     
     //selections
-    $scope.selectedEntityId = null;
+    $scope.selectedTeiId = null;
     $scope.selectedProgramId = null;
     
-    $scope.selectedEntityId = ($location.search()).selectedEntityId; 
-    $scope.selectedProgramId = ($location.search()).selectedProgramId; 
+    $scope.selectedTeiId = ($location.search()).tei; 
+    $scope.selectedProgramId = ($location.search()).program; 
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-    $scope.selectedProgram = null;
+    $scope.selectedProgram;
     $scope.programs = []; 
-    $scope.selectedEntity;
+    $scope.selectedTei;
         
-    if( $scope.selectedEntityId ){
+    if( $scope.selectedTeiId ){
         
         //Fetch the selected entity
-        TEIService.get($scope.selectedEntityId).then(function(data){
-            $scope.selectedEntity = data;
+        TEIService.get($scope.selectedTeiId).then(function(data){
+            $scope.selectedTei = data;
             
-            ProgramFactory.getAll().then(function(programs){  
-            
-                angular.forEach(programs, function(program){
-                    if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
-                       program.trackedEntity.id === $scope.selectedEntity.trackedEntity){
-                        $scope.programs.push(program);
-                    }
-                    
-                    if($scope.selectedProgramId && program.id === $scope.selectedProgramId){
-                        $scope.selectedProgram = program;
-                    }
-                });
+            //get the entity type
+            TEService.get($scope.selectedTei.trackedEntity).then(function(te){
+                $scope.trackedEntity = te;
                 
-                //broadcast selected items for dashboard controllers
-                $scope.broadCastProgram();                                    
-            });
+                ProgramFactory.getAll().then(function(programs){  
+            
+                    //get programs valid for the selected ou and tei
+                    angular.forEach(programs, function(program){
+                        if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
+                           program.trackedEntity.id === $scope.selectedTei.trackedEntity){
+                            $scope.programs.push(program);
+                        }
+
+                        if($scope.selectedProgramId && program.id === $scope.selectedProgramId){
+                            $scope.selectedProgram = program;
+                        }
+                    });
+                    
+                    //broadcast selected items for dashboard controllers
+                    CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null});
+                    $scope.broadCastSelections();                                    
+                });
+            });            
         });       
-    }   
+    }
     
-    $scope.broadCastProgram = function(){
-        CurrentSelection.set({tei: $scope.selectedEntity, pr: $scope.selectedProgram});
+    $scope.broadCastSelections = function(){
+        
+        var selections = CurrentSelection.get();
+        $scope.selectedTei = selections.tei;
+        $scope.trackedEntity = selections.te;
+        $scope.selectedEnrollment = selections.enrollment;
+        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null});
         $timeout(function() { 
-            $rootScope.$broadcast('selectedEntity', {programExists: $scope.programs.length > 0});
+            $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
         }, 100); 
     };
      
@@ -85,6 +98,10 @@ trackerCapture.controller('DashboardController',
     
     $scope.removeWidget = function(widget){        
         widget.show = false;
+    };
+    
+    $scope.expandCollapse = function(widget){
+        widget.expand = !widget.expand;
     };
     
     $scope.showHideWidgets = function(){

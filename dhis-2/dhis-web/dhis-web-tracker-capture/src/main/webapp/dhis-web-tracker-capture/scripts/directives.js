@@ -78,6 +78,29 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
     };
 })
 
+.directive('d2PopOver', function($compile, $templateCache){
+    return {        
+        restrict: 'EA',
+        link: function(scope, element, attrs){
+            var content = $templateCache.get("note.html");
+            content = $compile(content)(scope);
+            var options = {
+                    content: content,
+                    placement: 'bottom',
+                    trigger: 'hover',
+                    html: true,
+                    title: scope.title               
+                };            
+            $(element).popover(options);
+        },
+        scope: {
+            content: '=',
+            title: '@details',
+            template: "@template"
+        }
+    };
+})
+
 .directive('sortable', function() {        
 
     return {        
@@ -227,5 +250,66 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
         element.draggable();
       }
     };  
+})
+
+.directive('serversidePaginator', function factory() {
+    return {
+        restrict: 'E',
+        controller: function ($scope, Paginator) {
+            $scope.paginator = Paginator;
+        },
+        templateUrl: 'views/serverside-pagination.html'
+    };
+})
+
+.directive('clientsidePaginator', function factory() {
+    return {
+        restrict: 'E',
+        controller: function ($scope, Paginator) {
+            $scope.paginator = Paginator;
+        },
+        templateUrl: 'views/clientside-pagination.html'
+    };
+})
+
+.directive('d2Enter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.d2Enter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+})
+
+.directive('searchDropDownWidth', function() {        
+
+    return {        
+        restrict: 'A',        
+        link: function(scope, element, attrs){
+            $("#searchDropDown").width($("#searchDropDownParent").width());
+            $('#searchDropDown').on('click', "[data-stop-propagation]", function(e) {
+                e.stopPropagation();
+            });
+        }  
+    };
+})
+
+.directive('selectDropDownWidth', function() {        
+
+    return {        
+        restrict: 'A',        
+        link: function(scope, element, attrs){
+            $("#selectDropDown").width($("#selectDropDownParent").width());
+            $("#selectDropDown").css('margin-right: 15x;');
+            $(".select-drop-down-button").on('click', function(e) {
+                e.stopPropagation();
+                $("#selectDropDown").dropdown('toggle');
+            });
+        }  
+    };
 });
 

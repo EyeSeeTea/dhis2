@@ -69,7 +69,9 @@ public class DataValue
 
     private String storedBy;
 
-    private Date timestamp;
+    private Date created;
+
+    private Date lastUpdated;
 
     private String comment;
 
@@ -107,11 +109,11 @@ public class DataValue
      * @param attributeOptionCombo the attribute option combo.
      * @param value the value.
      * @param storedBy the user that stored this data value.
-     * @param timestamp the time of creation of this data value.
+     * @param lastUpdated the time of the last update to this data value.
      * @param comment the comment.
      */
     public DataValue( DataElement dataElement, Period period, OrganisationUnit source, DataElementCategoryOptionCombo categoryOptionCombo, 
-        DataElementCategoryOptionCombo attributeOptionCombo, String value, String storedBy, Date timestamp, String comment )
+        DataElementCategoryOptionCombo attributeOptionCombo, String value, String storedBy, Date lastUpdated, String comment )
     {
         this.dataElement = dataElement;
         this.period = period;
@@ -120,7 +122,7 @@ public class DataValue
         this.attributeOptionCombo = attributeOptionCombo;
         this.value = value;
         this.storedBy = storedBy;
-        this.timestamp = timestamp;
+        this.lastUpdated = lastUpdated;
         this.comment = comment;
     }
 
@@ -304,16 +306,26 @@ public class DataValue
         this.storedBy = storedBy;
     }
 
-    public Date getTimestamp()
+    public Date getCreated()
     {
-        return timestamp;
+        return created;
     }
 
-    public void setTimestamp( Date timestamp )
+    public void setCreated( Date created )
     {
-        this.timestamp = timestamp;
+        this.created = created;
     }
 
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+    
     public String getComment()
     {
         return comment;

@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.controller.user;
  */
 
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.webapi.controller.exception.FilterTooShortException;
 import org.hisp.dhis.webapi.controller.exception.NotAuthenticatedException;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -258,6 +259,15 @@ public class CurrentUserController
         userService.updateUser( currentUser );
     }
 
+    @RequestMapping( value = "/authorization", produces = { "application/json", "text/*" } )
+    public void getAuthorization( HttpServletResponse response ) throws IOException
+    {
+        User currentUser = currentUserService.getCurrentUser();
+
+        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
+        JacksonUtils.toJson( response.getOutputStream(), currentUser.getUserCredentials().getAllAuthorities() );
+    }
+
     @RequestMapping( value = "/authorization/{auth}", produces = { "application/json", "text/*" } )
     public void hasAuthorization( @PathVariable String auth, HttpServletResponse response ) throws IOException
     {
@@ -468,7 +478,8 @@ public class CurrentUserController
 
     @SuppressWarnings( "unchecked" )
     @RequestMapping( value = { "/assignedDataSets", "/dataSets" }, produces = { "application/json", "text/*" } )
-    public void getDataSets( HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
+    public void getDataSets( @RequestParam( defaultValue = "false" ) boolean optionSets, @RequestParam( defaultValue = "50" ) int maxOptions,
+        HttpServletResponse response, @RequestParam Map<String, String> parameters ) throws IOException, NotAuthenticatedException
     {
         User currentUser = currentUserService.getCurrentUser();
 
@@ -560,6 +571,24 @@ public class CurrentUserController
 
                 forms.getForms().put( uid, FormUtils.fromDataSet( dataSet ) );
                 formOrganisationUnit.getDataSets().add( formDataSet );
+
+                if ( optionSets )
+                {
+                    for ( DataElement dataElement : dataSet.getDataElements() )
+                    {
+                        if ( dataElement.hasOptionSet() )
+                        {
+                            int size = maxOptions;
+
+                            if ( size >= dataElement.getOptionSet().getOptions().size() )
+                            {
+                                size = dataElement.getOptionSet().getOptions().size();
+                            }
+
+                            forms.getOptionSets().put( dataElement.getOptionSet().getUid(), dataElement.getOptionSet().getOptions().subList( 0, size - 1 ) );
+                        }
+                    }
+                }
             }
 
             forms.getOrganisationUnits().put( formOrganisationUnit.getId(), formOrganisationUnit );

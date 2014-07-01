@@ -34,6 +34,7 @@ import java.util.List;
 
 import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
+import org.hisp.dhis.api.mobile.model.Interpretation;
 import org.hisp.dhis.api.mobile.model.Message;
 import org.hisp.dhis.api.mobile.model.MessageConversation;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
@@ -58,7 +59,7 @@ public interface ActivityReportingService
 
     Patient findPatient( int patientId )
         throws NotAllowedException;
-    
+
     PatientList findPatients( String patientIds )
         throws NotAllowedException;
 
@@ -70,6 +71,9 @@ public interface ActivityReportingService
 
     Patient enrollProgram( String enrollInfo,
         List<org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage> mobileProgramStageList, Date incidentDate )
+        throws NotAllowedException;
+
+    public String completeProgramInstance( int programId )
         throws NotAllowedException;
 
     Collection<org.hisp.dhis.trackedentity.TrackedEntityAttribute> getPatientAtts( String programId );
@@ -123,4 +127,12 @@ public interface ActivityReportingService
     String replyMessage( Message message )
         throws NotAllowedException;
 
+    Interpretation getInterpretation( String uId )
+        throws NotAllowedException;
+
+    String postInterpretation( String data )
+        throws NotAllowedException;
+
+    String postInterpretationComment( String data )
+        throws NotAllowedException;
 }

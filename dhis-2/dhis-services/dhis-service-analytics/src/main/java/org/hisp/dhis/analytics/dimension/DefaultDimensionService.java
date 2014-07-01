@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.dimension;
 
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
@@ -118,6 +119,7 @@ public class DefaultDimensionService
 
         if ( cat != null )
         {
+            cat.setDimensionType( DimensionType.CATEGORY );
             return cat;
         }
 
@@ -125,6 +127,7 @@ public class DefaultDimensionService
 
         if ( degs != null )
         {
+            degs.setDimensionType( DimensionType.DATAELEMENT_GROUPSET );
             return degs;
         }
 
@@ -132,6 +135,7 @@ public class DefaultDimensionService
 
         if ( ougs != null )
         {
+            ougs.setDimensionType( DimensionType.ORGANISATIONUNIT_GROUPSET );
             return ougs;
         }
 
@@ -139,6 +143,7 @@ public class DefaultDimensionService
 
         if ( cogs != null )
         {
+            cogs.setDimensionType( DimensionType.CATEGORYOPTION_GROUPSET );
             return cogs;
         }
         
@@ -146,14 +151,16 @@ public class DefaultDimensionService
         
         if ( tea != null )
         {
+            tea.setDimensionType( DimensionType.TRACKED_ENTITY_ATTRIBUTE );
             return tea;
         }
         
-        DataElement de = identifiableObjectManager.get( DataElement.class, uid );
+        DataElement tde = identifiableObjectManager.get( DataElement.class, uid );
         
-        if ( de != null )
+        if ( tde != null )
         {
-            return de;
+            tde.setDimensionType( DimensionType.TRACKED_ENTITY_DATAELEMENT );
+            return tde;
         }
         
         return null;
@@ -169,13 +176,20 @@ public class DefaultDimensionService
         {            
             User user = currentUserService.getCurrentUser();
 
-            items.addAll( filterCanRead( user, dimension.getItems() ) );
+            items.addAll( getCanReadObjects( user, dimension.getItems() ) );
         }
 
         return items;
     }
     
-    public <T extends IdentifiableObject> List<T> filterCanRead( User user, List<T> objects )
+    public <T extends IdentifiableObject> List<T> getCanReadObjects( List<T> objects )
+    {
+        User user = currentUserService.getCurrentUser();
+        
+        return getCanReadObjects( user, objects );
+    }
+    
+    public <T extends IdentifiableObject> List<T> getCanReadObjects( User user, List<T> objects )
     {        
         List<T> list = new ArrayList<T>( objects );
         Iterator<T> iterator = list.iterator();
@@ -267,7 +281,7 @@ public class DefaultDimensionService
 
         User user = currentUserService.getCurrentUser();
         
-        return filterCanRead( user, dimensions );
+        return getCanReadObjects( user, dimensions );
     }
     
     public List<DimensionalObject> getDimensionConstraints()
@@ -303,6 +317,23 @@ public class DefaultDimensionService
             mergeDimensionalObjects( object, object.getRows() );
             mergeDimensionalObjects( object, object.getFilters() );
         }
+    }
+    
+    public DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead )
+    {
+        DimensionalObject dimension = getDimension( uid );
+        
+        BaseDimensionalObject copy = new BaseDimensionalObject();
+        copy.mergeWith( dimension );
+        
+        if ( filterCanRead )
+        {
+            User user = currentUserService.getCurrentUser();
+            List<NameableObject> items = getCanReadObjects( user, dimension.getItems() );
+            copy.setItems( items );
+        }
+        
+        return copy;
     }
 
     //--------------------------------------------------------------------------

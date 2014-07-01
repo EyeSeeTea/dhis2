@@ -29,9 +29,9 @@ package org.hisp.dhis.dataset;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -62,6 +62,13 @@ public class DefaultCompleteDataSetRegistrationService
     {
         this.messageService = messageService;
     }
+    
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
+    }
 
     // -------------------------------------------------------------------------
     // CompleteDataSetRegistrationService
@@ -69,6 +76,11 @@ public class DefaultCompleteDataSetRegistrationService
 
     public void saveCompleteDataSetRegistration( CompleteDataSetRegistration registration )
     {
+        if ( registration.getAttributeOptionCombo() == null )
+        {
+            registration.setAttributeOptionCombo( categoryService.getDefaultDataElementCategoryOptionCombo() );
+        }
+
         completeDataSetRegistrationStore.saveCompleteDataSetRegistration( registration );
     }
 
@@ -92,9 +104,10 @@ public class DefaultCompleteDataSetRegistrationService
         completeDataSetRegistrationStore.deleteCompleteDataSetRegistration( registration );
     }
 
-    public CompleteDataSetRegistration getCompleteDataSetRegistration( DataSet dataSet, Period period, OrganisationUnit source )
+    public CompleteDataSetRegistration getCompleteDataSetRegistration( DataSet dataSet, Period period, 
+        OrganisationUnit source, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        return completeDataSetRegistrationStore.getCompleteDataSetRegistration( dataSet, period, source );
+        return completeDataSetRegistrationStore.getCompleteDataSetRegistration( dataSet, period, source, attributeOptionCombo );
     }
         
     public Collection<CompleteDataSetRegistration> getAllCompleteDataSetRegistrations()
@@ -107,34 +120,6 @@ public class DefaultCompleteDataSetRegistrationService
     {
         return completeDataSetRegistrationStore.getCompleteDataSetRegistrations( dataSets, sources, periods );
     }    
-
-    @SuppressWarnings( "unchecked" )
-    @Deprecated
-    public int getCompleteDataSetRegistrationsForDataSet( DataSet dataSet, Collection<OrganisationUnit> sources, Period period )
-    {
-        final Collection<OrganisationUnit> intersectingSources = CollectionUtils.intersection( sources, dataSet.getSources() );
-        
-        if ( intersectingSources == null || intersectingSources.size() == 0 )
-        {
-            return 0;
-        }        
-        
-        return completeDataSetRegistrationStore.getCompleteDataSetRegistrations( dataSet, intersectingSources, period ).size();
-    }
-    
-    @SuppressWarnings( "unchecked" )
-    @Deprecated
-    public int getCompleteDataSetRegistrationsForDataSet( DataSet dataSet, Collection<OrganisationUnit> sources, Period period, Date deadline )
-    {
-        final Collection<OrganisationUnit> intersectingSources = CollectionUtils.intersection( sources, dataSet.getSources() );
-        
-        if ( intersectingSources == null || intersectingSources.size() == 0 )
-        {
-            return 0;
-        }
-        
-        return completeDataSetRegistrationStore.getCompleteDataSetRegistrations( dataSet, intersectingSources, period, deadline ).size();
-    }
     
     public void deleteCompleteDataSetRegistrations( DataSet dataSet )
     {

@@ -45,6 +45,8 @@ import org.hisp.dhis.api.mobile.model.DataSetList;
 import org.hisp.dhis.api.mobile.model.DataSetValue;
 import org.hisp.dhis.api.mobile.model.DataSetValueList;
 import org.hisp.dhis.api.mobile.model.DataStreamSerializable;
+import org.hisp.dhis.api.mobile.model.Interpretation;
+import org.hisp.dhis.api.mobile.model.InterpretationComment;
 import org.hisp.dhis.api.mobile.model.Message;
 import org.hisp.dhis.api.mobile.model.MobileModel;
 import org.hisp.dhis.api.mobile.model.ModelList;
@@ -57,6 +59,7 @@ import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientList;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientIdentifierAndAttribute;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Program;
+import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramInstance;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.ProgramStage;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Relationship;
 import org.hisp.dhis.i18n.I18nService;
@@ -398,6 +401,16 @@ public class MobileOrganisationUnitController
         return activityReportingService.saveProgramStage( programStage, patientId, id );
     }
 
+    @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/completeProgramInstance" )
+    @ResponseBody
+    public String completeProgramInstance( @PathVariable
+    int id, @RequestBody
+    ProgramInstance programInstance )
+        throws NotAllowedException
+    {
+        return activityReportingService.completeProgramInstance( programInstance.getId() );
+    }
+
     @RequestMapping( method = RequestMethod.POST, value = "{clientVersion}/LWUIT/orgUnits/{id}/uploadSingleEventWithoutRegistration" )
     @ResponseBody
     public String saveSingleEventWithoutRegistration( @PathVariable
@@ -710,6 +723,41 @@ public class MobileOrganisationUnitController
     {
         return activityReportingService.replyMessage( message );
 
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/downloadInterpretation" )
+    @ResponseBody
+    public Interpretation downloadInterpretation( String clientVersion, @PathVariable
+    int id, @RequestHeader( "uId" )
+    String uId )
+        throws NotAllowedException
+    {
+        Interpretation interpretation = activityReportingService.getInterpretation( uId );
+        return interpretation;
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/postInterpretation" )
+    @ResponseBody
+    public Interpretation postInterpretation( String clientVersion, @PathVariable
+    int id, @RequestHeader( "data" )
+    String data )
+        throws NotAllowedException
+    {
+        Interpretation interpretation = new Interpretation();
+        interpretation.setText( activityReportingService.postInterpretation( data ) );
+        return interpretation;
+    }
+
+    @RequestMapping( method = RequestMethod.GET, value = "{clientVersion}/orgUnits/{id}/postComment" )
+    @ResponseBody
+    public InterpretationComment postInterpretationComment( String clientVersion, @PathVariable
+    int id, @RequestHeader( "data" )
+    String data )
+        throws NotAllowedException
+    {
+        InterpretationComment message = new InterpretationComment();
+        message.setText( activityReportingService.postInterpretationComment( data ) );
+        return message;
     }
 
 }

@@ -882,6 +882,8 @@ function loadProgramStageFromServer( programStageInstanceId ) {
 				}
 			}
 
+			disableCompletedButton(eval(data.completed));
+			
 			if(data.executionDate) {
 				$( '#executionDate' ).val(data.executionDate);
 				$( '#entryForm' ).removeClass( 'hidden' ).addClass( 'visible' );
@@ -1253,4 +1255,10 @@ function filterOnSection()
         $( '.formSection' ).hide();
         $( '#sec_' + value ).show();
     }
+}
+
+function isNumber( value )
+{
+	var regex = /^(-?0|-?[1-9]\d*)(\.\d+)?(E\d+)?$/;
+	return regex.test( value );
 }

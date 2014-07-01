@@ -75,9 +75,9 @@ public class DefaultDataElementService
         this.dataElementGroupStore = dataElementGroupStore;
     }
 
-    private DataElementGroupSetStore dataElementGroupSetStore;
+    private GenericNameableObjectStore<DataElementGroupSet> dataElementGroupSetStore;
 
-    public void setDataElementGroupSetStore( DataElementGroupSetStore dataElementGroupSetStore )
+    public void setDataElementGroupSetStore( GenericNameableObjectStore<DataElementGroupSet> dataElementGroupSetStore )
     {
         this.dataElementGroupSetStore = dataElementGroupSetStore;
     }
@@ -178,11 +178,6 @@ public class DefaultDataElementService
     public Collection<DataElement> getAggregateableDataElements()
     {
         return i18n( i18nService, dataElementStore.getAggregateableDataElements() );
-    }
-
-    public Collection<DataElement> getAllActiveDataElements()
-    {
-        return i18n( i18nService, dataElementStore.getAllActiveDataElements() );
     }
 
     public DataElement getDataElementByName( String name )

@@ -114,11 +114,6 @@ public class DataElement
     protected transient String displayFormName;
 
     /**
-     * If this DataElement is active or not (enabled or disabled).
-     */
-    private boolean active;
-
-    /**
      * The domain of this DataElement; e.g. DataElementDomainType.aggregate or
      * DataElementDomainType.TRACKER.
      */
@@ -408,7 +403,7 @@ public class DataElement
 
     public String getDisplayFormName()
     {
-        return (displayFormName != null && !displayFormName.trim().isEmpty()) ? displayFormName : formName;
+        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : formName;
     }
 
     public void setDisplayFormName( String displayFormName )
@@ -465,19 +460,6 @@ public class DataElement
     public void setFormName( String formName )
     {
         this.formName = formName;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isActive()
-    {
-        return active;
-    }
-
-    public void setActive( boolean active )
-    {
-        this.active = active;
     }
 
     @JsonProperty
@@ -702,7 +684,6 @@ public class DataElement
             DataElement dataElement = (DataElement) other;
 
             formName = dataElement.getFormName() == null ? formName : dataElement.getFormName();
-            active = dataElement.isActive();
             zeroIsSignificant = dataElement.isZeroIsSignificant();
             domainType = dataElement.getDomainType() == null ? domainType : dataElement.getDomainType();
             type = dataElement.getType() == null ? type : dataElement.getType();

@@ -60,6 +60,9 @@ public class TrackedEntityInstanceQueryParams
     public static final String META_DATA_NAMES_KEY = "names";
     public static final String PAGER_META_KEY = "pager";
     
+    public static final int DEFAULT_PAGE = 1;
+    public static final int DEFAULT_PAGE_SIZE = 50;
+    
     /**
      * Query value, will apply to all relevant attributes.
      */
@@ -147,6 +150,11 @@ public class TrackedEntityInstanceQueryParams
      */
     private Integer pageSize;
     
+    /**
+     * Indicates whether paging should be skipped.
+     */
+    private boolean skipPaging;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -190,8 +198,8 @@ public class TrackedEntityInstanceQueryParams
      * <li>
      * If a query item is specified as an attribute item as well as a filter 
      * item, the filter item will be removed. In that case, if the attribute 
-     * item does not have a filter value and the filter item has a filter value, 
-     * it will be applied to the attribute item. 
+     * item does not have any filters and the filter item has one or more filters, 
+     * these will be applied to the attribute item. 
      * </li>
      * </ul> 
      */
@@ -211,7 +219,7 @@ public class TrackedEntityInstanceQueryParams
                 
                 if ( !attribute.hasFilter() && filter.hasFilter() )
                 {
-                    attribute.getFilters().add( filter.getFilters().iterator().next() );
+                    attribute.getFilters().addAll( filter.getFilters() );
                 }
                 
                 filterIter.remove();
@@ -464,7 +472,7 @@ public class TrackedEntityInstanceQueryParams
      */
     public int getPageWithDefault()
     {
-        return page != null && page > 0 ? page : 1;
+        return page != null && page > 0 ? page : DEFAULT_PAGE;
     }
     
     /**
@@ -472,7 +480,7 @@ public class TrackedEntityInstanceQueryParams
      */
     public int getPageSizeWithDefault()
     {
-        return pageSize != null && pageSize >= 0 ? pageSize : 50;
+        return pageSize != null && pageSize >= 0 ? pageSize : DEFAULT_PAGE_SIZE;
     }
 
     /**
@@ -481,6 +489,31 @@ public class TrackedEntityInstanceQueryParams
     public int getOffset()
     {
         return ( getPageWithDefault() - 1 ) * getPageSizeWithDefault();
+    }
+    
+    /**
+     * Sets paging properties to default values.
+     */
+    public void setDefaultPaging()
+    {
+        this.page = DEFAULT_PAGE;
+        this.pageSize = DEFAULT_PAGE_SIZE;
+        this.skipPaging = false;
+    }
+
+    // -------------------------------------------------------------------------
+    // toString
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String toString()
+    {
+        return "[Query: " + query + ", Attributes: " + attributes + ", filters: " + filters + 
+            ", program: " + program + ", program status " + programStatus + ", follow up: " + followUp + 
+            ", program start date: " + programStartDate + ", program end date: " + programEndDate + 
+            ", tracked entity: " + trackedEntity + ", org unit mode: " + organisationUnitMode + 
+            ", event start date: " + eventStartDate + ", event end date: " + eventEndDate + 
+            ", event status: " + eventStatus + "]";
     }
     
     // -------------------------------------------------------------------------
@@ -655,5 +688,15 @@ public class TrackedEntityInstanceQueryParams
     public void setPageSize( Integer pageSize )
     {
         this.pageSize = pageSize;
+    }
+
+    public boolean isSkipPaging()
+    {
+        return skipPaging;
+    }
+
+    public void setSkipPaging( boolean skipPaging )
+    {
+        this.skipPaging = skipPaging;
     }
 }

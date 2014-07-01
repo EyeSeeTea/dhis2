@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.hisp.dhis.system.util.ValidationUtils;
@@ -75,6 +76,9 @@ public class TableAlteror
 
     @Autowired
     private StatementBuilder statementBuilder;
+    
+    @Autowired
+    private DataElementCategoryService categoryService;
 
     // -------------------------------------------------------------------------
     // Action Implementation
@@ -272,13 +276,15 @@ public class TableAlteror
         
         executeSql( "UPDATE trackedentityaudit SET accessedmodule='tracked_entity_instance_dashboard' WHERE accessedmodule='instance_dashboard' or accessedmodule='patient_dashboard'" );
         
-        updateUidColumn();
-        
         executeSql( "UPDATE program_attributes SET allowDateInFuture='false' WHERE allowDateInFuture is null" );
 
         executeSql( "UPDATE programstageinstance SET status=1 WHERE completed=true" );
         executeSql( "ALTER TABLE programstageinstance DROP COLUMN completed" );
         
+        executeSql( "update program_attributes set mandatory = false where mandatory is null;" );
+        
+        int attributeoptioncomboid = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
+        executeSql( "update datavalue set attributeoptioncomboid=" + attributeoptioncomboid + " where storedby='aggregated_from_tracker' or comment='aggregated_from_tracker'" );
     }
 
     // -------------------------------------------------------------------------
@@ -411,41 +417,6 @@ public class TableAlteror
 
             jdbcTemplate.execute( "UPDATE trackedentityinstance SET trackedentityid="
                 + "  (SELECT trackedentityid FROM trackedentity where name='Person') where trackedentityid is null" );
-        }
-    }
-
-    private void updateUidColumn()
-    {
-        updateUidColumn( "trackedentityinstancereminder" );
-        updateUidColumn( "programvalidation" );
-    }
-
-    private void updateUidColumn( String tableName )
-    {
-        StatementHolder holder = statementManager.getHolder();
-
-        try
-        {
-            Statement statement = holder.getStatement();
-
-            ResultSet resultSet = statement.executeQuery( "SELECT " + tableName + "id FROM " + tableName
-                + " where uid is null" );
-
-            while ( resultSet.next() )
-            {
-                String uid = CodeGenerator.generateCode();
-
-                executeSql( "UPDATE " + tableName + " SET uid='" + uid + "'  WHERE " + tableName + "id="
-                    + resultSet.getInt( 1 ) );
-            }
-        }
-        catch ( Exception ex )
-        {
-            log.debug( ex );
-        }
-        finally
-        {
-            holder.close();
         }
     }
     

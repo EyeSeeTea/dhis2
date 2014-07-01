@@ -416,7 +416,7 @@ public class SaveSectionFormAction
                             needsValidation = true;
 
                             dataValue.setValue( value );
-                            dataValue.setTimestamp( new Date() );
+                            dataValue.setLastUpdated( new Date() );
                             dataValue.setStoredBy( storedBy );
 
                             dataValueService.updateDataValue( dataValue );
@@ -426,8 +426,10 @@ public class SaveSectionFormAction
             }
         }
 
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
+        
         CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period,
-            organisationUnit );
+            organisationUnit, optionCombo );
 
         if ( registration == null && complete )
         {

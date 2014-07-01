@@ -57,7 +57,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementGroupSetStore"
-    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementGroupSetStore">
+    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroupSet" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -477,6 +477,7 @@
     class="org.hisp.dhis.dataset.DefaultCompleteDataSetRegistrationService">
     <property name="completeDataSetRegistrationStore" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore" />
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataset.SectionService" class="org.hisp.dhis.dataset.DefaultSectionService">
@@ -817,7 +818,7 @@
   <bean id="org.hisp.dhis.system.SystemService" class="org.hisp.dhis.system.DefaultSystemService" />
 
   <!-- SMS Services -->
-
+  
   <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue">
     <property name="smsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
   </bean>
