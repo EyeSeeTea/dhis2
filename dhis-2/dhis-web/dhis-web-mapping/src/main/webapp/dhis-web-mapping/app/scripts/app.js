@@ -782,7 +782,6 @@ Ext.onReady( function() {
 				});
 
 				this.numberField = Ext.create('Ext.form.field.Number', {
-					cls: 'gis-numberfield',
 					width: 47,
 					height: 18,
 					minValue: 0,
@@ -869,7 +868,6 @@ Ext.onReady( function() {
 					padding = 6;
 
 				this.numberField = Ext.create('Ext.form.field.Number', {
-					cls: 'gis-numberfield',
 					fieldStyle: 'border-top-left-radius: 1px; border-bottom-left-radius: 1px',
 					style: 'padding-bottom: 3px',
 					width: 70,
@@ -2122,19 +2120,19 @@ Ext.onReady( function() {
 		});
 
 		getLabelConfig = function(isLabel) {
-			var style = {
-				fontSize: fontSize.getValue(),
-				strong: strong.getValue(),
-				italic: italic.getValue(),
-				color: color.getValue()
-            };
+			//var style = {
+				//fontSize: fontSize.getValue(),
+				//strong: strong.getValue(),
+				//italic: italic.getValue(),
+				//color: color.getValue()
+            //};
 
-            if (isLabel) {
-                style.label = '\${label}';
-                style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
-			}
+            //if (isLabel) {
+                //style.label = '\${label}';
+                //style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
+			//}
 
-            return style;
+            //return style;
 		};
 
 		updateLabels = function() {
@@ -2148,7 +2146,7 @@ Ext.onReady( function() {
                     layer.core.setFeatureLabelStyle(false);
                 }
                 else {
-                    layer.styleMap = GIS.core.StyleMap(layer.id);
+                    layer.styleMap = GIS.core.StyleMap();
                     loader.loadLegend();
                 }
             }
@@ -2159,7 +2157,7 @@ Ext.onReady( function() {
                     layer.core.setFeatureLabelStyle(true);
                 }
                 else {
-                    layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
+                    layer.styleMap = GIS.core.StyleMap(getLabelConfig(true));
                     loader.loadLegend();
                 }
             }
@@ -6636,6 +6634,12 @@ Ext.onReady( function() {
 			radiusHigh,
             legend,
 
+            strong,
+            italic,
+            fontSize,
+            fontColor,
+            label,
+
 			treePanel,
 			userOrganisationUnit,
 			userOrganisationUnitChildren,
@@ -7248,7 +7252,7 @@ Ext.onReady( function() {
 
         data = Ext.create('Ext.panel.Panel', {
 			title: '<div class="ns-panel-title-data">' + 'Data and periods' + '</div>',
-			title: '<div style="font-weight:normal">Data and periods</div>',
+			//title: '<div style="font-weight:normal">Data and periods</div>',
 			hideCollapseTool: true,
             items: [
                 valueType,
@@ -7937,6 +7941,68 @@ Ext.onReady( function() {
 			}
         });
 
+
+		strong = Ext.create('Ext.form.field.Checkbox', {
+            cls: 'gis-checkbox',
+            fieldLabel: 'Bold',
+            labelWidth: 95
+        });
+
+		italic = Ext.create('Ext.form.field.Checkbox', {
+            cls: 'gis-checkbox',
+            fieldLabel: 'Italic',
+            labelWidth: 95
+		});
+
+		fontSize = Ext.create('Ext.form.field.Number', {
+            cls: 'gis-numberfield',
+			width: 150,
+            fieldLabel: 'Size',
+            labelWidth: 95,
+			allowDecimals: false,
+			minValue: 7,
+			value: 13,
+			emptyText: 13
+		});
+
+		fontColor = Ext.create('Ext.ux.button.ColorButton', {
+			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
+            fieldLabel: 'Color',
+            height: 24,
+			value: '000000'
+		});
+
+        fontColorPanel = Ext.create('Ext.container.Container', {
+			layout: 'hbox',
+            height: 25,
+            bodyStyle: 'border: 0 none',
+			items: [
+				{
+					html: GIS.i18n.color + ':',
+					width: 100,
+					style: 'padding: 4px 0 0 4px',
+                    bodyStyle: 'border: 0 none'
+				},
+				fontColor
+			]
+		});
+
+        label = Ext.create('Ext.panel.Panel', {
+			title: '<div class="ns-panel-title-data">' + GIS.i18n.labels + '</div>',
+			hideCollapseTool: true,
+            items: [
+                strong,
+                italic,
+                fontSize,
+                fontColorPanel
+            ],
+			listeners: {
+				added: function() {
+					accordionPanels.push(this);
+				}
+			}
+        });
+
 		// Functions
 
 		reset = function(skipTree) {
@@ -8186,14 +8252,22 @@ Ext.onReady( function() {
 				var panels = [
 					data,
 					organisationUnit,
-					legend
+					legend,
+                    label
 				];
 
 				last = panels[panels.length - 1];
 				last.cls = 'ns-accordion-last';
 
 				return panels;
-			}()
+			}(),
+            listeners: {
+                afterrender: function() { // nasty workaround
+                    for (var i = accordionPanels.length - 1; i >= 0; i--) {
+                        accordionPanels[i].expand();
+                    }
+                }
+            }
 		});
 
 		accordion = Ext.create('Ext.panel.Panel', {

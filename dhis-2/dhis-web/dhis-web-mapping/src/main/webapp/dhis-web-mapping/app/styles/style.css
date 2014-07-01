@@ -1040,8 +1040,29 @@ label.x-form-cb-label-alt1 {
 
 
 /*----------------------------------------------------------------------------
+ * GIS Checkbox
+ *--------------------------------------------------------------------------*/
+
+    /* Form label */
+.gis-checkbox .x-form-item-label-left {
+    padding-top: 4px;
+    padding-left: 4px;
+}
+
+
+/*----------------------------------------------------------------------------
  * GIS Numberfield
  *--------------------------------------------------------------------------*/
+
+.gis-numberfield {
+    margin-bottom: 1px;
+}
+
+    /* Form label */
+.gis-numberfield .x-form-item-label-left {
+    padding-top: 4px;
+    padding-left: 4px;
+}
 
 .gis-numberfield .x-form-field {
     height: 24px !important;

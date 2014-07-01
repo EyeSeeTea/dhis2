@@ -16,6 +16,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 ProgramFactory,
                 AttributesFactory,
                 EntityQueryFactory,
+                TEIGridService,
                 TEIService) {   
    
     //Selection
@@ -29,8 +30,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.ouMode = $scope.ouModes[0];
     
     //Paging
-    $scope.rowsPerPage = 50;
-    $scope.currentPage = Paginator.getPage() + 1;   
+    $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};   
     
     //EntityList
     $scope.showTrackedEntityDiv = false;
@@ -148,52 +148,95 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.search = function(mode){ 
 
+        $scope.teiFetched = false;
+        $scope.selectedSearchMode = mode;
         $scope.emptySearchText = false;
         $scope.emptySearchAttribute = false;
         $scope.showSearchDiv = false;
-        $scope.showRegistrationDiv = false;                          
+        $scope.showRegistrationDiv = false;  
+        $scope.showTrackedEntityDiv = false;
         $scope.trackedEntityList = null; 
+        $scope.teiCount = null;
         
-        var queryUrl = null, 
-            programUrl = null, 
-            attributeUrl = {url: null, hasValue: false};
+        $scope.queryUrl = null;
+        $scope.programUrl = null;
+        $scope.attributeUrl = {url: null, hasValue: false};
     
         if($scope.selectedProgram){
-            programUrl = 'program=' + $scope.selectedProgram.id;
+            $scope.programUrl = 'program=' + $scope.selectedProgram.id;
         }        
         
         //check search mode
-        if( mode === $scope.searchMode.freeText ){     
+        if( $scope.selectedSearchMode === $scope.searchMode.freeText ){     
+
             if(!$scope.searchText){                
                 $scope.emptySearchText = true;
+                $scope.teiFetched = false;   
+                $scope.teiCount = null;
                 return;
             }       
-            
-            $scope.showTrackedEntityDiv = true;      
-            queryUrl = 'query=' + $scope.searchText;                     
+ 
+            $scope.queryUrl = 'query=' + $scope.searchText;                     
         }
-        else if( mode === $scope.searchMode.attributeBased ){
-            $scope.showTrackedEntityDiv = true;                  
-            attributeUrl = EntityQueryFactory.getQueryForAttributes($scope.attributes, $scope.enrollment);
+        
+        if( $scope.selectedSearchMode === $scope.searchMode.attributeBased ){
             
-            if(!attributeUrl.hasValue && !$scope.selectedProgram){
+            $scope.attributeUrl = EntityQueryFactory.getQueryForAttributes($scope.attributes, $scope.enrollment);
+            
+            if(!$scope.attributeUrl.hasValue && !$scope.selectedProgram){
                 $scope.emptySearchAttribute = true;
-                $scope.showSearchDiv = true;
+                $scope.teiFetched = false;   
+                $scope.teiCount = null;
                 return;
             }
         }
-        else if( mode === $scope.searchMode.listAll ){   
-            $scope.showTrackedEntityDiv = true;    
-        } 
-
+        
+        $scope.doSearch();
+    };
+    
+    $scope.doSearch = function(){
+        
         //get events for the specified parameters
         TEIService.search($scope.selectedOrgUnit.id, 
                                             $scope.ouMode.name,
-                                            queryUrl,
-                                            programUrl,
-                                            attributeUrl.url).then(function(data){
-            $scope.trackedEntityList = data;            
+                                            $scope.queryUrl,
+                                            $scope.programUrl,
+                                            $scope.attributeUrl.url,
+                                            $scope.pager).then(function(data){
+            //$scope.trackedEntityList = data;            
+            if(data.rows){
+                $scope.teiCount = data.rows.length;
+            }                    
+            
+            if( data.metaData.pager ){
+                $scope.pager = data.metaData.pager;
+                $scope.pager.toolBarDisplay = 5;
+
+                Paginator.setPage($scope.pager.page);
+                Paginator.setPageCount($scope.pager.pageCount);
+                Paginator.setPageSize($scope.pager.pageSize);
+                Paginator.setItemCount($scope.pager.total);                    
+            }
+            
+            //process tei grid
+            $scope.trackedEntityList = TEIGridService.format(data);
+            $scope.showTrackedEntityDiv = true;
+            $scope.teiFetched = true;  
         });
+    };
+    
+    $scope.jumpToPage = function(){
+        $scope.search();
+    };
+    
+    $scope.resetPageSize = function(){
+        $scope.pager.page = 1;        
+        $scope.search();
+    };
+    
+    $scope.getPage = function(page){    
+        $scope.pager.page = page;
+        $scope.search();
     };
     
     $scope.generateAttributeFilters = function(attributes){
@@ -234,6 +277,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.clearEntities = function(){
         $scope.trackedEntityList = null;
+    };
+    
+    $scope.showSearch = function(){
+        $scope.showSearchDiv = !$scope.showSearchDiv;
     };
     
     $scope.showRegistration = function(){
@@ -325,6 +372,5 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     
     $scope.home = function(){        
         window.location = DHIS2URL;
-    };
-    
+    };    
 });

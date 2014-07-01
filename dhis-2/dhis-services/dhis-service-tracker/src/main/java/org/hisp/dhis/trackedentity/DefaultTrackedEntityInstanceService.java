@@ -35,6 +35,7 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_U
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.PAGER_META_KEY;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +71,7 @@ import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -166,6 +168,14 @@ public class DefaultTrackedEntityInstanceService
         // Verify params
         // ---------------------------------------------------------------------
 
+        User user = currentUserService.getCurrentUser();
+        
+        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
+        {            
+            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
+            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+        }
+
         for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
         {
             if ( !organisationUnit.hasLevel() )
@@ -173,6 +183,11 @@ public class DefaultTrackedEntityInstanceService
                 organisationUnit
                     .setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
             }
+        }
+        
+        if ( !params.isPaging() && !params.isSkipPaging() )
+        {
+            params.setDefaultPaging();
         }
 
         // ---------------------------------------------------------------------
@@ -278,7 +293,7 @@ public class DefaultTrackedEntityInstanceService
 
     public void decideAccess( TrackedEntityInstanceQueryParams params )
     {
-        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) &&
+        if ( params.isOrganisationUnitMode( ALL ) &&
             !currentUserService.currenUserIsAuthorized( F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS ) )
         {
             throw new IllegalQueryException( "Current user is not authorized to query across all organisation units" );
@@ -296,9 +311,16 @@ public class DefaultTrackedEntityInstanceService
             throw new IllegalQueryException( "Params cannot be null" );
         }
 
-        if ( !params.hasOrganisationUnits() && !params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        User user = currentUserService.getCurrentUser();
+        
+        if ( !params.hasOrganisationUnits() && !( params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE ) ) )
         {
             violation = "At least one organisation unit must be specified";
+        }
+        
+        if ( params.isOrganisationUnitMode( ACCESSIBLE ) && ( user == null || !user.hasDataViewOrganisationUnitWithFallback() ) )
+        {
+            violation = "Current user must be associated with at least one organisation unit when selection mode is ACCESSIBLE";
         }
 
         if ( params.hasProgram() && params.hasTrackedEntity() )
@@ -358,7 +380,7 @@ public class DefaultTrackedEntityInstanceService
     public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter,
         Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus,
         Boolean followUp, Date programStartDate, Date programEndDate, String trackedEntity, EventStatus eventStatus,
-        Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize )
+        Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize, boolean skipPaging )
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
@@ -427,6 +449,7 @@ public class DefaultTrackedEntityInstanceService
         params.setSkipMeta( skipMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
+        params.setSkipPaging( skipPaging );
 
         return params;
     }

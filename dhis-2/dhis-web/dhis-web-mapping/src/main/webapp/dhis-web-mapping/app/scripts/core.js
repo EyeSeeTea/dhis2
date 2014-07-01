@@ -738,7 +738,7 @@ Ext.onReady( function() {
 		});
 	};
 
-	GIS.core.StyleMap = function(id, labelConfig) {
+	GIS.core.StyleMap = function(labelConfig) {
 		var defaults = {
 				fillOpacity: 1,
 				strokeColor: '#fff',
@@ -757,14 +757,15 @@ Ext.onReady( function() {
                 labelYOffset: 13
 			};
 
-		if (labelConfig) {
-            defaults.label = labelConfig.label;
-            defaults.fontFamily = labelConfig.fontFamily;
-			defaults.fontSize = (labelConfig.fontSize || 13) + 'px';
-			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
-			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
-			defaults.fontColor = labelConfig.color ? (labelConfig.color.split('').shift() !== '#' ? '#' + labelConfig.color : labelConfig.color) : '#000000';
-		}
+        defaults.label = '\${label}';
+        defaults.fontFamily = 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas';
+
+        if (labelConfig) {
+            defaults.fontSize = labelConfig.fontSize || '13px';
+            defaults.fontWeight = labelConfig.fontWeight || 'normal';
+            defaults.fontStyle = labelConfig.fontStyle || 'normal';
+            defaults.fontColor = labelConfig.fontColor || '#000000';
+        }
 
 		return new OpenLayers.StyleMap({
 			'default': defaults,
@@ -779,7 +780,7 @@ Ext.onReady( function() {
 					force:true
 				})
 			],
-			styleMap: GIS.core.StyleMap(id),
+			styleMap: GIS.core.StyleMap(),
 			visibility: false,
 			displayInLayerSwitcher: false,
 			layerType: gis.conf.finals.layer.type_vector,
@@ -2034,11 +2035,24 @@ Ext.onReady( function() {
 
 					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 						feature.attributes.value = valueMap[id];
-						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+                        feature.attributes.label = view.labels ? feature.attributes.name + ' (' + feature.attributes.value + ')' : '';
+
+                            //feature.style.label = feature.attributes.name;
+                            //feature.style.fontSize = '15px';
+                            //feature.style.fontWeight = 'bold';
+                            //feature.style.fontStyle = 'normal';
+                            //feature.style.fontColor = 'blue';
+
 						newFeatures.push(feature);
 					}
 				}
-
+console.log(layer);
+                //label
+                //if (view.labels) {
+                    layer.styleMap = GIS.core.StyleMap(view);
+                    //alert(view.fontSize);
+                //}
+console.log(layer.styleMap);
 				layer.removeFeatures(layer.features);
 				layer.addFeatures(newFeatures);
 
