@@ -5,18 +5,7 @@
 
 <hibernate-mapping>
   <class name="org.hisp.dhis.datavalue.DataValueAudit" table="datavalueaudit">
-<!--
-    <composite-id name="id">
-      <key-many-to-one name="dataElement" class="org.hisp.dhis.dataelement.DataElement" column="dataelementid"
-                       foreign-key="fk_datavalueaudit_dataelementid" />
-      <key-many-to-one name="period" class="org.hisp.dhis.period.Period" column="columnid"
-                       foreign-key="fk_datavalueaudit_periodid" />
-      <key-many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organistaionunitid"
-                       foreign-key="fk_datavalueaudit_organisationunitid" />
-      <key-many-to-one name="categoryOptionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"
-                       column="categoryoptioncomboid" foreign-key="fk_datavalueaudit_categoryoptioncomboid" />
-    </composite-id>
--->
+
     <id name="id" column="datavalueauditid">
       <generator class="native" />
     </id>
@@ -24,10 +13,10 @@
     <many-to-one name="dataElement" class="org.hisp.dhis.dataelement.DataElement" column="dataelementid"
                      foreign-key="fk_datavalueaudit_dataelementid" not-null="true"/>
 
-    <many-to-one name="period" class="org.hisp.dhis.period.Period" column="columnid"
+    <many-to-one name="period" class="org.hisp.dhis.period.Period" column="periodid"
                      foreign-key="fk_datavalueaudit_periodid" not-null="true"/>
 
-    <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organistaionunitid"
+    <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" column="organisationunitid"
                      foreign-key="fk_datavalueaudit_organisationunitid" not-null="true"/>
 
     <many-to-one name="categoryOptionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo"
@@ -42,18 +31,9 @@
     <property name="auditType" column="audittype" not-null="true">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">org.hisp.dhis.common.AuditType</param>
+        <param name="type">12</param> <!-- java.sql.Types.VARCHAR = 12 -->
       </type>
     </property>
 
-    <!--
-    <property name="auditType">
-      <column name="audittype" />
-        <type name="org.hibernate.type.EnumType">
-          <param name="auditType">org.hisp.dhis.common.AuditType</param>
-          <param name="type">12</param>
-          <param name="useNamed">true</param>
-        </type>
-    </property>
-    -->
   </class>
 </hibernate-mapping>

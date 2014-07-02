@@ -72,6 +72,12 @@ public class DefaultDataValueAuditService
         return dataValueAuditStore.getDataValueAuditsByDataValue( dataValue );
     }
 
+    @Override
+    public Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
+    {
+        return dataValueAuditStore.getDataValueAuditsByPropertyCombo( dataElement, period, organisationUnit, categoryOptionCombo );
+    }
+
     public Collection<DataValueAudit> getAllDataValueAudits()
     {
         return dataValueAuditStore.getAllDataValueAudits();

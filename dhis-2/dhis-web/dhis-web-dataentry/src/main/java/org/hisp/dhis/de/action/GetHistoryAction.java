@@ -28,6 +28,7 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.struts2.ServletActionContext;
@@ -264,15 +265,21 @@ public class GetHistoryAction
         {
             UserCredentials credentials = userService.getUserCredentialsByUsername( dataValue.getStoredBy() );
             storedBy = credentials != null ? credentials.getName() : dataValue.getStoredBy();
+            dataValueAudits = dataValueAuditService.getDataValueAuditsByDataValue( dataValue );
         }
+        else
+        {
+            dataValueAudits = dataValueAuditService.getDataValueAuditsByPropertyCombo( dataElement, period,
+                organisationUnit, categoryOptionCombo );
+        }
+
+        if( dataValueAudits == null ) dataValueAudits = new ArrayList<DataValueAudit>();
 
         dataElementHistory = historyRetriever.getHistory( dataElement, categoryOptionCombo, organisationUnit, period, HISTORY_LENGTH );
 
         historyInvalid = dataElementHistory == null;
 
         minMaxInvalid = !DataElement.VALUE_TYPE_INT.equals( dataElement.getType() );
-
-        dataValueAudits = dataValueAuditService.getDataValueAuditsByDataValue( dataValue );
 
         commentOptionSet = dataElement.getCommentOptionSet();
         

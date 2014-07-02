@@ -28,12 +28,12 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+
+import java.util.Collection;
 
 /**
  * @author Quang Nguyen
@@ -48,6 +48,9 @@ public interface DataValueAuditStore
     void deleteDataValueAudit( DataValueAudit dataValueAudit );
 
     Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue );
+
+    Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement,
+        Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo );
 
     Collection<DataValueAudit> getAllDataValueAudits();
 }

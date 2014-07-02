@@ -31,6 +31,7 @@ package org.hisp.dhis.datavalue;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 
 import java.util.Collection;
 
@@ -48,6 +49,9 @@ public interface DataValueAuditService
     void deleteDataValueAudit( DataValueAudit dataValueAudit );
 
     Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue );
+
+    Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement,
+        Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo );
 
     Collection<DataValueAudit> getAllDataValueAudits();
 

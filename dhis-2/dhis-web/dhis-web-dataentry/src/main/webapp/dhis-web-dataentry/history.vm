@@ -104,7 +104,7 @@ $( document ).ready( function() {
           $format.formatDateTime( $dataValueAudit.timestamp )
         </td>
         <td>
-          $dataValueAudit.storedBy
+          $dataValueAudit.modifiedBy
         </td>
         <td>
         #if ( $dataValueAudit.value )

@@ -34,9 +34,15 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditStore;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 
 /**
  * @author Quang Nguyen
@@ -75,16 +81,24 @@ public class HibernateDataValueAuditStore
     @Override
     public Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue )
     {
+        return getDataValueAuditsByPropertyCombo( dataValue.getDataElement(), dataValue.getPeriod(),
+            dataValue.getSource(), dataValue.getCategoryOptionCombo() );
+    }
+
+    @Override
+    public Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement, Period period,
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
+    {
         Session session = sessionFactory.getCurrentSession();
 
-        Query query = session.createQuery( "SELECT DataValueAudit WHERE dataElement = :dataElement " +
-            "AND period = :period AND organisationUnit = :organisationUnit AND categoryOptionCombo = :categoryOptionCombo")
-            .setEntity( "dataElement", dataValue.getDataElement() )
-            .setEntity( "period", dataValue.getPeriod() )
-            .setEntity( "organisationUnit", dataValue.getSource() )
-            .setEntity( "categoryOptionCombo", dataValue.getCategoryOptionCombo() );
+        Criteria criteria = session.createCriteria( DataValueAudit.class )
+            .add( Restrictions.eq( "dataElement", dataElement ) )
+            .add( Restrictions.eq( "period", period ) )
+            .add( Restrictions.eq( "organisationUnit", organisationUnit ) )
+            .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ))
+            .addOrder( Order.desc( "timestamp") );
 
-        return query.list();
+        return criteria.list();
     }
 
     @Override

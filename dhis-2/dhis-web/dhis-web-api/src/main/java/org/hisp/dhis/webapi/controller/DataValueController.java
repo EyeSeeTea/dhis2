@@ -212,7 +212,7 @@ public class DataValueController
         else
         {
             // ---------------------------------------------------------------------
-            // Audit trail
+            // Audit
             // ---------------------------------------------------------------------
 
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
@@ -225,7 +225,7 @@ public class DataValueController
             {
                 if ( comment == null )
                 {
-                    //dataValueAudit.setAuditType( AuditType.DELETE );
+                    dataValueAudit.setAuditType( AuditType.DELETE );
                     dataValueAuditService.addDataValueAudit( dataValueAudit );
 
                     dataValueService.deleteDataValue( dataValue );
@@ -254,6 +254,16 @@ public class DataValueController
 
             dataValue.setLastUpdated( now );
             dataValue.setStoredBy( storedBy );
+
+            // From DataValueService
+            if( dataValue.isNullValue() || ValidationUtils.dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
+            {
+                dataValueAudit.setAuditType( AuditType.DELETE );
+                dataValueAuditService.addDataValueAudit( dataValueAudit );
+
+                dataValueService.deleteDataValue( dataValue );
+                return;
+            }
 
             dataValueAuditService.addDataValueAudit( dataValueAudit );
             dataValueService.updateDataValue( dataValue );
@@ -352,6 +362,10 @@ public class DataValueController
             return;
         }
 
+        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+            dataValue.getStoredBy(), new Date(), AuditType.DELETE );
+
+        dataValueAuditService.addDataValueAudit( dataValueAudit );
         dataValueService.deleteDataValue( dataValue );
     }
 
