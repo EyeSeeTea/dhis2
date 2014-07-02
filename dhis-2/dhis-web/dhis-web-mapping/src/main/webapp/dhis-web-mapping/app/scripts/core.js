@@ -761,7 +761,7 @@ Ext.onReady( function() {
         defaults.fontFamily = 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas';
 
         if (config) {
-            defaults.fontSize = config.labelFontSize ? (parseInt(config.labelFontSize) + 'px') : '13px';
+            defaults.fontSize = config.labelFontSize ? (parseInt(config.labelFontSize) + 'px') : '11px';
             defaults.fontWeight = config.labelFontWeight ? 'bold' : 'normal';
             defaults.fontStyle = config.labelFontStyle ? 'italic' : 'normal';
             defaults.fontColor = config.labelFontColor || '#000000';

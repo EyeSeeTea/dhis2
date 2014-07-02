@@ -919,7 +919,7 @@ Ext.onReady( function() {
             bodyStyle: 'border: 0 none',
             checkboxWidth: 100,
 			chechboxBoxLabel: 'Show labels',
-            numberFieldValue: 13,
+            numberFieldValue: 11,
             numberFieldWidth: 50,
             colorButtonWidth: 87,
             colorButtonColor: '000000',
