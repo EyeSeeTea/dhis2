@@ -761,10 +761,10 @@ Ext.onReady( function() {
         defaults.fontFamily = 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas';
 
         if (config) {
-            defaults.fontSize = config.labelFontSize ? (parseInt(config.labelFontSize) + 'px') : '11px';
-            defaults.fontWeight = config.labelFontWeight ? '700' : 'normal';
-            defaults.fontStyle = config.labelFontStyle ? 'italic' : 'normal';
-            defaults.fontColor = config.labelFontColor || '#000000';
+            defaults.fontSize = config.labelFontSize;
+            defaults.fontWeight = config.labelFontWeight;
+            defaults.fontStyle = config.labelFontStyle;
+            defaults.fontColor = config.labelFontColor;
         }
 
 		return new OpenLayers.StyleMap({
@@ -3013,7 +3013,7 @@ Ext.onReady( function() {
 
                     layout.labelFontWeight = Ext.isString(config.labelFontWeight) || Ext.isNumber(config.labelFontWeight) ? config.labelFontWeight : 'normal';
                     layout.labelFontWeight = Ext.Array.contains(['normal', 'bold', 'bolder', 'lighter'], layout.labelFontWeight) ? layout.labelFontWeight : 'normal';
-                    layout.labelFontWeight = Ext.isNumber(parseInt(layout.labelFontWeight)) && parseInt(layout.labelFontWeight) <= 1000) ? layout.labelFontWeight.toString() : 'normal';
+                    layout.labelFontWeight = Ext.isNumber(parseInt(layout.labelFontWeight)) && parseInt(layout.labelFontWeight) <= 1000 ? layout.labelFontWeight.toString() : layout.labelFontWeight;
 
                     layout.labelFontStyle = Ext.Array.contains(['normal', 'italic', 'oblique'], config.labelFontStyle) ? config.labelFontStyle : 'normal';
 

@@ -366,6 +366,58 @@ public class MapView
     }
 
     @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getLabelFontSize()
+    {
+        return labelFontSize;
+    }
+
+    public void setLabelFontSize( String labelFontSize )
+    {
+        this.labelFontSize = labelFontSize;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getLabelFontWeight()
+    {
+        return labelFontWeight;
+    }
+
+    public void setLabelFontWeight( String labelFontWeight )
+    {
+        this.labelFontWeight = labelFontWeight;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getLabelFontStyle()
+    {
+        return labelFontStyle;
+    }
+
+    public void setLabelFontStyle( String labelFontStyle )
+    {
+        this.labelFontStyle = labelFontStyle;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getLabelFontColor()
+    {
+        return labelFontColor;
+    }
+
+    public void setLabelFontColor( String labelFontColor )
+    {
+        this.labelFontColor = labelFontColor;
+    }
+
+    @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getParentGraph()
@@ -412,6 +464,10 @@ public class MapView
             organisationUnitGroupSet = mapView.getOrganisationUnitGroupSet();
             areaRadius = mapView.getAreaRadius();
             hidden = mapView.getHidden();
+            labelFontSize = mapView.getLabelFontSize();
+            labelFontWeight = mapView.getLabelFontWeight();
+            labelFontStyle = mapView.getLabelFontStyle();
+            labelFontColor = mapView.getLabelFontColor();
         }
     }
 }
