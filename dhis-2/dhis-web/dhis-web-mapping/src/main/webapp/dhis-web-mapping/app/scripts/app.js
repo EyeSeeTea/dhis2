@@ -912,6 +912,141 @@ Ext.onReady( function() {
 			}
 		});
 
+		Ext.define('Ext.ux.panel.LabelPanel', {
+			extend: 'Ext.panel.Panel',
+			alias: 'widget.labelpanel',
+			layout: 'column',
+            bodyStyle: 'border: 0 none',
+            checkboxWidth: 100,
+			text: 'Show labels',
+            numberFieldValue: 13,
+            numberFieldWidth: 50,
+            colorButtonWidth: 87,
+            colorButtonColor: '383838',
+			width: 290,
+			height: 24,
+            value: false,
+            components: [],
+			getValue: function() {
+				return this.checkbox.getValue();
+			},
+			getNumber: function() {
+				return this.numberField.getValue();
+			},
+			setValue: function(value, number) {
+				if (value) {
+					this.checkbox.setValue(value);
+				}
+				if (number) {
+					this.numberField.setValue(number);
+				}
+			},
+			enable: function() {
+				for (var i = 0; i < this.components.length; i++) {
+                    this.components[i].enable();
+                }
+			},
+			disable: function() {
+				for (var i = 0; i < this.components.length; i++) {
+                    this.components[i].disable();
+                }
+			},
+			reset: function() {
+				this.checkbox.setValue(false);
+				this.numberField.setValue(this.number);
+				this.numberField.disable();
+			},
+			initComponent: function() {
+				var ct = this,
+					padding = 4,
+                    onAdded = function(cmp) {
+                        ct.components.push(cmp);
+                    };
+
+				ct.checkbox = Ext.create('Ext.form.field.Checkbox', {
+                    cls: 'gis-checkbox',
+					width: ct.checkboxWidth,
+					boxLabel: ct.text,
+					checked: ct.value,
+					disabled: ct.disabled,
+					boxLabelCls: 'x-form-cb-label-alt1',
+                    style: 'padding-left: 3px',
+					listeners: {
+						change: function(chb, value) {
+							if (value) {
+								ct.enable();
+							}
+							else {
+								ct.disable();
+							}
+						}
+					}
+				});
+
+				ct.numberField = Ext.create('Ext.form.field.Number', {
+                    cls: 'gis-numberfield',
+					width: ct.numberFieldWidth,
+					height: 21,
+					minValue: 0,
+					maxValue: 9999999,
+					allowBlank: false,
+					disabled: true,
+					value: ct.numberFieldValue,
+                    listeners: {
+                        added: onAdded
+                    }
+				});
+
+                ct.boldButton = Ext.create('Ext.button.Button', {
+                    width: 24,
+                    height: 24,
+                    icon: 'images/text_bold.png',
+                    style: 'margin-left: 1px',
+					disabled: true,
+                    handler: function() {
+                        this.toggle();
+                    },
+                    listeners: {
+                        added: onAdded
+                    }
+                });
+
+                ct.italicButton = Ext.create('Ext.button.Button', {
+                    width: 24,
+                    height: 24,
+                    icon: 'images/text_italic.png',
+                    style: 'margin-left: 1px',
+					disabled: true,
+                    handler: function() {
+                        this.toggle();
+                    },
+                    listeners: {
+                        added: onAdded
+                    }
+                });
+
+                ct.colorButton = Ext.create('Ext.ux.button.ColorButton', {
+                    width: ct.colorButtonWidth,
+                    height: 24,
+                    style: 'margin-left: 1px',
+                    value: ct.colorButtonColor,
+                    listeners: {
+                        added: onAdded
+                    }
+                });
+
+				ct.items = [
+                    ct.checkbox,
+                    ct.numberField,
+                    ct.boldButton,
+                    ct.italicButton,
+                    ct.colorButton
+				];
+
+				this.callParent();
+			}
+		});
+
         var operatorCmpWidth = 70,
             valueCmpWidth = 306,
             buttonCmpWidth = 20,
@@ -7990,12 +8125,7 @@ Ext.onReady( function() {
         label = Ext.create('Ext.panel.Panel', {
 			title: '<div class="ns-panel-title-data">' + GIS.i18n.labels + '</div>',
 			hideCollapseTool: true,
-            items: [
-                strong,
-                italic,
-                fontSize,
-                fontColorPanel
-            ],
+            items: Ext.create('Ext.ux.panel.LabelPanel'),
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
