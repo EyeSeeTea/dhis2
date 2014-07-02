@@ -930,16 +930,16 @@ Ext.onReady( function() {
 			getConfig: function() {
                 return {
                     labels: this.checkbox.getValue(),
-                    labelFontSize: this.numberField.getValue(),
-                    labelFontWeight: this.boldButton.pressed,
-                    labelFontStyle: this.italicButton.pressed,
+                    labelFontSize: this.numberField.getValue() + 'px',
+                    labelFontWeight: this.boldButton.pressed ? 'bold' : 'normal',
+                    labelFontStyle: this.italicButton.pressed ? 'italic' : 'normal',
                     labelFontColor: this.colorButton.getValue()
                 };
 			},
 			setConfig: function(config) {
-                this.numberField.setValue(config.labelFontSize);
-                this.boldButton.toggle(config.labelFontWeight);
-                this.italicButton.toggle(config.labelFontStyle);
+                this.numberField.setValue(parseInt(config.labelFontSize));
+                this.boldButton.toggle(Ext.Array.contains(['bold', 'bolder'], config.labelFontWeight) || (Ext.isNumber(parseInt(config.labelFontWeight)) && parseInt(config.labelFontWeight) >= 700));
+                this.italicButton.toggle(Ext.Array.contains(['italic', 'oblique'], config.labelFontStyle));
                 this.colorButton.setValue(config.labelFontColor);
 
                 this.checkbox.setValue(config.labels);

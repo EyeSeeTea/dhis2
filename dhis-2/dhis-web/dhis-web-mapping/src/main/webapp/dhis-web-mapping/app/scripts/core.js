@@ -762,11 +762,9 @@ Ext.onReady( function() {
 
         if (config) {
             defaults.fontSize = config.labelFontSize ? (parseInt(config.labelFontSize) + 'px') : '11px';
-            defaults.fontWeight = config.labelFontWeight ? 'bold' : 'normal';
+            defaults.fontWeight = config.labelFontWeight ? '700' : 'normal';
             defaults.fontStyle = config.labelFontStyle ? 'italic' : 'normal';
             defaults.fontColor = config.labelFontColor || '#000000';
-
-            defaults.fontColor = defaults.fontColor.charAt(0) !== '#' ? '#' + defaults.fontColor : defaults.fontColor;
         }
 
 		return new OpenLayers.StyleMap({
@@ -3008,11 +3006,20 @@ Ext.onReady( function() {
 					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : gis.conf.layout.layer.opacity;
 					layout.areaRadius = config.areaRadius;
 
-                    layout.labels = config.labels;
-                    layout.labelFontSize = config.labelFontSize;
-                    layout.labelFontWeight = config.labelFontWeight;
-                    layout.labelFontStyle = config.labelFontStyle;
-                    layout.labelFontColor = config.labelFontColor;
+                    layout.labels = !!config.labels;
+
+                    layout.labelFontSize = config.labelFontSize || '11px';
+                    layout.labelFontSize = parseInt(layout.labelFontSize) + 'px';
+
+                    layout.labelFontWeight = Ext.isString(config.labelFontWeight) || Ext.isNumber(config.labelFontWeight) ? config.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.Array.contains(['normal', 'bold', 'bolder', 'lighter'], layout.labelFontWeight) ? layout.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.isNumber(parseInt(layout.labelFontWeight)) && parseInt(layout.labelFontWeight) <= 1000) ? layout.labelFontWeight.toString() : 'normal';
+
+                    layout.labelFontStyle = Ext.Array.contains(['normal', 'italic', 'oblique'], config.labelFontStyle) ? config.labelFontStyle : 'normal';
+
+                    layout.labelFontColor = Ext.isString(config.labelFontColor) || Ext.isNumber(config.labelFontColor) ? config.labelFontColor : 'normal';
+                    layout.labelFontColor = Ext.isNumber(config.labelFontColor) ? config.labelFontColor.toString() : config.labelFontColor;
+                    layout.labelFontColor = layout.labelFontColor.charAt(0) !== '#' ? '#' + layout.labelFontColor : layout.labelFontColor;
 
                     layout.hidden = !!config.hidden;
 

@@ -102,6 +102,14 @@ public class MapView
     private Integer areaRadius;
     
     private Boolean hidden;
+    
+    private String labelFontSize;
+    
+    private String labelFontWeight;
+    
+    private String labelFontStyle;
+    
+    private String labelFontColor;
 
     // -------------------------------------------------------------------------
     // Transient properties
