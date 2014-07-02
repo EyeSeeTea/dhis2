@@ -214,7 +214,7 @@ Ext.onReady( function() {
 				shadow: false,
 				resizable: false,
 				items: {
-					html: feature.attributes.label
+					html: feature.attributes.popupText
 				}
 			});
 
@@ -1657,6 +1657,7 @@ Ext.onReady( function() {
 
 			for (var i = 0; i < features.length; i++) {
 				features[i].attributes.value = 0;
+                features[i].attributes.popupText = features[i].attributes.name;
 			}
 
 			layer.removeFeatures(layer.features);
@@ -2044,6 +2045,7 @@ Ext.onReady( function() {
 
 					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 						feature.attributes.value = valueMap[id];
+                        feature.attribute.popupText = feature.attributes.name + ' (' + feature.attributes.value + ')';
 
 						newFeatures.push(feature);
 					}

@@ -1678,22 +1678,6 @@ Ext.onReady( function() {
 			alwaysEnabled: true
 		});
 
-		item = {
-			text: GIS.i18n.labels,
-			iconCls: 'gis-menu-item-icon-labels',
-			handler: function() {
-                var window = layer.labelWindow || (layer.labelWidow = GIS.app.LabelWindow(layer));
-
-                if (layer.id === 'boundary') {
-                    window.updateLabels();
-                }
-                else {
-                    window.show();
-                }
-			}
-		};
-		items.push(item);
-
 		if (!(layer.id === gis.layer.boundary.id || layer.id === gis.layer.facility.id || layer.id === gis.layer.event.id)) {
 			item = {
 				text: GIS.i18n.filter + '..',
@@ -2484,183 +2468,6 @@ Ext.onReady( function() {
 				show: function(w) {
 					var pos = gis.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
-				}
-			}
-		});
-
-		return window;
-	};
-
-	GIS.app.LabelWindow = function(layer) {
-		var fontSize,
-			strong,
-			italic,
-			color,
-			getValues,
-			updateLabels,
-			window;
-
-		fontSize = Ext.create('Ext.form.field.Number', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			allowDecimals: false,
-			minValue: 8,
-			value: 13,
-			emptyText: 13,
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		strong = Ext.create('Ext.form.field.Checkbox', {
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		italic = Ext.create('Ext.form.field.Checkbox', {
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		button = Ext.create('Ext.ux.button.ColorButton', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			value: '0000ff'
-		});
-
-		color = Ext.create('Ext.ux.button.ColorButton', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			value: '000000',
-			menuHandler: function() {
-				updateLabels();
-			}
-		});
-
-		getLabelConfig = function(isLabel) {
-			var style = {
-				fontSize: fontSize.getValue(),
-				strong: strong.getValue(),
-				italic: italic.getValue(),
-				color: color.getValue()
-            };
-
-            if (isLabel) {
-                style.label = '\${label}';
-                style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
-			}
-
-            return style;
-		};
-
-		updateLabels = function() {
-            var loader = layer.core.getLoader();
-            loader.hideMask = true;
-
-            if (layer.hasLabels) {
-                layer.hasLabels = false;
-
-                if (layer.id === 'boundary') {
-                    layer.core.setFeatureLabelStyle(false);
-                }
-                else {
-                    layer.styleMap = GIS.core.StyleMap(layer.id);
-                    loader.loadLegend();
-                }
-            }
-            else {
-                layer.hasLabels = true;
-
-                if (layer.id === 'boundary') {
-                    layer.core.setFeatureLabelStyle(true);
-                }
-                else {
-                    layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
-                    loader.loadLegend();
-                }
-            }
-		};
-
-		window = Ext.create('Ext.window.Window', {
-			title: GIS.i18n.labels,
-			iconCls: 'gis-window-title-icon-labels',
-			cls: 'gis-container-default',
-			width: gis.conf.layout.tool.window_width,
-			resizable: false,
-			closeAction: 'hide',
-            updateLabels: updateLabels,
-			items: {
-				layout: 'fit',
-				cls: 'gis-container-inner',
-				items: [
-					//{
-						//layout: 'column',
-						//cls: 'gis-container-inner',
-						//items: [
-							//{
-								//cls: 'gis-panel-html-label',
-								//html: GIS.i18n.font_size,
-								//width: gis.conf.layout.tool.itemlabel_width
-							//},
-							//fontSize
-						//]
-					//},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: '<b>' + GIS.i18n.bold_ + '</b>:',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							strong
-						]
-					},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: '<i>' + GIS.i18n.italic + '</i>:',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							italic
-						]
-					},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: GIS.i18n.color + ':',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							color
-						]
-					}
-				]
-			},
-			bbar: [
-				'->',
-				{
-					xtype: 'button',
-					text: GIS.i18n.showhide,
-					handler: function() {
-                        updateLabels();
-					}
-				}
-			],
-			listeners: {
-				render: function() {
-					gis.util.gui.window.setPositionTopLeft(this);
 				}
 			}
 		});
@@ -5260,12 +5067,6 @@ Ext.onReady( function() {
 
 			organisationUnitLevel.clearValue();
 			organisationUnitGroup.clearValue();
-
-			// Layer options
-			//if (layer.labelWindow) {
-				//layer.labelWindow.destroy();
-				//layer.labelWindow = null;
-			//}
 		};
 
 		setGui = function(view) { //todo
@@ -5891,10 +5692,6 @@ Ext.onReady( function() {
 			if (layer.filterWindow) {
 				layer.filterWindow.destroy();
 				layer.filterWindow = null;
-			}
-			if (layer.labelWindow) {
-				layer.labelWindow.destroy();
-				layer.labelWindow = null;
 			}
 
 			if (layer.circleLayer & !skipTree) {
@@ -6655,10 +6452,6 @@ Ext.onReady( function() {
 			if (layer.searchWindow) {
 				layer.searchWindow.destroy();
 				layer.searchWindow = null;
-			}
-			if (layer.labelWindow) {
-				layer.labelWindow.destroy();
-				layer.labelWindow = null;
 			}
 		};
 
@@ -8175,10 +7968,6 @@ Ext.onReady( function() {
 			if (layer.filterWindow) {
 				layer.filterWindow.destroy();
 				layer.filterWindow = null;
-			}
-			if (layer.labelWindow) {
-				layer.labelWindow.destroy();
-				layer.labelWindow = null;
 			}
 
 			// Components
