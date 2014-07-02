@@ -6562,14 +6562,13 @@ Ext.onReady( function() {
 
 		var indicatorsByGroupStore,
 			dataElementsByGroupStore,
+            dataSetStore,
 			periodsByTypeStore,
 			infrastructuralDataElementValuesStore,
 			legendsByLegendSetStore,
 
 			valueTypeToggler,
 			legendTypeToggler,
-
-            accordionPanels = [],
 
 			valueType,
 			indicatorGroup,
@@ -6583,20 +6582,8 @@ Ext.onReady( function() {
 			period,
 			periodPrev,
 			periodNext,
+            periodTypePanel,
             data,
-
-			legendType,
-			legendSet,
-			classes,
-			method,
-			colorLow,
-			colorHigh,
-			radiusLow,
-			radiusHigh,
-            legend,
-
-            labelPanel,
-            label,
 
 			treePanel,
 			userOrganisationUnit,
@@ -6609,19 +6596,31 @@ Ext.onReady( function() {
 			toolPanel,
             organisationUnit,
 
-			periodTypePanel,
-			methodPanel,
-			lowPanel,
-			highPanel,
+			legendType,
+			legendSet,
+			classes,
+			method,
+			colorLow,
+			colorHigh,
+			radiusLow,
+			radiusHigh,
+            methodPanel,
+            lowPanel,
+            highPanel,
+            legend,
 
-			//createSelectHandlers,
+            labelPanel,
+            label,
+
 			reset,
 			setGui,
 			getView,
 
-			dimConf = gis.conf.finals.dimension,
+            accordionBody,
+            accordion,
 
-			panel;
+            accordionPanels = [],
+			dimConf = gis.conf.finals.dimension;
 
 		// Stores
 
@@ -8159,7 +8158,7 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none; margin-bottom:1px',
-			height: 450,
+			height: 400,
 			items: function() {
 				var panels = [
 					data,
