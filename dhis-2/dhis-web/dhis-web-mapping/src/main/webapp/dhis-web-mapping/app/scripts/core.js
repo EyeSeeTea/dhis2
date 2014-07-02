@@ -1561,6 +1561,12 @@ Ext.onReady( function() {
 					}
 					return gis.conf.finals.widget.loadtype_organisationunit;
 				}
+
+                if (doExecute) {
+                    loadLegend(view);
+                }
+
+                return gis.conf.finals.widget.loadtype_legend;
 			}
 			else {
 				if (doExecute) {
@@ -1650,23 +1656,23 @@ Ext.onReady( function() {
 			features = features || layer.core.featureStore.features;
 
 			for (var i = 0; i < features.length; i++) {
-				features[i].attributes.label = features[i].attributes.name;
 				features[i].attributes.value = 0;
 			}
 
 			layer.removeFeatures(layer.features);
 			layer.addFeatures(features);
 
-            // labels
-            if (layer.hasLabels) {
-                layer.core.setFeatureLabelStyle(true, true);
-            }
-
 			loadLegend(view);
 		};
 
 		loadLegend = function(view) {
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name : '';
+            }
 
 			var options = {
 				indicator: gis.conf.finals.widget.value,
@@ -1680,6 +1686,9 @@ Ext.onReady( function() {
 			layer.core.view = view;
 
 			layer.core.applyClassification(options);
+
+            // labels
+            layer.core.setFeatureLabelStyle(view.labels, false, view);
 
 			afterLoad(view);
 		};

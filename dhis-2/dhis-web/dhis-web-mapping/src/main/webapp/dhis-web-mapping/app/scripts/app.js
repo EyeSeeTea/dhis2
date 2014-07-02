@@ -917,6 +917,7 @@ Ext.onReady( function() {
 			alias: 'widget.labelpanel',
 			layout: 'column',
             bodyStyle: 'border: 0 none',
+            skipBoldButton: false,
             skipColorButton: false,
             checkboxWidth: 100,
 			chechboxBoxLabel: 'Show labels',
@@ -929,19 +930,33 @@ Ext.onReady( function() {
             value: false,
             components: [],
 			getConfig: function() {
-                return {
+                var config = {
                     labels: this.checkbox.getValue(),
                     labelFontSize: this.numberField.getValue() + 'px',
-                    labelFontWeight: this.boldButton.pressed ? 'bold' : 'normal',
-                    labelFontStyle: this.italicButton.pressed ? 'italic' : 'normal',
-                    labelFontColor: this.colorButton.getValue()
+                    labelFontStyle: this.italicButton.pressed ? 'italic' : 'normal'
                 };
+
+                if (!this.skipBoldButton) {
+                    config.labelFontWeight = this.boldButton.pressed ? 'bold' : 'normal';
+                }
+
+                if (!this.skipColorButton) {
+                    config.labelFontColor = this.colorButton.getValue();
+                }
+
+                return config;
 			},
 			setConfig: function(config) {
                 this.numberField.setValue(parseInt(config.labelFontSize));
-                this.boldButton.toggle(Ext.Array.contains(['bold', 'bolder'], config.labelFontWeight) || (Ext.isNumber(parseInt(config.labelFontWeight)) && parseInt(config.labelFontWeight) >= 700));
                 this.italicButton.toggle(Ext.Array.contains(['italic', 'oblique'], config.labelFontStyle));
-                this.colorButton.setValue(config.labelFontColor);
+
+                if (!skipBoldButton) {
+                    this.boldButton.toggle(Ext.Array.contains(['bold', 'bolder'], config.labelFontWeight) || (Ext.isNumber(parseInt(config.labelFontWeight)) && parseInt(config.labelFontWeight) >= 700));
+                }
+
+                if (!skipColorButton) {
+                    this.colorButton.setValue(config.labelFontColor);
+                }
 
                 this.checkbox.setValue(config.labels);
 			},
@@ -971,6 +986,8 @@ Ext.onReady( function() {
                         ct.components.push(cmp);
                     };
 
+                ct.items = [];
+
 				ct.checkbox = Ext.create('Ext.form.field.Checkbox', {
                     cls: 'gis-checkbox',
 					width: ct.checkboxWidth,
@@ -991,6 +1008,8 @@ Ext.onReady( function() {
 					}
 				});
 
+                ct.items.push(ct.checkbox);
+
 				ct.numberField = Ext.create('Ext.form.field.Number', {
                     cls: 'gis-numberfield',
 					width: ct.numberFieldWidth,
@@ -1005,17 +1024,23 @@ Ext.onReady( function() {
                     }
 				});
 
-                ct.boldButton = Ext.create('Ext.button.Button', {
-                    width: 24,
-                    height: 24,
-                    icon: 'images/text_bold.png',
-                    style: 'margin-left: 1px',
-					disabled: true,
-                    enableToggle: true,
-                    listeners: {
-                        added: onAdded
-                    }
-                });
+                ct.items.push(ct.numberField);
+
+                if (!ct.skipBoldButton) {
+                    ct.boldButton = Ext.create('Ext.button.Button', {
+                        width: 24,
+                        height: 24,
+                        icon: 'images/text_bold.png',
+                        style: 'margin-left: 1px',
+                        disabled: true,
+                        enableToggle: true,
+                        listeners: {
+                            added: onAdded
+                        }
+                    });
+
+                    ct.items.push(ct.boldButton);
+                }
 
                 ct.italicButton = Ext.create('Ext.button.Button', {
                     width: 24,
@@ -1029,12 +1054,7 @@ Ext.onReady( function() {
                     }
                 });
 
-				ct.items = [
-                    ct.checkbox,
-                    ct.numberField,
-                    ct.boldButton,
-                    ct.italicButton
-				];
+                ct.items.push(ct.italicButton);
 
                 if (!ct.skipColorButton) {
                     ct.colorButton = Ext.create('Ext.ux.button.ColorButton', {
@@ -6591,6 +6611,7 @@ Ext.onReady( function() {
 
 
         labelPanel = Ext.create('Ext.ux.panel.LabelPanel', {
+            skipBoldButton: true,
             skipColorButton: true
         });
 
@@ -6713,6 +6734,8 @@ Ext.onReady( function() {
 			var view = {};
 
 			view.rows = [treePanel.getDimension()];
+
+            Ext.apply(view, labelPanel.getConfig());
 
 			return validateView(view);
 		};
