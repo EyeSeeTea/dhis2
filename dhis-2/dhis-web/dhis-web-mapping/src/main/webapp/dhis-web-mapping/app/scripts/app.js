@@ -927,19 +927,22 @@ Ext.onReady( function() {
 			height: 24,
             value: false,
             components: [],
-			getValue: function() {
-				return this.checkbox.getValue();
+			getConfig: function() {
+                return {
+                    labels: this.checkbox.getValue(),
+                    labelFontSize: this.numberField.getValue(),
+                    labelFontWeight: this.boldButton.pressed,
+                    labelFontStyle: this.italicButton.pressed,
+                    labelFontColor: this.colorButton.getValue()
+                };
 			},
-			getNumber: function() {
-				return this.numberField.getValue();
-			},
-			setValue: function(value, number) {
-				if (value) {
-					this.checkbox.setValue(value);
-				}
-				if (number) {
-					this.numberField.setValue(number);
-				}
+			setConfig: function(config) {
+                this.numberField.setValue(config.labelFontSize);
+                this.boldButton.toggle(config.labelFontWeight);
+                this.italicButton.toggle(config.labelFontStyle);
+                this.colorButton.setValue(config.labelFontColor);
+
+                this.checkbox.setValue(config.labels);
 			},
 			enable: function() {
 				for (var i = 0; i < this.components.length; i++) {
@@ -1003,9 +1006,7 @@ Ext.onReady( function() {
                     icon: 'images/text_bold.png',
                     style: 'margin-left: 1px',
 					disabled: true,
-                    handler: function() {
-                        this.toggle();
-                    },
+                    enableToggle: true,
                     listeners: {
                         added: onAdded
                     }
@@ -1017,9 +1018,7 @@ Ext.onReady( function() {
                     icon: 'images/text_italic.png',
                     style: 'margin-left: 1px',
 					disabled: true,
-                    handler: function() {
-                        this.toggle();
-                    },
+                    enableToggle: true,
                     listeners: {
                         added: onAdded
                     }
