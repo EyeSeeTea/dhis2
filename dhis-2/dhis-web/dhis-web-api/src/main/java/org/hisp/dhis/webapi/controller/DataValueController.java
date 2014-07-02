@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import org.apache.commons.lang.StringUtils;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -213,11 +214,9 @@ public class DataValueController
             // ---------------------------------------------------------------------
             // Audit trail
             // ---------------------------------------------------------------------
-            DataValue originalDataValue = dataValueService.getDataValue( dataValue.getDataElement(), dataValue.getPeriod(),
-                dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo() );
 
-            DataValueAudit dataValueAudit = new DataValueAudit( originalDataValue, originalDataValue.getValue(),
-                storedBy, now, originalDataValue.getComment());
+            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+                currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
 
             // ---------------------------------------------------------------------
             // Update DataValue
@@ -226,6 +225,9 @@ public class DataValueController
             {
                 if ( comment == null )
                 {
+                    //dataValueAudit.setAuditType( AuditType.DELETE );
+                    dataValueAuditService.addDataValueAudit( dataValueAudit );
+
                     dataValueService.deleteDataValue( dataValue );
                     return;
                 }

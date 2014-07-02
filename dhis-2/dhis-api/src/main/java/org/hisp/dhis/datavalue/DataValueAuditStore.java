@@ -37,7 +37,7 @@ import org.hisp.dhis.period.Period;
 
 /**
  * @author Quang Nguyen
- * @version Mar 30, 2010 10:32:19 PM
+ * @author Halvdan Hoem Grelland
  */
 public interface DataValueAuditStore
 {
@@ -47,17 +47,7 @@ public interface DataValueAuditStore
 
     void deleteDataValueAudit( DataValueAudit dataValueAudit );
 
-    int deleteDataValueAuditByDataValue( DataValue dataValue );
+    Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue );
 
-    void deleteDataValueAuditBySource( OrganisationUnit source );
-
-    void deleteDataValueAuditByDataElement( DataElement dataElement );
-
-    Collection<DataValueAudit> getDataValueAuditByDataValue( DataValue dataValue );
-
-    Collection<DataValueAudit> getAll();
-    
-    int deleteByPeriod( Period period );
-    
-    int deleteByDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo );
+    Collection<DataValueAudit> getAllDataValueAudits();
 }

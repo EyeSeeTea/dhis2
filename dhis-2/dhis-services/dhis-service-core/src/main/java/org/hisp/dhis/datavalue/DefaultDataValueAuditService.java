@@ -37,6 +37,7 @@ import org.hisp.dhis.period.Period;
 
 /**
  * @author Quang Nguyen
+ * @author Halvdan Hoem Grelland
  */
 public class DefaultDataValueAuditService
     implements DataValueAuditService
@@ -66,38 +67,13 @@ public class DefaultDataValueAuditService
         dataValueAuditStore.deleteDataValueAudit( dataValueAudit );
     }
 
-    public int deleteDataValueAuditByDataValue( DataValue dataValue )
+    public Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue )
     {
-        return dataValueAuditStore.deleteDataValueAuditByDataValue( dataValue );
+        return dataValueAuditStore.getDataValueAuditsByDataValue( dataValue );
     }
 
-    public Collection<DataValueAudit> getDataValueAuditByDataValue( DataValue dataValue )
+    public Collection<DataValueAudit> getAllDataValueAudits()
     {
-        return dataValueAuditStore.getDataValueAuditByDataValue( dataValue );
-    }
-
-    public Collection<DataValueAudit> getAll()
-    {
-        return dataValueAuditStore.getAll();
-    }
-
-    public void deleteDataValueAuditBySource( OrganisationUnit unit )
-    {
-        dataValueAuditStore.deleteDataValueAuditBySource( unit );
-    }
-
-    public void deleteDataValueAuditByDataElement( DataElement dataElement )
-    {
-        dataValueAuditStore.deleteDataValueAuditByDataElement( dataElement );
-        
-    }
-    public void deleteByDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo )
-    {
-    	dataValueAuditStore.deleteByDataElementCategoryOptionCombo( optionCombo );
-    }
-    
-    public void deleteByPeriod( Period period )
-    {
-    	dataValueAuditStore.deleteByPeriod( period );
+        return dataValueAuditStore.getAllDataValueAudits();
     }
 }

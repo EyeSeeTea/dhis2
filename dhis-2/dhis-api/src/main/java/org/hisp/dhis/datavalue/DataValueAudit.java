@@ -28,15 +28,151 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.AuditType;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
+
 import java.util.Date;
 
 /**
  * @author Quang Nguyen
- * @version Mar 30, 2010 9:13:36 PM
+ * @author Halvdan Hoem Grelland
  */
 
 public class DataValueAudit
 {
+    private int id;
+
+    private String value;
+
+    private String modifiedBy;
+
+    private Date timestamp;
+
+    private DataElement dataElement;
+
+    private Period period;
+
+    private OrganisationUnit organisationUnit;
+
+    private DataElementCategoryOptionCombo categoryOptionCombo;
+
+    private AuditType auditType;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public DataValueAudit( DataValue dataValue, String value, String modifiedBy, Date timestamp, AuditType auditType )
+    {
+        this.dataElement = dataValue.getDataElement();
+        this.period = dataValue.getPeriod();
+        this.organisationUnit = dataValue.getSource();
+        this.categoryOptionCombo = dataValue.getCategoryOptionCombo();
+
+        this.value = value;
+        this.modifiedBy = modifiedBy;
+        this.timestamp = timestamp;
+        this.auditType = auditType;
+    }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
+
+    public int getId()
+    {
+        return id;
+    }
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    public String getValue()
+    {
+        return value;
+    }
+
+    public void setValue( String value )
+    {
+        this.value = value;
+    }
+
+    public String getModifiedBy()
+    {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy( String modifiedBy )
+    {
+        this.modifiedBy = modifiedBy;
+    }
+
+    public Date getTimestamp()
+    {
+        return timestamp;
+    }
+
+    public void setTimestamp( Date timestamp )
+    {
+        this.timestamp = timestamp;
+    }
+
+    public DataElement getDataElement()
+    {
+        return dataElement;
+    }
+
+    public void setDataElement( DataElement dataElement )
+    {
+        this.dataElement = dataElement;
+    }
+
+    public Period getPeriod()
+    {
+        return period;
+    }
+
+    public void setPeriod( Period period )
+    {
+        this.period = period;
+    }
+
+    public OrganisationUnit getOrganisationUnit()
+    {
+        return organisationUnit;
+    }
+
+    public void setOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        this.organisationUnit = organisationUnit;
+    }
+
+    public DataElementCategoryOptionCombo getCategoryOptionCombo()
+    {
+        return categoryOptionCombo;
+    }
+
+    public void setCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    {
+        this.categoryOptionCombo = categoryOptionCombo;
+    }
+
+    public AuditType getAuditType()
+    {
+        return auditType;
+    }
+
+    public void setAuditType( AuditType auditType )
+    {
+        this.auditType = auditType;
+    }
+
+    /*
     private int id;
 
     private DataValue dataValue;
@@ -129,4 +265,5 @@ public class DataValueAudit
     {
         this.comment = comment;
     }
+    */
 }

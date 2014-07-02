@@ -34,18 +34,13 @@ import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
 
 /**
  * @author Quang Nguyen
- * @version Mar 30, 2010 10:42:16 PM
+ * @author Halvdan Hoem Grelland
  */
 public class HibernateDataValueAuditStore
     implements DataValueAuditStore
@@ -65,96 +60,40 @@ public class HibernateDataValueAuditStore
     // DataValueAuditStore implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public void addDataValueAudit( DataValueAudit dataValueAudit )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.save( dataValueAudit );
+        sessionFactory.getCurrentSession().save( dataValueAudit );
     }
 
+    @Override
     public void deleteDataValueAudit( DataValueAudit dataValueAudit )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        session.delete( dataValueAudit );
+        sessionFactory.getCurrentSession().delete( dataValueAudit );
     }
 
-    public int deleteDataValueAuditByDataValue( DataValue dataValue )
+    @Override
+    public Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue )
     {
         Session session = sessionFactory.getCurrentSession();
 
-        Query query = session.createQuery( "delete DataValueAudit where dataValue = :dataValue" );
-        query.setEntity( "dataValue", dataValue );
+        Query query = session.createQuery( "SELECT DataValueAudit WHERE dataElement = :dataElement " +
+            "AND period = :period AND organisationUnit = :organisationUnit AND categoryOptionCombo = :categoryOptionCombo")
+            .setEntity( "dataElement", dataValue.getDataElement() )
+            .setEntity( "period", dataValue.getPeriod() )
+            .setEntity( "organisationUnit", dataValue.getSource() )
+            .setEntity( "categoryOptionCombo", dataValue.getCategoryOptionCombo() );
 
-        return query.executeUpdate();
+        return query.list();
     }
 
-    public void deleteDataValueAuditBySource( OrganisationUnit source )
-    {
-        for ( DataValueAudit each : getAll() )
-        {
-            if ( each.getDataValue().getSource().equals( source ) )
-            {
-                deleteDataValueAudit( each );
-            }
-        }
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<DataValueAudit> getDataValueAuditByDataValue( DataValue dataValue )
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( DataValueAudit.class );
-        criteria.add( Restrictions.eq( "dataValue", dataValue ) );
-
-        return criteria.list();
-    }
-
-    @SuppressWarnings( "unchecked" )
-    public Collection<DataValueAudit> getAll()
+    @Override
+    public Collection<DataValueAudit> getAllDataValueAudits()
     {
         Session session = sessionFactory.getCurrentSession();
 
         Criteria criteria = session.createCriteria( DataValueAudit.class );
 
         return criteria.list();
-    }
-
-    public void deleteDataValueAuditByDataElement( DataElement dataElement )
-    {
-        for ( DataValueAudit each : getAll() )
-        {
-            if ( each.getDataValue().getDataElement().equals( dataElement ) )
-            {
-                deleteDataValueAudit( each );
-            }
-        }
-    }
-
-    public int deleteByPeriod( Period period )
-    {
-        /*
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "delete DataValueAudit where period = :period" );
-        query.setEntity( "period", period );
-
-        return query.executeUpdate();
-        */
-        return 0;
-    }
-
-    public int deleteByDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo )
-    {
-        /*
-        Session session = sessionFactory.getCurrentSession();
-
-        Query query = session.createQuery( "delete DataValueAudit where optionCombo = :optionCombo" );
-        query.setEntity( "optionCombo", optionCombo );
-
-        return query.executeUpdate();
-        */
-        return 0;
     }
 }

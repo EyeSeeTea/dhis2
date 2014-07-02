@@ -272,7 +272,7 @@ public class GetHistoryAction
 
         minMaxInvalid = !DataElement.VALUE_TYPE_INT.equals( dataElement.getType() );
 
-        dataValueAudits = dataValueAuditService.getDataValueAuditByDataValue( dataValue );
+        dataValueAudits = dataValueAuditService.getDataValueAuditsByDataValue( dataValue );
 
         commentOptionSet = dataElement.getCommentOptionSet();
         
