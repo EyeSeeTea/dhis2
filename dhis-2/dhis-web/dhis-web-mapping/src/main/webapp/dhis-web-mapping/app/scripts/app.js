@@ -918,11 +918,11 @@ Ext.onReady( function() {
 			layout: 'column',
             bodyStyle: 'border: 0 none',
             checkboxWidth: 100,
-			text: 'Show labels',
+			chechboxBoxLabel: 'Show labels',
             numberFieldValue: 13,
             numberFieldWidth: 50,
             colorButtonWidth: 87,
-            colorButtonColor: '383838',
+            colorButtonColor: '000000',
 			width: 290,
 			height: 24,
             value: false,
@@ -973,7 +973,7 @@ Ext.onReady( function() {
 				ct.checkbox = Ext.create('Ext.form.field.Checkbox', {
                     cls: 'gis-checkbox',
 					width: ct.checkboxWidth,
-					boxLabel: ct.text,
+					boxLabel: ct.chechboxBoxLabel,
 					checked: ct.value,
 					disabled: ct.disabled,
 					boxLabelCls: 'x-form-cb-label-alt1',
@@ -2199,183 +2199,6 @@ Ext.onReady( function() {
 				destroy: function() {
 					layer.removeAllFeatures();
 					layer.addFeatures(coreFeatures);
-				}
-			}
-		});
-
-		return window;
-	};
-
-	GIS.app.LabelWindow = function(layer) {
-		var fontSize,
-			strong,
-			italic,
-			color,
-			getValues,
-			updateLabels,
-			window;
-
-		fontSize = Ext.create('Ext.form.field.Number', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			allowDecimals: false,
-			minValue: 8,
-			value: 13,
-			emptyText: 13,
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		strong = Ext.create('Ext.form.field.Checkbox', {
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		italic = Ext.create('Ext.form.field.Checkbox', {
-			listeners: {
-				change: function() {
-					updateLabels();
-				}
-			}
-		});
-
-		button = Ext.create('Ext.ux.button.ColorButton', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			value: '0000ff'
-		});
-
-		color = Ext.create('Ext.ux.button.ColorButton', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-			value: '000000',
-			menuHandler: function() {
-				updateLabels();
-			}
-		});
-
-		getLabelConfig = function(isLabel) {
-			//var style = {
-				//fontSize: fontSize.getValue(),
-				//strong: strong.getValue(),
-				//italic: italic.getValue(),
-				//color: color.getValue()
-            //};
-
-            //if (isLabel) {
-                //style.label = '\${label}';
-                //style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
-			//}
-
-            //return style;
-		};
-
-		updateLabels = function() {
-            var loader = layer.core.getLoader();
-            loader.hideMask = true;
-
-            if (layer.hasLabels) {
-                layer.hasLabels = false;
-
-                if (layer.id === 'boundary') {
-                    layer.core.setFeatureLabelStyle(false);
-                }
-                else {
-                    layer.styleMap = GIS.core.StyleMap();
-                    loader.loadLegend();
-                }
-            }
-            else {
-                layer.hasLabels = true;
-
-                if (layer.id === 'boundary') {
-                    layer.core.setFeatureLabelStyle(true);
-                }
-                else {
-                    layer.styleMap = GIS.core.StyleMap(getLabelConfig(true));
-                    loader.loadLegend();
-                }
-            }
-		};
-
-		window = Ext.create('Ext.window.Window', {
-			title: GIS.i18n.labels,
-			iconCls: 'gis-window-title-icon-labels',
-			cls: 'gis-container-default',
-			width: gis.conf.layout.tool.window_width,
-			resizable: false,
-			closeAction: 'hide',
-            updateLabels: updateLabels,
-			items: {
-				layout: 'fit',
-				cls: 'gis-container-inner',
-				items: [
-					//{
-						//layout: 'column',
-						//cls: 'gis-container-inner',
-						//items: [
-							//{
-								//cls: 'gis-panel-html-label',
-								//html: GIS.i18n.font_size,
-								//width: gis.conf.layout.tool.itemlabel_width
-							//},
-							//fontSize
-						//]
-					//},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: '<b>' + GIS.i18n.bold_ + '</b>:',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							strong
-						]
-					},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: '<i>' + GIS.i18n.italic + '</i>:',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							italic
-						]
-					},
-					{
-						layout: 'column',
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: GIS.i18n.color + ':',
-								width: gis.conf.layout.tool.itemlabel_width
-							},
-							color
-						]
-					}
-				]
-			},
-			bbar: [
-				'->',
-				{
-					xtype: 'button',
-					text: GIS.i18n.showhide,
-					handler: function() {
-                        updateLabels();
-					}
-				}
-			],
-			listeners: {
-				render: function() {
-					gis.util.gui.window.setPositionTopLeft(this);
 				}
 			}
 		});
@@ -6772,10 +6595,7 @@ Ext.onReady( function() {
 			radiusHigh,
             legend,
 
-            strong,
-            italic,
-            fontSize,
-            fontColor,
+            labelPanel,
             label,
 
 			treePanel,
@@ -8080,55 +7900,12 @@ Ext.onReady( function() {
         });
 
 
-		strong = Ext.create('Ext.form.field.Checkbox', {
-            cls: 'gis-checkbox',
-            fieldLabel: 'Bold',
-            labelWidth: 95
-        });
-
-		italic = Ext.create('Ext.form.field.Checkbox', {
-            cls: 'gis-checkbox',
-            fieldLabel: 'Italic',
-            labelWidth: 95
-		});
-
-		fontSize = Ext.create('Ext.form.field.Number', {
-            cls: 'gis-numberfield',
-			width: 150,
-            fieldLabel: 'Size',
-            labelWidth: 95,
-			allowDecimals: false,
-			minValue: 7,
-			value: 13,
-			emptyText: 13
-		});
-
-		fontColor = Ext.create('Ext.ux.button.ColorButton', {
-			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
-            fieldLabel: 'Color',
-            height: 24,
-			value: '000000'
-		});
-
-        fontColorPanel = Ext.create('Ext.container.Container', {
-			layout: 'hbox',
-            height: 25,
-            bodyStyle: 'border: 0 none',
-			items: [
-				{
-					html: GIS.i18n.color + ':',
-					width: 100,
-					style: 'padding: 4px 0 0 4px',
-                    bodyStyle: 'border: 0 none'
-				},
-				fontColor
-			]
-		});
+        labelPanel = Ext.create('Ext.ux.panel.LabelPanel');
 
         label = Ext.create('Ext.panel.Panel', {
 			title: '<div class="ns-panel-title-data">' + GIS.i18n.labels + '</div>',
 			hideCollapseTool: true,
-            items: Ext.create('Ext.ux.panel.LabelPanel'),
+            items: labelPanel,
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
@@ -8365,6 +8142,8 @@ Ext.onReady( function() {
 			view.radiusLow = parseInt(radiusLow.getValue());
 			view.radiusHigh = parseInt(radiusHigh.getValue());
 			view.opacity = layer.item.getOpacity();
+
+            Ext.apply(view, labelPanel.getConfig());
 
 			if (legendType.getValue() === gis.conf.finals.widget.legendtype_predefined && legendSet.getValue()) {
 				view.legendSet = {

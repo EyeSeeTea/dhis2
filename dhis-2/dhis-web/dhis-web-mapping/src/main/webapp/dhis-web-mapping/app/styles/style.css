@@ -46,7 +46,6 @@
 
 html * {
 	font-family: arial, sans-serif, liberation sans, consolas !important;
-	font-size: 11px !important;
 }
 
 	/* Scrollbar Webkit */
@@ -439,6 +438,10 @@ gis-combo .x-form-item-label {
 /*----------------------------------------------------------------------------
  * Panel
  *--------------------------------------------------------------------------*/
+
+.x-panel-body {
+    font-size: 11px;
+}
 
 .x-panel-header	{ /* Panel header */
 /*
@@ -1036,6 +1039,7 @@ label.x-form-cb-label-alt1 {
     position: relative;
     top: -2px;
     padding-left: 4px;
+    font-size: 11px;
 }
 
 

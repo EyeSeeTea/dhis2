@@ -738,7 +738,7 @@ Ext.onReady( function() {
 		});
 	};
 
-	GIS.core.StyleMap = function(labelConfig) {
+	GIS.core.StyleMap = function(config) {
 		var defaults = {
 				fillOpacity: 1,
 				strokeColor: '#fff',
@@ -760,13 +760,15 @@ Ext.onReady( function() {
         defaults.label = '\${label}';
         defaults.fontFamily = 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas';
 
-        if (labelConfig) {
-            defaults.fontSize = labelConfig.fontSize || '13px';
-            defaults.fontWeight = labelConfig.fontWeight || 'normal';
-            defaults.fontStyle = labelConfig.fontStyle || 'normal';
-            defaults.fontColor = labelConfig.fontColor || '#000000';
-        }
+        if (config) {
+            defaults.fontSize = config.labelFontSize ? (parseInt(config.labelFontSize) + 'px') : '13px';
+            defaults.fontWeight = config.labelFontWeight ? 'bold' : 'normal';
+            defaults.fontStyle = config.labelFontStyle ? 'italic' : 'normal';
+            defaults.fontColor = config.labelFontColor || '#000000';
 
+            defaults.fontColor = defaults.fontColor.charAt(0) !== '#' ? '#' + defaults.fontColor : defaults.fontColor;
+        }
+console.log(defaults);
 		return new OpenLayers.StyleMap({
 			'default': defaults,
 			select: select
@@ -2035,24 +2037,11 @@ Ext.onReady( function() {
 
 					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 						feature.attributes.value = valueMap[id];
-                        feature.attributes.label = view.labels ? feature.attributes.name + ' (' + feature.attributes.value + ')' : '';
-
-                            //feature.style.label = feature.attributes.name;
-                            //feature.style.fontSize = '15px';
-                            //feature.style.fontWeight = 'bold';
-                            //feature.style.fontStyle = 'normal';
-                            //feature.style.fontColor = 'blue';
 
 						newFeatures.push(feature);
 					}
 				}
-console.log(layer);
-                //label
-                //if (view.labels) {
-                    layer.styleMap = GIS.core.StyleMap(view);
-                    //alert(view.fontSize);
-                //}
-console.log(layer.styleMap);
+
 				layer.removeFeatures(layer.features);
 				layer.addFeatures(newFeatures);
 
@@ -2091,6 +2080,14 @@ console.log(layer.styleMap);
 				fn;
 
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name + ' (' + attr.value + ')' : '';
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
 
 			addNames = function(response) {
 
@@ -3010,6 +3007,13 @@ console.log(layer.styleMap);
 					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
 					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : gis.conf.layout.layer.opacity;
 					layout.areaRadius = config.areaRadius;
+
+                    layout.labels = config.labels;
+                    layout.labelFontSize = config.labelFontSize;
+                    layout.labelFontWeight = config.labelFontWeight;
+                    layout.labelFontStyle = config.labelFontStyle;
+                    layout.labelFontColor = config.labelFontColor;
+
                     layout.hidden = !!config.hidden;
 
 					layout.userOrganisationUnit = isOu;
