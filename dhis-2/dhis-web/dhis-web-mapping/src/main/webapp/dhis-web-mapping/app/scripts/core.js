@@ -768,7 +768,7 @@ Ext.onReady( function() {
 
             defaults.fontColor = defaults.fontColor.charAt(0) !== '#' ? '#' + defaults.fontColor : defaults.fontColor;
         }
-console.log(defaults);
+
 		return new OpenLayers.StyleMap({
 			'default': defaults,
 			select: select
