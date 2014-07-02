@@ -917,6 +917,7 @@ Ext.onReady( function() {
 			alias: 'widget.labelpanel',
 			layout: 'column',
             bodyStyle: 'border: 0 none',
+            skipColorButton: false,
             checkboxWidth: 100,
 			chechboxBoxLabel: 'Show labels',
             numberFieldValue: 11,
@@ -1028,23 +1029,26 @@ Ext.onReady( function() {
                     }
                 });
 
-                ct.colorButton = Ext.create('Ext.ux.button.ColorButton', {
-                    width: ct.colorButtonWidth,
-                    height: 24,
-                    style: 'margin-left: 1px',
-                    value: ct.colorButtonColor,
-                    listeners: {
-                        added: onAdded
-                    }
-                });
-
 				ct.items = [
                     ct.checkbox,
                     ct.numberField,
                     ct.boldButton,
-                    ct.italicButton,
-                    ct.colorButton
+                    ct.italicButton
 				];
+
+                if (!ct.skipColorButton) {
+                    ct.colorButton = Ext.create('Ext.ux.button.ColorButton', {
+                        width: ct.colorButtonWidth,
+                        height: 24,
+                        style: 'margin-left: 1px',
+                        value: ct.colorButtonColor,
+                        listeners: {
+                            added: onAdded
+                        }
+                    });
+
+                    ct.items.push(ct.colorButton);
+                }
 
 				this.callParent();
 			}
@@ -2460,6 +2464,183 @@ Ext.onReady( function() {
 				show: function(w) {
 					var pos = gis.viewport.favoriteWindow.getPosition();
 					w.setPosition(pos[0] + 5, pos[1] + 5);
+				}
+			}
+		});
+
+		return window;
+	};
+
+	GIS.app.LabelWindow = function(layer) {
+		var fontSize,
+			strong,
+			italic,
+			color,
+			getValues,
+			updateLabels,
+			window;
+
+		fontSize = Ext.create('Ext.form.field.Number', {
+			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
+			allowDecimals: false,
+			minValue: 8,
+			value: 13,
+			emptyText: 13,
+			listeners: {
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+
+		strong = Ext.create('Ext.form.field.Checkbox', {
+			listeners: {
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+
+		italic = Ext.create('Ext.form.field.Checkbox', {
+			listeners: {
+				change: function() {
+					updateLabels();
+				}
+			}
+		});
+
+		button = Ext.create('Ext.ux.button.ColorButton', {
+			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
+			value: '0000ff'
+		});
+
+		color = Ext.create('Ext.ux.button.ColorButton', {
+			width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width,
+			value: '000000',
+			menuHandler: function() {
+				updateLabels();
+			}
+		});
+
+		getLabelConfig = function(isLabel) {
+			var style = {
+				fontSize: fontSize.getValue(),
+				strong: strong.getValue(),
+				italic: italic.getValue(),
+				color: color.getValue()
+            };
+
+            if (isLabel) {
+                style.label = '\${label}';
+                style.fontFamily = 'arial,sans-serif,ubuntu,consolas';
+			}
+
+            return style;
+		};
+
+		updateLabels = function() {
+            var loader = layer.core.getLoader();
+            loader.hideMask = true;
+
+            if (layer.hasLabels) {
+                layer.hasLabels = false;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(false);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id);
+                    loader.loadLegend();
+                }
+            }
+            else {
+                layer.hasLabels = true;
+
+                if (layer.id === 'boundary') {
+                    layer.core.setFeatureLabelStyle(true);
+                }
+                else {
+                    layer.styleMap = GIS.core.StyleMap(layer.id, getLabelConfig(true));
+                    loader.loadLegend();
+                }
+            }
+		};
+
+		window = Ext.create('Ext.window.Window', {
+			title: GIS.i18n.labels,
+			iconCls: 'gis-window-title-icon-labels',
+			cls: 'gis-container-default',
+			width: gis.conf.layout.tool.window_width,
+			resizable: false,
+			closeAction: 'hide',
+            updateLabels: updateLabels,
+			items: {
+				layout: 'fit',
+				cls: 'gis-container-inner',
+				items: [
+					//{
+						//layout: 'column',
+						//cls: 'gis-container-inner',
+						//items: [
+							//{
+								//cls: 'gis-panel-html-label',
+								//html: GIS.i18n.font_size,
+								//width: gis.conf.layout.tool.itemlabel_width
+							//},
+							//fontSize
+						//]
+					//},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: '<b>' + GIS.i18n.bold_ + '</b>:',
+								width: gis.conf.layout.tool.itemlabel_width
+							},
+							strong
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: '<i>' + GIS.i18n.italic + '</i>:',
+								width: gis.conf.layout.tool.itemlabel_width
+							},
+							italic
+						]
+					},
+					{
+						layout: 'column',
+						cls: 'gis-container-inner',
+						items: [
+							{
+								cls: 'gis-panel-html-label',
+								html: GIS.i18n.color + ':',
+								width: gis.conf.layout.tool.itemlabel_width
+							},
+							color
+						]
+					}
+				]
+			},
+			bbar: [
+				'->',
+				{
+					xtype: 'button',
+					text: GIS.i18n.showhide,
+					handler: function() {
+                        updateLabels();
+					}
+				}
+			],
+			listeners: {
+				render: function() {
+					gis.util.gui.window.setPositionTopLeft(this);
 				}
 			}
 		});
@@ -5913,10 +6094,7 @@ Ext.onReady( function() {
 
 	GIS.app.LayerWidgetBoundary = function(layer) {
 
-		// Stores
 		var infrastructuralDataElementValuesStore,
-
-		// Components
 
 			treePanel,
 			userOrganisationUnit,
@@ -5927,14 +6105,20 @@ Ext.onReady( function() {
 			toolMenu,
 			tool,
 			toolPanel,
+            organisationUnit,
 
-		// Functions
+            labelPanel,
+            label,
+
 			reset,
 			setGui,
 			getView,
 			validateView,
 
-			panel;
+            accordionBody,
+            accordion,
+
+			accordionPanels = [];
 
 		// Stores
 
@@ -5946,7 +6130,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 200,
+			height: 247,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -6248,7 +6432,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 37,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_levels,
@@ -6264,7 +6448,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 37,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_groups,
@@ -6369,10 +6553,57 @@ Ext.onReady( function() {
 		toolPanel = Ext.create('Ext.panel.Panel', {
 			width: 36,
 			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
+			style: 'margin-right:1px',
 			items: tool
 		});
 
+        organisationUnit = Ext.create('Ext.panel.Panel', {
+			title: '<div class="ns-panel-title-data">' + GIS.i18n.organisation_units + '</div>',
+			hideCollapseTool: true,
+            items: [
+                {
+                    layout: 'column',
+                    bodyStyle: 'border:0 none',
+                    style: 'padding-bottom:1px',
+                    items: [
+                        toolPanel,
+                        {
+                            layout: 'column',
+                            bodyStyle: 'border:0 none',
+                            items: [
+                                userOrganisationUnit,
+                                userOrganisationUnitChildren,
+                                userOrganisationUnitGrandChildren,
+                                organisationUnitLevel,
+                                organisationUnitGroup
+                            ]
+                        }
+                    ]
+                },
+                treePanel
+            ],
+			listeners: {
+				added: function() {
+					accordionPanels.push(this);
+				}
+			}
+        });
+
+
+        labelPanel = Ext.create('Ext.ux.panel.LabelPanel', {
+            skipColorButton: true
+        });
+
+        label = Ext.create('Ext.panel.Panel', {
+			title: '<div class="ns-panel-title-data">' + GIS.i18n.labels + '</div>',
+			hideCollapseTool: true,
+            items: labelPanel,
+			listeners: {
+				added: function() {
+					accordionPanels.push(this);
+				}
+			}
+        });
 		// Functions
 
 		reset = function(skipTree) {
@@ -6496,7 +6727,37 @@ Ext.onReady( function() {
 			return view;
 		};
 
-		panel = Ext.create('Ext.panel.Panel', {
+        accordionBody = Ext.create('Ext.panel.Panel', {
+			layout: 'accordion',
+			activeOnTop: true,
+			cls: 'ns-accordion',
+			bodyStyle: 'border:0 none; margin-bottom:1px',
+			height: 328,
+			items: function() {
+				var panels = [
+					organisationUnit,
+                    label
+				];
+
+				last = panels[panels.length - 1];
+				last.cls = 'ns-accordion-last';
+
+				return panels;
+			}(),
+            listeners: {
+                afterrender: function() { // nasty workaround
+                    for (var i = accordionPanels.length - 1; i >= 0; i--) {
+                        accordionPanels[i].expand();
+                    }
+                }
+            }
+		});
+
+		accordion = Ext.create('Ext.panel.Panel', {
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0',
+			items: accordionBody,
+			panels: accordionPanels,
+
 			map: layer.map,
 			layer: layer,
 			menu: layer.menu,
@@ -6509,44 +6770,22 @@ Ext.onReady( function() {
 			},
 
 			infrastructuralDataElementValuesStore: infrastructuralDataElementValuesStore,
-
-			cls: 'gis-form-widget el-border-0',
-			border: false,
-			items: [
-				{
-					xtype: 'form',
-					cls: 'el-border-0',
-					//width: 270,
-					items: [
-						{
-							html: GIS.i18n.organisation_units,
-							cls: 'gis-form-subtitle-first'
-						},
-						{
-							layout: 'column',
-							bodyStyle: 'border:0 none',
-							style: 'padding-bottom:2px',
-							items: [
-								toolPanel,
-								{
-									width: gis.conf.layout.widget.item_width - 38,
-									layout: 'column',
-									bodyStyle: 'border:0 none',
-									items: [
-										userOrganisationUnit,
-										userOrganisationUnitChildren,
-										userOrganisationUnitGrandChildren,
-										organisationUnitLevel,
-										organisationUnitGroup
-									]
-								}
-							]
-						},
-						treePanel
-					]
+			getExpandedPanel: function() {
+				for (var i = 0, panel; i < this.panels.length; i++) {
+					if (!this.panels[i].collapsed) {
+						return this.panels[i];
+					}
 				}
-			],
+
+				return null;
+			},
+			getFirstPanel: function() {
+				return this.panels[0];
+			},
 			listeners: {
+				added: function() {
+					layer.accordion = this;
+				},
 				render: function() {
 					toolMenu.clickHandler('level');
 				}
@@ -6555,7 +6794,7 @@ Ext.onReady( function() {
 
 		//createSelectHandlers();
 
-		return panel;
+		return accordion;
 	};
 
 	GIS.app.LayerWidgetThematic = function(layer) {
@@ -7546,7 +7785,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 37,
 			valueField: 'level',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_levels,
@@ -7561,7 +7800,7 @@ Ext.onReady( function() {
 			cls: 'gis-combo',
 			multiSelect: true,
 			style: 'margin-bottom:0',
-			width: gis.conf.layout.widget.item_width - 38,
+			width: gis.conf.layout.widget.item_width - 37,
 			valueField: 'id',
 			displayField: 'name',
 			emptyText: GIS.i18n.select_organisation_unit_groups,
@@ -7665,7 +7904,7 @@ Ext.onReady( function() {
 		toolPanel = Ext.create('Ext.panel.Panel', {
 			width: 36,
 			bodyStyle: 'border:0 none; text-align:right',
-			style: 'margin-right:2px',
+			style: 'margin-right:1px',
 			items: tool
 		});
 
@@ -7680,7 +7919,6 @@ Ext.onReady( function() {
                     items: [
                         toolPanel,
                         {
-                            width: gis.conf.layout.widget.item_width - 38,
                             layout: 'column',
                             bodyStyle: 'border:0 none',
                             items: [
@@ -7695,22 +7933,9 @@ Ext.onReady( function() {
                 },
                 treePanel
             ],
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[indicatorAvailable, indicatorSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
-			},
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
 				}
 			}
         });
@@ -9050,3 +9275,4 @@ Ext.onReady( function() {
         });
 	}();
 });
+
