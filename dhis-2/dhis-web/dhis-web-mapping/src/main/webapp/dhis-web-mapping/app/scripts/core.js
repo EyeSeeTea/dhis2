@@ -1563,6 +1563,7 @@ Ext.onReady( function() {
 				}
 
                 if (doExecute) {
+                    loader.zoomToVisibleExtent = false;
                     loadLegend(view);
                 }
 
