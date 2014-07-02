@@ -955,9 +955,13 @@ Ext.onReady( function() {
                 }
 			},
 			reset: function() {
-				this.checkbox.setValue(false);
-				this.numberField.setValue(this.number);
-				this.numberField.disable();
+                this.numberField.setValue(this.numberFieldValue);
+                this.boldButton.toggle(false);
+                this.italicButton.toggle(false);
+                this.colorButton.setValue(this.colorButtonColor);
+
+                this.checkbox.setValue(false);
+                this.disable();
 			},
 			initComponent: function() {
 				var ct = this,
