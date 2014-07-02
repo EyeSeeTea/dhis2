@@ -7244,7 +7244,7 @@ Ext.onReady( function() {
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
-			height: 290,
+			height: 247,
 			style: 'border-top: 1px solid #ddd; padding-top: 1px',
 			displayField: 'name',
 			width: gis.conf.layout.widget.item_width,
@@ -8083,6 +8083,9 @@ Ext.onReady( function() {
 				}
 
 				treePanel.selectGraphMap(view.parentGraphMap);
+
+                // labels
+                labelPanel.setConfig(view);
 			}();
 
 			setLayerGui = function() {
@@ -8158,7 +8161,7 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none; margin-bottom:1px',
-			height: 400,
+			height: 380,
 			items: function() {
 				var panels = [
 					data,

@@ -103,6 +103,8 @@ public class MapView
     
     private Boolean hidden;
     
+    private Boolean labels;
+    
     private String labelFontSize;
     
     private String labelFontWeight;
@@ -360,6 +362,19 @@ public class MapView
         return hidden;
     }
 
+    public void setLabels( Boolean labels )
+    {
+        this.labels = labels;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Boolean getLabels()
+    {
+        return labels;
+    }
+
     public void setHidden( Boolean hidden )
     {
         this.hidden = hidden;
@@ -464,6 +479,7 @@ public class MapView
             organisationUnitGroupSet = mapView.getOrganisationUnitGroupSet();
             areaRadius = mapView.getAreaRadius();
             hidden = mapView.getHidden();
+            labels = mapView.getLabels();
             labelFontSize = mapView.getLabelFontSize();
             labelFontWeight = mapView.getLabelFontWeight();
             labelFontStyle = mapView.getLabelFontStyle();
