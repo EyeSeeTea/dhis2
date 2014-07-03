@@ -123,6 +123,8 @@ table.padding1 td {
 .gis-panel-html-label .x-panel-body {
 	height: 22px;
 	line-height: 18px;
+    padding-right: 5px;
+    padding-left: 4px;
 }
 
 .x-splitter-collapsed .x-layout-split-bottom { /* Hide expand arrow when east panel is collapsed */
@@ -957,6 +959,7 @@ gis-combo .x-form-item-label {
 .gis-grid .x-grid-cell-inner {
 	padding-top: 3px;
 	padding-bottom: 3px;
+    font-size: 10px;
 }
 
 .gis-grid .x-column-header-text {
@@ -992,6 +995,10 @@ gis-combo .x-form-item-label {
 /*----------------------------------------------------------------------------
  * GIS Textfield
  *--------------------------------------------------------------------------*/
+
+.gis-textfield {
+    margin-bottom: 1px;
+}
 
 .gis-textfield input.x-form-text {
 	border-radius: 1px;
