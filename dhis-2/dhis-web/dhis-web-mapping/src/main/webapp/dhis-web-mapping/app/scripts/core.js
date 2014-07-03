@@ -1385,7 +1385,7 @@ Ext.onReady( function() {
 			features = features || layer.core.featureStore.features;
 
 			for (var i = 0; i < features.length; i++) {
-				features[i].attributes.label = features[i].attributes.name;
+				features[i].attributes.popupText = features[i].attributes.name + ' (' + features[i].attributes[view.organisationUnitGroupSet.id] + ')';
 			}
 
 			layer.removeFeatures(layer.features);
@@ -1401,6 +1401,16 @@ Ext.onReady( function() {
                 success;
 
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, attr; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+console.log(view.labels);
+                attr.label = view.labels ? attr.name : '';
+console.log(attr.label);
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
 
             success = function(r) {
                 var data = r.organisationUnitGroups,

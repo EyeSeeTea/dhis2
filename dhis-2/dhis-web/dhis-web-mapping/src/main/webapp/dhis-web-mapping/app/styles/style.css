@@ -1048,6 +1048,10 @@ label.x-form-cb-label-alt1 {
  * GIS Checkbox
  *--------------------------------------------------------------------------*/
 
+.gis-checkbox {
+    margin-bottom: 1px;
+}
+
     /* Form label */
 .gis-checkbox .x-form-item-label-left {
     padding-top: 4px;
