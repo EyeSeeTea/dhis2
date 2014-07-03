@@ -2046,7 +2046,7 @@ Ext.onReady( function() {
 
 					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 						feature.attributes.value = valueMap[id];
-                        feature.attribute.popupText = feature.attributes.name + ' (' + feature.attributes.value + ')';
+                        feature.attributes.popupText = feature.attributes.name + ' (' + feature.attributes.value + ')';
 
 						newFeatures.push(feature);
 					}
@@ -2969,7 +2969,6 @@ Ext.onReady( function() {
 
                     if (Ext.Array.contains([gis.layer.thematic1.id, gis.layer.thematic2.id, gis.layer.thematic3.id, gis.layer.thematic4.id], config.layer)) {
                         if (!config.columns) {
-                            console.log('Data dimension is invalid', config.columns);
                             return;
                         }
                     }

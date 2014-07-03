@@ -6738,7 +6738,7 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid;
+                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
 				}
 				else if (uid === 0) {
 					path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false';
@@ -7264,7 +7264,6 @@ Ext.onReady( function() {
 
         data = Ext.create('Ext.panel.Panel', {
 			title: '<div class="ns-panel-title-data">' + 'Data and periods' + '</div>',
-			//title: '<div style="font-weight:normal">Data and periods</div>',
 			hideCollapseTool: true,
             items: [
                 valueType,
@@ -7276,22 +7275,9 @@ Ext.onReady( function() {
                 periodTypePanel,
                 period,
             ],
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[indicatorAvailable, indicatorSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
-			},
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
 				}
 			}
         });
@@ -7759,15 +7745,14 @@ Ext.onReady( function() {
 
 		legendType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
+			fieldLabel: GIS.i18n.legend_type,
+			labelWidth: gis.conf.layout.widget.itemlabel_width,
 			editable: false,
 			valueField: 'id',
 			displayField: 'name',
-			fieldLabel: GIS.i18n.legend_type,
-            fieldStyle: 'padding-top: 4px',
-			value: gis.conf.finals.widget.legendtype_automatic,
 			queryMode: 'local',
+			value: gis.conf.finals.widget.legendtype_automatic,
 			width: gis.conf.layout.widget.item_width,
-			labelWidth: gis.conf.layout.widget.itemlabel_width,
 			store: Ext.create('Ext.data.ArrayStore', {
 				fields: ['id', 'name'],
 				data: [
@@ -7919,22 +7904,9 @@ Ext.onReady( function() {
                 lowPanel,
                 highPanel,
             ],
-			onExpand: function() {
-				//var h = westRegion.hasScrollbar ?
-					//ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
-				//accordion.setThisHeight(h);
-				//ns.core.web.multiSelect.setHeight(
-					//[indicatorAvailable, indicatorSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
-			},
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
-				},
-				expand: function(p) {
-					p.onExpand();
 				}
 			}
         });
@@ -8367,6 +8339,14 @@ Ext.onReady( function() {
                             delete view.legendSet.bounds;
                             delete view.legendSet.colors;
                             delete view.legendSet.names;
+                        }
+
+                        if (!view.labels) {
+                            delete view.labels;
+                            delete view.labelFontSize;
+                            delete view.labelFontWeight;
+                            delete view.labelFontStyle;
+                            delete view.labelFontColor;
                         }
                     }
                 }
