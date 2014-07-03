@@ -273,6 +273,10 @@ Ext.onReady( function() {
 					}
 				}
 
+                if (!layers.length) {
+					return false;
+				}
+
 				for (var i = 0; i < layers.length; i++) {
 					var layer = layers[i],
 						id = layer.id,
