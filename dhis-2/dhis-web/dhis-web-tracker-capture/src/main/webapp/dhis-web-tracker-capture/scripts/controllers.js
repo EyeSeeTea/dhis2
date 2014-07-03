@@ -5,8 +5,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
 
 //Controller for settings page
 .controller('SelectionController',
-        function($rootScope,
-                $scope,
+        function($scope,
                 $modal,
                 $location,
                 Paginator,
@@ -292,8 +291,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         //$scope.showSearchDiv = false;
         //$rootScope.showAdvancedSearchDiv = false;
     };
-    
-    
     
     $scope.showHideColumns = function(){
         

@@ -33,8 +33,42 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };  
 })
 
+/* Factory to fetch relationships */
+.factory('RelationshipFactory', function($q, $rootScope, StorageService) { 
+    return {
+        getAll: function(){
+            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.getAll('relationshipTypes').done(function(relationshipTypes){
+                    $rootScope.$apply(function(){
+                        def.resolve(relationshipTypes);
+                    });                    
+                });
+            });            
+            
+            return def.promise;            
+        },
+        get: function(uid){
+            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('relationshipTypes', uid).done(function(relationshipType){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(relationshipType);
+                    });
+                });
+            });                        
+            return def.promise;            
+        }
+    };
+})
+
+
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($q, $rootScope, StorageService, ProgramStageFactory) { 
+.factory('ProgramFactory', function($q, $rootScope, StorageService) { 
     return {
         getAll: function(){
             
@@ -415,8 +449,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         
-        getByEntity: function(entity, orgUnit, program){   
-            var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
+        getEvents: function(entity, orgUnit, program, programStatus){   
+            var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus + '&paging=false').then(function(response){
                 return response.data.events;
             });            
             return promise;
@@ -447,6 +481,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         updateForNote: function(dhis2Event){   
             var promise = $http.put('../api/events/' + dhis2Event.event + '/addNote', dhis2Event).then(function(response){
+                return response.data;         
+            });
+            return promise;
+        },
+        updateForEventDate: function(dhis2Event){
+            var promise = $http.put('../api/events/' + dhis2Event.event + '/updateEventDate', dhis2Event).then(function(response){
                 return response.data;         
             });
             return promise;
@@ -837,17 +877,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             dateValue = Date.parse(dateValue);
             dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
             return dateValue;
-        },
-        getDueDate: function(programStage, enrollment){
-            var dueDate = moment(moment(enrollment.dateOfIncident).add('d', programStage.minDaysFromStart), 'YYYY-MM-DD')._d;
-            dueDate = Date.parse(dueDate);
-            dueDate = $filter('date')(dueDate, 'yyyy-MM-dd');
-            return dueDate;
         }
     };            
 })
 
-.service('EventUtils', function(DateUtils, $filter){
+.service('EventUtils', function($filter, OrgUnitService){
     return {
         createDummyEvent: function(programStage, orgUnit, enrollment){
             
@@ -855,7 +889,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             today = Date.parse(today);
             today = $filter('date')(today, 'yyyy-MM-dd');
     
-            var dueDate = DateUtils.getDueDate(programStage, enrollment);
+            var dueDate = this.getEventDueDate(programStage, enrollment);
             var dummyEvent = {programStage: programStage.id, 
                               orgUnit: orgUnit.id,
                               orgUnitName: orgUnit.name,
@@ -863,11 +897,49 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                               name: programStage.name,
                               reportDateDescription: programStage.reportDateDescription,
                               status: 'ACTIVE'};
-            dummyEvent.statusColor = 'stage-on-time';
+            dummyEvent.statusColor = 'alert alert-info';//'stage-on-time';
             if(moment(today).isAfter(dummyEvent.dueDate)){
-                dummyEvent.statusColor = 'stage-overdue';
+                dummyEvent.statusColor = 'alert alert-danger';//'stage-overdue';
             }
             return dummyEvent;        
+        },
+        getEventStatusColor: function(dhis2Event){    
+            var today = moment();
+            today = Date.parse(today);
+            today = $filter('date')(today, 'yyyy-MM-dd');
+            var eventDate = today;
+            
+            if(dhis2Event.eventDate){
+                eventDate = dhis2Event.eventDate;
+            }
+    
+            if(dhis2Event.status === 'COMPLETED'){
+                return 'alert alert-success';//'stage-completed';
+            }
+            else{                
+                if(moment(eventDate).isAfter(dhis2Event.dueDate)){
+                    return 'alert alert-danger';//'stage-overdue';
+                }                
+                return 'alert alert-info';//'stage-on-time';
+            }            
+        },
+        getEventDueDate: function(programStage, enrollment){
+            var dueDate = moment(moment(enrollment.dateOfIncident).add('d', programStage.minDaysFromStart), 'YYYY-MM-DD')._d;
+            dueDate = Date.parse(dueDate);
+            dueDate = $filter('date')(dueDate, 'yyyy-MM-dd');
+            return dueDate;
+        },
+        setEventOrgUnitName: function(dhis2Event){            
+            if(dhis2Event.orgUnit){
+                OrgUnitService.open().then(function(){
+                    OrgUnitService.get(dhis2Event.orgUnit).then(function(ou){
+                        if(ou){
+                            dhis2Event.orgUnitName = ou.n;
+                            return dhis2Event;                            
+                        }                                                       
+                    });                            
+                }); 
+            }
         }
     }; 
 });

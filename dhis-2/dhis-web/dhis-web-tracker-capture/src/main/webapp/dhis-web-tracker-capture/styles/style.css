@@ -340,6 +340,10 @@ div.paging a.active
     color: white;
 }
 
+.error {
+    color:red;
+    font-size:12px;
+}
 .anchor-color {
     color: #276696;
 }
@@ -549,9 +553,12 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 }
 
 .empty-dashboard-container{
-    min-height: 100px;
+    min-height: 100px;    
 }
 
+.handle {
+    cursor: move;
+}
 .horizonal-spacing{
     margin-left: 10px;    
     margin-right: 10px;    
@@ -574,10 +581,16 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     margin-top: 5px;    
 }
 
+.search-container-main {
+    width: 100%;
+    float: left;
+    height: 100%; 
+}
+
 .search-container{
     margin: 5px;
     padding: 5px; 
-    max-height: 50% !important;
+    max-height: 570px;
     overflow-y: scroll;
 }
 
@@ -588,6 +601,15 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 
 .widget-content-container{
     padding: 20px 10px;
+}
+
+.relationship-container {
+    border: 1px solid #c2c2c2;
+    border-radius: 5px;
+    padding: 5px;
+    min-height: 500px;
+    max-height: 500px;
+    overflow-y: scroll;
 }
 
 .trim {
@@ -697,6 +719,7 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 }
 .modal-body {
     position: relative;
+    font-size: 14px;
 }
 .modal-footer {
     padding: 19px 20px 20px;    
@@ -729,7 +752,7 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 }
 @media screen and (min-width: 768px) {
     .modal-dialog {
-        width: 600px;
+        width: 75%;
         padding-top: 30px;
         padding-bottom: 30px;
     }
@@ -959,7 +982,6 @@ a:hover {
     background-color: #f6f7f8;
     border-color: #d1d1d1;
 }
-
 
 .dropdown-menu-right{
     right: 0;
