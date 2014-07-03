@@ -28,9 +28,11 @@ package org.hisp.dhis.datavalue.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -79,11 +81,6 @@ public class HibernateDataValueAuditStore
         sessionFactory.getCurrentSession().save( dataValueAudit );
     }
 
-    @Override
-    public void deleteDataValueAudit( DataValueAudit dataValueAudit )
-    {
-        sessionFactory.getCurrentSession().delete( dataValueAudit );
-    }
 
     @Override
     public Collection<DataValueAudit> getDataValueAudits( DataValue dataValue )
@@ -102,7 +99,7 @@ public class HibernateDataValueAuditStore
 
         if( storedPeriod == null )
         {
-            return null;
+            return new ArrayList<DataValueAudit>();
         }
 
         Criteria criteria = session.createCriteria( DataValueAudit.class )
@@ -113,5 +110,53 @@ public class HibernateDataValueAuditStore
             .addOrder( Order.desc( "timestamp") );
 
         return criteria.list();
+    }
+
+    @Override
+    public void deleteDataValueAudit( DataValueAudit dataValueAudit )
+    {
+        sessionFactory.getCurrentSession().delete( dataValueAudit );
+    }
+
+    @Override
+    public int deleteDataValueAuditsByDataElement( DataElement dataElement )
+    {
+        Query query = sessionFactory.getCurrentSession()
+            .createQuery( "DELETE DataValueAudit WHERE dataElement = :dataElement" )
+            .setEntity( "dataElement", dataElement );
+
+        return query.executeUpdate();
+    }
+
+    @Override
+    public int deleteDataValueAuditsByPeriod( Period period )
+    {
+        Period storedPeriod = periodStore.reloadPeriod( period );
+
+        Query query = sessionFactory.getCurrentSession()
+            .createQuery( "DELETE DataValueAudit WHERE period = :period" )
+            .setEntity( "period", storedPeriod );
+
+        return query.executeUpdate();
+    }
+
+    @Override
+    public int deleteDataValueAuditsByOrganisationUnit( OrganisationUnit organisationUnit )
+    {
+        Query query = sessionFactory.getCurrentSession()
+            .createQuery( "DELETE DataValueAudit WHERE organisationUnit = :organisationUnit" )
+            .setEntity( "organisationUnit", organisationUnit );
+
+        return query.executeUpdate();
+    }
+
+    @Override
+    public int deleteDataValueAuditsByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    {
+        Query query = sessionFactory.getCurrentSession()
+            .createQuery( "DELETE DataValueAudit WHERE categoryOptionCombo = :categoryOptionCombo" )
+            .setEntity( "categoryOptionCombo", categoryOptionCombo );
+
+        return query.executeUpdate();
     }
 }

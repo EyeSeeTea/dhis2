@@ -167,7 +167,7 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getPreviousValue(),
             currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAudit );

@@ -62,29 +62,28 @@ public class DataValueAuditDeletionHandler
     {
         return DataValueAudit.class.getSimpleName();
     }
-/*
+
     @Override
     public void deleteOrganisationUnit( OrganisationUnit unit )
     {
-    	dataValueAuditService.deleteDataValueAuditBySource( unit );
+    	dataValueAuditService.deleteDataValueAuditsByOrganisationUnit( unit );
     }
 
     @Override
     public void deleteDataElement( DataElement dataElement )
     {
-    	dataValueAuditService.deleteDataValueAuditByDataElement( dataElement );
+    	dataValueAuditService.deleteDataValueAuditsByDataElement( dataElement );
     }
 
     @Override
     public void deletePeriod( Period period )
     {
-    	dataValueAuditService.deleteByPeriod( period );
+    	dataValueAuditService.deleteDataValueAuditsByPeriod( period );
     }
     
     @Override
     public void deleteDataElementCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo)
     {
-    	dataValueAuditService.deleteByDataElementCategoryOptionCombo( categoryOptionCombo );
+    	dataValueAuditService.deleteDataValueAuditsByCategoryOptionCombo( categoryOptionCombo );
     }
-*/
 }

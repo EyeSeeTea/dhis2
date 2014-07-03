@@ -217,7 +217,7 @@ public class DataValueController
         }
         else
         {
-            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getPreviousValue(),
                 currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
 
             if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )

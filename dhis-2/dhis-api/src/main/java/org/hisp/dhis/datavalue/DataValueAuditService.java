@@ -44,12 +44,73 @@ public interface DataValueAuditService
 {
     String ID = DataValueAuditService.class.getName();
 
+    /**
+     * Adds a DataValueAudit.
+     *
+     * @param dataValueAudit the DataValueAudit to add.
+     */
     void addDataValueAudit( DataValueAudit dataValueAudit );
 
-    void deleteDataValueAudit( DataValueAudit dataValueAudit );
-
+    /**
+     * Returns all DataValueAudits for the given DataValue.
+     *
+     * @param dataValue the DataValue to get DataValueAudits for.
+     * @return a collection of DataValueAudits which match the given DataValue,
+     *         or an empty collection if there are no matches.
+     */
     Collection<DataValueAudit> getDataValueAudits( DataValue dataValue );
 
+    /**
+     * Returns all DataValueAudits for the given DataElement, Period,
+     * OrganisationUnit and DataElementCategoryOptionCombo.
+     *
+     * @param dataElement the DataElement of the DataValueAudits.
+     * @param period the Period of the DataValueAudits.
+     * @param organisationUnit the OrganisationUnit of the DataValueAudits.
+     * @param categoryOptionCombo the DataElementCategoryOptionCombo of the DataValueAudits.
+     * @return a collection of DataValueAudits which matches the given DataElement, Period,
+     *         OrganisationUnit and DataElementCategoryOptionCombo, or an empty collection if
+     *         there are not matches.
+     */
     Collection<DataValueAudit> getDataValueAudits( DataElement dataElement,
         Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo );
+
+    /**
+     * Deletes a DataValueAudit.
+     *
+     * @param dataValueAudit the DataValueAudit to be deleted.
+     */
+    void deleteDataValueAudit( DataValueAudit dataValueAudit );
+
+    /**
+     * Deletes all DataValueAudits for the given DataElement.
+     *
+     * @param dataElement the DataElement for which the DataValueAudits should be deleted.
+     * @return the number of deleted DataValueAudits.
+     */
+    int deleteDataValueAuditsByDataElement( DataElement dataElement );
+
+    /**
+     * Deletes all DataValueAudits for the given Period.
+     *
+     * @param period the Period for which the DataValueAudits should be deleted.
+     * @return the number of deleted DataValueAudits.
+     */
+    int deleteDataValueAuditsByPeriod( Period period );
+
+    /**
+     * Deletes all DataValues for the given OrganisationUnit.
+     *
+     * @param organisationUnit the OrganisationUnit for which the DataValueAudits should be deleted.
+     * @return the number of deleted DataValueAudits.
+     */
+    int deleteDataValueAuditsByOrganisationUnit( OrganisationUnit organisationUnit );
+
+    /**
+     * Deletes all DataValues for the given DataElementCategoryOptionCombo.
+     *
+     * @param categoryOptionCombo the DataElementCategoryOptionCombo for which the DataValueAudits should be deleted.
+     * @return the number of deleted DataValueAudits.
+     */
+    int deleteDataValueAuditsByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
 }
