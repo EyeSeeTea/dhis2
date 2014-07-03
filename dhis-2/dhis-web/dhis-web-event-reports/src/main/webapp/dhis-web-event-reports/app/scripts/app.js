@@ -3086,6 +3086,11 @@ Ext.onReady( function() {
 			tool,
 			toolPanel,
             organisationUnit,
+			dimensionIdAvailableStoreMap = {},
+			dimensionIdSelectedStoreMap = {},
+
+			getDimensionPanel,
+			getDimensionPanels,
 
             accordionBody,
 			accordionPanels = [],
@@ -4879,7 +4884,6 @@ Ext.onReady( function() {
 
         organisationUnit = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-organisationunit">' + NS.i18n.organisation_units + '</div>',
-            cls: 'ns-accordion-last',
             bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
@@ -4901,6 +4905,269 @@ Ext.onReady( function() {
 			}
         });
 
+		// dimensions
+
+		getDimensionPanel = function(dimension, iconCls) {
+			var	onSelect,
+                availableStore,
+				selectedStore,
+				available,
+				selected,
+				panel,
+
+				createPanel,
+				getPanels;
+
+            onSelect = function() {
+                var win = ns.app.layoutWindow;
+
+                if (selectedStore.getRange().length) {
+                    win.addDimension({id: dimension.id, name: dimension.name});
+                }
+                else if (!selectedStore.getRange().length && win.hasDimension(dimension.id)) {
+                    win.removeDimension(dimension.id);
+                }
+            };
+
+			availableStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				lastPage: null,
+				nextPage: 1,
+				isPending: false,
+				isLoaded: false,
+				reset: function() {
+					this.removeAll();
+					this.lastPage = null;
+					this.nextPage = 1;
+					this.isPending = false;
+					//indicatorSearch.hideFilter();
+				},
+				loadPage: function(filter, append) {
+					var store = this,
+						path;
+
+					filter = filter || null;
+
+					if (!append) {
+						this.lastPage = null;
+						this.nextPage = 1;
+					}
+
+					if (store.nextPage === store.lastPage) {
+						return;
+					}
+
+					path = '/organisationUnitGroupSets.json?fields=id,name,organisationUnitGroups[id,name]&filter=id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
+
+					store.isPending = true;
+
+					Ext.Ajax.request({
+						url: ns.core.init.contextPath + '/api' + path,
+						params: {
+							page: store.nextPage,
+							pageSize: 50
+						},
+						failure: function() {
+							store.isPending = false;
+						},
+						success: function(r) {
+							var response = Ext.decode(r.responseText),
+								data = response.organisationUnitGroups || [],
+								pager = response.pager;
+
+							store.loadStore(data, pager, append);
+						}
+					});
+				},
+				loadStore: function(data, pager, append) {
+					this.loadData(data, append);
+					this.lastPage = this.nextPage;
+
+					if (pager.pageCount > this.nextPage) {
+						this.nextPage++;
+					}
+
+					this.isPending = false;
+					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+				},
+				sortStore: function() {
+					this.sort('name', 'ASC');
+				}
+			});
+
+			selectedStore = Ext.create('Ext.data.Store', {
+				fields: ['id', 'name'],
+				data: [],
+                listeners: {
+                    add: function() {
+                        onSelect();
+                    },
+                    remove: function() {
+                        onSelect();
+                    }
+                }
+			});
+
+			available = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-left',
+                width: accBaseWidth / 2,
+				valueField: 'id',
+				displayField: 'name',
+				store: availableStore,
+				tbar: [
+					{
+						xtype: 'label',
+						text: NS.i18n.available,
+						cls: 'ns-toolbar-multiselect-left-label'
+					},
+					'->',
+					{
+						xtype: 'button',
+						icon: 'images/arrowright.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.select(available, selected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowrightdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.selectAll(available, selected);
+						}
+					}
+				],
+				listeners: {
+					render: function(ms) {
+						var el = Ext.get(ms.boundList.getEl().id + '-listEl').dom;
+
+						el.addEventListener('scroll', function(e) {
+							if (isScrolled(e) && !availableStore.isPending) {
+								availableStore.loadPage(null, true);
+							}
+						});
+
+						ms.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.select(available, selected);
+						}, ms);
+					}
+				}
+			});
+
+			selected = Ext.create('Ext.ux.form.MultiSelect', {
+				cls: 'ns-toolbar-multiselect-right',
+                width: accBaseWidth / 2,
+				valueField: 'id',
+				displayField: 'name',
+				ddReorder: true,
+				store: selectedStore,
+				tbar: [
+					{
+						xtype: 'button',
+						icon: 'images/arrowleftdouble.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselectAll(available, selected);
+						}
+					},
+					{
+						xtype: 'button',
+						icon: 'images/arrowleft.png',
+						width: 22,
+						handler: function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}
+					},
+					'->',
+					{
+						xtype: 'label',
+						text: NS.i18n.selected,
+						cls: 'ns-toolbar-multiselect-right-label'
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						this.boundList.on('itemdblclick', function() {
+							ns.core.web.multiSelect.unselect(available, selected);
+						}, this);
+					}
+				}
+			});
+
+			dimensionIdAvailableStoreMap[dimension.id] = availableStore;
+			dimensionIdSelectedStoreMap[dimension.id] = selectedStore;
+
+			//availableStore.on('load', function() {
+				//ns.core.web.multiSelect.filterAvailable(available, selected);
+			//});
+
+			panel = {
+				xtype: 'panel',
+				title: '<div class="' + iconCls + '">' + dimension.name + '</div>',
+				hideCollapseTool: true,
+				availableStore: availableStore,
+				selectedStore: selectedStore,
+				getDimension: function() {
+					var config = {
+						dimension: dimension.id,
+						items: []
+					};
+
+					selectedStore.each( function(r) {
+						config.items.push({id: r.data.id});
+					});
+
+					return config.items.length ? config : null;
+				},
+				onExpand: function() {
+					if (!availableStore.isLoaded) {
+						availableStore.loadPage();
+					}
+
+					var h = ns.app.westRegion.hasScrollbar ?
+						ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
+					ns.app.accordion.setThisHeight(h);
+					ns.core.web.multiSelect.setHeight(
+						[available, selected],
+						this,
+						ns.core.conf.layout.west_fill_accordion_dataset
+					);
+				},
+				items: [
+					{
+						xtype: 'panel',
+						layout: 'column',
+						bodyStyle: 'border-style:none',
+						items: [
+							available,
+							selected
+						]
+					}
+				],
+				listeners: {
+					added: function() {
+						accordionPanels.push(this);
+					},
+					expand: function(p) {
+						p.onExpand();
+					}
+				}
+			};
+
+			return panel;
+		};
+
+		getDimensionPanels = function(dimensions, iconCls) {
+			var panels = [];
+
+			for (var i = 0, panel; i < dimensions.length; i++) {
+				panels.push(getDimensionPanel(dimensions[i], iconCls));
+			}
+
+			return panels;
+		};
+
             // accordion
         accordionBody = Ext.create('Ext.panel.Panel', {
 			layout: 'accordion',
@@ -4908,11 +5175,21 @@ Ext.onReady( function() {
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
 			height: 550,
-			items: [
-                dataElement,
-                period,
-                organisationUnit
-            ],
+			items: function() {
+                var panels = [
+                    dataElement,
+                    period,
+                    organisationUnit
+                ],
+				dims = Ext.clone(ns.core.init.dimensions);
+
+				panels = panels.concat(getDimensionPanels(dims, 'ns-panel-title-dimension'));
+
+				last = panels[panels.length - 1];
+				last.cls = 'ns-accordion-last';
+
+				return panels;
+            }(),
             listeners: {
                 afterrender: function() { // nasty workaround, should be fixed
                     organisationUnit.expand();
@@ -5161,7 +5438,7 @@ Ext.onReady( function() {
 			return view;
 		};
 
-		panel = Ext.create('Ext.panel.Panel', {
+		accordion = Ext.create('Ext.panel.Panel', {
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
@@ -5189,7 +5466,7 @@ Ext.onReady( function() {
             }
 		});
 
-		return panel;
+		return accordion;
 	};
 
 	// core
@@ -6608,7 +6885,7 @@ Ext.onReady( function() {
 						numberOfTabs = 3,
 						tabHeight = 28,
 						minPeriodHeight = 380,
-						settingsHeight = 91;
+						settingsHeight = 41;
 
 					if (viewportHeight > numberOfTabs * tabHeight + minPeriodHeight + settingsHeight) {
 						if (!Ext.isIE) {
@@ -6761,9 +7038,9 @@ Ext.onReady( function() {
 
 								// dimensions
 								requests.push({
-									url: init.contextPath + '/api/dimensions.json?links=false&paging=false',
+									url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
 									success: function(r) {
-										init.dimensions = Ext.decode(r.responseText).dimensions || [];
+										init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
 										fn();
 									}
 								});
