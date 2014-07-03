@@ -1,13 +1,13 @@
-<div class="search-container">
-
-        
+<div class="search-container-main">
+    <div class="search-container">    
         <table data-stop-propagation="true" class="table-borderless table-striped">
             <tr>
                 <td>{{'org_unit'| translate}}</td>
                 <td>
                     <label><input type="radio" ng-model="ouMode.name" name="selected" value="SELECTED"> {{'selected'| translate}}</label><br/>
                     <label><input type="radio" ng-model="ouMode.name" name="children" value="CHILDREN"> {{'immediate_children'| translate}}</label><br/>
-                    <label><input type="radio" ng-model="ouMode.name" name="descendants" value="DESCENDANTS"> {{'all_accessible'| translate}}</label>
+                    <label><input type="radio" ng-model="ouMode.name" name="descendants" value="DESCENDANTS"> {{'all_children'| translate}}</label><br/>
+                    <label><input type="radio" ng-model="ouMode.name" name="accessible" value="ACCESSIBLE"> {{'all_accessible'| translate}}</label>
                 </td>
             </tr>
             <tr ng-if="selectedProgram">
@@ -75,10 +75,7 @@
                                     </div>
                                 </div>                            
                             </div> 
-                        </div>
-                        <div ng-switch-when="string">
-                            <input type="text" class="form-control-select2" ng-model="attribute.value" /> 
-                        </div>
+                        </div>                        
                         <div ng-switch-when="optionSet">
                             <select multiple ui-select2  ng-model="attribute.value" data-placeholder="{{'please_select'| translate}}" style="width:100%;">
                                 <option ng-repeat="option in attribute.optionSet.options" value="{{option}}">{{option}}</option>
@@ -86,14 +83,19 @@
                         </div>
                         <div ng-switch-when="bool">
                             <select multiple ui-select2  ng-model="attribute.value" data-placeholder="{{'please_select'| translate}}" style="width:100%;">
-                                <option ng-repeat="option in boolOperators" value="{{option}}">{{option}}</option>
+                                <option ng-repeat="option in boolOperators" value="{{option}}">{{option| translate}}</option>
                             </select>
-                        </div>                    
+                        </div> 
+                        <div ng-switch-default>
+                            <input type="text" class="form-control-select2" ng-model="attribute.value" /> 
+                        </div>
                     </div>
                 </td>
             </tr>         
         </table>
+    </div>
 
+    <div class="horizonal-spacing">
         <button type="button"
                 class="btn btn-primary"
                 ng-click="search(searchMode.attributeBased)">
@@ -106,10 +108,8 @@
         </button>
         <button type="button" 
                 class="btn btn-default small-horizonal-spacing" 
-                ng-click="closeSearch()">
+                ng-click="showHideSearch()">
             {{'cancel'| translate}}
         </button>
-    
-    
-        
+    </div>
 </div>

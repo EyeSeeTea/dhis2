@@ -109,7 +109,8 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
             element.sortable({
                 connectWith: ".connectedSortable",
                 placeholder: "ui-state-highlight",
-                tolerance: "pointer"
+                tolerance: "pointer",
+                handle: '.handle'
             }).disableSelection();  
             //scope.$apply();
         }  
@@ -282,34 +283,6 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                 event.preventDefault();
             }
         });
-    };
-})
-
-.directive('searchDropDownWidth', function() {        
-
-    return {        
-        restrict: 'A',        
-        link: function(scope, element, attrs){
-            $("#searchDropDown").width($("#searchDropDownParent").width());
-            $('#searchDropDown').on('click', "[data-stop-propagation]", function(e) {
-                e.stopPropagation();
-            });
-        }  
-    };
-})
-
-.directive('selectDropDownWidth', function() {        
-
-    return {        
-        restrict: 'A',        
-        link: function(scope, element, attrs){
-            $("#selectDropDown").width($("#selectDropDownParent").width());
-            $("#selectDropDown").css('margin-right: 15x;');
-            $(".select-drop-down-button").on('click', function(e) {
-                e.stopPropagation();
-                $("#selectDropDown").dropdown('toggle');
-            });
-        }  
     };
 });
 

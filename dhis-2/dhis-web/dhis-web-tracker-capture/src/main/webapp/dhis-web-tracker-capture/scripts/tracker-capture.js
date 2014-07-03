@@ -23,7 +23,7 @@ var TRACKER_VALUES = 'TRACKER_VALUES';
 dhis2.tc.store = new dhis2.storage.Store({
     name: TC_STORE_NAME,
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities','attributes','optionSets']
+    objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets']
 });
 
 (function($) {
@@ -58,6 +58,7 @@ $(document).ready(function()
         
         promise = promise.then( dhis2.tc.store.open );
         promise = promise.then( getUserProfile );
+        promise = promise.then( getRelationships );
         promise = promise.then( getAttributes );
         promise = promise.then( getOptionSetsForAttributes );
         promise = promise.then( getTrackedEntities );
@@ -125,12 +126,27 @@ $(document).ready(function()
     });
 
     //dhis2.availability.startAvailabilityCheck();
+    
+    var selectParentWidth = $("#selectDropDownParent").width();
+    $("#selectDropDown").width(selectParentWidth);
+    $(".select-drop-down-button").on('click', function(e) {
+        e.stopPropagation();
+        $("#selectDropDown").dropdown('toggle');
+    });  
+    
+    var searchParentWidth = $("#searchDropDownParent").width();    
+    $("#searchDropDown").width(searchParentWidth);
+    $('#searchDropDown').on('click', "[data-stop-propagation]", function(e) {
+        e.stopPropagation();
+    });    
+
 });
 
 $(window).resize(function() {
-    $("#selectDropDown").width($("#selectDropDownParent").width());
-     $("#selectDropDown").css('margin-right: 15x;');
-    $("#searchDropDown").width($("#searchDropDownParent").width());
+    var searchWidth = $("#searchDropDownParent").width();
+    var selectWidth = $("#selectDropDownParent").width();
+    $("#selectDropDown").width(selectWidth);
+    $("#searchDropDown").width(searchWidth);
 });
 
 function ajax_login()
@@ -166,6 +182,22 @@ function getUserProfile()
     }).done(function(response) {
         localStorage['USER_PROFILE'] = JSON.stringify(response);
         def.resolve();
+    });
+
+    return def.promise();
+}
+
+
+function getRelationships()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/relationshipTypes.json?paging=false&fields=id,name,aIsToB,bIsToA,displayName',
+        type: 'GET'
+    }).done(function(response) {        
+        dhis2.tc.store.setAll( 'relationshipTypes', response.relationshipTypes );
+        def.resolve();        
     });
 
     return def.promise();
@@ -325,7 +357,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs.json',
             type: 'GET',
-            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,minDaysFromStart,reportDateDescription,repeatable],programTrackedEntityAttributes[displayInList,mandatory,attribute[id]]'
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,relationshipText,relationshipFromA,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,minDaysFromStart,reportDateDescription,repeatable],programTrackedEntityAttributes[displayInList,mandatory,attribute[id]]'
         }).done( function( response ){
             
             _.each( _.values( response.programs ), function ( program ) { 

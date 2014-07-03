@@ -40,9 +40,10 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
-import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
+import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
@@ -58,8 +59,8 @@ import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.webapi.controller.exception.NotFoundException;
 import org.hisp.dhis.webapi.service.ContextService;
-import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.service.LinkService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -142,19 +144,56 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         boolean hasPaging = options.hasPaging();
 
-        // get full list if we are using filters
-        if ( filters != null && !filters.isEmpty() )
-        {
-            options.getOptions().put( "links", "false" );
+        List<T> entityList;
 
-            if ( options.hasPaging() )
+        if ( filters.isEmpty() )
+        {
+            entityList = getEntityList( metaData, options );
+        }
+        else
+        {
+            Iterator<String> iterator = filters.iterator();
+            String name = null;
+
+            while ( iterator.hasNext() )
             {
-                hasPaging = true;
-                options.getOptions().put( "paging", "false" );
+                String filter = iterator.next();
+
+                if ( filter.startsWith( "name:like:" ) )
+                {
+                    name = filter.substring( "name:like:".length() );
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            if ( name != null )
+            {
+                int count = manager.getCountByName( getEntityClass(), name );
+
+                Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+                metaData.setPager( pager );
+
+                entityList = Lists.newArrayList( manager.getBetweenByName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
+            }
+            else
+            {
+                // get full list if we are using filters
+                if ( !filters.isEmpty() )
+                {
+                    options.getOptions().put( "links", "false" );
+
+                    if ( options.hasPaging() )
+                    {
+                        hasPaging = true;
+                        options.getOptions().put( "paging", "false" );
+                    }
+                }
+
+                entityList = getEntityList( metaData, options );
             }
         }
 
-        List<T> entityList = getEntityList( metaData, options );
         Pager pager = metaData.getPager();
 
         // enable object filter
@@ -292,6 +331,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postCreateEntity( parsed );
+        }
+
         renderService.toXml( response.getOutputStream(), summary );
     }
 
@@ -305,6 +350,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postCreateEntity( parsed );
+        }
+
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -334,6 +385,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postUpdateEntity( parsed );
+        }
+
         renderService.toXml( response.getOutputStream(), summary );
     }
 
@@ -359,6 +416,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postUpdateEntity( parsed );
+        }
+
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -424,6 +487,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
      * storage and before it is returned to the view. Entity is null-safe.
      */
     protected void postProcessEntity( T entity, WebOptions options, Map<String, String> parameters ) throws Exception
+    {
+    }
+
+    // TODO replace with hooks directly in idManager
+    protected void postCreateEntity( T entity )
+    {
+    }
+
+    // TODO replace with hooks directly in idManager
+    protected void postUpdateEntity( T entity )
     {
     }
 
