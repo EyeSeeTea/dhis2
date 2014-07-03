@@ -2013,7 +2013,9 @@ Ext.onReady( function() {
 			window;
 
 		greaterNumberField = Ext.create('Ext.form.field.Number', {
-			width: gis.conf.layout.tool.itemlabel_width,
+            cls: 'gis-numberfield',
+            fieldLabel: 'Greater than',
+            width: 200,
 			value: parseInt(layer.core.minVal),
 			listeners: {
 				change: function() {
@@ -2023,7 +2025,10 @@ Ext.onReady( function() {
 		});
 
 		lowerNumberField = Ext.create('Ext.form.field.Number', {
-			width: gis.conf.layout.tool.itemlabel_width,
+            cls: 'gis-numberfield',
+            fieldLabel: 'And/or lower than',
+            style: 'margin-bottom: 0',
+            width: 200,
 			value: parseInt(layer.core.maxVal) + 1,
 			listeners: {
 				change: function() {
@@ -2074,55 +2079,52 @@ Ext.onReady( function() {
 		window = Ext.create('Ext.window.Window', {
 			title: 'Filter by value',
 			iconCls: 'gis-window-title-icon-filter',
-			cls: 'gis-container-default',
-			width: gis.conf.layout.tool.window_width,
+            bodyStyle: 'background-color: #fff; padding: 1px',
 			resizable: false,
 			filter: filter,
-			items: {
-				layout: 'fit',
-				cls: 'gis-container-inner',
-				items: [
-					{
-						cls: 'gis-container-inner',
-						html: '<b>Show</b> organisation units with values..'
-					},
-					{
-						cls: 'gis-panel-html-separator'
-					},
-					{
-						cls: 'gis-panel-html-separator'
-					},
-					{
-						layout: 'column',
-						height: 22,
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: 'Greater than:',
-								width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width
-							},
-							greaterNumberField
-						]
-					},
-					{
-						cls: 'gis-panel-html-separator'
-					},
-					{
-						layout: 'column',
-						height: 22,
-						cls: 'gis-container-inner',
-						items: [
-							{
-								cls: 'gis-panel-html-label',
-								html: 'And/or lower than:',
-								width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width
-							},
-							lowerNumberField
-						]
-					}
-				]
-			},
+			items: [
+                {
+                    xtype: 'container',
+                    style: 'padding: 4px; border: 0 none',
+                    html: '<b>Show</b> organisation units with values..'
+                },
+                {
+                    xtype: 'container',
+                    height: 7
+                },
+                greaterNumberField,
+                lowerNumberField
+                //{
+                    //layout: 'column',
+                    //height: 22,
+                    //cls: 'gis-container-inner',
+                    //items: [
+                        //{
+                            //cls: 'gis-panel-html-label',
+                            //html: 'Greater than:',
+                            //width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width
+                        //},
+                        //greaterNumberField
+                    //]
+                //},
+					//{
+						//cls: 'gis-panel-html-separator'
+					//},
+					//{
+						//layout: 'column',
+						//height: 22,
+						//cls: 'gis-container-inner',
+						//items: [
+							//{
+								//cls: 'gis-panel-html-label',
+								//html: 'And/or lower than:',
+								//width: gis.conf.layout.tool.item_width - gis.conf.layout.tool.itemlabel_width
+							//},
+							//lowerNumberField
+						//]
+					//}
+				//]
+			],
 			bbar: [
 				'->',
 				{
