@@ -962,11 +962,11 @@ Ext.onReady( function() {
                 this.numberField.setValue(parseInt(config.labelFontSize));
                 this.italicButton.toggle(Ext.Array.contains(['italic', 'oblique'], config.labelFontStyle));
 
-                if (!skipBoldButton) {
+                if (!this.skipBoldButton) {
                     this.boldButton.toggle(Ext.Array.contains(['bold', 'bolder'], config.labelFontWeight) || (Ext.isNumber(parseInt(config.labelFontWeight)) && parseInt(config.labelFontWeight) >= 700));
                 }
 
-                if (!skipColorButton) {
+                if (!this.skipColorButton) {
                     this.colorButton.setValue(config.labelFontColor);
                 }
 
@@ -5862,7 +5862,10 @@ Ext.onReady( function() {
 
 				treePanel.selectGraphMap(view.parentGraphMap);
 
-				// Area radius
+                // labels
+                labelPanel.setConfig(view);
+
+				// area radius
 				areaRadius.setValue(!!view.areaRadius, !!view.areaRadius ? view.areaRadius : null);
 			}();
 

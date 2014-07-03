@@ -1405,9 +1405,7 @@ Ext.onReady( function() {
             // labels
             for (var i = 0, attr; i < layer.features.length; i++) {
                 attr = layer.features[i].attributes;
-console.log(view.labels);
                 attr.label = view.labels ? attr.name : '';
-console.log(attr.label);
             }
 
             layer.styleMap = GIS.core.StyleMap(view);
