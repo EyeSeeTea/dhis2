@@ -258,22 +258,16 @@ public class GetHistoryAction
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitId );
 
         DataElementCategoryOptionCombo attributeOptionCombo = inputUtils.getAttributeOptionCombo( ServletActionContext.getResponse(), cc, cp );
-        
+
+        dataValueAudits = dataValueAuditService.getDataValueAudits( dataElement, period, organisationUnit, categoryOptionCombo );
+
         dataValue = dataValueService.getDataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo );
 
         if ( dataValue != null )
         {
             UserCredentials credentials = userService.getUserCredentialsByUsername( dataValue.getStoredBy() );
             storedBy = credentials != null ? credentials.getName() : dataValue.getStoredBy();
-            dataValueAudits = dataValueAuditService.getDataValueAuditsByDataValue( dataValue );
         }
-        else
-        {
-            dataValueAudits = dataValueAuditService.getDataValueAuditsByPropertyCombo( dataElement, period,
-                organisationUnit, categoryOptionCombo );
-        }
-
-        if( dataValueAudits == null ) dataValueAudits = new ArrayList<DataValueAudit>();
 
         dataElementHistory = historyRetriever.getHistory( dataElement, categoryOptionCombo, organisationUnit, period, HISTORY_LENGTH );
 

@@ -48,11 +48,8 @@ public interface DataValueAuditService
 
     void deleteDataValueAudit( DataValueAudit dataValueAudit );
 
-    Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue );
+    Collection<DataValueAudit> getDataValueAudits( DataValue dataValue );
 
-    Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement,
+    Collection<DataValueAudit> getDataValueAudits( DataElement dataElement,
         Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo );
-
-    Collection<DataValueAudit> getAllDataValueAudits();
-
 }

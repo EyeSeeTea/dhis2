@@ -67,19 +67,15 @@ public class DefaultDataValueAuditService
         dataValueAuditStore.deleteDataValueAudit( dataValueAudit );
     }
 
-    public Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue )
+    public Collection<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
-        return dataValueAuditStore.getDataValueAuditsByDataValue( dataValue );
+        return dataValueAuditStore.getDataValueAudits( dataValue );
     }
 
     @Override
-    public Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
+    public Collection<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period,
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
     {
-        return dataValueAuditStore.getDataValueAuditsByPropertyCombo( dataElement, period, organisationUnit, categoryOptionCombo );
-    }
-
-    public Collection<DataValueAudit> getAllDataValueAudits()
-    {
-        return dataValueAuditStore.getAllDataValueAudits();
+        return dataValueAuditStore.getDataValueAudits( dataElement, period, organisationUnit, categoryOptionCombo );
     }
 }

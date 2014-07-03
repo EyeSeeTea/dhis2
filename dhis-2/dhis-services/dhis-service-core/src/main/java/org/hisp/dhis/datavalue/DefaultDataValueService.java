@@ -153,21 +153,13 @@ public class DefaultDataValueService
         {
             deleteDataValue( dataValue );
         }
-        else */
-        if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
+        else if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
         {
-            // ---------------------------------------------------------------------
-            // Save audit
-            // ---------------------------------------------------------------------
-
-            //DataValue oldDataValue = getDataValue( dataValue.getDataElement(), dataValue.getPeriod(),
-            //    dataValue.getSource(), dataValue.getCategoryOptionCombo() );
-
-            //DataValueAudit dataValueAudit = new DataValueAudit( oldDataValue, oldDataValue.getValue(),
-            //    currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
-
-            //dataValueAuditService.addDataValueAudit( dataValueAudit );
-
+            dataValueStore.updateDataValue( dataValue );
+        }
+        */
+        if( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
+        {
             dataValueStore.updateDataValue( dataValue );
         }
     }
@@ -175,16 +167,11 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        //DataValue oldDataValue = getDataValue( dataValue.getDataElement(), dataValue.getPeriod(), dataValue.getSource(),
-        //    dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo());
+        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+            currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
 
-        //DataValue oldDataValue = dataValueStore.getDataValue( dataValue.getDataElement(), dataValue.getPeriod(),
-        //    dataValue.getSource(), dataValue.getCategoryOptionCombo(), dataValue.getAttributeOptionCombo() );
+        dataValueAuditService.addDataValueAudit( dataValueAudit );
 
-        //DataValueAudit dataValueAudit = new DataValueAudit( oldDataValue, oldDataValue.getValue(),
-        //    currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
-
-        //dataValueAuditService.addDataValueAudit( dataValueAudit );
         dataValueStore.deleteDataValue( dataValue );
     }
 

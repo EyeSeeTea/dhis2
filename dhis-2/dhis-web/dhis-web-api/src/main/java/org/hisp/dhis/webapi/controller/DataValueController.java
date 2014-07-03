@@ -28,6 +28,8 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.ValidationUtils.dataValueIsZeroAndInsignificant;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.datavalue.DataValueAudit;
@@ -209,25 +211,19 @@ public class DataValueController
 
             dataValueService.addDataValue( dataValue );
         }
+        else if ( dataValue.isNullValue() || dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
+        {
+            dataValueService.deleteDataValue( dataValue );
+        }
         else
         {
-            // ---------------------------------------------------------------------
-            // Audit
-            // ---------------------------------------------------------------------
-
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
                 currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
 
-            // ---------------------------------------------------------------------
-            // Update DataValue
-            // ---------------------------------------------------------------------
             if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
             {
                 if ( comment == null )
                 {
-                    dataValueAudit.setAuditType( AuditType.DELETE );
-                    dataValueAuditService.addDataValueAudit( dataValueAudit );
-
                     dataValueService.deleteDataValue( dataValue );
                     return;
                 }
@@ -236,6 +232,10 @@ public class DataValueController
                     value = "false";
                 }
             }
+
+            // ---------------------------------------------------------------------
+            // Update DataValue
+            // ---------------------------------------------------------------------
 
             if ( value != null )
             {
@@ -255,17 +255,8 @@ public class DataValueController
             dataValue.setLastUpdated( now );
             dataValue.setStoredBy( storedBy );
 
-            // From DataValueService
-            if( dataValue.isNullValue() || ValidationUtils.dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
-            {
-                dataValueAudit.setAuditType( AuditType.DELETE );
-                dataValueAuditService.addDataValueAudit( dataValueAudit );
-
-                dataValueService.deleteDataValue( dataValue );
-                return;
-            }
-
             dataValueAuditService.addDataValueAudit( dataValueAudit );
+
             dataValueService.updateDataValue( dataValue );
         }
     }
@@ -362,10 +353,6 @@ public class DataValueController
             return;
         }
 
-        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
-            dataValue.getStoredBy(), new Date(), AuditType.DELETE );
-
-        dataValueAuditService.addDataValueAudit( dataValueAudit );
         dataValueService.deleteDataValue( dataValue );
     }
 

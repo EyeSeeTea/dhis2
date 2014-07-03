@@ -34,4 +34,24 @@ package org.hisp.dhis.common;
 public enum AuditType
 {
     UPDATE, DELETE;
+
+    @Override
+    public String toString()
+    {
+        String s;
+
+        switch( this )
+        {
+        case UPDATE:
+            s = "update";
+            break;
+        case DELETE:
+            s = "delete";
+            break;
+        default:
+            s = "";
+        }
+
+        return s;
+    }
 }

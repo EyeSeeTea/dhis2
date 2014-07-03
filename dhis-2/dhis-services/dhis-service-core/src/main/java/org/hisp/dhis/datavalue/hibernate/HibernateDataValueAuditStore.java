@@ -31,7 +31,6 @@ package org.hisp.dhis.datavalue.hibernate;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
@@ -43,6 +42,7 @@ import org.hisp.dhis.datavalue.DataValueAudit;
 import org.hisp.dhis.datavalue.DataValueAuditStore;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodStore;
 
 /**
  * @author Quang Nguyen
@@ -62,6 +62,13 @@ public class HibernateDataValueAuditStore
         this.sessionFactory = sessionFactory;
     }
 
+    private PeriodStore periodStore;
+
+    public void setPeriodStore( PeriodStore periodStore )
+    {
+        this.periodStore = periodStore;
+    }
+
     // -------------------------------------------------------------------------
     // DataValueAuditStore implementation
     // -------------------------------------------------------------------------
@@ -79,34 +86,31 @@ public class HibernateDataValueAuditStore
     }
 
     @Override
-    public Collection<DataValueAudit> getDataValueAuditsByDataValue( DataValue dataValue )
+    public Collection<DataValueAudit> getDataValueAudits( DataValue dataValue )
     {
-        return getDataValueAuditsByPropertyCombo( dataValue.getDataElement(), dataValue.getPeriod(),
+        return getDataValueAudits( dataValue.getDataElement(), dataValue.getPeriod(),
             dataValue.getSource(), dataValue.getCategoryOptionCombo() );
     }
 
     @Override
-    public Collection<DataValueAudit> getDataValueAuditsByPropertyCombo( DataElement dataElement, Period period,
+    public Collection<DataValueAudit> getDataValueAudits( DataElement dataElement, Period period,
         OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
     {
         Session session = sessionFactory.getCurrentSession();
 
+        Period storedPeriod = periodStore.reloadPeriod( period );
+
+        if( storedPeriod == null )
+        {
+            return null;
+        }
+
         Criteria criteria = session.createCriteria( DataValueAudit.class )
             .add( Restrictions.eq( "dataElement", dataElement ) )
-            .add( Restrictions.eq( "period", period ) )
+            .add( Restrictions.eq( "period", storedPeriod ) )
             .add( Restrictions.eq( "organisationUnit", organisationUnit ) )
             .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ))
             .addOrder( Order.desc( "timestamp") );
-
-        return criteria.list();
-    }
-
-    @Override
-    public Collection<DataValueAudit> getAllDataValueAudits()
-    {
-        Session session = sessionFactory.getCurrentSession();
-
-        Criteria criteria = session.createCriteria( DataValueAudit.class );
 
         return criteria.list();
     }

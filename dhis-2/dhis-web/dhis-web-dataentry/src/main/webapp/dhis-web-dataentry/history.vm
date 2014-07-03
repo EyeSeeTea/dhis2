@@ -96,7 +96,8 @@ $( document ).ready( function() {
 			<tr>
 			  <td>$encoder.htmlEncode( $i18n.getString( "on" ) )</td>
 			  <td>Modified by</td>
-			  <td>$encoder.htmlEncode( $i18n.getString( "change_from" ) )</td>
+			  <td>$encoder.htmlEncode( $i18n.getString( "previous_value" ) )</td>
+			  <td>$encoder.htmlEncode( $i18n.getString( "modification" ) )</td>
 			</tr>
 			#foreach( $dataValueAudit in $dataValueAudits )
       <tr>
@@ -112,6 +113,9 @@ $( document ).ready( function() {
         #else
           <i>No value</i>
         #end
+        </td>
+        <td>
+          <i>$i18n.getString( $dataValueAudit.auditType.toString() )</i>
         </td>
       </tr>
 			#end					
