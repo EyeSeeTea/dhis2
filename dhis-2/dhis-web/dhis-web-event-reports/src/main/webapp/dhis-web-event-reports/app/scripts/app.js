@@ -5125,14 +5125,14 @@ Ext.onReady( function() {
 						availableStore.loadPage();
 					}
 
-					var h = ns.app.westRegion.hasScrollbar ?
-						ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-					ns.app.accordion.setThisHeight(h);
-					ns.core.web.multiSelect.setHeight(
-						[available, selected],
-						this,
-						ns.core.conf.layout.west_fill_accordion_dataset
-					);
+					//var h = ns.app.westRegion.hasScrollbar ?
+						//ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
+					//ns.app.accordion.setThisHeight(h);
+					//ns.core.web.multiSelect.setHeight(
+						//[available, selected],
+						//this,
+						//ns.core.conf.layout.west_fill_accordion_dataset
+					//);
 				},
 				items: [
 					{
@@ -5174,7 +5174,7 @@ Ext.onReady( function() {
 			activeOnTop: true,
 			cls: 'ns-accordion',
 			bodyStyle: 'border:0 none',
-			height: 550,
+			height: 700,
 			items: function() {
                 var panels = [
                     dataElement,
