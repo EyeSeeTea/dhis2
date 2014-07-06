@@ -1,4 +1,4 @@
-package org.hisp.dhis.i18n.resourcebundle;
+package org.hisp.dhis.i18n.ui.resourcebundle;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,25 +28,24 @@ package org.hisp.dhis.i18n.resourcebundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 /**
+ * @author Pham Thi Thuy
  * @author Nguyen Dang Quang
- * @version $Id: ResourceBundleManagerException.java 2869 2007-02-20 14:26:09Z andegje $
+ * @version $Id: ResourceBundleManager.java 6335 2008-11-20 11:11:26Z larshelg $
  */
-public class ResourceBundleManagerException
-    extends Exception
+public interface ResourceBundleManager
 {
-    /**
-     * Determines if a de-serialized file is compatible with this class.
-     */
-    private static final long serialVersionUID = 3993400755227581346L;
+    String ID = ResourceBundleManager.class.getName();
 
-    public ResourceBundleManagerException( String message )
-    {
-        super( message );
-    }
+    ResourceBundle getSpecificResourceBundle( Class<?> clazz, Locale locale );
 
-    public ResourceBundleManagerException( String message, Throwable throwable )
-    {
-        super( message, throwable );
-    }
+    ResourceBundle getSpecificResourceBundle( String clazzName, Locale locale );
+
+    ResourceBundle getGlobalResourceBundle( Locale locale ) throws ResourceBundleManagerException;
+
+    List<Locale> getAvailableLocales() throws ResourceBundleManagerException;
 }

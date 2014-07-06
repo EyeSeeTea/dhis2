@@ -1,4 +1,9 @@
-package org.hisp.dhis.i18n.resourcebundle;
+package org.hisp.dhis.i18n;
+
+import java.util.Locale;
+
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nFormat;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,24 +33,20 @@ package org.hisp.dhis.i18n.resourcebundle;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 /**
  * @author Pham Thi Thuy
  * @author Nguyen Dang Quang
- * @version $Id: ResourceBundleManager.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @version $Id: I18nManager.java 6335 2008-11-20 11:11:26Z larshelg $
  */
-public interface ResourceBundleManager
+public interface I18nManager
 {
-    String ID = ResourceBundleManager.class.getName();
+    String ID = I18nManager.class.getName();
 
-    ResourceBundle getSpecificResourceBundle( Class<?> clazz, Locale locale );
+    I18n getI18n( Class<?> clazz );
 
-    ResourceBundle getSpecificResourceBundle( String clazzName, Locale locale );
+    I18n getI18n( Class<?> clazz, Locale locale );
 
-    ResourceBundle getGlobalResourceBundle( Locale locale ) throws ResourceBundleManagerException;
+    I18n getI18n( String clazzName );
 
-    List<Locale> getAvailableLocales() throws ResourceBundleManagerException;
+    I18nFormat getI18nFormat();
 }

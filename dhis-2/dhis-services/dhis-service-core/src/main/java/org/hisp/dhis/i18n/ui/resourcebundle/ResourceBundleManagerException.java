@@ -1,6 +1,4 @@
-package org.hisp.dhis.i18n;
-
-import java.util.Locale;
+package org.hisp.dhis.i18n.ui.resourcebundle;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -31,19 +29,24 @@ import java.util.Locale;
  */
 
 /**
- * @author Pham Thi Thuy
  * @author Nguyen Dang Quang
- * @version $Id: I18nManager.java 6335 2008-11-20 11:11:26Z larshelg $
+ * @version $Id: ResourceBundleManagerException.java 2869 2007-02-20 14:26:09Z andegje $
  */
-public interface I18nManager
+public class ResourceBundleManagerException
+    extends Exception
 {
-    String ID = I18nManager.class.getName();
+    /**
+     * Determines if a de-serialized file is compatible with this class.
+     */
+    private static final long serialVersionUID = 3993400755227581346L;
 
-    I18n getI18n( Class<?> clazz );
+    public ResourceBundleManagerException( String message )
+    {
+        super( message );
+    }
 
-    I18n getI18n( Class<?> clazz, Locale locale );
-
-    I18n getI18n( String clazzName );
-
-    I18nFormat getI18nFormat();
+    public ResourceBundleManagerException( String message, Throwable throwable )
+    {
+        super( message, throwable );
+    }
 }
