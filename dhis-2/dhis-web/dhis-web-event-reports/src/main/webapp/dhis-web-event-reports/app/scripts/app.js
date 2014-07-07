@@ -3761,24 +3761,41 @@ Ext.onReady( function() {
 			}
         };
 
+        programStagePanel = Ext.create('Ext.panel.Panel', {
+            layout: 'column',
+            bodyStyle: 'border:0 none',
+            style: 'margin-top:2px',
+            items: [
+                program,
+                stage
+            ]
+        });
+
         data = Ext.create('Ext.panel.Panel', {
             title: '<div class="ns-panel-title-data">Data</div>',
             bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             items: [
-                {
-					layout: 'column',
-                    bodyStyle: 'border:0 none',
-					style: 'margin-top:2px',
-					items: [
-						program,
-						stage
-					]
-				},
+                programStagePanel,
                 dataElementAvailable,
                 dataElementSelected
             ],
             onExpand: function() {
+				var h = ns.app.westRegion.hasScrollbar ?
+					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
+
+				accordion.setThisHeight(h);
+
+				//ns.core.web.multiSelect.setHeight(
+					//[dataElementAvailable, dataElementSelected],
+					//this,
+					//ns.core.conf.layout.west_fill_accordion_indicator
+				//);
+
+                var msHeight = this.getHeight() - 28 - programStagePanel.getHeight() - 6;
+
+                dataElementAvailable.setHeight(msHeight * 0.4);
+                dataElementSelected.setHeight(msHeight * 0.6);
 
             },
             listeners: {
@@ -4368,6 +4385,16 @@ Ext.onReady( function() {
             bodyStyle: 'padding:1px',
             hideCollapseTool: true,
             width: accBaseWidth,
+			onExpand: function() {
+				var h = ns.app.westRegion.hasScrollbar ?
+					ns.core.conf.layout.west_scrollbarheight_accordion_period : ns.core.conf.layout.west_maxheight_accordion_period;
+				accordion.setThisHeight(h);
+				ns.core.web.multiSelect.setHeight(
+					[fixedPeriodAvailable, fixedPeriodSelected],
+					this,
+					ns.core.conf.layout.west_fill_accordion_period
+				);
+			},
             reset: function() {
 				this.resetRelativePeriods();
 				this.resetFixedPeriods();
@@ -4901,6 +4928,12 @@ Ext.onReady( function() {
                 },
                 treePanel
             ],
+            onExpand: function() {
+                var h = ns.app.westRegion.hasScrollbar ?
+                    ns.core.conf.layout.west_scrollbarheight_accordion_organisationunit : ns.core.conf.layout.west_maxheight_accordion_organisationunit;
+                accordion.setThisHeight(h);
+                treePanel.setHeight(this.getHeight() - ns.core.conf.layout.west_fill_accordion_organisationunit);
+            },
             listeners: {
 				added: function(cmp) {
 					accordionPanels.push(cmp);
@@ -4922,7 +4955,7 @@ Ext.onReady( function() {
 				getPanels;
 
             onSelect = function() {
-                var win = ns.app.layoutWindow;
+                var win = ns.app.viewport.getLayoutWindow();
 
                 if (selectedStore.getRange().length) {
                     win.addDimension({id: dimension.id, name: dimension.name});
@@ -4960,7 +4993,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/organisationUnitGroupSets.json?fields=id,name,organisationUnitGroups[id,name]&filter=id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
+					path = '/organisationUnitGroups.json?fields=id,name&filter=organisationUnitGroupSet.id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
 
 					store.isPending = true;
 
@@ -5006,6 +5039,9 @@ Ext.onReady( function() {
                         onSelect();
                     },
                     remove: function() {
+                        onSelect();
+                    },
+                    clear: function() {
                         onSelect();
                     }
                 }
@@ -5130,7 +5166,7 @@ Ext.onReady( function() {
 
 					var h = ns.app.westRegion.hasScrollbar ?
 						ns.core.conf.layout.west_scrollbarheight_accordion_group : ns.core.conf.layout.west_maxheight_accordion_group;
-					ns.app.accordion.setThisHeight(h);
+					accordion.setThisHeight(h);
 					ns.core.web.multiSelect.setHeight(
 						[available, selected],
 						this,
@@ -5192,14 +5228,14 @@ Ext.onReady( function() {
 				last.cls = 'ns-accordion-last';
 
 				return panels;
-            }()
-            //listeners: {
-                //afterrender: function() { // nasty workaround, todo
-                    //organisationUnit.expand();
-                    //period.expand();
-                    //data.expand();
-                //}
-            //}
+            }(),
+            listeners: {
+                afterrender: function() { // nasty workaround, should be fixed
+                    organisationUnit.expand();
+                    period.expand();
+                    data.expand();
+                }
+            }
 		});
 
 		// functions
@@ -5258,7 +5294,8 @@ Ext.onReady( function() {
 		};
 
 		getView = function(config) {
-			var view = {},
+			var panels = ns.app.accordion.panels,
+                view = {},
 				dataType = ns.app.typeToolbar.getType(),
 				layoutWindow = ns.app.viewport.getLayoutWindow(dataType),
 				map = {},
@@ -5276,7 +5313,6 @@ Ext.onReady( function() {
             }
 
 			// pe
-
             if (periodMode.getValue() === 'dates') {
                 view.startDate = startDate.getSubmitValue();
                 view.endDate = endDate.getSubmitValue();
@@ -5292,11 +5328,9 @@ Ext.onReady( function() {
 			}
 
 			// ou
-
 			map['ou'] = [treePanel.getDimension()];
 
             // data items
-
             for (var i = 0, record; i < dataElementSelected.items.items.length; i++) {
                 record = dataElementSelected.items.items[i].getRecord();
 
@@ -5305,13 +5339,24 @@ Ext.onReady( function() {
                 map[record.dimension].push(record);
             }
 
-            // other
+            // dynamic dimensions data
+            for (var i = 0, panel, dim, dimName; i < panels.length; i++) {
+                panel = panels[i];
 
+                if (panel.getDimension) {
+                    dim = panel.getDimension();
+
+                    if (dim && !map.hasOwnProperty(dim.dimension)) {
+                        map[dim.dimension] = [dim];
+                    }
+                }
+            }
+
+            // other
             map['longitude'] = [{dimension: 'longitude'}];
             map['latitude'] = [{dimension: 'latitude'}];
 
             // dimensions
-
             if (layoutWindow.colStore) {
 				layoutWindow.colStore.each(function(item) {
 					a = map[item.data.id] || [];
@@ -5442,29 +5487,59 @@ Ext.onReady( function() {
 		};
 
 		accordion = Ext.create('Ext.panel.Panel', {
+			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
+            accordionBody: accordionBody,
+			items: accordionBody,
+			panels: accordionPanels,
+
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
 
+			setThisHeight: function(mx) {
+				var settingsHeight = 41,
+					panelHeight = settingsHeight + this.panels.length * 28,
+					height;
+
+				if (ns.app.westRegion.hasScrollbar) {
+					height = panelHeight + mx;
+					this.setHeight(viewport.getHeight() - settingsHeight - 2);
+					accordionBody.setHeight(height - settingsHeight - 2);
+				}
+				else {
+					height = ns.app.westRegion.getHeight() - ns.core.conf.layout.west_fill - settingsHeight;
+					mx += panelHeight;
+					this.setHeight((height > mx ? mx : height) - 2);
+					accordionBody.setHeight((height > mx ? mx : height) - 2);
+				}
+			},
+			getExpandedPanel: function() {
+				for (var i = 0, panel; i < this.panels.length; i++) {
+					if (!this.panels[i].collapsed) {
+						return this.panels[i];
+					}
+				}
+
+				return null;
+			},
+			getFirstPanel: function() {
+				return this.panels[0];
+			},
+			getParentGraphMap: function() {
+				return treePanel.getParentGraphMap();
+			},
+
 			accordionBody: accordionBody,
-			accordionPanels: accordionPanels,
+			panels: accordionPanels,
             treePanel: treePanel,
 
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
-			getParentGraphMap: function() {
-				return treePanel.getParentGraphMap();
-			},
 
-			cls: 'ns-form-widget',
-			border: false,
-			items: [
-                accordionBody
-			],
             listeners: {
                 added: function() {
-					ns.app.widget = this;
+					ns.app.accordion = this;
 				}
             }
 		});
@@ -5567,10 +5642,16 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.multiSelect.setHeight = function(ms, panel, fill) {
-				for (var i = 0, height; i < ms.length; i++) {
-					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
-					ms[i].setHeight(height);
+			web.multiSelect.setHeight = function(multiSelects, panel, fill) {
+                fill = fill || 0;
+
+
+				for (var i = 0, height, ms, hasToolbar; i < multiSelects.length; i++) {
+                    ms = multiSelects[i];
+                    hasToolbar = Ext.isArray(ms.tbar) && ms.tbar.length;
+
+					height = panel.getHeight() - 4 - fill - (hasToolbar ? 27 : 0);
+					ms.setHeight(height);
 				}
 			};
 
@@ -5935,7 +6016,7 @@ Ext.onReady( function() {
 			web.report = web.report || {};
 
 			web.report.getLayoutConfig = function() {
-                var view = ns.app.widget.getView(),
+                var view = ns.app.accordion.getView(),
                     options = {};
 
                 if (!view) {
@@ -6123,7 +6204,7 @@ Ext.onReady( function() {
 						web.storage.session.set(layout, 'eventtable');
 					}
 
-					ns.app.widget.setGui(layout, xLayout, response, isUpdateGui, table);
+					ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 
@@ -6163,7 +6244,7 @@ Ext.onReady( function() {
 						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
 					}
 
-					ns.app.widget.setGui(layout, null, response, isUpdateGui, table);
+					ns.app.accordion.setGui(layout, null, response, isUpdateGui, table);
 
 					web.mask.hide(ns.app.centerRegion);
 				};
@@ -6273,7 +6354,7 @@ Ext.onReady( function() {
         paramButtonMap[caseButton.param] = caseButton;
 
 		typeToolbar = Ext.create('Ext.toolbar.Toolbar', {
-			style: 'padding:1px; background:#f5f5f5; border:0 none',
+			style: 'padding:1px; background:#fff; border:0 none',
             height: 41,
             getType: function() {
 				return aggregateButton.pressed ? aggregateButton.param : caseButton.param;
@@ -6312,47 +6393,7 @@ Ext.onReady( function() {
 			update();
 		};
 
-		widget = LayerWidgetEvent();
-
-		accordion = Ext.create('Ext.panel.Panel', {
-			bodyStyle: 'border-style:none; padding:1px; padding-bottom:0; overflow-y:scroll;',
-            items: widget,
-			panels: widget.accordionPanels,
-			setThisHeight: function(mx) {
-				var settingsHeight = 41,
-					panelHeight = settingsHeight + this.panels.length * 28,
-					height;
-
-				if (westRegion.hasScrollbar) {
-					height = panelHeight + mx;
-					this.setHeight(viewport.getHeight() - settingsHeight - 2); // acc
-					widget.setHeight(height - settingsHeight - 2);              // acc body
-				}
-				else {
-					height = westRegion.getHeight() - ns.core.conf.layout.west_fill - settingsHeight;
-					mx += panelHeight;
-					accordion.setHeight((height > mx ? mx : height) - 2);
-					widget.setHeight((height > mx ? mx : height) - 2);
-				}
-			},
-			getExpandedPanel: function() {
-				for (var i = 0, panel; i < this.panels.length; i++) {
-					if (!this.panels[i].collapsed) {
-						return this.panels[i];
-					}
-				}
-
-				return null;
-			},
-			getFirstPanel: function() {
-				return this.panels[0];
-			},
-			listeners: {
-				added: function() {
-					ns.app.accordion = this;
-				}
-			}
-		});
+		accordion = LayerWidgetEvent();
 
 		update = function() {
 			var config = ns.core.web.report.getLayoutConfig();
@@ -6757,7 +6798,7 @@ Ext.onReady( function() {
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										handler: function() {
 											if (NS.isSessionStorage) {
-												ns.app.layout.parentGraphMap = ns.app.widget.treePanel.getParentGraphMap();
+												ns.app.layout.parentGraphMap = ns.app.accordion.treePanel.getParentGraphMap();
 												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?s=eventanalytical');
 											}
 										}
@@ -6828,6 +6869,8 @@ Ext.onReady( function() {
 		});
 
         getLayoutWindow = function(dataType) {
+            dataType = dataType || typeToolbar.getType();
+
             if (dataType === 'aggregated_values') {
                 return ns.app.aggregateLayoutWindow;
             }
@@ -6840,6 +6883,8 @@ Ext.onReady( function() {
         };
 
         getOptionsWindow = function(dataType) {
+            dataType = dataType || typeToolbar.getType();
+
             if (dataType === 'aggregated_values') {
                 return ns.app.aggregateOptionsWindow;
             }
@@ -6878,7 +6923,7 @@ Ext.onReady( function() {
 						var panel = accordion.getExpandedPanel();
 
 						if (panel) {
-							panel.onExpand(); //todo
+							panel.onExpand();
 						}
 					});
 
@@ -7043,14 +7088,6 @@ Ext.onReady( function() {
 									url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
 									success: function(r) {
 										init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
-
-                                        init.dimensions.push({id: 'a', name: 'Fake dim 1'});
-                                        init.dimensions.push({id: 'b', name: 'Fake dim 2'});
-                                        init.dimensions.push({id: 'c', name: 'Fake dim 3'});
-                                        init.dimensions.push({id: 'd', name: 'Fake dim 4'});
-                                        init.dimensions.push({id: 'd', name: 'Fake dim 5'});
-                                        init.dimensions.push({id: 'd', name: 'Fake dim 6'});
-                                        init.dimensions.push({id: 'd', name: 'Fake dim 7'});
 										fn();
 									}
 								});
