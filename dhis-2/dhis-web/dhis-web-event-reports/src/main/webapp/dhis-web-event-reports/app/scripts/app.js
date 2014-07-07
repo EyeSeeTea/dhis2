@@ -3380,7 +3380,7 @@ Ext.onReady( function() {
                         }
 
                         stages = program.programStages;
-                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'attribute');
+                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute');
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -3448,7 +3448,7 @@ Ext.onReady( function() {
                 var attributes = attributeStorage[programId],
                     data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 
-				dataElementsByStageStore.loadData(dataElements);
+				dataElementsByStageStore.loadData(data);
 
                 if (layout) {
                     var dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout),
