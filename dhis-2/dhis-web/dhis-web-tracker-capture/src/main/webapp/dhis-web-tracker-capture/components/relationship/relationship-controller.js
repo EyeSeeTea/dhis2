@@ -1,6 +1,8 @@
 trackerCapture.controller('RelationshipController',
         function($scope,
-                $modal,
+                $modal,                
+                $location,
+                $route,
                 CurrentSelection,
                 RelationshipFactory,
                 TranslationService) {
@@ -8,27 +10,27 @@ trackerCapture.controller('RelationshipController',
     TranslationService.translate();        
 
     $scope.relationshipTypes = []; 
-    
+    $scope.relationships = [];
     RelationshipFactory.getAll().then(function(rels){
         $scope.relationshipTypes = rels;    
-    }); 
-    
+        angular.forEach(rels, function(rel){
+            $scope.relationships[rel.id] = rel;
+        });
+    });    
     
     //listen for the selected entity       
     $scope.$on('dashboard', function(event, args) { 
         $scope.selections = CurrentSelection.get();
         $scope.selectedTei = angular.copy($scope.selections.tei);
         $scope.trackedEntity = $scope.selections.te;
-        $scope.selectedProgram = $scope.selections.pr;   
-        $scope.selectedEnrollment = $scope.selections.enrollment;     
-
+        $scope.selectedEnrollment = $scope.selections.enrollment;
     });
     
-    $scope.showAddRelationship = function() {
-        
+    $scope.showAddRelationship = function() {        
         var modalInstance = $modal.open({
             templateUrl: 'components/relationship/add-relationship.html',
             controller: 'AddRelationshipController',
+            windowClass: 'relationship-modal-window',
             resolve: {
                 relationshipTypes: function () {
                     return $scope.relationshipTypes;
@@ -43,20 +45,35 @@ trackerCapture.controller('RelationshipController',
         });
 
         modalInstance.result.then(function (relationships) {
-            $scope.selectedTei.relationships = relationships;
+            $scope.selectedTei.relationships = relationships;           
         });
-    };   
+    };    
     
+    $scope.showDashboard = function(rel){
+        var relativeTeiId = '';
+        if($scope.selectedTei.trackedEntityInstance === rel.trackedEntityInstanceA){
+            relativeTeiId = rel.trackedEntityInstanceB;
+        }
+        else{
+            relativeTeiId = rel.trackedEntityInstanceA;
+        }          
+                
+        $location.path('/dashboard').search({tei: relativeTeiId, program: null}); 
+        $route.reload();                                 
+    };
 })
 
 //Controller for adding new relationship
 .controller('AddRelationshipController', 
     function($scope, 
+            CurrentSelection,
             OperatorFactory,
             AttributesFactory,
             EntityQueryFactory,
+            ProgramFactory,
             TEIService,
             TEIGridService,
+            DialogService,
             Paginator,
             storage,
             $modalInstance, 
@@ -67,18 +84,58 @@ trackerCapture.controller('RelationshipController',
     $scope.relationshipTypes = relationshipTypes;
     $scope.selectedTei = selectedTei;
     $scope.relationshipSources = ['search_from_existing','register_new'];
+    $scope.selectedRelationshipSource = {};   
+    $scope.relationship = {};
     
     //Selection
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-    $scope.selectedProgram = selections.pr;
     $scope.selectedTei = selections.tei;
     
+    ProgramFactory.getAll().then(function(programs){
+        $scope.programs = [];
+        angular.forEach(programs, function(program){                            
+            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
+                $scope.programs.push(program);
+            }
+        });
+
+        if(angular.isObject($scope.programs) && $scope.programs.length === 1){
+            $scope.selectedProgramForRelative = $scope.programs[0];
+            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+                $scope.attributes = atts;
+                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+            });
+        }   
+        else{
+            AttributesFactory.getWithoutProgram().then(function(atts){
+                $scope.attributes = atts;
+                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+            });
+        }
+    });    
     
-    $scope.ouModes = [{name: 'SELECTED'}, 
-                    {name: 'CHILDREN'}, 
-                    {name: 'DESCENDANTS'},
-                    {name: 'ACCESSIBLE'}
-                  ];         
+    //set attributes as per selected program
+    $scope.setAttributesForSearch = function(program){
+        $scope.selectedProgramForRelative = program;
+        if( angular.isObject($scope.selectedProgramForRelative)){
+            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+                $scope.attributes = atts;
+                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+            });
+        }
+        else{
+            AttributesFactory.getWithoutProgram().then(function(atts){
+                $scope.attributes = atts;
+                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+            });
+        }
+    };
+    
+    $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
     $scope.selectedOuMode = $scope.ouModes[0];
     
     //Paging
@@ -98,27 +155,14 @@ trackerCapture.controller('RelationshipController',
     $scope.trackedEntityList = null; 
     $scope.enrollment = {programStartDate: '', programEndDate: '', operator: $scope.defaultOperators[0]};
    
-    $scope.searchMode = { 
-                            listAll: 'LIST_ALL', 
-                            freeText: 'FREE_TEXT', 
-                            attributeBased: 'ATTRIBUTE_BASED'
-                        };
+    $scope.searchMode = {listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED'};      
     
-    if($scope.selectedProgram){
-        AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-            $scope.attributes = atts; 
-            $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
-            $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
-        });           
-    }
-    else{
-        AttributesFactory.getWithoutProgram().then(function(atts){
-            $scope.attributes = atts;  
-            $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
-            $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
-        });
-    }
-   
+    //listen for selections
+    $scope.$on('relationship', function(event, args) { 
+        var relationshipInfo = CurrentSelection.getRelationshipInfo();
+        $scope.teiForRelationship = relationshipInfo.tei;
+    });
+
     $scope.search = function(mode){ 
         
         $scope.teiForRelationship = null;
@@ -135,12 +179,10 @@ trackerCapture.controller('RelationshipController',
         $scope.programUrl = null;
         $scope.attributeUrl = {url: null, hasValue: false};
         
-        $scope.selectedSearchMode = mode;
-        $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
-        $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+        $scope.selectedSearchMode = mode;        
    
-        if($scope.selectedProgram){
-            $scope.programUrl = 'program=' + $scope.selectedProgram.id;
+        if($scope.selectedProgramForRelative){
+            $scope.programUrl = 'program=' + $scope.selectedProgramForRelative.id;
         }        
         
         //check search mode
@@ -160,7 +202,7 @@ trackerCapture.controller('RelationshipController',
             $scope.searchText.value = null;
             $scope.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.attributes, $scope.enrollment);
             
-            if(!$scope.attributeUrl.hasValue && !$scope.selectedProgram){
+            if(!$scope.attributeUrl.hasValue && !$scope.selectedProgramForRelative){
                 $scope.emptySearchAttribute = true;
                 $scope.teiFetched = false;   
                 $scope.teiCount = null;
@@ -263,20 +305,212 @@ trackerCapture.controller('RelationshipController',
     };    
     
     $scope.close = function () {
-      $modalInstance.close('');
+      $modalInstance.close($scope.selectedTei.relationships ? $scope.selectedTei.relationships : []);
     };
     
-    $scope.closeRegistration = function(){
-        console.log('registration close');
-        $scope.selectedRelationshipSource = '';
+    $scope.assignRelationship = function(relativeTei){
+        $scope.teiForRelationship = relativeTei;
     };
     
-    $scope.assignRelationship = function(selectedTei){
-        $scope.teiForRelationship = selectedTei;     
-        console.log('selected is:  ', $scope.teiForRelationship);
+    $scope.addRelationship = function(){
+        if($scope.selectedTei && $scope.teiForRelationship && $scope.relationship.selected){
+
+            var relationship = {relationship: $scope.relationship.selected.id, 
+                                displayName: $scope.relationship.selected.name, 
+                                trackedEntityInstanceA: $scope.selectedTei.trackedEntityInstance, 
+                                trackedEntityInstanceB: $scope.teiForRelationship.id};
+            
+            if($scope.selectedTei.relationships){
+                $scope.selectedTei.relationships.push(relationship);
+            }
+            else{
+                $scope.selectedTei.relationships = [relationship];
+            }
+            
+            TEIService.update($scope.selectedTei).then(function(response){
+                if(response.status !== 'SUCCESS'){//update has failed
+                    var dialogOptions = {
+                            headerText: 'relationship_error',
+                            bodyText: response.description
+                        };
+                    DialogService.showDialog({}, dialogOptions);
+                    return;
+                }
+                
+                $modalInstance.close($scope.selectedTei.relationships);                
+            });
+        }        
+    };
+})
+
+.controller('RelativeRegistrationController', 
+        function($rootScope,
+                $scope,
+                $timeout,
+                AttributesFactory,
+                ProgramFactory,
+                TEService,
+                TEIService,
+                EnrollmentService,
+                DialogService,
+                CurrentSelection,
+                DateUtils,
+                storage,
+                TranslationService) {
+
+    //do translation of the registration page
+    TranslationService.translate();   
+
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+    $scope.enrollment = {enrollmentDate: '', incidentDate: ''};    
+    
+    ProgramFactory.getAll().then(function(programs){
+        $scope.programs = [];
+        angular.forEach(programs, function(program){                            
+            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
+                $scope.programs.push(program);
+            }
+        });
+
+        if(angular.isObject($scope.programs) && $scope.programs.length === 1){
+            $scope.selectedProgramForRelative = $scope.programs[0];
+            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+                $scope.attributes = atts;
+            });
+        }                
+    });
+    
+    //watch for selection of program
+    $scope.$watch('selectedProgramForRelative', function() {        
+        if( angular.isObject($scope.selectedProgramForRelative)){
+            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+                $scope.attributes = atts;
+            });
+        }
+        else{
+            AttributesFactory.getWithoutProgram().then(function(atts){
+                $scope.attributes = atts;
+            });
+        }
+    }); 
+            
+    $scope.trackedEntities = {available: []};
+    TEService.getAll().then(function(entities){
+        $scope.trackedEntities.available = entities;   
+        $scope.trackedEntities.selected = $scope.trackedEntities.available[0];
+    });
+    
+    $scope.registerEntity = function(){
+        
+        //check for form validity
+        $scope.outerForm.submitted = true;        
+        if( $scope.outerForm.$invalid ){
+            return false;
+        }
+        
+        //form is valid, continue the registration
+        //get selected entity
+        var selectedTrackedEntity = $scope.trackedEntities.selected.id; 
+        if($scope.selectedProgramForRelative){
+            selectedTrackedEntity = $scope.selectedProgramForRelative.trackedEntity.id;
+        }
+        
+        //get tei attributes and their values
+        //but there could be a case where attributes are non-mandatory and
+        //registration form comes empty, in this case enforce at least one value
+        $scope.valueExists = false;
+        var registrationAttributes = [];    
+        angular.forEach($scope.attributes, function(attribute){
+            if(!angular.isUndefined(attribute.value)){
+                var att = {attribute: attribute.id, value: attribute.value};
+                registrationAttributes.push(att);
+                $scope.valueExists = true;
+            } 
+        });       
+        
+        if(!$scope.valueExists){
+            //registration form is empty
+            return false;
+        }
+        
+        //prepare tei model and do registration
+        $scope.tei = {trackedEntity: selectedTrackedEntity, orgUnit: $scope.selectedOrgUnit.id, attributes: registrationAttributes };   
+        var teiId = '';
+    
+        TEIService.register($scope.tei).then(function(tei){
+            
+            if(tei.status === 'SUCCESS'){
+                
+                teiId = tei.reference;
+                
+                //registration is successful and check for enrollment
+                if($scope.selectedProgramForRelative){    
+                    //enroll TEI
+                    var enrollment = {trackedEntityInstance: teiId,
+                                program: $scope.selectedProgramForRelative.id,
+                                status: 'ACTIVE',
+                                dateOfEnrollment: $scope.enrollment.enrollmentDate,
+                                dateOfIncident: $scope.enrollment.incidentDate
+                            };
+                    EnrollmentService.enroll(enrollment).then(function(data){
+                        if(data.status !== 'SUCCESS'){
+                            //enrollment has failed
+                            var dialogOptions = {
+                                    headerText: 'enrollment_error',
+                                    bodyText: data.description
+                                };
+                            DialogService.showDialog({}, dialogOptions);
+                            return;
+                        }
+                    });
+                }
+            }
+            else{
+                //registration has failed
+                var dialogOptions = {
+                        headerText: 'registration_error',
+                        bodyText: tei.description
+                    };
+                DialogService.showDialog({}, dialogOptions);
+                return;
+            }
+            
+            $timeout(function() { 
+                //reset form
+                angular.forEach($scope.attributes, function(attribute){
+                    delete attribute.value;                
+                });            
+
+                $scope.enrollment.enrollmentDate = '';
+                $scope.enrollment.incidentDate =  '';
+                $scope.outerForm.submitted = false; 
+                
+                $scope.tei.id = teiId;
+                $scope.broadCastSelections();
+                
+            }, 100);        
+            
+        });
     };
     
-    $scope.add = function(){       
-        console.log('I will add new relationship');     
-    };    
+    $scope.resetRelationshipSource = function(){       
+        $scope.selectedRelationshipSource.value = '';   
+    };
+    
+    $scope.broadCastSelections = function(){
+        if($scope.tei){
+            angular.forEach($scope.tei.attributes, function(att){
+                $scope.tei[att.attribute] = att.value;
+            });
+
+            $scope.tei.orgUnitName = $scope.selectedOrgUnit.name;
+            $scope.tei.created = DateUtils.format(new Date());
+            
+            CurrentSelection.setRelationshipInfo({tei: $scope.tei, src: $scope.selectedRelationshipSource});
+            
+            $timeout(function() { 
+                $rootScope.$broadcast('relationship', {});
+            }, 100);
+        }        
+    };
 });

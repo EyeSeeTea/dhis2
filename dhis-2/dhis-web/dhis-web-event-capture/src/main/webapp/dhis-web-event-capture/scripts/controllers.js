@@ -8,6 +8,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         function($scope,
                 $filter,
                 $modal,
+                storage,
                 Paginator,
                 TranslationService,                
                 ProgramFactory,
@@ -36,6 +37,19 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.displayCustomForm = false;
     $scope.currentElement = {id: '', update: false};
     $scope.selectedOrgUnit = '';
+    
+    //notes
+    $scope.note = {};
+    var today = moment();
+    today = Date.parse(today);
+    today = $filter('date')(today, 'yyyy-MM-dd');
+    
+    var loginDetails = storage.get('LOGIN_DETAILS');
+    var storedBy = '';
+    if(loginDetails){
+        storedBy = loginDetails.userCredentials.username;
+    }
+    $scope.noteExists = false;
         
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function(newObj, oldObj) {
@@ -89,6 +103,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     //get events for the selected program (and org unit)
     $scope.loadEvents = function(){   
         
+        $scope.noteExists = false;
         $scope.selectedProgramStage = null;
         
         //Filtering
@@ -125,7 +140,12 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     //for date type dataelements, filtering is based on start and end dates
                     var dataElement = prStDe.dataElement;
                     var name = dataElement.formName || dataElement.name;
-                    $scope.newDhis2Event.dataValues.push({id: dataElement.id, value: ''});                       
+                    
+                    $scope.newDhis2Event.dataValues.push({id: dataElement.id, value: ''});   
+                    if($scope.selectedProgramStage.captureCoordinates){
+                        $scope.newDhis2Event.coordinate = {};
+                    }
+                    
                     $scope.eventGridColumns.push({name: name, id: dataElement.id, type: dataElement.type, compulsory: prStDe.compulsory, showFilter: false, show: prStDe.displayInReports});
 
                     $scope.filterTypes[dataElement.id] = dataElement.type;
@@ -159,6 +179,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     if( angular.isObject( $scope.dhis2Events ) ) {
 
                         for(var i=0; i < $scope.dhis2Events.length; i++){  
+                            
+                            if($scope.dhis2Events[i].notes && !$scope.noteExists){
+                                $scope.noteExists = true;
+                            }
 
                             //check if event is empty
                             if(!angular.isUndefined($scope.dhis2Events[i].dataValues)){                            
@@ -304,11 +328,12 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.showEventRegistration = function(){        
         $scope.displayCustomForm = $scope.customForm ? true:false;        
         
-        $scope.eventRegistration = !$scope.eventRegistration;  
-        $scope.currentEvent = $scope.newDhis2Event;        
+        $scope.eventRegistration = !$scope.eventRegistration;          
+        $scope.currentEvent = angular.copy($scope.newDhis2Event);        
         $scope.outerForm.submitted = false;
+        $scope.note = {};
         
-        $scope.currentEvent = {};
+        //$scope.currentEvent = {};
     };    
     
     $scope.showEditEventInGrid = function(){
@@ -318,7 +343,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.outerForm.$valid = true;
     };
     
-    $scope.showEditEventInFull = function(){        
+    $scope.showEditEventInFull = function(){       
+        $scope.note = {};
         $scope.displayCustomForm = $scope.customForm ? true:false;                
 
         $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();  
@@ -334,8 +360,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             if(!$scope.currentEvent.hasOwnProperty(prStDe.dataElement.id)){
                 $scope.currentEvent[prStDe.dataElement.id] = '';
             }
-        });
-        
+        });        
     };
     
     $scope.switchDataEntryForm = function(){
@@ -356,7 +381,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             dataValues.push({dataElement: dataElement, value: $scope.currentEvent[dataElement]});
         }
         
-        var newEvent = angular.copy($scope.currentEvent);
+        var newEvent = angular.copy($scope.currentEvent);        
         
         //prepare the event to be created
         var dhis2Event = {
@@ -366,7 +391,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 status: 'ACTIVE',            
                 eventDate: $filter('date')(newEvent.eventDate, 'yyyy-MM-dd'),
                 dataValues: dataValues
-        };      
+        }; 
+        
+        if(!angular.isUndefined($scope.note.value) && $scope.note.value != ''){
+            dhis2Event.notes = [{value: $scope.note.value}];
+            
+            newEvent.notes = [{value: $scope.note.value, storedDate: today, storedBy: storedBy}];
+            
+            $scope.noteExists = true;
+        }
         
         if($scope.selectedProgramStage.captureCoordinates){
             dhis2Event.coordinate = {latitude: $scope.currentEvent.coordinate.latitude ? $scope.currentEvent.coordinate.latitude : '',
@@ -400,7 +433,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     $scope.editingEventInGrid = false;  
                     $scope.outerForm.submitted = false;
                 }
-                $scope.currentEvent = {};
+                //reset form
+                $scope.currentEvent = angular.copy($scope.newDhis2Event); 
+                $scope.note = {};
                 $scope.outerForm.submitted = false;
             }
         });
@@ -439,6 +474,20 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                      longitude: $scope.currentEvent.coordinate.longitude ? $scope.currentEvent.coordinate.longitude : ''};             
         }
         
+        if(!angular.isUndefined($scope.note.value) && $scope.note.value != ''){
+           
+            updatedEvent.notes = [{value: $scope.note.value}];
+            
+            if($scope.currentEvent.notes){
+                $scope.currentEvent.notes.splice(0,0,{value: $scope.note.value, storedDate: today, storedBy: ''});
+            }
+            else{
+                $scope.currentEvent.notes = [{value: $scope.note.value, storedDate: today, storedBy: storedBy}];
+            }   
+            
+            $scope.noteExists = true;
+        }
+
         DHIS2EventFactory.update(updatedEvent).then(function(data){            
             
             //update original value
@@ -534,8 +583,37 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         });        
     };
     
+    $scope.showNotes = function(dhis2Event){
+        
+        var modalInstance = $modal.open({
+            templateUrl: 'views/notes.html',
+            controller: 'NotesController',
+            resolve: {
+                dhis2Event: function () {
+                    return dhis2Event;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (){
+        });
+    };
+    
     $scope.getHelpContent = function(){
     };
+})
+
+//Controller for notes
+.controller('NotesController', 
+    function($scope, 
+            $modalInstance, 
+            dhis2Event){
+    
+    $scope.dhis2Event = dhis2Event;
+    
+    $scope.close = function () {
+        $modalInstance.close();
+    };      
 })
 
 //Controller for the header section

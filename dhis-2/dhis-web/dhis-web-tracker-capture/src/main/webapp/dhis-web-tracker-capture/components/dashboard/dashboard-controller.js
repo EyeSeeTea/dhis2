@@ -14,12 +14,13 @@ trackerCapture.controller('DashboardController',
 
     //do translation of the dashboard page
     TranslationService.translate();    
-    
+ 
     //dashboard items   
     $rootScope.biggerDashboardWidgets = [];
-    $rootScope.smallerDashboardWidgets = [];//{bigger: [], smaller: []};       
+    $rootScope.smallerDashboardWidgets = [];
     $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true};
     $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true};
+    $rootScope.reportWidget = {title: 'report', view: "components/report/teiReport.html", show: true, expand: true};
     $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true};
     $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true};
     $rootScope.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true};
@@ -27,24 +28,20 @@ trackerCapture.controller('DashboardController',
    
     $rootScope.biggerDashboardWidgets.push($rootScope.enrollmentWidget);
     $rootScope.biggerDashboardWidgets.push($rootScope.dataentryWidget);
+    $rootScope.biggerDashboardWidgets.push($rootScope.reportWidget);
     $rootScope.smallerDashboardWidgets.push($rootScope.selectedWidget);
     $rootScope.smallerDashboardWidgets.push($rootScope.profileWidget);
     $rootScope.smallerDashboardWidgets.push($rootScope.relationshipWidget);
     $rootScope.smallerDashboardWidgets.push($rootScope.notesWidget);
     
-    //selections
-    $scope.selectedTeiId = null;
-    $scope.selectedProgramId = null;
-    
+    //selections  
     $scope.selectedTeiId = ($location.search()).tei; 
     $scope.selectedProgramId = ($location.search()).program; 
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-    $scope.selectedProgram;
-    $scope.programs = []; 
-    $scope.selectedTei;
-        
-    if( $scope.selectedTeiId ){
-        
+    $scope.selectedProgram;    
+    $scope.selectedTei;    
+    
+    if($scope.selectedTeiId){
         //Fetch the selected entity
         TEIService.get($scope.selectedTeiId).then(function(data){
             $scope.selectedTei = data;
@@ -54,7 +51,8 @@ trackerCapture.controller('DashboardController',
                 $scope.trackedEntity = te;
                 
                 ProgramFactory.getAll().then(function(programs){  
-            
+                    
+                    $scope.programs = []; 
                     //get programs valid for the selected ou and tei
                     angular.forEach(programs, function(program){
                         if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
@@ -72,7 +70,7 @@ trackerCapture.controller('DashboardController',
                     $scope.broadCastSelections();                                    
                 });
             });            
-        });       
+        });      
     }
     
     $scope.broadCastSelections = function(){
@@ -85,8 +83,7 @@ trackerCapture.controller('DashboardController',
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
         }, 100); 
-    };
-     
+    };     
     
     $scope.back = function(){
         $location.path('/');
@@ -113,5 +110,6 @@ trackerCapture.controller('DashboardController',
 
         modalInstance.result.then(function () {
         });
-    };
+    };   
+
 });

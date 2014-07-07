@@ -54,6 +54,9 @@ import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
+/**
+ * @author Lars Helge Overland
+ */
 public class SpringDataValueSetStore
     implements DataValueSetStore
 {
@@ -66,6 +69,7 @@ public class SpringDataValueSetStore
     // DataValueSetStore implementation
     //--------------------------------------------------------------------------
 
+    @Override
     public void writeDataValueSetXml( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit,
         Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out )
     {
@@ -77,7 +81,8 @@ public class SpringDataValueSetStore
     }
 
     @Override
-    public void writeDataValueSetJson( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream outputStream )
+    public void writeDataValueSetJson( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
+        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream outputStream )
     {
         DataValueSet dataValueSet = new StreamingJsonDataValueSet( outputStream );
 
@@ -86,12 +91,17 @@ public class SpringDataValueSetStore
         StreamUtils.closeOutputStream( outputStream );
     }
 
+    @Override
     public void writeDataValueSetCsv( Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer )
     {
         DataValueSet dataValueSet = new StreamingCsvDataValueSet( new CsvWriter( writer, CSV_DELIM ) );
 
         writeDataValueSet( null, null, null, null, dataElements, periods, orgUnits, dataValueSet );
     }
+
+    //--------------------------------------------------------------------------
+    // Supportive methods
+    //--------------------------------------------------------------------------
 
     private void writeDataValueSet( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit,
         Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, DataValueSet dataValueSet )
@@ -139,14 +149,14 @@ public class SpringDataValueSetStore
     {
         return
             "select de.uid as deuid, pe.startdate, pt.name, ou.uid as ouuid, coc.uid as cocuid, dv.value, dv.storedby, dv.lastupdated, dv.comment, dv.followup " +
-                "from datavalue dv " +
-                "join dataelement de on (dv.dataelementid=de.dataelementid) " +
-                "join period pe on (dv.periodid=pe.periodid) " +
-                "join periodtype pt on (pe.periodtypeid=pt.periodtypeid) " +
-                "join organisationunit ou on (dv.sourceid=ou.organisationunitid) " +
-                "join categoryoptioncombo coc on (dv.categoryoptioncomboid=coc.categoryoptioncomboid) " +
-                "where dv.dataelementid in (" + getCommaDelimitedString( getIdentifiers( DataElement.class, dataElements ) ) + ") " +
-                "and dv.periodid in (" + getCommaDelimitedString( getIdentifiers( Period.class, periods ) ) + ") " +
-                "and dv.sourceid in (" + getCommaDelimitedString( getIdentifiers( OrganisationUnit.class, orgUnits ) ) + ")";
+            "from datavalue dv " +
+            "join dataelement de on (dv.dataelementid=de.dataelementid) " +
+            "join period pe on (dv.periodid=pe.periodid) " +
+            "join periodtype pt on (pe.periodtypeid=pt.periodtypeid) " +
+            "join organisationunit ou on (dv.sourceid=ou.organisationunitid) " +
+            "join categoryoptioncombo coc on (dv.categoryoptioncomboid=coc.categoryoptioncomboid) " +
+            "where dv.dataelementid in (" + getCommaDelimitedString( getIdentifiers( DataElement.class, dataElements ) ) + ") " +
+            "and dv.periodid in (" + getCommaDelimitedString( getIdentifiers( Period.class, periods ) ) + ") " +
+            "and dv.sourceid in (" + getCommaDelimitedString( getIdentifiers( OrganisationUnit.class, orgUnits ) ) + ")";
     }
 }

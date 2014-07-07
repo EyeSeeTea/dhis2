@@ -411,8 +411,6 @@ public abstract class AbstractEventService
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
-        //ProgramInstance programInstance = programStageInstance.getProgramInstance();
-
         saveTrackedEntityComment( programStageInstance, event, storedBy );
 
         Set<TrackedEntityDataValue> dataValues = new HashSet<TrackedEntityDataValue>(

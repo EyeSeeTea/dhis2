@@ -245,7 +245,7 @@ public class SetGeneralSettingsAction
             configuration.setInfrastructuralPeriodType( periodService.getPeriodTypeByClass( PeriodType
                 .getPeriodTypeByName( infrastructuralPeriodType ).getClass() ) );
         }
-
+        
         configurationService.setConfiguration( configuration );
 
         message = i18n.getString( "settings_updated" );
