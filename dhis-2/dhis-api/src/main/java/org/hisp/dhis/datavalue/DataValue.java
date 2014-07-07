@@ -37,16 +37,13 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-import org.springframework.beans.factory.InitializingBean;
-
-import javax.annotation.PostConstruct;
 
 /**
  * @author Kristian Nordal
  * @version $Id: DataValue.java 4638 2008-02-25 10:06:47Z larshelg $
  */
 public class DataValue
-    implements Serializable, ImportableObject, InitializingBean
+    implements Serializable, ImportableObject
 {
     /**
      * Determines if a de-serialized file is compatible with this class.
@@ -83,15 +80,6 @@ public class DataValue
     private String comment;
 
     private Boolean followup;
-
-    // -------------------------------------------------------------------------
-    // Transient properties
-    // -------------------------------------------------------------------------
-
-    /**
-     * The last known value of the DataValue.
-     */
-    private transient String previousValue;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -140,16 +128,6 @@ public class DataValue
         this.storedBy = storedBy;
         this.lastUpdated = lastUpdated;
         this.comment = comment;
-    }
-
-    // -------------------------------------------------------------------------
-    // Init
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void afterPropertiesSet()
-    {
-        setPreviousValue( this.value );
     }
 
     // -------------------------------------------------------------------------
@@ -370,15 +348,5 @@ public class DataValue
     public void setFollowup( Boolean followup )
     {
         this.followup = followup;
-    }
-
-    public String getPreviousValue()
-    {
-        return previousValue;
-    }
-
-    private void setPreviousValue( String previousValue )
-    {
-        this.previousValue = previousValue;
     }
 }

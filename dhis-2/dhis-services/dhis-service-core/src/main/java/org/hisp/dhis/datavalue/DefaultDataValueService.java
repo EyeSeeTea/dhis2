@@ -38,6 +38,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -91,6 +92,13 @@ public class DefaultDataValueService
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private SessionFactory sessionFactory;
+
+    public void setSessionFactory( SessionFactory sessionFactory )
+    {
+        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
@@ -148,18 +156,27 @@ public class DefaultDataValueService
 
     public void updateDataValue( DataValue dataValue )
     {
-        /*
         if ( dataValue.isNullValue() || dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
         {
             deleteDataValue( dataValue );
         }
         else if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
         {
-            dataValueStore.updateDataValue( dataValue );
-        }
-        */
-        if( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
-        {
+            String updateValue = dataValue.getValue();
+            String updateStoredby = dataValue.getStoredBy();
+            Date updateDate = dataValue.getLastUpdated();
+
+            sessionFactory.getCurrentSession().refresh( dataValue );
+
+            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+                currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
+
+            dataValueAuditService.addDataValueAudit( dataValueAudit );
+
+            dataValue.setValue( updateValue );
+            dataValue.setStoredBy( updateStoredby );
+            dataValue.setLastUpdated( updateDate );
+
             dataValueStore.updateDataValue( dataValue );
         }
     }
@@ -167,7 +184,9 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getPreviousValue(),
+        sessionFactory.getCurrentSession().refresh( dataValue );
+
+        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
             currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAudit );

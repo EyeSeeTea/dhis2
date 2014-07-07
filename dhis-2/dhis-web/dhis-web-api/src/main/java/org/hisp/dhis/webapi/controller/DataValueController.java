@@ -211,15 +211,12 @@ public class DataValueController
 
             dataValueService.addDataValue( dataValue );
         }
-        else if ( dataValue.isNullValue() || dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
-        {
-            dataValueService.deleteDataValue( dataValue );
-        }
         else
         {
+            /*
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getPreviousValue(),
                 currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
-
+            */
             if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
             {
                 if ( comment == null )
@@ -255,7 +252,7 @@ public class DataValueController
             dataValue.setLastUpdated( now );
             dataValue.setStoredBy( storedBy );
 
-            dataValueAuditService.addDataValueAudit( dataValueAudit );
+            //dataValueAuditService.addDataValueAudit( dataValueAudit );
 
             dataValueService.updateDataValue( dataValue );
         }
