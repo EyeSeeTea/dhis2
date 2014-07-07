@@ -29,9 +29,7 @@ package org.hisp.dhis.settings.action.system;
 
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
-import org.hisp.dhis.dataapproval.DataApprovalLevelService;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.i18n.I18n;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -39,9 +37,9 @@ import com.opensymphony.xwork2.Action;
 /**
  * @author Chau Thu Tran
  * 
- * @version $ SetConfigurationAction.java Jul 7, 2014 10:04:29 PM $
+ * @version $ SetSynchronizationSettingsAction.java Jul 7, 2014 10:04:29 PM $
  */
-public class GetConfigurationAction
+public class SetSynchronizationSettingsAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -57,16 +55,41 @@ public class GetConfigurationAction
 
     private String remoteServerUrl;
 
-    public String getRemoteServerUrl()
+    public void setRemoteServerUrl( String remoteServerUrl )
     {
-        return remoteServerUrl;
+        this.remoteServerUrl = remoteServerUrl;
     }
 
     private String remoteServerUsername;
 
-    public String getRemoteServerUsername()
+    public void setRemoteServerUsername( String remoteServerUsername )
     {
-        return remoteServerUsername;
+        this.remoteServerUsername = remoteServerUsername;
+    }
+
+    private String remoteServerPassword;
+
+    public void setRemoteServerPassword( String remoteServerPassword )
+    {
+        this.remoteServerPassword = remoteServerPassword;
+    }
+    
+    // -------------------------------------------------------------------------
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
     
     // -------------------------------------------------------------------------
@@ -76,9 +99,17 @@ public class GetConfigurationAction
     public String execute()
     {
         Configuration config = configurationService.getConfiguration();
-        remoteServerUrl = config.getRemoteServerUrl();
-        remoteServerUsername = config.getRemoteServerUsername();
-
+        config.setRemoteServerUrl( remoteServerUrl );
+        config.setRemoteServerUsername( remoteServerUsername );
+        if( !remoteServerPassword.isEmpty() )
+        {
+            config.setRemoteServerPassword( remoteServerPassword );
+        }
+        
+        configurationService.setConfiguration( config );
+      
+        message = i18n.getString( "settings_updated" );
+        
         return SUCCESS;
     }
 }
