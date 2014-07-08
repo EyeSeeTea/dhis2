@@ -5502,7 +5502,7 @@ Ext.onReady( function() {
 			panels: accordionPanels,
             expandInitPanels: function() {
                 organisationUnit.expand();
-                period.expand();
+                //period.expand();
                 data.expand();
             },
 			map: layer ? layer.map : null,
@@ -5522,7 +5522,8 @@ Ext.onReady( function() {
 				else {
 					height = ns.app.westRegion.getHeight() - ns.core.conf.layout.west_fill - settingsHeight;
 					mx += panelHeight;
-					this.setHeight((height > mx ? mx : height) - 2);
+					//this.setHeight((height > mx ? mx : height) - 2);
+					this.setHeight(height);
 					accordionBody.setHeight((height > mx ? mx : height) - 2);
 				}
 			},
@@ -5655,7 +5656,7 @@ Ext.onReady( function() {
 				}
 			};
 
-			web.multiSelect.setHeight = function(multiSelects, panel, fill) {
+			web.multiSelect.setHeight = function(ms, panel, fill) {
                 //fill = fill || 0;
 
 				//for (var i = 0, height, ms, hasToolbar; i < multiSelects.length; i++) {
@@ -5668,6 +5669,7 @@ Ext.onReady( function() {
 
 				for (var i = 0, height; i < ms.length; i++) {
 					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
+console.log("panel.getHeight()", panel.getHeight(), "fill", fill, "pluss", ms[i].hasToolbar ? 25 : 0, "MS HEIGHT", height);
 					ms[i].setHeight(height);
 				}
 			};
