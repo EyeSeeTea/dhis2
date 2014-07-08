@@ -3801,7 +3801,10 @@ Ext.onReady( function() {
             listeners: {
 				added: function(cmp) {
 					accordionPanels.push(cmp);
-				}
+				},
+                expand: function(cmp) {
+                    cmp.onExpand();
+                }
 			}
         });
 
@@ -4467,7 +4470,10 @@ Ext.onReady( function() {
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
-				}
+				},
+                expand: function(cmp) {
+                    cmp.onExpand();
+                }
 			}
 		});
 
@@ -4937,7 +4943,10 @@ Ext.onReady( function() {
             listeners: {
 				added: function(cmp) {
 					accordionPanels.push(cmp);
-				}
+				},
+                expand: function(cmp) {
+                    cmp.onExpand();
+                }
 			}
         });
 
@@ -5231,9 +5240,9 @@ Ext.onReady( function() {
             }(),
             listeners: {
                 afterrender: function() { // nasty workaround, should be fixed
-                    organisationUnit.expand();
-                    period.expand();
-                    data.expand();
+                    //organisationUnit.expand();
+                    //period.expand();
+                    //data.expand();
                 }
             }
 		});
@@ -5491,7 +5500,11 @@ Ext.onReady( function() {
             accordionBody: accordionBody,
 			items: accordionBody,
 			panels: accordionPanels,
-
+            expandInitPanels: function() {
+                organisationUnit.expand();
+                period.expand();
+                data.expand();
+            },
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
 			menu: layer ? layer.menu : null,
@@ -6945,8 +6958,8 @@ Ext.onReady( function() {
 						westRegion.hasScrollbar = true;
 					}
 
-					// expand first panel
-					accordion.getFirstPanel().expand();
+					// expand init panels
+					accordion.expandInitPanels();
 
 					// look for url params
 					var id = ns.core.web.url.getParam('id'),
