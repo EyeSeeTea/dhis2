@@ -5516,7 +5516,7 @@ Ext.onReady( function() {
 
 				if (ns.app.westRegion.hasScrollbar) {
 					height = panelHeight + mx;
-					this.setHeight(viewport.getHeight() - settingsHeight - 2);
+					this.setHeight(ns.app.viewport.getHeight() - settingsHeight - 2);
 					accordionBody.setHeight(height - settingsHeight - 2);
 				}
 				else {
