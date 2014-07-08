@@ -106,8 +106,8 @@ public class HibernateDataValueAuditStore
             .add( Restrictions.eq( "dataElement", dataElement ) )
             .add( Restrictions.eq( "period", storedPeriod ) )
             .add( Restrictions.eq( "organisationUnit", organisationUnit ) )
-            .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ))
-            .addOrder( Order.desc( "timestamp") );
+            .add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) )
+            .addOrder( Order.desc( "timestamp" ) );
 
         return criteria.list();
     }

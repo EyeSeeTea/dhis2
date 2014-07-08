@@ -24,16 +24,19 @@
 
     <property name="value" length="255" />
 
-    <property name="timestamp" column="timestamp" type="timestamp" not-null="true" />
+    <property name="timestamp" column="timestamp" type="timestamp" not-null="true" index="id_datavalueaudit_timestamp"/>
 
-    <property name="modifiedBy" column="modifiedby" not-null="true" />
+    <property name="modifiedBy" column="modifiedby" length="100" not-null="true" />
 
+    <property name="modificationType" column="modificationtype" type="org.hisp.dhis.common.AuditModificationTypeUserType" not-null="true" />
+<!--
     <property name="auditType" column="audittype" not-null="true">
       <type name="org.hibernate.type.EnumType">
         <param name="enumClass">org.hisp.dhis.common.AuditType</param>
-        <param name="type">12</param> <!-- java.sql.Types.VARCHAR = 12 -->
+        <param name="type">12</param>
       </type>
     </property>
+-->
 
   </class>
 </hibernate-mapping>

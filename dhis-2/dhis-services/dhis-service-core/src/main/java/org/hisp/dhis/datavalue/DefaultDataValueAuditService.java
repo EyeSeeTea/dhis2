@@ -83,25 +83,25 @@ public class DefaultDataValueAuditService
     }
 
     @Override
-    public int deleteDataValueAuditsByDataElement( DataElement dataElement )
+    public int deleteDataValueAuditByDataElement( DataElement dataElement )
     {
         return dataValueAuditStore.deleteDataValueAuditsByDataElement( dataElement );
     }
 
     @Override
-    public int deleteDataValueAuditsByPeriod( Period period )
+    public int deleteDataValueAuditByPeriod( Period period )
     {
         return dataValueAuditStore.deleteDataValueAuditsByPeriod( period );
     }
 
     @Override
-    public int deleteDataValueAuditsByOrganisationUnit( OrganisationUnit organisationUnit )
+    public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
     {
         return dataValueAuditStore.deleteDataValueAuditsByOrganisationUnit( organisationUnit );
     }
 
     @Override
-    public int deleteDataValueAuditsByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
     {
         return dataValueAuditStore.deleteDataValueAuditsByCategoryOptionCombo( categoryOptionCombo );
     }

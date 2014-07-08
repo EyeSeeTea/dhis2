@@ -28,12 +28,7 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.system.util.ValidationUtils.dataValueIsZeroAndInsignificant;
-
 import org.apache.commons.lang.StringUtils;
-import org.hisp.dhis.common.AuditType;
-import org.hisp.dhis.datavalue.DataValueAudit;
-import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.utils.InputUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -88,9 +83,6 @@ public class DataValueController
 
     @Autowired
     private DataSetService dataSetService;
-
-    @Autowired
-    private DataValueAuditService dataValueAuditService;
 
     @Autowired
     private InputUtils inputUtils;
@@ -213,10 +205,6 @@ public class DataValueController
         }
         else
         {
-            /*
-            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getPreviousValue(),
-                currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
-            */
             if ( value == null && DataElement.VALUE_TYPE_TRUE_ONLY.equals( dataElement.getType() ) )
             {
                 if ( comment == null )
@@ -251,8 +239,6 @@ public class DataValueController
 
             dataValue.setLastUpdated( now );
             dataValue.setStoredBy( storedBy );
-
-            //dataValueAuditService.addDataValueAudit( dataValueAudit );
 
             dataValueService.updateDataValue( dataValue );
         }

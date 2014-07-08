@@ -28,7 +28,7 @@ package org.hisp.dhis.datavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AuditType;
+import org.hisp.dhis.common.AuditModificationType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -59,7 +59,7 @@ public class DataValueAudit
 
     private DataElementCategoryOptionCombo categoryOptionCombo;
 
-    private AuditType auditType;
+    private AuditModificationType modificationType;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -70,7 +70,7 @@ public class DataValueAudit
 
     }
 
-    public DataValueAudit( DataValue dataValue, String value, String modifiedBy, Date timestamp, AuditType auditType )
+    public DataValueAudit( DataValue dataValue, String value, String modifiedBy, Date timestamp, AuditModificationType modificationType )
     {
         this.dataElement = dataValue.getDataElement();
         this.period = dataValue.getPeriod();
@@ -80,7 +80,7 @@ public class DataValueAudit
         this.value = value;
         this.modifiedBy = modifiedBy;
         this.timestamp = timestamp;
-        this.auditType = auditType;
+        this.modificationType = modificationType;
     }
 
     // -------------------------------------------------------------------------
@@ -167,13 +167,13 @@ public class DataValueAudit
         this.categoryOptionCombo = categoryOptionCombo;
     }
 
-    public AuditType getAuditType()
+    public AuditModificationType getModificationType()
     {
-        return auditType;
+        return modificationType;
     }
 
-    public void setAuditType( AuditType auditType )
+    public void setModificationType( AuditModificationType modificationType )
     {
-        this.auditType = auditType;
+        this.modificationType = modificationType;
     }
 }

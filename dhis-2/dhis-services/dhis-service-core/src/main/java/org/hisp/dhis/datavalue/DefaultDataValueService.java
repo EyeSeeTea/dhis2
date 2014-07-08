@@ -39,7 +39,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.common.AuditType;
+import org.hisp.dhis.common.AuditModificationType;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
@@ -51,10 +51,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Kristian Nordal
+ * @author Halvdan Hoem Grelland
  */
 @Transactional
 public class DefaultDataValueService
@@ -154,6 +156,7 @@ public class DefaultDataValueService
         return true;
     }
 
+    @Transactional
     public void updateDataValue( DataValue dataValue )
     {
         if ( dataValue.isNullValue() || dataValueIsZeroAndInsignificant( dataValue.getValue(), dataValue.getDataElement() ) )
@@ -162,21 +165,17 @@ public class DefaultDataValueService
         }
         else if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
         {
-            String updateValue = dataValue.getValue();
-            String updateStoredby = dataValue.getStoredBy();
-            Date updateDate = dataValue.getLastUpdated();
+            DataValue dataValueCopy = new DataValue();
+            BeanUtils.copyProperties( dataValue, dataValueCopy );
 
             sessionFactory.getCurrentSession().refresh( dataValue );
 
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
-                currentUserService.getCurrentUsername(), new Date(), AuditType.UPDATE );
+                dataValue.getStoredBy(), new Date(), AuditModificationType.UPDATE );
 
             dataValueAuditService.addDataValueAudit( dataValueAudit );
 
-            dataValue.setValue( updateValue );
-            dataValue.setStoredBy( updateStoredby );
-            dataValue.setLastUpdated( updateDate );
-
+            BeanUtils.copyProperties( dataValueCopy, dataValue );
             dataValueStore.updateDataValue( dataValue );
         }
     }
@@ -184,10 +183,10 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        sessionFactory.getCurrentSession().refresh( dataValue );
+        sessionFactory.getCurrentSession().refresh( dataValue ); // Re-fetch entity for auditing
 
         DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
-            currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
+            currentUserService.getCurrentUsername(), new Date(), AuditModificationType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAudit );
 
