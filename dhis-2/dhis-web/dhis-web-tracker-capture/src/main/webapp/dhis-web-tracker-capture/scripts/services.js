@@ -331,7 +331,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }
             
             promise = $http.get( url + '&pageSize=' + pgSize + '&page=' + pg ).then(function(response){                                
-                //return EntityService.formatter(response.data);
                 return response.data;
             });            
             return promise;
@@ -339,7 +338,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         update: function(tei){
             
             var url = '../api/trackedEntityInstances';
-            
             var promise = $http.put( url + '/' + tei.trackedEntityInstance , tei).then(function(response){
                 return response.data;
             });
@@ -449,8 +447,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     return {
         
-        getEvents: function(entity, orgUnit, program, programStatus){   
+        getEventsByStatus: function(entity, orgUnit, program, programStatus){   
             var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&programStatus=' + programStatus + '&paging=false').then(function(response){
+                return response.data.events;
+            });            
+            return promise;
+        },
+        getEventsByProgram: function(entity, orgUnit, program){   
+            var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + entity + '&orgUnit=' + orgUnit + '&program=' + program + '&paging=false').then(function(response){
                 return response.data.events;
             });            
             return promise;
@@ -466,6 +470,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return response.data;           
             });
             return promise;            
+        },
+        delete: function(dhis2Event){
+            var promise = $http.delete('../api/events/' + dhis2Event.event).then(function(response){
+                return response.data;               
+            });
+            return promise;           
         },
         update: function(dhis2Event){   
             var promise = $http.put('../api/events/' + dhis2Event.event, dhis2Event).then(function(response){
@@ -506,7 +516,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 .service('EntityQueryFactory', function(OperatorFactory){  
     
-    this.getQueryForAttributes = function(attributes, enrollment){
+    this.getAttributesQuery = function(attributes, enrollment){
 
         var query = {url: null, hasValue: false};
         
@@ -716,6 +726,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 /* current selections */
 .service('CurrentSelection', function(){
     this.currentSelection = '';
+    this.relationshipInfo = '';
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
@@ -723,6 +734,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     this.get = function(){
         return this.currentSelection;
+    };
+    
+    this.setRelationshipInfo = function(relationshipInfo){  
+        this.relationshipInfo = relationshipInfo;        
+    };
+    
+    this.getRelationshipInfo = function(){
+        return this.relationshipInfo;
     };
 })
 
@@ -940,6 +959,29 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     });                            
                 }); 
             }
+        },
+        reconstruct: function(dhis2Event, programStage){
+            
+            var e = {dataValues: [], 
+                    event: dhis2Event.event, 
+                    program: dhis2Event.program, 
+                    programStage: dhis2Event.programStage, 
+                    orgUnit: dhis2Event.orgUnit, 
+                    trackedEntityInstance: dhis2Event.trackedEntityInstance,
+                    status: dhis2Event.status
+                };
+                
+            angular.forEach(programStage.programStageDataElements, function(prStDe){
+                if(dhis2Event[prStDe.dataElement.id]){
+                    var val = {value: dhis2Event[prStDe.dataElement.id], dataElement: prStDe.dataElement.id};
+                    if(dhis2Event.providedElsewhere[prStDe.dataElement.id]){
+                        val.providedElsewhere = dhis2Event.providedElsewhere[prStDe.dataElement.id];
+                    }
+                    e.dataValues.push(val);
+                }                                
+            });
+                     
+            return e;
         }
     }; 
 });
