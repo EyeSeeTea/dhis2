@@ -5511,21 +5511,19 @@ Ext.onReady( function() {
 
 			setThisHeight: function(mx) {
 				var settingsHeight = 41,
-					panelHeight = settingsHeight + this.panels.length * 28,
-					height;
+					containerHeight = settingsHeight + (this.panels.length * 28) + mx,
+					accordionHeight = ns.app.westRegion.getHeight() - settingsHeight - ns.core.conf.layout.west_fill,
+                    accordionBodyHeight;
 
 				if (ns.app.westRegion.hasScrollbar) {
-					height = panelHeight + mx;
-					this.setHeight(ns.app.viewport.getHeight() - settingsHeight - 2);
-					accordionBody.setHeight(height - settingsHeight - 2);
+                    accordionBodyHeight = containerHeight - settingsHeight - ns.core.conf.layout.west_fill;
 				}
 				else {
-					height = ns.app.westRegion.getHeight() - ns.core.conf.layout.west_fill - settingsHeight;
-					mx += panelHeight;
-					//this.setHeight((height > mx ? mx : height) - 2);
-					this.setHeight(height);
-					accordionBody.setHeight((height > mx ? mx : height) - 2);
+                    accordionBodyHeight = (accordionHeight > containerHeight ? containerHeight : accordionHeight) - ns.core.conf.layout.west_fill;
 				}
+
+                this.setHeight(accordionHeight);
+                accordionBody.setHeight(accordionBodyHeight);
 			},
 			getExpandedPanel: function() {
 				for (var i = 0, panel; i < this.panels.length; i++) {
