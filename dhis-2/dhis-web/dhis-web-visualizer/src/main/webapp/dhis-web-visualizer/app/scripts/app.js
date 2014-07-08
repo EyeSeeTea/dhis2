@@ -6011,7 +6011,11 @@ Ext.onReady( function() {
 								requests.push({
 									url: init.contextPath + '/api/dimensions.json?links=false&paging=false',
 									success: function(r) {
-										init.dimensions = Ext.decode(r.responseText).dimensions || [];
+
+                                        var a = Ext.decode(r.responseText).dimensions || [];
+										init.dimensions = [a[0], a[1], a[2]];
+
+                                        
 										fn();
 									}
 								});
