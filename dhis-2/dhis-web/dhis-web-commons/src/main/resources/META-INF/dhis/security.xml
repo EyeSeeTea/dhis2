@@ -23,6 +23,7 @@
   <sec:http pattern="/dhis-web-commons/css/**" security="none" />
   <sec:http pattern="/dhis-web-commons/flags/**" security="none" />
   <sec:http pattern="/dhis-web-commons/fonts/**" security="none" />
+  <sec:http pattern="/api/files/style/external" security="none" />
   <sec:http pattern="/external-static/**" security="none" />
   <sec:http pattern="/favicon.ico" security="none" />
 
@@ -292,6 +293,7 @@
         <value>F_APPROVE_DATA</value>
         <value>F_APPROVE_DATA_LOWER_LEVELS</value>
         <value>F_ACCEPT_DATA_LOWER_LEVELS</value>
+        <value>F_INSERT_CUSTOM_JS_CSS</value>
       </set>
     </property>
   </bean>
