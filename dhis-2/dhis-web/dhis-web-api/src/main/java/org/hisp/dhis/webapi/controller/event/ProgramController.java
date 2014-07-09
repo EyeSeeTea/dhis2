@@ -34,6 +34,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.schema.descriptors.ProgramSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
@@ -58,6 +59,9 @@ public class ProgramController
     @Autowired
     private ProgramInstanceService programInstanceService;
 
+    @Autowired
+    private ProgramService programService;
+
     @Override
     protected void postCreateEntity( Program program )
     {
@@ -75,7 +79,16 @@ public class ProgramController
 
     protected List<Program> getEntityList( WebMetaData metaData, WebOptions options )
     {
+        String type = options.getOptions().get( "type" );
+        String orgUnit = options.getOptions().get( "orgUnit" );
+        Boolean userFilter = Boolean.parseBoolean( options.getOptions().get( "userFilter" ) );
+
         List<Program> entityList;
+
+        if ( type != null || orgUnit != null || userFilter )
+        {
+            options.getOptions().put( "paging", "false" );
+        }
 
         if ( options.getOptions().containsKey( "query" ) )
         {
@@ -88,15 +101,18 @@ public class ProgramController
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<Program>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+            entityList = new ArrayList<>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
-            entityList = new ArrayList<Program>( manager.getAllSorted( getEntityClass() ) );
+            entityList = new ArrayList<>( manager.getAllSorted( getEntityClass() ) );
         }
 
-        String type = options.getOptions().get( "type" );
-        String orgUnit = options.getOptions().get( "orgUnit" );
+        if ( userFilter )
+        {
+            List<Program> programs = Lists.newArrayList( programService.getProgramsByCurrentUser() );
+            entityList.retainAll( programs );
+        }
 
         if ( type != null )
         {

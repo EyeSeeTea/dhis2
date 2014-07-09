@@ -40,7 +40,7 @@
 			<a href='javascript:markForFollowup($programInstance.id, true)' #if( $followup == 'true') class='hidden' #end name='imgUnmarkFollowup' title='$i18n.getString("toggle_risk_status")' ><img src='images/unrisk_large.png'></a>			
 		</td>
 		<td rowspan='3' colspan='8'>
-			<textarea id="comment" name='comment' maxlength="360" style="height:100px;width:100%">$!encoder.htmlEncode( $programInstance.comment.commentText )</textarea>
+			<textarea id="comment" name='comment' maxlength="360" style="height:100px;width:100%"></textarea>
 		</td>
    </tr>
    
@@ -93,7 +93,8 @@
 
 </table>
 
-#if( $programInstance.outboundSms.size() > 0 )
+#if( $programInstance.outboundSms.size() > 0 
+	|| $programInstance.comments.size() > 0 )
 	<table>
 		<tr>
 			<td><span class="commentHeader">$i18n.getString('message')</span><td>
@@ -104,6 +105,14 @@
 				<td>
 					($format.formatDateTime($!sms.date) - $encoder.htmlEncode($sms.sender) )
 					$encoder.htmlEncode($sms.message)
+				</td>
+			</tr>
+		#end
+		#foreach($comment in $programInstance.comments)
+			<tr>
+				<td>
+					($format.formatDateTime($!comment.createdDate) - $encoder.htmlEncode($comment.creator) )
+					$encoder.htmlEncode($comment.commentText)
 				</td>
 			</tr>
 		#end
@@ -174,7 +183,7 @@
 				</script>
 			</td>
 			<td>
-				<input type='text' id='message_$programStageInstance.id' name='message_$programStageInstance.id' class="{validate:{required:true,maxlength:160}}" style="width:100%" onchange="addComment(byId('message_$programStageInstance.id'),'$programStageInstance.id')" >
+				<input type='text' id='message_$programStageInstance.id' name='message_$programStageInstance.id' class="{validate:{required:true,maxlength:160}}" style="width:100%" >
 			</td>
 			<td>
 				<input type='button' class='normal-button' onclick="addComment(byId('message_$programStageInstance.id'),'$programStageInstance.id')" value="$i18n.getString('save')" >

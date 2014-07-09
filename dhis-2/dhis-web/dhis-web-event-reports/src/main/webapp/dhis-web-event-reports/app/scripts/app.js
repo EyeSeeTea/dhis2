@@ -3094,15 +3094,13 @@ Ext.onReady( function() {
 
             accordionBody,
 			accordionPanels = [],
+            accordion,
 
-		// functions
 			reset,
 			setGui,
 			getView,
 			validateView,
-			panel,
 
-        // constants
             baseWidth = 446,
             toolWidth = 36,
 
@@ -3785,12 +3783,6 @@ Ext.onReady( function() {
 					ns.core.conf.layout.west_scrollbarheight_accordion_indicator : ns.core.conf.layout.west_maxheight_accordion_indicator;
 
 				accordion.setThisHeight(h);
-
-				//ns.core.web.multiSelect.setHeight(
-					//[dataElementAvailable, dataElementSelected],
-					//this,
-					//ns.core.conf.layout.west_fill_accordion_indicator
-				//);
 
                 var msHeight = this.getHeight() - 28 - programStagePanel.getHeight() - 6;
 
@@ -5655,19 +5647,8 @@ Ext.onReady( function() {
 			};
 
 			web.multiSelect.setHeight = function(ms, panel, fill) {
-                //fill = fill || 0;
-
-				//for (var i = 0, height, ms, hasToolbar; i < multiSelects.length; i++) {
-                    //ms = multiSelects[i];
-                    //hasToolbar = Ext.isArray(ms.tbar) && ms.tbar.length;
-
-					//height = panel.getHeight() - 4 - fill - (hasToolbar ? 27 : 0);
-					//ms.setHeight(height);
-				//}
-
 				for (var i = 0, height; i < ms.length; i++) {
 					height = panel.getHeight() - fill - (ms[i].hasToolbar ? 25 : 0);
-console.log("panel.getHeight()", panel.getHeight(), "fill", fill, "pluss", ms[i].hasToolbar ? 25 : 0, "MS HEIGHT", height);
 					ms[i].setHeight(height);
 				}
 			};
@@ -6273,11 +6254,14 @@ console.log("panel.getHeight()", panel.getHeight(), "fill", fill, "pluss", ms[i]
 
 	// viewport
 	createViewport = function() {
-        var caseButton,
+        var eventReportStore,
+
+            caseButton,
 			aggregateButton,
 			paramButtonMap = {},
 			typeToolbar,
             onTypeClick,
+
 			widget,
 			accordion,
 			westRegion,

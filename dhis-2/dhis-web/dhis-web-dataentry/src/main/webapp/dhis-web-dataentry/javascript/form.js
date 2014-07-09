@@ -725,7 +725,7 @@ function getDataElementName( dataElementId )
 		return span.text();
 	}
 
-  console.log( 'Data element not present in form, falling back to default name: ' + dataElementId );
+    console.log( 'Data element not present in form, falling back to default name: ' + dataElementId );
 	return DEFAULT_NAME;
 }
 
@@ -738,7 +738,7 @@ function getOptionComboName( optionComboId )
 		return span.text();
 	}
 
-  console.log( 'Category option combo not present in form, falling back to default name: ' + optionComboId );
+    console.log( 'Category option combo not present in form, falling back to default name: ' + optionComboId );
 	return DEFAULT_NAME;
 }
 
@@ -1938,15 +1938,11 @@ function closeCurrentSelection()
 
 function updateForms()
 {
-    DAO.store.open().done( function() {
-        purgeLocalForms().done(function() {
-            updateExistingLocalForms().done(function() {
-                downloadRemoteForms();
-            });
-        });
-
-        dhis2.de.loadOptionSets();
-    });
+    DAO.store.open()
+        .then(purgeLocalForms)
+        .then(updateExistingLocalForms)
+        .then(downloadRemoteForms)
+        .then(dhis2.de.loadOptionSets);
 }
 
 function purgeLocalForms()
@@ -1966,14 +1962,7 @@ function purgeLocalForms()
             }
         } );
 
-        console.log( 'should delete: ', keys );
         def.resolve();
-
-        /*
-        DAO.store.removeAll( "forms", keys ).done(function() {
-            def.resolve();
-        });
-        */
 
         console.log( 'Purged local forms' );
     });
@@ -1983,7 +1972,9 @@ function purgeLocalForms()
 
 function updateExistingLocalForms()
 {
-    return dhis2.de.storageManager.getAllForms().done(function( formIds ) {
+    var def = $.Deferred();
+
+    dhis2.de.storageManager.getAllForms().done(function( formIds ) {
         var formVersions = dhis2.de.storageManager.getAllFormVersions();
 
         $.safeEach( formIds, function( idx, item )
@@ -1993,14 +1984,21 @@ function updateExistingLocalForms()
 
             if ( remoteVersion == null || localVersion == null || remoteVersion != localVersion )
             {
-            	dhis2.de.storageManager.downloadForm( item, remoteVersion );
+                dhis2.de.storageManager.downloadForm( item, remoteVersion )
             }
         } );
+
+        def.resolve();
     });
+
+    return def.promise();
 }
 
 function downloadRemoteForms()
 {
+    var def = $.Deferred();
+    var chain = [];
+
     $.safeEach( dhis2.de.dataSets, function( idx, item )
     {
         var remoteVersion = item.version;
@@ -2009,11 +2007,17 @@ function downloadRemoteForms()
         {
             dhis2.de.storageManager.formExists( idx ).done(function( value ) {
                 if( !value ) {
-                    dhis2.de.storageManager.downloadForm( idx, remoteVersion );
+                    chain.push(dhis2.de.storageManager.downloadForm( idx, remoteVersion ));
                 }
             });
         }
     } );
+
+    $.when.apply($, chain).then(function() {
+        def.resolve();
+    });
+
+    return def.promise();
 }
 
 // -----------------------------------------------------------------------------
@@ -2562,7 +2566,7 @@ dhis2.de.searchOptionSet = function( uid, query, success )
  */
 dhis2.de.getOptions = function( uid, query, success ) 
 {
-    $.ajax( {
+    return $.ajax( {
         url: '../api/optionSets/' + uid + '.json?links=false&q=' + query,
         dataType: "json",
         cache: false,
@@ -2583,7 +2587,10 @@ dhis2.de.getOptions = function( uid, query, success )
  */
 dhis2.de.loadOptionSets = function() 
 {
-    var options = _.values( dhis2.de.optionSets ); // Array of objects with uid and v
+    var options = _.uniq( _.values( dhis2.de.optionSets ), function( item ) {
+        return item.uid;
+    }); // Array of objects with uid and v
+
     var uids = [];
 
     var deferred = $.Deferred();

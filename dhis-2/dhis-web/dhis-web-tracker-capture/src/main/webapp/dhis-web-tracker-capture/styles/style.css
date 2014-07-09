@@ -11,15 +11,15 @@ h1 {
 }
 
 h2 {
-    font-size: 1.4em;    
+    font-size: 1.6em;    
 }
 
 h3 {
-    font-size: 1em;    
+    font-size: 1.2em;    
 }
 
 h4 {
-    font-size: 0.8em;
+    font-size: 1em;
     font-weight: bold;
 }
 
@@ -97,6 +97,20 @@ textarea {
 
 .inline-block {
     display: inline-block;
+}
+
+.vertical-center {
+    vertical-align: middle;
+}
+
+.empty-stage-container {
+    display: inline-block;
+    width: 135px;
+    height: 60px;
+    opacity: 1.0;
+    white-space: normal;
+    padding-top: 5px;
+    text-align: center;
 }
 
 .stage-container {
@@ -430,12 +444,13 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .search-container-main {
     width: 100%;
     float: left;
-    height: 100%; 
+    height: 100%;
+    padding-bottom: 5px;
 }
 
 .search-container{
     margin: 5px;
-    padding: 5px; 
+    padding: 5px 9px 5px 5px;
     max-height: 570px;
     overflow-y: scroll;
 }
@@ -482,6 +497,11 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .relationship-modal-window .modal-dialog {
     width: 100%;
     height: 100%;
+}
+
+.modal-dialog {
+    top: 50%;
+    
 }
 .expanded{
     border: 1px solid #aaa;
