@@ -115,7 +115,7 @@ $( document ).ready( function() {
         #end
         </td>
         <td>
-          <i>$i18n.getString( $dataValueAudit.modificationType.getValue() )</i>
+          <i>$i18n.getString( $dataValueAudit.auditType.getValue() )</i>
         </td>
       </tr>
 			#end					

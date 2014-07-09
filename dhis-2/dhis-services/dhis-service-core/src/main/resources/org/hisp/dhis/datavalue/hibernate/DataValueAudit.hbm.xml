@@ -7,7 +7,7 @@
   <class name="org.hisp.dhis.datavalue.DataValueAudit" table="datavalueaudit">
 
     <id name="id" column="datavalueauditid">
-      <generator class="native" />
+      <generator class="native"/>
     </id>
 
     <many-to-one name="dataElement" class="org.hisp.dhis.dataelement.DataElement" column="dataelementid"
@@ -26,17 +26,9 @@
 
     <property name="timestamp" column="timestamp" type="timestamp" not-null="true" index="id_datavalueaudit_timestamp"/>
 
-    <property name="modifiedBy" column="modifiedby" length="100" not-null="true" />
+    <property name="modifiedBy" column="modifiedby" length="100"/>
 
-    <property name="modificationType" column="modificationtype" type="org.hisp.dhis.common.AuditModificationTypeUserType" not-null="true" />
-<!--
-    <property name="auditType" column="audittype" not-null="true">
-      <type name="org.hibernate.type.EnumType">
-        <param name="enumClass">org.hisp.dhis.common.AuditType</param>
-        <param name="type">12</param>
-      </type>
-    </property>
--->
+    <property name="auditType" column="audittype" type="org.hisp.dhis.common.AuditTypeUserType" not-null="true" />
 
   </class>
 </hibernate-mapping>

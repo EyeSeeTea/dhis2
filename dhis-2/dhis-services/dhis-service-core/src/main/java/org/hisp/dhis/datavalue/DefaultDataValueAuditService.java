@@ -34,6 +34,7 @@ import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Quang Nguyen
@@ -64,6 +65,7 @@ public class DefaultDataValueAuditService
     }
 
     @Override
+    @Transactional
     public void deleteDataValueAudit( DataValueAudit dataValueAudit )
     {
         dataValueAuditStore.deleteDataValueAudit( dataValueAudit );
@@ -83,26 +85,30 @@ public class DefaultDataValueAuditService
     }
 
     @Override
+    @Transactional
     public int deleteDataValueAuditByDataElement( DataElement dataElement )
     {
-        return dataValueAuditStore.deleteDataValueAuditsByDataElement( dataElement );
+        return dataValueAuditStore.deleteDataValueAuditByDataElement( dataElement );
     }
 
     @Override
+    @Transactional
     public int deleteDataValueAuditByPeriod( Period period )
     {
-        return dataValueAuditStore.deleteDataValueAuditsByPeriod( period );
+        return dataValueAuditStore.deleteDataValueAuditByPeriod( period );
     }
 
     @Override
+    @Transactional
     public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
     {
-        return dataValueAuditStore.deleteDataValueAuditsByOrganisationUnit( organisationUnit );
+        return dataValueAuditStore.deleteDataValueAuditByOrganisationUnit( organisationUnit );
     }
 
     @Override
+    @Transactional
     public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
     {
-        return dataValueAuditStore.deleteDataValueAuditsByCategoryOptionCombo( categoryOptionCombo );
+        return dataValueAuditStore.deleteDataValueAuditByCategoryOptionCombo( categoryOptionCombo );
     }
 }

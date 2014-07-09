@@ -29,7 +29,7 @@ package org.hisp.dhis.datavalue;
  */
 
 import org.hisp.dhis.DhisTest;
-import org.hisp.dhis.common.AuditModificationType;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -128,6 +128,11 @@ public class DataValueAuditServiceTest
         periodC = createPeriod( getDay( 7 ), getDay( 8 ) );
         periodD = createPeriod( getDay( 8 ), getDay( 9 ) );
 
+        periodService.addPeriod( periodA );
+        periodService.addPeriod( periodB );
+        periodService.addPeriod( periodC );
+        periodService.addPeriod( periodD );
+
         orgUnitA = createOrganisationUnit( 'A' );
         orgUnitB = createOrganisationUnit( 'B' );
         orgUnitC = createOrganisationUnit( 'C' );
@@ -139,6 +144,7 @@ public class DataValueAuditServiceTest
         organisationUnitService.addOrganisationUnit( orgUnitD );
 
         optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        categoryService.addDataElementCategoryOptionCombo( optionCombo );
 
         dataValueA = createDataValue( dataElementA, periodA, orgUnitA,  "1", optionCombo );
         dataValueB = createDataValue( dataElementB, periodB, orgUnitB,  "2", optionCombo );
@@ -167,9 +173,9 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueB, dataValueB.getValue(), dataValueB.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );
@@ -177,7 +183,6 @@ public class DataValueAuditServiceTest
         Collection<DataValueAudit> audits = dataValueAuditService.getDataValueAudits( dataValueA );
         assertNotNull( audits );
         assertTrue( audits.contains( dataValueAuditA ) );
-        assertFalse( audits.contains( dataValueAuditB ) );
     }
 
     @Test
@@ -186,19 +191,23 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.DELETE );
+            now, AuditType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );
 
-        dataValueAuditService.deleteDataValueAudit( dataValueAuditA );
-
         Collection<DataValueAudit> audits = dataValueAuditService.getDataValueAudits( dataValueA );
 
+        assertEquals( 2, audits.size() );
+
+        dataValueAuditService.deleteDataValueAudit( dataValueAuditA );
+
+        audits = dataValueAuditService.getDataValueAudits( dataValueA );
+
         assertNotNull( audits );
-        assertEquals( audits.size(), 1 );
+        assertEquals( 1, audits.size() );
         assertTrue( audits.contains( dataValueAuditB ) );
     }
 
@@ -212,14 +221,14 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueB, dataValueB.getValue(), dataValueB.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         DataValueAudit dataValueAuditC1 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditC2 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );
@@ -250,14 +259,14 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueB, dataValueB.getValue(), dataValueB.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         DataValueAudit dataValueAuditC1 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditC2 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );
@@ -288,14 +297,14 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueB, dataValueB.getValue(), dataValueB.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         DataValueAudit dataValueAuditC1 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditC2 = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );
@@ -317,6 +326,9 @@ public class DataValueAuditServiceTest
 
         audits = dataValueAuditService.getDataValueAudits( dataValueB );
 
+        assertNotNull( dataValueAuditB );
+        assertNotNull( audits );
+
         assertTrue( audits.contains( dataValueAuditB ) );
     }
 
@@ -326,11 +338,11 @@ public class DataValueAuditServiceTest
         Date now = new Date();
 
         DataValueAudit dataValueAuditA = new DataValueAudit( dataValueA, dataValueA.getValue(), dataValueA.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditB = new DataValueAudit( dataValueB, dataValueB.getValue(), dataValueB.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
         DataValueAudit dataValueAuditC = new DataValueAudit( dataValueC, dataValueC.getValue(), dataValueC.getStoredBy(),
-            now, AuditModificationType.UPDATE );
+            now, AuditType.UPDATE );
 
         dataValueAuditService.addDataValueAudit( dataValueAuditA );
         dataValueAuditService.addDataValueAudit( dataValueAuditB );

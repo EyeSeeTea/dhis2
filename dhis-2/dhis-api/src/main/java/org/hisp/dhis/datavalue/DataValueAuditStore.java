@@ -89,7 +89,7 @@ public interface DataValueAuditStore
      * @param dataElement the DataElement for which the DataValueAudits should be deleted.
      * @return the number of deleted DataValueAudits.
      */
-    int deleteDataValueAuditsByDataElement( DataElement dataElement );
+    int deleteDataValueAuditByDataElement( DataElement dataElement );
 
     /**
      * Deletes all DataValueAudits for the given Period.
@@ -97,7 +97,7 @@ public interface DataValueAuditStore
      * @param period the Period for which the DataValueAudits should be deleted.
      * @return the number of deleted DataValueAudits.
      */
-    int deleteDataValueAuditsByPeriod( Period period );
+    int deleteDataValueAuditByPeriod( Period period );
 
     /**
      * Deletes all DataValues for the given OrganisationUnit.
@@ -105,7 +105,7 @@ public interface DataValueAuditStore
      * @param organisationUnit the OrganisationUnit for which the DataValueAudits should be deleted.
      * @return the number of deleted DataValueAudits.
      */
-    int deleteDataValueAuditsByOrganisationUnit( OrganisationUnit organisationUnit );
+    int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit );
 
     /**
      * Deletes all DataValues for the given DataElementCategoryOptionCombo.
@@ -113,5 +113,5 @@ public interface DataValueAuditStore
      * @param categoryOptionCombo the DataElementCategoryOptionCombo for which the DataValueAudits should be deleted.
      * @return the number of deleted DataValueAudits.
      */
-    int deleteDataValueAuditsByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
+    int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo );
 }

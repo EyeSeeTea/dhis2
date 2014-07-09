@@ -115,11 +115,13 @@ public class HibernateDataValueAuditStore
     @Override
     public void deleteDataValueAudit( DataValueAudit dataValueAudit )
     {
-        sessionFactory.getCurrentSession().delete( dataValueAudit );
+        Session session = sessionFactory.getCurrentSession();
+
+        session.delete( dataValueAudit );
     }
 
     @Override
-    public int deleteDataValueAuditsByDataElement( DataElement dataElement )
+    public int deleteDataValueAuditByDataElement( DataElement dataElement )
     {
         Query query = sessionFactory.getCurrentSession()
             .createQuery( "DELETE DataValueAudit WHERE dataElement = :dataElement" )
@@ -129,7 +131,7 @@ public class HibernateDataValueAuditStore
     }
 
     @Override
-    public int deleteDataValueAuditsByPeriod( Period period )
+    public int deleteDataValueAuditByPeriod( Period period )
     {
         Period storedPeriod = periodStore.reloadPeriod( period );
 
@@ -141,7 +143,7 @@ public class HibernateDataValueAuditStore
     }
 
     @Override
-    public int deleteDataValueAuditsByOrganisationUnit( OrganisationUnit organisationUnit )
+    public int deleteDataValueAuditByOrganisationUnit( OrganisationUnit organisationUnit )
     {
         Query query = sessionFactory.getCurrentSession()
             .createQuery( "DELETE DataValueAudit WHERE organisationUnit = :organisationUnit" )
@@ -151,7 +153,7 @@ public class HibernateDataValueAuditStore
     }
 
     @Override
-    public int deleteDataValueAuditsByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
+    public int deleteDataValueAuditByCategoryOptionCombo( DataElementCategoryOptionCombo categoryOptionCombo )
     {
         Query query = sessionFactory.getCurrentSession()
             .createQuery( "DELETE DataValueAudit WHERE categoryOptionCombo = :categoryOptionCombo" )

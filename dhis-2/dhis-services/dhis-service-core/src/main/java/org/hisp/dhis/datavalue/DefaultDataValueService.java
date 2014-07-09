@@ -39,7 +39,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
-import org.hisp.dhis.common.AuditModificationType;
+import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
@@ -171,7 +171,7 @@ public class DefaultDataValueService
             sessionFactory.getCurrentSession().refresh( dataValue );
 
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
-                dataValue.getStoredBy(), new Date(), AuditModificationType.UPDATE );
+                dataValue.getStoredBy(), new Date(), AuditType.UPDATE );
 
             dataValueAuditService.addDataValueAudit( dataValueAudit );
 
@@ -186,7 +186,7 @@ public class DefaultDataValueService
         sessionFactory.getCurrentSession().refresh( dataValue ); // Re-fetch entity for auditing
 
         DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
-            currentUserService.getCurrentUsername(), new Date(), AuditModificationType.DELETE );
+            currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAudit );
 
