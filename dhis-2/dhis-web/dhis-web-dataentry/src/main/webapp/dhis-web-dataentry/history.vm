@@ -91,7 +91,8 @@ $( document ).ready( function() {
                     #if( $historyInvalid )
                         $encoder.htmlEncode( $i18n.getString( "history_not_valid" ) )
                     #else
-                        <img id="historyChart" src="../api/charts/history/data.png?de=${dataElementHistory.dataElement.uid}&co=${dataElementHistory.optionCombo.uid}&ou=${dataElementHistory.organisationUnit.uid}&pe=${periodId}"/>
+                        <img id="historyChart"
+                             src="../api/charts/history/data.png?de=${dataElementHistory.dataElement.uid}&co=${dataElementHistory.optionCombo.uid}&ou=${dataElementHistory.organisationUnit.uid}&pe=${periodId}"/>
                     #end
                 </div>
                 <div id="historyTabs-audit">
@@ -133,7 +134,7 @@ $( document ).ready( function() {
                             </tbody>
                         </table>
                     #else
-                        <i>$i18n.getString( "there_is_no_audit_trail_for_this_value" )</i>
+                        <i>$encoder.htmlEncode( $i18n.getString( "there_is_no_audit_trail_for_this_value" ) )</i>
                     #end
                 </div>
             </div>

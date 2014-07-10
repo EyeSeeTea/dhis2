@@ -67,7 +67,6 @@ public class DataValueAudit
 
     public DataValueAudit()
     {
-
     }
 
     public DataValueAudit( DataValue dataValue, String value, String modifiedBy, Date timestamp, AuditType auditType )

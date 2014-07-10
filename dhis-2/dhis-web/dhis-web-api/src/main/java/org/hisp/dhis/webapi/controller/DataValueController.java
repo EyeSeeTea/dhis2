@@ -218,10 +218,6 @@ public class DataValueController
                 }
             }
 
-            // ---------------------------------------------------------------------
-            // Update DataValue
-            // ---------------------------------------------------------------------
-
             if ( value != null )
             {
                 dataValue.setValue( StringUtils.trimToNull( value ) );

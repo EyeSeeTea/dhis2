@@ -78,7 +78,9 @@ public class HibernateDataValueAuditStore
     @Override
     public void addDataValueAudit( DataValueAudit dataValueAudit )
     {
-        sessionFactory.getCurrentSession().save( dataValueAudit );
+        Session session = sessionFactory.getCurrentSession();
+
+        session.save( dataValueAudit );
     }
 
 

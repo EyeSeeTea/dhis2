@@ -165,10 +165,10 @@ public class DefaultDataValueService
         }
         else if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
         {
-            DataValue dataValueCopy = new DataValue();
+            DataValue dataValueCopy = new DataValue();  // Keep a copy of this DataValue to persist
             BeanUtils.copyProperties( dataValue, dataValueCopy );
 
-            sessionFactory.getCurrentSession().refresh( dataValue );
+            sessionFactory.getCurrentSession().refresh( dataValue ); // Roll back entity to get audit properties
 
             DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
                 dataValue.getStoredBy(), new Date(), AuditType.UPDATE );
@@ -176,6 +176,7 @@ public class DefaultDataValueService
             dataValueAuditService.addDataValueAudit( dataValueAudit );
 
             BeanUtils.copyProperties( dataValueCopy, dataValue );
+
             dataValueStore.updateDataValue( dataValue );
         }
     }

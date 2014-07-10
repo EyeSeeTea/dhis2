@@ -28,7 +28,6 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.struts2.ServletActionContext;
@@ -56,6 +55,7 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
+ * @author Halvdan Hoem Grelland
  */
 public class GetHistoryAction
     implements Action
