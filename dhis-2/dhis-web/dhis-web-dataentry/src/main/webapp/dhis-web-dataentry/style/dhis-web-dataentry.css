@@ -135,3 +135,42 @@
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.06);
 }
 
+/* jQuery tab style overrides for data value history element */
+
+#historyTabs.ui-tabs
+{
+    padding: 0 !important;
+    border-width: 0 !important;
+}
+
+#historyTabs .ui-tabs-nav
+{
+    border-width: 3px !important;
+    border-top-width: 0 !important;
+    border-left-width: 0 !important;
+    border-right-width: 0 !important;
+    -moz-border-radius-bottomleft: 0 !important;
+    -webkit-border-bottom-left-radius: 0 !important;
+    -moz-border-radius-bottomright: 0 !important;
+    -webkit-border-bottom-right-radius: 0 !important;
+    padding: 0 !important;
+}
+
+#historyTabs .ui-tabs-nav li
+{
+    margin-right: .5em !important;
+}
+
+#historyTabs .ui-tabs-nav li.ui-tabs-selected
+{
+    border-width: 3px !important;
+    margin-bottom: -3px !important;
+}
+
+#historyTabs .ui-tabs-panel
+{
+    border-width: 3px !important;
+    border-top-width: 0 !important;
+    padding-top: 1.5em !important;
+
+}
