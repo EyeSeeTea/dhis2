@@ -141,6 +141,7 @@
 {
     padding: 0;
     width:  545px;
+    height: 345px;
 }
 
 #historyTabs.ui-tabs.ui-widget.ui-widget-content
@@ -179,7 +180,6 @@
     border-collapse: collapse;
     text-align: left;
     background-color: #F5F5F5;
-    margin-top: 0.8em;
 }
 
 #historyAuditTable tbody tr:nth-child( odd )
