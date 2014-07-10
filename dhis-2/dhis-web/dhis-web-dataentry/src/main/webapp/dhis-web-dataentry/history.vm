@@ -96,13 +96,16 @@ $( document ).ready( function() {
                 </div>
                 <div id="historyTabs-audit">
                     #if( $dataValueAuditSize > 0 )
-                        <table>
-                            <tr>
-                                <th>$encoder.htmlEncode( $i18n.getString( "on" ) )</th>
-                                <th>$encoder.htmlEncode( $i18n.getString( "modified_by" ) )</th>
-                                <th>$encoder.htmlEncode( $i18n.getString( "previous_value" ) )</th>
-                                <th>$encoder.htmlEncode( $i18n.getString( "modification" ) )</th>
-                            </tr>
+                        <table id="historyAuditTable">
+                            <thead>
+                                <tr>
+                                    <th>$encoder.htmlEncode( $i18n.getString( "on" ) )</th>
+                                    <th>$encoder.htmlEncode( $i18n.getString( "modified_by" ) )</th>
+                                    <th>$encoder.htmlEncode( $i18n.getString( "value" ) )</th>
+                                    <th>$encoder.htmlEncode( $i18n.getString( "modification" ) )</th>
+                                </tr>
+                            </thead>
+                            <tbody>
                             #foreach( $dataValueAudit in $dataValueAudits )
                                 <tr>
                                     <td>
@@ -127,6 +130,7 @@ $( document ).ready( function() {
                                     </td>
                                 </tr>
                             #end
+                            </tbody>
                         </table>
                     #else
                         <i>$i18n.getString( "there_is_no_audit_trail_for_this_value" )</i>
