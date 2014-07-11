@@ -1275,6 +1275,7 @@ Ext.onReady( function() {
 			getSetup,
             addDimension,
             removeDimension,
+            hasDimension,
             saveState,
             resetData,
             reset,
@@ -1423,9 +1424,12 @@ Ext.onReady( function() {
 			};
 		};
 
-        addDimension = function(record) {
-            var store = dimensionStoreMap[record.id] || dimensionStore;
-            store.add(record);
+        addDimension = function(record, store) {
+            var store = dimensionStoreMap[record.id] || store || dimensionStore;
+
+            if (!hasDimension(record.id)) {
+                store.add(record);
+            }
         };
 
         removeDimension = function(dataElementId) {
@@ -1440,6 +1444,21 @@ Ext.onReady( function() {
                     dimensionStoreMap[dataElementId] = store;
                 }
             }
+        };
+
+        hasDimension = function(id) {
+            var stores = [colStore, dimensionStore];
+
+            for (var i = 0, store, index; i < stores.length; i++) {
+                store = stores[i];
+                index = store.findExact('id', id);
+
+                if (index != -1) {
+                    return true;
+                }
+            }
+
+            return false;
         };
 
 		saveState = function(map) {
@@ -3683,7 +3702,7 @@ Ext.onReady( function() {
 				},
                 extendDim = function(dim) {
                     dim.id = dim.id || dim.dimension;
-                    dim.name = dim.name || ns.app.response.metaData.names[dim.dimension] || "Nissa";
+                    dim.name = dim.name || ns.app.response.metaData.names[dim.dimension];
 
                     return dim;
                 };
@@ -4986,13 +5005,16 @@ Ext.onReady( function() {
 				getPanels;
 
             onSelect = function() {
-                var win = ns.app.viewport.getLayoutWindow();
+                var aggWin = ns.app.aggregateLayoutWindow,
+                    queryWin = ns.app.queryLayoutWindow;
 
                 if (selectedStore.getRange().length) {
-                    win.addDimension({id: dimension.id, name: dimension.name}, win.rowStore);
+                    aggWin.addDimension({id: dimension.id, name: dimension.name}, aggWin.rowStore);
+                    queryWin.addDimension({id: dimension.id, name: dimension.name}, queryWin.colStore);
                 }
                 else if (!selectedStore.getRange().length && win.hasDimension(dimension.id)) {
-                    win.removeDimension(dimension.id);
+                    aggWin.removeDimension(dimension.id);
+                    queryWin.removeDimension(dimension.id);
                 }
             };
 

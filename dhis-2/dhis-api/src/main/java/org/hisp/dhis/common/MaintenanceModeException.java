@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.datavalueset;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,29 +28,14 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.OutputStream;
-import java.io.Writer;
-import java.util.Date;
-import java.util.Set;
-
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-
 /**
  * @author Lars Helge Overland
  */
-public interface DataValueSetStore
+public class MaintenanceModeException
+    extends RuntimeException
 {
-    public void writeDataValueSetXml( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
-        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
-
-    public void writeDataValueSetCsv( Set<DataElement> dataElements, Set<Period> periods, 
-        Set<OrganisationUnit> orgUnits, Writer writer );
-    
-    void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream );
-
-    public void writeDataValueSetJson( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit,
-        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
+    public MaintenanceModeException( String message )
+    {
+        super( message );
+    }
 }
