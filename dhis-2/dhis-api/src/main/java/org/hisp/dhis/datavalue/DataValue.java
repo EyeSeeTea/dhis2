@@ -82,6 +82,16 @@ public class DataValue
     private Boolean followup;
 
     // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    private transient boolean auditValueIsSet = false;
+
+    private transient boolean valueIsSet = false;
+
+    private transient String auditValue;
+
+    // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
@@ -300,6 +310,14 @@ public class DataValue
 
     public void setValue( String value )
     {
+        if( !auditValueIsSet )
+        {
+            this.auditValue = valueIsSet ? this.auditValue : value;
+            auditValueIsSet = true;
+        }
+
+        valueIsSet = true;
+
         this.value = value;
     }
 
@@ -351,5 +369,10 @@ public class DataValue
     public void setFollowup( Boolean followup )
     {
         this.followup = followup;
+    }
+
+    public String getAuditValue()
+    {
+        return auditValue;
     }
 }

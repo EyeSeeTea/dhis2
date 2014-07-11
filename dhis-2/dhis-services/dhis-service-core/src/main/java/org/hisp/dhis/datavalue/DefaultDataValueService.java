@@ -38,7 +38,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.AuditType;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -51,7 +50,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.CurrentUserService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -94,13 +92,6 @@ public class DefaultDataValueService
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
-    }
-
-    private SessionFactory sessionFactory;
-
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
     }
 
     // -------------------------------------------------------------------------
@@ -165,18 +156,10 @@ public class DefaultDataValueService
         }
         else if ( dataValueIsValid( dataValue.getValue(), dataValue.getDataElement() ) == null )
         {
-            DataValue dataValueCopy = new DataValue();  // Keep a copy of this DataValue to persist
-            BeanUtils.copyProperties( dataValue, dataValueCopy );
-
-            sessionFactory.getCurrentSession().refresh( dataValue ); // Roll back entity to get audit properties
-
-            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+            DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getAuditValue(),
                 dataValue.getStoredBy(), new Date(), AuditType.UPDATE );
 
             dataValueAuditService.addDataValueAudit( dataValueAudit );
-
-            BeanUtils.copyProperties( dataValueCopy, dataValue );
-
             dataValueStore.updateDataValue( dataValue );
         }
     }
@@ -184,9 +167,7 @@ public class DefaultDataValueService
     @Transactional
     public void deleteDataValue( DataValue dataValue )
     {
-        sessionFactory.getCurrentSession().refresh( dataValue ); // Re-fetch entity for auditing
-
-        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getValue(),
+        DataValueAudit dataValueAudit = new DataValueAudit( dataValue, dataValue.getAuditValue(),
             currentUserService.getCurrentUsername(), new Date(), AuditType.DELETE );
 
         dataValueAuditService.addDataValueAudit( dataValueAudit );
