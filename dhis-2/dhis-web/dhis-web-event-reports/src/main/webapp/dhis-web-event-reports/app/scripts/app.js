@@ -1511,6 +1511,7 @@ Ext.onReady( function() {
 			colStore: colStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
+            hasDimension: hasDimension,
             saveState: saveState,
             resetData: resetData,
             reset: reset,
@@ -2452,10 +2453,12 @@ Ext.onReady( function() {
 												params: Ext.encode(favorite),
 												success: function(r) {
 													ns.app.layout.id = record.data.id;
-													ns.app.xLayout.id = record.data.id;
-
 													ns.app.layout.name = true;
-													ns.app.xLayout.name = true;
+
+                                                    if (ns.app.xLayout) {
+                                                        ns.app.xLayout.id = record.data.id;
+                                                        ns.app.xLayout.name = true;
+                                                    }
 
 													ns.app.stores.eventReport.loadStore();
 												}
@@ -5012,8 +5015,10 @@ Ext.onReady( function() {
                     aggWin.addDimension({id: dimension.id, name: dimension.name}, aggWin.rowStore);
                     queryWin.addDimension({id: dimension.id, name: dimension.name}, queryWin.colStore);
                 }
-                else if (!selectedStore.getRange().length && win.hasDimension(dimension.id)) {
+                else if (!selectedStore.getRange().length && aggWin.hasDimension(dimension.id)) {
                     aggWin.removeDimension(dimension.id);
+                }
+                else if (!selectedStore.getRange().length && queryWin.hasDimension(dimension.id)) {
                     queryWin.removeDimension(dimension.id);
                 }
             };
