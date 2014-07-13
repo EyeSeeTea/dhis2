@@ -38,10 +38,4 @@ public interface SynchronizationManager
     AvailabilityStatus isRemoteServerAvailable();
     
     ImportSummary executeDataSynch();
-    
-    void enableDataSynch();
-    
-    void disableDataSynch();
-    
-    boolean isDataSynchEnabled();
 }

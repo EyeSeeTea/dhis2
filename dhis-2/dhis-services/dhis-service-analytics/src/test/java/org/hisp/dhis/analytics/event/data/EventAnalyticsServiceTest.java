@@ -28,17 +28,34 @@ package org.hisp.dhis.analytics.event.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.system.util.CollectionUtils.asSet;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
+import org.hisp.dhis.analytics.event.EventQueryParams;
+import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.eventchart.EventChart;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
+import org.hisp.dhis.program.ProgramStageDataElementService;
+import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -48,6 +65,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class EventAnalyticsServiceTest
     extends DhisSpringTest
 {
+    private Program prA;
+    private ProgramStage psA;
+
+    private Period peA;
+    private Period peB;
+    
+    private OrganisationUnit ouA;
+    private OrganisationUnit ouB;
+    
+    private DataElement deA;
+    private DataElement deB;
+    
+    private TrackedEntityAttribute atA;
+    private TrackedEntityAttribute atB;
+
     @Autowired
     private EventAnalyticsService analyticsService;
 
@@ -55,27 +87,120 @@ public class EventAnalyticsServiceTest
     private ProgramService programService;
 
     @Autowired
+    private ProgramStageService programStageService;
+    
+    @Autowired
+    private ProgramStageDataElementService programStageDataElementService;
+    
+    @Autowired
     private DataElementService dataElementService;
 
     @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
+    @Autowired
     private TrackedEntityAttributeService attributeService;
-
-    private Program prA;
-    private DataElement deA;
-    private DataElement deB;
-    private TrackedEntityAttribute atA;
-    private TrackedEntityAttribute atB;
-
+    
     @Override
     public void setUpTest()
     {
-        prA = createProgram( 'A', new HashSet<ProgramStage>(), null );
+        peA = PeriodType.getPeriodFromIsoString( "201401" );
+        peB = PeriodType.getPeriodFromIsoString( "201402" );
+        
+        ouA = createOrganisationUnit( 'A' );
+        ouB = createOrganisationUnit( 'B' );
 
+        organisationUnitService.addOrganisationUnit( ouA );
+        organisationUnitService.addOrganisationUnit( ouB );
+        
+        deA = createDataElement( 'A' );
+        deB = createDataElement( 'B' );
+
+        dataElementService.addDataElement( deA );
+        dataElementService.addDataElement( deB );
+        
+        atA = createTrackedEntityAttribute( 'A' );
+        atB = createTrackedEntityAttribute( 'B' );
+        
+        attributeService.addTrackedEntityAttribute( atA );
+        attributeService.addTrackedEntityAttribute( atB );
+
+        psA = createProgramStage( 'A', asSet( deA, deB ) );
+        programStageService.saveProgramStage( psA );
+                
+        prA = createProgram( 'A', asSet( psA ), asSet( atA, atB ), asSet( ouA, ouB ) );
+        programService.addProgram( prA );
+        
+        programStageDataElementService.addProgramStageDataElement( new ProgramStageDataElement( psA, deA, false ) );
+        programStageDataElementService.addProgramStageDataElement( new ProgramStageDataElement( psA, deB, false ) );
     }
 
     @Test
-    public void testGetFromUrl()
+    public void testGetFromUrlA()
     {
-
+        Set<String> dimensionParams = new HashSet<String>();
+        dimensionParams.add( "ou:" + ouA.getUid() + ";" + ouB.getId() );
+        dimensionParams.add( atA.getUid() + ":LE:5" );
+        
+        Set<String> filterParams = new HashSet<String>();
+        filterParams.add( "pe:201401;201402" );
+        
+        EventQueryParams params = analyticsService.getFromUrl( prA.getUid(), null, 
+            null, null, dimensionParams, filterParams, false, false, null, null, false, null );
+        
+        assertEquals( prA, params.getProgram() );
+        assertEquals( 1, params.getOrganisationUnits().size() );
+        assertEquals( 1, params.getItems().size() );
+        assertEquals( 2, params.getFilterPeriods().size() );
+    }
+    
+    @Test
+    public void testGetFromAnalyticalObjectA()
+    {
+        EventChart chart = new EventChart();
+        chart.setProgram( prA );
+        
+        chart.getColumnDimensions().add( atA.getUid() );
+        chart.getRowDimensions().add( DimensionalObject.ORGUNIT_DIM_ID );
+        chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
+        
+        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, "LE:5" ) );
+        chart.getPeriods().add( peA );
+        chart.getPeriods().add( peB );
+        chart.getOrganisationUnits().add( ouA );
+        chart.getOrganisationUnits().add( ouB );
+        
+        EventQueryParams params = analyticsService.getFromAnalyticalObject( chart, null );
+        
+        assertNotNull( params );
+        assertEquals( 1, params.getItems().size() );
+        assertEquals( 2, params.getOrganisationUnits().size() );
+        assertEquals( 2, params.getFilterPeriods().size() );
+    }
+    
+    @Test
+    public void testGetFromAnalyticalObjectB()
+    {
+        EventChart chart = new EventChart();
+        chart.setProgram( prA );
+        
+        chart.getColumnDimensions().add( atA.getUid() );
+        chart.getColumnDimensions().add( deA.getUid() );
+        chart.getRowDimensions().add( DimensionalObject.PERIOD_DIM_ID );
+        chart.getFilterDimensions().add( DimensionalObject.ORGUNIT_DIM_ID );
+        
+        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, "LE:5" ) );
+        chart.getDataElementDimensions().add( new TrackedEntityDataElementDimension( deA, "GE:100" ) );
+        chart.getPeriods().add( peA );
+        chart.getPeriods().add( peB );
+        chart.getOrganisationUnits().add( ouA );
+        chart.getOrganisationUnits().add( ouB );
+        
+        EventQueryParams params = analyticsService.getFromAnalyticalObject( chart, null );
+        
+        assertNotNull( params );
+        assertEquals( 2, params.getItems().size() );
+        assertEquals( 2, params.getPeriods().size() );
+        assertEquals( 2, params.getFilterOrganisationUnits().size() );
     }
 }

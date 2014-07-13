@@ -1,4 +1,4 @@
-package org.hisp.dhis.scheduling;
+package org.hisp.dhis.dxf2.synch;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,42 +28,45 @@ package org.hisp.dhis.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.period.BiMonthlyPeriodType;
-import org.hisp.dhis.period.FinancialJulyPeriodType;
-import org.hisp.dhis.period.MonthlyPeriodType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.QuarterlyPeriodType;
-import org.hisp.dhis.period.SixMonthlyPeriodType;
-import org.hisp.dhis.period.YearlyPeriodType;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.Notifier;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
  */
-public class TaskTest
+public class DataSynchronizationTask
+    implements Runnable
 {
-    @Test
-    public void testGetPeriods()
-    {
-        Set<String> periodTypes = new HashSet<String>();
-        periodTypes.add( MonthlyPeriodType.NAME );
-        periodTypes.add( BiMonthlyPeriodType.NAME );
-        periodTypes.add( QuarterlyPeriodType.NAME );
-        periodTypes.add( SixMonthlyPeriodType.NAME );
-        periodTypes.add( YearlyPeriodType.NAME );
-        periodTypes.add( FinancialJulyPeriodType.NAME );
-        
-        DataMartTask dataMartTask = new DataMartTask();
+    @Autowired
+    private SynchronizationManager synchronizationManager;
 
-        List<Period> periods = dataMartTask.getPeriods( periodTypes );
+    @Autowired
+    private Notifier notifier;
+
+    private TaskId taskId;
+
+    public void setTaskId( TaskId taskId )
+    {
+        this.taskId = taskId;
+    }
+
+    // -------------------------------------------------------------------------
+    // Runnable implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void run()
+    {
+        try
+        {
+            synchronizationManager.executeDataSynch();
+        }
+        catch ( RuntimeException ex )
+        {
+            notifier.notify( taskId, "Data synch failed: " + ex.getMessage() );
+        }
         
-        assertNotNull( periods );
-        assertEquals( 26, periods.size() ); // 12 + 6 + 4 + 2 + 1 + 1 
+        notifier.notify( taskId, "Data synch successful" );
     }
 }

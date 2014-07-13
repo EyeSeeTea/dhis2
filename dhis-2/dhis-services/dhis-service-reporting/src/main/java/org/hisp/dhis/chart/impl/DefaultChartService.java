@@ -28,14 +28,14 @@ package org.hisp.dhis.chart.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.chart.Chart.TYPE_AREA;
-import static org.hisp.dhis.chart.Chart.TYPE_BAR;
-import static org.hisp.dhis.chart.Chart.TYPE_COLUMN;
-import static org.hisp.dhis.chart.Chart.TYPE_LINE;
-import static org.hisp.dhis.chart.Chart.TYPE_PIE;
-import static org.hisp.dhis.chart.Chart.TYPE_RADAR;
-import static org.hisp.dhis.chart.Chart.TYPE_STACKED_BAR;
-import static org.hisp.dhis.chart.Chart.TYPE_STACKED_COLUMN;
+import static org.hisp.dhis.chart.BaseChart.TYPE_AREA;
+import static org.hisp.dhis.chart.BaseChart.TYPE_BAR;
+import static org.hisp.dhis.chart.BaseChart.TYPE_COLUMN;
+import static org.hisp.dhis.chart.BaseChart.TYPE_LINE;
+import static org.hisp.dhis.chart.BaseChart.TYPE_PIE;
+import static org.hisp.dhis.chart.BaseChart.TYPE_RADAR;
+import static org.hisp.dhis.chart.BaseChart.TYPE_STACKED_BAR;
+import static org.hisp.dhis.chart.BaseChart.TYPE_STACKED_COLUMN;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.system.util.ConversionUtils.getArray;
 
@@ -45,6 +45,7 @@ import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,9 +56,12 @@ import org.apache.commons.math.analysis.UnivariateRealFunction;
 import org.apache.commons.math.analysis.UnivariateRealInterpolator;
 import org.apache.commons.math.stat.regression.SimpleRegression;
 import org.hisp.dhis.analytics.AnalyticsService;
+import org.hisp.dhis.analytics.event.EventAnalyticsService;
+import org.hisp.dhis.chart.BaseChart;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.AnalyticalObjectStore;
+import org.hisp.dhis.common.AnalyticsType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dataelement.DataElement;
@@ -180,13 +184,16 @@ public class DefaultChartService
     {
         this.analyticsService = analyticsService;
     }
-
+    
+    private EventAnalyticsService eventAnalyticsService;
+    
+    public void setEventAnalyticsService( EventAnalyticsService eventAnalyticsService )
+    {
+        this.eventAnalyticsService = eventAnalyticsService;
+    }
+    
     // -------------------------------------------------------------------------
     // ChartService implementation
-    // -------------------------------------------------------------------------
-
-    // -------------------------------------------------------------------------
-    // Logic
     // -------------------------------------------------------------------------
 
     public JFreeChart getJFreeChart( int id, I18nFormat format )
@@ -196,12 +203,12 @@ public class DefaultChartService
         return chart != null ? getJFreeChart( chart, format ) : null;
     }
 
-    public JFreeChart getJFreeChart( Chart chart, I18nFormat format )
+    public JFreeChart getJFreeChart( BaseChart chart, I18nFormat format )
     {
         return getJFreeChart( chart, null, null, format );
     }
 
-    public JFreeChart getJFreeChart( Chart chart, Date date, OrganisationUnit organisationUnit, I18nFormat format )
+    public JFreeChart getJFreeChart( BaseChart chart, Date date, OrganisationUnit organisationUnit, I18nFormat format )
     {
         User user = currentUserService.getCurrentUser();
 
@@ -227,6 +234,10 @@ public class DefaultChartService
 
         return getJFreeChart( chart );
     }
+
+    // -------------------------------------------------------------------------
+    // Specific chart methods
+    // -------------------------------------------------------------------------
 
     public JFreeChart getJFreePeriodChart( Indicator indicator, OrganisationUnit unit, boolean title, I18nFormat format )
     {
@@ -511,7 +522,7 @@ public class DefaultChartService
     /**
      * Returns a JFreeChart of type defined in the chart argument.
      */
-    private JFreeChart getJFreeChart( Chart chart )
+    private JFreeChart getJFreeChart( BaseChart chart )
     {
         final BarRenderer barRenderer = getBarRenderer();
         final LineAndShapeRenderer lineRenderer = getLineRenderer();
@@ -605,7 +616,7 @@ public class DefaultChartService
         return jFreeChart;
     }
 
-    private JFreeChart getAreaChart( Chart chart, CategoryDataset dataSet )
+    private JFreeChart getAreaChart( BaseChart chart, CategoryDataset dataSet )
     {
         JFreeChart areaChart = ChartFactory.createAreaChart( chart.getName(), chart.getDomainAxisLabel(),
             chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
@@ -623,7 +634,7 @@ public class DefaultChartService
         return areaChart;
     }
 
-    private JFreeChart getRadarChart( Chart chart, CategoryDataset dataSet )
+    private JFreeChart getRadarChart( BaseChart chart, CategoryDataset dataSet )
     {
         SpiderWebPlot plot = new SpiderWebPlot( dataSet, TableOrder.BY_ROW );
         plot.setLabelFont( LABEL_FONT );
@@ -635,7 +646,7 @@ public class DefaultChartService
         return radarChart;
     }
 
-    private JFreeChart getStackedBarChart( Chart chart, CategoryDataset dataSet, boolean horizontal )
+    private JFreeChart getStackedBarChart( BaseChart chart, CategoryDataset dataSet, boolean horizontal )
     {
         JFreeChart stackedBarChart = ChartFactory.createStackedBarChart( chart.getName(), chart.getDomainAxisLabel(),
             chart.getRangeAxisLabel(), dataSet, PlotOrientation.VERTICAL, true, false, false );
@@ -652,7 +663,7 @@ public class DefaultChartService
         return stackedBarChart;
     }
     
-    private JFreeChart getMultiplePieChart( Chart chart, CategoryDataset[] dataSets )
+    private JFreeChart getMultiplePieChart( BaseChart chart, CategoryDataset[] dataSets )
     {
         JFreeChart multiplePieChart = ChartFactory.createMultiplePieChart( chart.getName(), dataSets[0], TableOrder.BY_ROW,
             !chart.isHideLegend(), false, false );
@@ -689,7 +700,7 @@ public class DefaultChartService
      * Sets basic configuration including title font, subtitle, background paint and
      * anti-alias on the given JFreeChart.
      */
-    private void setBasicConfig( JFreeChart jFreeChart, Chart chart)
+    private void setBasicConfig( JFreeChart jFreeChart, BaseChart chart)
     {
         jFreeChart.getTitle().setFont( TITLE_FONT );
         jFreeChart.addSubtitle( getSubTitle( chart ) );
@@ -700,10 +711,29 @@ public class DefaultChartService
         plot.setBackgroundPaint( COLOR_TRANSPARENT );
         plot.setOutlinePaint( COLOR_TRANSPARENT );
     }
-    
-    private CategoryDataset[] getCategoryDataSet( Chart chart )
+
+    private TextTitle getSubTitle( BaseChart chart )
     {
-        Map<String, Double> valueMap = analyticsService.getAggregatedDataValueMapping( chart, chart.getFormat() );
+        TextTitle title = new TextTitle();
+
+        title.setFont( SUB_TITLE_FONT );
+        title.setText( chart.generateTitle() );
+
+        return title;
+    }
+
+    private CategoryDataset[] getCategoryDataSet( BaseChart chart )
+    {
+        Map<String, Double> valueMap = new HashMap<>();
+        
+        if ( chart.isAnalyticsType( AnalyticsType.AGGREGATE ) )
+        {
+            valueMap = analyticsService.getAggregatedDataValueMapping( chart, chart.getFormat() );
+        }
+        else if ( chart.isAnalyticsType( AnalyticsType.EVENT ) )
+        {
+            valueMap = eventAnalyticsService.getAggregatedEventDataMappping( chart, chart.getFormat() );
+        }
 
         DefaultCategoryDataset regularDataSet = new DefaultCategoryDataset();
         DefaultCategoryDataset regressionDataSet = new DefaultCategoryDataset();
@@ -753,16 +783,6 @@ public class DefaultChartService
         }
 
         return new CategoryDataset[]{ regularDataSet, regressionDataSet };
-    }
-
-    private TextTitle getSubTitle( Chart chart )
-    {
-        TextTitle title = new TextTitle();
-
-        title.setFont( SUB_TITLE_FONT );
-        title.setText( chart.generateTitle() );
-
-        return title;
     }
 
     // -------------------------------------------------------------------------

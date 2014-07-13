@@ -30,8 +30,12 @@ package org.hisp.dhis.analytics.event.data;
 
 import static org.hisp.dhis.analytics.AnalyticsService.NAMES_META_KEY;
 import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionFromParam;
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionItemsFromParam;
+import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
@@ -43,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.SortOrder;
@@ -50,6 +55,7 @@ import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.analytics.event.EventQueryPlanner;
+import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -65,6 +71,7 @@ import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -74,6 +81,7 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.system.util.ListUtils;
 import org.hisp.dhis.system.util.Timer;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -153,7 +161,7 @@ public class DefaultEventAnalyticsService
             grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true ) );
         }
 
-        grid.addHeader( new GridHeader( "value", "Value" ) );
+        grid.addHeader( new GridHeader( "value", "Value", Double.class.getName(), false, false ) );
 
         // ---------------------------------------------------------------------
         // Data
@@ -209,6 +217,33 @@ public class DefaultEventAnalyticsService
         }
 
         return grid;
+    }
+    
+    public Map<String, Double> getAggregatedEventDataMappping( EventQueryParams params )
+    {
+        Map<String, Double> map = new HashMap<>();
+        
+        Grid grid = getAggregatedEventData( params );
+        
+        List<Integer> metaIndexes = grid.getMetaColumnIndexes();
+        int valueIndex = grid.getWidth() - 1;
+        
+        for ( List<Object> row : grid.getRows() )
+        {
+            String key = StringUtils.join( ListUtils.getAtIndexes( row, metaIndexes ), DIMENSION_SEP );
+            Object val = row.get( valueIndex );
+            Double value = val != null ? ((Integer) val).doubleValue() : null;             
+            map.put( key, value );
+        }
+        
+        return map;
+    }
+    
+    public Map<String, Double> getAggregatedEventDataMappping( BaseAnalyticalObject object, I18nFormat format )
+    {
+        EventQueryParams params = getFromAnalyticalObject( (EventChart) object, format );
+        
+        return getAggregatedEventDataMappping( params );
     }
 
     public Grid getEvents( EventQueryParams params )
@@ -351,8 +386,8 @@ public class DefaultEventAnalyticsService
         {
             for ( String dim : dimension )
             {
-                String dimensionId = DimensionalObjectUtils.getDimensionFromParam( dim );
-                List<String> items = DimensionalObjectUtils.getDimensionItemsFromParam( dim );                
+                String dimensionId = getDimensionFromParam( dim );
+                List<String> items = getDimensionItemsFromParam( dim );                
                 List<DimensionalObject> dimObj = analyticsService.getDimension( dimensionId, items, date, format, true );
                 
                 if ( dimObj != null )
@@ -361,7 +396,7 @@ public class DefaultEventAnalyticsService
                 }
                 else
                 {
-                    params.getItems().add( getQueryItem( dim, pr ) );
+                    params.getItems().add( getQueryItem( dim ) );
                 }
             }
         }
@@ -370,8 +405,8 @@ public class DefaultEventAnalyticsService
         {
             for ( String dim : filter )
             {
-                String dimensionId = DimensionalObjectUtils.getDimensionFromParam( dim );
-                List<String> items = DimensionalObjectUtils.getDimensionItemsFromParam( dim );                
+                String dimensionId = getDimensionFromParam( dim );
+                List<String> items = getDimensionItemsFromParam( dim );                
                 List<DimensionalObject> dimObj = analyticsService.getDimension( dimensionId, items, date, format, true );
                 
                 if ( dimObj != null )
@@ -380,7 +415,7 @@ public class DefaultEventAnalyticsService
                 }
                 else
                 {
-                    params.getItemFilters().add( getQueryItem( dim, pr ) );
+                    params.getItemFilters().add( getQueryItem( dim ) );
                 }
             }
         }
@@ -398,7 +433,7 @@ public class DefaultEventAnalyticsService
         {
             for ( String sort : asc )
             {
-                params.getAsc().add( getSortItem( sort, pr ) );
+                params.getAsc().add( getSortItem( sort ) );
             }
         }
 
@@ -406,7 +441,7 @@ public class DefaultEventAnalyticsService
         {
             for ( String sort : desc )
             {
-                params.getDesc().add( getSortItem( sort, pr ) );
+                params.getDesc().add( getSortItem( sort ) );
             }
         }
 
@@ -425,11 +460,65 @@ public class DefaultEventAnalyticsService
         return params;
     }
 
+    /**
+     * TODO Generalize and change from EventChart to EventAnayticalObject.
+     */
+    public EventQueryParams getFromAnalyticalObject( BaseAnalyticalObject object_, I18nFormat format )
+    {
+        EventChart object = (EventChart) object_; //TODO temporary
+        
+        EventQueryParams params = new EventQueryParams();
+
+        if ( object != null )
+        {
+            Date date = object.getRelativePeriodDate();
+            
+            object.populateAnalyticalProperties();
+
+            for ( DimensionalObject dimension : ListUtils.union( object.getColumns(), object.getRows() ) )
+            {
+                List<DimensionalObject> dimObj = analyticsService.
+                    getDimension( toDimension( dimension.getDimension() ), getUids( dimension.getItems() ), date, format, true );
+                
+                if ( dimObj != null )
+                {
+                    params.getDimensions().addAll( dimObj );
+                }
+                else
+                {
+                    params.getItems().add( getQueryItem( dimension.getDimension() ) );
+                }
+            }
+            
+            for ( DimensionalObject filter : object.getFilters() )
+            {
+                List<DimensionalObject> dimObj = analyticsService.
+                    getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, true );
+                
+                if ( dimObj != null )
+                {
+                    params.getFilters().addAll( dimObj );
+                }
+                else
+                {
+                    params.getItemFilters().add( getQueryItem( filter.getDimension() ) );
+                }
+            }
+        }
+
+        params.setProgram( object.getProgram() );
+        params.setProgramStage( object.getProgramStage() );
+        params.setStartDate( object.getStartDate() );
+        params.setEndDate( object.getEndDate() );
+        
+        return params;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private QueryItem getQueryItem( String dimension, Program program )
+    private QueryItem getQueryItem( String dimension )
     {
         String[] split = dimension.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
         
@@ -438,7 +527,7 @@ public class DefaultEventAnalyticsService
             throw new IllegalQueryException( "Query item or filter is invalid: " + dimension );
         }
         
-        QueryItem queryItem = getQueryItem( program, split[0] );
+        QueryItem queryItem = getQuryItemFromUid( split[0] );
         
         if ( split.length > 1 ) // Filters specified
         {   
@@ -513,9 +602,9 @@ public class DefaultEventAnalyticsService
         return map;
     }
 
-    private String getSortItem( String item, Program program )
+    private String getSortItem( String item )
     {
-        if ( !SORTABLE_ITEMS.contains( item.toLowerCase() ) && getQueryItem( program, item ) == null )
+        if ( !SORTABLE_ITEMS.contains( item.toLowerCase() ) && getQueryItem( item ) == null )
         {
             throw new IllegalQueryException( "Descending sort item is invalid: " + item );
         }
@@ -525,18 +614,18 @@ public class DefaultEventAnalyticsService
         return item;
     }
 
-    private QueryItem getQueryItem( Program program, String item )
+    private QueryItem getQuryItemFromUid( String item )
     {
         DataElement de = dataElementService.getDataElement( item );
 
-        if ( de != null && program.getAllDataElements().contains( de ) )
+        if ( de != null ) //TODO check if part of program
         {
             return new QueryItem( de, de.isNumericType() );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
-        if ( at != null && program.getTrackedEntityAttributes().contains( at ) )
+        if ( at != null )
         {
             return new QueryItem( at, at.isNumericType() );
         }

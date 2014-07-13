@@ -107,7 +107,9 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.sqlview.SqlView;
@@ -1161,12 +1163,20 @@ public abstract class DhisConvenienceTest
         return userGroup;
     }
 
-    protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
-        OrganisationUnit organisationUnit )
+    public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
+        OrganisationUnit unit )
+    {
+        Set<OrganisationUnit> units = new HashSet<>();
+        units.add( unit );
+        
+        return createProgram( uniqueCharacter, programStages, null, units );
+    }
+    
+    public static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
+        Set<TrackedEntityAttribute> attributes, Set<OrganisationUnit> organisationUnits )
     {
         Program program = new Program();
-        program.setAutoFields();
-
+        
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
         program.setDateOfEnrollmentDescription( "DateOfEnrollmentDescription" );
@@ -1179,11 +1189,25 @@ public abstract class DhisConvenienceTest
             for ( ProgramStage programStage : programStages )
             {
                 programStage.setProgram( program );
+                program.getProgramStages().add( programStage );
+            }
+        }
+        
+        if ( attributes != null )
+        {
+            int i = 0;
+            
+            for ( TrackedEntityAttribute attribute : attributes )
+            {
+                program.getAttributes().add( new ProgramTrackedEntityAttribute( attribute, i++, false ) );
             }
         }
 
-        program.getOrganisationUnits().add( organisationUnit );
-
+        if ( organisationUnits != null )
+        {            
+            program.getOrganisationUnits().addAll( organisationUnits );
+        }
+        
         return program;
     }
 
@@ -1195,13 +1219,28 @@ public abstract class DhisConvenienceTest
     public static ProgramStage createProgramStage( char uniqueCharacter, int minDays, boolean irregular )
     {
         ProgramStage programStage = new ProgramStage();
-        programStage.setAutoFields();
 
         programStage.setName( "ProgramStage" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setMinDaysFromStart( minDays );
         programStage.setIrregular( irregular );
 
+        return programStage;
+    }
+    
+    public static ProgramStage createProgramStage( char uniqueCharacter, Set<DataElement> dataElements )
+    {
+        ProgramStage programStage = createProgramStage( uniqueCharacter, 0 );
+        
+        if ( dataElements != null )
+        {
+            for ( DataElement dataElement : dataElements )
+            {
+                ProgramStageDataElement psd = new ProgramStageDataElement( programStage, dataElement, false );
+                programStage.getProgramStageDataElements().add( psd );
+            }
+        }
+        
         return programStage;
     }
 

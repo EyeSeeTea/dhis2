@@ -136,6 +136,7 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.system.util.Timer;
 import org.hisp.dhis.system.util.UniqueArrayList;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,6 +182,9 @@ public class DefaultAnalyticsService
     
     @Autowired
     private OrganisationUnitGroupService organisationUnitGroupService;
+    
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
     
     @Autowired
     private ExpressionService expressionService;
@@ -1038,7 +1042,7 @@ public class DefaultAnalyticsService
             
             return ListUtils.getList( object );
         }
-        
+                
         if ( allowNull )
         {
             return null;

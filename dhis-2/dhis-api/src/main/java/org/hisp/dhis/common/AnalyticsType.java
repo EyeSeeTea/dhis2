@@ -1,4 +1,4 @@
-package org.hisp.dhis.scheduling;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,42 +28,10 @@ package org.hisp.dhis.scheduling;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.hisp.dhis.period.BiMonthlyPeriodType;
-import org.hisp.dhis.period.FinancialJulyPeriodType;
-import org.hisp.dhis.period.MonthlyPeriodType;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.QuarterlyPeriodType;
-import org.hisp.dhis.period.SixMonthlyPeriodType;
-import org.hisp.dhis.period.YearlyPeriodType;
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 /**
- * @author Lars Helge Overland
- */
-public class TaskTest
+* @author Lars Helge Overland
+*/
+public enum AnalyticsType
 {
-    @Test
-    public void testGetPeriods()
-    {
-        Set<String> periodTypes = new HashSet<String>();
-        periodTypes.add( MonthlyPeriodType.NAME );
-        periodTypes.add( BiMonthlyPeriodType.NAME );
-        periodTypes.add( QuarterlyPeriodType.NAME );
-        periodTypes.add( SixMonthlyPeriodType.NAME );
-        periodTypes.add( YearlyPeriodType.NAME );
-        periodTypes.add( FinancialJulyPeriodType.NAME );
-        
-        DataMartTask dataMartTask = new DataMartTask();
-
-        List<Period> periods = dataMartTask.getPeriods( periodTypes );
-        
-        assertNotNull( periods );
-        assertEquals( 26, periods.size() ); // 12 + 6 + 4 + 2 + 1 + 1 
-    }
+    AGGREGATE, EVENT;
 }
