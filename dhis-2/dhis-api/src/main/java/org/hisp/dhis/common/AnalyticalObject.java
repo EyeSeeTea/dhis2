@@ -1,4 +1,4 @@
-package org.hisp.dhis.analytics;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,10 +28,28 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+
 /**
- * @author Lars Helge Overland
- */
-public enum AggregationType
+* @author Lars Helge Overland
+*/
+public interface AnalyticalObject
 {
-    SUM, AVERAGE_INT, AVERAGE_INT_DISAGGREGATION, AVERAGE_BOOL, COUNT, STDDEV, VARIANCE
+    void populateAnalyticalProperties();
+    
+    List<DimensionalObject> getColumns();
+    
+    List<DimensionalObject> getRows();
+    
+    List<DimensionalObject> getFilters();
+    
+    Map<String, String> getParentGraphMap();
+    
+    Date getRelativePeriodDate();
+    
+    OrganisationUnit getRelativeOrganisationUnit();
 }

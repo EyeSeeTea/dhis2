@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.analytics;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -31,29 +31,35 @@ package org.hisp.dhis.common;
 /**
  * @author Lars Helge Overland
  */
-public enum QueryOperator
+public enum AggregationType
 {
-    EQ( "=" ), GT( ">" ), GE( ">=" ), LT( "<" ), LE( "<=" ), NE( "!=" ), LIKE( "like" ), IN( "in" );
-    
+    SUM( "sum" ), 
+    AVERAGE_INT( "avg_int" ), 
+    AVERAGE_INT_DISAGGREGATION( "avg_int_disaggregation" ), 
+    AVERAGE_BOOL( "avg" ), 
+    COUNT( "count" ), 
+    STDDEV( "stddev" ), 
+    VARIANCE( "variance" ),
+    MIN( "min" ),
+    MAX( "max" );
+
     private final String value;
-    
-    private QueryOperator( String value )
+
+    private AggregationType( String value )
     {
         this.value = value;
-    }    
-    
-    public static final QueryOperator fromString( String string )
-    {
-        if ( string == null || string.isEmpty() )
-        {
-            return null;
-        }
-        
-        return valueOf( string.toUpperCase() );
     }
-    
-    public String getValue()
+
+    public static AggregationType fromValue( String value )
     {
-        return value;
+        for ( AggregationType type : AggregationType.values() )
+        {
+            if ( type.value.equalsIgnoreCase( value ) )
+            {
+                return type;
+            }
+        }
+
+        return null;
     }
 }
