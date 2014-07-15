@@ -3,6 +3,7 @@ trackerCapture.controller('EnrollmentController',
                 $scope,  
                 $filter,
                 $timeout,
+                $location,
                 storage,
                 AttributesFactory,
                 CurrentSelection,
@@ -15,7 +16,7 @@ trackerCapture.controller('EnrollmentController',
     
     //listen for the selected items
     $scope.$on('selectedItems', function(event, args) {   
-        //programs for enrollment
+        //programs for enrollment        
         $scope.enrollments = [];
         $scope.showEnrollmentDiv = false;
         $scope.showSchedulingDiv = false;    
@@ -30,14 +31,14 @@ trackerCapture.controller('EnrollmentController',
         
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
         
-        if($scope.selectedProgram){ 
+        if($scope.selectedProgram){             
             EnrollmentService.getByEntityAndProgram($scope.selectedTei.trackedEntityInstance, $scope.selectedProgram.id).then(function(data){
                 $scope.enrollments = data.enrollmentList;
                 $scope.loadEnrollmentDetails();                
             });
         }
         else{
-            $scope.broadCastSelections();
+            $scope.broadCastSelections('dashboardWidgets');
         }
     }); 
     
@@ -84,7 +85,7 @@ trackerCapture.controller('EnrollmentController',
             }           
         }
         
-        $scope.broadCastSelections();
+        $scope.broadCastSelections('dashboardWidgets');
     };
         
     $scope.showEnrollment = function(){        
@@ -157,7 +158,7 @@ trackerCapture.controller('EnrollmentController',
                     enrollment.enrollment = enrollmentResponse.reference;
                     $scope.selectedEnrollment = enrollment;
                     
-                    $scope.broadCastSelections(); 
+                    $scope.broadCastSelections('dashboardWidgets'); 
                     
                     $scope.outerForm.submitted = false;      
                 });
@@ -174,15 +175,22 @@ trackerCapture.controller('EnrollmentController',
         });
     };
     
-    $scope.broadCastSelections = function(){
+    $scope.broadCastSelections = function(listeners){
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.selectedEntity, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
         $timeout(function() { 
-            $rootScope.$broadcast('dashboard', {});
-            $rootScope.$broadcast('notesController', {});
+            $rootScope.$broadcast(listeners, {});
         }, 100);
     };
     
     $scope.cancelEnrollment = function(){
-        $scope.selectedProgram = '';
+        
+        /*currently the only way to cancel enrollment window is by going through
+         * the main dashboard controller. Here I am mixing program and programId, 
+         * as I didn't want to refetch program from server, the main dashboard
+         * has already fetched the programs. With the ID passed to it, it will
+         * pass back the actual program than ID. 
+         */
+        $scope.selectedProgram = ($location.search()).program;
+        $scope.broadCastSelections('mainDashboard'); 
     };
 });

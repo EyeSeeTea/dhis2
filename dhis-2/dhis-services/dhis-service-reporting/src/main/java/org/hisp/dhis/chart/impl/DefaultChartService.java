@@ -62,6 +62,7 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.AnalyticalObjectStore;
 import org.hisp.dhis.common.AnalyticsType;
+import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.NameableObject;
@@ -526,6 +527,8 @@ public class DefaultChartService
      */
     private JFreeChart getJFreeChart( BaseChart chart )
     {
+        final CategoryDataset[] dataSets = getCategoryDataSet( chart );
+
         final BarRenderer barRenderer = getBarRenderer();
         final LineAndShapeRenderer lineRenderer = getLineRenderer();
 
@@ -534,8 +537,6 @@ public class DefaultChartService
         // ---------------------------------------------------------------------
 
         CategoryPlot plot = null;
-
-        CategoryDataset[] dataSets = getCategoryDataSet( chart );
 
         if ( chart.isType( TYPE_LINE ) )
         {
@@ -735,7 +736,9 @@ public class DefaultChartService
         else if ( chart.isAnalyticsType( AnalyticsType.EVENT ) )
         {
             Grid grid = eventAnalyticsService.getAggregatedEventData( chart, chart.getFormat() );
-            
+                        
+            chart.setDataItemGrid( grid );
+                        
             valueMap = GridUtils.getMetaValueMapping( grid, ( grid.getWidth() - 1 ) );
         }
 
@@ -744,6 +747,8 @@ public class DefaultChartService
 
         SimpleRegression regression = new SimpleRegression();
 
+        BaseAnalyticalObject.sortKeys( valueMap );
+        
         for ( NameableObject series : chart.series() )
         {
             double categoryIndex = 0;
@@ -756,7 +761,13 @@ public class DefaultChartService
 
                 // Replace potential operand separator with dimension separator
 
-                key = key.replace( DataElementOperand.SEPARATOR, DIMENSION_SEP );
+                key = chart.isAnalyticsType( AnalyticsType.AGGREGATE ) ? key.replace( DataElementOperand.SEPARATOR, DIMENSION_SEP ) : key; 
+                
+                //TODO fix issue with keys including -
+                
+                // Sort key on components to remove significance of column order
+                
+                key = BaseAnalyticalObject.sortKey( key );
 
                 Double value = valueMap.get( key );
 

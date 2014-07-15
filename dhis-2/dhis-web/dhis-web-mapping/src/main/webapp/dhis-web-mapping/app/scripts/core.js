@@ -3037,7 +3037,7 @@ Ext.onReady( function() {
                     layout.labelFontStyle = Ext.Array.contains(['normal', 'italic', 'oblique'], config.labelFontStyle) ? config.labelFontStyle : 'normal';
 
                     layout.labelFontColor = Ext.isString(config.labelFontColor) || Ext.isNumber(config.labelFontColor) ? config.labelFontColor : 'normal';
-                    layout.labelFontColor = Ext.isNumber(config.labelFontColor) ? config.labelFontColor.toString() : config.labelFontColor;
+                    layout.labelFontColor = Ext.isNumber(layout.labelFontColor) ? layout.labelFontColor.toString() : layout.labelFontColor;
                     layout.labelFontColor = layout.labelFontColor.charAt(0) !== '#' ? '#' + layout.labelFontColor : layout.labelFontColor;
 
                     layout.hidden = !!config.hidden;

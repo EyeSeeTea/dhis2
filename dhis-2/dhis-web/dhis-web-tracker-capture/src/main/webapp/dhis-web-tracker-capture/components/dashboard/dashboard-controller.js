@@ -20,7 +20,7 @@ trackerCapture.controller('DashboardController',
     $rootScope.smallerDashboardWidgets = [];
     $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true};
     $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true};
-    $rootScope.reportWidget = {title: 'report', view: "components/report/teiReport.html", show: true, expand: true};
+    $rootScope.reportWidget = {title: 'report', view: "components/report/tei-report.html", show: true, expand: true};
     $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true};
     $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true};
     $rootScope.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true};
@@ -73,12 +73,25 @@ trackerCapture.controller('DashboardController',
         });      
     }
     
+    
+    //listen for any change to program selection
+    //it is possible that such could happen during enrollment.
+    $scope.$on('mainDashboard', function(event, args) { 
+        var selections = CurrentSelection.get();
+        $scope.selectedProgram = null;
+        angular.forEach($scope.programs, function(pr){
+            if(pr.id === selections.pr){
+                $scope.selectedProgram = pr;
+            }
+        });
+        $scope.broadCastSelections(); 
+    }); 
+    
     $scope.broadCastSelections = function(){
         
         var selections = CurrentSelection.get();
         $scope.selectedTei = selections.tei;
         $scope.trackedEntity = selections.te;
-        $scope.selectedEnrollment = selections.enrollment;
         CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null});
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            

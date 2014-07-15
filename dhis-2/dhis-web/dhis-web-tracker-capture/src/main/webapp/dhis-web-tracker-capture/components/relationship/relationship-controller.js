@@ -19,7 +19,7 @@ trackerCapture.controller('RelationshipController',
     });    
     
     //listen for the selected entity       
-    $scope.$on('dashboard', function(event, args) { 
+    $scope.$on('dashboardWidgets', function(event, args) { 
         $scope.selections = CurrentSelection.get();
         $scope.selectedTei = angular.copy($scope.selections.tei);
         $scope.trackedEntity = $scope.selections.te;
@@ -30,7 +30,7 @@ trackerCapture.controller('RelationshipController',
         var modalInstance = $modal.open({
             templateUrl: 'components/relationship/add-relationship.html',
             controller: 'AddRelationshipController',
-            windowClass: 'relationship-modal-window',
+            windowClass: 'modal-full-window',
             resolve: {
                 relationshipTypes: function () {
                     return $scope.relationshipTypes;
