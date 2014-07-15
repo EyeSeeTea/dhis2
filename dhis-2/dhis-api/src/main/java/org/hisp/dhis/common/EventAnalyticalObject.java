@@ -28,32 +28,22 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramStage;
+
 /**
  * @author Lars Helge Overland
  */
-public enum QueryOperator
+public interface EventAnalyticalObject
+    extends AnalyticalObject
 {
-    EQ( "=" ), GT( ">" ), GE( ">=" ), LT( "<" ), LE( "<=" ), NE( "!=" ), LIKE( "like" ), IN( "in" );
+    Program getProgram();
     
-    private final String value;
+    ProgramStage getProgramStage();
     
-    private QueryOperator( String value )
-    {
-        this.value = value;
-    }    
+    Date getStartDate();
     
-    public static final QueryOperator fromString( String string )
-    {
-        if ( string == null || string.isEmpty() )
-        {
-            return null;
-        }
-        
-        return valueOf( string.toUpperCase() );
-    }
-    
-    public String getValue()
-    {
-        return value;
-    }
+    Date getEndDate();
 }

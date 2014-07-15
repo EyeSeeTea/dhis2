@@ -31,7 +31,8 @@ package org.hisp.dhis.analytics.event;
 import java.util.Set;
 
 import org.hisp.dhis.analytics.SortOrder;
-import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.common.AnalyticalObject;
+import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.i18n.I18nFormat;
 
@@ -44,7 +45,7 @@ public interface EventAnalyticsService
     
     Grid getAggregatedEventData( EventQueryParams params );
     
-    Grid getAggregatedEventData( BaseAnalyticalObject object, I18nFormat format );
+    Grid getAggregatedEventData( AnalyticalObject object, I18nFormat format );
     
     Grid getEvents( EventQueryParams params );
 
@@ -61,5 +62,5 @@ public interface EventAnalyticsService
     EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, Set<String> dimension, Set<String> filter, 
         String ouMode, Set<String> asc, Set<String> desc, boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, Integer page, Integer pageSize, I18nFormat format );
     
-    EventQueryParams getFromAnalyticalObject( BaseAnalyticalObject object, I18nFormat format );
+    EventQueryParams getFromAnalyticalObject( EventAnalyticalObject object, I18nFormat format );
 }

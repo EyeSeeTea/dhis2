@@ -28,32 +28,28 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+
 /**
- * @author Lars Helge Overland
- */
-public enum QueryOperator
+* @author Lars Helge Overland
+*/
+public interface AnalyticalObject
 {
-    EQ( "=" ), GT( ">" ), GE( ">=" ), LT( "<" ), LE( "<=" ), NE( "!=" ), LIKE( "like" ), IN( "in" );
+    void populateAnalyticalProperties();
     
-    private final String value;
+    List<DimensionalObject> getColumns();
     
-    private QueryOperator( String value )
-    {
-        this.value = value;
-    }    
+    List<DimensionalObject> getRows();
     
-    public static final QueryOperator fromString( String string )
-    {
-        if ( string == null || string.isEmpty() )
-        {
-            return null;
-        }
-        
-        return valueOf( string.toUpperCase() );
-    }
+    List<DimensionalObject> getFilters();
     
-    public String getValue()
-    {
-        return value;
-    }
+    Map<String, String> getParentGraphMap();
+    
+    Date getRelativePeriodDate();
+    
+    OrganisationUnit getRelativeOrganisationUnit();
 }

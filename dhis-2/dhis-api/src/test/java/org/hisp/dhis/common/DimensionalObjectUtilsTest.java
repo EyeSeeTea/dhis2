@@ -28,32 +28,22 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.junit.Test;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Lars Helge Overland
  */
-public enum QueryOperator
+public class DimensionalObjectUtilsTest
 {
-    EQ( "=" ), GT( ">" ), GE( ">=" ), LT( "<" ), LE( "<=" ), NE( "!=" ), LIKE( "like" ), IN( "in" );
-    
-    private final String value;
-    
-    private QueryOperator( String value )
-    {
-        this.value = value;
-    }    
-    
-    public static final QueryOperator fromString( String string )
-    {
-        if ( string == null || string.isEmpty() )
-        {
-            return null;
-        }
-        
-        return valueOf( string.toUpperCase() );
-    }
-    
-    public String getValue()
-    {
-        return value;
+    @Test
+    public void testGetPrettyFilter()
+    {        
+        assertEquals( "< 5, = Discharged", DimensionalObjectUtils.getPrettyFilter( "LT:5:EQ:Discharged" ) );
+        assertEquals( ">= 10, Female", DimensionalObjectUtils.getPrettyFilter( "GE:10:LIKE:Female" ) );
+        assertEquals( "> 20, Discharged, Transferred", DimensionalObjectUtils.getPrettyFilter( "GT:20:IN:Discharged;Transferred" ) );
+        assertEquals( null, DimensionalObjectUtils.getPrettyFilter( null ) );
+        assertEquals( null, DimensionalObjectUtils.getPrettyFilter( "uid" ) );
     }
 }
