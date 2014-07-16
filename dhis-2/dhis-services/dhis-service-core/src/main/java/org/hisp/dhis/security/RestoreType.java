@@ -37,8 +37,8 @@ import java.util.Calendar;
 
 public enum RestoreType
 {
-    RECOVER_PASSWORD( Calendar.HOUR_OF_DAY, 1, "restore_message", "User account restore confirmation", "restore.action" ),
-    INVITE( Calendar.MONTH, 3, "invite_message", "Create DHIS 2 user account invitation", "invite.action" );
+    RECOVER_PASSWORD( Calendar.HOUR_OF_DAY, 1, "i18n_restore_message", "User account restore confirmation", "restore.action" ),
+    INVITE( Calendar.MONTH, 3, "i18n_invite_message", "Create DHIS 2 user account invitation", "invite.action" );
 
     /**
      * Type of Calendar interval before the restore expires.

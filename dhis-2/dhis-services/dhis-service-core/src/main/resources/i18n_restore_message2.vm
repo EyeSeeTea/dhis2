@@ -1,0 +1,8 @@
+$object.i18n.getString( 'email.restore_2.first_paragraph' ) ${object.rootPath}.
+$object.i18n.getString( 'email.restore_2.second_paragraph' )
+
+
+${object.code}
+
+
+$object.i18n.getString( 'email.restore_2.third_paragraph' )

@@ -76,6 +76,7 @@ public class VelocityManager
             if ( object != null )
             {
                 context.put( CONTEXT_KEY, object );
+                System.out.println("put object: " + object.toString() + " class " + object.getClass());
             }
 
             velocity.getTemplate( template + VM_SUFFIX ).merge( context, writer );

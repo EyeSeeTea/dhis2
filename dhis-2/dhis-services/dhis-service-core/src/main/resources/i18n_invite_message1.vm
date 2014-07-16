@@ -1,0 +1,8 @@
+$object.i18n.getString( "email.invite_1.first_paragraph" ) ${object.rootPath}.
+$object.i18n.getString( "email.invite_1.second_paragraph" )
+
+
+${object.restorePath}?username=${object.username}&token=${object.token}
+
+
+$object.i18n.getString( "email.invite_1.third_paragraph" )

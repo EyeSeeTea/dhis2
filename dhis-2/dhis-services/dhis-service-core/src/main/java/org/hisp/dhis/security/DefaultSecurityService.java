@@ -33,6 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -98,6 +100,13 @@ public class DefaultSecurityService
     public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
         this.systemSettingManager = systemSettingManager;
+    }
+
+    private I18nManager i18nManager;
+
+    public void setI18nManager( I18nManager i18nManager )
+    {
+        this.i18nManager = i18nManager;
     }
 
     @Autowired
@@ -171,18 +180,45 @@ public class DefaultSecurityService
         Set<User> users = new HashSet<User>();
         users.add( credentials.getUser() );
 
-        Map<String, String> vars = new HashMap<String, String>();
+        Map<String, Object> vars = new HashMap<String, Object>();
         vars.put( "rootPath", rootPath );
         vars.put( "restorePath", rootPath + RESTORE_PATH + restoreType.getAction() );
         vars.put( "token", result[0] );
         vars.put( "code", result[1] );
         vars.put( "username", credentials.getUsername() );
 
-        String text1 = new VelocityManager().render( vars, restoreType.getEmailTemplate() + "1" );
-        String text2 = new VelocityManager().render( vars, restoreType.getEmailTemplate() + "2" );
+        I18n i18n = i18nManager.getI18n();
+        vars.put( "i18n" , i18n );
 
-        emailMessageSender.sendMessage( restoreType.getEmailSubject() + " (message 1 of 2)", text1, null, users, true );
-        emailMessageSender.sendMessage( restoreType.getEmailSubject() + " (message 2 of 2)", text2, null, users, true );
+        // -------------------------------------------------------------------------
+        // Render emails
+        // -------------------------------------------------------------------------
+
+        VelocityManager vm = new VelocityManager();
+
+        String text1 = vm.render( vars, restoreType.getEmailTemplate() + "1" ),
+               text2 = vm.render( vars, restoreType.getEmailTemplate() + "2" );
+
+        String subject1 = "", subject2 = "";
+
+        switch( restoreType )
+        {
+        case INVITE:
+            subject1 = i18n.getString( "email.invite_1.subject" );
+            subject2 = i18n.getString( "email.invite_2.subject" );
+            break;
+        case RECOVER_PASSWORD:
+            subject1 = i18n.getString( "email.recover_1.subject" );
+            subject2 = i18n.getString( "email.recover_2.subject" );
+            break;
+        }
+
+        // -------------------------------------------------------------------------
+        // Send emails
+        // -------------------------------------------------------------------------
+
+        emailMessageSender.sendMessage( subject1, text1, null, users, true );
+        emailMessageSender.sendMessage( subject2, text2, null, users, true );
 
         return true;
     }
