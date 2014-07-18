@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.converters;
+package org.hisp.dhis.analytics;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,47 +25,41 @@ package org.hisp.dhis.node.converters;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-import org.hisp.dhis.node.AbstractNodePropertyConverter;
-import org.hisp.dhis.node.Node;
-import org.hisp.dhis.node.types.SimpleNode;
-import org.hisp.dhis.schema.Property;
-import org.springframework.stereotype.Component;
-
-import java.util.Collection;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class SizeNodePropertyConverter extends AbstractNodePropertyConverter
+public enum AggregationType
 {
-    @Override
-    public String name()
+    SUM( "sum" ), 
+    AVERAGE_INT( "avg_int" ), 
+    AVERAGE_INT_DISAGGREGATION( "avg_int_disaggregation" ), 
+    AVERAGE_BOOL( "avg" ), 
+    COUNT( "count" ), 
+    STDDEV( "stddev" ), 
+    VARIANCE( "variance" ),
+    MIN( "min" ),
+    MAX( "max" );
+
+    private final String value;
+
+    private AggregationType( String value )
     {
-        return "size";
+        this.value = value;
     }
 
-    @Override
-    public boolean canConvertTo( Property property, Object value )
+    public static AggregationType fromValue( String value )
     {
-        return property.isCollection() || String.class.isInstance( value );
-    }
-
-    @Override
-    public Node convertTo( Property property, Object value )
-    {
-        if ( property.isCollection() )
+        for ( AggregationType type : AggregationType.values() )
         {
-            return new SimpleNode( property.getCollectionName(), ((Collection<?>) value).size(), property.isAttribute() );
-        }
-        else if ( String.class.isInstance( value ) )
-        {
-            return new SimpleNode( property.getName(), ((String) value).length(), property.isAttribute() );
+            if ( type.value.equalsIgnoreCase( value ) )
+            {
+                return type;
+            }
         }
 
-        throw new IllegalStateException( "Should never get here, this property/value is not supported by this transformer." );
+        return null;
     }
 }

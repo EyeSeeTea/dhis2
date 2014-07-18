@@ -29,8 +29,6 @@ dhis2.db.maxItems = 40;
 
 // TODO support table as link and embedded
 // TODO double horizontal size
-// TODO dashboard list horizontal scroll
-// TODO report type in link
 
 //------------------------------------------------------------------------------
 // Document ready
@@ -111,8 +109,7 @@ dhis2.db.dashboardReady = function( id )
 	
 	$( ".item" ).droppable( {
 		accept: ".item",
-		over: dhis2.db.dropOver,
-		out: dhis2.db.dropOut
+		over: dhis2.db.dropOver
 	} );
 
 	$( ".dropItem" ).droppable( {
@@ -145,28 +142,25 @@ dhis2.db.dragStop = function( event, ui )
 
 dhis2.db.dropOver = function( event, ui ) 
 {
+	$( ".dropItem" ).not( "#dropLast" ).hide();
 	var itemId = $( this ).attr( "id" );
 	var dropItemId = "drop-" + itemId;
 	$( "#" + dropItemId ).show();
 }
 
-dhis2.db.dropOut = function( event, ui ) 
-{
-	var itemId = $( this ).attr( "id" );
-	var dropItemId = "drop-" + itemId;
-	$( "#" + dropItemId ).hide();
-}
-
 dhis2.db.lastDropOver = function( event, ui ) 
 {
+	$( ".dropItem" ).not( "#dropLast" ).hide();
 	$( this ).removeClass( "blankDropItem" ).css( "display", "block" );
 }
 
-dhis2.db.lastDropOut = function( event, ui ) {
+dhis2.db.lastDropOut = function( event, ui ) 
+{
 	$( this ).addClass( "blankDropItem" );
 }
 
-dhis2.db.dropItem = function( event, ui ) {
+dhis2.db.dropItem = function( event, ui ) 
+{
 	var destItemId = $( this ).data( "item" );
 	var position = dhis2.db.getIndex( destItemId );
 	

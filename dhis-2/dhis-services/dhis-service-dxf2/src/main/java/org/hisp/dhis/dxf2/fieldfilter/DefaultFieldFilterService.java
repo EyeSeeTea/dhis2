@@ -28,14 +28,10 @@ package org.hisp.dhis.dxf2.fieldfilter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.PresetProvider;
 import org.hisp.dhis.dxf2.parser.ParserService;
@@ -46,16 +42,19 @@ import org.hisp.dhis.node.NodeTransformer;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.annotation.PostConstruct;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -285,6 +284,14 @@ public class DefaultFieldFilterService implements FieldFilterService
 
             if ( child != null )
             {
+                child.setName( fieldKey );
+
+                // TODO fix ugly hack, will be replaced by custom field serializer/deserializer
+                if ( child.isSimple() && PeriodType.class.isInstance( (((SimpleNode) child).getValue()) ) )
+                {
+                    child = new SimpleNode( child.getName(), ((PeriodType) ((SimpleNode) child).getValue()).getName() );
+                }
+
                 complexNode.addChild( fieldValue.getPipeline().process( child ) );
             }
         }

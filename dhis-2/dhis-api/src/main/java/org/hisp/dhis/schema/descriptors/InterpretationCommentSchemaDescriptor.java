@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.converters;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,48 +25,35 @@ package org.hisp.dhis.node.converters;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.node.AbstractNodePropertyConverter;
-import org.hisp.dhis.node.Node;
-import org.hisp.dhis.node.types.SimpleNode;
-import org.hisp.dhis.schema.Property;
+import org.hisp.dhis.interpretation.InterpretationComment;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
-public class IsEmptyNodePropertyConverter extends AbstractNodePropertyConverter
+public class InterpretationCommentSchemaDescriptor implements SchemaDescriptor
 {
-    @Override
-    public String name()
-    {
-        return "isEmpty";
-    }
+    public static final String SINGULAR = "interpretationComment";
+
+    public static final String PLURAL = "interpretationComments";
+
+    public static final String API_ENDPOINT = "/" + PLURAL;
 
     @Override
-    public boolean canConvertTo( Property property, Object value )
+    public Schema getSchema()
     {
-        return property.isCollection() || String.class.isInstance( value );
-    }
+        Schema schema = new Schema( InterpretationComment.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setMetadata( false );
+        schema.setShareable( false );
+        schema.setOrder( 1441 );
 
-    @Override
-    public Node convertTo( Property property, Object value )
-    {
-        if ( property.isCollection() )
-        {
-            return new SimpleNode( property.getCollectionName(), ((Collection<?>) value).isEmpty(), property.isAttribute() );
-        }
-        else if ( String.class.isInstance( value ) )
-        {
-            return new SimpleNode( property.getName(), StringUtils.isEmpty( value ), property.isAttribute() );
-        }
-
-        throw new IllegalStateException( "Should never get here, this property/value is not supported by this transformer." );
+        return schema;
     }
 }

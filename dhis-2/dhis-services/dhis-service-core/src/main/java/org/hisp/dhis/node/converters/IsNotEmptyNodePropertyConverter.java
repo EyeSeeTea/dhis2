@@ -1,4 +1,4 @@
-package org.hisp.dhis.analytics;
+package org.hisp.dhis.node.converters;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,13 +25,48 @@ package org.hisp.dhis.analytics;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
+import org.hisp.dhis.node.AbstractNodePropertyConverter;
+import org.hisp.dhis.node.Node;
+import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.schema.Property;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.Collection;
+
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public enum AggregationType
+@Component
+public class IsNotEmptyNodePropertyConverter extends AbstractNodePropertyConverter
 {
-    SUM, AVERAGE_INT, AVERAGE_INT_DISAGGREGATION, AVERAGE_BOOL, COUNT, STDDEV, VARIANCE
+    @Override
+    public String name()
+    {
+        return "isNotEmpty";
+    }
+
+    @Override
+    public boolean canConvertTo( Property property, Object value )
+    {
+        return property.isCollection() || String.class.isInstance( value );
+    }
+
+    @Override
+    public Node convertTo( Property property, Object value )
+    {
+        if ( property.isCollection() )
+        {
+            return new SimpleNode( property.getCollectionName(), !((Collection<?>) value).isEmpty(), property.isAttribute() );
+        }
+        else if ( String.class.isInstance( value ) )
+        {
+            return new SimpleNode( property.getName(), !StringUtils.isEmpty( value ), property.isAttribute() );
+        }
+
+        throw new IllegalStateException( "Should never get here, this property/value is not supported by this field converter." );
+    }
 }

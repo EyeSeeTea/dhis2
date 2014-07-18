@@ -1,5 +1,4 @@
-package org.hisp.dhis.expression;
-
+package org.hisp.dhis.dxf2.csv;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -29,43 +28,16 @@ package org.hisp.dhis.expression;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-public enum Operator
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.hisp.dhis.dxf2.metadata.MetaData;
+
+/**
+ * @author Lars Helge Overland
+ */
+public interface CsvImportService
 {
-    equal_to( "==" ), 
-    not_equal_to( "!=" ), 
-    greater_than( ">" ), 
-    greater_than_or_equal_to( ">=" ), 
-    less_than( "<" ), 
-    less_than_or_equal_to( "<=" ),
-    compulsory_pair( "[Compulsory pair]" );
-
-    private final String mathematicalOperator;
-
-    private Operator( String mathematicalOperator )
-    {
-        this.mathematicalOperator = mathematicalOperator;
-    }
-
-    public String getMathematicalOperator()
-    {
-        return mathematicalOperator;
-    }
-    
-    public static Operator fromValue( String value )
-    {
-        for ( Operator operator : Operator.values() )
-        {
-            if ( operator.mathematicalOperator.equalsIgnoreCase( value ) )
-            {
-                return operator;
-            }
-        }
-
-        return null;
-    }
-    
-    public static Operator safeValueOf( String name )
-    {
-        return name != null ? Operator.valueOf( name ) : null;
-    }
+    MetaData fromCsv( InputStream input, Class<?> clazz )
+        throws IOException;
 }
