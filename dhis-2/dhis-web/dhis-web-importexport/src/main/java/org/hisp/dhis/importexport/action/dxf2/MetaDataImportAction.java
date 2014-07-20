@@ -34,11 +34,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementGroup;
+import org.hisp.dhis.dxf2.csv.CsvImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.importexport.ImportStrategy;
@@ -54,6 +54,7 @@ import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
@@ -71,6 +72,7 @@ public class MetaDataImportAction
        put( "categoryoptiongroup", CategoryOptionGroup.class );
        put( "organisationunit", OrganisationUnit.class );
        put( "organisationunitgroup", OrganisationUnitGroup.class );
+       put( "validationrule", ValidationRule.class );
        put( "optionset", OptionSet.class );
     }};
     
@@ -82,8 +84,8 @@ public class MetaDataImportAction
     private ImportService importService;
     
     @Autowired
-    private IdentifiableObjectManager identifiableObjectManager;
-
+    private CsvImportService csvImportService;
+    
     @Autowired
     private CurrentUserService currentUserService;
 
@@ -163,7 +165,7 @@ public class MetaDataImportAction
         
         if ( "csv".equals( importFormat ) && classKey != null && KEY_CLASS_MAP.get( classKey ) != null )
         {
-            scheduler.executeTask( new ImportMetaDataCsvTask( userId, importService, identifiableObjectManager, 
+            scheduler.executeTask( new ImportMetaDataCsvTask( userId, importService, csvImportService,
                 importOptions, in, taskId, KEY_CLASS_MAP.get( classKey ) ) );
         }
         else

@@ -1,5 +1,4 @@
-package org.hisp.dhis.expression;
-
+package org.hisp.dhis.node.converters;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -26,46 +25,48 @@ package org.hisp.dhis.expression;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-public enum Operator
+import org.hisp.dhis.node.AbstractNodePropertyConverter;
+import org.hisp.dhis.node.Node;
+import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.schema.Property;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.util.Collection;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+@Component
+public class IsEmptyNodePropertyConverter extends AbstractNodePropertyConverter
 {
-    equal_to( "==" ), 
-    not_equal_to( "!=" ), 
-    greater_than( ">" ), 
-    greater_than_or_equal_to( ">=" ), 
-    less_than( "<" ), 
-    less_than_or_equal_to( "<=" ),
-    compulsory_pair( "[Compulsory pair]" );
-
-    private final String mathematicalOperator;
-
-    private Operator( String mathematicalOperator )
+    @Override
+    public String name()
     {
-        this.mathematicalOperator = mathematicalOperator;
+        return "isEmpty";
     }
 
-    public String getMathematicalOperator()
+    @Override
+    public boolean canConvertTo( Property property, Object value )
     {
-        return mathematicalOperator;
+        return property.isCollection() || String.class.isInstance( value );
     }
-    
-    public static Operator fromValue( String value )
+
+    @Override
+    public Node convertTo( Property property, Object value )
     {
-        for ( Operator operator : Operator.values() )
+        if ( property.isCollection() )
         {
-            if ( operator.mathematicalOperator.equalsIgnoreCase( value ) )
-            {
-                return operator;
-            }
+            return new SimpleNode( property.getCollectionName(), ((Collection<?>) value).isEmpty(), property.isAttribute() );
+        }
+        else if ( String.class.isInstance( value ) )
+        {
+            return new SimpleNode( property.getName(), StringUtils.isEmpty( value ), property.isAttribute() );
         }
 
-        return null;
-    }
-    
-    public static Operator safeValueOf( String name )
-    {
-        return name != null ? Operator.valueOf( name ) : null;
+        throw new IllegalStateException( "Should never get here, this property/value is not supported by this field converter." );
     }
 }

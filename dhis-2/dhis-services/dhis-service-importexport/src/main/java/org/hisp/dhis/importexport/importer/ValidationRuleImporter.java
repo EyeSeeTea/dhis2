@@ -37,7 +37,6 @@ import org.hisp.dhis.validation.ValidationRuleService;
 
 /**
  * @author Lars Helge Overland
- * @version $Id: AbstractValidationRuleConverter.java 4646 2008-02-26 14:54:29Z larshelg $
  */
 public class ValidationRuleImporter
     extends AbstractImporter<ValidationRule> implements Importer<ValidationRule>
@@ -76,7 +75,6 @@ public class ValidationRuleImporter
     {
         match.setName( object.getName() );
         match.setDescription( object.getDescription() );
-        match.setType( object.getType() );
         match.setOperator( object.getOperator() );
         match.getLeftSide().setExpression( object.getLeftSide().getExpression() );
         match.getLeftSide().setDescription( object.getLeftSide().getDescription() );
@@ -106,10 +104,6 @@ public class ValidationRuleImporter
             return false;
         }
         if ( !isSimiliar( object.getDescription(), existing.getDescription() ) || ( isNotNull( object.getDescription(), existing.getDescription() ) && !object.getDescription().equals( existing.getDescription() ) ) )
-        {
-            return false;
-        }
-        if ( !isSimiliar( object.getType(), existing.getType() ) || ( isNotNull( object.getType(), existing.getType() ) && !object.getType().equals( existing.getType() ) ) )
         {
             return false;
         }
