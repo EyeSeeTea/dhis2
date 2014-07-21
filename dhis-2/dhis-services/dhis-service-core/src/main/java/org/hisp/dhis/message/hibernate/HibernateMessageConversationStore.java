@@ -30,7 +30,10 @@ package org.hisp.dhis.message.hibernate;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Query;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
@@ -120,6 +123,20 @@ public class HibernateMessageConversationStore
         } );
 
         return conversations;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<MessageConversation> getMessageConversations( Collection<Integer> messageConversationIds )
+    {
+        int[] ids;
+
+        String hql = ( "FROM MessageConversation where messageconversationid in :messageConversationIds" );
+
+        Query query = getQuery( hql );
+        query.setParameterList( "messageConversationIds", messageConversationIds );
+
+        return query.list();
     }
 
     public int getMessageConversationCount( User user, boolean followUpOnly, boolean unreadOnly )

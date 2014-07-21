@@ -6,7 +6,12 @@ function submitMessage()
 
 function removeMessage( id )
 {
-    removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
+  removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
+}
+
+function removeMessages( messageIds)
+{
+
 }
 
 function read( id )

@@ -57,6 +57,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -234,5 +235,36 @@ public class MessageConversationController
         messageService.sendFeedback( subject, body, metaData );
 
         ContextUtils.createdResponse( response, "Feedback created", null );
+    }
+
+    //--------------------------------------------------------------------------
+    // Delete
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( method = RequestMethod.DELETE )
+    public void deleteMessageConversations( @RequestBody List<Integer> ids, HttpServletRequest request, HttpServletResponse response )
+    {
+        if( ids.isEmpty() )
+        {
+            ContextUtils.badRequestResponse( response, "No message conversation IDs given" );
+            return;
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( ids );
+
+        if( messageConversations.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No message conversations found for the given IDs" );
+        }
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        for( MessageConversation conversation : messageConversations )
+        {
+            conversation.remove( currentUser );
+            messageService.updateMessageConversation( conversation );
+        }
+
+        ContextUtils.okResponse( response, ids.size() > 1 ? "Messages conversations deleted" : "Message conversation deleted");
     }
 }
