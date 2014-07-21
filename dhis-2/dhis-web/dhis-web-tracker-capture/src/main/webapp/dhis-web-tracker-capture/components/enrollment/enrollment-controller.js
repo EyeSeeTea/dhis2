@@ -194,6 +194,7 @@ trackerCapture.controller('EnrollmentController',
                     $scope.autoGenerateEvents();                    
                     $scope.broadCastSelections('dashboardWidgets'); 
                     
+                    $scope.showEnrollmentDiv = false;
                     $scope.outerForm.submitted = false;      
                 });
             }
@@ -268,29 +269,7 @@ trackerCapture.controller('EnrollmentController',
         //$scope.showEnrollmentHistoryDiv = !$scope.showEnrollmentHistoryDiv;
         console.log('need to figure out how to deal with previous enrollments'); 
     };
-    
-    $scope.getEventsForRescheduling = function(){
         
-        DHIS2EventFactory.getEventsByStatus($scope.selectedTei.trackedEntityInstance, $scope.selectedOrgUnit.id, $scope.selectedProgram.id, 'ACTIVE', 'SCHEDULE').then(function(data){
-            if(angular.isObject(data)){
-                angular.forEach(data, function(ev){                    
-                    if(ev.enrollment === $scope.selectedEnrollment.enrollment){                        
-                        ev.name = $scope.selectedProgramWithStage[ev.programStage].name;                        
-                        ev.dueDate = DateUtils.format(ev.dueDate);                        
-                        ev.statusColor = EventUtils.getEventStatusColor(ev);                          
-                        $scope.eventsForRescheduling.push(ev);
-                        ev = EventUtils.setEventOrgUnitName(ev);
-                    }                                                                                 
-                });
-            }  
-            
-            if($scope.eventsForRescheduling.length > 0 ){
-                $scope.eventsForRescheduling = orderByFilter($scope.eventsForRescheduling, '-eventDate');
-                $scope.eventsForRescheduling.reverse();
-            }
-        });        
-    };
-    
     $scope.autoGenerateEvents = function(){
         if($scope.selectedTei && $scope.selectedProgram && $scope.selectedOrgUnit && $scope.selectedEnrollment){            
             $scope.dhis2Events = {events: []};
@@ -310,7 +289,6 @@ trackerCapture.controller('EnrollmentController',
             
             if($scope.dhis2Events.events.length > 0){
                 DHIS2EventFactory.create($scope.dhis2Events).then(function(data) {
-                    console.log('the response is:  ', data);
                 });
             }
         }
