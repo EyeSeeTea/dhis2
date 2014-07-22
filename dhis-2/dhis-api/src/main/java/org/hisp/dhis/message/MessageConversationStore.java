@@ -52,12 +52,12 @@ public interface MessageConversationStore
     List<MessageConversation> getMessageConversations( User user, boolean followUpOnly, boolean unreadOnly, Integer first, Integer max );
 
     /**
-     * Returns the MessageConversations given by the supplied ids.
+     * Returns the MessageConversations given by the supplied UIDs.
      *
-     * @param messageConversationIds the ids of the MessageConversations to get.
+     * @param messageConversationUids the UIDs of the MessageConversations to get.
      * @return a collection of MessageConversations.
      */
-    Collection<MessageConversation> getMessageConversations( Collection<Integer> messageConversationIds );
+    Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids );
     
     int getMessageConversationCount( User user, boolean followUpOnly, boolean unreadOnly );
     

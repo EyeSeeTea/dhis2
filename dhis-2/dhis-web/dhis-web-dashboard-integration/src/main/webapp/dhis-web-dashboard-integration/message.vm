@@ -1,9 +1,24 @@
+<script type="text/javascript">
+    $( document ).ready( function() {
+
+        var i18n_confirm_delete_message = '$encoder.jsEscape( $i18n.getString( "confirm_delete_message" ) , "'" )';
+
+        $("#batchOkButton").click( function() {
+            selectedAction = $("#batchActions").val();
+            if( selectedAction === "delete" ) {
+                batchRemoveMessages();
+            } else if ( selectedAction === "markRead" ) {
+                batchMarkMessagesRead();
+            }
+        });
+    });
+</script>
 
 <h3>$i18n.getString( "messages" ) #openHelp( "dashboard_messages" )</h3>
 
 <div class="horizontalMenu" style="padding: 8px 0 40px 0;">
     <ul>
-    	#if( $auth.hasAccess( "dhis-web-dashboard-integration", "sendMessage" ) )
+        #if( $auth.hasAccess( "dhis-web-dashboard-integration", "sendMessage" ) )
         <li><a class="blueButtonLink" href="showSendMessage.action">$i18n.getString( 'write_message' )</a></li>
         #end
         <li><a class="blueButtonLink" href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a></li>
@@ -12,17 +27,17 @@
         <li><a class="greyButtonLink" href="message.action?followUp=true">$i18n.getString( "follow_up" )</a></li>
         <li><a class="greyButtonLink" href="message.action?unread=true">$i18n.getString( "unread" )</a></li>
         <li>
-          <select>
-            <option>Delete</option>
-            <option>Mark as read</option>
+          <select id="batchActions">
+            <option value="delete">Delete</option>
+            <option value="markRead">Mark as read</option>
           </select>
         </li>
-        <li><a class="greyButtonLink" href="javascript:void();">Ok</a></li>
+        <li><a id="batchOkButton" class="greyButtonLink" href="#">OK</a></li>
     </ul>
 </div>
 
 <div style="width:100%">
-<div style="padding-right:15px">
+<div id="messages" style="padding-right:15px">
 <table class="plainList" style="width:100%">
 	<tr>
         <th></th>
@@ -33,9 +48,9 @@
 		<th></th>
 	</tr>
 	#foreach( $conversation in $conversations )
-	<tr id="tr${conversation.id}" #if( !$conversation.read )class="unread bold"#end>
-        <td style="width:20px;padding-left:5px;" onclick="alert(' ${conversation.id}') ">
-          <input type="checkbox" />
+	<tr name="${conversation.uid}" id="tr${conversation.id}" #if( !$conversation.read )class="unread bold"#end>
+        <td style="width:20px;padding-left:5px;">
+          <input type="checkbox" value="${conversation.uid}" />
         </td>
 		<td style="width:40px;padding-left:5px;" onclick="toggleFollowUp( '${conversation.id}' )">
 			<img id="followUp${conversation.id}" #if( $conversation.followUp ) src="../images/marked.png"#else src="../images/unmarked.png"#end></td>		
@@ -55,7 +70,3 @@
 #parse( "/dhis-web-commons/paging/paging.vm" )
 </div>
 </div>
-
-<script type="text/javascript">
-	var i18n_confirm_delete_message = '$encoder.jsEscape( $i18n.getString( "confirm_delete_message" ) , "'" )';
-</script>

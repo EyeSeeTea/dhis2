@@ -273,9 +273,9 @@ public class DefaultMessageService
             unreadOnly, first, max );
     }
 
-    public Collection<MessageConversation> getMessageConversations( Collection<Integer> messageConversationIds )
+    public Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids )
     {
-        return messageConversationStore.getMessageConversations( messageConversationIds );
+        return messageConversationStore.getMessageConversations( messageConversationUids );
     }
 
     public int getMessageConversationCount()

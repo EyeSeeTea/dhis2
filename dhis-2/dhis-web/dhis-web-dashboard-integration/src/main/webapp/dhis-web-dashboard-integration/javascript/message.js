@@ -9,7 +9,35 @@ function removeMessage( id )
   removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
 }
 
-function removeMessages( messageIds)
+function batchRemoveMessages( messageUids )
+{
+  var confirmed = window.confirm( "Really delete all selected messages?" );
+
+  if ( confirmed )
+  {
+    setHeaderWaitMessage( i18n_deleting );
+
+    requestParams = $.param( { uid: messageUids });
+
+    $.ajax({
+      url: "../../api/messageConversations?" + requestParams,
+      type: "DELETE",
+      traditional: true,
+      success: function( response ) {
+
+        var i;
+        for( i = 0 ; i < messageUids.length ; i++ )
+        {
+          $("#messages").find("[name='" + messageUids[i] + "']").remove();
+        }
+
+        setHeaderDelayMessage( response );
+      }
+    });
+  }
+}
+
+function batchMarkMessagesRead( messageUids )
 {
 
 }

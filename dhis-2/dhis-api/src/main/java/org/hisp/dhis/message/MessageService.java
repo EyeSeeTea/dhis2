@@ -94,7 +94,7 @@ public interface MessageService
 
     List<MessageConversation> getMessageConversations( boolean followUpOnly, boolean unreadOnly, int first, int max );
 
-    Collection<MessageConversation> getMessageConversations( Collection<Integer> messageConversationIds );
+    Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids );
 
     int getMessageConversationCount();
 

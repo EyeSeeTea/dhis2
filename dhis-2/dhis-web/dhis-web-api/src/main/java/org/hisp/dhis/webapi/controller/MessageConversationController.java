@@ -60,6 +60,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -241,20 +242,26 @@ public class MessageConversationController
     // Delete
     //--------------------------------------------------------------------------
 
+    /**
+     * Removes the current user from a list of MessageConversations (and the MessageConversations from the user).
+     * @param uids UIDs of the MessageConversations to remove the user from.
+     */
     @RequestMapping( method = RequestMethod.DELETE )
-    public void deleteMessageConversations( @RequestBody List<Integer> ids, HttpServletRequest request, HttpServletResponse response )
+    public void removeMessageConversations( @RequestParam("uid") String[] uids, HttpServletResponse response )
     {
-        if( ids.isEmpty() )
+        List<String> uidList = Arrays.asList( uids );
+
+        if( uidList.isEmpty() )
         {
-            ContextUtils.badRequestResponse( response, "No message conversation IDs given" );
+            ContextUtils.badRequestResponse( response, "No message conversation UIDs given" );
             return;
         }
 
-        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( ids );
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uidList );
 
         if( messageConversations.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "No message conversations found for the given IDs" );
+            ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
         }
 
         User currentUser = currentUserService.getCurrentUser();
@@ -265,6 +272,6 @@ public class MessageConversationController
             messageService.updateMessageConversation( conversation );
         }
 
-        ContextUtils.okResponse( response, ids.size() > 1 ? "Messages conversations deleted" : "Message conversation deleted");
+        ContextUtils.okResponse( response, uidList.size() > 1 ? "Messages conversations deleted" : "Message conversation deleted");
     }
 }
