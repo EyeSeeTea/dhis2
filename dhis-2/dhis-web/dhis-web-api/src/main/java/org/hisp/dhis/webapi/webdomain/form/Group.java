@@ -28,14 +28,17 @@ package org.hisp.dhis.webapi.webdomain.form;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.common.DxfNamespaces;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -50,6 +53,8 @@ public class Group
     private int dataElementCount;
 
     private List<Field> fields = new ArrayList<Field>();
+
+    private Map<Object, Object> metaData = new HashMap<Object, Object>();
 
     public Group()
     {
@@ -102,5 +107,18 @@ public class Group
     public void setFields( List<Field> fields )
     {
         this.fields = fields;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "metaData", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Map<Object, Object> getMetaData()
+    {
+        return metaData;
+    }
+    
+    public void setMetaData( Map<Object, Object> metaData )
+    {
+        this.metaData = metaData;
     }
 }

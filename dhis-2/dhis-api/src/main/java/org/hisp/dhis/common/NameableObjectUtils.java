@@ -137,12 +137,33 @@ public class NameableObjectUtils
     }
 
     /**
+     * Returns a list of BaseNameableObjects based on the given list of NameableObjects.
+     * 
+     * @param objects the list of NameableObjects.
+     * @return a list of BaseNameableObejcts.
+     */
+    public static List<NameableObject> getAsNameableObjects( List<? extends NameableObject> objects )
+    {
+        List<NameableObject> list = new ArrayList<>();
+        
+        for ( NameableObject object : objects )
+        {
+            if ( object != null )
+            {
+                list.add( new BaseNameableObject( object ) );
+            }
+        }
+        
+        return list;
+    }
+
+    /**
      * Returns a mapping between the uid and the nameable objects.
      *
      * @param objects the nameable objects.
      * @return mapping between the uid and the nameable objects.
      */
-    public static Map<String, NameableObject> getUidObjectMap( Collection<? extends NameableObject> objects )
+    public static Map<String, NameableObject> getUidObjectMap( List<? extends NameableObject> objects )
     {
         Map<String, NameableObject> map = new HashMap<String, NameableObject>();
 
