@@ -210,19 +210,22 @@ public class MessageServiceTest
         MessageConversation conversationB = new MessageConversation( "SubjectB", sender );
         MessageConversation conversationC = new MessageConversation( "SubjectC", userA );
 
-        int idA = messageService.saveMessageConversation( conversationA );
-        int idB = messageService.saveMessageConversation( conversationB );
-        int idC = messageService.saveMessageConversation( conversationC );
+        messageService.saveMessageConversation( conversationA );
+        messageService.saveMessageConversation( conversationB );
+        messageService.saveMessageConversation( conversationC );
+
+        String uidA = conversationA.getUid();
+        String uidB = conversationB.getUid();
 
         messageService.saveMessageConversation( conversationA );
         messageService.saveMessageConversation( conversationB );
         messageService.saveMessageConversation( conversationC );
 
-        Collection<Integer> ids = new ArrayList<Integer>();
-        ids.add( idA );
-        ids.add( idB );
+        Collection<String> uids = new ArrayList<String>();
+        uids.add( uidA );
+        uids.add( uidB );
 
-        Collection<MessageConversation> conversations = messageService.getMessageConversations( ids );
+        Collection<MessageConversation> conversations = messageService.getMessageConversations( uids );
 
         assertTrue( conversations.contains( conversationA ) );
         assertTrue( conversations.contains( conversationB ) );

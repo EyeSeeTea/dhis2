@@ -23,6 +23,7 @@ function batchRemoveMessages( messages )
         type: "DELETE",
         success: function( response )
         {
+
           for( var i = 0 ; i < messages.uid.length ; i++ )
           {
             $( "#messages" ).find( "[name='" + messages.uid[i] + "']" ).remove();
@@ -45,19 +46,20 @@ function batchMarkMessagesRead( messages )
       url: "../../api/messageConversations/read",
       data: JSON.stringify( messages.uid ),
       contentType: "application/json",
+      dataType: "json",
       type: "PUT",
       success: function( response )
       {
-        msg = $("#messages");
-        for( var i = 0 ; i < messages.uid.length ; i++ )
+        var msg = $( "#messages" );
+        for( var i = 0 ; i < response.markedRead.length ; i++ )
         {
-          msg.find( "[name='" + messages.uid[i] + "']" ).toggleClass( "unread bold" );
+          msg.find( "[name='" + response.markedRead[i] + "']" ).toggleClass( "unread bold" );
           msg.find( "input:checkbox" ).removeAttr( "checked" );
         }
       },
       error: function( response )
       {
-        setHeaderDelayMessage( response );
+        setHeaderDelayMessage( response.message );
       }
     }
   );

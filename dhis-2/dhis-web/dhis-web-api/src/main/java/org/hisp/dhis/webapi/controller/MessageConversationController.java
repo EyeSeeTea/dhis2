@@ -28,6 +28,7 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.message.Message;
@@ -55,9 +56,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
@@ -84,6 +87,8 @@ public class MessageConversationController
 
     @Autowired
     private CurrentUserService currentUserService;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public void postProcessEntity( MessageConversation entity, WebOptions options, Map<String, String> parameters ) throws Exception
@@ -239,11 +244,63 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // PUT to set MessageConversations as read
+    // PUT to mark MessageConversations as read for the current user
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/read", method = RequestMethod.PUT )
-    public void setMessageConversationsRead( @RequestBody String[] uids, HttpServletResponse response )
+    public void markMessageConversationsRead( @RequestBody String[] uids, HttpServletResponse response )
+        throws IOException
+    {
+        Map<String, Object> result = new HashMap<String, Object>();
+
+        List<String> uidList = Arrays.asList( uids );
+
+        if( uidList.isEmpty() )
+        {
+            result.put( "response", "error" );
+            result.put( "message", "No message conversations given" );
+            //ContextUtils.badRequestResponse( response, "No message conversations given" );
+            ContextUtils.badRequestResponse( response, objectMapper.writeValueAsString( result ) );
+            return;
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uidList );
+
+        if( messageConversations.isEmpty() )
+        {
+            result.put( "response", "error" );
+            result.put( "message", "No message conversations found for the given UIDs" );
+            ContextUtils.badRequestResponse( response, objectMapper.writeValueAsString( result ) );
+            //ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
+            return;
+        }
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        List<String> marked = new ArrayList<String>();
+
+        for( MessageConversation conversation : messageConversations )
+        {
+            if( conversation.markRead( currentUser ) )
+            {
+                marked.add( conversation.getUid() );
+                messageService.updateMessageConversation( conversation );
+            }
+        }
+
+        result.put("response", "success" );
+        result.put("markedRead", marked );
+
+        //ContextUtils.okResponse( response, "" );
+        ContextUtils.okResponse( response, objectMapper.writeValueAsString( result ) );
+    }
+
+    //--------------------------------------------------------------------------
+    // PUT to mark MessageConversations as unread for the current user
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "/unread", method = RequestMethod.PUT )
+    public void markMessageConversationsUnread( @RequestBody String[] uids, HttpServletResponse response )
     {
         List<String> uidList = Arrays.asList( uids );
 
@@ -265,7 +322,7 @@ public class MessageConversationController
 
         for( MessageConversation conversation : messageConversations )
         {
-            conversation.markRead( currentUser );
+            conversation.markUnread( currentUser );
             messageService.updateMessageConversation( conversation );
         }
 
@@ -273,7 +330,7 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // DELETE
+    // DELETE messageConversation for the current user
     //--------------------------------------------------------------------------
 
     /**
@@ -281,7 +338,8 @@ public class MessageConversationController
      * @param uids UIDs of the MessageConversations to remove the user from.
      */
     @RequestMapping( method = RequestMethod.DELETE )
-    public void removeMessageConversations( @RequestParam("uid") String[] uids, HttpServletResponse response )
+    public void removeMessageConversations(
+        @RequestParam("uid") String[] uids, HttpServletResponse response )
     {
         List<String> uidList = Arrays.asList( uids );
 

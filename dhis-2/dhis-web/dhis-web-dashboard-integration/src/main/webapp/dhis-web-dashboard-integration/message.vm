@@ -21,7 +21,7 @@
           return;
       }
 
-      selectedAction = $("#batchActions").val();
+      var selectedAction = $("#batchActions").val();
 
       if( selectedAction === "delete" )
       {
