@@ -9,7 +9,7 @@ function removeMessage( id )
   removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
 }
 
-function batchRemoveMessages( messageUids )
+function batchRemoveMessages( messages )
 {
   var confirmed = window.confirm( "Really delete all selected messages?" );
 
@@ -17,29 +17,50 @@ function batchRemoveMessages( messageUids )
   {
     setHeaderWaitMessage( i18n_deleting );
 
-    requestParams = $.param( { uid: messageUids });
-
-    $.ajax({
-      url: "../../api/messageConversations?" + requestParams,
-      type: "DELETE",
-      traditional: true,
-      success: function( response ) {
-
-        var i;
-        for( i = 0 ; i < messageUids.length ; i++ )
+    $.ajax(
+      {
+        url: "../../api/messageConversations?" + $.param( messages, true ),
+        type: "DELETE",
+        success: function( response )
         {
-          $("#messages").find("[name='" + messageUids[i] + "']").remove();
+          for( var i = 0 ; i < messages.uid.length ; i++ )
+          {
+            $( "#messages" ).find( "[name='" + messages.uid[i] + "']" ).remove();
+          }
+          setHeaderDelayMessage( response );
+        },
+        error: function( response )
+        {
+          setHeaderDelayMessage( response );
         }
-
-        setHeaderDelayMessage( response );
       }
-    });
+    );
   }
 }
 
-function batchMarkMessagesRead( messageUids )
+function batchMarkMessagesRead( messages )
 {
-
+  $.ajax(
+    {
+      url: "../../api/messageConversations/read",
+      data: JSON.stringify( messages.uid ),
+      contentType: "application/json",
+      type: "PUT",
+      success: function( response )
+      {
+        msg = $("#messages");
+        for( var i = 0 ; i < messages.uid.length ; i++ )
+        {
+          msg.find( "[name='" + messages.uid[i] + "']" ).toggleClass( "unread bold" );
+          msg.find( "input:checkbox" ).removeAttr( "checked" );
+        }
+      },
+      error: function( response )
+      {
+        setHeaderDelayMessage( response );
+      }
+    }
+  );
 }
 
 function read( id )

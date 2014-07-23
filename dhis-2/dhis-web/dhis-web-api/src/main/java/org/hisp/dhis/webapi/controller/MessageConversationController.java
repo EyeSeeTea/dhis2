@@ -239,7 +239,41 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // Delete
+    // PUT to set MessageConversations as read
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "/read", method = RequestMethod.PUT )
+    public void setMessageConversationsRead( @RequestBody String[] uids, HttpServletResponse response )
+    {
+        List<String> uidList = Arrays.asList( uids );
+
+        if( uidList.isEmpty() )
+        {
+            ContextUtils.badRequestResponse( response, "No message conversations given" );
+            return;
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uidList );
+
+        if( messageConversations.isEmpty() )
+        {
+            ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
+            return;
+        }
+
+        User currentUser = currentUserService.getCurrentUser();
+
+        for( MessageConversation conversation : messageConversations )
+        {
+            conversation.markRead( currentUser );
+            messageService.updateMessageConversation( conversation );
+        }
+
+        ContextUtils.okResponse( response, "" );
+    }
+
+    //--------------------------------------------------------------------------
+    // DELETE
     //--------------------------------------------------------------------------
 
     /**
@@ -253,7 +287,7 @@ public class MessageConversationController
 
         if( uidList.isEmpty() )
         {
-            ContextUtils.badRequestResponse( response, "No message conversation UIDs given" );
+            ContextUtils.badRequestResponse( response, "No message conversations given" );
             return;
         }
 
@@ -262,6 +296,7 @@ public class MessageConversationController
         if( messageConversations.isEmpty() )
         {
             ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
+            return;
         }
 
         User currentUser = currentUserService.getCurrentUser();
@@ -272,6 +307,6 @@ public class MessageConversationController
             messageService.updateMessageConversation( conversation );
         }
 
-        ContextUtils.okResponse( response, uidList.size() > 1 ? "Messages conversations deleted" : "Message conversation deleted");
+        ContextUtils.okResponse( response, uidList.size() > 1 ? "Messages were deleted" : "Message was deleted");
     }
 }
