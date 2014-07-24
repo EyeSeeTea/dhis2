@@ -1,8 +1,9 @@
-$object.i18n.getString( "email.invite_1.first_paragraph" ) ${object.rootPath}.
-$object.i18n.getString( "email.invite_1.second_paragraph" )
+## Email account invite message 1 of 2
+$object.i18n.getString( "email_invite_1_1st_paragraph" ) ${object.rootPath}.
+$object.i18n.getString( "email_invite_1_2nd_paragraph" )
 
 
 ${object.restorePath}?username=${object.username}&token=${object.token}
 
 
-$object.i18n.getString( "email.invite_1.third_paragraph" )
+$object.i18n.getString( "email_invite_1_3rd_paragraph" )

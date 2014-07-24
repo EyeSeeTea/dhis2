@@ -28,6 +28,7 @@ package org.hisp.dhis.security;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.acl.AclService;
@@ -35,6 +36,7 @@ import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -51,8 +53,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import static org.hisp.dhis.user.UserSettingService.KEY_UI_LOCALE;
 
 /**
  * @author Lars Helge Overland
@@ -187,7 +192,9 @@ public class DefaultSecurityService
         vars.put( "code", result[1] );
         vars.put( "username", credentials.getUsername() );
 
-        I18n i18n = i18nManager.getI18n();
+        Locale userLocale = (Locale) userService.getUserSettingValue( credentials.getUser(), KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
+
+        I18n i18n = i18nManager.getI18n( userLocale );
         vars.put( "i18n" , i18n );
 
         // -------------------------------------------------------------------------
@@ -199,19 +206,8 @@ public class DefaultSecurityService
         String text1 = vm.render( vars, restoreType.getEmailTemplate() + "1" ),
                text2 = vm.render( vars, restoreType.getEmailTemplate() + "2" );
 
-        String subject1 = "", subject2 = "";
-
-        switch( restoreType )
-        {
-        case INVITE:
-            subject1 = i18n.getString( "email.invite_1.subject" );
-            subject2 = i18n.getString( "email.invite_2.subject" );
-            break;
-        case RECOVER_PASSWORD:
-            subject1 = i18n.getString( "email.recover_1.subject" );
-            subject2 = i18n.getString( "email.recover_2.subject" );
-            break;
-        }
+        String subject1 = i18n.getString( restoreType.getEmailSubject() ) + " (" + i18n.getString( "message" ).toLowerCase() + " 1 / 2)",
+               subject2 = i18n.getString( restoreType.getEmailSubject() ) + " (" + i18n.getString( "message" ).toLowerCase() + " 2 / 2)";
 
         // -------------------------------------------------------------------------
         // Send emails

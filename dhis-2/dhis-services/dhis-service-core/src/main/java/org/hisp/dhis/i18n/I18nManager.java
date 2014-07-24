@@ -44,6 +44,8 @@ public interface I18nManager
 
     I18n getI18n();
 
+    I18n getI18n( Locale locale );
+
     I18n getI18n( Class<?> clazz );
 
     I18n getI18n( Class<?> clazz, Locale locale );

@@ -37,8 +37,8 @@ import java.util.Calendar;
 
 public enum RestoreType
 {
-    RECOVER_PASSWORD( Calendar.HOUR_OF_DAY, 1, "restore_message", "restore.action" ),
-    INVITE( Calendar.MONTH, 3, "invite_message", "invite.action" );
+    RECOVER_PASSWORD( Calendar.HOUR_OF_DAY, 1, "restore_message", "email_restore_subject", "restore.action" ),
+    INVITE( Calendar.MONTH, 3, "invite_message", "email_invite_subject", "invite.action" );
 
     /**
      * Type of Calendar interval before the restore expires.
@@ -56,6 +56,11 @@ public enum RestoreType
     private final String emailTemplate;
 
     /**
+     * Subject line of the email for this restore action type.
+     */
+    private final String emailSubject;
+
+    /**
      * Return web action to put in the email message.
      */
     private final String action;
@@ -65,11 +70,12 @@ public enum RestoreType
     // -------------------------------------------------------------------------
 
     RestoreType( int expiryIntervalType, int expiryIntervalCount,
-                 String emailTemplate, String action )
+                 String emailTemplate, String emailSubject, String action )
     {
         this.expiryIntervalType = expiryIntervalType;
         this.expiryIntervalCount = expiryIntervalCount;
         this.emailTemplate = emailTemplate;
+        this.emailSubject = emailSubject;
         this.action = action;
     }
 
@@ -90,6 +96,11 @@ public enum RestoreType
     public String getEmailTemplate()
     {
         return emailTemplate;
+    }
+
+    public String getEmailSubject()
+    {
+        return emailSubject;
     }
 
     public String getAction()
