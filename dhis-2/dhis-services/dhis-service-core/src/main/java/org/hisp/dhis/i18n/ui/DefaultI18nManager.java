@@ -68,12 +68,6 @@ public class DefaultI18nManager
     // -------------------------------------------------------------------------
 
     @Override
-    public I18n getI18n()
-    {
-        return new I18n( getGlobalResourceBundle(), null );
-    }
-
-    @Override
     public I18n getI18n( Locale locale )
     {
         return new I18n( getGlobalResourceBundle( locale ), null );
