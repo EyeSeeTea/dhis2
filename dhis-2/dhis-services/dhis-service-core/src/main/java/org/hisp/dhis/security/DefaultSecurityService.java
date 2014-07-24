@@ -46,6 +46,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.UserSettingService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -55,8 +56,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-
-import static org.hisp.dhis.user.UserSettingService.KEY_UI_LOCALE;
 
 /**
  * @author Lars Helge Overland
@@ -191,9 +190,10 @@ public class DefaultSecurityService
         vars.put( "code", result[1] );
         vars.put( "username", credentials.getUsername() );
 
-        Locale userLocale = (Locale) userService.getUserSettingValue( credentials.getUser(), KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
+        User user = credentials.getUser();
+        Locale locale = (Locale) userService.getUserSettingValue( user, UserSettingService.KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
 
-        I18n i18n = i18nManager.getI18n( userLocale );
+        I18n i18n = i18nManager.getI18n( locale );
         vars.put( "i18n" , i18n );
 
         // -------------------------------------------------------------------------
