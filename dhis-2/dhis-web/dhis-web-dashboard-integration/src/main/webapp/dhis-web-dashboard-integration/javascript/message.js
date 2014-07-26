@@ -23,8 +23,7 @@ function batchRemoveMessages( messages )
         type: "DELETE",
         success: function( response )
         {
-
-          for( var i = 0 ; i < messages.uid.length ; i++ )
+          for( var i = 0 ; i < response.removed.length ; i++ )
           {
             $( "#messages" ).find( "[name='" + messages.uid[i] + "']" ).remove();
           }

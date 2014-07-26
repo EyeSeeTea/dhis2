@@ -15,7 +15,7 @@ Ext.onReady( function() {
 			core: {},
 			app: {}
 		};
-
+	
 	// set app config
 	(function() {
 
