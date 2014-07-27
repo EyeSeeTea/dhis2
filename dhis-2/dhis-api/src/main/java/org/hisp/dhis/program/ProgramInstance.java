@@ -80,7 +80,7 @@ public class ProgramInstance
 
     private Boolean followup = false;
 
-    private List<TrackedEntityComment> comments = new ArrayList<TrackedEntityComment>();
+    private TrackedEntityComment comment;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -392,14 +392,14 @@ public class ProgramInstance
         this.messageConversations = messageConversations;
     }
 
-    public List<TrackedEntityComment> getComments()
+    public TrackedEntityComment getComment()
     {
-        return comments;
+        return comment;
     }
 
-    public void setComment( List<TrackedEntityComment> comments )
+    public void setComment( TrackedEntityComment comment )
     {
-        this.comments = comments;
+        this.comment = comment;
     }
 
 }
