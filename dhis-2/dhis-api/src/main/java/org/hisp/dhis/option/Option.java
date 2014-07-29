@@ -1,5 +1,3 @@
-package org.hisp.dhis.dataadmin.action.option;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -28,61 +26,31 @@ package org.hisp.dhis.dataadmin.action.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.option.OptionService;
-import org.hisp.dhis.option.OptionSet;
+package org.hisp.dhis.option;
 
-import com.opensymphony.xwork2.Action;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Chau Thu Tran
- * @version $UpdateOptionSetAction.java Feb 3, 2012 9:28:11 PM$
+ *
+ * @version $ Option.java Jul 28, 2014 4:28:53 PM $
  */
-public class UpdateOptionSetAction
-    implements Action
+@JacksonXmlRootElement( localName = "option", namespace = DxfNamespaces.DXF_2_0 )
+public class Option
+    extends BaseIdentifiableObject
 {
-    // -------------------------------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------------------------------
-
-    private OptionService optionService;
-
-    public void setOptionService( OptionService optionService )
+    public Option()
     {
-        this.optionService = optionService;
+        setAutoFields();
     }
-
-    // -------------------------------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
+    
+    public Option( String name, String code )
     {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
+        setAutoFields();
         this.name = name;
+        this.code = code;
     }
-
-    // -------------------------------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------------------------------
-
-    @Override
-    public String execute()
-        throws Exception
-    {
-        OptionSet optionSet = optionService.getOptionSet( id );
-        optionSet.setName( name );
-
-        optionService.updateOptionSet( optionSet );
-
-        return SUCCESS;
-    }
-
 }
