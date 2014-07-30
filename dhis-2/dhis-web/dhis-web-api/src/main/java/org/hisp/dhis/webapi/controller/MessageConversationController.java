@@ -263,58 +263,37 @@ public class MessageConversationController
 
         if( uidList.isEmpty() )
         {
-            rootNode.addChild( new SimpleNode( "response", "error" ) );
             rootNode.addChild( new SimpleNode( "message", "No messages given" ) );
 
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
 
             return rootNode;
-
-            //result.put( "response", "error" );
-            //result.put( "message", "No message conversations given" );
-            //ContextUtils.badRequestResponse( response, objectMapper.writeValueAsString( result ) );
-            //return;
         }
 
         Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uidList );
 
         if( messageConversations.isEmpty() )
         {
-            rootNode.addChild( new SimpleNode( "response", "error" ) );
             rootNode.addChild( new SimpleNode( "message", "Invalid UIDs given" ) );
 
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
 
             return rootNode;
-
-            //result.put( "response", "error" );
-            //result.put( "message", "No message conversations found for the given UIDs" );
-            //ContextUtils.badRequestResponse( response, objectMapper.writeValueAsString( result ) );
-            //return;
         }
 
         User currentUser = currentUserService.getCurrentUser();
 
         CollectionNode marked = rootNode.addChild( new CollectionNode( "markedRead" ) );
         marked.setWrapping( false );
-        //Set<String> marked = new HashSet<String>();
 
         for( MessageConversation conversation : messageConversations )
         {
             if( conversation.markRead( currentUser ) )
             {
-                //marked.add( conversation.getUid() );
                 marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
                 messageService.updateMessageConversation( conversation );
             }
         }
-
-        //result.put("response", "success" );
-        //result.put("markedRead", marked );
-
-        //ContextUtils.okResponse( response, objectMapper.writeValueAsString( result ) );
-
-        rootNode.addChild( new SimpleNode( "response", "success" ) );
 
         response.setStatus( HttpServletResponse.SC_OK );
 
@@ -326,36 +305,46 @@ public class MessageConversationController
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/unread", method = RequestMethod.PUT )
-    public void markMessageConversationsUnread( @RequestBody String[] uids, HttpServletResponse response )
+    public @ResponseBody RootNode markMessageConversationsUnread( @RequestBody String[] uids, HttpServletResponse response )
+        throws IOException, InvalidTypeException
     {
-        Map<String, Object> result = new HashMap<String, Object>();
+        RootNode rootNode = new RootNode( "reply" );
 
         List<String> uidList = Arrays.asList( uids );
 
         if( uidList.isEmpty() )
         {
-            result.put( "response", "error" );
-            ContextUtils.badRequestResponse( response, "No message conversations given" );
-            return;
+            rootNode.addChild( new SimpleNode( "message", "No messages given" ) );
+            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
+
+            return rootNode;
         }
 
         Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uidList );
 
         if( messageConversations.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
-            return;
+            rootNode.addChild( new SimpleNode( "message", "No messages found for the given UIDs" ) );
+            response.setStatus( HttpServletResponse.SC_CONFLICT );
+            return rootNode;
         }
+
+        CollectionNode marked = rootNode.addChild( new CollectionNode( "markedUnread" ) );
+        marked.setWrapping( false );
 
         User currentUser = currentUserService.getCurrentUser();
 
         for( MessageConversation conversation : messageConversations )
         {
-            conversation.markUnread( currentUser );
-            messageService.updateMessageConversation( conversation );
+            if( conversation.markUnread( currentUser ) )
+            {
+                messageService.updateMessageConversation( conversation );
+                marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
+            }
         }
 
-        ContextUtils.okResponse( response, "" );
+        response.setStatus( HttpServletResponse.SC_OK );
+        return rootNode;
     }
 
     //--------------------------------------------------------------------------
@@ -374,7 +363,6 @@ public class MessageConversationController
         {
             rootNode.addChild( new SimpleNode( "message", "No messages given" ) );
             response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            //ContextUtils.badRequestResponse( response, "No message conversations given" );
             return rootNode;
         }
 
@@ -384,7 +372,6 @@ public class MessageConversationController
         {
             rootNode.addChild( new SimpleNode( "message", "No messages found for the given UIDs" ) );
             response.setStatus( HttpServletResponse.SC_CONFLICT );
-            //ContextUtils.conflictResponse( response, "No message conversations found for the given UIDs" );
             return rootNode;
         }
 
@@ -400,8 +387,6 @@ public class MessageConversationController
                 messageService.updateMessageConversation( conversation );
             }
         }
-
-        //ContextUtils.okResponse( response, uidList.size() > 1 ? "Messages were deleted" : "Message was deleted");
 
         response.setStatus( HttpServletResponse.SC_OK );
 

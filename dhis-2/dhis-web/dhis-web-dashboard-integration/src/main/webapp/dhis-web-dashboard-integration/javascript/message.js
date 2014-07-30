@@ -1,67 +1,94 @@
 
 function submitMessage()
 {
-	$( "#messageForm" ).submit();
+    $( "#messageForm" ).submit();
 }
 
 function removeMessage( id )
 {
-  removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
+    removeItem( id, "", i18n_confirm_delete_message, "removeMessage.action" );
 }
 
-function batchRemoveMessages( messages )
+function removeMessages( messages )
 {
-  var confirmed = window.confirm( "Really delete all selected messages?" );
+    var confirmed = window.confirm( i18n_confirm_delete_all_selected_messages );
 
-  if ( confirmed )
-  {
-    setHeaderWaitMessage( i18n_deleting );
+    if ( confirmed )
+    {
+        setHeaderWaitMessage( i18n_deleting );
 
-    $.ajax(
-      {
-        url: "../../api/messageConversations?" + $.param( messages, true ),
-        type: "DELETE",
-        success: function( response )
+        $.ajax(
         {
-          for( var i = 0 ; i < response.removed.length ; i++ )
-          {
-            $( "#messages" ).find( "[name='" + messages.uid[i] + "']" ).remove();
-          }
-          setHeaderDelayMessage( response );
-        },
-        error: function( response )
-        {
-          setHeaderDelayMessage( response );
-        }
-      }
-    );
-  }
+            url: "../../api/messageConversations?" + $.param( messages, true ),
+            contentType: "application/json",
+            dataType: "json",
+            type: "DELETE",
+            success: function( response )
+            {
+                for( var i = 0 ; i < response.removed.length ; i++ )
+                {
+                    $( "#messages" ).find( "[name='" + response.removed[i] + "']" ).remove();
+                }
+                setHeaderDelayMessage( response );
+            },
+            error: function( response )
+            {
+                showErrorMessage( response.message );
+            }
+        });
+    }
 }
 
-function batchMarkMessagesRead( messages )
+function markMessagesRead( messages )
 {
   $.ajax(
-    {
+  {
       url: "../../api/messageConversations/read",
+      type: "PUT",
       data: JSON.stringify( messages.uid ),
       contentType: "application/json",
       dataType: "json",
-      type: "PUT",
       success: function( response )
       {
-        var msg = $( "#messages" );
-        for( var i = 0 ; i < response.markedRead.length ; i++ )
-        {
-          msg.find( "[name='" + response.markedRead[i] + "']" ).toggleClass( "unread bold" );
-          msg.find( "input:checkbox" ).removeAttr( "checked" );
-        }
+          toggleMessagesRead( messages.markedRead );
       },
       error: function( response )
       {
-        setHeaderDelayMessage( response.message );
+          showErrorMessage( response.message );
       }
+  });
+}
+
+function markMessagesUnread( messages )
+{
+    $.ajax(
+    {
+        url: "../../api/messageConversations/unread",
+        type: "PUT",
+        data: JSON.stringify( messages.uid ),
+        contentType: "application/json",
+        dataType: "json",
+        success: function( response )
+        {
+            toggleMessagesRead( response.markedUnread );
+        },
+        error: function( response )
+        {
+            showErrorMessage( response.message );
+        }
+    });
+}
+
+function toggleMessagesRead( messageUids )
+{
+    var messages = $( "#messages" );
+
+    for( var i = 0 ; i < messageUids.length ; i++ )
+    {
+        messages.find( "[name='" + messageUids[i] + "']" ).toggleClass( "unread bold" );
+        messages.find( "input:checkbox" ).removeAttr( "checked" );
+        $( "#toggleAllCheckbox" ).removeAttr( "checked" );
     }
-  );
 }
 
 function read( id )
