@@ -2,65 +2,60 @@
 
 <div class="horizontalMenu" style="padding: 8px 0 40px 0;">
     <ul>
+
         #if( $auth.hasAccess( "dhis-web-dashboard-integration", "sendMessage" ) )
-        <li><a class="blueButtonLink" href="showSendMessage.action">$i18n.getString( 'write_message' )</a></li>
+            <li><a class="blueButtonLink" href="showSendMessage.action">$i18n.getString( 'write_message' )</a></li>
         #end
         <li><a class="blueButtonLink" href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a></li>
         <li><span style="padding-left:12px"></span></li>
         <li><a class="greyButtonLink" href="message.action">$i18n.getString( "inbox" )</a></li>
         <li><a class="greyButtonLink" href="message.action?followUp=true">$i18n.getString( "follow_up" )</a></li>
         <li><a class="greyButtonLink" href="message.action?unread=true">$i18n.getString( "unread" )</a></li>
-        <li>
-            <select id="batchActions">
-                <option value="delete">$i18n.getString( "delete" )</option>
-                <option value="markRead">$i18n.getString( "mark_read" )</option>
-                <option value="markUnread">$i18n.getString( "mark_unread" )</option>
-            </select>
-        </li>
-        <li>
-            <a id="batchOkButton" class="blueButtonLink" href="#">OK</a>
-        </li>
+        <li><a class="multiSelectButton" id="multiSelectButton"><input type="checkbox" id="multiSelectCheckbox" /><span class="downArrow"></span></a></li>
     </ul>
 </div>
+<ul id="multiSelectMenu" class="multiSelectMenu" >
+    <li><a href="#" value="delete">Delete</a></li>
+    <li><a href="#" value="markRead">Mark read</a></li>
+    <li><a href="#" value="markUnread">Mark unread</a></li>
+</ul>
 <div style="width:100%">
-<div style="padding-right:15px">
-<table class="plainList" style="width:100%">
-    <thead>
-        <tr>
-            <th style="width:20px;padding-left:5px;">
-                <input type="checkbox" id="toggleAllCheckbox" />
-            </th>
-            <th></th>
-            <th>$i18n.getString( "sender" )</th>
-            <th>$i18n.getString( "subject" )</th>
-            <th>$i18n.getString( "date" )</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody id="messages" >
-    #foreach( $conversation in $conversations )
-        <tr name="${conversation.uid}" id="tr${conversation.id}" #if( !$conversation.read )class="unread bold"#end>
-            <td style="width:20px;padding-left:5px;">
-              <input type="checkbox" value="${conversation.uid}" />
-            </td>
-            <td style="width:40px;padding-left:5px;" onclick="toggleFollowUp( '${conversation.id}' )">
-                <img id="followUp${conversation.id}" #if( $conversation.followUp ) src="../images/marked.png"#else src="../images/unmarked.png"#end></td>
-            <td style="width:200px" onclick="read( '${conversation.uid}' )">
-                #if( $conversation.lastSenderName )$!encoder.htmlEncode( $conversation.lastSenderName )#else$i18n.getString( "system_notification" )#end
-                #if( $conversation.messageCount > 1 ) <span class="normal">(${conversation.messageCount})</span>#end
-            </td>
-            <td onclick="read( '${conversation.uid}' )">$!encoder.htmlEncode( $conversation.subject )</td>
-            <td onclick="read( '${conversation.uid}' )" style="width:80px">$!format.formatDate( $conversation.lastMessage )</td>
-            <td style="width:70px; text-align:center;">
-                <a href="readMessage.action?id=${conversation.uid}"><img src="../images/read.png" title="$i18n.getString( 'read' )"></a>
-                <a href="javascript:removeMessage( '${conversation.id}' )"><img src="../images/delete.png" title="$i18n.getString( 'delete' )"></a>
-            </td>
-        </tr>
-    #end
-    </tbody>
-</table>
-#parse( "/dhis-web-commons/paging/paging.vm" )
-</div>
+    <div style="padding-right:15px">
+        <table class="plainList" style="width:100%">
+            <thead>
+            <tr>
+                <th></th>
+                <th></th>
+                <th>$i18n.getString( "sender" )</th>
+                <th>$i18n.getString( "subject" )</th>
+                <th>$i18n.getString( "date" )</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="messages" >
+                #foreach( $conversation in $conversations )
+                <tr name="${conversation.uid}" id="tr${conversation.id}" #if( !$conversation.read )class="unread bold"#end>
+                    <td style="width:20px;padding-left:5px;">
+                        <input type="checkbox" value="${conversation.uid}" />
+                    </td>
+                    <td style="width:40px;padding-left:5px;" onclick="toggleFollowUp( '${conversation.id}' )">
+                        <img id="followUp${conversation.id}" #if( $conversation.followUp ) src="../images/marked.png"#else src="../images/unmarked.png"#end></td>
+                    <td style="width:200px" onclick="read( '${conversation.uid}' )">
+                        #if( $conversation.lastSenderName )$!encoder.htmlEncode( $conversation.lastSenderName )#else$i18n.getString( "system_notification" )#end
+                        #if( $conversation.messageCount > 1 ) <span class="normal">(${conversation.messageCount})</span>#end
+                    </td>
+                    <td onclick="read( '${conversation.uid}' )">$!encoder.htmlEncode( $conversation.subject )</td>
+                    <td onclick="read( '${conversation.uid}' )" style="width:80px">$!format.formatDate( $conversation.lastMessage )</td>
+                    <td style="width:70px; text-align:center;">
+                        <a href="readMessage.action?id=${conversation.uid}"><img src="../images/read.png" title="$i18n.getString( 'read' )"></a>
+                        <a href="javascript:removeMessage( '${conversation.id}' )"><img src="../images/delete.png" title="$i18n.getString( 'delete' )"></a>
+                    </td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+        #parse( "/dhis-web-commons/paging/paging.vm" )
+    </div>
 </div>
 <script type="text/javascript">
     $( document ).ready( function() {
@@ -68,11 +63,57 @@
         i18n_confirm_delete_all_selected_messages = '$encoder.jsEscape( $i18n.getString( "confirm_delete_all_selected_messages" ), "'" )';
         i18n_no_messages_selected = '$encoder.jsEscape( $i18n.getString( "no_messages_selected" ), "'" )';
 
-        $("#batchOkButton").click( function()
+        /* Multi select checkbox button */
+
+        $( "#multiSelectButton" ).click( function( event )
+        {
+            $( document ).one( "click", function()
+            {
+                $( "#multiSelectMenu" ).css( "visibility", "hidden" );
+            });
+
+            var $multiMenu = $( "#multiSelectMenu" );
+
+            if( $multiMenu.css( "visibility" ) !== "visible" )
+            {
+                $multiMenu.css( "visibility", "visible" );
+            }
+            else
+            {
+                $multiMenu.css( "visibility", "hidden" );
+            }
+            event.stopPropagation();
+        });
+
+        $( "#multiSelectMenu" )
+            .css( "visibility", "hidden" )
+            .position(
+            {
+                my: "left top",
+                at: "left bottom",
+                of: "#multiSelectButton"
+            });
+
+        $( "#multiSelectCheckbox" ).click(
+                function( event )
+                {
+                    if( typeof $( this ).attr( "checked" ) !== "undefined" )
+                    {
+                        $( "#messages input:checkbox").attr( "checked", "checked" );
+                    }
+                    else
+                    {
+                        $( "#messages input:checkbox:checked").removeAttr( "checked" );
+                    }
+                    event.stopPropagation();
+                }
+        );
+
+        $( "#multiSelectMenu li").click( function()
         {
             var messages = {};
             messages.uid = [];
-            $( "#messages input:checkbox:checked" ).each( function ()
+            $( "#messages input:checkbox:checked" ).each( function()
             {
                 messages.uid.push( this.value );
             });
@@ -83,51 +124,37 @@
                 return;
             }
 
-            var selectedAction = $( "#batchActions" ).val();
+            var action = $( this.value );
 
-            if( selectedAction === "delete" )
+            if( action === "delete" )
             {
                 removeMessages( messages );
             }
-            else if ( selectedAction === "markRead" )
+            else if( action === "markRead" )
             {
                 markMessagesRead( messages );
             }
-            else if ( selectedAction === "markUnread" )
+            else if( action === "markUnread" )
             {
                 markMessagesUnread( messages );
             }
         });
 
-        $( "#toggleAllCheckbox" ).click(
-                function()
-                {
-                    if( typeof $( this ).attr( "checked" ) !== "undefined" )
-                    {
-                        $( "#messages input:checkbox").attr( "checked", "checked" );
-                    }
-                    else
-                    {
-                        $( "#messages input:checkbox:checked").removeAttr( "checked" );
-                    }
-                }
-        );
+        /* Checkboxes all selected/deselected trigger select/deselect of multi select checkbox */
 
         var numCheckboxes = $( "#messages input:checkbox" ).length;
 
-        $( "#messages input:checkbox" ).click(
-                function()
-                {
-                    var checked = $( "#messages input:checkbox:checked" );
-                    if( checked.length < 1 )
-                    {
-                        $( "#toggleAllCheckbox" ).removeAttr( "checked" );
-                    }
-                    else if( checked.length === numCheckboxes )
-                    {
-                        $( "#toggleAllCheckbox" ).attr( "checked", "checked" );
-                    }
-                }
-        );
+        $( "#messages input:checkbox" ).click( function()
+        {
+            var checked = $( "#messages input:checkbox:checked" );
+            if( checked.length < 1 )
+            {
+                $( "#multiSelectCheckbox" ).removeAttr( "checked" );
+            }
+            else if( checked.length === numCheckboxes )
+            {
+                $( "#multiSelectCheckbox" ).attr( "checked", "checked" );
+            }
+        });
     });
 </script>
