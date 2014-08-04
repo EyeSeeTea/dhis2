@@ -28,11 +28,10 @@ package org.hisp.dhis.dataadmin.action.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.option.OptionService;
 import org.hisp.dhis.option.OptionSet;
 
-import java.util.List;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
@@ -47,38 +46,27 @@ public class UpdateOptionSetAction
 
     private OptionService optionService;
 
+    public void setOptionService( OptionService optionService )
+    {
+        this.optionService = optionService;
+    }
+
     // -------------------------------------------------------------------------------------------------
     // Input
     // -------------------------------------------------------------------------------------------------
 
     private Integer id;
 
-    private String name;
-
-    private List<String> options;
-
-    // -------------------------------------------------------------------------------------------------
-    // Setters
-    // -------------------------------------------------------------------------------------------------
-
-    public void setOptionService( OptionService optionService )
-    {
-        this.optionService = optionService;
-    }
-
     public void setId( Integer id )
     {
         this.id = id;
     }
 
+    private String name;
+
     public void setName( String name )
     {
         this.name = name;
-    }
-
-    public void setOptions( List<String> options )
-    {
-        this.options = options;
     }
 
     // -------------------------------------------------------------------------------------------------
@@ -91,13 +79,6 @@ public class UpdateOptionSetAction
     {
         OptionSet optionSet = optionService.getOptionSet( id );
         optionSet.setName( name );
-
-        if ( !optionSet.getOptions().equals( options ) )
-        {
-            optionSet.setVersion( optionSet.getVersion() + 1 );
-        }
-
-        optionSet.setOptions( options );
 
         optionService.updateOptionSet( optionSet );
 

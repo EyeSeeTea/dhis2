@@ -132,22 +132,23 @@
     <bean id="org.hisp.dhis.rbf.action.LoadBankDetailsAction" class="org.hisp.dhis.rbf.action.LoadBankDetailsAction" scope="prototype">
         <property name="bankDetailsService" ref="org.hisp.dhis.rbf.api.BankDetailsService" />   
         <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-        <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+        <!--<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />-->
         <property name="lookupService" ref="org.hisp.dhis.rbf.api.LookupService" />
+        <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     </bean>
     
     <!-- Add Bank Detail -->
 	<bean id="org.hisp.dhis.rbf.action.AddBankDataAction" class="org.hisp.dhis.rbf.action.AddBankDataAction" scope="prototype">
 		<property name="bankDetailsService" ref="org.hisp.dhis.rbf.api.BankDetailsService" />		
 		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />		
+		<!--<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />-->		
     </bean>
     
     <!-- Add Bank Detail -->
 	<bean id="org.hisp.dhis.rbf.action.DeleteBankDataAction" class="org.hisp.dhis.rbf.action.DeleteBankDataAction" scope="prototype">
 		<property name="bankDetailsService" ref="org.hisp.dhis.rbf.api.BankDetailsService" />		
 		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />		
+		<!--<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />-->		
     </bean>
     
     
@@ -202,6 +203,25 @@
 		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
 		<property name="pbfDataValueService" ref="org.hisp.dhis.rbf.api.PBFDataValueService" />			
 	</bean>
+
+
+    <!-- Save Value In DataValue-->
+    
+    <bean id="org.hisp.dhis.rbf.dataentry.SaveValueInDataValueAction"  class="org.hisp.dhis.rbf.dataentry.SaveValueInDataValueAction" scope="prototype">
+		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+		<property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
+		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
+		<property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	</bean>
+
+
+
+
+
+
+
+
     
     <!-- Quality Max Data Entry -->
     
@@ -268,6 +288,14 @@
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
 		<property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 	</bean>
+	
+	
+	<bean id="org.hisp.dhis.rbf.quality.dataentry.LoadQualityMaxScoreAction"  class="org.hisp.dhis.rbf.quality.dataentry.LoadQualityMaxScoreAction" scope="prototype">
+		<property name="qualityMaxValueService" ref="org.hisp.dhis.rbf.api.QualityMaxValueService" />	
+		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
+		<property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+	</bean>	
+	
 	
 	<!-- Payment Adjustment -->
 	
@@ -421,6 +449,22 @@
         <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
     </bean>
 
+
+	<!-- Update Quality Score Payment Form -->
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.UpdateQualityScorePaymentFormAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.UpdateQualityScorePaymentFormAction"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+
+	<!-- Update Quality Score Payment -->
+	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.UpdateQualityScorePaymentAction"
+        class="org.hisp.dhis.rbf.qualityscorepayment.action.UpdateQualityScorePaymentAction"
+        scope="prototype">
+        <property name="qualityScorePaymentService" ref="org.hisp.dhis.rbf.api.QualityScorePaymentService" />      
+    </bean>
+    
+    
 	<!-- Delete Quality Score Payment --> 
 	<bean id="org.hisp.dhis.rbf.qualityscorepayment.action.DeleteQualityScorePaymentAction"
         class="org.hisp.dhis.rbf.qualityscorepayment.action.DeleteQualityScorePaymentAction"

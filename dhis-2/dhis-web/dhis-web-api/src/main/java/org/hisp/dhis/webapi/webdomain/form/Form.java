@@ -28,16 +28,17 @@ package org.hisp.dhis.webapi.webdomain.form;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -52,7 +53,7 @@ public class Form
     private List<Group> groups = new ArrayList<Group>();
 
     private Map<String, Object> options = new HashMap<String, Object>();
-
+    
     public Form()
     {
     }
@@ -105,7 +106,7 @@ public class Form
     {
         this.options = options;
     }
-
+    
     @Override
     public String toString()
     {

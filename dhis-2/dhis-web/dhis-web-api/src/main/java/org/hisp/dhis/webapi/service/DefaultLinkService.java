@@ -72,7 +72,7 @@ public class DefaultLinkService implements LinkService
             return;
         }
 
-        String endpoint = contextService.getServletPath() + "/" + schema.getApiEndpoint();
+        String endpoint = contextService.getServletPath() + schema.getApiEndpoint();
 
         if ( pager.getPage() < pager.getPageCount() )
         {
@@ -100,13 +100,13 @@ public class DefaultLinkService implements LinkService
     }
 
     @Override
-    public <T> void generateLinks( T object )
+    public <T> void generateLinks( T object, boolean deepScan )
     {
-        generateLinks( object, contextService.getServletPath() );
+        generateLinks( object, contextService.getServletPath(), deepScan );
     }
 
     @Override
-    public <T> void generateLinks( T object, String hrefBase )
+    public <T> void generateLinks( T object, String hrefBase, boolean deepScan )
     {
         if ( Collection.class.isInstance( object ) )
         {
@@ -114,12 +114,12 @@ public class DefaultLinkService implements LinkService
 
             for ( Object collectionObject : collection )
             {
-                generateLink( collectionObject, hrefBase, false );
+                generateLink( collectionObject, hrefBase, deepScan );
             }
         }
         else
         {
-            generateLink( object, hrefBase, true );
+            generateLink( object, hrefBase, deepScan );
         }
     }
 

@@ -15,6 +15,7 @@ import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.Section;
@@ -45,7 +46,9 @@ public class LoadQualityScoreDetailsAction
     private final static String TARIFF_SETTING_AUTHORITY = "TARIFF_SETTING_AUTHORITY";
 
     private final static String QUALITY_MAX_DATAELEMENT = "QUALITY_MAX_DATAELEMENT";
-
+    
+    private final static String OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID = "OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -111,7 +114,9 @@ public class LoadQualityScoreDetailsAction
     @Autowired
     private QualityScorePaymentService qualityScorePaymentService;
 
-
+    @Autowired
+    private DataElementService dataElementService;
+    
     // -------------------------------------------------------------------------
     // Input / Output
     // -------------------------------------------------------------------------
@@ -185,10 +190,18 @@ public class LoadQualityScoreDetailsAction
     {
         return qualityScorePayments;
     }
-
+    
+    private int overAllQtyDataElementId;
+    
+    public int getOverAllQtyDataElementId()
+    {
+        return overAllQtyDataElementId;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
+
 
     public String execute()
         throws Exception
@@ -208,6 +221,14 @@ public class LoadQualityScoreDetailsAction
         else
         {
             tariff_setting_authority = (int) tariff_authority.getValue();
+        }
+        
+        Constant overAllQtyDetId = constantService.getConstantByName( OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID );
+        DataElement overAllDataElement = dataElementService.getDataElement( (int) overAllQtyDetId.getValue() );
+        overAllQtyDataElementId = 0;
+        if( overAllDataElement != null )
+        {
+            overAllQtyDataElementId = overAllDataElement.getId();
         }
         
         Constant qualityMaxDataElement = constantService.getConstantByName( QUALITY_MAX_DATAELEMENT );
@@ -233,9 +254,16 @@ public class LoadQualityScoreDetailsAction
 
         //List<DataElement> dataElementList = new ArrayList<DataElement>( dataSet.getDataElements() );
         
+        
+        
+        dataElements = new ArrayList<DataElement>();
+        dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
+        
         List<DataElement> dataElementList = new ArrayList<DataElement>();
         
         
+        
+    
         List<Section> sectionList = new ArrayList<Section>( dataSet.getSections() );
         List<DataElement> tempDEList = new ArrayList<DataElement>();
         
@@ -255,6 +283,7 @@ public class LoadQualityScoreDetailsAction
             dataElementList.addAll( dataSet.getDataElements() );
         }
         
+        List<DataElement> tempDataElementList = new ArrayList<DataElement>();
         
         for ( DataElement de : dataElementList )
         {
@@ -263,10 +292,13 @@ public class LoadQualityScoreDetailsAction
             {
                 if ( attValue.getAttribute().getId() == qualityMaxDataElement.getValue() )
                 {
-                    dataElements.add( de );
+                    tempDataElementList.add( de );
                 }
             }
         }
+        
+        
+        dataElements.retainAll( tempDataElementList );
         
         for ( DataElement dataElement : dataElements )
         {
@@ -304,6 +336,7 @@ public class LoadQualityScoreDetailsAction
         
         //System.out.println(" Payment dataSet Period Type---" + paymentDataSet.getPeriodType() );
         
+        period = periodService.reloadPeriod( period );
         
         Set<Period> periods = new HashSet<Period>( periodService.getIntersectingPeriodsByPeriodType( paymentDataSet.getPeriodType(), period.getStartDate(), period.getEndDate() ) );
         

@@ -70,7 +70,7 @@
     <tbody>
 		<tr>
 			<td><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( "required" )" class="required">*</em></label></td>
-			<td><input type="text" id="name" name="name" value="$encoder.htmlEncode( $program.displayName )" class="{validate:{required:true,minlength:4}}"></td>
+			<td><input type="text" id="name" name="name" value="$encoder.htmlEncode( $program.name )" class="{validate:{required:true,minlength:4}}"></td>
 			<td></td>
 		</tr>	
 		
@@ -122,6 +122,8 @@
 			<td></td>
 		</tr>
 		
+		<tr name='nonAnonymous'><td>&nbsp;</td></tr>
+		
 		<tr name='nonAnonymous'>
 			<th colspan="2">$i18n.getString( "enrollment_details" )</th>
 		</tr>
@@ -168,7 +170,8 @@
             <td></td>
         </tr>
 
-
+		<tr name='nonAnonymous'><td>&nbsp;</td></tr>
+		
 		<tr name='nonAnonymous'>
 			<th colspan="2">$i18n.getString( "dashboard_shortcut_to_add_relative" )</th>
 		</tr>
@@ -215,26 +218,18 @@
 			</td>
 		</tr>
 		
-		<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-			
-	<tbody>
-	</table>
-
-  <table name='nonAnonymous'>
-      <thead>
-        <tr>
+		<tr><td>&nbsp;</td></tr>
+		
+        <tr name='nonAnonymous'>
           <th colspan="2">$i18n.getString( "scheduling_of_events" )</th>
         </tr>
-      </thead>
-
-      <tbody>
         <tr name='nonAnonymous'>
             <td><label for="ignoreOverdueEvents">$i18n.getString( "skip_to_generate_overdue_events" )</label></td>
             <td><input type="checkbox" id="ignoreOverdueEvents" name="ignoreOverdueEvents" value='true' #if($program.ignoreOverdueEvents=='true') checked #end #if( $program.type!='1' ) disabled #end ></td>
             <td></td>
         </tr>
-      </tbody>
-  </table>
+    </tbody>
+</table>
 
   <br />
 
@@ -288,7 +283,7 @@
                             </tr>
 						</thead>
 						<tbody id="selectedList" #if($program.type==3) style="display:none;" #end>
-							#foreach( $programAttribute in $program.attributes )
+							#foreach( $programAttribute in $program.programAttributes )
 								#set($attribute = $programAttribute.attribute)
 								<tr ondblclick="unSelectProperties( this )" id="attr_$programAttribute.attribute.id">
 									<td onmousedown="select(event, this)">$encoder.htmlEncode( $attribute.name )</td>

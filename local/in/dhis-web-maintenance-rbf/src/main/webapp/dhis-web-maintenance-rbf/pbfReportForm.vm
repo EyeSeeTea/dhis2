@@ -67,7 +67,7 @@
 		
 		var orgUnitGroupName = tempOrgUnitGroupNameMap[orgUnitId];
 		
-		//alert( orgUnitGroupName );
+		alert( orgUnitGroupName );
 		
 		
 		if( rprDesign == "MH_PATIENT_ALLOWANCE_CLAIM")
@@ -90,6 +90,12 @@
 				window.location.href =  birtReportURL;
 			}
 			
+			else 
+			{ 
+				showWarningMessage( "Selected Facility Not Related to any group" );
+				//return false; 
+			}		
+			
 		}
 		
 		else if( rprDesign == "HEALTH_PROVIDER_PAYMENT_CLAIM")
@@ -111,7 +117,11 @@
 				var birtReportURL = "http://178.79.144.205:8989/birt/run?__report=/home/dqa/tomcat_pbf_laos/webapps/birt/report/healthprovider_DH_report4.rptdesign&__format="+reportFormat+"&startDate="+startPeriod+"&endDate="+endPeriod+"&orgUnit="+orgUnitId;
 				window.location.href =  birtReportURL;
 			}
-			
+			else 
+			{ 
+				showWarningMessage( "Selected Facility Not Related to any group" );
+				//return false; 
+			}					
 		}		
 		
 		else if( rprDesign == "MATERNAL_HEALTH")
@@ -133,7 +143,11 @@
 				var birtReportURL = "http://178.79.144.205:8989/birt/run?__report=/home/dqa/tomcat_pbf_laos/webapps/birt/report/Mathealth_DH.rptdesign&__format="+reportFormat+"&startDate="+startPeriod+"&endDate="+endPeriod+"&orgUnit="+orgUnitId;
 				window.location.href =  birtReportURL;
 			}
-			
+			else 
+			{ 
+				showWarningMessage( "Selected Facility Not Related to any group" );
+				//return false; 
+			}					
 		}
 		
 		else if( rprDesign == "MONTHLY_PPS")
@@ -142,6 +156,12 @@
 			{
 				var birtReportURL = "http://178.79.144.205:8989/birt/run?__report=/home/dqa/tomcat_pbf_laos/webapps/birt/report/monthly_pps.rptdesign&__format="+reportFormat+"&startDate="+startPeriod+"&endDate="+endPeriod+"&orgUnit="+orgUnitId;
 				window.location.href =  birtReportURL;
+				
+				/*
+				var birtReportURL = "/birt/run?__report=/home/dhis2sever2/tomcat-8/webapps/birt/report/Mathealth_report3_PH.rptdesign&__format="+reportFormat+"&startDate="+startPeriod+"&endDate="+endPeriod+"&orgUnit="+orgUnitId;
+				window.location.href =  birtReportURL;
+				*/
+				
 			}
 			
 			else if( orgUnitGroupName == "Province Hospitals")
@@ -155,8 +175,18 @@
 				var birtReportURL = "http://178.79.144.205:8989/birt/run?__report=/home/dqa/tomcat_pbf_laos/webapps/birt/report/monthly_pps.rptdesign&__format="+reportFormat+"&startDate="+startPeriod+"&endDate="+endPeriod+"&orgUnit="+orgUnitId;
 				window.location.href =  birtReportURL;
 			}
-			
+			else 
+			{ 
+				showWarningMessage( "Selected Facility Not Related to any group" );
+				//return false; 
+			}					
 		}		
+		
+		else 
+		{ 
+			showWarningMessage( "Design file is not set" );
+			//return false; 
+		}			
 		
 		//alert( orgunit + "--" + orgUnitId )
 		
@@ -207,7 +237,7 @@
 					<option value="-1">[$i18n.getString( "select" )]</option>
 					<option value="MATERNAL_HEALTH" >Maternal Health</option>
 					<option value="MONTHLY_PPS" >Monthly PPS</option>
-					<option value="MH_PATIENT_ALLOWANCE_CLAIM" >MH Patient Allownce Claim</option>
+					<option value="MH_PATIENT_ALLOWANCE_CLAIM" >MH Patient Allowance Claim</option>
 					<option value="HEALTH_PROVIDER_PAYMENT_CLAIM" >Health Provider Payment Claim</option>
 					
 					<!--

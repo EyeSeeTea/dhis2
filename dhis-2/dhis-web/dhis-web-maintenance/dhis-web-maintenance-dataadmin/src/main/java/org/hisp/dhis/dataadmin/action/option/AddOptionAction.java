@@ -1,5 +1,3 @@
-package org.hisp.dhis.trackedentity.action.programstage;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -28,78 +26,77 @@ package org.hisp.dhis.trackedentity.action.programstage;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+package org.hisp.dhis.dataadmin.action.option;
 
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.option.Option;
+import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
 
 import com.opensymphony.xwork2.Action;
 
 /**
- * @author Abyot Asalefew Gizaw
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ AddOptionAction.java Jul 28, 2014 8:41:52 PM $
  */
-public class GetProgramStageListAction
+public class AddOptionAction
     implements Action
 {
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
     // Dependencies
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
 
-    private ProgramService programService;
+    private OptionService optionService;
 
-    public void setProgramService( ProgramService programService )
+    public void setOptionService( OptionService optionService )
     {
-        this.programService = programService;
+        this.optionService = optionService;
     }
 
-    // -------------------------------------------------------------------------
-    // Input/Output
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer optionSetId;
 
-    public Integer getId()
+    public void setOptionSetId( Integer optionSetId )
     {
-        return id;
+        this.optionSetId = optionSetId;
     }
 
-    public void setId( Integer id )
+    public Integer getOptionSetId()
     {
-        this.id = id;
+        return optionSetId;
     }
 
-    private List<ProgramStage> associations;
+    private String name;
 
-    public List<ProgramStage> getAssociations()
+    public void setName( String name )
     {
-        return associations;
+        this.name = name;
     }
 
-    public void setAssociations( List<ProgramStage> associations )
+    private String code;
+
+    public void setCode( String code )
     {
-        this.associations = associations;
+        this.code = code;
     }
 
-    private Program program;
-
-    public Program getProgram()
-    {
-        return program;
-    }
-
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
     // Action implementation
-    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
-        program = programService.getProgram( id );
+        OptionSet optionSet = optionService.getOptionSet( optionSetId );
 
-        associations = new ArrayList<ProgramStage>( program.getProgramStages() );
+        Option option = new Option( name, code );
+        optionSet.getOptions().add( option );
+
+        optionService.updateOptionSet( optionSet );
 
         return SUCCESS;
     }

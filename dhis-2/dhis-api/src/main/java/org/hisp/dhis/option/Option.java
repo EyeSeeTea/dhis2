@@ -1,5 +1,3 @@
-package org.hisp.dhis.filter;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -28,12 +26,31 @@ package org.hisp.dhis.filter;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+package org.hisp.dhis.option;
+
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- * @author Ovidiu Rosu <rosu.ovi@gmail.com>
+ * @author Chau Thu Tran
+ *
+ * @version $ Option.java Jul 28, 2014 4:28:53 PM $
  */
-public interface MetaDataFilterStore
-    extends GenericIdentifiableObjectStore<MetaDataFilter>
+@JacksonXmlRootElement( localName = "option", namespace = DxfNamespaces.DXF_2_0 )
+public class Option
+    extends BaseIdentifiableObject
 {
+    public Option()
+    {
+        setAutoFields();
+    }
+    
+    public Option( String name, String code )
+    {
+        setAutoFields();
+        this.name = name;
+        this.code = code;
+    }
 }

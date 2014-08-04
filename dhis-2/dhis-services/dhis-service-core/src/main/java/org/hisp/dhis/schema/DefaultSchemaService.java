@@ -150,6 +150,15 @@ public class DefaultSchemaService implements SchemaService
     }
 
     @Override
+    public List<Schema> getSortedSchemas()
+    {
+        List<Schema> schemas = Lists.newArrayList( classSchemaMap.values() );
+        Collections.sort( schemas, OrderComparator.INSTANCE );
+
+        return schemas;
+    }
+
+    @Override
     public List<Schema> getMetadataSchemas()
     {
         List<Schema> schemas = getSchemas();

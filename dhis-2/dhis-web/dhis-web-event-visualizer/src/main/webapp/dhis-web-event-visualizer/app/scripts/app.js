@@ -2598,7 +2598,7 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var url = ns.core.init.contextPath + '/dhis-web-event-charts/app/index.html?id=' + ns.app.layout.id,
+					var url = ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?id=' + ns.app.layout.id,
 						apiUrl = ns.core.init.contextPath + '/api/eventCharts/' + ns.app.layout.id + '/data.html',
 						html = '';
 
@@ -2957,6 +2957,24 @@ Ext.onReady( function() {
 			}
 			else {
 				treePanel.reset();
+			}
+
+            // dimensions
+			for (var key in dimensionIdSelectedStoreMap) {
+				if (dimensionIdSelectedStoreMap.hasOwnProperty(key)) {
+					var a = dimensionIdAvailableStoreMap[key],
+						s = dimensionIdSelectedStoreMap[key];
+
+					if (s.getCount() > 0) {
+						a.reset();
+						s.removeAll();
+					}
+
+					if (recMap[key]) {
+						s.add(recMap[key]);
+						ns.core.web.multiSelect.filterAvailable({store: a}, {store: s});
+					}
+				}
 			}
 
 			// options

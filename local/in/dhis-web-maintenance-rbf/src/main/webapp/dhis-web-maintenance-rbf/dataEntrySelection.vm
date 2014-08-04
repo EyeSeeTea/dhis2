@@ -25,9 +25,11 @@
 	   var fieldId = "#"+valueId;
 	   var defaultValue = document.getElementById(valueId).defaultValue;
 	   var value = document.getElementById(valueId).value;
-	
-	   if(defaultValue != value)
-	   {
+		
+	   //alert( defaultValue + ":" + value );
+	   
+	   //if(defaultValue != value)
+	  // {
 	       var dataValue = {
                 'dataElementId' : $utilizationRateDataElementId,        
                 'organisationUnitId' : $("#selectedOrgunitID").val(),
@@ -42,7 +44,7 @@
 	            success: handleSuccess,
 	            error: handleError
 	        } );
-	   }
+	   //}
 	
 	   function handleSuccess( json )
 	   {
@@ -142,6 +144,8 @@
 <script type="text/javascript">
 
 var i18n_select_dataset = '$encoder.jsEscape( $i18n.getString( "select_dataSet" ) , "'")';
+
+var i18n_saving_value_failed_status_code = '$encoder.jsEscape( $i18n.getString( "saving_value_failed_status_code" ) , "'")';
 
 
 jQuery( document ).ready( function()

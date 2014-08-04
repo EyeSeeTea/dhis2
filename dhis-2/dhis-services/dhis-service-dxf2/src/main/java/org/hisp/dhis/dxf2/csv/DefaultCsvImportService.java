@@ -51,6 +51,7 @@ import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.expression.Operator;
+import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -258,12 +259,14 @@ public class DefaultCsvImportService
                 
                 leftSide.setExpression( getSafe( values, 9, null, 255 ) );
                 leftSide.setDescription( getSafe( values, 10, null, 255 ) );
+                leftSide.setNullIfBlank( Boolean.valueOf( getSafe( values, 11, Boolean.FALSE.toString(), 5 ) ) );
                 leftSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( leftSide.getExpression() ) );
                 leftSide.setOptionCombosInExpression( expressionService.getOptionCombosInExpression( leftSide.getExpression() ) );
                 leftSide.setNullIfBlank( true );
                 
-                rightSide.setExpression( getSafe( values, 11, null, 255 ) );
-                rightSide.setDescription( getSafe( values, 12, null, 255 ) );
+                rightSide.setExpression( getSafe( values, 12, null, 255 ) );
+                rightSide.setDescription( getSafe( values, 13, null, 255 ) );
+                rightSide.setNullIfBlank( Boolean.valueOf( getSafe( values, 14, Boolean.FALSE.toString(), 5 ) ) );
                 rightSide.setDataElementsInExpression( expressionService.getDataElementsInExpression( rightSide.getExpression() ) );
                 rightSide.setOptionCombosInExpression( expressionService.getOptionCombosInExpression( rightSide.getExpression() ) );
                 rightSide.setNullIfBlank( true );
@@ -365,10 +368,16 @@ public class DefaultCsvImportService
         for ( OptionSet optionSet : listMap.keySet() )
         {
             List<String> options = new ArrayList<String>( listMap.get( optionSet ) );
-            optionSet.setOptions( options );
+            List<Option> optionObj = new ArrayList<Option>();
+            for ( String opt : options )
+            {
+                Option option = new Option( opt, opt );
+                optionObj.add(option);
+            }
+            optionSet.setOptions( optionObj );
             optionSets.add( optionSet );
         }
-
+        
         return optionSets;
     }
 

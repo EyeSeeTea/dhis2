@@ -31,6 +31,7 @@ package org.hisp.dhis.dxf2.synch;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
@@ -42,6 +43,7 @@ import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.utils.ImportSummaryResponseExtractor;
+import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.CodecUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +162,7 @@ public class DefaultSynchronizationManager
         
         log.info( status );
         
-        return status;        
+        return status;
     }
     
     public ImportSummary executeDataSynch()
@@ -180,7 +182,7 @@ public class DefaultSynchronizationManager
         // ---------------------------------------------------------------------
 
         final Date startTime = new Date();
-        final Date lastSuccessTime = getLastSynchSuccess();
+        final Date lastSuccessTime = getLastSynchSuccessFallback();
         
         int lastUpdatedCount = dataValueService.getDataValueCountLastUpdatedAfter( lastSuccessTime );
         
@@ -223,17 +225,24 @@ public class DefaultSynchronizationManager
         return summary;
     }
     
+    public Date getLastSynchSuccess()
+    {
+        return (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_SYNC );
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
     /**
      * Gets the time of the last successful synchronization operation. If not set,
-     * the current time is returned.
+     * the current date subtracted three days is returned.
      */
-    private Date getLastSynchSuccess()
+    private Date getLastSynchSuccessFallback()
     {
-        return (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_SYNC, new Date() );
+        Date fallback = new Cal().subtract( Calendar.DAY_OF_YEAR, 3 ).time();
+        
+        return (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_SYNC, fallback );
     }
 
     /**

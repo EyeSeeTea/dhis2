@@ -569,7 +569,7 @@ public class CurrentUserController
                 formDataSet.setId( uid );
                 formDataSet.setLabel( dataSet.getDisplayName() );
 
-                forms.getForms().put( uid, FormUtils.fromDataSet( dataSet ) );
+                forms.getForms().put( uid, FormUtils.fromDataSet( dataSet, false ) );
                 formOrganisationUnit.getDataSets().add( formDataSet );
 
                 if ( optionSets )
@@ -585,7 +585,7 @@ public class CurrentUserController
                                 size = dataElement.getOptionSet().getOptions().size();
                             }
 
-                            forms.getOptionSets().put( dataElement.getOptionSet().getUid(), dataElement.getOptionSet().getOptions().subList( 0, size - 1 ) );
+                            forms.getOptionSets().put( dataElement.getOptionSet().getUid(), dataElement.getOptionSet().getOptionValues().subList( 0, size - 1 ) );
                         }
                     }
                 }

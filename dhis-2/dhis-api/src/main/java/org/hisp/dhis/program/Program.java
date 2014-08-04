@@ -28,12 +28,12 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -50,11 +50,12 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Abyot Asalefew
@@ -82,7 +83,7 @@ public class Program
     private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
     
     @Scanned
-    private Set<ProgramStage> programStages = new HashSet<ProgramStage>(); //TODO use List?
+    private List<ProgramStage> programStages = new ArrayList<ProgramStage>();
 
     @Scanned
     private Set<ValidationCriteria> validationCriteria = new HashSet<ValidationCriteria>();
@@ -93,7 +94,7 @@ public class Program
 
     private Boolean ignoreOverdueEvents = false;
 
-    private Set<ProgramTrackedEntityAttribute> attributes = new HashSet<ProgramTrackedEntityAttribute>(); //TODO use List?
+    private List<ProgramTrackedEntityAttribute> programAttributes = new ArrayList<ProgramTrackedEntityAttribute>(); //TODO use List?
 
     @Scanned
     private Set<UserAuthorityGroup> userRoles = new HashSet<UserAuthorityGroup>();
@@ -151,7 +152,7 @@ public class Program
      */
     public ProgramTrackedEntityAttribute getAttribute( TrackedEntityAttribute attribute )
     {
-        for ( ProgramTrackedEntityAttribute programAttribute : attributes )
+        for ( ProgramTrackedEntityAttribute programAttribute : programAttributes )
         {
             if ( programAttribute != null && programAttribute.getAttribute().equals( attribute ) )
             {
@@ -187,10 +188,9 @@ public class Program
     public List<TrackedEntityAttribute> getTrackedEntityAttributes()
     {
         List<TrackedEntityAttribute> entityAttributes = new ArrayList<TrackedEntityAttribute>();
-
-        for ( ProgramTrackedEntityAttribute entityAttribute : attributes )
+        for ( ProgramTrackedEntityAttribute programAttribute : programAttributes )
         {
-            entityAttributes.add( entityAttribute.getAttribute() );
+        	entityAttributes.add( programAttribute.getAttribute() );
         }
 
         return entityAttributes;
@@ -263,12 +263,12 @@ public class Program
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "programStages", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStage", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<ProgramStage> getProgramStages()
+    public List<ProgramStage> getProgramStages()
     {
         return programStages;
     }
 
-    public void setProgramStages( Set<ProgramStage> programStages )
+    public void setProgramStages( List<ProgramStage> programStages )
     {
         this.programStages = programStages;
     }
@@ -524,17 +524,16 @@ public class Program
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "programTrackedEntityAttributes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<ProgramTrackedEntityAttribute> getAttributes()
-    {
-        return attributes;
-    }
+    public List<ProgramTrackedEntityAttribute> getProgramAttributes() {
+		return programAttributes;
+	}
 
-    public void setAttributes( Set<ProgramTrackedEntityAttribute> attributes )
-    {
-        this.attributes = attributes;
-    }
+	public void setProgramAttributes(
+			List<ProgramTrackedEntityAttribute> programAttributes) {
+		this.programAttributes = programAttributes;
+	}
 
-    @JsonProperty
+	@JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "trackedEntity", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "trackedEntity", namespace = DxfNamespaces.DXF_2_0 )
@@ -584,8 +583,8 @@ public class Program
             validationCriteria.clear();
             validationCriteria.addAll( program.getValidationCriteria() );
 
-            attributes.clear();
-            attributes.addAll( program.getAttributes() );
+            programAttributes.clear();
+            programAttributes.addAll( program.getProgramAttributes() );
 
             userRoles.clear();
             userRoles.addAll( program.getUserRoles() );

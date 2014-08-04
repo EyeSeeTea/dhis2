@@ -16,6 +16,10 @@ function showOptionSetDetails( context ) {
     });
 }
 
+function showOptionList( context ) {
+  location.href = 'option.action?optionSetId=' + context.id;
+}
+
 // -----------------------------------------------------------------------------
 // Remove category constant
 // -----------------------------------------------------------------------------

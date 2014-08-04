@@ -54,6 +54,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function(newObj, oldObj) {
         
+        $scope.dhis2Events = [];
         if( angular.isObject($scope.selectedOrgUnit)){            
             
             //apply translation - by now user's profile is fetched from server.
@@ -70,6 +71,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         //$scope.selectedOrgUnit = orgUnit;
         $scope.selectedProgram = null;
         $scope.selectedProgramStage = null;
+        $scope.dhis2Events = [];
 
         $scope.eventRegistration = false;
         $scope.editGridColumns = false;
@@ -227,7 +229,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                 $scope.dhis2Events.splice(index,1);
                                 i--;                           
                             }
-                        }                                  
+                        }  
+                        
+                        if($scope.noteExists){
+                            $scope.eventGridColumns.push({name: 'Comment', id: 'comment', type: 'string', compulsory: false, showFilter: false, show: true});
+                        }
                     }                
                     $scope.eventFetched = true;
                 });            
@@ -581,6 +587,14 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $scope.currentEvent = {};             
             });
         });        
+    };
+    
+    $scope.printForm = function(){
+        var printContents = document.getElementById('printableForm').innerHTML;
+        var originalContents = document.body.innerHTML;        
+        document.body.innerHTML = printContents;
+        window.print();
+        document.body.innerHTML = originalContents;
     };
     
     $scope.showNotes = function(dhis2Event){
