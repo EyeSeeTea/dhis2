@@ -6055,11 +6055,26 @@ Ext.onReady( function() {
 						Ext.Ajax.request({
 							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
-                                var info = Ext.decode(r.responseText);
-								init.contextPath = info.contextPath || init.contextPath;
+                                var info = Ext.decode(r.responseText),
+                                    dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                    calendarUrl;
 
                                 // calendar
-                                init.calendar = info.calendar;
+                                init.calendar = info.calendar || 'iso8601';
+
+                                if (Ext.Array.contains(['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'], init.calendar)) {
+                                    calendarUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + init.calendar + '.min.js';
+
+                                    Ext.Loader.injectScriptElement(calendarUrl, function() {
+                                        Ext.Loader.injectScriptElement(dhis2PeriodUrl, function() {});
+                                    });
+                                }
+                                else {
+                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, function() {});
+                                }
+
+                                // context path
+								init.contextPath = info.contextPath || init.contextPath;
 
 								// i18n
 								requests.push({
