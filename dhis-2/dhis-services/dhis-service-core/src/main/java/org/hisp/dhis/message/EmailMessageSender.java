@@ -40,6 +40,7 @@ import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.scheduling.annotation.Async;
@@ -137,7 +138,11 @@ public class EmailMessageSender
         }
         catch ( EmailException ex )
         {
-            log.warn( "Could not send email: " + ex.getMessage() );
+            log.warn( "Could not send email: " + ex.getMessage() + ", " + DebugUtils.getStackTrace( ex ) );
+        }
+        catch ( RuntimeException ex )
+        {
+            log.warn( "Error while sending email: " + ex.getMessage() + ", " + DebugUtils.getStackTrace( ex ) );
         }
 
         return null;
