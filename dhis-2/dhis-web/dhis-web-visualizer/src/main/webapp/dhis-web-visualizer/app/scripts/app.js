@@ -2126,9 +2126,9 @@ Ext.onReady( function() {
 
 			web.chart.getLayoutConfig = function() {
 				var panels = ns.app.accordion.panels,
-					columnDimNames = [ns.app.stores.col.getDimensionNames()],
-					rowDimNames = [ns.app.stores.row.getDimensionNames()],
-					filterDimNames = [ns.app.stores.filter.getDimensionNames()],
+					columnDimNames = ns.app.stores.col.getDimensionNames(),
+					rowDimNames = ns.app.stores.row.getDimensionNames(),
+					filterDimNames = ns.app.stores.filter.getDimensionNames(),
 					config = ns.app.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
@@ -2158,7 +2158,7 @@ Ext.onReady( function() {
 
 				// columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], nameArray; i < nameArrays.length; i++) {
-					nameArray = nameArrays[i][0];
+					nameArray = nameArrays[i];
 
 					for (var j = 0, dimName, dim; j < nameArray.length; j++) {
 						dimName = nameArray[j];
