@@ -2157,12 +2157,12 @@ Ext.onReady( function() {
 				));
 
 				// columns, rows, filters
-				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
-					dimNames = nameArrays[i];
+				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], nameArray; i < nameArrays.length; i++) {
+					nameArray = nameArrays[i][0];
 
-					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
-						dimName = dimNames[j];
-
+					for (var j = 0, dimName, dim; j < nameArray.length; j++) {
+						dimName = nameArray[j];
+                        
 						if (dimName === co) {
 							axes[i].push({
 								dimension: co,
