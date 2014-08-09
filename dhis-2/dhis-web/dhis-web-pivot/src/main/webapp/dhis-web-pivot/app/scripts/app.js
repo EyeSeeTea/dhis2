@@ -4127,7 +4127,7 @@ Ext.onReady( function() {
 			cls: 'ns-toolbar-multiselect-left',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			height: 180,
-			valueField: 'iso',
+			valueField: 'id',
 			displayField: 'name',
 			store: fixedPeriodAvailableStore,
 			tbar: [
@@ -4168,7 +4168,7 @@ Ext.onReady( function() {
 			cls: 'ns-toolbar-multiselect-right',
 			width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
 			height: 180,
-			valueField: 'iso',
+			valueField: 'id',
 			displayField: 'name',
 			ddReorder: false,
 			store: fixedPeriodSelectedStore,
@@ -4284,6 +4284,10 @@ Ext.onReady( function() {
                                     var periodType = this.getValue(),
                                         generator = ns.core.init.periodGenerator,
                                         periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
+
+                                    for (var i = 0; i < periods.length; i++) {
+                                        periods[i].id = periods[i].iso;
+                                    }
 
 									fixedPeriodAvailableStore.setIndex(periods);
 									fixedPeriodAvailableStore.loadData(periods);
