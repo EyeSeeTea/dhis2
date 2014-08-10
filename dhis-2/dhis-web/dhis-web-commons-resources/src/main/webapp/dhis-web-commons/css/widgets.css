@@ -741,6 +741,80 @@ ul.pageSizeSelection input
 }
 
 /*----------------------------------------------------------------------------*/
+/* Multi select/checkbox combo button                                         */
+/*----------------------------------------------------------------------------*/
+
+.multiSelectButton
+{
+    padding: 6px 12px;
+    height: 25px;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    background-color: #f3f3f3;
+    color: #606060 !important;
+    text-decoration: none !important;
+}
+
+.multiSelectButton:hover
+{
+    text-decoration: none;
+    background-color: #f8f8f8;
+}
+
+.multiSelectMenu
+{
+    position: absolute;
+    margin-top: -15px;
+    z-index: 999;
+    padding: 1px 1px;
+    border: 1px solid #bbb;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: bold;
+    font-size: 13px;
+    background-color: #f3f3f3;
+    color: #606060 !important;
+    text-decoration: none !important;
+}
+
+.multiSelectMenu li
+{
+    display: block;
+}
+
+.multiSelectMenu li a
+{
+    text-decoration: none;
+    display: block;
+    color: #606060;
+    padding: 6px 6px;
+}
+
+.multiSelectMenu li a:hover
+{
+    text-decoration: none;
+    background-color: #fcfcfc;
+}
+
+.downArrow
+{
+    border:thick;
+    border-color:#777777 transparent white;
+    border-style:solid dashed dashed;
+    margin-left:5px;
+    position:relative;
+    top: 10px;
+}
+
+.downArrow:hover
+{
+    border-color: #999999 transparent white;
+}
+
+/*----------------------------------------------------------------------------*/
 /* Placeholders                                                               */
 /*----------------------------------------------------------------------------*/
 
