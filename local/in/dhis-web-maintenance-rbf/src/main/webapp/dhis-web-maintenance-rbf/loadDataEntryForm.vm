@@ -40,12 +40,19 @@
         <option value="$utilizationRateDataElement.id">$utilizationRateDataElement.name</option>
     #end
 </select>
+<select id="pbfDataElementLB" size="10" style="display:none" >
+    #foreach($dataElement in $dataElements )
+        <option value="$dataElement.id">$dataElement.name</option>
+    #end
+</select>
 
+<input type="hidden" id='totalDataElementId' name = 'totalDataElementId' value="$!totalDataElementId" />
 
 #set( $tabIndex = 1 )
 #if ( $dataElements.size() > 0)
 
 <table class="formSection" id="dataEntryTable" style="width:100%">
+    
 	<tr bgcolor="#CBDDEB">
 		<th style="width:35%;">$i18n.getString( "dataelement" )</th>
 		<th style="text-align: center;width:15%;">$i18n.getString( "qty_reported" )</th>
@@ -245,10 +252,7 @@
                     }
                     
                     calVal();
-                    
-                    $('input').on('keyup', function() {
-                      calVal();
-                    });
+                                        
             	</script>
 			
 			#end
@@ -273,27 +277,37 @@
 	#end
 	<script>
 		
-    	function getUtilizationRateTariffValue()
-    	{
-            var utilizationRate = $('#utilizationRate').val();
-			//alert( utilizationRate );
+function getUtilizationRateTariffValue()
+{
+    var utilizationRate = $('#utilizationRate').val();
+	//alert( utilizationRate );
+	
+	//alert( utilizationRate.length);
+	
+	var tempUtilizationRateDataElements = document.getElementById("utilizationRateDataElementLB");
+   	
+	//if( utilizationRate != "" || utilizationRate != " " || utilizationRate != '' || utilizationRate != ' ' || utilizationRate.length != 0 )
+	//{
+		for ( i=0; i < tempUtilizationRateDataElements.length; i++ )
+        {                    
+			var utilizationRateTariffMapValue1 = utilizationRateTariffMap[tempUtilizationRateDataElements.options[i].value];
 			
-			var tempUtilizationRateDataElements = document.getElementById("utilizationRateDataElementLB");
-    	   	
-			if( utilizationRate != "" || utilizationRate != " " || utilizationRate != '' || utilizationRate != ' ' || utilizationRate.length != 0 )
+			//alert( utilizationRateTariffMapValue1.split("#").length + " :  " + utilizationRateTariffMapValue1 );
+			
+			for( j=0; j < utilizationRateTariffMapValue1.split("#").length; j++ )
 			{
-    			for ( i=0; i < tempUtilizationRateDataElements.length; i++ )
-                {	
-    			
-    				var utilizationRateTariffMapValue = utilizationRateTariffMap[tempUtilizationRateDataElements.options[i].value];
-    				
-                    var startRange = parseFloat( utilizationRateTariffMapValue.split(":")[0] );           
-                    var endRange = parseFloat( utilizationRateTariffMapValue.split(":")[1] );
-                    var tariffValue = parseFloat( utilizationRateTariffMapValue.split(":")[2] );
-    				
-    				//alert( startRange + "--" + endRange + "--" +  tariffValue );
-    				
-                    if( parseFloat( utilizationRate) >= parseFloat( startRange ) && parseFloat( utilizationRate ) < parseFloat( endRange ) )
+		        var utilizationRateTariffMapValue = utilizationRateTariffMapValue1.split("#")[j];
+		        
+                var startRange = parseFloat( utilizationRateTariffMapValue.split(":")[0] );           
+                var endRange = parseFloat( utilizationRateTariffMapValue.split(":")[1] );
+                var tariffValue = parseFloat( utilizationRateTariffMapValue.split(":")[2] );    				
+			
+			    //alert( startRange + "--" + endRange + "--" +  tariffValue + "--" + utilizationRate );
+                
+                
+                if( utilizationRate != "" || utilizationRate != " " || utilizationRate != '' || utilizationRate != ' ' || utilizationRate.length != 0 )
+                {
+                	if( parseFloat( utilizationRate) >= parseFloat( startRange ) && parseFloat( utilizationRate ) < parseFloat( endRange ) )
                     {	
     					//alert( "2 Alert" + " : " + startRange + "--" + endRange + "--" +  tariffValue + "--" +  utilizationRate );
     					var dataElementId = tempUtilizationRateDataElements.options[i].value;
@@ -303,9 +317,20 @@
     					//alert( $('#pbfdv_tariff_amt_'+dataElementId).val( parseFloat( tariffValue ) ) );
                     }
                 }
-			}
-			            
-    	}
+                
+                if(  utilizationRate.length == 0 )
+                {
+                	var dataElementId = tempUtilizationRateDataElements.options[i].value;
+					//alert( '#pbfdv_tariff_amt_'+dataElementId );
+                    $('#pbfdv_tariff_amt_'+dataElementId).val( "" );
+                }
+               
+            }
+        }
+	//}
+	            
+}
+
 			
 			function calTariffVal( dataElementId ) {
 					var total = 0.0;
@@ -334,9 +359,19 @@
 					
 					$('#total_'+dataElementId).val(total);
 					
-					allTotal = allTotal + total;
+					var tempPBFDataElements = document.getElementById("pbfDataElementLB");			
+					var allTotal1 = 0.0;
+					for ( i=0; i < tempPBFDataElements.length; i++ )
+					{                
+						var tempDataElementId = tempPBFDataElements.options[i].value;
+						var tempTotal = parseFloat($('#total_'+tempDataElementId).val());
+						allTotal1 = allTotal1 + tempTotal;
+					}								
+			
+					$('#all-total').val(allTotal1);
 					
-					$('#all-total').val(allTotal);
+					saveTotalValueInDataValue();					
+					
                 }
 				
 				

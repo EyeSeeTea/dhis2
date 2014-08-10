@@ -105,18 +105,6 @@ public class UpdateProgramAction
         this.description = description;
     }
 
-    private Integer version;
-
-    public Integer getVersion()
-    {
-        return version;
-    }
-
-    public void setVersion( Integer version )
-    {
-        this.version = version;
-    }
-
     private String dateOfEnrollmentDescription;
 
     public void setDateOfEnrollmentDescription( String dateOfEnrollmentDescription )
@@ -299,7 +287,6 @@ public class UpdateProgramAction
         Program program = programService.getProgram( id );
         program.setName( name );
         program.setDescription( description );
-        program.setVersion( version );
         program.setDateOfEnrollmentDescription( dateOfEnrollmentDescription );
         program.setDateOfIncidentDescription( dateOfIncidentDescription );
         program.setType( type );
@@ -344,9 +331,9 @@ public class UpdateProgramAction
             program.setTrackedEntity( null );
         }
 
-        if ( program.getAttributes() != null )
+        if ( program.getProgramAttributes() != null )
         {
-            program.getAttributes().clear();
+            program.getProgramAttributes().clear();
         }
 
         int index = 0;
@@ -360,8 +347,8 @@ public class UpdateProgramAction
                 TrackedEntityAttribute attribute = attributeService.getTrackedEntityAttribute( Integer
                     .parseInt( ids[1] ) );
                 ProgramTrackedEntityAttribute programAttribute = new ProgramTrackedEntityAttribute( attribute,
-                    index + 1, personDisplayNames.get( index ), mandatory.get( index ), allowFutureDate.get( index ) );
-                program.getAttributes().add( programAttribute );
+                    personDisplayNames.get( index ), mandatory.get( index ), allowFutureDate.get( index ) );
+                program.getProgramAttributes().add( programAttribute );
             }
 
             index++;
@@ -373,6 +360,8 @@ public class UpdateProgramAction
             program.setRelatedProgram( relatedProgram );
         }
 
+        program.increaseVersion(); //TODO make more fine-grained
+        
         programService.updateProgram( program );
 
         return SUCCESS;

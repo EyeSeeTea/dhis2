@@ -83,6 +83,18 @@ Ext.onReady( function() {
 				return Ext.clone(dimensionNames);
 			};
 
+            config.hasDimension = function(id) {
+                return Ext.isString(id) && this.findExact('id', id) != -1 ? true : false;
+            };
+
+            config.removeDimension = function(id) {
+                var index = this.findExact('id', id);
+
+                if (index != -1) {
+                    this.remove(this.getAt(index));
+                }
+            };
+
 			return Ext.create('Ext.data.Store', config);
 		};
 
@@ -309,27 +321,23 @@ Ext.onReady( function() {
         };
 
         removeDimension = function(dataElementId) {
-            var stores = [colStore, rowStore, filterStore];
+            var stores = [colStore, rowStore, filterStore, dimensionStore];
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
-                index = store.findExact('id', dataElementId);
 
-                if (index != -1) {
-                    store.remove(store.getAt(index));
+                if (store.hasDimension(dataElementId)) {
+                    store.removeDimension(dataElementId);
                     dimensionStoreMap[dataElementId] = store;
                 }
             }
         };
 
         hasDimension = function(id) {
-            var stores = [colStore, rowStore, filterStore];
+            var stores = [colStore, rowStore, filterStore, dimensionStore];
 
             for (var i = 0, store, index; i < stores.length; i++) {
-                store = stores[i];
-                index = store.findExact('id', id);
-
-                if (index != -1) {
+                if (stores[i].hasDimension(id)) {
                     return true;
                 }
             }
@@ -2126,9 +2134,9 @@ Ext.onReady( function() {
 
 			web.chart.getLayoutConfig = function() {
 				var panels = ns.app.accordion.panels,
-					columnDimNames = [ns.app.stores.col.getDimensionNames()],
-					rowDimNames = [ns.app.stores.row.getDimensionNames()],
-					filterDimNames = [ns.app.stores.filter.getDimensionNames()],
+					columnDimNames = ns.app.stores.col.getDimensionNames(),
+					rowDimNames = ns.app.stores.row.getDimensionNames(),
+					filterDimNames = ns.app.stores.filter.getDimensionNames(),
 					config = ns.app.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
@@ -2162,7 +2170,7 @@ Ext.onReady( function() {
 
 					for (var j = 0, dimName, dim; j < dimNames.length; j++) {
 						dimName = dimNames[j];
-
+                        
 						if (dimName === co) {
 							axes[i].push({
 								dimension: co,
@@ -4241,14 +4249,13 @@ Ext.onReady( function() {
 							periodOffset: 0,
 							listeners: {
 								select: function() {
-									var nsype = new PeriodType(),
-										periodType = this.getValue();
+                                    var periodType = this.getValue(),
+                                        generator = ns.core.init.periodGenerator,
+                                        periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
 
-									var periods = nsype.get(periodType).generatePeriods({
-										offset: this.periodOffset,
-										filterFuturePeriods: true,
-										reversePeriods: true
-									});
+                                    for (var i = 0; i < periods.length; i++) {
+                                        periods[i].id = periods[i].iso;
+                                    }
 
 									fixedPeriodAvailableStore.setIndex(periods);
 									fixedPeriodAvailableStore.loadData(periods);
@@ -4857,6 +4864,9 @@ Ext.onReady( function() {
 
 					this.isPending = false;
 					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+				},
+				sortStore: function() {
+					this.sort('name', 'ASC');
 				}
 			});
 
@@ -5944,7 +5954,36 @@ Ext.onReady( function() {
 						Ext.Ajax.request({
 							url: init.contextPath + '/api/system/info.json',
 							success: function(r) {
-								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
+                                var info = Ext.decode(r.responseText),
+                                    dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                    defaultCalendarId = 'gregorian',
+                                    calendarIdMap = {'iso8601': defaultCalendarId},
+                                    calendarId = calendarIdMap[info.calendar] || info.calendar || defaultCalendarId,
+                                    calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                    calendarScriptUrl,
+                                    createGenerator;
+                                    
+                                // calendar
+                                init.dateFormat = info.dateFormat || 'yyyy-mm-dd';
+
+                                createGenerator = function() {
+                                    init.calendar = $.calendars.instance(calendarId);
+                                    init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.dateFormat);
+                                };
+
+                                if (Ext.Array.contains(calendarIds, calendarId)) {
+                                    calendarScriptUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                    Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                        Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                    });
+                                }
+                                else {
+                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                }
+
+                                // context path
+								init.contextPath = info.contextPath || init.contextPath;
 
 								// i18n
 								requests.push({

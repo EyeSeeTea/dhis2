@@ -159,13 +159,42 @@ function savePBFDataValue( dataElementId, valueType )
 	var period = document.getElementById("selectedPeriodId").value;
 	var dataSetId = $( '#dataSetId' ).val();
 	var valueId = "";
+	
+	var qtyReportedFieldId = "pbfdv_qty_reported_"+dataElementId;
+	
+	var qtyValidatedFieldId = "pbfdv_qty_validated_"+dataElementId;
+	
+	var qtyRreported = document.getElementById( qtyReportedFieldId ).value;
+	
+	var qtyValidated = document.getElementById( qtyValidatedFieldId ).value;
+	
 	if( valueType == 1 )
 	{
 		valueId = "pbfdv_qty_reported_"+dataElementId;
 	}
+	
 	else if( valueType == 2 )
 	{
-		valueId = "pbfdv_qty_validated_"+dataElementId;
+		//alert( qtyRreported + ":" + qtyValidated )
+		
+		if(  parseInt(qtyValidated)  > parseInt(qtyRreported)   )
+		{
+			alert( "Quantity Validated should less or equal to Quantity Reported" );
+			document.getElementById( qtyValidatedFieldId ).value = "";
+			return;
+		}
+		
+		else
+		{
+			valueId = "pbfdv_qty_validated_"+dataElementId;
+		
+			saveDataInDataValue( dataElementId );
+		}
+		
+		//valueId = "pbfdv_qty_validated_"+dataElementId;
+		
+		//saveDataInDataValue( dataElementId );
+		
 	}
 	
 	else
@@ -180,8 +209,8 @@ function savePBFDataValue( dataElementId, valueType )
 	var defaultValue = document.getElementById(valueId).defaultValue;
 	var value = document.getElementById( valueId ).value;
 	
-	if(defaultValue != value)
-	{
+	//if(defaultValue != value)
+	//{
 		var dataValue = {
 				'dataElementId' : dataElementId,
 				'valueType' : valueType,
@@ -198,7 +227,7 @@ function savePBFDataValue( dataElementId, valueType )
             success: handleSuccess,
             error: handleError
         } );
-	}
+	//}
 	
 	function handleSuccess( json )
 	{
@@ -231,6 +260,153 @@ function savePBFDataValue( dataElementId, valueType )
 	    document.getElementById(valueId).style.backgroundColor = color;	   
 	}
 }
+
+// save qty validated in dataValue table
+function saveDataInDataValue( dataElementId )
+{	
+	//alert ( " Inside Save qty validated in dataValue table " );
+	
+	var period = document.getElementById("selectedPeriodId").value;
+	var valueId  = "pbfdv_qty_validated_"+dataElementId;
+
+	var fieldId = "#"+valueId;
+	var defaultValue = document.getElementById(valueId).defaultValue;
+	var value = document.getElementById(valueId).value;
+
+	if( defaultValue != value )
+	{
+       var dataValue = {
+            'dataElementId' : dataElementId,        
+            'organisationUnitId' : $("#selectedOrgunitID").val(),
+            'periodIso' : period,
+            'value' : value
+        };
+    
+       jQuery.ajax( {
+            url: 'saveValueInDataValue.action',
+            data: dataValue,
+            dataType: 'json',
+            success: handleSuccess,
+            error: handleError
+        } );
+	}
+
+	function handleSuccess( json )
+	{
+       var code = json.c;
+       if ( code == '0' || code == 0) // Value successfully saved on server
+       {
+    	  markValue( fieldId, COLOR_GREEN );
+       }
+       else if ( code == 2 )
+       {
+           markValue( fieldId, COLOR_RED );
+           window.alert( i18n_saving_value_failed_dataset_is_locked );
+       }
+       else // Server error during save
+       {
+           markValue( fieldId, COLOR_RED );
+           window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+       }
+	}
+
+	function handleError( jqXHR, textStatus, errorThrown )
+	{       
+       markValue( fieldId, COLOR_RED );
+	}
+
+	function markValue( fieldId, color )
+	{
+       document.getElementById(valueId).style.backgroundColor = color;	   
+	}	
+}
+
+
+
+function saveTotalValueInDataValue()
+{	
+	//alert ( " Inside Save Total in dataValue table " );
+	var period = document.getElementById("selectedPeriodId").value;
+	
+	var totalDeId  = document.getElementById("totalDataElementId").value;
+	
+	//alert( totalDeId );
+	
+	var totalDeFieldId = "#"+totalDeId;
+	
+	var defaultValue = document.getElementById("all-total").defaultValue;
+	var value = document.getElementById("all-total").value;
+	//alert( value );
+	
+	if( defaultValue != value )
+	{
+       var dataValue = {
+            'dataElementId' : totalDeId,        
+            'organisationUnitId' : $("#selectedOrgunitID").val(),
+            'periodIso' : period,
+            'value' : value
+        };
+    
+       jQuery.ajax( {
+            url: 'saveValueInDataValue.action',
+            data: dataValue,
+            dataType: 'json',
+            success: handleSuccess,
+            error: handleError
+        } );
+	}
+
+	function handleSuccess( json )
+	{
+       var code = json.c;
+       if ( code == '0' || code == 0) // Value successfully saved on server
+       {
+    	  markValue( totalDeFieldId, COLOR_GREEN );
+    	  
+       }
+       else if ( code == 2 )
+       {
+           markValue( totalDeFieldId, COLOR_RED );
+           window.alert( i18n_saving_value_failed_dataset_is_locked );
+       }
+       else // Server error during save
+       {
+           markValue( totalDeFieldId, COLOR_RED );
+           window.alert( i18n_saving_value_failed_status_code + '\n\n' + code );
+       }
+	}
+
+	function handleError( jqXHR, textStatus, errorThrown )
+	{       
+       markValue( totalDeFieldId, COLOR_RED );
+	}
+
+	function markValue( totalDeFieldId, color )
+	{
+       document.getElementById("all-total").style.backgroundColor = color;	   
+	}	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // load periods
 function loadPeriods()
@@ -303,3 +479,79 @@ function getAvailablePeriodsTemp( availablePeriodsId, selectedPeriodsId, year )
 			
 		} );
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+function getUtilizationRateTariffValue()
+{
+    var utilizationRate = $('#utilizationRate').val();
+	//alert( utilizationRate );
+	
+	var tempUtilizationRateDataElements = document.getElementById("utilizationRateDataElementLB");
+   	
+	if( utilizationRate != "" || utilizationRate != " " || utilizationRate != '' || utilizationRate != ' ' || utilizationRate.length != 0 )
+	{
+		for ( i=0; i < tempUtilizationRateDataElements.length; i++ )
+        {                    
+			var utilizationRateTariffMapValue1 = utilizationRateTariffMap[tempUtilizationRateDataElements.options[i].value];
+			
+			//alert( utilizationRateTariffMapValue1.split("#").length + " :  " + utilizationRateTariffMapValue1 );
+			
+			for( j=0; j < utilizationRateTariffMapValue1.split("#").length; j++ )
+			{
+		        var utilizationRateTariffMapValue = utilizationRateTariffMapValue1.split("#")[j];
+		        
+                var startRange = parseFloat( utilizationRateTariffMapValue.split(":")[0] );           
+                var endRange = parseFloat( utilizationRateTariffMapValue.split(":")[1] );
+                var tariffValue = parseFloat( utilizationRateTariffMapValue.split(":")[2] );    				
+			
+			    //alert( startRange + "--" + endRange + "--" +  tariffValue + "--" + utilizationRate );
+			
+                if( parseFloat( utilizationRate) >= parseFloat( startRange ) && parseFloat( utilizationRate ) < parseFloat( endRange ) )
+                {	
+					//alert( "2 Alert" + " : " + startRange + "--" + endRange + "--" +  tariffValue + "--" +  utilizationRate );
+					var dataElementId = tempUtilizationRateDataElements.options[i].value;
+					//alert( '#pbfdv_tariff_amt_'+dataElementId );
+                    $('#pbfdv_tariff_amt_'+dataElementId).val( tariffValue );
+					
+					//alert( $('#pbfdv_tariff_amt_'+dataElementId).val( parseFloat( tariffValue ) ) );
+                }
+            }
+        }
+	}
+	            
+}
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

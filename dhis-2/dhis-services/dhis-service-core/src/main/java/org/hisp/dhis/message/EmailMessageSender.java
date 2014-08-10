@@ -39,7 +39,9 @@ import org.apache.commons.mail.DefaultAuthenticator;
 import org.apache.commons.mail.Email;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.SimpleEmail;
+import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.scheduling.annotation.Async;
@@ -69,6 +71,13 @@ public class EmailMessageSender
         this.systemSettingManager = systemSettingManager;
     }
     
+    private ConfigurationService configurationService;
+    
+    public void setConfigurationService( ConfigurationService configurationService )
+    {
+        this.configurationService = configurationService;
+    }
+    
     private UserService userService;
 
     public void setUserService( UserService userService )
@@ -90,7 +99,7 @@ public class EmailMessageSender
         String hostName = systemSettingManager.getEmailHostName();
         int port = systemSettingManager.getEmailPort();
         String username = systemSettingManager.getEmailUsername();
-        String password = systemSettingManager.getEmailPassword();
+        String password = configurationService.getConfiguration().getSmtpPassword();
         boolean tls = systemSettingManager.getEmailTls();
         String from = systemSettingManager.getEmailSender();
 
@@ -107,6 +116,7 @@ public class EmailMessageSender
         
         try
         {
+            System.out.println("pw " + password);
             Email email = getEmail( hostName, port, username, password, tls, from );
             email.setSubject( SUBJECT_PREFIX + subject );
             email.setMsg( text );
@@ -123,7 +133,7 @@ public class EmailMessageSender
                 {
                     email.addBcc( user.getEmail() );
                     
-                    log.info( "Sending email to user: " + user.getUsername() + " with email address: " + user.getEmail() );
+                    log.info( "Sending email to user: " + user.getUsername() + " with email address: " + user.getEmail() + " to host: " + hostName + ":" + port );
                     
                     hasRecipients = true;
                 }
@@ -132,12 +142,16 @@ public class EmailMessageSender
             if ( hasRecipients )
             {
                 email.send();
-                log.info( "Email sent using host: " + hostName + " with TLS: " + tls );
+                log.info( "Email sent using host: " + hostName + ":" + port + " with TLS: " + tls );
             }
         }
         catch ( EmailException ex )
         {
-            log.warn( "Could not send email: " + ex.getMessage() );
+            log.warn( "Could not send email: " + ex.getMessage() + ", " + DebugUtils.getStackTrace( ex ) );
+        }
+        catch ( RuntimeException ex )
+        {
+            log.warn( "Error while sending email: " + ex.getMessage() + ", " + DebugUtils.getStackTrace( ex ) );
         }
 
         return null;

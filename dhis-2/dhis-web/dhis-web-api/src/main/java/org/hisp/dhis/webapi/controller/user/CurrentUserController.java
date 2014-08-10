@@ -193,6 +193,7 @@ public class CurrentUserController
         UserAccount userAccount = new UserAccount();
 
         // user account
+        userAccount.setUsername( currentUser.getUsername() );
         userAccount.setFirstName( currentUser.getFirstName() );
         userAccount.setSurname( currentUser.getSurname() );
         userAccount.setEmail( currentUser.getEmail() );
@@ -585,7 +586,7 @@ public class CurrentUserController
                                 size = dataElement.getOptionSet().getOptions().size();
                             }
 
-                            forms.getOptionSets().put( dataElement.getOptionSet().getUid(), dataElement.getOptionSet().getOptions().subList( 0, size - 1 ) );
+                            forms.getOptionSets().put( dataElement.getOptionSet().getUid(), dataElement.getOptionSet().getOptionValues().subList( 0, size - 1 ) );
                         }
                     }
                 }

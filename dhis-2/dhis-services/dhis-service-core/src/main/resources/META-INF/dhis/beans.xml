@@ -87,7 +87,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-    <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.metadatafilter.hibernate.HibernateMetaDataFilterStore">
+  <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.filter.MetaDataFilter" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -353,6 +353,11 @@
 
   <bean id="org.hisp.dhis.option.OptionStore" class="org.hisp.dhis.option.hibernate.HibernateOptionStore">
     <property name="clazz" value="org.hisp.dhis.option.OptionSet" />
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
+  
+   <bean id="org.hisp.dhis.option.OptionValueStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.option.Option" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
 
@@ -638,6 +643,7 @@
 
   <bean id="emailMessageSender" class="org.hisp.dhis.message.EmailMessageSender">
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+    <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
@@ -676,6 +682,7 @@
 
   <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
+    <property name="optionValueStore" ref="org.hisp.dhis.option.OptionValueStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -1005,6 +1012,7 @@
         <value>usergroup</value>
         <value>userrole</value>
         <value>optionset</value>
+        <value>optionvalue</value>
         <value>validationcriteria</value>
       </list>
     </property>

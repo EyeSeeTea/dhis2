@@ -46,7 +46,9 @@ public class LoadQualityScoreDetailsAction
     private final static String TARIFF_SETTING_AUTHORITY = "TARIFF_SETTING_AUTHORITY";
 
     private final static String QUALITY_MAX_DATAELEMENT = "QUALITY_MAX_DATAELEMENT";
-
+    
+    private final static String OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID = "OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -188,10 +190,18 @@ public class LoadQualityScoreDetailsAction
     {
         return qualityScorePayments;
     }
-
+    
+    private int overAllQtyDataElementId;
+    
+    public int getOverAllQtyDataElementId()
+    {
+        return overAllQtyDataElementId;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
+
 
     public String execute()
         throws Exception
@@ -211,6 +221,14 @@ public class LoadQualityScoreDetailsAction
         else
         {
             tariff_setting_authority = (int) tariff_authority.getValue();
+        }
+        
+        Constant overAllQtyDetId = constantService.getConstantByName( OVER_ALL_QUALITY_SCORE_DATAELEMENT_ID );
+        DataElement overAllDataElement = dataElementService.getDataElement( (int) overAllQtyDetId.getValue() );
+        overAllQtyDataElementId = 0;
+        if( overAllDataElement != null )
+        {
+            overAllQtyDataElementId = overAllDataElement.getId();
         }
         
         Constant qualityMaxDataElement = constantService.getConstantByName( QUALITY_MAX_DATAELEMENT );
@@ -318,6 +336,7 @@ public class LoadQualityScoreDetailsAction
         
         //System.out.println(" Payment dataSet Period Type---" + paymentDataSet.getPeriodType() );
         
+        period = periodService.reloadPeriod( period );
         
         Set<Period> periods = new HashSet<Period>( periodService.getIntersectingPeriodsByPeriodType( paymentDataSet.getPeriodType(), period.getStartDate(), period.getEndDate() ) );
         
