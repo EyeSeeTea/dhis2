@@ -8,7 +8,8 @@
         #end
         <li><a class="blueButtonLink" href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a></li>
         <li><span style="padding-left:12px"></span></li>
-        <li><a class="multiSelectButton" id="multiSelectButton"><input type="checkbox" id="multiSelectCheckbox" /><span class="downArrow"></span></a></li>
+        <!-- <li><a class="multiSelectButton" id="multiSelectButton"><input type="checkbox" id="multiSelectCheckbox" /><span class="downArrow"></span></a></li> -->
+        <li><span id="multiButton"></span></li>
         <li><span style="padding-left:12px"></span></li>
         <li><a class="greyButtonLink" href="message.action">$i18n.getString( "inbox" )</a></li>
         <li><a class="greyButtonLink" href="message.action?followUp=true">$i18n.getString( "follow_up" )</a></li>
@@ -66,6 +67,35 @@ $( document ).ready( function() {
     i18n_no_messages_selected = '$encoder.jsEscape( $i18n.getString( "no_messages_selected" ), "'" )';
     i18n_messages_were_deleted = '$encoder.jsEscape( $i18n.getString( "messages_were_deleted" ), "'" )';
 
-    multiSelect( "#multiSelectButton", "#multiSelectMenu", "#messages" );
+    //multiSelect2( "#multiSelectButton", "#multiSelectMenu", "#messages" );
+    $("#multiButton" ).multiSelect(
+    {
+        buttonClass: "multiSelectButton",
+        checkboxContainerId: "messages",
+        menuElements:
+        [
+            {
+                displayName: "Delete",
+                action: function( checked )
+                {
+                    removeMessages( checked );
+                }
+            },
+            {
+                displayName: "Mark read",
+                action: function( checked )
+                {
+                   markMessagesRead( checked );
+                }
+            },
+            {
+                displayName: "Mark unread",
+                action: function( checked )
+                {
+                  markMessagesUnread( checked );
+                }
+            }
+        ]
+    });
 });
 </script>
