@@ -64,7 +64,8 @@ $( document ).ready( function() {
     i18n_confirm_delete_message = '$encoder.jsEscape( $i18n.getString( "confirm_delete_message" ) , "'" )';
     i18n_confirm_delete_all_selected_messages = '$encoder.jsEscape( $i18n.getString( "confirm_delete_all_selected_messages" ), "'" )';
     i18n_no_messages_selected = '$encoder.jsEscape( $i18n.getString( "no_messages_selected" ), "'" )';
+    i18n_messages_were_deleted = '$encoder.jsEscape( $i18n.getString( "messages_were_deleted" ), "'" )';
 
-    multiSelect();
+    multiSelect( "#multiSelectButton", "#multiSelectMenu", "#messages" );
 });
 </script>

@@ -29,7 +29,7 @@ function removeMessages( messages )
                 {
                     $( "#messages" ).find( "[name='" + response.removed[i] + "']" ).remove();
                 }
-                setHeaderDelayMessage( response );
+                setHeaderDelayMessage( i18n_messages_were_deleted );
                 $( "#multiSelectCheckbox" ).removeAttr( "checked" );
             },
             error: function( response )
@@ -184,94 +184,98 @@ function formatItem( item )
 }
 
 /* Multi select checkbox button */
-function multiSelect()
+function multiSelect( buttonId, menuId, checkboxContainerId )
 {
-    $( "#multiSelectButton" ).click(function( event )
+    var $button = $( buttonId );
+    var $menu = $( menuId );
+    var $multiCheckbox = $button.children( "input:checkbox" );
+    var $checkboxes = $( checkboxContainerId + " input:checkbox" );
+
+    $button.click( function( event )
     {
         $( document ).one( "click", function()
         {
-            $( "#multiSelectMenu" ).css( "visibility", "hidden" );
+            $menu.css( "visibility", "hidden" );
         });
 
-        var $multiMenu = $( "#multiSelectMenu" );
-
-        if( $multiMenu.css( "visibility" ) !== "visible" )
+        if( $menu.css( "visibility" ) !== "visible" )
         {
-            $multiMenu.css( "visibility", "visible" );
+            $menu.css( "visibility", "visible" );
         }
         else
         {
-            $multiMenu.css( "visibility", "hidden" );
+            $menu.css( "visibility", "hidden" );
         }
         event.stopPropagation();
     });
 
-    $( "#multiSelectMenu" )
-        .css( "visibility", "hidden" )
-        .position(
-        {
-            my: "left top",
-            at: "left bottom",
-            of: "#multiSelectButton"
-        });
+    $menu.css( "visibility", "hidden" );
 
-    $( "#multiSelectCheckbox" ).click( function( event )
+    $menu.position(
     {
-        if( typeof $( this ).attr( "checked" ) !== "undefined" ) {
-            $( "#messages input:checkbox" ).attr( "checked" , "checked" );
+        my: "left top",
+        at: "left bottom",
+        of: $button
+    });
+
+    $multiCheckbox.click( function( event )
+    {
+        if( typeof $( this ).attr( "checked" ) !== "undefined" )
+        {
+            $checkboxes.attr( "checked" , "checked" );
         }
-        else {
-            $( "#messages input:checkbox:checked" ).removeAttr( "checked" );
+        else
+        {
+            $checkboxes.removeAttr( "checked" );
         }
         event.stopPropagation();
     });
 
-    $( "#multiSelectMenu li, #multiSelectMenu li a" ).click(function()
+    $menu.find( "li, a" ).click( function()
     {
         var messages = {};
         messages.uid = [];
-        $( "#messages input:checkbox:checked" ).each(function()
+
+        $checkboxes.filter( ":checked" ).each( function()
         {
-            messages.uid.push(this.value);
+            messages.uid.push( this.value );
         });
 
         if( messages.uid.length < 1 )
         {
-            showErrorMessage(i18n_no_messages_selected);
+            showErrorMessage( i18n_no_messages_selected );
             return;
         }
 
-        var action = $(this).attr( "data-action" );
+        var action = $( this ).attr( "data-action" );
 
         if( action === "delete" )
         {
-            removeMessages(messages);
+            removeMessages( messages );
         }
         else if( action === "markRead" )
         {
-            markMessagesRead(messages);
+            markMessagesRead( messages );
         }
         else if( action === "markUnread" )
         {
-            markMessagesUnread(messages);
+            markMessagesUnread( messages );
         }
     });
 
     /* Checkboxes all selected/deselected trigger select/deselect of multi select checkbox */
 
-    var numCheckboxes = $( "#messages input:checkbox" ).length;
-
-    $( "#messages input:checkbox" ).click( function()
+    $checkboxes.click( function()
     {
-        var checked = $( "#messages input:checkbox:checked" );
+        var checked = $checkboxes.filter( ":checked" );
 
         if( checked.length < 1 )
         {
-            $( "#multiSelectCheckbox" ).removeAttr( "checked" );
+            $multiCheckbox.removeAttr( "checked" );
         }
-        else if( checked.length === numCheckboxes )
+        else if( checked.length === $checkboxes.length )
         {
-            $( "#multiSelectCheckbox" ).attr( "checked", "checked" );
+            $multiCheckbox.attr( "checked", "checked" );
         }
     });
 }
