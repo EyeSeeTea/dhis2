@@ -3432,7 +3432,7 @@ Ext.onReady( function() {
 					for (var i = 0, record, dim; i < layout.rows.length; i++) {
                         dim = layout.rows[i];
                         record = recordMap[dim.dimension];
-
+                        
 						aggWindow.rowStore.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
