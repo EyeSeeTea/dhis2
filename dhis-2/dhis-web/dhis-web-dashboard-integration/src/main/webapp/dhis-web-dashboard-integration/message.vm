@@ -8,16 +8,18 @@
         #end
         <li><a class="blueButtonLink" href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a></li>
         <li><span style="padding-left:12px"></span></li>
+        <li><a class="multiSelectButton" id="multiSelectButton"><input type="checkbox" id="multiSelectCheckbox" /><span class="downArrow"></span></a></li>
+        <li><span style="padding-left:12px"></span></li>
         <li><a class="greyButtonLink" href="message.action">$i18n.getString( "inbox" )</a></li>
         <li><a class="greyButtonLink" href="message.action?followUp=true">$i18n.getString( "follow_up" )</a></li>
         <li><a class="greyButtonLink" href="message.action?unread=true">$i18n.getString( "unread" )</a></li>
-        <li><a class="multiSelectButton" id="multiSelectButton"><input type="checkbox" id="multiSelectCheckbox" /><span class="downArrow"></span></a></li>
+
     </ul>
 </div>
 <ul id="multiSelectMenu" class="multiSelectMenu" >
-    <li><a href="#" value="delete">Delete</a></li>
-    <li><a href="#" value="markRead">Mark read</a></li>
-    <li><a href="#" value="markUnread">Mark unread</a></li>
+    <li><a href="#" data-action="delete">Delete</a></li>
+    <li><a href="#" data-action="markRead">Mark read</a></li>
+    <li><a href="#" data-action="markUnread">Mark unread</a></li>
 </ul>
 <div style="width:100%">
     <div style="padding-right:15px">
@@ -58,103 +60,11 @@
     </div>
 </div>
 <script type="text/javascript">
-    $( document ).ready( function() {
-        i18n_confirm_delete_message = '$encoder.jsEscape( $i18n.getString( "confirm_delete_message" ) , "'" )';
-        i18n_confirm_delete_all_selected_messages = '$encoder.jsEscape( $i18n.getString( "confirm_delete_all_selected_messages" ), "'" )';
-        i18n_no_messages_selected = '$encoder.jsEscape( $i18n.getString( "no_messages_selected" ), "'" )';
+$( document ).ready( function() {
+    i18n_confirm_delete_message = '$encoder.jsEscape( $i18n.getString( "confirm_delete_message" ) , "'" )';
+    i18n_confirm_delete_all_selected_messages = '$encoder.jsEscape( $i18n.getString( "confirm_delete_all_selected_messages" ), "'" )';
+    i18n_no_messages_selected = '$encoder.jsEscape( $i18n.getString( "no_messages_selected" ), "'" )';
 
-        /* Multi select checkbox button */
-
-        $( "#multiSelectButton" ).click( function( event )
-        {
-            $( document ).one( "click", function()
-            {
-                $( "#multiSelectMenu" ).css( "visibility", "hidden" );
-            });
-
-            var $multiMenu = $( "#multiSelectMenu" );
-
-            if( $multiMenu.css( "visibility" ) !== "visible" )
-            {
-                $multiMenu.css( "visibility", "visible" );
-            }
-            else
-            {
-                $multiMenu.css( "visibility", "hidden" );
-            }
-            event.stopPropagation();
-        });
-
-        $( "#multiSelectMenu" )
-            .css( "visibility", "hidden" )
-            .position(
-            {
-                my: "left top",
-                at: "left bottom",
-                of: "#multiSelectButton"
-            });
-
-        $( "#multiSelectCheckbox" ).click(
-                function( event )
-                {
-                    if( typeof $( this ).attr( "checked" ) !== "undefined" )
-                    {
-                        $( "#messages input:checkbox").attr( "checked", "checked" );
-                    }
-                    else
-                    {
-                        $( "#messages input:checkbox:checked").removeAttr( "checked" );
-                    }
-                    event.stopPropagation();
-                }
-        );
-
-        $( "#multiSelectMenu li").click( function()
-        {
-            var messages = {};
-            messages.uid = [];
-            $( "#messages input:checkbox:checked" ).each( function()
-            {
-                messages.uid.push( this.value );
-            });
-
-            if( messages.uid.length < 1 )
-            {
-                showErrorMessage( i18n_no_messages_selected );
-                return;
-            }
-
-            var action = $( this.value );
-
-            if( action === "delete" )
-            {
-                removeMessages( messages );
-            }
-            else if( action === "markRead" )
-            {
-                markMessagesRead( messages );
-            }
-            else if( action === "markUnread" )
-            {
-                markMessagesUnread( messages );
-            }
-        });
-
-        /* Checkboxes all selected/deselected trigger select/deselect of multi select checkbox */
-
-        var numCheckboxes = $( "#messages input:checkbox" ).length;
-
-        $( "#messages input:checkbox" ).click( function()
-        {
-            var checked = $( "#messages input:checkbox:checked" );
-            if( checked.length < 1 )
-            {
-                $( "#multiSelectCheckbox" ).removeAttr( "checked" );
-            }
-            else if( checked.length === numCheckboxes )
-            {
-                $( "#multiSelectCheckbox" ).attr( "checked", "checked" );
-            }
-        });
-    });
+    multiSelect();
+});
 </script>
