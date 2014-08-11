@@ -230,7 +230,8 @@ function multiSelect()
     {
         var messages = {};
         messages.uid = [];
-        $( "#messages input:checkbox:checked" ).each(function() {
+        $( "#messages input:checkbox:checked" ).each(function()
+        {
             messages.uid.push(this.value);
         });
 
@@ -242,13 +243,16 @@ function multiSelect()
 
         var action = $(this).attr( "data-action" );
 
-        if( action === "delete" ) {
+        if( action === "delete" )
+        {
             removeMessages(messages);
         }
-        else if( action === "markRead" ) {
+        else if( action === "markRead" )
+        {
             markMessagesRead(messages);
         }
-        else if( action === "markUnread" ) {
+        else if( action === "markUnread" )
+        {
             markMessagesUnread(messages);
         }
     });
@@ -260,11 +264,14 @@ function multiSelect()
     $( "#messages input:checkbox" ).click( function()
     {
         var checked = $( "#messages input:checkbox:checked" );
-        if( checked.length < 1 ) {
-        $( "#multiSelectCheckbox" ).removeAttr( "checked" );
+
+        if( checked.length < 1 )
+        {
+            $( "#multiSelectCheckbox" ).removeAttr( "checked" );
         }
-        else if( checked.length === numCheckboxes ) {
-        $( "#multiSelectCheckbox" ).attr( "checked", "checked" );
+        else if( checked.length === numCheckboxes )
+        {
+            $( "#multiSelectCheckbox" ).attr( "checked", "checked" );
         }
     });
 }
