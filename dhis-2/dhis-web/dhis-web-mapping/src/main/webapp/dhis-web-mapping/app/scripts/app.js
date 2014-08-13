@@ -7248,25 +7248,22 @@ Ext.onReady( function() {
 			store: gis.store.periodTypes,
 			periodOffset: 0,
 			selectHandler: function() {
-				var type = this.getValue(),
-					pType,
-					offset,
-					periods;
+                var periodType = this.getValue(),
+                    generator = gis.init.periodGenerator,
+                    periods;
 
-				if (type === 'relativePeriods') {
+				if (periodType === 'relativePeriods') {
 					periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
 
 					periodPrev.disable();
 					periodNext.disable();
 				}
 				else {
-					pType = new PeriodType();
-					offset = this.periodOffset;
-					periods = pType.get(type).generatePeriods({
-						offset: offset,
-						filterFuturePeriods: true,
-						reversePeriods: true
-					});
+                    periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
+
+                    for (var i = 0; i < periods.length; i++) {
+                        periods[i].id = periods[i].iso;
+                    }
 
 					periodsByTypeStore.setIndex(periods);
 					periodsByTypeStore.loadData(periods);
