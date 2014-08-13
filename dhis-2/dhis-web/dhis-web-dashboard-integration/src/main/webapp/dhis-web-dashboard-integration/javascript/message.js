@@ -320,12 +320,11 @@ jQuery.fn.extend(
 
         this.append( $button );
 
-        // Position menu relative to button
         $menu.css( "visibility", "hidden" );
         $menu.position(
             {
                 my: "left top",
-                at: "left bottom",
+                at: "left bottom+1",
                 of: $button
             }
         );
