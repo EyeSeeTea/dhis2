@@ -11,6 +11,11 @@ function removeMessage( id )
 
 function removeMessages( messages )
 {
+    if( messages.length < 1 )
+    {
+        return;
+    }
+
     var confirmed = window.confirm( i18n_confirm_delete_all_selected_messages );
 
     if ( confirmed )
@@ -19,7 +24,7 @@ function removeMessages( messages )
 
         $.ajax(
         {
-            url: "../../api/messageConversations?" + $.param( messages, true ),
+            url: "../../api/messageConversations?" + $.param( { uid: messages }, true ),
             contentType: "application/json",
             dataType: "json",
             type: "DELETE",
@@ -33,7 +38,7 @@ function removeMessages( messages )
             },
             error: function( response )
             {
-                showErrorMessage( response.message );
+                showErrorMessage( response.message, 3 );
             }
         });
     }
@@ -41,11 +46,16 @@ function removeMessages( messages )
 
 function markMessagesRead( messages )
 {
+    if( messages.length < 1 )
+    {
+        return;
+    }
+
     $.ajax(
     {
         url: "../../api/messageConversations/read",
         type: "PUT",
-        data: JSON.stringify( messages.uid ),
+        data: JSON.stringify( messages ),
         contentType: "application/json",
         dataType: "json",
         success: function( response )
@@ -54,18 +64,23 @@ function markMessagesRead( messages )
         },
         error: function( response )
         {
-            showErrorMessage( response.message );
+            showErrorMessage( response.message, 3 );
         }
     });
 }
 
 function markMessagesUnread( messages )
 {
+    if( messages.length < 1 )
+    {
+        return;
+    }
+
     $.ajax(
     {
         url: "../../api/messageConversations/unread",
         type: "PUT",
-        data: JSON.stringify( messages.uid ),
+        data: JSON.stringify( messages ),
         contentType: "application/json",
         dataType: "json",
         success: function( response )
@@ -74,7 +89,7 @@ function markMessagesUnread( messages )
         },
         error: function( response )
         {
-            showErrorMessage( response.message );
+            showErrorMessage( response.message, 3 );
         }
     });
 }
@@ -180,184 +195,36 @@ function formatItem( item )
     }
 }
 
-/* Multi select checkbox button */
-function multiSelect2( buttonId, menuId, checkboxContainerId )
-{
-    var $button = $( buttonId );
-    var $menu = $( menuId );
-    var $multiCheckbox = $button.children( "input:checkbox" );
-    var $checkboxes = $( checkboxContainerId + " input:checkbox" );
-
-    $button.click( function( event )
-    {
-        $( document ).one( "click", function()
-        {
-            $menu.css( "visibility", "hidden" );
-        });
-
-        if( $menu.css( "visibility" ) !== "visible" )
-        {
-            $menu.css( "visibility", "visible" );
-        }
-        else
-        {
-            $menu.css( "visibility", "hidden" );
-        }
-        event.stopPropagation();
-    });
-
-    $menu.css( "visibility", "hidden" );
-
-    $menu.position(
-    {
-        my: "left top",
-        at: "left bottom",
-        of: $button
-    });
-
-    $multiCheckbox.click( function( event )
-    {
-        if( typeof $( this ).attr( "checked" ) !== "undefined" )
-        {
-            $checkboxes.attr( "checked" , "checked" );
-        }
-        else
-        {
-            $checkboxes.removeAttr( "checked" );
-        }
-        event.stopPropagation();
-    });
-
-    $menu.find( "li, a" ).click( function()
-    {
-        var messages = {};
-        messages.uid = [];
-
-        $checkboxes.filter( ":checked" ).each( function()
-        {
-            messages.uid.push( this.value );
-        });
-
-        if( messages.uid.length < 1 )
-        {
-            showErrorMessage( i18n_no_messages_selected );
-            return;
-        }
-
-        var action = $( this ).attr( "data-action" );
-
-        if( action === "delete" )
-        {
-            removeMessages( messages );
-        }
-        else if( action === "markRead" )
-        {
-            markMessagesRead( messages );
-        }
-        else if( action === "markUnread" )
-        {
-            markMessagesUnread( messages );
-        }
-    });
-
-    /* Checkboxes all selected/deselected trigger select/deselect of multi select checkbox */
-
-    $checkboxes.click( function()
-    {
-        var checked = $checkboxes.filter( ":checked" );
-
-        if( checked.length < 1 )
-        {
-            $multiCheckbox.removeAttr( "checked" );
-        }
-        else if( checked.length === $checkboxes.length )
-        {
-            $multiCheckbox.attr( "checked", "checked" );
-        }
-    });
-}
-
-// Experimental
+// Experimental jquery extension to provide multi select button and friends
+// Test fiddle: http://jsfiddle.net/g6awde3z/
 jQuery.fn.extend(
 {
-    multiSelect: function( options )
+    _multiCheckbox: function( $checkboxContainer )
     {
-        return this.each( function( )
+        return this.each( function()
         {
-            // Ref to all checkboxes
-            var $checkboxes = $( "#" + options.checkboxContainerId + " input:checkbox" );
+            var $checkbox = $( this );
 
-            // Build button
-            var $button = $( '<a href="#"></a>' );
-            $( this ).append( $button );
-
-            var $multiCheckbox = $('<input type="checkbox" id="multiCheckbox"/>');
-            $button.append( $multiCheckbox );
-            $button.append( '<span class="downArrow"></span>' );
-
-            $button.addClass( options.buttonClass );
-
-            // Build menu
-            var $menu = $( '<ul id="multiSelectMenu" class="multiSelectMenu"></ul>' );
-            $( document.body ).append( $menu );
-
-            // Menu elements
-            $( options.menuElements ).each( function()
+            // Ensure we're applying this to a checkbox
+            if( !$checkbox.is( "input" ) || $checkbox.attr( "type") !== "checkbox" )
             {
-                var el = $('<li><a href="#">' + this.displayName + '</a></li>');
+                throw new Error( "Can only apply to a checkbox." );
+            }
 
-                var checked = [];
-                $checkboxes.filter(":checked").each( function()
-                {
-                    checked.push( this.value );
-                });
+            // Get checkboxes to control
+            var $checkboxes = [];
 
-                var action = this.action;
-
-                el.click( function()
-                {
-                    var checked = [];
-                    $checkboxes.filter( ":checked" ).each( function()
-                    {
-                        checked.push( this.value );
-                    });
-
-                    action( checked );
-                    $multiCheckbox.removeAttr( "checked" );
-                });
-
-                $menu.append( el );
-            });
-
-            // Position menu
-            $menu.css( "visibility", "hidden" );
-            $menu.position( { my: "left top", at: "left bottom", of: $button } );
-
-            // Button click handler (show/hide dropdown menu)
-            $button.click( function( event )
+            if( typeof $checkboxContainer !== "undefined" )
             {
-                $( document ).one( "click", function()
-                {
-                    $menu.css( "visibility", "hidden" );
-                });
+                $checkboxes = $checkboxContainer.find( "input:checkbox" );
+            }
 
-                if( $menu.css( "visibility" ) !== "visible" )
-                {
-                    $menu.css( "visibility", "visible" );
-                }
-                else
-                {
-                    $menu.css( "visibility", "hidden" );
-                }
-                event.stopPropagation();
-            });
-
-            // Multi-checkbox (select/deselect all)
-            $multiCheckbox.click( function( event )
+            // Apply master checkbox behaviour
+            $checkbox.click( function( event )
             {
-                if( typeof $( this ).attr( "checked" ) !== "undefined" )
+                if( this.checked )
                 {
-                    $checkboxes.attr( "checked" , "checked" );
+                    $checkboxes.attr( "checked", "checked" );
                 }
                 else
                 {
@@ -366,44 +233,138 @@ jQuery.fn.extend(
                 event.stopPropagation();
             });
 
-            // Checkboxes all selected/deselected trigger select/deselect of multi select checkbox
+            // Apply reverse behaviour to slaves
             $checkboxes.click( function()
             {
                 var checked = $checkboxes.filter( ":checked" );
 
                 if( checked.length < 1 )
                 {
-                    $multiCheckbox.removeAttr( "checked" );
+                    $checkbox.removeAttr( "checked" );
                 }
-                else if( checked.length === $checkboxes.length )
+                else if( checked.length > 0 && checked.length < $checkboxes.length )
                 {
-                    $multiCheckbox.attr( "checked", "checked" );
+                    $checkbox.removeAttr( "checked" );
+                }
+                else
+                {
+                    $checkbox.attr( "checked", "checked" );
                 }
             });
         });
+    },
+    _dropdownMenu: function( menuItems, menuClass, buttonClass, buttonElements )
+    {
+        // Build menu
+        var $menu = $( "<ul>", { "class" : menuClass } );
+
+        $( menuItems ).each( function()
+        {
+            var el = $( "<li>" );
+            $( el ).append( $( "<a>", { href: "#", text: this.displayName } ) );
+
+            el.action = this.action;
+            el.onAction = this.onAction;
+
+            if( typeof this.actionArgFunc !== "undefined" )
+            {
+                el.actionArgFunc = this.actionArgFunc;
+
+                // Create and attach click handler to menu item
+                el.click( function()
+                {
+                    el.onAction();
+                    return el.action( el.actionArgFunc() );
+                });
+            }
+            else
+            {
+                el.click( function()
+                {
+                    el.onAction();
+                    el.action();
+                });
+            }
+
+            $menu.append( el );
+        });
+
+        $( document.body ).append( $menu );
+
+        // Build button
+        var $button = $( "<a>", { href: "#", "class" : buttonClass } );
+
+        $( buttonElements ).each( function()
+        {
+            $button.append( this );
+        });
+
+        // Click handler to show/hide menu
+        $button.click( function( event )
+        {
+            $( document ).one( "click", function()
+            {
+                $menu.css( "visibility", "hidden" );
+            });
+
+            if( $menu.css( "visibility") !== "visible" )
+            {
+                $menu.css( "visibility", "visible" );
+            }
+            else
+            {
+                $menu.css( "visibility", "hidden" );
+            }
+            event.stopPropagation();
+        });
+
+        this.append( $button );
+
+        // Position menu relative to button
+        $menu.css( "visibility", "hidden" );
+        $menu.position(
+            {
+                my: "left top",
+                at: "left bottom",
+                of: $button
+            }
+        );
+    },
+    multiCheckDropdownCombo: function( $checkboxContainer, menuItems, options )
+    {
+        var $cb = $( "<input>", { type: "checkbox" } )._multiCheckbox( $checkboxContainer );
+
+        var buttonElements = [
+            $cb,
+            $( "<span>", { "class" : "downArrow" } )
+        ];
+
+        var defaults = {
+            menuClass: "multiSelectMenu",
+            buttonClass: "multiSelectButton"
+        };
+
+        if ( typeof options === "undefined" )
+        {
+            options = defaults;
+        }
+
+        $( menuItems ).each( function()
+        {
+            this.actionArgFunc = function()
+            {
+                var checked = [];
+                $checkboxContainer.find( "input:checkbox:checked" ).each( function()
+                {
+                    checked.push( this.value );
+                });
+                return checked;
+            };
+            this.onAction = function()
+            {
+                $cb.removeAttr( "checked" );
+            };
+        });
+        $( this )._dropdownMenu( menuItems, options.menuClass, options.buttonClass, buttonElements );
     }
 });
-
-/*    $("#exampleButtonContainer").multiSelect2(
- {
- buttonClass: "multiSelectButton",
- checkboxContainerId: "messages",
- menuElements:
- [
- {
- displayName: "Delete",
- action: function( checked )
- {
- console.log(checked);
- }
- },
- {
- displayName: "Mark read",
- action: function( checked )
- {
- console.log(checked);
- }
- }
- ]
- });
- */

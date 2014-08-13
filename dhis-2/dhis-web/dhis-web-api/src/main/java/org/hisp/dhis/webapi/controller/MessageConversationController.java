@@ -353,7 +353,7 @@ public class MessageConversationController
 
     @RequestMapping( method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode removeMessageConversations(
-        @RequestParam("uid") String[] uids, HttpServletResponse response )
+        @RequestParam( "uid" ) String[] uids, HttpServletResponse response )
     {
         RootNode rootNode = new RootNode( "reply" );
 

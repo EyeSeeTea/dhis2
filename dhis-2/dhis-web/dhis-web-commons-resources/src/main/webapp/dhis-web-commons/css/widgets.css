@@ -764,6 +764,36 @@ ul.pageSizeSelection input
     background-color: #f8f8f8;
 }
 
+.multiSelectButton .downArrow
+{
+    border: thick;
+    border-color: #777777 transparent white;
+    border-style: solid dashed dashed;
+    margin-left: 5px;
+    position: relative;
+    top: 10px;
+}
+
+.multiSelectButton .downArrow:hover
+{
+    border-color: #999999 transparent white;
+}
+
+.multiSelectButton.disabled
+{
+    pointer-events: none;
+}
+
+.multiSelectButton.disabled .downArrow
+{
+    border-color: #e2e2e2 transparent white;
+}
+
+.multiSelectButton input[type='checkbox']
+{
+    margin: 0;
+}
+
 .multiSelectMenu
 {
     position: absolute;
@@ -799,20 +829,6 @@ ul.pageSizeSelection input
     background-color: #f8f8f8;
 }
 
-.downArrow
-{
-    border:thick;
-    border-color:#777777 transparent white;
-    border-style:solid dashed dashed;
-    margin-left:5px;
-    position:relative;
-    top: 10px;
-}
-
-.downArrow:hover
-{
-    border-color: #999999 transparent white;
-}
 
 /*----------------------------------------------------------------------------*/
 /* Placeholders                                                               */

@@ -125,7 +125,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                             $scope.selectedProgram = $scope.programs[0];
                         }                        
                     }
-                }                
+                } 
             });
         }        
     };
@@ -165,10 +165,10 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         if($scope.doSearch){
             $scope.search($scope.searchMode);
         }       
-    };
-    
+    };   
+   
     $scope.search = function(mode){ 
-
+        
         $scope.teiFetched = false;
         $scope.selectedSearchMode = mode;
         $scope.emptySearchText = false;
@@ -198,10 +198,14 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 return;
             }       
  
-            $scope.queryUrl = 'query=' + $scope.searchText;                     
+            $scope.queryUrl = 'query=' + $scope.searchText;     
+            
+            $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
         }
         
         if( $scope.selectedSearchMode === $scope.searchMode.attributeBased ){
+            
+            $scope.searchText = '';
             
             $scope.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.attributes, $scope.enrollment);
             
@@ -211,6 +215,12 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $scope.teiCount = null;
                 return;
             }
+        }
+        
+        if( $scope.selectedSearchMode === $scope.searchMode.listAll ){
+            $scope.searchText = '';
+            
+            $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
         }
         
         $scope.fetchTeis();
