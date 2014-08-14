@@ -4524,29 +4524,57 @@ Ext.onReady( function() {
         });
 
             // date
-		startDate = Ext.create('Ext.form.field.Date', {
+        startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
-            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
-			columnWidth: 0.5,
-			//style: 'margin-right: 1px',
-			format: 'Y-m-d',
-			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
-		});
+            columnWidth: 0.5,
+            listeners: {
+                render: function(c) {
+                    $('#' + c.inputEl.id).calendarsPicker({calendar: gis.init.calendar});
+                },
+                focus: function() {
+                    var calendarElements = Ext.query('.calendars-popup');
 
-		endDate = Ext.create('Ext.form.field.Date', {
+                    for (var i = 0; i < calendarElements.length; i++) {
+                        Ext.get(calendarElements[i]).setStyle('z-index', 100000);
+                    }
+                }
+            }
+        });
+
+        endDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
-            //labelStyle: 'font-weight: bold',
 			labelSeparator: '',
-			columnWidth: 0.5,
-			style: 'margin-left: 1px',
-			format: 'Y-m-d',
-			value: new Date()
-		});
+            columnWidth: 0.5,
+            listeners: {
+                render: function(c) {
+                    $('#' + c.inputEl.id).calendarsPicker({calendar: gis.init.calendar});
+                },
+                focus: function() {
+                    var calendarElements = Ext.query('.calendars-popup');
+
+                    for (var i = 0; i < calendarElements.length; i++) {
+                        Ext.get(calendarElements[i]).setStyle('z-index', 100000);
+                    }
+                }
+            }
+        });
+
+		//endDate = Ext.create('Ext.form.field.Date', {
+			//fieldLabel: 'End date',
+			//labelAlign: 'top',
+			//labelCls: 'gis-form-item-label-top',
+            ////labelStyle: 'font-weight: bold',
+			//labelSeparator: '',
+			//columnWidth: 0.5,
+			//style: 'margin-left: 1px',
+			//format: 'Y-m-d',
+			//value: new Date()
+		//});
 
         period = Ext.create('Ext.panel.Panel', {
             title: '<div class="gis-panel-title-period">Periods</div>',
