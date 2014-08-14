@@ -19,6 +19,8 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -46,6 +48,9 @@ public class LoadDataEntryFormAction implements Action
     private final static String TARIFF_SETTING_AUTHORITY = "TARIFF_SETTING_AUTHORITY";
     private final static String UTILIZATION_RULE_DATAELEMENT_ATTRIBUTE = "UTILIZATION_RULE_DATAELEMENT_ATTRIBUTE";
     private final static String UTILIZATION_RATE_DATAELEMENT_ID = "UTILIZATION_RATE_DATAELEMENT_ID";
+    
+    private final static String TOTAL_PBF_DATAELEMENT_ID = "TOTAL_PBF_DATAELEMENT_ID";
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -128,6 +133,9 @@ public class LoadDataEntryFormAction implements Action
     
     @Autowired
     private DataElementCategoryService categoryService;
+    
+    
+    
     // -------------------------------------------------------------------------
     // Comparator
     // -------------------------------------------------------------------------
@@ -254,6 +262,14 @@ public class LoadDataEntryFormAction implements Action
         return utilizationRate;
     }
     
+    private int totalDataElementId;
+    
+    public int getTotalDataElementId()
+    {
+        return totalDataElementId;
+    }
+
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -262,7 +278,24 @@ public class LoadDataEntryFormAction implements Action
     public String execute()
     {
         dataValueMap = new HashMap<String, String>();
-
+        
+        Constant totalDetId = constantService.getConstantByName( TOTAL_PBF_DATAELEMENT_ID );
+        DataElement totalDataElement = dataElementService.getDataElement( (int) totalDetId.getValue() );
+        totalDataElementId = 0;
+        if( totalDataElement != null )
+        {
+            totalDataElementId = totalDataElement.getId();
+        }
+        
+        /*
+        String abc = null;
+        System.out.println( " Test ABC " +  abc );
+        
+        String abc1;
+        abc1 = "pppp";
+        System.out.println( " Test ABC " +  abc1 );
+        */
+        
         //Lookup lookup = lookupService.getLookupByName( Lookup.OC_TARIFF );
 
         //Lookup lookup2 = lookupService.getLookupByName( Lookup.QV_TARIFF );
@@ -277,10 +310,37 @@ public class LoadDataEntryFormAction implements Action
 
         period = PeriodType.getPeriodFromIsoString( selectedPeriodId );
 
-        dataElements = new ArrayList<DataElement>( dataSet.getDataElements() );
+        //dataElements = new ArrayList<DataElement>( dataSet.getDataElements() );
 
-        Collections.sort( dataElements );
+        //Collections.sort( dataElements );
 
+        dataElements = new ArrayList<DataElement>();
+        dataElements = new ArrayList<DataElement>( dataElementService.getAllDataElements() );
+        
+        List<DataElement> dataElementList = new ArrayList<DataElement>();
+        
+        List<Section> sectionList = new ArrayList<Section>( dataSet.getSections() );
+        List<DataElement> tempDEList = new ArrayList<DataElement>();
+        
+        if( sectionList != null && sectionList.size() > 0  )
+        {
+            Collections.sort(sectionList ,new SectionOrderComparator());
+            
+            for ( Section section : sectionList )
+            {
+               tempDEList.addAll( section.getDataElements() );
+            }
+            
+            dataElementList.addAll( tempDEList );
+        }
+        else
+        {
+            dataElementList.addAll( dataSet.getDataElements() );
+        }
+        
+        
+        dataElements.retainAll( dataElementList );
+        
         optionCombos = new ArrayList<DataElementCategoryOptionCombo>();
 
         Map<Integer, Double> tariffDataValueMap = new HashMap<Integer, Double>();
@@ -298,15 +358,16 @@ public class LoadDataEntryFormAction implements Action
             tariff_setting_authority = (int) tariff_authority.getValue();
         }
 
-        OrganisationUnitGroup orgUnitGroup = findPBFOrgUnitGroupforTariff( organisationUnit );
+        
         
         List<OrganisationUnit> orgUnitBranch = organisationUnitService.getOrganisationUnitBranch( organisationUnit.getId() );
         String orgUnitBranchIds = "-1";
         for( OrganisationUnit orgUnit : orgUnitBranch )
         {
-        	orgUnitBranchIds += "," + orgUnit.getId();
+            orgUnitBranchIds += "," + orgUnit.getId();
         }
         
+        OrganisationUnitGroup orgUnitGroup = findPBFOrgUnitGroupforTariff( organisationUnit, dataSet.getId(), orgUnitBranchIds );
         if( orgUnitGroup != null )
         {
             tariffDataValueMap.putAll( tariffDataValueService.getTariffDataValues( orgUnitGroup, orgUnitBranchIds, dataSet, period ) );
@@ -328,7 +389,7 @@ public class LoadDataEntryFormAction implements Action
         for ( PBFDataValue pbfDataValue : pbfDataValues )
         {
             DataElement de = pbfDataValue.getDataElement();
-            if ( pbfDataValue.getTariffAmount() == null )
+            if ( pbfDataValue.getTariffAmount() == null || pbfDataValue.getTariffAmount().toString().trim().equals( "" ) )
             {
                 Double tariffAmount = tariffDataValueMap.get( de.getId() );
                 if ( tariffAmount != null )
@@ -444,6 +505,7 @@ public class LoadDataEntryFormAction implements Action
             }
         }
         
+        
         utilizationRatesMap = new HashMap<Integer, String>( utilizationRateService.getUtilizationRates() );
         
         /*
@@ -464,18 +526,27 @@ public class LoadDataEntryFormAction implements Action
         {
             utilizationRate = dataValue.getValue();
         }        
-        
       
         return SUCCESS;
     }
 
-    public OrganisationUnitGroup findPBFOrgUnitGroupforTariff( OrganisationUnit organisationUnit )
+    public OrganisationUnitGroup findPBFOrgUnitGroupforTariff( OrganisationUnit organisationUnit, Integer dataSetId, String orgUnitIds )
     {
-    	Constant tariff_authority = constantService.getConstantByName( TARIFF_SETTING_AUTHORITY );
-    	
-    	OrganisationUnitGroupSet orgUnitGroupSet = orgUnitGroupService.getOrganisationUnitGroupSet( (int) tariff_authority.getValue() );
-    	
-    	OrganisationUnitGroup orgUnitGroup = organisationUnit.getGroupInGroupSet( orgUnitGroupSet );
+        Set<Integer> orgUnitGroupIds = tariffDataValueService.getOrgUnitGroupsByDataset( dataSetId, orgUnitIds );
+        
+        OrganisationUnitGroup orgUnitGroup = null;
+        if( orgUnitGroupIds != null && orgUnitGroupIds.size() > 0 )
+        {
+             orgUnitGroup = orgUnitGroupService.getOrganisationUnitGroup( orgUnitGroupIds.iterator().next() );
+        }
+        else
+        {        
+            Constant tariff_authority = constantService.getConstantByName( TARIFF_SETTING_AUTHORITY );
+        	
+            OrganisationUnitGroupSet orgUnitGroupSet = orgUnitGroupService.getOrganisationUnitGroupSet( (int) tariff_authority.getValue() );
+        	
+            orgUnitGroup = organisationUnit.getGroupInGroupSet( orgUnitGroupSet );
+        }
     	
     	return orgUnitGroup;
     }

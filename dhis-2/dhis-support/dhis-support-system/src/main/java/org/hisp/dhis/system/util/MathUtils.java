@@ -43,7 +43,6 @@ import org.nfunk.jep.JEP;
  */
 public class MathUtils
 {
-    public static final double INVALID = -1.0;
     public static final Double ZERO = new Double( 0 );
     
     private static final double TOLERANCE = 0.01; 
@@ -88,9 +87,19 @@ public class MathUtils
         final JEP parser = getJep();
         parser.parseExpression( expression );
         
-        double result = parser.getValue();
-        
-        return ( result == Double.NEGATIVE_INFINITY || result == Double.POSITIVE_INFINITY ) ? INVALID : result;       
+        return parser.getValue();
+    }
+    
+    /**
+     * Indicates whether the given double valid, implying it is not null, not
+     * infinite and not NaN.
+     * 
+     * @param d the double.
+     * @return true if the given double is valid.
+     */
+    public static boolean isValidDouble( Double d )
+    {
+        return d != null && !Double.isInfinite( d ) && !Double.isNaN( d );
     }
     
     /**
@@ -325,6 +334,25 @@ public class MathUtils
         Double dbl = Double.parseDouble( value );
         
         return dbl >= 0d && dbl <= 1d;
+    }
+    
+    /**
+     * Returns true if the provided string argument is an integer in the inclusive
+     * range of 0 to 100.
+     * 
+     * @param value the value.
+     * @return true if the provided string argument is a percentage.
+     */
+    public static boolean isPercentage( String value )
+    {
+        if ( !isInteger( value ) )
+        {
+            return false;
+        }
+        
+        Integer integer = Integer.valueOf( value );
+        
+        return integer >= 0 && integer <= 100;
     }
 
     /**

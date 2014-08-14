@@ -48,6 +48,7 @@ public class GetStringsFromLocaleAction
     // -------------------------------------------------------------------------
     // Dependency
     // -------------------------------------------------------------------------
+    
     @Autowired
     private I18nManager manager;
 
@@ -95,7 +96,7 @@ public class GetStringsFromLocaleAction
     
             i18nObject = manager.getI18n( this.getClass(), locale );
         
-            translations = translateSystemSettingManager.getTranslation_SystemAppearanceSetting( loc );
+            translations = translateSystemSettingManager.getTranslationSystemAppearanceSettings( loc );
         }
         
         return SUCCESS;

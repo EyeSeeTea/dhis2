@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.system.startup.AbstractStartupRoutine;
 import org.hisp.dhis.system.util.ValidationUtils;
@@ -75,6 +76,9 @@ public class TableAlteror
 
     @Autowired
     private StatementBuilder statementBuilder;
+
+    @Autowired
+    private DataElementCategoryService categoryService;
 
     // -------------------------------------------------------------------------
     // Action Implementation
@@ -126,9 +130,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE program DROP COLUMN maxDaysAllowedInputData" );
 
         executeSql( "ALTER TABLE period modify periodid int AUTO_INCREMENT" );
-        executeSql( "CREATE SEQUENCE period_periodid_seq" );
-        executeSql( "ALTER TABLE period ALTER COLUMN periodid SET DEFAULT NEXTVAL('period_periodid_seq')" );
-
+        
         executeSql( "UPDATE program SET programstage_dataelements=false WHERE displayInReports is null" );
 
         executeSql( "ALTER TABLE programvalidation DROP COLUMN leftside" );
@@ -258,27 +260,45 @@ public class TableAlteror
         executeSql( "update datavalue set storedby='aggregated_from_tracker' where storedby='DHIS-System'" );
 
         executeSql( "ALTER TABLE trackedentityattribute DROP COLUMN groupBy" );
-        
+
         executeSql( "update trackedentityattribute set valuetype='string' where valuetype='combo' and optionsetid is null" );
 
         executeSql( "UPDATE trackedentityattribute SET valuetype='string' WHERE valuetype='localId';" );
         executeSql( "UPDATE trackedentityattribute SET valuetype='number' WHERE valuetype='age'" );
-        
-        executeSql( "DROP TABLE orgunitgroupprograms" ); 
-        
+
+        executeSql( "DROP TABLE orgunitgroupprograms" );
+
         executeSql( "UPDATE trackedentityattribute SET valuetype='optionSet' WHERE valuetype='combo'" );
-        
+
         updateAggregateQueryBuilder();
-        
+
         executeSql( "UPDATE trackedentityaudit SET accessedmodule='tracked_entity_instance_dashboard' WHERE accessedmodule='instance_dashboard' or accessedmodule='patient_dashboard'" );
-        
-        updateUidColumn();
-        
-        executeSql( "UPDATE program_attributes SET allowDateInFuture='false' WHERE allowDateInFuture is null" );
 
         executeSql( "UPDATE programstageinstance SET status=1 WHERE completed=true" );
         executeSql( "ALTER TABLE programstageinstance DROP COLUMN completed" );
+
+        executeSql( "update program_attributes set mandatory = false where mandatory is null;" );
+
+        int attributeoptioncomboid = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
+        executeSql( "update datavalue set attributeoptioncomboid=" + attributeoptioncomboid
+            + " where storedby='aggregated_from_tracker' or comment='aggregated_from_tracker'" );
+
+        executeSql( "update trackedentityattribute set confidential = false where confidential is null;" );
+
+        executeSql( "update programstage_dataelements set allowfuturedate = allowdateinfuture where allowfuturedate is null" );
+        executeSql( "update programstage_dataelements set allowfuturedate = false where allowfuturedate is null" );
+        executeSql( "ALTER TABLE programstage_dataelements DROP COLUMN allowdateinfuture" );
+
+        executeSql( "update program_attributes set allowfuturedate = allowdateinfuture where allowfuturedate is null" );
+        executeSql( "update program_attributes set allowfuturedate = false where allowfuturedate is null" );
+        executeSql( "ALTER TABLE program_attributes DROP COLUMN allowdateinfuture" );
+        executeSql( "UPDATE program_attributes SET allowFutureDate='false' WHERE allowFutureDate is null" );
+
+        executeSql( "ALTER TABLE period ALTER COLUMN periodid DROP DEFAULT" );
+        executeSql( "DROP SEQUENCE period_periodid_seq" );
         
+        updateProgramStageList();
+        updateProgramAttributeList();
     }
 
     // -------------------------------------------------------------------------
@@ -298,7 +318,7 @@ public class TableAlteror
             if ( resultSet.next() )
             {
                 int id = resultSet.getInt( "trackedentityattributeid" );
-                
+
                 String source = "PC:DATE@executionDate#-DATE@birthDate#";
                 String target = CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE
                     + CaseAggregationCondition.SEPARATOR_OBJECT + id + ".visit";
@@ -399,6 +419,7 @@ public class TableAlteror
     {
         int exist = jdbcTemplate.queryForObject( "SELECT count(*) FROM trackedentity where name='Person'",
             Integer.class );
+        
         if ( exist == 0 )
         {
             String id = statementBuilder.getAutoIncrementValue();
@@ -414,13 +435,48 @@ public class TableAlteror
         }
     }
 
-    private void updateUidColumn()
+    private void updateProgramStageList()
     {
-        updateUidColumn( "trackedentityinstancereminder" );
-        updateUidColumn( "programvalidation" );
+        int count = jdbcTemplate.queryForObject( "select count(*) from programstage where sort_order is null", Integer.class );
+        
+        if ( count > 0 )
+        {
+            StatementHolder holder = statementManager.getHolder();
+
+            try
+            {
+                Statement statement = holder.getStatement();
+
+                ResultSet resultSet = statement
+                    .executeQuery( "SELECT programstageid, programid, minDaysFromStart FROM programstage order by programid, minDaysFromStart" );
+
+                int index = 1;
+                int programId = 0;
+                while ( resultSet.next() )
+                {
+                    if ( programId != resultSet.getInt( "programid" ) )
+                    {
+                        programId = resultSet.getInt( "programid" );
+                        index = 1;
+                    }
+
+                    executeSql( "UPDATE programStage SET sort_order=" + index + " WHERE programstageid="
+                        + resultSet.getInt( "programstageid" ) );
+                    index++;
+                }
+            }
+            catch ( Exception ex )
+            {
+                log.debug( ex );
+            }
+            finally
+            {
+                holder.close();
+            }
+        }
     }
 
-    private void updateUidColumn( String tableName )
+    private void updateProgramAttributeList()
     {
         StatementHolder holder = statementManager.getHolder();
 
@@ -428,15 +484,22 @@ public class TableAlteror
         {
             Statement statement = holder.getStatement();
 
-            ResultSet resultSet = statement.executeQuery( "SELECT " + tableName + "id FROM " + tableName
-                + " where uid is null" );
+            ResultSet resultSet = statement
+                .executeQuery( "select programtrackedentityattributeid, programid from program_attributes ORDER BY programid, sort_order" );
 
+            int index = 1;
+            int programId = 0;
             while ( resultSet.next() )
             {
-                String uid = CodeGenerator.generateCode();
+                if ( programId != resultSet.getInt( "programid" ) )
+                {
+                    programId = resultSet.getInt( "programid" );
+                    index = 1;
+                }
 
-                executeSql( "UPDATE " + tableName + " SET uid='" + uid + "'  WHERE " + tableName + "id="
-                    + resultSet.getInt( 1 ) );
+                executeSql( "UPDATE program_attributes SET sort_order=" + index + " WHERE programtrackedentityattributeid="
+                    + resultSet.getInt( "programtrackedentityattributeid" ) );
+                index++;
             }
         }
         catch ( Exception ex )
@@ -448,7 +511,7 @@ public class TableAlteror
             holder.close();
         }
     }
-    
+
     private int executeSql( String sql )
     {
         try

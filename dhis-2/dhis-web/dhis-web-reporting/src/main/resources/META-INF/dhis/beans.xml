@@ -108,6 +108,7 @@
 	<property name="registrationService" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
   
   <!-- Data Approval -->
@@ -165,7 +166,7 @@
 	<property name="scheduler" ref="scheduler"/>
 	<property name="resourceTableTask" ref="resourceTableTask" />
 	<property name="analyticsTableTask" ref="analyticsAllTask" />
-	<property name="dataMartTask" ref="dataMartLast12MonthsTask"/>
+	<property name="dataMartTask" ref="dataMartLastYearTask"/>
   </bean>
 
   <!-- Export -->

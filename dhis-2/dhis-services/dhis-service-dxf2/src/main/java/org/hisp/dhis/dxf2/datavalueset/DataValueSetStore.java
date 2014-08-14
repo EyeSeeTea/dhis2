@@ -28,24 +28,27 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
+
 import java.io.OutputStream;
 import java.io.Writer;
 import java.util.Date;
 import java.util.Set;
 
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-
+/**
+ * @author Lars Helge Overland
+ */
 public interface DataValueSetStore
 {
-    public void writeDataValueSetXml( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit, 
-        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
+    public void writeDataValueSetXml(Set<DataSet> dataSets, Date completeDate, Period period, OrganisationUnit orgUnit,
+                                     Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out);
 
-    public void writeDataValueSetCsv( Set<DataElement> dataElements, 
-        Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer );
+    public void writeDataValueSetCsv(Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer);
 
-    public void writeDataValueSetJson( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit,
-        Set<DataElement> dataElements, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
+    public void writeDataValueSetJson(Set<DataSet> dataSets, Date completeDate, Period period, OrganisationUnit orgUnit,
+                                      Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out);
+
+    void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream );
 }

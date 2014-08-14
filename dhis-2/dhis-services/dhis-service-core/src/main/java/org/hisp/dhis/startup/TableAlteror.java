@@ -88,7 +88,6 @@ public class TableAlteror
         executeSql( "DROP TABLE orgunitstructure" );
         executeSql( "DROP TABLE orgunithierarchystructure" );
         executeSql( "DROP TABLE orgunithierarchy" );
-        executeSql( "DROP TABLE datavalueaudit" );
         executeSql( "DROP TABLE columnorder" );
         executeSql( "DROP TABLE roworder" );
         executeSql( "DROP TABLE sectionmembers" );
@@ -154,6 +153,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE orgunitgroup DROP COLUMN image" );
         executeSql( "ALTER TABLE report DROP COLUMN usingorgunitgroupsets" );
         executeSql( "ALTER TABLE eventchart DROP COLUMN datatype" );
+        executeSql( "ALTER TABLE validationrule DROP COLUMN type" );
 
         executeSql( "DROP INDEX datamart_crosstab" );
 
@@ -164,7 +164,7 @@ public class TableAlteror
         // upgrade report table totals
         executeSql( "UPDATE reporttable SET rowtotals = totals, coltotals = totals" );
         executeSql( "ALTER TABLE reporttable DROP COLUMN totals" );
-        
+
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
         executeSql( "ALTER TABLE mapview DROP COLUMN mapid" );
@@ -491,7 +491,7 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
-        
+
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
 
@@ -709,7 +709,7 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET userattribute=false WHERE userattribute IS NULL" );
         executeSql( "UPDATE attribute SET usergroupattribute=false WHERE usergroupattribute IS NULL" );
         executeSql( "UPDATE attribute SET datasetattribute=false WHERE datasetattribute IS NULL" );
-        
+
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
 
@@ -723,9 +723,14 @@ public class TableAlteror
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
 
         upgradeDataValuesWithAttributeOptionCombo();
+        upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
         upgradeTranslations();
-        
+
+        executeSql( "ALTER TABLE dataelement DROP COLUMN active" );
+
+        updateOptions();
+
         log.info( "Tables updated" );
     }
 
@@ -737,7 +742,7 @@ public class TableAlteror
 
         if ( no >= 5 )
         {
-            return; // attributeoptioncomboid already part of datavalue pkey
+            return; // attributeoptioncomboid already part of pkey
         }
 
         int optionComboId = getDefaultOptionCombo();
@@ -757,6 +762,30 @@ public class TableAlteror
             + "references datavalue (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) match simple;" );
 
         log.info( "Data value table upgraded with attributeoptioncomboid column" );
+    }
+
+    private void upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo()
+    {
+        final String sql = statementBuilder.getNumberOfColumnsInPrimaryKey( "completedatasetregistration" );
+
+        Integer no = statementManager.getHolder().queryForInteger( sql );
+
+        if ( no >= 4 )
+        {
+            return; // attributeoptioncomboid already part of pkey
+        }
+
+        int optionComboId = getDefaultOptionCombo();
+
+        executeSql( "alter table completedatasetregistration drop constraint completedatasetregistration_pkey" );
+        executeSql( "alter table completedatasetregistration add column attributeoptioncomboid integer;" );
+        executeSql( "update completedatasetregistration set attributeoptioncomboid = " + optionComboId
+            + " where attributeoptioncomboid is null;" );
+        executeSql( "alter table completedatasetregistration alter column attributeoptioncomboid set not null;" );
+        executeSql( "alter table completedatasetregistration add constraint fk_completedatasetregistration_attributeoptioncomboid foreign key (attributeoptioncomboid) references categoryoptioncombo (categoryoptioncomboid) match simple;" );
+        executeSql( "alter table completedatasetregistration add constraint completedatasetregistration_pkey primary key(datasetid, periodid, sourceid, attributeoptioncomboid);" );
+
+        log.info( "Complete data set registration table upgraded with attributeoptioncomboid column" );
     }
 
     private void upgradeMapViewsToAnalyticalObject()
@@ -992,7 +1021,7 @@ public class TableAlteror
             log.debug( ex );
         }
     }
-    
+
     private void upgradeTranslations()
     {
         final String sql = statementBuilder.getNumberOfColumnsInPrimaryKey( "translation" );
@@ -1003,7 +1032,7 @@ public class TableAlteror
         {
             return; // translationid already set as single pkey
         }
-        
+
         executeSql( statementBuilder.getDropPrimaryKey( "translation" ) );
         executeSql( statementBuilder.getAddPrimaryKeyToExistingTable( "translation", "translationid" ) );
         executeSql( statementBuilder.getDropNotNullConstraint( "translation", "objectid", "integer" ) );
@@ -1133,4 +1162,21 @@ public class TableAlteror
         return statementManager.getHolder().queryForInteger( sql );
     }
 
+    private void updateOptions()
+    {
+        String sql = "insert into optionvalue(optionvalueid, code, name, optionsetid, sort_order) "
+            + "select " + statementBuilder.getAutoIncrementValue() + ", optionvalue, optionvalue, optionsetid, ( sort_order + 1 ) "
+            + "from optionsetmembers";
+        
+        int result = executeSql( sql );
+        
+        if ( result != -1 )
+        {
+            executeSql( "drop table optionsetmembers" );
+        }
+        else
+        {
+            log.info( "Updated optionvalue table, SQL: " + sql );
+        }
+    }
 }

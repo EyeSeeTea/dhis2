@@ -157,24 +157,19 @@ Ext.onReady( function() {
 			conf.layout = {
 				west_width: 452,
 				west_fill: 2,
-				west_fill_accordion_indicator: 59,
-				west_fill_accordion_dataelement: 59,
-				west_fill_accordion_dataset: 33,
-				west_fill_accordion_period: 296,
-				west_fill_accordion_organisationunit: 62,
-				west_maxheight_accordion_indicator: 400,
-				west_maxheight_accordion_dataelement: 400,
-				west_maxheight_accordion_dataset: 400,
-				west_maxheight_accordion_period: 513,
-				west_maxheight_accordion_organisationunit: 900,
-				west_maxheight_accordion_group: 340,
-				west_maxheight_accordion_options: 449,
-				west_scrollbarheight_accordion_indicator: 300,
-				west_scrollbarheight_accordion_dataelement: 300,
-				west_scrollbarheight_accordion_dataset: 300,
-				west_scrollbarheight_accordion_period: 450,
-				west_scrollbarheight_accordion_organisationunit: 450,
-				west_scrollbarheight_accordion_group: 300,
+                west_fill_accordion_indicator: 56,
+                west_fill_accordion_dataelement: 59,
+                west_fill_accordion_dataset: 31,
+                west_fill_accordion_period: 307,
+                west_fill_accordion_organisationunit: 58,
+                west_maxheight_accordion_indicator: 450,
+                west_maxheight_accordion_dataset: 350,
+                west_maxheight_accordion_period: 405,
+                west_maxheight_accordion_organisationunit: 500,
+                west_scrollbarheight_accordion_indicator: 300,
+                west_scrollbarheight_accordion_dataset: 250,
+                west_scrollbarheight_accordion_period: 405,
+                west_scrollbarheight_accordion_organisationunit: 350,
 				east_tbar_height: 31,
 				east_gridcolumn_height: 30,
 				form_label_width: 55,
@@ -483,22 +478,7 @@ Ext.onReady( function() {
 
 					// config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert('Layout: config is not an object (' + init.el + ')');
-						return;
-					}
-
-					config.columns = getValidatedDimensionArray(config.columns);
-					config.rows = getValidatedDimensionArray(config.rows);
-					config.filters = getValidatedDimensionArray(config.filters);
-
-					// at least one dimension specified as column or row
-					if (!config.columns) {
-						alert('No series items selected');
-						return;
-					}
-
-					if (!config.rows && !config.startDate && !config.endDate) {
-						alert('No category items selected');
+						console.log('Layout: config is not an object (' + init.el + ')');
 						return;
 					}
 
@@ -511,11 +491,39 @@ Ext.onReady( function() {
 						}
 					}
 
-					// at least one period
-					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						//alert(NS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
-						//return;
+                    // period
+                    if (!Ext.Array.contains(objectNames, 'pe') && !(config.startDate && config.endDate)) {
+                        alert('At least one fixed period, one relative period or start/end dates must be specified');
+                        return;
+                    }
+                    
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					// column
+					if (!config.columns) {
+						alert('No series items selected');
+						return;
 					}
+
+                    if (config.columns.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.columns.splice(1));
+                    }
+
+					// row
+					if (!config.rows) {
+						alert('No category items selected');
+						return;
+					}
+
+                    if (config.rows.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.rows.splice(1));
+                    }
 
 					// favorite
 					if (config.id) {
@@ -531,7 +539,7 @@ Ext.onReady( function() {
 					layout.rows = config.rows;
 					layout.filters = config.filters;
                     
-                    layout.type = config.type;
+                    layout.type = Ext.isString(config.type) ? config.type : 'column';
                     layout.program = config.program;
                     layout.programStage = config.programStage;
 
@@ -1188,7 +1196,9 @@ Ext.onReady( function() {
 			service.layout.getSyncronizedXLayout = function(xLayout, xResponse) {
 				var removeDimensionFromXLayout,
 					getHeaderNames,
-					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
+                    getSeriesValidatedLayout,
+                    layout;
 
 				removeDimensionFromXLayout = function(objectName) {
 					var getUpdatedAxis;
@@ -1231,6 +1241,19 @@ Ext.onReady( function() {
 					return headerNames;
 				};
 
+                getSeriesValidatedLayout = function(xLayout) {
+                    var nSeries = xLayout.columns[0].ids.length * xLayout.rows[0].ids.length,
+                        message = 'This chart is potentially very large due to the high number of series and category items. Create the chart anyway?';
+
+                    if (nSeries > 200) {
+                        if (!confirm(message))  {
+                            return null;
+                        }
+                    }
+
+                    return xLayout;
+                };
+
 				return function() {
 
 					// items
@@ -1254,11 +1277,20 @@ Ext.onReady( function() {
 					// Re-layout
 					layout = api.layout.Layout(xLayout);
 
-					if (layout) {
-						return service.layout.getExtendedLayout(layout);
-					}
+                    if (!layout) {
+                        return null;
+                    }
 
-					return null;
+                    xLayout = service.layout.getExtendedLayout(layout);
+
+                    // validate number of series
+                    xLayout = getSeriesValidatedLayout(xLayout);
+
+                    if (!xLayout) {
+                        return null;
+                    }
+
+                    return xLayout;
 				}();
 			};
 
@@ -1894,7 +1926,7 @@ Ext.onReady( function() {
 
                         paramString += '&filter=' + dim.dimension;
 
-                        if (dim.items) {
+                        if (Ext.isArray(dim.items) && dim.items.length) {
                             paramString += ':';
 
                             for (var j = 0; j < dim.items.length; j++) {

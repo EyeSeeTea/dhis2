@@ -68,7 +68,7 @@ Ext.onReady( function() {
                         objectName: 'ds'
                     },
                     category: {
-                        name: DV.i18n.categories,
+                        name: DV.i18n.assigned_categories,
                         dimensionName: 'co',
                         objectName: 'co',
                     },
@@ -675,10 +675,12 @@ Ext.onReady( function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-
+                    
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
-						return;
+                        if (!DV.plugin) {
+                            alert('No values found');
+                        }
+                        return;
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
@@ -794,8 +796,17 @@ Ext.onReady( function() {
 				// str
 			support.prototype.str = {};
 
-			support.prototype.str.replaceAll = function(str, find, replace) {
-				return str.replace(new RegExp(find, 'g'), replace);
+			support.prototype.str.replaceAll = function(variable, find, replace) {
+                if (Ext.isString(variable)) {
+                    variable = variable.split(find).join(replace);
+                }
+                else if (Ext.isArray(variable)) {
+                    for (var i = 0; i < variable.length; i++) {
+                        variable[i] = variable[i].split(find).join(replace);
+                    }
+                }
+
+                return variable;
 			};
 		}());
 
@@ -1753,11 +1764,14 @@ Ext.onReady( function() {
 			web.chart = {};
 
 			web.chart.createChart = function(ns) {
-				var xResponse = ns.app.xResponse,
-					xLayout = ns.app.xLayout,
-
-                    columnIds = xLayout.columns[0].ids,
-                    rowIds = xLayout.rows[0].ids,
+                var xLayout = ns.app.xLayout,
+                    xResponse = ns.app.xResponse,
+                    //columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
+                    columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
+                    replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
+                    //rowIds = xLayout.rows[0] ? xLayout.rows[0].ids : [],
+                    rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
+                    replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
                     filterIds = function() {
                         var ids = [];
                         
@@ -1768,6 +1782,20 @@ Ext.onReady( function() {
                         }
 
                         return ids;
+                    }(),
+                    replacedFilterIds = support.prototype.str.replaceAll(Ext.clone(filterIds), '.', ''),
+
+                    replacedIdMap = function() {
+                        var map = {},
+                            names = xResponse.metaData.names,
+                            ids = Ext.clean([].concat(columnIds || [], rowIds || [], filterIds || [])),
+                            replacedIds = Ext.clean([].concat(replacedColumnIds || [], replacedRowIds || [], replacedFilterIds || []));
+
+                        for (var i = 0; i < replacedIds.length; i++) {
+                            map[replacedIds[i]] = ids[i];
+                        }
+
+                        return map;
                     }(),
 
 					getSyncronizedXLayout,
@@ -1900,7 +1928,7 @@ Ext.onReady( function() {
                         var minimums = [];
 
                         for (var i = 0; i < store.numericFields.length; i++) {
-                            minimums.push(store.max(store.numericFields[i]));
+                            minimums.push(store.min(store.numericFields[i]));
                         }
 
                         return Ext.Array.min(minimums);

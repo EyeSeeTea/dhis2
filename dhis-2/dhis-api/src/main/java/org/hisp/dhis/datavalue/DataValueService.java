@@ -288,8 +288,7 @@ public interface DataValueService
      * @param periodType the Period Type of period of the DataValue
      * @param organisationUnit the Organisation Unit of the DataValue
      * @return a Latest DataValue 
-     */   
-    
+     */
     DataValue getLatestDataValues( DataElement dataElement, PeriodType periodType, OrganisationUnit organisationUnit );
     
     /**
@@ -299,6 +298,15 @@ public interface DataValueService
      * @return the number of DataValues.
      */
     int getDataValueCount( int days );
+
+    /**
+     * Gets the number of DataValues which have been updated after the given 
+     * date time.
+     * 
+     * @param date the date time.
+     * @return the number of DataValues.
+     */
+    int getDataValueCountLastUpdatedAfter( Date date );
 
     /**
      * Returns a map of values for each attribute option combo found.

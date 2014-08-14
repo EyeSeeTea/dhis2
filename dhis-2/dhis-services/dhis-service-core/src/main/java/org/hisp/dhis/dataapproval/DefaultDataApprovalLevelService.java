@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -44,6 +45,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -97,6 +99,20 @@ public class DefaultDataApprovalLevelService
     public DataApprovalLevel getDataApprovalLevelByName( String name )
     {
         return dataApprovalLevelStore.getByName( name );
+    }
+
+    public DataApprovalLevel getDataApprovalLevelByLevelNumber( int levelNumber )
+    {
+        List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
+
+        if ( levelNumber < 1 || levelNumber > dataApprovalLevels.size() )
+        {
+            return null;
+        }
+        else
+        {
+            return dataApprovalLevels.get( levelNumber - 1 );
+        }
     }
 
     public List<DataApprovalLevel> getAllDataApprovalLevels()
@@ -451,7 +467,7 @@ public class DefaultDataApprovalLevelService
         {
             if ( level.getOrgUnitLevel() >= orgUnitLevel
                 && securityService.canRead( level )
-                && ( level.getCategoryOptionGroupSet() == null || canReadSomeCategory( level.getCategoryOptionGroupSet() ) )
+                && canReadCOGS( level.getCategoryOptionGroupSet() )
                 && level.getLevel() < getAllDataApprovalLevels().size() )
             {
                 required = level.getLevel() + 1;
@@ -463,14 +479,28 @@ public class DefaultDataApprovalLevelService
     }
 
     /**
-     * Can the user read at least one category from inside a category option
-     * group set?
+     * Can the user read from this CategoryOptionGroupSet (COGS)?
+     * <p>
+     * If the COGS is null, then the user must have no dimension constraints.
+     * (In other words, the user must be able to read across all category
+     * option groups.)
+     * <p>
+     * If the COGS is not null, then the user must be able to read at least
+     * one category option group from the category option group set.
      *
      * @param cogs The category option group set to test
      * @return true if user can read at least one category option group.
      */
-    private boolean canReadSomeCategory( CategoryOptionGroupSet cogs )
+    private boolean canReadCOGS( CategoryOptionGroupSet cogs )
     {
+        if ( cogs == null )
+        {
+            UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
+
+            return CollectionUtils.isEmpty( userCredentials.getCogsDimensionConstraints() )
+                && CollectionUtils.isEmpty( userCredentials.getCatDimensionConstraints() );
+        }
+
         for ( CategoryOptionGroup cog : cogs.getMembers() )
         {
             if ( securityService.canRead(cog) )

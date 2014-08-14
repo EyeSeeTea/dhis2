@@ -212,6 +212,8 @@ public class DefaultProgramService
             prStg.setReportDate( "" );
 
             prStg.setReportDateDescription( programStage.getReportDateDescription() );
+            
+            prStg.setDueDate( "" );
 
             prStg.setId( programStage.getId() );
 
@@ -282,7 +284,7 @@ public class DefaultProgramService
         pr.setProgramStages( prStgs );
 
         List<ProgramTrackedEntityAttribute> programPatientAttributes = new ArrayList<ProgramTrackedEntityAttribute>(
-            program.getAttributes() );
+            program.getProgramAttributes() );
 
         for ( int i = 0; i < programPatientAttributes.size(); i++ )
         {
@@ -320,7 +322,7 @@ public class DefaultProgramService
             {
                 optionSet.setId( pa.getOptionSet().getId() );
                 optionSet.setName( pa.getOptionSet().getName() );
-                optionSet.setOptions( pa.getOptionSet().getOptions() );
+//                optionSet.setOptions( pa.getOptionSet().getOptions() );
 
                 mobileAttribute.setOptionSet( optionSet );
             }

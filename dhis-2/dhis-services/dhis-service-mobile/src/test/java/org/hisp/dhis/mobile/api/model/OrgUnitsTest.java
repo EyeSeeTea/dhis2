@@ -91,6 +91,9 @@ public class OrgUnitsTest
         orgUnit.setDownloadMessageConversationUrl( "downloadMessageConversation" );
         orgUnit.setGetMessageUrl( "getMessage" );
         orgUnit.setReplyMessageUrl( "replyMessage" );
+        orgUnit.setDownloadInterpretationUrl( "downloadInterpretation" );
+        orgUnit.setPostInterpretationUrl( "postInterpretation" );
+        orgUnit.setPostCommentUrl( "postComment" );
         orgUnit.setUpdateContactUrl( "updateContactForMobile" );
         orgUnit.setFindPatientUrl( "findPatient" );
         orgUnit.setRegisterPersonUrl( "registerPerson" );
@@ -107,6 +110,7 @@ public class OrgUnitsTest
         orgUnit.setHandleLostToFollowUpUrl( "handleLostToFollowUp" );
         orgUnit.setGenerateRepeatableEventUrl( "generateRepeatableEvent" );
         orgUnit.setUploadSingleEventWithoutRegistration( "uploadSingleEventWithoutRegistration" );
+        orgUnit.setCompleteProgramInstanceUrl( "completeProgramInstance" );
 
         return orgUnit;
     }

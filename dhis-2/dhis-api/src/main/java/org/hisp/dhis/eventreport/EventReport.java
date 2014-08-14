@@ -33,9 +33,12 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -53,8 +56,10 @@ import java.util.List;
 /**
  * @author Lars Helge Overland
  */
+@JacksonXmlRootElement( localName = "eventReport", namespace = DxfNamespaces.DXF_2_0 )
 public class EventReport
     extends BaseAnalyticalObject
+    implements EventAnalyticalObject
 {
     public static final String DATA_TYPE_AGGREGATED_VALUES = "aggregated_values";
 

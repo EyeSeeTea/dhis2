@@ -26,8 +26,6 @@ function loadDataEntry( programStageInstanceId )
 	showById('programNameDiv');
 	setFieldValue( 'dueDate', '' );
 	setFieldValue( 'executionDate', '' );
-	disableCompletedButton(true);
-	disable('uncompleteBtn');
 	jQuery( 'input[id=programStageInstanceId]').val(programStageInstanceId );
 			
 	showLoader();	
@@ -39,7 +37,7 @@ function loadDataEntry( programStageInstanceId )
 			var programName = $('#program option:selected').text();
 			setInnerHTML( 'programNameDiv', '<h3>' + programName + '</h3>');
 			var completed = jQuery('#entryFormContainer input[id=completed]').val();
-			var irregular = jQuery('#entryFormContainer input[id=irregular]').val();
+			disableCompletedButton(completed);
 			showById('inputCriteriaDiv');
 			showById('entryForm');
 			hideLoader();
@@ -335,40 +333,17 @@ function paging(json, page) {
 
 function loadProgramStages( entityInstanceId, programId )
 {
-	jQuery.getJSON( "loadProgramStageInstances.action",
+	jQuery.getJSON( "loadProgramStageInstance.action",
 		{
 			entityInstanceId:entityInstanceId,
 			programId: programId
 		},  
 		function( json ) 
 		{   
-			if( json.programStageInstances == 0)
-			{
-				createProgramInstance( entityInstanceId, programId );
-			}
-			else
-			{
-				jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageInstances[0].programStageId);	
-				loadDataEntry( json.programStageInstances[0].id );
-			}
+			jQuery("#selectForm [id=programStageId]").attr('psid', json.id);	
+			loadDataEntry( json.id );
 		});
 }
-
-function createProgramInstance( entityInstanceId, programId )
-{
-	jQuery.postJSON( "saveProgramEnrollment.action",
-		{
-			entityInstanceId: entityInstanceId,
-			programId: programId,
-			dateOfIncident: getCurrentDate(),
-			enrollmentDate: getCurrentDate()
-		}, 
-		function( json ) 
-		{
-			jQuery("#selectForm [id=programStageId]").attr('psid', json.programStageId);	
-			loadDataEntry( json.activeProgramStageInstanceId );
-		});
-};		
 
 function removeSingleEvent(uid)
 {

@@ -164,7 +164,7 @@ public class DataValueController
 
         if ( valid != null )
         {
-            ContextUtils.conflictResponse( response, "Invalid value: " + value + ", must match data element type: " + dataElement.getType() );
+            ContextUtils.conflictResponse( response, "Invalid value: " + value + ", must match data element type: " + dataElement.getDetailedType() );
             return;
         }
 
@@ -199,17 +199,7 @@ public class DataValueController
         if ( dataValue == null )
         {
             dataValue = new DataValue( dataElement, period, organisationUnit, categoryOptionCombo, attributeOptionCombo,
-                null, storedBy, now, null );
-
-            if ( value != null )
-            {
-                dataValue.setValue( StringUtils.trimToNull( value ) );
-            }
-
-            if ( comment != null )
-            {
-                dataValue.setComment( StringUtils.trimToNull( comment ) );
-            }
+                StringUtils.trimToNull( value ), storedBy, now, StringUtils.trimToNull( comment ) );
 
             dataValueService.addDataValue( dataValue );
         }
@@ -243,7 +233,7 @@ public class DataValueController
                 dataValue.toggleFollowUp();
             }
 
-            dataValue.setTimestamp( now );
+            dataValue.setLastUpdated( now );
             dataValue.setStoredBy( storedBy );
 
             dataValueService.updateDataValue( dataValue );

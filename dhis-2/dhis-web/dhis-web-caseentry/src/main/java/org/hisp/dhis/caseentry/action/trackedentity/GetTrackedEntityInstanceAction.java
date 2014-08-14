@@ -270,11 +270,11 @@ public class GetTrackedEntityInstanceAction
         return mandatoryMap;
     }
 
-    private Map<Integer, Boolean> allowDateInFutureMap = new HashMap<Integer, Boolean>();
+    private Map<Integer, Boolean> allowFutureDateMap = new HashMap<Integer, Boolean>();
 
-    public Map<Integer, Boolean> getAllowDateInFutureMap()
+    public void setAllowFutureDateMap( Map<Integer, Boolean> allowFutureDateMap )
     {
-        return allowDateInFutureMap;
+        this.allowFutureDateMap = allowFutureDateMap;
     }
 
     // -------------------------------------------------------------------------
@@ -309,9 +309,9 @@ public class GetTrackedEntityInstanceAction
 
             Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstance,
                 program, ProgramInstance.STATUS_ACTIVE );
-            
+
             ProgramInstance programInstance = null;
-            
+
             if ( programInstances != null && !programInstances.isEmpty() )
             {
                 programInstance = programInstances.iterator().next();
@@ -337,20 +337,21 @@ public class GetTrackedEntityInstanceAction
                 attributes = new ArrayList<TrackedEntityAttribute>(
                     attributeService.getTrackedEntityAttributesDisplayInList() );
                 Collections.sort( attributes, new TrackedEntityAttributeSortOrderInListNoProgramComparator() );
-                
+
                 for ( TrackedEntityAttribute attribute : attributes )
                 {
                     mandatoryMap.put( attribute.getId(), false );
-                    allowDateInFutureMap.put(  attribute.getId(), false );
+                    allowFutureDateMap.put( attribute.getId(), false );
                 }
             }
             else
             {
                 attributes = program.getTrackedEntityAttributes();
-                for ( ProgramTrackedEntityAttribute programAttribute : program.getAttributes() )
+                for ( ProgramTrackedEntityAttribute programAttribute : program.getProgramAttributes() )
                 {
                     mandatoryMap.put( programAttribute.getAttribute().getId(), programAttribute.isMandatory() );
-                    allowDateInFutureMap.put( programAttribute.getAttribute().getId(), programAttribute.getAllowFutureDate() );
+                    allowFutureDateMap.put( programAttribute.getAttribute().getId(),
+                        programAttribute.getAllowFutureDate() );
                 }
             }
 

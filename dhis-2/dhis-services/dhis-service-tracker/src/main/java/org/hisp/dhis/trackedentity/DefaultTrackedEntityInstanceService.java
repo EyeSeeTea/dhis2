@@ -35,6 +35,7 @@ import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.ORG_U
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.PAGER_META_KEY;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_ID;
 import static org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams.TRACKED_ENTITY_INSTANCE_ID;
+import static org.hisp.dhis.common.OrganisationUnitSelectionMode.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -70,6 +71,7 @@ import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -166,6 +168,14 @@ public class DefaultTrackedEntityInstanceService
         // Verify params
         // ---------------------------------------------------------------------
 
+        User user = currentUserService.getCurrentUser();
+        
+        if ( user != null && params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ACCESSIBLE ) )
+        {            
+            params.setOrganisationUnits( user.getDataViewOrganisationUnitsWithFallback() );
+            params.setOrganisationUnitMode( OrganisationUnitSelectionMode.DESCENDANTS );
+        }
+
         for ( OrganisationUnit organisationUnit : params.getOrganisationUnits() )
         {
             if ( !organisationUnit.hasLevel() )
@@ -174,11 +184,16 @@ public class DefaultTrackedEntityInstanceService
                     .setLevel( organisationUnitService.getLevelOfOrganisationUnit( organisationUnit.getId() ) );
             }
         }
+        
+        if ( !params.isPaging() && !params.isSkipPaging() )
+        {
+            params.setDefaultPaging();
+        }
 
         // ---------------------------------------------------------------------
         // If params of type query and no attributes or filters defined, use
-        // attributes from program if exists, if not, use display-in-list
-        // attributes.
+        // attributes from program if program is defined, if not, use 
+        // display-in-list attributes.
         // ---------------------------------------------------------------------
 
         if ( params.isOrQuery() || !params.hasAttributes() )
@@ -222,7 +237,7 @@ public class DefaultTrackedEntityInstanceService
         {
             grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName() ) );
         }
-
+        
         List<Map<String, String>> entities = trackedEntityInstanceStore.getTrackedEntityInstances( params );
 
         // ---------------------------------------------------------------------
@@ -278,7 +293,7 @@ public class DefaultTrackedEntityInstanceService
 
     public void decideAccess( TrackedEntityInstanceQueryParams params )
     {
-        if ( params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) &&
+        if ( params.isOrganisationUnitMode( ALL ) &&
             !currentUserService.currenUserIsAuthorized( F_TRACKED_ENTITY_INSTANCE_SEARCH_IN_ALL_ORGUNITS ) )
         {
             throw new IllegalQueryException( "Current user is not authorized to query across all organisation units" );
@@ -296,9 +311,16 @@ public class DefaultTrackedEntityInstanceService
             throw new IllegalQueryException( "Params cannot be null" );
         }
 
-        if ( !params.hasOrganisationUnits() && !params.isOrganisationUnitMode( OrganisationUnitSelectionMode.ALL ) )
+        User user = currentUserService.getCurrentUser();
+        
+        if ( !params.hasOrganisationUnits() && !( params.isOrganisationUnitMode( ALL ) || params.isOrganisationUnitMode( ACCESSIBLE ) ) )
         {
             violation = "At least one organisation unit must be specified";
+        }
+        
+        if ( params.isOrganisationUnitMode( ACCESSIBLE ) && ( user == null || !user.hasDataViewOrganisationUnitWithFallback() ) )
+        {
+            violation = "Current user must be associated with at least one organisation unit when selection mode is ACCESSIBLE";
         }
 
         if ( params.hasProgram() && params.hasTrackedEntity() )
@@ -326,7 +348,7 @@ public class DefaultTrackedEntityInstanceService
             violation = "Program must be defined when program end date is specified";
         }
 
-        if ( params.hasEventStatus() && (!params.hasEventStartDate() || !params.hasEventEndDate()) )
+        if ( params.hasEventStatus() && ( !params.hasEventStartDate() || !params.hasEventEndDate() ) )
         {
             violation = "Event start and end date must be specified when event status is specified";
         }
@@ -358,7 +380,7 @@ public class DefaultTrackedEntityInstanceService
     public TrackedEntityInstanceQueryParams getFromUrl( String query, Set<String> attribute, Set<String> filter,
         Set<String> ou, OrganisationUnitSelectionMode ouMode, String program, ProgramStatus programStatus,
         Boolean followUp, Date programStartDate, Date programEndDate, String trackedEntity, EventStatus eventStatus,
-        Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize )
+        Date eventStartDate, Date eventEndDate, boolean skipMeta, Integer page, Integer pageSize, boolean skipPaging )
     {
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
@@ -373,17 +395,17 @@ public class DefaultTrackedEntityInstanceService
                 params.getAttributes().add( it );
             }
         }
-
+        
         if ( filter != null )
         {
             for ( String filt : filter )
             {
                 QueryItem it = getQueryItem( filt );
-
+                
                 params.getFilters().add( it );
             }
         }
-
+        
         if ( ou != null )
         {
             for ( String orgUnit : ou )
@@ -427,37 +449,40 @@ public class DefaultTrackedEntityInstanceService
         params.setSkipMeta( skipMeta );
         params.setPage( page );
         params.setPageSize( pageSize );
+        params.setSkipPaging( skipPaging );
 
         return params;
     }
 
     /**
      * Creates a QueryItem from the given item string. Item is on format
-     * {attribute-id}:{operator}:{filter-value}. Only the attribute-id is mandatory.
+     * {attribute-id}:{operator}:{filter-value}[:{operator}:{filter-value}].
+     * Only the attribute-id is mandatory.
      */
     private QueryItem getQueryItem( String item )
     {
-        if ( !item.contains( DimensionalObjectUtils.DIMENSION_NAME_SEP ) )
-        {
-            return getItem( item, null, null );
-        }
-        else // Filter
-        {
-            String[] split = item.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
+        String[] split = item.split( DimensionalObjectUtils.DIMENSION_NAME_SEP );
 
-            if ( split == null || split.length != 3 )
+        if ( split == null || ( split.length % 2 != 1 ) )
+        {
+            throw new IllegalQueryException( "Query item or filter is invalid: " + item );
+        }
+        
+        QueryItem queryItem = getItem( split[0] );
+        
+        if ( split.length > 1 ) // Filters specified
+        {
+            for ( int i = 1; i < split.length; i += 2 )
             {
-                throw new IllegalQueryException( "Item filter has invalid format: " + item );
-            }
-
-            return getItem( split[0], split[1], split[2] );
+                QueryOperator operator = QueryOperator.fromString( split[i] );
+                queryItem.getFilters().add( new QueryFilter( operator, split[i+1] ) );
+            }            
         }
+        
+        return queryItem;
     }
 
-    /**
-     * Creates a QueryItem from the given item, operator and filter strings.
-     */
-    private QueryItem getItem( String item, String operator, String filter )
+    private QueryItem getItem( String item )
     {
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
@@ -465,17 +490,8 @@ public class DefaultTrackedEntityInstanceService
         {
             throw new IllegalQueryException( "Attribute does not exist: " + item );
         }
-
-        if ( operator != null && filter != null )
-        {
-            QueryOperator op = QueryOperator.fromString( operator );
-            
-            return new QueryItem( at, op, filter, at.isNumericType() );
-        }
-        else
-        {
-            return new QueryItem( at, at.isNumericType() );
-        }
+        
+        return new QueryItem( at, at.isNumericType() );
     }
     
     /**

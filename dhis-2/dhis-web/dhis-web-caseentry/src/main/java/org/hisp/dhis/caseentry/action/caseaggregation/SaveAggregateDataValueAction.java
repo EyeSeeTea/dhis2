@@ -127,12 +127,14 @@ public class SaveAggregateDataValueAction
             DataElement dataElement = dataElementService.getDataElement( dataElementId );
             DataElementCategoryOptionCombo optionCombo = categoryService
                 .getDataElementCategoryOptionCombo( optionComboId );
+           
+            DataElementCategoryOptionCombo attributeOptioncombo = categoryService.getDefaultDataElementCategoryOptionCombo();
             
             Period period = PeriodType.getPeriodFromIsoString( periodIsoId );
 
             OrganisationUnit orgunit = organisationUnitService.getOrganisationUnit( orgunitId );
 
-            DataValue dataValue = dataValueService.getDataValue( dataElement, period, orgunit, optionCombo , optionCombo );
+            DataValue dataValue = dataValueService.getDataValue( dataElement, period, orgunit, optionCombo , attributeOptioncombo );
 
             // -----------------------------------------------------------------
             // Save/Update/Delete data-values
@@ -142,14 +144,14 @@ public class SaveAggregateDataValueAction
             {
                 if ( dataValue == null )
                 {
-                    dataValue = new DataValue( dataElement, period, orgunit, optionCombo, optionCombo,
+                    dataValue = new DataValue( dataElement, period, orgunit, optionCombo, attributeOptioncombo,
                         "" + resultValue, CaseAggregationCondition.AUTO_STORED_BY, new Date(), null );
                     dataValueService.addDataValue( dataValue );
                 }
                 else
                 {
                     dataValue.setValue( resultValue );
-                    dataValue.setTimestamp( new Date() );
+                    dataValue.setLastUpdated( new Date() );
                     dataValue.setStoredBy(  CaseAggregationCondition.AUTO_STORED_BY );
 
                     dataValueService.updateDataValue( dataValue );

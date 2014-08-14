@@ -10,7 +10,7 @@ $( document ).ready( function()
 		$( '.scheduling' ).removeAttr( 'disabled' );
 	}
 	
-	if ( $( '#dataMartStrategy' ).val() == 'never' )
+	if ( $( '#dataMartStrategy' ).val() == 'disabled' )
 	{
 		$( '.dataMart' ).attr( 'disabled', 'disabled' );
 	}
@@ -32,4 +32,10 @@ function toggleDataMart()
 	{
 		$( '.dataMart' ).removeAttr( 'disabled' );
 	}
+}
+
+function toggleMoreOptions()
+{
+	$( "#moreOptionsLink" ).toggle();
+	$( "#moreOptionsDiv" ).toggle();
 }

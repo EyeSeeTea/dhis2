@@ -32,11 +32,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
@@ -127,7 +128,7 @@ public class TrackedEntityDataValueStoreTest
         entityInstance = createTrackedEntityInstance( 'A', organisationUnit );
         entityInstanceService.addTrackedEntityInstance( entityInstance );
 
-        Program program = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
+        Program program = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnit );
         programService.addProgram( program );
 
         ProgramStage stageA = createProgramStage( 'A', 0 );
@@ -138,7 +139,7 @@ public class TrackedEntityDataValueStoreTest
         stageB.setProgram( program );
         programStageService.saveProgramStage( stageB );
 
-        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+        List<ProgramStage> programStages = new ArrayList<ProgramStage>();
         programStages.add( stageA );
         programStages.add( stageB );
         program.setProgramStages( programStages );

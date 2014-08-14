@@ -103,7 +103,9 @@ function saveValue(dataElementId)
 	
 	var overAllScoreValue = document.getElementById("all-total").value;
 	
-	var overAllScoreDeId = "126";
+	//var overAllScoreDeId = "126";
+	
+	var overAllScoreDeId  = document.getElementById("overAllQtyDataElementId").value;
 	
 	var overAllScorefieldId = "#"+overAllScoreDeId;
 	
@@ -133,6 +135,7 @@ function saveValue(dataElementId)
 	function handleSuccess( json )
 	{
 	    var code = json.c;
+	    //alert(code);
 	    if ( code == '0' || code == 0) // Value successfully saved on server
 	    {
 	    	 markValue( fieldId, COLOR_GREEN );
@@ -207,7 +210,7 @@ function savePBFDataValue( dataElementId, valueType )
 	{
 	    var code = json.c;
 
-	    alert(code)
+	    //alert(code)
 	    if ( code == '0' || code == 0) // Value successfully saved on server
 	    {
 	    	 markValue( fieldId, COLOR_GREEN );

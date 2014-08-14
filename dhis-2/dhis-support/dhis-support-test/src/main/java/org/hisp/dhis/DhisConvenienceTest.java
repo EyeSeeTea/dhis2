@@ -79,6 +79,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dataset.SectionService;
 import org.hisp.dhis.datavalue.DataValue;
+import org.hisp.dhis.datavalue.DataValueAuditService;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
@@ -106,7 +107,9 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageService;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.sqlview.SqlView;
@@ -197,6 +200,8 @@ public abstract class DhisConvenienceTest
     protected ExpressionService expressionService;
 
     protected DataValueService dataValueService;
+
+    protected DataValueAuditService dataValueAuditService;
 
     protected ResourceTableService resourceTableService;
 
@@ -420,7 +425,6 @@ public abstract class DhisConvenienceTest
         dataElement.setShortName( "DataElementShort" + uniqueCharacter );
         dataElement.setCode( "DataElementCode" + uniqueCharacter );
         dataElement.setDescription( "DataElementDescription" + uniqueCharacter );
-        dataElement.setActive( true );
         dataElement.setType( DataElement.VALUE_TYPE_INT );
         dataElement.setDomainType( DataElementDomain.AGGREGATE );
         dataElement.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
@@ -904,7 +908,8 @@ public abstract class DhisConvenienceTest
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
-        dataValue.setTimestamp( date );
+        dataValue.setCreated( date );
+        dataValue.setLastUpdated( date );
 
         return dataValue;
     }
@@ -930,7 +935,8 @@ public abstract class DhisConvenienceTest
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
-        dataValue.setTimestamp( date );
+        dataValue.setCreated( date );
+        dataValue.setLastUpdated( date );
 
         return dataValue;
     }
@@ -957,7 +963,8 @@ public abstract class DhisConvenienceTest
         dataValue.setValue( value );
         dataValue.setComment( "Comment" );
         dataValue.setStoredBy( "StoredBy" );
-        dataValue.setTimestamp( lastupdated );
+        dataValue.setCreated( lastupdated );
+        dataValue.setLastUpdated( lastupdated );
 
         return dataValue;
     }
@@ -977,7 +984,6 @@ public abstract class DhisConvenienceTest
 
         validationRule.setName( "ValidationRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
         validationRule.setRightSide( rightSide );
@@ -1012,7 +1018,6 @@ public abstract class DhisConvenienceTest
 
         validationRule.setName( "MonitoringRule" + uniqueCharacter );
         validationRule.setDescription( "Description" + uniqueCharacter );
-        validationRule.setType( ValidationRule.TYPE_ABSOLUTE );
         validationRule.setRuleType( ValidationRule.RULE_TYPE_SURVEILLANCE );
         validationRule.setOperator( operator );
         validationRule.setLeftSide( leftSide );
@@ -1156,12 +1161,20 @@ public abstract class DhisConvenienceTest
         return userGroup;
     }
 
-    protected static Program createProgram( char uniqueCharacter, Set<ProgramStage> programStages,
-        OrganisationUnit organisationUnit )
+    public static Program createProgram( char uniqueCharacter, List<ProgramStage> programStages,
+        OrganisationUnit unit )
+    {
+        Set<OrganisationUnit> units = new HashSet<>();
+        units.add( unit );
+        
+        return createProgram( uniqueCharacter, programStages, null, units );
+    }
+    
+    public static Program createProgram( char uniqueCharacter, List<ProgramStage> programStages,
+        Set<TrackedEntityAttribute> attributes, Set<OrganisationUnit> organisationUnits )
     {
         Program program = new Program();
-        program.setAutoFields();
-
+        
         program.setName( "Program" + uniqueCharacter );
         program.setDescription( "Description" + uniqueCharacter );
         program.setDateOfEnrollmentDescription( "DateOfEnrollmentDescription" );
@@ -1174,11 +1187,25 @@ public abstract class DhisConvenienceTest
             for ( ProgramStage programStage : programStages )
             {
                 programStage.setProgram( program );
+                program.getProgramStages().add( programStage );
+            }
+        }
+        
+        if ( attributes != null )
+        {
+            int i = 0;
+            
+            for ( TrackedEntityAttribute attribute : attributes )
+            {
+                program.getProgramAttributes().add( new ProgramTrackedEntityAttribute( attribute, i++, false ) );
             }
         }
 
-        program.getOrganisationUnits().add( organisationUnit );
-
+        if ( organisationUnits != null )
+        {            
+            program.getOrganisationUnits().addAll( organisationUnits );
+        }
+        
         return program;
     }
 
@@ -1190,13 +1217,28 @@ public abstract class DhisConvenienceTest
     public static ProgramStage createProgramStage( char uniqueCharacter, int minDays, boolean irregular )
     {
         ProgramStage programStage = new ProgramStage();
-        programStage.setAutoFields();
 
         programStage.setName( "ProgramStage" + uniqueCharacter );
         programStage.setDescription( "description" + uniqueCharacter );
         programStage.setMinDaysFromStart( minDays );
         programStage.setIrregular( irregular );
 
+        return programStage;
+    }
+    
+    public static ProgramStage createProgramStage( char uniqueCharacter, Set<DataElement> dataElements )
+    {
+        ProgramStage programStage = createProgramStage( uniqueCharacter, 0 );
+        
+        if ( dataElements != null )
+        {
+            for ( DataElement dataElement : dataElements )
+            {
+                ProgramStageDataElement psd = new ProgramStageDataElement( programStage, dataElement, false );
+                programStage.getProgramStageDataElements().add( psd );
+            }
+        }
+        
         return programStage;
     }
 

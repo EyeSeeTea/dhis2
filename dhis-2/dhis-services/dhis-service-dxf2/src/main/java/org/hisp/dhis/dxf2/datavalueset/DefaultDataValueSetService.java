@@ -84,6 +84,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang.StringUtils.trimToNull;
 import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
@@ -101,8 +102,13 @@ public class DefaultDataValueSetService
     private static final Log log = LogFactory.getLog( DefaultDataValueSetService.class );
 
     private static final String ERROR_INVALID_DATA_SET = "Invalid data set: ";
+
     private static final String ERROR_INVALID_PERIOD = "Invalid period: ";
+
     private static final String ERROR_INVALID_ORG_UNIT = "Invalid org unit: ";
+
+    private static final String ERROR_INVALID_START_END_DATE = "Invalid start and/or end date: ";
+
     private static final String ERROR_OBJECT_NEEDED_TO_COMPLETE = "Must be provided to complete data set";
 
     @Autowired
@@ -139,6 +145,7 @@ public class DefaultDataValueSetService
     // DataValueSet implementation
     //--------------------------------------------------------------------------
 
+    @Override
     public void writeDataValueSet( String dataSet, String period, String orgUnit, OutputStream out )
     {
         DataSet dataSet_ = dataSetService.getDataSet( dataSet );
@@ -160,25 +167,32 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
         }
 
-        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_ );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
+
+        CompleteDataSetRegistration registration = registrationService
+            .getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
         period_ = periodService.reloadPeriod( period_ );
 
-        dataValueSetStore.writeDataValueSetXml( dataSet_, completeDate, period_, orgUnit_, dataSet_.getDataElements(), wrap( period_ ), wrap( orgUnit_ ), out );
+        dataValueSetStore.writeDataValueSetXml( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, wrap( period_ ),
+            wrap( orgUnit_ ), out );
     }
 
-    public void writeDataValueSet( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, OutputStream out )
+    @Override
+    public void writeDataValueSet( Set<String> dataSetUids, Date startDate, Date endDate, Set<String> orgUnits,
+        OutputStream out )
     {
-        Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        List<DataSet> dataSets = dataSetService.getDataSetsByUid( dataSetUids );
 
         if ( periods.isEmpty() )
         {
             throw new IllegalArgumentException( "At least one period must be specified" );
         }
 
-        dataValueSetStore.writeDataValueSetXml( null, null, null, null, getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), out );
+        dataValueSetStore.writeDataValueSetXml( newHashSet( dataSets ), null, null, null, periods, getOrgUnits( orgUnits ), out );
     }
 
     @Override
@@ -203,17 +217,44 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + orgUnit );
         }
 
-        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet_, period_, orgUnit_ );
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo(); //TODO
+
+        CompleteDataSetRegistration registration = registrationService
+            .getCompleteDataSetRegistration( dataSet_, period_, orgUnit_, optionCombo );
 
         Date completeDate = registration != null ? registration.getDate() : null;
 
         period_ = periodService.reloadPeriod( period_ );
 
-        dataValueSetStore.writeDataValueSetJson( dataSet_, completeDate, period_, orgUnit_, dataSet_.getDataElements(), wrap( period_ ), wrap( orgUnit_ ), outputStream );
+        dataValueSetStore.writeDataValueSetJson( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, wrap( period_ ),
+            wrap( orgUnit_ ), outputStream );
     }
 
     @Override
-    public void writeDataValueSetJson( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, OutputStream outputStream )
+    public void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream )
+    {
+        dataValueSetStore.writeDataValueSetJson( lastUpdated, outputStream );
+    }
+
+    @Override
+    public void writeDataValueSetJson( Set<String> dataSetUids, Date startDate, Date endDate, Set<String> orgUnits,
+        OutputStream outputStream )
+    {
+        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        List<DataSet> dataSets = dataSetService.getDataSetsByUid( dataSetUids );
+
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one period must be specified" );
+        }
+
+        dataValueSetStore.writeDataValueSetJson( newHashSet( dataSets ), null, null, null, periods, getOrgUnits( orgUnits ),
+            outputStream );
+    }
+
+    @Override
+    public void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits,
+        Writer writer )
     {
         Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
 
@@ -222,21 +263,8 @@ public class DefaultDataValueSetService
             throw new IllegalArgumentException( "At least one period must be specified" );
         }
 
-        dataValueSetStore.writeDataValueSetJson( null, null, null, null, getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), outputStream );
+        dataValueSetStore.writeDataValueSetCsv( periods, getOrgUnits( orgUnits ), writer );
     }
-
-    public void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, Writer writer )
-    {
-        Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
-
-        if ( periods.isEmpty() )
-        {
-            throw new IllegalArgumentException( "At least one period must be specified" );
-        }
-
-        dataValueSetStore.writeDataValueSetCsv( getDataElements( dataSets ), periods, getOrgUnits( orgUnits ), writer );
-    }
-
 
     @Override
     public RootNode getDataValueSetTemplate( DataSet dataSet, Period period, List<String> orgUnits,
@@ -253,7 +281,8 @@ public class DefaultDataValueSetService
         {
             for ( DataElement dataElement : dataSet.getDataElements() )
             {
-                CollectionNode collection = getDataValueTemplate( dataElement, deScheme, null, ouScheme, period, writeComments );
+                CollectionNode collection = getDataValueTemplate( dataElement, deScheme, null, ouScheme, period,
+                    writeComments );
                 collectionNode.addChildren( collection.getChildren() );
             }
         }
@@ -270,7 +299,8 @@ public class DefaultDataValueSetService
 
                 for ( DataElement dataElement : dataSet.getDataElements() )
                 {
-                    CollectionNode collection = getDataValueTemplate( dataElement, deScheme, organisationUnit, ouScheme, period, writeComments );
+                    CollectionNode collection = getDataValueTemplate( dataElement, deScheme, organisationUnit, ouScheme,
+                        period, writeComments );
                     collectionNode.addChildren( collection.getChildren() );
                 }
             }
@@ -279,7 +309,8 @@ public class DefaultDataValueSetService
         return rootNode;
     }
 
-    private CollectionNode getDataValueTemplate( DataElement dataElement, String deScheme, OrganisationUnit organisationUnit, String ouScheme, Period period, boolean comment )
+    private CollectionNode getDataValueTemplate( DataElement dataElement, String deScheme,
+        OrganisationUnit organisationUnit, String ouScheme, Period period, boolean comment )
     {
         CollectionNode collectionNode = new CollectionNode( "dataValues" );
         collectionNode.setWrapping( false );
@@ -300,7 +331,8 @@ public class DefaultDataValueSetService
                 complexNode.setComment( "Data element: " + label );
             }
 
-            if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase().equals( deScheme.toLowerCase() ) )
+            if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase()
+                .equals( deScheme.toLowerCase() ) )
             {
                 SimpleNode simpleNode = complexNode.addChild( new SimpleNode( "dataElement", dataElement.getCode() ) );
                 simpleNode.setAttribute( true );
@@ -321,12 +353,14 @@ public class DefaultDataValueSetService
             {
                 if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase().equals( ouScheme.toLowerCase() ) )
                 {
-                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit", organisationUnit.getCode() == null ? "" : organisationUnit.getCode() ) );
+                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit",
+                        organisationUnit.getCode() == null ? "" : organisationUnit.getCode() ) );
                     simpleNode.setAttribute( true );
                 }
                 else
                 {
-                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit", organisationUnit.getUid() == null ? "" : organisationUnit.getUid() ) );
+                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit",
+                        organisationUnit.getUid() == null ? "" : organisationUnit.getUid() ) );
                     simpleNode.setAttribute( true );
                 }
             }
@@ -408,7 +442,6 @@ public class DefaultDataValueSetService
         try
         {
             DataValueSet dataValueSet = PdfDataEntryFormUtil.getDataValueSet( in );
-
             return saveDataValueSet( importOptions, id, dataValueSet );
         }
         catch ( RuntimeException ex )
@@ -421,58 +454,83 @@ public class DefaultDataValueSetService
 
     private ImportSummary saveDataValueSet( ImportOptions importOptions, TaskId id, DataValueSet dataValueSet )
     {
+        log.debug( "Import options: " + importOptions );
         notifier.clear( id ).notify( id, "Process started" );
 
         ImportSummary summary = new ImportSummary();
 
         importOptions = importOptions != null ? importOptions : ImportOptions.getDefaultImportOptions();
 
-        IdentifiableProperty dataElementIdScheme = dataValueSet.getDataElementIdScheme() != null ? IdentifiableProperty.valueOf( dataValueSet.getDataElementIdScheme().toUpperCase() ) : importOptions.getDataElementIdScheme();
-        IdentifiableProperty orgUnitIdScheme = dataValueSet.getOrgUnitIdScheme() != null ? IdentifiableProperty.valueOf( dataValueSet.getOrgUnitIdScheme().toUpperCase() ) : importOptions.getOrgUnitIdScheme();
+        IdentifiableProperty dataElementIdScheme = dataValueSet.getDataElementIdScheme() != null ?
+            IdentifiableProperty.valueOf( dataValueSet.getDataElementIdScheme().toUpperCase() ) :
+            importOptions.getDataElementIdScheme();
+        IdentifiableProperty orgUnitIdScheme = dataValueSet.getOrgUnitIdScheme() != null ?
+            IdentifiableProperty.valueOf( dataValueSet.getOrgUnitIdScheme().toUpperCase() ) :
+            importOptions.getOrgUnitIdScheme();
         boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
-        ImportStrategy strategy = dataValueSet.getStrategy() != null ? ImportStrategy.valueOf( dataValueSet.getStrategy() ) : importOptions.getImportStrategy();
+        ImportStrategy strategy = dataValueSet.getStrategy() != null ?
+            ImportStrategy.valueOf( dataValueSet.getStrategy() ) :
+            importOptions.getImportStrategy();
         boolean skipExistingCheck = importOptions.isSkipExistingCheck();
 
         Map<String, DataElement> dataElementMap = identifiableObjectManager.getIdMap( DataElement.class, dataElementIdScheme );
-        Map<String, OrganisationUnit> orgUnitMap = orgUnitIdScheme == UUID ? getUuidOrgUnitMap() : identifiableObjectManager.getIdMap( OrganisationUnit.class, orgUnitIdScheme );
-        Map<String, DataElementCategoryOptionCombo> categoryOptionComboMap = identifiableObjectManager.getIdMap( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID );
+        Map<String, OrganisationUnit> orgUnitMap = orgUnitIdScheme == UUID ?
+            getUuidOrgUnitMap() :
+            identifiableObjectManager.getIdMap( OrganisationUnit.class, orgUnitIdScheme );
+        Map<String, DataElementCategoryOptionCombo> categoryOptionComboMap = identifiableObjectManager
+            .getIdMap( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID );
         Map<String, Period> periodMap = new HashMap<String, Period>();
 
-        DataSet dataSet = dataValueSet.getDataSet() != null ? identifiableObjectManager.getObject( DataSet.class, IdentifiableProperty.UID, dataValueSet.getDataSet() ) : null;
+        DataSet dataSet = dataValueSet.getDataSet() != null ?
+            identifiableObjectManager.getObject( DataSet.class, IdentifiableProperty.UID, dataValueSet.getDataSet() ) :
+            null;
         Date completeDate = getDefaultDate( dataValueSet.getCompleteDate() );
 
-        Period outerPeriod = PeriodType.getPeriodFromIsoString( dataValueSet.getPeriod() );
+        Period outerPeriod = PeriodType.getPeriodFromIsoString( trimToNull( dataValueSet.getPeriod() ) );
 
         OrganisationUnit outerOrgUnit;
 
+        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService
+            .getDefaultDataElementCategoryOptionCombo();
+
         if ( orgUnitIdScheme.equals( IdentifiableProperty.UUID ) )
         {
-            outerOrgUnit = dataValueSet.getOrgUnit() == null ? null : organisationUnitService.getOrganisationUnitByUuid( dataValueSet.getOrgUnit() );
+            outerOrgUnit = dataValueSet.getOrgUnit() == null ?
+                null :
+                organisationUnitService.getOrganisationUnitByUuid( dataValueSet.getOrgUnit() );
         }
         else
         {
-            outerOrgUnit = dataValueSet.getOrgUnit() != null ? identifiableObjectManager.getObject( OrganisationUnit.class, orgUnitIdScheme, dataValueSet.getOrgUnit() ) : null;
+            outerOrgUnit = dataValueSet.getOrgUnit() != null ?
+                identifiableObjectManager.getObject( OrganisationUnit.class, orgUnitIdScheme, dataValueSet.getOrgUnit() ) : null;
         }
+
+        DataElementCategoryOptionCombo outerAttrOptionCombo = dataValueSet.getAttributeOptionCombo() != null ?
+            identifiableObjectManager.getObject( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID,
+                trimToNull( dataValueSet.getAttributeOptionCombo() ) ) : null;
 
         if ( dataSet != null && completeDate != null )
         {
             notifier.notify( id, "Completing data set" );
-            handleComplete( dataSet, completeDate, outerOrgUnit, outerPeriod, summary );
+            handleComplete( dataSet, completeDate, outerPeriod, outerOrgUnit, fallbackCategoryOptionCombo, summary ); //TODO
         }
         else
         {
             summary.setDataSetComplete( Boolean.FALSE.toString() );
         }
 
-        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-
         String currentUser = currentUserService.getCurrentUsername();
 
-        BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class ).init();
+        BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class )
+            .init();
 
         int importCount = 0;
         int updateCount = 0;
         int totalCount = 0;
+
+        // ---------------------------------------------------------------------
+        // Data values
+        // ---------------------------------------------------------------------
 
         notifier.notify( id, "Importing data values" );
         log.info( "importing data values" );
@@ -486,13 +544,21 @@ public class DefaultDataValueSetService
             totalCount++;
 
             DataElement dataElement = dataElementMap.get( trimToNull( dataValue.getDataElement() ) );
-            DataElementCategoryOptionCombo categoryOptionCombo = categoryOptionComboMap.get( trimToNull( dataValue.getCategoryOptionCombo() ) );
-            Period period = outerPeriod != null ? outerPeriod : PeriodType.getPeriodFromIsoString( trimToNull( dataValue.getPeriod() ) );
-            OrganisationUnit orgUnit = outerOrgUnit != null ? outerOrgUnit : orgUnitMap.get( trimToNull( dataValue.getOrgUnit() ) );
+            DataElementCategoryOptionCombo categoryOptionCombo = categoryOptionComboMap
+                .get( trimToNull( dataValue.getCategoryOptionCombo() ) );
+            Period period = outerPeriod != null ?
+                outerPeriod :
+                PeriodType.getPeriodFromIsoString( trimToNull( dataValue.getPeriod() ) );
+            OrganisationUnit orgUnit =
+                outerOrgUnit != null ? outerOrgUnit : orgUnitMap.get( trimToNull( dataValue.getOrgUnit() ) );
+            DataElementCategoryOptionCombo attrOptionCombo = outerAttrOptionCombo != null ?
+                outerAttrOptionCombo :
+                categoryOptionComboMap.get( trimToNull( dataValue.getAttributeOptionCombo() ) );
 
             if ( dataElement == null )
             {
-                summary.getConflicts().add( new ImportConflict( DataElement.class.getSimpleName(), dataValue.getDataElement() ) );
+                summary.getConflicts()
+                    .add( new ImportConflict( DataElement.class.getSimpleName(), dataValue.getDataElement() ) );
                 continue;
             }
 
@@ -504,13 +570,19 @@ public class DefaultDataValueSetService
 
             if ( orgUnit == null )
             {
-                summary.getConflicts().add( new ImportConflict( OrganisationUnit.class.getSimpleName(), dataValue.getOrgUnit() ) );
+                summary.getConflicts()
+                    .add( new ImportConflict( OrganisationUnit.class.getSimpleName(), dataValue.getOrgUnit() ) );
                 continue;
             }
 
             if ( categoryOptionCombo == null )
             {
                 categoryOptionCombo = fallbackCategoryOptionCombo;
+            }
+
+            if ( attrOptionCombo == null )
+            {
+                attrOptionCombo = fallbackCategoryOptionCombo;
             }
 
             if ( dataValue.getValue() == null && dataValue.getComment() == null )
@@ -548,7 +620,7 @@ public class DefaultDataValueSetService
             internalValue.setPeriod( period );
             internalValue.setSource( orgUnit );
             internalValue.setCategoryOptionCombo( categoryOptionCombo );
-            internalValue.setAttributeOptionCombo( fallbackCategoryOptionCombo ); // TODO
+            internalValue.setAttributeOptionCombo( attrOptionCombo );
             internalValue.setValue( trimToNull( dataValue.getValue() ) );
 
             if ( dataValue.getStoredBy() == null || dataValue.getStoredBy().trim().isEmpty() )
@@ -560,7 +632,8 @@ public class DefaultDataValueSetService
                 internalValue.setStoredBy( dataValue.getStoredBy() );
             }
 
-            internalValue.setTimestamp( parseDate( dataValue.getLastUpdated() ) );
+            internalValue.setCreated( parseDate( dataValue.getCreated() ) );
+            internalValue.setLastUpdated( parseDate( dataValue.getLastUpdated() ) );
             internalValue.setComment( trimToNull( dataValue.getComment() ) );
             internalValue.setFollowup( dataValue.getFollowup() );
 
@@ -609,7 +682,8 @@ public class DefaultDataValueSetService
     // Supportive methods
     //--------------------------------------------------------------------------
 
-    private void handleComplete( DataSet dataSet, Date completeDate, OrganisationUnit orgUnit, Period period, ImportSummary summary )
+    private void handleComplete( DataSet dataSet, Date completeDate, Period period, OrganisationUnit orgUnit,
+        DataElementCategoryOptionCombo attributeOptionCombo, ImportSummary summary )
     {
         if ( orgUnit == null )
         {
@@ -625,7 +699,8 @@ public class DefaultDataValueSetService
 
         period = periodService.reloadPeriod( period );
 
-        CompleteDataSetRegistration completeAlready = registrationService.getCompleteDataSetRegistration( dataSet, period, orgUnit );
+        CompleteDataSetRegistration completeAlready = registrationService
+            .getCompleteDataSetRegistration( dataSet, period, orgUnit, attributeOptionCombo );
 
         String username = currentUserService.getCurrentUsername();
 
@@ -638,7 +713,8 @@ public class DefaultDataValueSetService
         }
         else
         {
-            CompleteDataSetRegistration registration = new CompleteDataSetRegistration( dataSet, period, orgUnit, completeDate, username );
+            CompleteDataSetRegistration registration = new CompleteDataSetRegistration( dataSet, period, orgUnit,
+                attributeOptionCombo, completeDate, username );
 
             registrationService.saveCompleteDataSetRegistration( registration );
         }
@@ -663,6 +739,23 @@ public class DefaultDataValueSetService
         }
 
         return dataElements;
+    }
+
+    private Set<Period> getPeriods( Date startDate, Date endDate )
+    {
+        if ( startDate == null || endDate == null || endDate.before( startDate ) )
+        {
+            throw new IllegalArgumentException( ERROR_INVALID_START_END_DATE + startDate + ", " + endDate );
+        }
+
+        Set<Period> periods = new HashSet<Period>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+
+        if ( periods.isEmpty() )
+        {
+            throw new IllegalArgumentException( "No periods exist for start/end date: " + startDate + ", " + endDate );
+        }
+
+        return periods;
     }
 
     private Set<OrganisationUnit> getOrgUnits( Set<String> orgUnits )

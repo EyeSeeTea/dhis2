@@ -43,10 +43,10 @@
 			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_SEARCH</param>
 		</action>
 
-		<action name="loadProgramStageInstances"
-			class="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstancesAction">
+		<action name="loadProgramStageInstance"
+			class="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstanceAction">
 			<result name="success" type="velocity-json">
-				/dhis-web-caseentry/jsonProgramStageInstances.vm
+				/dhis-web-caseentry/jsonProgramStageInstance.vm
 			</result>
 		</action>
 
@@ -543,6 +543,8 @@
 
 		<action name="registerTrackedEntityInstanceLocation"
 			class="org.hisp.dhis.caseentry.action.trackedentity.RegisterTrackedEntityInstanceLocationAction">
+			<result name="input" type="velocity-json">/dhis-web-commons/ajax/jsonResponseInput.vm
+			</result>
 			<result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm
 			</result>
 			<param name="requiredAuthorities">F_TRACKED_ENTITY_INSTANCE_CHANGE_LOCATION</param>

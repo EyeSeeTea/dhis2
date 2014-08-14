@@ -74,6 +74,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -162,7 +163,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         private Set<DataElementOperand> greyedFields = Sets.newHashSet();
 
         private Collection<ProgramStageDataElement> programStageDataElements = Lists.newArrayList();
-        private Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = Sets.newHashSet();
+        private List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = new ArrayList<>();
 
         public void extract( T object )
         {
@@ -252,9 +253,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Expression extractExpression( T object, String fieldName )
         {
+            Expression expression = null;
+
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
             {
-                Object expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
+                expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
 
                 if ( expression != null && Expression.class.isAssignableFrom( expression.getClass() ) )
                 {
@@ -262,7 +265,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
             }
 
-            return null;
+            return expression;
         }
 
         private Set<DataElementOperand> extractDataElementOperands( T object, String fieldName )
@@ -362,7 +365,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
         }
 
-        private void saveAttributeValues( T object, Set<AttributeValue> attributeValues )
+        private void saveAttributeValues( T object, Collection<AttributeValue> attributeValues )
         {
             if ( attributeValues.size() > 0 )
             {
@@ -409,13 +412,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             }
         }
 
-        private Set<ProgramTrackedEntityAttribute> extractProgramTrackedEntityAttributes( T object )
+        private List<ProgramTrackedEntityAttribute> extractProgramTrackedEntityAttributes( T object )
         {
-            Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributeSet = Sets.newHashSet();
+            List<ProgramTrackedEntityAttribute> programTrackedEntityAttributeSet = new ArrayList<>();
 
-            if ( ReflectionUtils.isCollection( "attributes", object, ProgramTrackedEntityAttribute.class ) )
+            if ( ReflectionUtils.isCollection( "programAttributes", object, ProgramTrackedEntityAttribute.class ) )
             {
-                Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = ReflectionUtils.invokeGetterMethod( "attributes", object );
+                List<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = ReflectionUtils.invokeGetterMethod( "programAttributes", object );
+
+                if ( programTrackedEntityAttributes == null )
+                {
+                    programTrackedEntityAttributes = new ArrayList<>();
+                    ReflectionUtils.invokeSetterMethod( "programAttributes", object, programTrackedEntityAttributes );
+                }
 
                 for ( ProgramTrackedEntityAttribute trackedEntityAttribute : programTrackedEntityAttributes )
                 {
@@ -440,7 +449,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             extractProgramTrackedEntityAttributes( object );
         }
 
-        private void saveProgramTrackedEntityAttributes( T object, Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes )
+        private void saveProgramTrackedEntityAttributes( T object, Collection<ProgramTrackedEntityAttribute> programTrackedEntityAttributes )
         {
             for ( ProgramTrackedEntityAttribute programTrackedEntityAttribute : programTrackedEntityAttributes )
             {
@@ -449,7 +458,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 sessionFactory.getCurrentSession().persist( programTrackedEntityAttribute );
             }
 
-            ReflectionUtils.invokeSetterMethod( "programTrackedEntityAttributes", object, programTrackedEntityAttributes );
+            ReflectionUtils.invokeSetterMethod( "programAttributes", object, programTrackedEntityAttributes );
         }
 
         private Collection<ProgramStageDataElement> extractProgramStageDataElements( T object )

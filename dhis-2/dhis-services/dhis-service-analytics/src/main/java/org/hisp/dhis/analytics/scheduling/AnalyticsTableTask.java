@@ -30,13 +30,18 @@ package org.hisp.dhis.analytics.scheduling;
 
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE;
+
+import java.util.Date;
 
 import javax.annotation.Resource;
 
 import org.hisp.dhis.analytics.AnalyticsTableService;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.system.util.DebugUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -66,6 +71,9 @@ public class AnalyticsTableTask
     @Autowired
     private MessageService messageService;
 
+    @Autowired
+    private SystemSettingManager systemSettingManager;
+    
     private Integer lastYears;
 
     public void setLastYears( Integer lastYears )
@@ -108,6 +116,8 @@ public class AnalyticsTableTask
     @Override
     public void run()
     {
+        final Date startTime = new Date();
+        
         notifier.clear( taskId ).notify( taskId, "Analytics table update process started" );
 
         try
@@ -145,9 +155,16 @@ public class AnalyticsTableTask
         {
             notifier.notify( taskId, ERROR, "Process failed: " + ex.getMessage(), true );
             
-            messageService.sendFeedback( "Analytics table process failed", "Analytics table process failed, please check the logs.", null );
+            messageService.sendFeedback( 
+                "Analytics table process failed", 
+                "Analytics table process failed, please check the logs. " +
+                "Message: " + ex.getMessage() + " " +
+                "Cause: " + DebugUtils.getStackTrace( ex.getCause() ), 
+                null );
             
             throw ex;
         }
+        
+        systemSettingManager.saveSystemSetting( KEY_LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE, startTime );
     }
 }

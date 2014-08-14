@@ -29,6 +29,7 @@ package org.hisp.dhis.smscommand;
  */
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 
 public class SMSCode
 {
@@ -37,6 +38,8 @@ public class SMSCode
     private String code;
 
     private DataElement dataElement;
+    
+    private TrackedEntityAttribute trackedEntityAttribute;
 
     private int optionId;
 
@@ -45,6 +48,12 @@ public class SMSCode
         this.code = code;
         this.dataElement = dataElement;
         this.optionId = optionId;
+    }
+    
+    public SMSCode( String code, TrackedEntityAttribute trackedEntityAttribute)
+    {
+        this.code = code;
+        this.trackedEntityAttribute = trackedEntityAttribute;
     }
 
     public SMSCode()
@@ -91,4 +100,16 @@ public class SMSCode
     {
         this.optionId = optionId;
     }
+
+    public TrackedEntityAttribute getTrackedEntityAttribute()
+    {
+        return trackedEntityAttribute;
+    }
+
+    public void setTrackedEntityAttribute( TrackedEntityAttribute trackedEntityAttribute )
+    {
+        this.trackedEntityAttribute = trackedEntityAttribute;
+    }
+    
+    
 }

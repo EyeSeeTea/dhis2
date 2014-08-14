@@ -364,6 +364,7 @@ public abstract class AbstractEventService
         if ( event.getEventDate() != null )
         {
             executionDate = DateUtils.getMediumDate( event.getEventDate() );
+            programStageInstance.setExecutionDate( executionDate );
         }
 
         Date dueDate = new Date();
@@ -393,9 +394,17 @@ public abstract class AbstractEventService
                     i18nManager.getI18nFormat() );
             }
         }
+        else if ( event.getStatus() == EventStatus.SKIPPED )
+        {
+            programStageInstance.setStatus( EventStatus.SKIPPED );            
+        }
+        
+        else if ( event.getStatus() == EventStatus.SCHEDULE )
+        {
+            programStageInstance.setStatus( EventStatus.SCHEDULE );            
+        } 
 
         programStageInstance.setDueDate( dueDate );
-        programStageInstance.setExecutionDate( executionDate );
         programStageInstance.setOrganisationUnit( organisationUnit );
 
         if ( programStageInstance.getProgramStage().getCaptureCoordinates() && event.getCoordinate().isValid() )
@@ -411,9 +420,7 @@ public abstract class AbstractEventService
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
-        ProgramInstance programInstance = programStageInstance.getProgramInstance();
-
-        saveTrackedEntityCommentFromEvent( programInstance, event, storedBy );
+        saveTrackedEntityComment( programStageInstance, event, storedBy );
 
         Set<TrackedEntityDataValue> dataValues = new HashSet<TrackedEntityDataValue>(
             dataValueService.getTrackedEntityDataValues( programStageInstance ) );
@@ -447,6 +454,58 @@ public abstract class AbstractEventService
                 dataValueService.deleteTrackedEntityDataValue( value );
             }
         }
+
+    }
+
+    public void updateEventForNote( Event event )
+    {
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event
+            .getEvent() );
+
+        if ( programStageInstance == null )
+        {
+            return;
+        }
+        saveTrackedEntityComment( programStageInstance, event, getStoredBy( event, null ) );
+
+    }
+
+    public void updateEventForEventDate( Event event )
+    {
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event
+            .getEvent() );
+
+        if ( programStageInstance == null )
+        {
+            return;
+        }
+
+        Date executionDate = new Date();
+
+        if ( event.getEventDate() != null )
+        {
+            executionDate = DateUtils.getMediumDate( event.getEventDate() );
+        }
+
+        if ( event.getStatus() == EventStatus.ACTIVE )
+        {
+            programStageInstance.setStatus( EventStatus.ACTIVE );
+        }
+        else if ( event.getStatus() == EventStatus.COMPLETED )
+        {
+            programStageInstance.setStatus( EventStatus.COMPLETED );
+        }
+        else if ( event.getStatus() == EventStatus.SCHEDULE )
+        {
+            programStageInstance.setStatus( EventStatus.ACTIVE );
+        }
+        else if ( event.getStatus() == EventStatus.SKIPPED )
+        {
+            programStageInstance.setStatus( EventStatus.ACTIVE );
+        }
+
+        programStageInstance.setExecutionDate( executionDate );
+        programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
     }
 
@@ -542,11 +601,9 @@ public abstract class AbstractEventService
             event.getDataValues().add( value );
         }
 
-        ProgramInstance programInstance = programStageInstance.getProgramInstance();
+        List<TrackedEntityComment> comments = programStageInstance.getComments();
 
-        TrackedEntityComment comment = programInstance.getComment();
-
-        if ( comment != null )
+        for ( TrackedEntityComment comment : comments )
         {
             Note note = new Note();
 
@@ -642,8 +699,8 @@ public abstract class AbstractEventService
             {
                 dataValue.setValue( value );
                 dataValue.setTimestamp( new Date() );
-                dataValue.setProvidedElsewhere( providedElsewhere );
                 dataValue.setStoredBy( storedBy );
+                dataValue.setProvidedElsewhere( providedElsewhere );
 
                 dataValueService.updateTrackedEntityDataValue( dataValue );
             }
@@ -718,10 +775,10 @@ public abstract class AbstractEventService
 
         Date eventDate = DateUtils.getMediumDate( event.getEventDate() );
 
-        if ( eventDate == null )
-        {
-            return new ImportSummary( ImportStatus.ERROR, "Event.eventDate is not in a valid format." );
-        }
+        /*
+         * if ( eventDate == null ) { return new ImportSummary(
+         * ImportStatus.ERROR, "Event.eventDate is not in a valid format." ); }
+         */
 
         Date dueDate = DateUtils.getMediumDate( event.getDueDate() );
 
@@ -741,7 +798,7 @@ public abstract class AbstractEventService
 
             }
 
-            saveTrackedEntityCommentFromEvent( programInstance, event, storedBy );
+            saveTrackedEntityComment( programStageInstance, event, storedBy );
 
             importSummary.setReference( programStageInstance.getUid() );
         }
@@ -776,7 +833,7 @@ public abstract class AbstractEventService
         return importSummary;
     }
 
-    private void saveTrackedEntityCommentFromEvent( ProgramInstance programInstance, Event event, String storedBy )
+    private void saveTrackedEntityComment( ProgramStageInstance programStageInstance, Event event, String storedBy )
     {
         for ( Note note : event.getNotes() )
         {
@@ -787,9 +844,9 @@ public abstract class AbstractEventService
 
             commentService.addTrackedEntityComment( comment );
 
-            programInstance.setComment( comment );
+            programStageInstance.getComments().add( comment );
 
-            programInstanceService.updateProgramInstance( programInstance );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
     }
 

@@ -60,7 +60,7 @@ Ext.onReady( function() {
 				})
 			],
 			displayProjection: new OpenLayers.Projection('EPSG:4326'),
-			maxExtent: new OpenLayers.Bounds(-20037508, -20037508, 20037508, 20037508),
+			//maxExtent: new OpenLayers.Bounds(-1160037508, -1160037508, 1160037508, 1160037508),
 			mouseMove: {}, // Track all mouse moves
 			relocate: {} // Relocate organisation units
 		});
@@ -214,7 +214,7 @@ Ext.onReady( function() {
 				shadow: false,
 				resizable: false,
 				items: {
-					html: feature.attributes.label
+					html: feature.attributes.popupText
 				}
 			});
 
@@ -382,21 +382,19 @@ Ext.onReady( function() {
 											store: {
 												fields: ['id', 'name'],
 												data: function() {
-													var pt = new PeriodType(),
-														periodType = gis.init.systemSettings.infrastructuralPeriodType.id,
-														data;
+                                                    var periodType = gis.init.systemSettings.infrastructuralPeriodType.id,
+                                                        generator = gis.init.periodGenerator,
+														periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset)) || [];
 
-													data = pt.get(periodType).generatePeriods({
-														offset: 0,
-														filterFuturePeriods: true,
-														reversePeriods: true
-													});
+													if (Ext.isArray(periods) && periods.length) {
+                                                        for (var i = 0; i < periods.length; i++) {
+                                                            periods[i].id = periods[i].iso;
+                                                        }
 
-													if (Ext.isArray(data) && data.length) {
-														data = data.slice(0,5);
+														periods = periods.slice(0,5);
 													}
 
-													return data;
+													return periods;
 												}()
 											},
 											lockPosition: false,
@@ -641,7 +639,7 @@ Ext.onReady( function() {
 
 		if (isEvent) {
 			options.onClickSelect = function fn(feature) {
-                var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname'],
+                var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname', 'popupText'],
                     attributes = feature.attributes,
                     map = attributes.nameColumnMap,
                     html = '<table class="padding1">',
@@ -738,33 +736,33 @@ Ext.onReady( function() {
 		});
 	};
 
-	GIS.core.StyleMap = function(id, labelConfig) {
+	GIS.core.StyleMap = function(labelConfig) {
 		var defaults = {
 				fillOpacity: 1,
 				strokeColor: '#fff',
 				strokeWidth: 1,
-                pointRadius: 5,
+                pointRadius: 8,
                 labelAlign: 'cr',
-                labelYOffset: 13
+                labelYOffset: 13,
+                fontFamily: 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas'
 			},
 			select = {
 				fillOpacity: 0.9,
 				strokeColor: '#fff',
 				strokeWidth: 1,
-                pointRadius: 5,
+                pointRadius: 8,
 				cursor: 'pointer',
                 labelAlign: 'cr',
                 labelYOffset: 13
 			};
 
-		if (labelConfig) {
-            defaults.label = labelConfig.label;
-            defaults.fontFamily = labelConfig.fontFamily;
-			defaults.fontSize = (labelConfig.fontSize || 13) + 'px';
-			defaults.fontWeight = labelConfig.strong ? 'bold' : 'normal';
-			defaults.fontStyle = labelConfig.italic ? 'italic' : 'normal';
-			defaults.fontColor = labelConfig.color ? (labelConfig.color.split('').shift() !== '#' ? '#' + labelConfig.color : labelConfig.color) : '#000000';
-		}
+        if (Ext.isObject(labelConfig) && labelConfig.labels) {
+            defaults.label = '\${label}';
+            defaults.fontSize = labelConfig.labelFontSize;
+            defaults.fontWeight = labelConfig.labelFontWeight;
+            defaults.fontStyle = labelConfig.labelFontStyle;
+            defaults.fontColor = labelConfig.labelFontColor;
+        }
 
 		return new OpenLayers.StyleMap({
 			'default': defaults,
@@ -779,7 +777,7 @@ Ext.onReady( function() {
 					force:true
 				})
 			],
-			styleMap: GIS.core.StyleMap(id),
+			styleMap: GIS.core.StyleMap(),
 			visibility: false,
 			displayInLayerSwitcher: false,
 			layerType: gis.conf.finals.layer.type_vector,
@@ -1042,10 +1040,11 @@ Ext.onReady( function() {
 		};
 
 		loadData = function(view) {
-			view = view || layer.core.view;
-
             var paramString = '?',
-                features = [];
+                features = [],
+                success;
+
+			view = view || layer.core.view;
 
             // stage
             paramString += 'stage=' + view.stage.id;
@@ -1079,86 +1078,105 @@ Ext.onReady( function() {
                 //}
             }
 
-			Ext.data.JsonP.request({
-				url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
-				disableCaching: false,
-				scope: this,
-				success: function(r) {
-                    var events = [],
-                        features = [],
-                        rows = [],
-                        lonIndex,
-                        latIndex,
-                        map = Ext.clone(r.metaData.names);
+            success = function(r) {
+                var events = [],
+                    features = [],
+                    rows = [],
+                    lonIndex,
+                    latIndex,
+                    map = Ext.clone(r.metaData.names);
 
-                    // name-column map, lonIndex, latIndex
-                    for (var i = 0; i < r.headers.length; i++) {
-                        map[r.headers[i].name] = r.headers[i].column;
+                // name-column map, lonIndex, latIndex
+                for (var i = 0; i < r.headers.length; i++) {
+                    map[r.headers[i].name] = r.headers[i].column;
 
-                        if (r.headers[i].name === 'longitude') {
-							lonIndex = i;
-						}
-
-						if (r.headers[i].name === 'latitude') {
-							latIndex = i;
-						}
+                    if (r.headers[i].name === 'longitude') {
+                        lonIndex = i;
                     }
 
-					// get events with coordinates
-                    if (Ext.isArray(r.rows) && r.rows.length) {
-						for (var i = 0, row; i < r.rows.length; i++) {
-							row = r.rows[i];
-
-							if (row[lonIndex] && row[latIndex]) {
-								rows.push(row);
-							}
-						}
-					}
-
-                    if (!rows.length) {
-                        alert('No coordinates found');
-                        olmap.mask.hide();
-                        return;
+                    if (r.headers[i].name === 'latitude') {
+                        latIndex = i;
                     }
-
-                    // name-column map
-                    map = r.metaData.names;
-
-                    for (var i = 0; i < r.headers.length; i++) {
-                        map[r.headers[i].name] = r.headers[i].column;
-                    }
-
-                    // events
-                    for (var i = 0, row, obj; i < rows.length; i++) {
-                        row = rows[i];
-                        obj = {};
-
-                        for (var j = 0; j < row.length; j++) {
-                            obj[r.headers[j].name] = row[j];
-                        }
-
-                        obj[gis.conf.finals.widget.value] = 0;
-                        obj.label = obj.ouname;
-                        obj.nameColumnMap = map;
-
-                        events.push(obj);
-                    }
-
-                    // features
-                    for (var i = 0, event, point; i < events.length; i++) {
-                        event = events[i];
-
-                        point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
-
-                        features.push(new OpenLayers.Feature.Vector(point, event));
-                    }
-
-                    layer.removeFeatures(layer.features);
-                    layer.addFeatures(features);
-
-                    loadLegend(view);
                 }
-            });
+
+                // get events with coordinates
+                if (Ext.isArray(r.rows) && r.rows.length) {
+                    for (var i = 0, row; i < r.rows.length; i++) {
+                        row = r.rows[i];
+
+                        if (row[lonIndex] && row[latIndex]) {
+                            rows.push(row);
+                        }
+                    }
+                }
+
+                if (!rows.length) {
+                    alert('No event coordinates found');
+                    olmap.mask.hide();
+                    return;
+                }
+
+                // name-column map
+                map = r.metaData.names;
+
+                for (var i = 0; i < r.headers.length; i++) {
+                    map[r.headers[i].name] = r.headers[i].column;
+                }
+
+                // events
+                for (var i = 0, row, obj; i < rows.length; i++) {
+                    row = rows[i];
+                    obj = {};
+
+                    for (var j = 0; j < row.length; j++) {
+                        obj[r.headers[j].name] = row[j];
+                    }
+
+                    obj[gis.conf.finals.widget.value] = 0;
+                    obj.label = obj.ouname;
+                    obj.popupText = obj.ouname;
+                    obj.nameColumnMap = map;
+
+                    events.push(obj);
+                }
+
+                // features
+                for (var i = 0, event, point; i < events.length; i++) {
+                    event = events[i];
+
+                    point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
+
+                    features.push(new OpenLayers.Feature.Vector(point, event));
+                }
+
+                layer.removeFeatures(layer.features);
+                layer.addFeatures(features);
+
+                loadLegend(view);
+            };
+
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+						alert(r.responseText);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
 		};
 
 		loadLegend = function(view) {
@@ -1384,7 +1402,7 @@ Ext.onReady( function() {
 			features = features || layer.core.featureStore.features;
 
 			for (var i = 0; i < features.length; i++) {
-				features[i].attributes.label = features[i].attributes.name;
+				features[i].attributes.popupText = features[i].attributes.name + ' (' + features[i].attributes[view.organisationUnitGroupSet.id] + ')';
 			}
 
 			layer.removeFeatures(layer.features);
@@ -1396,10 +1414,18 @@ Ext.onReady( function() {
 		loadLegend = function(view) {
             var isPlugin = GIS.plugin && !GIS.app,
                 type = isPlugin ? 'jsonp' : 'json',
-                url = gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.' + type + '?fields=organisationUnitGroups[id,name]',
+                url = gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.' + type + '?fields=organisationUnitGroups[id,name,symbol]',
                 success;
 
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, attr; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name : '';
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
 
             success = function(r) {
                 var data = r.organisationUnitGroups,
@@ -1560,6 +1586,13 @@ Ext.onReady( function() {
 					}
 					return gis.conf.finals.widget.loadtype_organisationunit;
 				}
+
+                if (doExecute) {
+                    loader.zoomToVisibleExtent = false;
+                    loadLegend(view);
+                }
+
+                return gis.conf.finals.widget.loadtype_legend;
 			}
 			else {
 				if (doExecute) {
@@ -1573,75 +1606,97 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-				idParamString = '';
-
-			for (var i = 0; i < items.length; i++) {
-				idParamString += 'ids=' + items[i].id;
-				idParamString += i !== items.length - 1 ? '&' : '';
-			}
-
-			Ext.data.JsonP.request({
-				url: gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + idParamString,
-				scope: this,
-				disableCaching: false,
-				success: function(r) {
-					var geojson = gis.util.geojson.decode(r, 'DESC'),
-						format = new OpenLayers.Format.GeoJSON(),
-						features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
-                        colors = ['black', 'blue', 'red', 'green', 'yellow'],
-                        levels = [],
-                        levelObjectMap = {};
-
-					if (!Ext.isArray(features)) {
-						olmap.mask.hide();
-						alert(GIS.i18n.invalid_coordinates);
-						return;
-					}
-
-					if (!features.length) {
-						olmap.mask.hide();
-						alert(GIS.i18n.no_valid_coordinates_found);
-						return;
-					}
-
-                    // get levels, colors, map
-                    for (var i = 0; i < features.length; i++) {
-                        levels.push(parseFloat(features[i].attributes.level));
+                url = function() {
+                    var params = '';
+                    for (var i = 0; i < items.length; i++) {
+                        params += 'ids=' + items[i].id;
+                        params += i !== items.length - 1 ? '&' : '';
                     }
+                    return gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + params;
+                }(),
+                success,
+                failure;
 
-                    levels = Ext.Array.unique(levels).sort();
+            success = function(r) {
+                var geojson = gis.util.geojson.decode(r, 'DESC'),
+                    format = new OpenLayers.Format.GeoJSON(),
+                    features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
+                    colors = ['black', 'blue', 'red', 'green', 'yellow'],
+                    levels = [],
+                    levelObjectMap = {};
 
-                    for (var i = 0; i < levels.length; i++) {
-                        levelObjectMap[levels[i]] = {
-                            strokeColor: colors[i]
-                        };
+                if (!Ext.isArray(features)) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.invalid_coordinates);
+                    return;
+                }
+
+                if (!features.length) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.no_valid_coordinates_found);
+                    return;
+                }
+
+                // get levels, colors, map
+                for (var i = 0; i < features.length; i++) {
+                    levels.push(parseFloat(features[i].attributes.level));
+                }
+
+                levels = Ext.Array.unique(levels).sort();
+
+                for (var i = 0; i < levels.length; i++) {
+                    levelObjectMap[levels[i]] = {
+                        strokeColor: colors[i]
+                    };
+                }
+
+                // style
+                for (var i = 0, feature, obj, strokeWidth; i < features.length; i++) {
+                    feature = features[i];
+                    obj = levelObjectMap[feature.attributes.level];
+                    strokeWidth = levels.length === 1 ? 1 : feature.attributes.level == 2 ? 2 : 1;
+
+                    feature.style = {
+                        strokeColor: obj.strokeColor || 'black',
+                        strokeWidth: strokeWidth,
+                        fillOpacity: 0,
+                        pointRadius: 5,
+                        labelAlign: 'cr',
+                        labelYOffset: 13
+                    };
+                }
+
+                layer.core.featureStore.loadFeatures(features.slice(0));
+
+                loadData(view, features);
+            };
+
+            failure = function() {
+                olmap.mask.hide();
+                alert(GIS.i18n.coordinates_could_not_be_loaded);
+            };
+
+            if (GIS.plugin && !GIS.app) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
                     }
-
-                    // style
-                    for (var i = 0, feature, obj, strokeWidth; i < features.length; i++) {
-                        feature = features[i];
-                        obj = levelObjectMap[feature.attributes.level];
-                        strokeWidth = levels.length === 1 ? 1 : feature.attributes.level == 2 ? 2 : 1;
-
-                        feature.style = {
-                            strokeColor: obj.strokeColor || 'black',
-                            strokeWidth: strokeWidth,
-                            fillOpacity: 0,
-                            pointRadius: 5,
-                            labelAlign: 'cr',
-                            labelYOffset: 13
-                        };
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
                     }
-
-					layer.core.featureStore.loadFeatures(features.slice(0));
-
-					loadData(view, features);
-				},
-				failure: function(r) {
-					olmap.mask.hide();
-					alert(GIS.i18n.coordinates_could_not_be_loaded);
-				}
-			});
+                });
+            }
 		};
 
 		loadData = function(view, features) {
@@ -1649,23 +1704,24 @@ Ext.onReady( function() {
 			features = features || layer.core.featureStore.features;
 
 			for (var i = 0; i < features.length; i++) {
-				features[i].attributes.label = features[i].attributes.name;
 				features[i].attributes.value = 0;
+                features[i].attributes.popupText = features[i].attributes.name;
 			}
 
 			layer.removeFeatures(layer.features);
 			layer.addFeatures(features);
-
-            // labels
-            if (layer.hasLabels) {
-                layer.core.setFeatureLabelStyle(true, true);
-            }
 
 			loadLegend(view);
 		};
 
 		loadLegend = function(view) {
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name : '';
+            }
 
 			var options = {
 				indicator: gis.conf.finals.widget.value,
@@ -1679,6 +1735,9 @@ Ext.onReady( function() {
 			layer.core.view = view;
 
 			layer.core.applyClassification(options);
+
+            // labels
+            layer.core.setFeatureLabelStyle(view.labels, false, view);
 
 			afterLoad(view);
 		};
@@ -1943,6 +2002,9 @@ Ext.onReady( function() {
                     disableCaching: false,
                     success: function(r) {
                         success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
                     }
                 });
             }
@@ -2034,7 +2096,8 @@ Ext.onReady( function() {
 
 					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
 						feature.attributes.value = valueMap[id];
-						feature.attributes.label = feature.attributes.name + ' (' + feature.attributes.value + ')';
+                        feature.attributes.popupText = feature.attributes.name + ' (' + feature.attributes.value + ')';
+
 						newFeatures.push(feature);
 					}
 				}
@@ -2077,6 +2140,14 @@ Ext.onReady( function() {
 				fn;
 
 			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name + ' (' + attr.value + ')' : '';
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
 
 			addNames = function(response) {
 
@@ -2351,7 +2422,7 @@ Ext.onReady( function() {
 				widget: {
 					item_width: 288,
 					itemlabel_width: 95,
-					window_width: 310
+					window_width: 306
 				},
 				tool: {
 					item_width: 228,
@@ -2540,15 +2611,16 @@ Ext.onReady( function() {
 			util.geojson = {};
 
 			util.geojson.decode = function(doc, levelOrder) {
-				var geojson = {};
-				geojson.type = 'FeatureCollection';
-				geojson.crs = {
-					type: 'EPSG',
-					properties: {
-						code: '4326'
-					}
+				var geojson = {
+                    type: 'FeatureCollection',
+                    crs: {
+                        type: 'EPSG',
+                        properties: {
+                            code: '4326'
+                        }
+                    },
+                    features: []
 				};
-				geojson.features = [];
 
                 levelOrder = levelOrder || 'ASC';
 
@@ -2609,7 +2681,7 @@ Ext.onReady( function() {
 				// accepts [number], [string], [{prop: number}], [{prop: string}]
 
 				if (!util.object.getLength(array)) {
-					return;
+					return array;
 				}
 
 				key = key || 'name';
@@ -2948,7 +3020,6 @@ Ext.onReady( function() {
 
                     if (Ext.Array.contains([gis.layer.thematic1.id, gis.layer.thematic2.id, gis.layer.thematic3.id, gis.layer.thematic4.id], config.layer)) {
                         if (!config.columns) {
-                            console.log('Data dimension is invalid', config.columns);
                             return;
                         }
                     }
@@ -2996,6 +3067,22 @@ Ext.onReady( function() {
 					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
 					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : gis.conf.layout.layer.opacity;
 					layout.areaRadius = config.areaRadius;
+
+                    layout.labels = !!config.labels;
+
+                    layout.labelFontSize = config.labelFontSize || '11px';
+                    layout.labelFontSize = parseInt(layout.labelFontSize) + 'px';
+
+                    layout.labelFontWeight = Ext.isString(config.labelFontWeight) || Ext.isNumber(config.labelFontWeight) ? config.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.Array.contains(['normal', 'bold', 'bolder', 'lighter'], layout.labelFontWeight) ? layout.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.isNumber(parseInt(layout.labelFontWeight)) && parseInt(layout.labelFontWeight) <= 1000 ? layout.labelFontWeight.toString() : layout.labelFontWeight;
+
+                    layout.labelFontStyle = Ext.Array.contains(['normal', 'italic', 'oblique'], config.labelFontStyle) ? config.labelFontStyle : 'normal';
+
+                    layout.labelFontColor = Ext.isString(config.labelFontColor) || Ext.isNumber(config.labelFontColor) ? config.labelFontColor : 'normal';
+                    layout.labelFontColor = Ext.isNumber(layout.labelFontColor) ? layout.labelFontColor.toString() : layout.labelFontColor;
+                    layout.labelFontColor = layout.labelFontColor.charAt(0) !== '#' ? '#' + layout.labelFontColor : layout.labelFontColor;
+
                     layout.hidden = !!config.hidden;
 
 					layout.userOrganisationUnit = isOu;

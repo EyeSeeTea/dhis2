@@ -1,7 +1,5 @@
 package org.hisp.dhis.rbf.qualityscorepayment.action;
 
-import org.hisp.dhis.rbf.api.Lookup;
-import org.hisp.dhis.rbf.api.LookupService;
 import org.hisp.dhis.rbf.api.QualityScorePayment;
 import org.hisp.dhis.rbf.api.QualityScorePaymentService;
 

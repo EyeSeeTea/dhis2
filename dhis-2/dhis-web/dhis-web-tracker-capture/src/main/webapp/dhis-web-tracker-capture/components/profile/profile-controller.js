@@ -1,8 +1,9 @@
 trackerCapture.controller('ProfileController',
-        function($scope,                
+        function($rootScope,
+                $scope,     
                 CurrentSelection,
-                TEService,
                 TEIService,
+                DialogService,
                 AttributesFactory,
                 TranslationService) {
 
@@ -19,72 +20,38 @@ trackerCapture.controller('ProfileController',
     }); 
     
     //listen for the selected entity       
-    $scope.$on('selectedEntity', function(event, args) { 
+    $scope.$on('dashboardWidgets', function(event, args) { 
         var selections = CurrentSelection.get();
-        $scope.selectedEntity = selections.tei; 
-        $scope.selectedProgram = selections.pr; 
-        if($scope.selectedEntity){
-            TEService.get($scope.selectedEntity.trackedEntity).then(function(te){
-                $scope.trackedEntity = te;
-            });
-            
-            $scope.processTeiAttributes();
-        }        
+        $scope.selectedTei = angular.copy(selections.tei);
+        $scope.trackedEntity = selections.te;
+        $scope.selectedProgram = selections.pr;   
+        $scope.selectedEnrollment = selections.enrollment;  
+        
+        //display only those attributes that belong the selected program
+        //if no program, display attributesInNoProgram
+        TEIService.processAttributes($scope.selectedTei, $scope.selectedProgram, $scope.selectedEnrollment).then(function(tei){
+            $scope.selectedTei = tei;            
+        });
     });
     
-    //display only those attributes that belong the selected program
-    //if no program, display attributesInNoProgram
-    $scope.processTeiAttributes = function(){        
-        
-        angular.forEach($scope.selectedEntity.attributes, function(att){
-            if(att.type === 'number' && !isNaN(parseInt(att.value))){
-                att.value = parseInt(att.value);
-            }
-        });        
-        
-        if($scope.selectedProgram){
-            //show only those attributes in selected program            
-            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                for(var i=0; i<$scope.selectedEntity.attributes.length; i++){
-                    $scope.selectedEntity.attributes[i].show = false;
-                    var processed = false;
-                    for(var j=0; j<atts.length && !processed; j++){
-                        if($scope.selectedEntity.attributes[i].attribute === atts[j].id){
-                            processed = true;
-                            $scope.selectedEntity.attributes[i].show = true;
-                        }
-                    }                                   
-                }
-            }); 
-        }
-        else{
-            //show attributes in no program
-            AttributesFactory.getWithoutProgram().then(function(atts){
-                for(var i=0; i<$scope.selectedEntity.attributes.length; i++){
-                    $scope.selectedEntity.attributes[i].show = false;
-                    var processed = false;
-                    for(var j=0; j<atts.length && !processed; j++){
-                        if($scope.selectedEntity.attributes[i].attribute === atts[j].id){
-                            processed = true;
-                            $scope.selectedEntity.attributes[i].show = true;
-                        }
-                    }                                   
-                }
-            });
-        }              
-    };
-    
     $scope.enableEdit = function(){
-        $scope.entityAttributes = angular.copy($scope.selectedEntity.attributes);
+        $scope.entityAttributes = angular.copy($scope.selectedTei.attributes);
         $scope.editProfile = !$scope.editProfile; 
+        $rootScope.profileWidget.expand = true;
     };
     
     $scope.save = function(){
         
-        var tei = angular.copy($scope.selectedEntity);
+        //check for form validity
+        $scope.outerForm.submitted = true;        
+        if( $scope.outerForm.$invalid ){
+            return false;
+        }
+        
+        var tei = angular.copy($scope.selectedTei);
         tei.attributes = [];
         //prepare to update the tei on the server side 
-        angular.forEach($scope.selectedEntity.attributes, function(attribute){
+        angular.forEach($scope.selectedTei.attributes, function(attribute){
             if(!angular.isUndefined(attribute.value)){
                 tei.attributes.push({attribute: attribute.attribute, value: attribute.value});
             } 
@@ -99,13 +66,16 @@ trackerCapture.controller('ProfileController',
                     };
                 DialogService.showDialog({}, dialogOptions);
                 return;
-            }            
-        });
-        $scope.editProfile = !$scope.editProfile;
+            }
+            
+            $scope.editProfile = !$scope.editProfile;
+            CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});   
+            $scope.outerForm.submitted = false; 
+        });       
     };
     
     $scope.cancel = function(){
-        $scope.selectedEntity.attributes = $scope.entityAttributes;  
+        $scope.selectedTei.attributes = $scope.entityAttributes;  
         $scope.editProfile = !$scope.editProfile;
     };
 });

@@ -154,6 +154,11 @@ public class DefaultI18nService
 
     public Map<String, String> getObjectPropertyValues( Object object )
     {
+        if ( object == null )
+        {
+            return null;
+        }
+        
         List<String> properties = getObjectPropertyNames( object );
 
         Map<String, String> translations = new HashMap<String, String>();
@@ -168,6 +173,11 @@ public class DefaultI18nService
 
     public List<String> getObjectPropertyNames( Object object )
     {
+        if ( object == null )
+        {
+            return null;
+        }
+        
         if ( !(object instanceof IdentifiableObject) )
         {
             throw new IllegalArgumentException( "I18n object must be identifiable: " + object );
@@ -269,7 +279,6 @@ public class DefaultI18nService
      * Returns a map representing Translations for an object matching the given
      * id where the key is the translation property and the value is the
      * translation value.
-     * 
      *
      * @param translations Collection to search.
      * @param objectUid
@@ -279,11 +288,14 @@ public class DefaultI18nService
     {
         Collection<Translation> objectTranslations = new ArrayList<Translation>();
 
-        for ( Translation translation : translations )
+        if ( objectUid != null )
         {
-            if (translation.getObjectUid().equals( objectUid ))
+            for ( Translation translation : translations )
             {
-                objectTranslations.add( translation );
+                if ( objectUid.equals( translation.getObjectUid() ) )
+                {
+                    objectTranslations.add( translation );
+                }
             }
         }
 

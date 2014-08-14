@@ -207,13 +207,19 @@ var eventCaptureDirectives = angular.module('eventCaptureDirectives', [])
 
 .directive('typeaheadOpenOnFocus', function () {
   return {
-    require: ['typeahead', 'ngModel'],
-    link: function (scope, element, attr, ctrls) {        
-      element.bind('focus', function () {
-        ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
-      });
-    }
-  };
+        require: ['typeahead', 'ngModel'],
+        link: function (scope, element, attr, ctrls) {        
+            element.bind('focus', function () {
+                ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
+                
+                scope.$watch(attr.ngModel, function(value) {
+                    if(value === '' || angular.isUndefined(value)){
+                        ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
+                    }                
+                });
+            });
+        }
+    };
 })
 
 .directive('draggableModal', function(){
@@ -223,7 +229,30 @@ var eventCaptureDirectives = angular.module('eventCaptureDirectives', [])
         element.draggable();
       }
     };  
-}) 
+})
+
+.directive('d2PopOver', function($compile, $templateCache){
+    return {        
+        restrict: 'EA',
+        link: function(scope, element, attrs){
+            var content = $templateCache.get("note.html");
+            content = $compile(content)(scope);
+            var options = {
+                    content: content,
+                    placement: 'right',
+                    trigger: 'hover',
+                    html: true,
+                    title: scope.title               
+                };            
+            $(element).popover(options);
+        },
+        scope: {
+            content: '=',
+            title: '@details',
+            template: "@template"
+        }
+    };
+})
 
 .directive('serversidePaginator', function factory() {
     return {

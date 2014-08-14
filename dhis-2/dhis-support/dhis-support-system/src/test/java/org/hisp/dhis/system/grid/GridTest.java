@@ -36,8 +36,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
@@ -559,6 +561,33 @@ public class GridTest
         assertTrue( column.contains( 140.0 ) );
     }
 
+    @Test
+    public void testGetMetaColumnIndexes()
+    {
+        List<Integer> expected = new ArrayList<>();
+        expected.add( 0 );
+        expected.add( 1 );
+        
+        assertEquals( expected, gridA.getMetaColumnIndexes() );
+    }
+
+    @Test
+    public void testGetUniqueValues()
+    {
+        gridA.addRow();
+        gridA.addValue( 11 );
+        gridA.addValue( 12 );
+        gridA.addValue( 13 );
+        
+        Set<Object> expected = new HashSet<>();
+        expected.add( 12 );
+        expected.add( 22 );
+        expected.add( 32 );
+        expected.add( 42 );
+        
+        assertEquals( expected, gridA.getUniqueValues( "ColB" ) );
+    }
+    
     @Test
     public void testJRDataSource() throws Exception
     {

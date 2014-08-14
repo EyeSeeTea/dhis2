@@ -216,21 +216,30 @@ public class SaveDataValueAction
                 dataValue.setCategoryOptionCombo(optionCombo);
                 
                 dataValue.setValue( value.trim() );
-                dataValue.setTimestamp( now );
+                //dataValue.setTimestamp( now );
+                dataValue.setLastUpdated( now );
                 dataValue.setStoredBy( storedBy );
                 
                 dataValueService.addDataValue( dataValue );
             }
         }
         else
-        {
+        {   /*    
             if( !(value.trim().equalsIgnoreCase( dataValue.getValue() ) ) )
             {
                 dataValue.setValue( value.trim() );
-                dataValue.setTimestamp( now );
+                //dataValue.setTimestamp( now );
+                dataValue.setLastUpdated( now );
                 dataValue.setStoredBy( storedBy );                
                 dataValueService.updateDataValue( dataValue );
-          }            
+            }
+            */
+            
+            dataValue.setValue( value );
+            dataValue.setLastUpdated( now );
+            dataValue.setStoredBy( storedBy );
+
+            dataValueService.updateDataValue( dataValue );  
         }
         
         // for saving Over All Score
@@ -260,7 +269,9 @@ public class SaveDataValueAction
                     overAllScoreDataValue.setCategoryOptionCombo( optionCombo );
                     
                     overAllScoreDataValue.setValue( overAllScoreValue.trim() );
-                    overAllScoreDataValue.setTimestamp( now );
+                    //overAllScoreDataValue.setTimestamp( now );
+                    overAllScoreDataValue.setLastUpdated( now );
+                    
                     overAllScoreDataValue.setStoredBy( storedBy );
                     
                     dataValueService.addDataValue( overAllScoreDataValue );
@@ -271,7 +282,8 @@ public class SaveDataValueAction
                 if( !(overAllScoreValue.trim().equalsIgnoreCase( overAllScoreDataValue.getValue() ) ) )
                 {
                     overAllScoreDataValue.setValue( overAllScoreValue.trim() );
-                    overAllScoreDataValue.setTimestamp( now );
+                    //overAllScoreDataValue.setTimestamp( now );
+                    overAllScoreDataValue.setLastUpdated( now );
                     overAllScoreDataValue.setStoredBy( storedBy );                
                     dataValueService.updateDataValue( overAllScoreDataValue );
               }            

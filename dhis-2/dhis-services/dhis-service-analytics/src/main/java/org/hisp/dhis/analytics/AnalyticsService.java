@@ -33,9 +33,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.i18n.I18nFormat;
 
 /**
@@ -133,13 +134,13 @@ public interface AnalyticsService
     /**
      * Generates a mapping where the key represents the dimensional item identifiers
      * concatenated by "-" and the value is the corresponding aggregated data value
-     * based on the given BaseAnalyticalObject.
+     * based on the given AnalyticalObject.
      * 
      * @param object the BaseAnalyticalObject.
      * @param format the I18nFormat, can be null.
      * @return a mapping of dimensional items and aggregated data values.
      */
-    Map<String, Double> getAggregatedDataValueMapping( BaseAnalyticalObject object, I18nFormat format );
+    Map<String, Double> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format );
 
     /**
      * Creates a data query parameter object from the given URL.
@@ -168,7 +169,7 @@ public interface AnalyticsService
      * @param format the i18n format.
      * @return a data query parameter object created based on the given BaseAnalyticalObject.
      */
-    DataQueryParams getFromAnalyticalObject( BaseAnalyticalObject object, I18nFormat format );
+    DataQueryParams getFromAnalyticalObject( AnalyticalObject object, I18nFormat format );
     
     /**
      * Returns a list of persisted DimensionalObjects generated from the given 
@@ -185,8 +186,10 @@ public interface AnalyticsService
      * @param dimension the dimension identifier.
      * @param items the dimension items.
      * @param relativePeriodDate the date to use for generating relative periods, can be null.
-     * @parma format the I18nFormat, can be null.
+     * @param format the I18nFormat, can be null.
+     * @param allowNull return null if no dimension was found.
+     * @throws IllegalQueryException if no dimensions was found.
      * @return list of DimensionalObjects.
      */
-    List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format );
+    List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull );
 }

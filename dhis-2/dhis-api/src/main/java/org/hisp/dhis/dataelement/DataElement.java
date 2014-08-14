@@ -89,6 +89,7 @@ public class DataElement
     public static final String VALUE_TYPE_TRUE_ONLY = "trueOnly";
     public static final String VALUE_TYPE_DATE = "date";
     public static final String VALUE_TYPE_UNIT_INTERVAL = "unitInterval";
+    public static final String VALUE_TYPE_PERCENTAGE = "percentage";
 
     public static final String VALUE_TYPE_NUMBER = "number";
     public static final String VALUE_TYPE_POSITIVE_INT = "posInt";
@@ -102,7 +103,9 @@ public class DataElement
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
     public static final String AGGREGATION_OPERATOR_STDDEV = "stddev";
     public static final String AGGREGATION_OPERATOR_VARIANCE = "variance";
-
+    public static final String AGGREGATION_OPERATOR_MIN = "min";
+    public static final String AGGREGATION_OPERATOR_MAX = "max";
+    
     /**
      * The name to appear in forms.
      */
@@ -112,11 +115,6 @@ public class DataElement
      * The i18n variant of the display name. Should not be persisted.
      */
     protected transient String displayFormName;
-
-    /**
-     * If this DataElement is active or not (enabled or disabled).
-     */
-    private boolean active;
 
     /**
      * The domain of this DataElement; e.g. DataElementDomainType.aggregate or
@@ -289,6 +287,27 @@ public class DataElement
     }
 
     /**
+     * Returns the detailed data element type. If value type is int, the number
+     * type is returned. If value type is string, the text type is returned.
+     * Otherwise the type is returned.
+     */
+    public String getDetailedType()
+    {
+        if ( VALUE_TYPE_INT.equals( type ) )
+        {
+            return numberType;
+        }
+        else if ( VALUE_TYPE_STRING.equals( type ) )
+        {
+            return textType;
+        }
+        else
+        {
+            return type;
+        }
+    }
+    
+    /**
      * Returns whether aggregation should be skipped for this data element, based
      * on the setting of the data set which this data element is a members of,
      * if any.
@@ -408,7 +427,7 @@ public class DataElement
 
     public String getDisplayFormName()
     {
-        return (displayFormName != null && !displayFormName.trim().isEmpty()) ? displayFormName : formName;
+        return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : formName;
     }
 
     public void setDisplayFormName( String displayFormName )
@@ -465,19 +484,6 @@ public class DataElement
     public void setFormName( String formName )
     {
         this.formName = formName;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isActive()
-    {
-        return active;
-    }
-
-    public void setActive( boolean active )
-    {
-        this.active = active;
     }
 
     @JsonProperty
@@ -702,7 +708,6 @@ public class DataElement
             DataElement dataElement = (DataElement) other;
 
             formName = dataElement.getFormName() == null ? formName : dataElement.getFormName();
-            active = dataElement.isActive();
             zeroIsSignificant = dataElement.isZeroIsSignificant();
             domainType = dataElement.getDomainType() == null ? domainType : dataElement.getDomainType();
             type = dataElement.getType() == null ? type : dataElement.getType();

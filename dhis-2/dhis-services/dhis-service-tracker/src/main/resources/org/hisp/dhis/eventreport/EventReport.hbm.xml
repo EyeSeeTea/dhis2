@@ -36,6 +36,14 @@
     <many-to-one name="relatives" unique="true" class="org.hisp.dhis.period.RelativePeriods" column="relativeperiodsid"
       cascade="all-delete-orphan" foreign-key="fk_report_relativeperiodsid" />
 
+    <list name="organisationUnitGroups" table="eventreport_orgunitgroups">
+      <cache usage="read-write" />
+      <key column="eventreportid" foreign-key="fk_eventreport_orgunitunitgroups_eventreportid" />
+      <list-index column="sort_order" base="0" />
+      <many-to-many column="orgunitgroupid" class="org.hisp.dhis.organisationunit.OrganisationUnitGroup"
+        foreign-key="fk_eventreport_orgunitgroups_orgunitgroupid" />
+    </list>
+
     <list name="organisationUnitLevels" table="eventreport_orgunitlevels">
       <cache usage="read-write" />
       <key column="eventreportid" foreign-key="fk_eventreport_orgunitlevels_eventreportid" />

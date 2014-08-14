@@ -118,18 +118,15 @@ function getKeyCode(e) {
 function validateAdvancedSearch( page ) {
 	hideById('listEntityInstanceDiv');
 	var flag = true;
-	if (getFieldValue('startDate') == ''
-			&& getFieldValue('endDate') == '') {
-		if (getFieldValue('searchByProgramStage') == "false"
-				|| (getFieldValue('searchByProgramStage') == "true" && jQuery('#advancedSearchTB tr').length > 1)) {
-			jQuery("#searchDiv :input").each(function(i, item) {
-				var elementName = $(this).attr('name');
-				if (elementName == 'searchText' && jQuery(item).val() == '') {
-					showWarningMessage(i18n_specify_search_criteria);
-					flag = false;
-				}
-			});
-		}
+	if (getFieldValue('searchByProgramStage') == "false"
+			|| (getFieldValue('searchByProgramStage') == "true" && jQuery('#advancedSearchTB tr').length > 1)) {
+		jQuery("#searchDiv :input").each(function(i, item) {
+			var elementName = $(this).attr('name');
+			if (elementName == 'searchText' && jQuery(item).val() == '') {
+				showWarningMessage(i18n_specify_search_criteria);
+				flag = false;
+			}
+		});
 	}
 
 	if (flag) {
@@ -1038,34 +1035,29 @@ function programOnchange(programId) {
 	} else {
 		var type = $('#enrollmentDiv [name=programId] option:selected').attr(
 				'programType')
-		if (type == '2') {
-			hideById('enrollmentDateTR');
-			hideById('dateOfIncidentTR');
-			disable('enrollmentDateField');
-			disable('dateOfIncidentField');
+		
+		showById('enrollmentDateTR');
+		enable('enrollmentDateField');
+		var dateOfEnrollmentDescription = $(
+				'#enrollmentDiv [name=programId] option:selected').attr(
+				'dateOfEnrollmentDescription');
+		var dateOfIncidentDescription = $(
+				'#enrollmentDiv [name=programId] option:selected').attr(
+				'dateOfIncidentDescription');
+		setInnerHTML('enrollmentDateDescription',
+				dateOfEnrollmentDescription);
+		setInnerHTML('dateOfIncidentDescription', dateOfIncidentDescription);
+		var displayIncidentDate = $(
+				'#enrollmentDiv [name=programId] option:selected').attr(
+				'displayIncidentDate');
+		if (displayIncidentDate == 'true') {
+			showById('dateOfIncidentTR');
+			enable('dateOfIncidentField');
 		} else {
-			showById('enrollmentDateTR');
-			enable('enrollmentDateField');
-			var dateOfEnrollmentDescription = $(
-					'#enrollmentDiv [name=programId] option:selected').attr(
-					'dateOfEnrollmentDescription');
-			var dateOfIncidentDescription = $(
-					'#enrollmentDiv [name=programId] option:selected').attr(
-					'dateOfIncidentDescription');
-			setInnerHTML('enrollmentDateDescription',
-					dateOfEnrollmentDescription);
-			setInnerHTML('dateOfIncidentDescription', dateOfIncidentDescription);
-			var displayIncidentDate = $(
-					'#enrollmentDiv [name=programId] option:selected').attr(
-					'displayIncidentDate');
-			if (displayIncidentDate == 'true') {
-				showById('dateOfIncidentTR');
-				enable('dateOfIncidentField');
-			} else {
-				hideById('dateOfIncidentTR');
-				disable('dateOfIncidentField');
-			}
+			hideById('dateOfIncidentTR');
+			disable('dateOfIncidentField');
 		}
+		
 		var program = $('#programEnrollmentSelectDiv [id=programId] option:selected');
 		$('#identifierAndAttributeDiv')
 				.load("getAttribute.action", {
@@ -1339,8 +1331,13 @@ function registerTrackedEntityInstanceLocation(entityInstanceId) {
 	$.getJSON('registerTrackedEntityInstanceLocation.action', {
 		entityInstanceId : entityInstanceId
 	}, function(json) {
-		showTrackedEntityInstanceDashboardForm(entityInstanceId);
-		showSuccessMessage(i18n_save_success);
+		if(json.response=='input'){
+			showWarningMessage( i18n_please_select_an_orgunit );
+		}
+		else{
+			showTrackedEntityInstanceDashboardForm(entityInstanceId);
+			showSuccessMessage(i18n_save_success);
+		}
 	});
 }
 
@@ -1395,8 +1392,7 @@ function hideProgramInstanceDiv(programInstanceId) {
 	$('#pi_' + programInstanceId).removeClass("link-area-active");
 	$("#img_" + programInstanceId).attr('src', '');
 }
-function loadActiveProgramStageRecords(programInstanceId,
-		activeProgramStageInstanceId) {
+function loadActiveProgramStageRecords(programInstanceId, activeProgramStageInstanceId) {
 	hideById('programEnrollmentDiv');
 	if (programInstanceId == "")
 		return;
@@ -1647,9 +1643,9 @@ function removeComment(programStageInstanceId, commentId) {
 }
 function commentKeyup() {
 	var commentInput = byId('commentInput');
-	while ($(commentInput).outerHeight() < commentInput.scrollHeight
+	if ($(commentInput).outerHeight() < commentInput.scrollHeight
 			+ parseFloat($(commentInput).css("borderTopWidth"))
-			+ parseFloat($(commentInput).css("borderBottomWidth"))) {
+			+ parseFloat($(commentInput).css("borderBottomWidth")) - 1 ) {
 		$(commentInput).height($(commentInput).height() + 10);
 	}
 }
@@ -1768,8 +1764,7 @@ function saveCoordinatesEvent() {
 		isValid = false;
 	}
 	if (isValid) {
-		$
-				.ajax({
+		$.ajax({
 					url : 'saveCoordinatesEvent.action',
 					data : {
 						programStageInstanceId : programStageInstanceId,
@@ -1921,4 +1916,3 @@ function moveToActiveDiv( programInstanceId, programStageInstanceId )
 	$('#completedTB [id=tr1_' + programInstanceId + ']').remove();
 	$('#completedTB [id=tr2_' + programInstanceId + ']').remove();
 }
-

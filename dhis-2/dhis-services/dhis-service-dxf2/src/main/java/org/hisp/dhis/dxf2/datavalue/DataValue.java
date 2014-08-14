@@ -51,10 +51,14 @@ public class DataValue
     protected String orgUnit;
 
     protected String categoryOptionCombo;
+    
+    protected String attributeOptionCombo;
 
     protected String value;
 
     protected String storedBy;
+
+    protected String created;
 
     protected String lastUpdated;
 
@@ -130,6 +134,19 @@ public class DataValue
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getAttributeOptionCombo()
+    {
+        return attributeOptionCombo;
+    }
+    
+    public void setAttributeOptionCombo( String attributeOptionCombo )
+    {
+        this.attributeOptionCombo = attributeOptionCombo;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
     public String getValue()
     {
         return value;
@@ -151,6 +168,19 @@ public class DataValue
     public void setStoredBy( String storedBy )
     {
         this.storedBy = storedBy;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public String getCreated()
+    {
+        return created;
+    }
+
+    public void setCreated( String created )
+    {
+        this.created = created;
     }
 
     @JsonProperty

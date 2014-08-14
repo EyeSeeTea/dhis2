@@ -29,6 +29,7 @@ package org.hisp.dhis.smscommand;
  */
 
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.user.UserGroup;
 
@@ -61,14 +62,22 @@ public class SMSCommand
     private ParserType parserType;
 
     private String separator;
+    
+    //Dataset
 
     private DataSet dataset;
 
     private Set<SMSCode> codes;
 
     private String codeSeparator;
+    
+    //Usergroup
 
     private UserGroup userGroup;
+    
+    //Program
+    
+    private Program program;
 
     private Set<SMSSpecialCharacter> specialCharacters;
 
@@ -87,6 +96,9 @@ public class SMSCommand
     private String noUserMessage;
     
     private String moreThanOneOrgUnitMessage;
+    
+    private String successMessage;
+    
 
     public SMSCommand( String name, String parser, ParserType parserType, String separator, DataSet dataset,
         Set<SMSCode> codes, String codeSeparator, String defaultMessage, UserGroup userGroup, String receivedMessage, Set<SMSSpecialCharacter> specialCharacters )
@@ -361,6 +373,24 @@ public class SMSCommand
     {
         this.completenessMethod = completenessMethod;
     }
-    
-    
+
+    public String getSuccessMessage()
+    {
+        return successMessage;
+    }
+
+    public void setSuccessMessage( String successMessage )
+    {
+        this.successMessage = successMessage;
+    }
+
+    public Program getProgram()
+    {
+        return program;
+    }
+
+    public void setProgram( Program program )
+    {
+        this.program = program;
+    }
 }

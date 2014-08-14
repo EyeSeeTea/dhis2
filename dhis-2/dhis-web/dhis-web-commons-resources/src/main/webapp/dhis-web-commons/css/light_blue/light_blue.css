@@ -215,6 +215,7 @@ input[type=text],input[type=password],textarea
   padding-top: 6px;
   border-right: 1px solid #ddd;
   box-shadow: #ddd 0 0 2px 0;
+  z-index: 10;
 }
 
 #leftBarContents
@@ -350,17 +351,13 @@ input[type=text],input[type=password],textarea
 {
   background-color: rgba( 0, 0, 0, 0 );
   border-bottom: 1px solid #cad5e5;
-  padding: 6px 0 3px 5px;
+  padding: 6px 5px 3px 5px;
+  text-align: center;
 }
 
 .listTable td
 {
-  padding: 2px 2px 2px 5px;
-}
-
-.listTable > tbody > tr > td
-{
-  padding: 11px 0 10px 5px;
+  padding: 11px 5px 10px 5px;
 }
 
 .listRow
@@ -463,7 +460,7 @@ input[type=text],input[type=password],textarea
 @font-face {
     font-family: 'LiberationSans';
     src: url('../../fonts/LiberationSans-Regular-webfont.eot');
-    src: url('../../fonts/LiberationSans-Regular-webfont.eot?#iefix') format('eot'),
+    src: url('../../fonts/LiberationSans-Regular-webfont.eot?#iefix') format('embedded-opentype'),
          url('../../fonts/LiberationSans-Regular-webfont.woff') format('woff'),
          url('../../fonts/LiberationSans-Regular-webfont.ttf') format('truetype'),
          url('../../fonts/LiberationSans-Regular-webfont.svg#webfontc8rbNdBe') format('svg');
@@ -474,7 +471,7 @@ input[type=text],input[type=password],textarea
 @font-face {
     font-family: 'LiberationSans';
     src: url('../../fonts/LiberationSans-Bold-webfont.eot');
-    src: url('../../fonts/LiberationSans-Bold-webfont.eot?#iefix') format('eot'),
+    src: url('../../fonts/LiberationSans-Bold-webfont.eot?#iefix') format('embedded-opentype'),
          url('../../fonts/LiberationSans-Bold-webfont.woff') format('woff'),
          url('../../fonts/LiberationSans-Bold-webfont.ttf') format('truetype'),
          url('../../fonts/LiberationSans-Bold-webfont.svg#webfontHyWb8e07') format('svg');

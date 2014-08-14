@@ -284,7 +284,7 @@
     <!-- ProgramStage -->
 
     <action name="programStage"
-      class="org.hisp.dhis.trackedentity.action.programstage.GetProgramStageListAction">
+      class="org.hisp.dhis.trackedentity.action.program.GetProgramAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-program/programStage.vm</param>
       <param name="menu">/dhis-web-maintenance-program/menu.vm</param>
@@ -360,13 +360,6 @@
       </result>
       <param name="onExceptionReturn">plainTextError</param>
       <param name="requiredAuthorities">F_PROGRAMSTAGE_DELETE</param>
-    </action>
-
-    <action name="saveProgramStageSortOder"
-      class="org.hisp.dhis.trackedentity.action.programstage.SaveProgramStageSortOrderAction">
-      <result name="success" type="velocity-json">
-        /dhis-web-commons/ajax/jsonResponseSuccess.vm
-      </result>
     </action>
 
     <action name="programStageList"
@@ -799,6 +792,13 @@
         /dhis-web-commons/ajax/jsonProgramStages.vm
       </result>
       <param name="onExceptionReturn">plainTextError</param>
+    </action>
+    
+     <action name="getOptions"
+      class="org.hisp.dhis.trackedentity.action.caseaggregation.GetOptionsAction">
+      <result name="success" type="velocity-json">
+        /dhis-web-maintenance-program/jsonOptions.vm
+      </result>
     </action>
 
     <!-- Validation - ValidationCriteria -->

@@ -23,15 +23,6 @@
       <param name="javascripts">javascript/dataElement.js,javascript/dataDictionary.js</param>
     </action>
 
-    <action name="showSortDataElementForm" class="org.hisp.dhis.dd.action.dataelement.GetDataElementListSortOrderAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-datadictionary/sortDataElementForm.vm</param>
-    </action>
-
-    <action name="saveDataElementSortOrder" class="org.hisp.dhis.dd.action.dataelement.SaveDataElementSortOrderAction">
-      <result name="success" type="redirect">dataElement.action</result>
-    </action>
-
     <action name="getDataElementGroupMembers" class="org.hisp.dhis.dd.action.dataelement.GetDataElementGroupMembersAction">
       <result name="success" type="velocity-xml">/dhis-web-commons/ajax/xmlOperands.vm</result>
       <param name="onExceptionReturn">plainTextError</param>
@@ -219,15 +210,6 @@
       <param name="javascripts">javascript/indicator.js,javascript/dataDictionary.js</param>
     </action>
 
-    <action name="showSortIndicatorForm" class="org.hisp.dhis.dd.action.indicator.GetIndicatorListSortOrderAction">
-      <result name="success" type="velocity">/main.vm</result>
-      <param name="page">/dhis-web-maintenance-datadictionary/sortIndicatorForm.vm</param>
-    </action>
-
-    <action name="saveIndicatorSortOrder" class="org.hisp.dhis.dd.action.indicator.SaveIndicatorSortOrderAction">
-      <result name="success" type="redirect">indicator.action?currentPage=${keyCurrentPage}&amp;key=${keyCurrentKey}</result>
-    </action>
-
     <action name="removeIndicator" class="org.hisp.dhis.dd.action.indicator.RemoveIndicatorAction">
       <result name="success" type="velocity-json">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
       <result name="error" type="velocity-json">/dhis-web-commons/ajax/jsonResponseError.vm</result>
@@ -238,7 +220,7 @@
     <action name="showAddIndicatorForm" class="org.hisp.dhis.dd.action.indicator.ShowAddIndicatorForm">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-datadictionary/addIndicatorForm.vm</param>
-      <param name="javascripts">javascript/shortName.js,javascript/indicator.js</param>
+      <param name="javascripts">javascript/shortName.js,javascript/indicator.js,javascript/expressionBuilder.js</param>
       <param name="anyAuthorities">F_INDICATOR_PUBLIC_ADD, F_INDICATOR_PRIVATE_ADD</param>
     </action>
 
@@ -250,7 +232,7 @@
     <action name="showUpdateIndicatorForm" class="org.hisp.dhis.dd.action.indicator.ShowUpdateIndicatorFormAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="page">/dhis-web-maintenance-datadictionary/updateIndicatorForm.vm</param>
-      <param name="javascripts">javascript/shortName.js,javascript/indicator.js</param>
+      <param name="javascripts">javascript/shortName.js,javascript/indicator.js,javascript/expressionBuilder.js</param>
       <param name="anyAuthorities">F_INDICATOR_PUBLIC_ADD, F_INDICATOR_PRIVATE_ADD</param>
     </action>
 

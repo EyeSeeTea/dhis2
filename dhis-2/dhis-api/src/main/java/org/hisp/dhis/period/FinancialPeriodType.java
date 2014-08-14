@@ -29,6 +29,8 @@ package org.hisp.dhis.period;
  */
 
 import com.google.common.collect.Lists;
+
+import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.calendar.DateUnit;
 
 import java.util.Date;
@@ -58,7 +60,7 @@ public abstract class FinancialPeriodType
     // -------------------------------------------------------------------------
 
     @Override
-    public Period createPeriod( DateUnit dateUnit )
+    public Period createPeriod( DateUnit dateUnit, Calendar calendar )
     {
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
@@ -76,7 +78,7 @@ public abstract class FinancialPeriodType
         end = getCalendar().plusYears( end, 1 );
         end = getCalendar().minusDays( end, 1 );
 
-        return toIsoPeriod( start, end );
+        return toIsoPeriod( start, end, calendar );
     }
 
     @Override
@@ -92,19 +94,23 @@ public abstract class FinancialPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
+        Calendar cal = getCalendar();
+        
         DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = getCalendar().plusYears( dateUnit, 1 );
+        dateUnit = cal.plusYears( dateUnit, 1 );
 
-        return createPeriod( dateUnit );
+        return createPeriod( dateUnit, cal );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
+        Calendar cal = getCalendar();
+        
         DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = getCalendar().minusYears( dateUnit, 1 );
+        dateUnit = cal.minusYears( dateUnit, 1 );
 
-        return createPeriod( dateUnit );
+        return createPeriod( dateUnit, cal );
     }
 
     /**
@@ -114,17 +120,19 @@ public abstract class FinancialPeriodType
     @Override
     public List<Period> generatePeriods( DateUnit dateUnit )
     {
+        Calendar cal = getCalendar();
+        
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
         List<Period> periods = Lists.newArrayList();
 
-        dateUnit = getCalendar().minusYears( dateUnit, past ? 5 : 6 );
+        dateUnit = cal.minusYears( dateUnit, past ? 5 : 6 );
         dateUnit.setMonth( getBaseMonth() + 1 );
         dateUnit.setDay( 1 );
 
         for ( int i = 0; i < 11; i++ )
         {
-            periods.add( createPeriod( dateUnit ) );
+            periods.add( createPeriod( dateUnit, cal ) );
             dateUnit = getCalendar().plusYears( dateUnit, 1 );
         }
 
@@ -150,19 +158,21 @@ public abstract class FinancialPeriodType
     @Override
     public List<Period> generateLast5Years( Date date )
     {
+        Calendar cal = getCalendar();
+        
         DateUnit dateUnit = createLocalDateUnitInstance( date );
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
         List<Period> periods = Lists.newArrayList();
 
-        dateUnit = getCalendar().minusYears( dateUnit, past ? 4 : 5 );
+        dateUnit = cal.minusYears( dateUnit, past ? 4 : 5 );
         dateUnit.setMonth( getBaseMonth() + 1 );
         dateUnit.setDay( 1 );
 
         for ( int i = 0; i < 5; i++ )
         {
-            periods.add( createPeriod( dateUnit ) );
-            dateUnit = getCalendar().plusYears( dateUnit, 1 );
+            periods.add( createPeriod( dateUnit, cal ) );
+            dateUnit = cal.plusYears( dateUnit, 1 );
         }
 
         return periods;
@@ -171,12 +181,14 @@ public abstract class FinancialPeriodType
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
+        Calendar cal = getCalendar();
+        
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
         DateUnit dateUnit = createLocalDateUnitInstance( date );
-        dateUnit = getCalendar().minusYears( dateUnit, rewindedPeriods );
+        dateUnit = cal.minusYears( dateUnit, rewindedPeriods );
 
-        return getCalendar().toIso( dateUnit ).toJdkDate();
+        return cal.toIso( dateUnit ).toJdkDate();
     }
 }

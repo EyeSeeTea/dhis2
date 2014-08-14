@@ -34,10 +34,10 @@ import static org.hisp.dhis.analytics.AnalyticsTableManager.COMPLETENESS_TARGET_
 import static org.hisp.dhis.analytics.AnalyticsTableManager.ORGUNIT_TARGET_TABLE_NAME;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_CATEGORYOPTIONCOMBO;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_DATA_X;
+import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LATITUDE;
+import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LONGITUDE;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_ORGUNIT;
 import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_PERIOD;
-import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LONGITUDE;
-import static org.hisp.dhis.analytics.DataQueryParams.DISPLAY_NAME_LATITUDE;
 import static org.hisp.dhis.analytics.DataQueryParams.FIXED_DIMS;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
@@ -45,10 +45,10 @@ import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
 import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.LATITUDE_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.LONGITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.LONGITUDE_DIM_ID;
-import static org.hisp.dhis.common.DimensionalObject.LATITUDE_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.common.NameableObjectUtils.asList;
@@ -66,7 +66,6 @@ import static org.hisp.dhis.reporttable.ReportTable.addIfEmpty;
 import static org.hisp.dhis.system.util.DateUtils.daysBetween;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -88,7 +87,7 @@ import org.hisp.dhis.analytics.DataQueryGroups;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.analytics.DimensionItem;
 import org.hisp.dhis.analytics.QueryPlanner;
-import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.CombinationGenerator;
@@ -127,7 +126,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.RelativePeriodEnum;
 import org.hisp.dhis.period.RelativePeriods;
-import org.hisp.dhis.period.comparator.AscendingPeriodComparator;
+import org.hisp.dhis.period.comparator.AscendingPeriodEndDateComparator;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.ConversionUtils;
@@ -137,6 +136,7 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.system.util.Timer;
 import org.hisp.dhis.system.util.UniqueArrayList;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,6 +184,9 @@ public class DefaultAnalyticsService
     private OrganisationUnitGroupService organisationUnitGroupService;
     
     @Autowired
+    private TrackedEntityAttributeService attributeService;
+    
+    @Autowired
     private ExpressionService expressionService;
     
     @Autowired
@@ -220,24 +223,58 @@ public class DefaultAnalyticsService
         queryPlanner.validate( params );
         
         params.conform();
-                
+
         // ---------------------------------------------------------------------
         // Headers
         // ---------------------------------------------------------------------
 
         Grid grid = new ListGrid();
+        
+        addHeaders( params, grid );
 
+        // ---------------------------------------------------------------------
+        // Data
+        // ---------------------------------------------------------------------
+
+        addIndicatorValues( params, grid );
+        
+        addDataElementValues( params, grid );
+        
+        addDataSetValues( params, grid );
+        
+        addDynamicDimensionValues( params, grid );
+        
+        // ---------------------------------------------------------------------
+        // Meta-data
+        // ---------------------------------------------------------------------
+
+        addMetaData( params, grid );
+        
+        return grid;
+    }
+    
+    /**
+     * Adds headers to the given grid based on the given data query parameters.
+     */
+    private void addHeaders( DataQueryParams params, Grid grid )
+    {
         for ( DimensionalObject col : params.getHeaderDimensions() )
         {
             grid.addHeader( new GridHeader( col.getDimension(), col.getDisplayName(), String.class.getName(), false, true ) );
         }
         
         grid.addHeader( new GridHeader( DataQueryParams.VALUE_ID, VALUE_HEADER_NAME, Double.class.getName(), false, false ) );
+    }
 
-        // ---------------------------------------------------------------------
-        // Indicators
-        // ---------------------------------------------------------------------
-
+    /**
+     * Adds indicator values to the given grid based on the given data query 
+     * parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
+    private void addIndicatorValues( DataQueryParams params, Grid grid )
+    {
         if ( params.getIndicators() != null )
         {   
             int indicatorIndex = params.getIndicatorDimensionIndex();
@@ -305,11 +342,17 @@ public class DefaultAnalyticsService
                 }
             }
         }
+    }
 
-        // ---------------------------------------------------------------------
-        // Data elements
-        // ---------------------------------------------------------------------
-
+    /**
+     * Adds data element values to the given grid based on the given data query 
+     * parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
+    private void addDataElementValues( DataQueryParams params, Grid grid )
+    {
         if ( params.getDataElements() != null )
         {
             DataQueryParams dataSourceParams = params.instance();
@@ -325,11 +368,17 @@ public class DefaultAnalyticsService
                 grid.addValue( params.isSkipRounding() ? entry.getValue() : MathUtils.getRounded( entry.getValue() ) );
             }
         }
+    }
 
-        // ---------------------------------------------------------------------
-        // Data sets / completeness
-        // ---------------------------------------------------------------------
-
+    /**
+     * Adds data set values to the given grid based on the given data query 
+     * parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
+    private void addDataSetValues( DataQueryParams params, Grid grid )
+    {
         if ( params.getDataSets() != null )
         {
             // -----------------------------------------------------------------
@@ -372,7 +421,7 @@ public class DefaultAnalyticsService
 
             for ( Map.Entry<String, Double> entry : aggregatedDataMap.entrySet() )
             {
-                List<String> dataRow = new ArrayList<String>( Arrays.asList( entry.getKey().split( DIMENSION_SEP ) ) );
+                List<String> dataRow = ListUtils.getList( entry.getKey().split( DIMENSION_SEP ) );
                 
                 List<String> targetRow = ListUtils.getAtIndexes( dataRow, completenessDimIndexes );
                 String targetKey = StringUtils.join( targetRow, DIMENSION_SEP );
@@ -393,11 +442,17 @@ public class DefaultAnalyticsService
                 }
             }
         }
+    }
 
-        // ---------------------------------------------------------------------
-        // Other dimensions
-        // ---------------------------------------------------------------------
-
+    /**
+     * Adds values to the given grid based on dynamic dimensions from the given 
+     * data query parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
+    private void addDynamicDimensionValues( DataQueryParams params, Grid grid )
+    {
         if ( params.getIndicators() == null && params.getDataElements() == null && params.getDataSets() == null )
         {
             Map<String, Double> aggregatedDataMap = getAggregatedDataValueMap( params.instance() );
@@ -409,11 +464,17 @@ public class DefaultAnalyticsService
                 grid.addValue( params.isSkipRounding() ? entry.getValue() : MathUtils.getRounded( entry.getValue() ) );
             }
         }
+    }
 
-        // ---------------------------------------------------------------------
-        // Meta-data
-        // ---------------------------------------------------------------------
-
+    /**
+     * Adds meta data values to the given grid based on the given data query 
+     * parameters.
+     * 
+     * @param params the data query parameters.
+     * @param grid the grid.
+     */
+    private void addMetaData( DataQueryParams params, Grid grid )
+    {
         if ( !params.isSkipMeta() )
         {
             Integer cocIndex = params.getCocIndex();
@@ -440,9 +501,7 @@ public class DefaultAnalyticsService
             }
             
             grid.setMetaData( metaData );
-        }
-        
-        return grid;
+        }        
     }
     
     @Override
@@ -509,7 +568,7 @@ public class DefaultAnalyticsService
     }
     
     @Override
-    public Map<String, Double> getAggregatedDataValueMapping( BaseAnalyticalObject object, I18nFormat format )
+    public Map<String, Double> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format )
     {
         DataQueryParams params = getFromAnalyticalObject( object, format );
         
@@ -521,12 +580,12 @@ public class DefaultAnalyticsService
     // -------------------------------------------------------------------------
 
     /**
-     * Generates a mapping of permutations keys (org unit id or null) and mappings
-     * of org unit group and counts.
+     * Generates a mapping of permutations keys (organisation unit id or null) 
+     * and mappings of organisation unit group and counts.
      * 
-     * @param params the data query params.
-     * @param indicators the indicators for which formulas to scan for org unit 
-     *        groups.
+     * @param params the data query parameters.
+     * @param indicators the indicators for which formulas to scan for organisation 
+     *        unit groups.
      * @return a map of maps.
      */
     private Map<String, Map<String, Integer>> getOrgUnitTargetMap( DataQueryParams params, Collection<Indicator> indicators )
@@ -638,9 +697,13 @@ public class DefaultAnalyticsService
      * Generates a mapping between a dimension key and the aggregated value. The
      * dimension key is a concatenation of the identifiers of the dimension items
      * separated by "-".
+     * 
+     * @param params the data query parameters.
      */
     private Map<String, Double> getAggregatedValueMap( DataQueryParams params, String tableName )        
     {
+        queryPlanner.validateMaintenanceMode();
+        
         int optimalQueries = MathUtils.getWithin( SystemUtils.getCpuCores(), 1, MAX_QUERIES );
         
         Timer t = new Timer().start();
@@ -710,7 +773,7 @@ public class DefaultAnalyticsService
                 
                 if ( dimension != null && options != null )
                 {
-                    params.getDimensions().addAll( getDimension( dimension, options, null, format ) );
+                    params.getDimensions().addAll( getDimension( dimension, options, null, format, false ) );
                 }
             }
         }
@@ -724,7 +787,7 @@ public class DefaultAnalyticsService
                 
                 if ( dimension != null && options != null )
                 {
-                    params.getFilters().addAll( getDimension( dimension, options, null, format ) );
+                    params.getFilters().addAll( getDimension( dimension, options, null, format, false ) );
                 }
             }
         }
@@ -744,7 +807,7 @@ public class DefaultAnalyticsService
     }
 
     @Override
-    public DataQueryParams getFromAnalyticalObject( BaseAnalyticalObject object, I18nFormat format )
+    public DataQueryParams getFromAnalyticalObject( AnalyticalObject object, I18nFormat format )
     {
         DataQueryParams params = new DataQueryParams();
         
@@ -756,17 +819,17 @@ public class DefaultAnalyticsService
             
             for ( DimensionalObject column : object.getColumns() )
             {
-                params.getDimensions().addAll( getDimension( toDimension( column.getDimension() ), getUids( column.getItems() ), date, format ) );
+                params.getDimensions().addAll( getDimension( toDimension( column.getDimension() ), getUids( column.getItems() ), date, format, false ) );
             }
             
             for ( DimensionalObject row : object.getRows() )
             {
-                params.getDimensions().addAll( getDimension( toDimension( row.getDimension() ), getUids( row.getItems() ), date, format ) );
+                params.getDimensions().addAll( getDimension( toDimension( row.getDimension() ), getUids( row.getItems() ), date, format, false ) );
             }
             
             for ( DimensionalObject filter : object.getFilters() )
             {
-                params.getFilters().addAll( getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format ) );
+                params.getFilters().addAll( getDimension( toDimension( filter.getDimension() ), getUids( filter.getItems() ), date, format, false ) );
             }
         }
         
@@ -775,7 +838,7 @@ public class DefaultAnalyticsService
     
     // TODO verify that current user can read each dimension and dimension item
     
-    public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format )
+    public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull )
     {        
         if ( DATA_X_DIM_ID.equals( dimension ) )
         {
@@ -856,7 +919,7 @@ public class DefaultAnalyticsService
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY_OPTION_COMBO, null, DISPLAY_NAME_CATEGORYOPTIONCOMBO, new ArrayList<NameableObject>() );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
 
         if ( PERIOD_DIM_ID.equals( dimension ) )
@@ -892,11 +955,11 @@ public class DefaultAnalyticsService
             }
 
             List<Period> periodList = new ArrayList<Period>( periods );
-            Collections.sort( periodList, AscendingPeriodComparator.INSTANCE );
+            Collections.sort( periodList, AscendingPeriodEndDateComparator.INSTANCE );
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.PERIOD, null, DISPLAY_NAME_PERIOD, asList( periodList ) );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         if ( ORGUNIT_DIM_ID.equals( dimension ) )
@@ -977,21 +1040,21 @@ public class DefaultAnalyticsService
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT, null, DISPLAY_NAME_ORGUNIT, orgUnits );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         if ( LONGITUDE_DIM_ID.contains( dimension ) )
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.STATIC, null, DISPLAY_NAME_LONGITUDE, new ArrayList<NameableObject>() );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
 
         if ( LATITUDE_DIM_ID.contains( dimension ) )
         {
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.STATIC, null, DISPLAY_NAME_LATITUDE, new ArrayList<NameableObject>() );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         OrganisationUnitGroupSet ougs = organisationUnitGroupService.getOrganisationUnitGroupSet( dimension );
@@ -1002,7 +1065,7 @@ public class DefaultAnalyticsService
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.ORGANISATIONUNIT_GROUPSET, null, ougs.getDisplayName(), ous );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         DataElementGroupSet degs = dataElementService.getDataElementGroupSet( dimension );
@@ -1013,7 +1076,7 @@ public class DefaultAnalyticsService
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.DATAELEMENT_GROUPSET, null, degs.getDisplayName(), des );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         CategoryOptionGroupSet cogs = categoryService.getCategoryOptionGroupSet( dimension );
@@ -1024,7 +1087,7 @@ public class DefaultAnalyticsService
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORYOPTION_GROUPSET, null, cogs.getDisplayName(), cogz );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
         }
         
         DataElementCategory dec = categoryService.getDataElementCategory( dimension );
@@ -1035,7 +1098,12 @@ public class DefaultAnalyticsService
             
             DimensionalObject object = new BaseDimensionalObject( dimension, DimensionType.CATEGORY, null, dec.getDisplayName(), decos );
             
-            return Arrays.asList( object );
+            return ListUtils.getList( object );
+        }
+                
+        if ( allowNull )
+        {
+            return null;
         }
         
         throw new IllegalQueryException( "Dimension identifier does not reference any dimension: " + dimension );
@@ -1045,6 +1113,13 @@ public class DefaultAnalyticsService
     // Supportive methods
     // -------------------------------------------------------------------------
     
+    /**
+     * Replaces the indicator dimension including items with the data elements
+     * part of the indicator expressions.
+     * 
+     * @param params the data query parameters.
+     * @param indicatorIndex the index of the indicator dimension in the given query.
+     */
     private DataQueryParams replaceIndicatorsWithDataElements( DataQueryParams params, int indicatorIndex )
     {
         List<Indicator> indicators = asTypedList( params.getIndicators() );        
@@ -1057,8 +1132,10 @@ public class DefaultAnalyticsService
     }
     
     /**
-     * Returns a mapping between the uid and the name of all dimension and filter
-     * items for the given params.
+     * Returns a mapping between the identifier and the name of all dimension and 
+     * filter items for the given parameters.
+     * 
+     * @param params the data query.
      */
     private Map<String, String> getUidNameMap( DataQueryParams params )
     {
@@ -1070,6 +1147,14 @@ public class DefaultAnalyticsService
         return map;
     }
 
+    /**
+     * Returns a mapping between identifiers and names for the given dimensional
+     * objects.
+     * 
+     * @param dimensions the dimensional objects.
+     * @param hierarchyMeta indicates whether to include meta data of the 
+     *        organisation unit hierarchy.
+     */
     private Map<String, String> getUidNameMap( List<DimensionalObject> dimensions, boolean hierarchyMeta )
     {
         Map<String, String> map = new HashMap<String, String>();
@@ -1093,6 +1178,10 @@ public class DefaultAnalyticsService
                 else if ( DimensionType.DATAELEMENT_GROUPSET.equals( dimension.getDimensionType() ) )
                 {
                     items = asList( dataElementService.getDataElementGroupSet( dimension.getDimension() ).getMembers() );
+                }
+                else if ( DimensionType.CATEGORYOPTION_GROUPSET.equals( dimension.getDimensionType() ) )
+                {
+                    items = asList( categoryService.getCategoryOptionGroupSet( dimension.getDimension() ).getMembers() );
                 }
                 else if ( DimensionType.CATEGORY.equals( dimension.getDimensionType() ) )
                 {
@@ -1129,6 +1218,9 @@ public class DefaultAnalyticsService
      * Returns a mapping between the category option combo identifiers and names
      * in the given grid. Returns an empty map if the grid or cocIndex parameters
      * are null.
+     * 
+     * @param grid the grid.
+     * @param cocIndex the category option combo index in the grid.
      */
     private Map<String, String> getCocNameMap( Grid grid, Integer cocIndex )
     {

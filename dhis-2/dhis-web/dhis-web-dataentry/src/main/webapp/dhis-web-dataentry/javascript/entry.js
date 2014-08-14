@@ -17,30 +17,28 @@
 
 var FORMULA_PATTERN = /#\{.+?\}/g;
 var SEPARATOR = '.';
-var EVENT_VALUE_SAVED = 'dhis-web-dataentry-value-saved';
+var EVENT_VALUE_SAVED = 'dhis-web-dataentry-value-saved'; // Deprecated
 
-function updateDataElementTotals()
+/**
+ * Updates totals for data element total fields.
+ * 
+ * @param dataElementId the id of the data element to update total fields, if
+ *        omitted then all total fields are updated.
+ */
+dhis2.de.updateDataElementTotals = function( dataElementId )
 {
 	var currentTotals = [];
 	
 	$( 'input[name="total"]' ).each( function( index )
 	{
-		var targetId = $( this ).attr( 'dataelementid' );
+		var de = $( this ).attr( 'dataelementid' );
 		
-		var totalValue = new Number();
-		
-		$( 'input[name="entryfield"]' ).each( function( index )
-		{	
-			var key = $( this ).attr( 'id' );
-			var entryFieldId = key.substring( 0, key.indexOf( '-' ) );
+		if ( !dataElementId || dataElementId == de )
+		{		
+			var total = dhis2.de.getDataElementTotalValue( de );
 			
-			if ( targetId && $( this ).attr( 'value' ) && targetId == entryFieldId )
-			{
-				totalValue += new Number( $( this ).attr( 'value' ) );
-			}
-		} );
-		
-		$( this ).attr( 'value', totalValue );
+			$( this ).attr( 'value', total );
+		}
 	} );
 }
 
@@ -48,7 +46,7 @@ function updateDataElementTotals()
  * Updates all indicator input fields with the calculated value based on the
  * values in the input entry fields in the form.
  */
-function updateIndicators()
+dhis2.de.updateIndicators = function()
 {
     $( 'input[name="indicator"]' ).each( function( index )
     {
@@ -77,7 +75,47 @@ function updateIndicators()
 }
 
 /**
- * Parses the expression and substitues the operand identifiers with the value
+ * Returns the total sum of values in the current form for the given data element
+ * identifier.
+ */
+dhis2.de.getDataElementTotalValue = function( de )
+{
+	var sum = new Number();
+	
+	$( 'input[name="entryfield"]' ).each( function( index )
+	{	
+		var key = $( this ).attr( 'id' );
+		var entryFieldId = key.substring( 0, key.indexOf( '-' ) );
+		
+		if ( de && $( this ).attr( 'value' ) && de == entryFieldId )
+		{
+			sum += new Number( $( this ).attr( 'value' ) );
+		}
+	} );
+	
+	return sum;
+}
+
+/**
+ * Returns the value in the current form for the given data element and category
+ * option combo identifiers. Returns 0 if the field does not exist in the form.
+ */
+dhis2.de.getFieldValue = function( de, coc )
+{
+    var fieldId = '#' + de + '-' + coc + '-val';
+	
+    var value = '0';
+    
+    if ( $( fieldId ).length )
+    {
+        value = $( fieldId ).val() ? $( fieldId ).val() : '0';
+    }
+    
+    return value;
+}
+
+/**
+ * Parses the expression and substitutes the operand identifiers with the value
  * of the corresponding input entry field.
  */
 function generateExpression( expression )
@@ -92,16 +130,19 @@ function generateExpression( expression )
 
         var operand = match.replace( /[#\{\}]/g, '' );
 
-        var dataElementId = operand.substring( 0, operand.indexOf( SEPARATOR ) );
-        var categoryOptionComboId = operand.substring( operand.indexOf( SEPARATOR ) + 1, operand.length );
-
-        var fieldId = '#' + dataElementId + '-' + categoryOptionComboId + '-val';
-
+        var isTotal = !!( operand.indexOf( SEPARATOR ) == -1 );
+        
         var value = '0';
         
-        if ( $( fieldId ).length )
+        if ( isTotal )
         {
-            value = $( fieldId ).val() ? $( fieldId ).val() : '0';
+        	value = dhis2.de.getDataElementTotalValue( operand );
+        }
+        else
+        {
+	        var de = operand.substring( 0, operand.indexOf( SEPARATOR ) );
+	        var coc = operand.substring( operand.indexOf( SEPARATOR ) + 1, operand.length );	
+	        value = dhis2.de.getFieldValue( de, coc );
         }
 
         expression = expression.replace( match, value );
@@ -137,10 +178,12 @@ function saveVal( dataElementId, optionComboId, fieldId )
 	}
 
 	var warning = undefined;
+
+	var existing = !!( dhis2.de.currentExistingValue && dhis2.de.currentExistingValue != '' );
 	
     if ( value != '' )
     {
-        if ( type == 'string' || type == 'int' || type == 'number' || type == 'unitInterval' || type == 'posInt' || type == 'negInt' || type == 'zeroPositiveInt' )
+        if ( type == 'string' || type == 'int' || type == 'number' || type == 'posInt' || type == 'negInt' || type == 'zeroPositiveInt' || type == 'unitInterval' || type == 'percentage' )
         {
             if ( value.length > 255 )
             {
@@ -154,10 +197,6 @@ function saveVal( dataElementId, optionComboId, fieldId )
             {
                 return alertField( fieldId, i18n_value_must_number + '\n\n' + dataElementName );
             }
-            if ( type == 'unitInterval' && !dhis2.validation.isUnitInterval( value ) )
-            {
-            	return alertField( fieldId, i18n_value_must_unit_interval + '\n\n' + dataElementName );
-            }
             if ( type == 'posInt' && !dhis2.validation.isPositiveInt( value ) )
             {
                 return alertField( fieldId, i18n_value_must_positive_integer + '\n\n' + dataElementName );
@@ -170,9 +209,18 @@ function saveVal( dataElementId, optionComboId, fieldId )
             {
                 return alertField( fieldId, i18n_value_must_zero_or_positive_integer + '\n\n' + dataElementName );
             }
-            if ( dhis2.validation.isValidZeroNumber( value ) )
+            if ( type == 'unitInterval' && !dhis2.validation.isUnitInterval( value ) )
+            {
+            	return alertField( fieldId, i18n_value_must_unit_interval + '\n\n' + dataElementName );
+            }
+            if ( type == 'percentage' && !dhis2.validation.isPercentage( value ) )
+            {
+            	return alertField( fieldId, i18n_value_must_percentage + '\n\n' + dataElementName );
+            }
+            if ( !existing && dhis2.validation.isValidZeroNumber( value ) )
             {
                 // If value = 0 and zero not significant for data element, skip
+            	// If existing value, let through and delete on server
 
                 if ( dhis2.de.significantZeros.indexOf( dataElementId ) == -1 )
                 {
@@ -208,8 +256,8 @@ function saveVal( dataElementId, optionComboId, fieldId )
     var valueSaver = new ValueSaver( dataElementId,	periodId, optionComboId, value, fieldId, color );
     valueSaver.save();
 
-    updateIndicators(); // Update indicators for custom form
-    updateDataElementTotals(); // Update data element totals for custom forms
+    dhis2.de.updateIndicators(); // Update indicators for custom form
+    dhis2.de.updateDataElementTotals( dataElementId ); // Update data element totals for custom forms
     
     if ( warning )
     {
@@ -252,10 +300,15 @@ function saveTrueOnly( dataElementId, optionComboId, fieldId )
  */
 function alertField( fieldId, alertMessage )
 {
-    $( fieldId ).css( 'background-color', COLOR_YELLOW );
-    $( fieldId ).select();
-    $( fieldId ).focus();    
+    var $field = $( fieldId );
+    $field.css( 'background-color', COLOR_YELLOW );
+
     window.alert( alertMessage );
+    
+    var val = dhis2.de.currentExistingValue || '';
+    $field.val( val );
+    
+    $field.focus();
 
     return false;
 }
@@ -319,7 +372,9 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
     {
     	dhis2.de.storageManager.clearDataValueJSON( dataValue );
         markValue( fieldId, resultColor );
-        $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue );
+        $( document ).trigger( dhis2.de.event.dataValueSaved, dataValue );
+        
+        $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue ); // Deprecated
     }
 
     function handleError( xhr, textStatus, errorThrown )

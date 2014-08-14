@@ -121,7 +121,7 @@ public class DefaultModuleManager
     {
         detectModules();
 
-        return menuModules;
+        return new ArrayList<Module>( menuModules );
     }
 
     public List<Module> getAccessibleMenuModules()
@@ -149,7 +149,7 @@ public class DefaultModuleManager
     {
         detectModules();
 
-        return modulesByName.values();
+        return new ArrayList<Module>( modulesByName.values() );
     }
     
     public Module getCurrentModule()
@@ -260,7 +260,7 @@ public class DefaultModuleManager
             List<Module> denied = new ArrayList<Module>( modules );
             denied.removeAll( allowed );
             
-            log.info( "User denied access to modules: " + denied ); //TODO reduce log level
+            log.debug( "User denied access to modules: " + denied );
         }
         
         return allowed;

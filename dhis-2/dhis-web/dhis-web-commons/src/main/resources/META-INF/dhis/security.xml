@@ -23,6 +23,8 @@
   <sec:http pattern="/dhis-web-commons/css/**" security="none" />
   <sec:http pattern="/dhis-web-commons/flags/**" security="none" />
   <sec:http pattern="/dhis-web-commons/fonts/**" security="none" />
+  <sec:http pattern="/api/files/style/external" security="none" />
+  <sec:http pattern="/external-static/**" security="none" />
   <sec:http pattern="/favicon.ico" security="none" />
 
   <sec:http access-decision-manager-ref="accessDecisionManager" use-expressions="true" realm="DHIS2">
@@ -37,6 +39,12 @@
       login-page="/dhis-web-commons/security/login.action"
       authentication-success-handler-ref="defaultAuthenticationSuccessHandler" />
 
+    <sec:headers>
+      <sec:content-type-options />
+      <sec:frame-options />
+      <sec:xss-protection />
+    </sec:headers>
+    
     <sec:http-basic />
     <sec:logout logout-url="/dhis-web-commons-security/logout.action" />
     <sec:intercept-url pattern="/dhis-web-commons/i18nJavaScript.action" access="permitAll()" />
@@ -291,6 +299,7 @@
         <value>F_APPROVE_DATA</value>
         <value>F_APPROVE_DATA_LOWER_LEVELS</value>
         <value>F_ACCEPT_DATA_LOWER_LEVELS</value>
+        <value>F_INSERT_CUSTOM_JS_CSS</value>
       </set>
     </property>
   </bean>

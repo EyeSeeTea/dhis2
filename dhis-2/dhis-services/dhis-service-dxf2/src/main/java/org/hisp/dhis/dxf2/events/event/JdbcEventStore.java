@@ -35,7 +35,9 @@ import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -100,6 +102,8 @@ public class JdbcEventStore
 
         Event event = new Event();
         event.setEvent( "not_valid" );
+        
+        Set<String> notes = new HashSet<String>();
 
         while ( rowSet.next() )
         {
@@ -117,6 +121,7 @@ public class JdbcEventStore
                 event.setStatus( EventStatus.valueOf( rowSet.getString( "psi_status" ) ) );
                 event.setProgram( rowSet.getString( "p_uid" ) );
                 event.setProgramStage( rowSet.getString( "ps_uid" ) );
+                event.setEnrollment( rowSet.getString( "pi_uid" ) );
                 event.setStoredBy( rowSet.getString( "psi_completeduser" ) );
                 event.setOrgUnit( rowSet.getString( "ou_uid" ) );
                 event.setDueDate( StringUtils.defaultIfEmpty( 
@@ -155,20 +160,31 @@ public class JdbcEventStore
                 }
 
                 events.add( event );
-            }
-
-            if ( rowSet.getString( "pdv_value" ) == null || rowSet.getString( "de_uid" ) == null )
+            }            
+            
+            if ( rowSet.getString( "pdv_value" ) != null && rowSet.getString( "de_uid" ) != null )
             {
-                continue;
+                DataValue dataValue = new DataValue();
+                dataValue.setValue( rowSet.getString( "pdv_value" ) );
+                dataValue.setProvidedElsewhere( rowSet.getBoolean( "pdv_providedelsewhere" ) );
+                dataValue.setDataElement( rowSet.getString( "de_uid" ) );
+                dataValue.setStoredBy( rowSet.getString( "pdv_storedby" ) );
+
+                event.getDataValues().add( dataValue );
+            }            
+            
+            if ( rowSet.getString( "psinote_value" ) != null && !notes.contains( rowSet.getString( "psinote_id" ) ) )
+            {                
+                Note note = new Note();
+                note.setValue( rowSet.getString( "psinote_value" ) );
+                note.setStoredDate( StringUtils.defaultIfEmpty( 
+                    rowSet.getString( "psinote_soreddate" ), rowSet.getString( "psinote_soreddate" ) ) );           
+                note.setStoredBy( rowSet.getString( "psinote_storedby" ) );
+                
+                event.getNotes().add( note );
+                notes.add( rowSet.getString( "psinote_id" ) );
             }
-
-            DataValue dataValue = new DataValue();
-            dataValue.setValue( rowSet.getString( "pdv_value" ) );
-            dataValue.setProvidedElsewhere( rowSet.getBoolean( "pdv_providedelsewhere" ) );
-            dataValue.setDataElement( rowSet.getString( "de_uid" ) );
-            dataValue.setStoredBy( rowSet.getString( "pdv_storedby" ) );
-
-            event.getDataValues().add( dataValue );
+            
         }
 
         return events;
@@ -180,13 +196,16 @@ public class JdbcEventStore
         SqlHelper hlp = new SqlHelper();
 
         String sql = 
-            "select p.uid as p_uid, ps.uid as ps_uid, ps.capturecoordinates as ps_capturecoordinates, pa.uid as pa_uid, psi.uid as psi_uid, psi.status as psi_status, ou.uid as ou_uid, " + 
+            "select pi.uid as pi_uid, p.uid as p_uid, ps.uid as ps_uid, ps.capturecoordinates as ps_capturecoordinates, pa.uid as pa_uid, psi.uid as psi_uid, psi.status as psi_status, ou.uid as ou_uid, " +
             "psi.executiondate as psi_executiondate, psi.duedate as psi_duedate, psi.completeduser as psi_completeduser, psi.longitude as psi_longitude, psi.latitude as psi_latitude, " +
+            "psinote.trackedentitycommentid as psinote_id, psinote.commenttext as psinote_value, psinote.createddate as psinote_soreddate, psinote.creator as psinote_storedby, " +
             "pdv.value as pdv_value, pdv.storedby as pdv_storedby, pdv.providedelsewhere as pdv_providedelsewhere, de.uid as de_uid " +
             "from program p " +
             "left join programstage ps on ps.programid=p.programid " +
             "left join programstageinstance psi on ps.programstageid=psi.programstageid " +
-            "left join programinstance pi on pi.programinstanceid=psi.programinstanceid ";
+            "left join programinstance pi on pi.programinstanceid=psi.programinstanceid " +
+            "left join programstageinstancecomments psic on psi.programstageinstanceid=psic.programstageinstanceid " +
+            "left join trackedentitycomment psinote on psic.trackedentitycommentid=psinote.trackedentitycommentid ";
 
         if ( status == null || EventStatus.isExistingEvent( status ) )
         {
@@ -265,23 +284,23 @@ public class JdbcEventStore
             
             if ( status == EventStatus.VISITED )
             {
-                sql = "and psi.status = " +  + EventStatus.ACTIVE.getValue() + " and psi.executiondate is not null ";
+                sql = "and psi.status = '" + EventStatus.ACTIVE.name() + "' and psi.executiondate is not null ";
             }
             else if ( status == EventStatus.COMPLETED )
             {
-                sql = "and psi.status = " + EventStatus.COMPLETED.getValue();
+                sql = "and psi.status = '" + EventStatus.COMPLETED.name() + "' ";
             }
             else if ( status == EventStatus.SCHEDULE )
             {
-                sql += "and psi.executiondate is null and date(now()) <= date(psi.duedate) and psi.status = 0 ";
+                sql += "and psi.executiondate is null and date(now()) <= date(psi.duedate) and psi.status = '" + EventStatus.ACTIVE.name() + "' ";
             }
             else  if ( status == EventStatus.OVERDUE )
             {
-                sql += "and psi.executiondate is null and date(now()) > date(psi.duedate) and psi.status = 0 ";
+                sql += "and psi.executiondate is null and date(now()) > date(psi.duedate) and psi.status = '" + EventStatus.ACTIVE.name() + "' ";
             }
             else
             {
-                sql += "and psi.status = " + status.getValue() + " ";
+                sql += "and psi.status = '" + status.name() + "' ";
             }
         }
 

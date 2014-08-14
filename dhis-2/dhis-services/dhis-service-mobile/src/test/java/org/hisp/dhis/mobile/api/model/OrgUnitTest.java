@@ -65,6 +65,9 @@ public class OrgUnitTest
         unit.setDownloadMessageConversationUrl( "downloadMessageConversationUrl" );
         unit.setGetMessageUrl( "getMessageUrl" );
         unit.setReplyMessageUrl( "replyMessageUrl" );
+        unit.setDownloadInterpretationUrl( "downloadInterpretationUrl" );
+        unit.setPostInterpretationUrl( "postInterpretationUrl" );
+        unit.setPostCommentUrl( "postCommentUrl" );
         unit.setUpdateContactUrl( "updateContactUrl" );
         unit.setFindPatientUrl( "findPatientUrl" );
         unit.setUploadProgramStageUrl( "uploadProgramStageUrl" );
@@ -81,6 +84,7 @@ public class OrgUnitTest
         unit.setHandleLostToFollowUpUrl( "handleLostToFollowUpUrl" );
         unit.setGenerateRepeatableEventUrl( "generateRepeatableEventUrl" );
         unit.setUploadSingleEventWithoutRegistration( "uploadSingleEventWithoutRegistration" );
+        unit.setCompleteProgramInstanceUrl( "completeProgramInstance" );
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream( baos );
