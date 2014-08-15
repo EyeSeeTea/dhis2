@@ -4524,22 +4524,24 @@ Ext.onReady( function() {
         });
 
             // date
+
+        onDateFieldRender = function(c) {
+            $('#' + c.inputEl.id).calendarsPicker({
+                calendar: gis.init.calendar,
+                dateFormat: gis.init.dateFormat
+            });
+        };
+
         startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
 			labelCls: 'gis-form-item-label-top',
 			labelSeparator: '',
             columnWidth: 0.5,
+            height: 41,
             listeners: {
                 render: function(c) {
-                    $('#' + c.inputEl.id).calendarsPicker({calendar: gis.init.calendar});
-                },
-                focus: function() {
-                    var calendarElements = Ext.query('.calendars-popup');
-
-                    for (var i = 0; i < calendarElements.length; i++) {
-                        Ext.get(calendarElements[i]).setStyle('z-index', 100000);
-                    }
+                    onDateFieldRender(c);
                 }
             }
         });
@@ -4550,16 +4552,11 @@ Ext.onReady( function() {
 			labelCls: 'gis-form-item-label-top',
 			labelSeparator: '',
             columnWidth: 0.5,
+            height: 41,
+            style: 'margin-left: 1px',
             listeners: {
                 render: function(c) {
-                    $('#' + c.inputEl.id).calendarsPicker({calendar: gis.init.calendar});
-                },
-                focus: function() {
-                    var calendarElements = Ext.query('.calendars-popup');
-
-                    for (var i = 0; i < calendarElements.length; i++) {
-                        Ext.get(calendarElements[i]).setStyle('z-index', 100000);
-                    }
+                    onDateFieldRender(c);
                 }
             }
         });
@@ -5183,8 +5180,10 @@ Ext.onReady( function() {
             view.program = program.getRecord();
             view.stage = stage.getRecord();
 
-            view.startDate = startDate.getSubmitValue();
-            view.endDate = endDate.getSubmitValue();
+            //view.startDate = startDate.getSubmitValue();
+            //view.endDate = endDate.getSubmitValue();
+            view.startDate = startDate.getValue();
+            view.endDate = endDate.getValue();
 
             view.dataElements = [];
 
