@@ -214,7 +214,7 @@ public class CsdController
     {
         Date lastModified = envelope.getBody().getGetModificationsRequest().getLastModified();
 
-        return new ArrayList<OrganisationUnit>(
+        return new ArrayList<>(
             organisationUnitService.getAllOrganisationUnitsByLastUpdated( lastModified ) );
     }
 
@@ -257,7 +257,6 @@ public class CsdController
 
             Facility facility = new Facility();
 
-            // facility.setOid( organisationUnit.getUrn() );
             facility.setOid( "urn:x-dhis:facility." + organisationUnit.getUid() );
 
             facility.getOtherID().add( new OtherID( organisationUnit.getUid(), "dhis2-uid" ) );
@@ -283,7 +282,6 @@ public class CsdController
                 facility.getContacts().add( contact );
             }
 
-            // TODO: this needs to be added to domain model?
             String facilityStatus = "Open";
 
             for ( OrganisationUnitGroup organisationUnitGroup : organisationUnit.getGroups() )
@@ -383,7 +381,7 @@ public class CsdController
 
             Map<String, List<AddressLine>> addressLines = Maps.newHashMap();
 
-            List<AttributeValue> attributeValues = new ArrayList<AttributeValue>( organisationUnit.getAttributeValues() );
+            List<AttributeValue> attributeValues = new ArrayList<>( organisationUnit.getAttributeValues() );
             Collections.sort( attributeValues, AttributeValueSortOrderComparator.INSTANCE );
 
             for ( AttributeValue attributeValue : attributeValues )
