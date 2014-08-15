@@ -30,7 +30,7 @@ package org.hisp.dhis.security.spring;
 
 import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.security.UsernameSaltSource;
-import org.springframework.security.authentication.encoding.Md5PasswordEncoder;
+import org.springframework.security.authentication.encoding.PasswordEncoder;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -43,9 +43,9 @@ public class SpringSecurityPasswordManager
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private Md5PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
-    public void setPasswordEncoder( Md5PasswordEncoder passwordEncoder )
+    public void setPasswordEncoder( PasswordEncoder passwordEncoder )
     {
         this.passwordEncoder = passwordEncoder;
     }

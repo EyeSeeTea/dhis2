@@ -2,8 +2,18 @@
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
-  <bean id="passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+  <bean id="md5passwordEncoder" class="org.springframework.security.authentication.encoding.Md5PasswordEncoder" />
+
   <bean id="usernameSaltSource" class="org.hisp.dhis.security.DefaultUsernameSaltSource" />
+
+  <bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
+
+  <bean id="passwordEncoder" class="org.hisp.dhis.security.HashMethodMigrationPasswordEncoder">
+    <property name="legacyPasswordEncoder" ref="md5passwordEncoder" />
+    <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
+    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+  </bean>
 
   <bean id="userDetailsService" class="org.hisp.dhis.security.DefaultUserDetailsService">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
