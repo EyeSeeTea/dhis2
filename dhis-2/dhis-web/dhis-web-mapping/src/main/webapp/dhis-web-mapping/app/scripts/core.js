@@ -1344,10 +1344,10 @@ Ext.onReady( function() {
                     var params = '?ou=ou:';
                     for (var i = 0; i < items.length; i++) {
                         params += items[i].id;
-                        params += i !== items.length - 1 ? '&' : '';
+                        params += i !== items.length - 1 ? ';' : '';
                     }
-                    //return gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action?' + params;
-                    return gis.init.contextPath + '/api/geoFeatures' + (isPlugin ? 'jsonp' : 'json') + params;
+
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params + '&viewClass=detailed';
                 }(),
                 success,
                 failure;
@@ -1952,13 +1952,14 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-				url = function() {
-                    var params = '';
+                isPlugin = GIS.plugin && !GIS.app,
+                url = function() {
+                    var params = '?ou=ou:';
                     for (var i = 0; i < items.length; i++) {
-                        params += 'ids=' + items[i].id;
-                        params += i !== items.length - 1 ? '&' : '';
+                        params += items[i].id;
+                        params += i !== items.length - 1 ? ';' : '';
                     }
-                    return gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJson.action?' + params;
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
                 failure;
@@ -1990,7 +1991,7 @@ Ext.onReady( function() {
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            if (GIS.plugin && !GIS.app) {
+            if (isPlugin) {
                 Ext.data.JsonP.request({
                     url: url,
                     disableCaching: false,
