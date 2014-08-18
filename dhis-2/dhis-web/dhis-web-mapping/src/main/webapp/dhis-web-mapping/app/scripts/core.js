@@ -2329,8 +2329,6 @@ Ext.onReady( function() {
 		(function() {
 			conf.finals = {
 				url: {
-					path_api: '/api/',
-					path_module: '/dhis-web-mapping/',
 					path_commons: '/dhis-web-commons-ajax-json/'
 				},
 				layer: {
