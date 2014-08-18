@@ -97,7 +97,6 @@
 
   <sec:authentication-manager alias="authenticationManager">
     <sec:authentication-provider user-service-ref="userDetailsService">
-      <!-- <sec:password-encoder hash="md5"> -->
       <sec:password-encoder ref="passwordEncoder">
         <sec:salt-source ref="usernameSaltSource" />
       </sec:password-encoder>
