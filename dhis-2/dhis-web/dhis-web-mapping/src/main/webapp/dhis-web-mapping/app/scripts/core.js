@@ -1615,7 +1615,6 @@ Ext.onReady( function() {
                         params += items[i].id;
                         params += i !== items.length - 1 ? ';' : '';
                     }
-                    //return gis.init.contextPath + gis.conf.finals.url.path_module + 'getGeoJsonFacilities.action?' + params;
                     return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
@@ -1680,7 +1679,7 @@ Ext.onReady( function() {
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            if (GIS.plugin && !GIS.app) {
+            if (isPlugin) {
                 Ext.data.JsonP.request({
                     url: url,
                     disableCaching: false,
