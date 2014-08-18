@@ -28,7 +28,14 @@ package org.hisp.dhis.webapi.controller.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -41,11 +48,13 @@ import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -66,16 +75,12 @@ public class OrganisationUnitController
     {
         List<OrganisationUnit> entityList;
 
-        Integer level = null;
-
+        Integer level = options.getInt( "level" );
+        Integer maxLevel = options.getInt( "maxLevel" );        
         boolean levelSorted = options.isTrue( "levelSorted" );
 
-        Integer maxLevel = options.getInt( "level" );
-
-        if ( options.contains( "maxLevel" ) )
+        if ( maxLevel != null )
         {
-            maxLevel = options.getInt( "maxLevel" );
-
             if ( organisationUnitService.getOrganisationUnitLevelByLevel( maxLevel ) == null )
             {
                 maxLevel = null;
@@ -195,4 +200,34 @@ public class OrganisationUnitController
 
         return organisationUnits;
     }
+    
+    @RequestMapping( value = "/{uid}/parents", method = RequestMethod.GET )
+    public List<OrganisationUnit> getEntityList( @PathVariable( "uid" ) String uid, 
+        @RequestParam Map<String, String> parameters, Model model, 
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
+    { 
+        OrganisationUnit organisationUnit = manager.get( getEntityClass(), uid );
+
+        List<OrganisationUnit> organisationUnits = Lists.newArrayList();
+        
+        if ( organisationUnit != null )
+        {
+            OrganisationUnit organisationUnitParent = organisationUnit.getParent();
+
+            while ( organisationUnitParent != null )
+            {
+                organisationUnits.add( organisationUnitParent );
+                organisationUnitParent = organisationUnitParent.getParent();   
+            }
+        }
+        
+        WebMetaData metaData = new WebMetaData();      
+        metaData.setOrganisationUnits( organisationUnits );
+        WebOptions options = new WebOptions(parameters);
+        
+        model.addAttribute( "model", metaData );        
+        model.addAttribute( "viewClass", options.getViewClass( "basic" ) );
+        
+        return organisationUnits;
+    }    
 }
