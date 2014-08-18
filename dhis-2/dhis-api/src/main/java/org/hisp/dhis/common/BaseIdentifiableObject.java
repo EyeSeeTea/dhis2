@@ -113,7 +113,7 @@ public class BaseIdentifiableObject
     /**
      * Access for userGroups
      */
-    protected Set<UserGroupAccess> userGroupAccesses = new HashSet<UserGroupAccess>();
+    protected Set<UserGroupAccess> userGroupAccesses = new HashSet<>();
 
     /**
      * Access information for this object. Applies to current user.
@@ -340,6 +340,11 @@ public class BaseIdentifiableObject
     {
         this.displayName = displayName;
     }
+    
+    public String getUrn()
+    {
+        return "urn:x-dhis:" + getUid();
+    }
 
     // -------------------------------------------------------------------------
     // hashCode and equals
@@ -428,7 +433,7 @@ public class BaseIdentifiableObject
      */
     public static Map<String, Integer> getUIDMap( Collection<? extends BaseIdentifiableObject> objects )
     {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
 
         for ( IdentifiableObject object : objects )
         {
@@ -449,7 +454,7 @@ public class BaseIdentifiableObject
      */
     public static Map<String, Integer> getCodeMap( Collection<? extends BaseIdentifiableObject> objects )
     {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         for ( BaseIdentifiableObject object : objects )
         {
             String code = object.getCode();
@@ -468,7 +473,7 @@ public class BaseIdentifiableObject
      */
     public static Map<String, Integer> getNameMap( Collection<? extends BaseIdentifiableObject> objects )
     {
-        Map<String, Integer> map = new HashMap<String, Integer>();
+        Map<String, Integer> map = new HashMap<>();
         for ( BaseIdentifiableObject object : objects )
         {
             String name = object.getName();
