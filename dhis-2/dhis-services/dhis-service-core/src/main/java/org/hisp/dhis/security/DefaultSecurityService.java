@@ -312,15 +312,9 @@ public class DefaultSecurityService
             return false;
         }
 
-        System.out.println( "\ntoken before: " + token );
-
         token = passwordManager.encodePassword( credentials.getUsername(), token );
 
-        System.out.println( "\ntoken after: " + token);
-
         String restoreToken = credentials.getRestoreToken();
-
-        System.out.println( "restoreToken: " + restoreToken );
 
         //return credentials.getRestoreToken().equals( token );
         return restoreToken.equals( token );

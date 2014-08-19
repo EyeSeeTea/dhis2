@@ -43,11 +43,18 @@ public class SpringSecurityPasswordManager
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PasswordEncoder passwordEncoder;
+    private org.springframework.security.authentication.encoding.PasswordEncoder legacyPasswordEncoder;
 
-    public void setPasswordEncoder( PasswordEncoder passwordEncoder )
+    public void setPasswordEncoder( PasswordEncoder legacyPasswordEncoder )
     {
-        this.passwordEncoder = passwordEncoder;
+        this.legacyPasswordEncoder = legacyPasswordEncoder;
+    }
+
+    private org.springframework.security.authentication.encoding.PasswordEncoder tokenPasswordEncoder;
+
+    public void setTokenPasswordEncoder( ShaPasswordEncoder tokenPasswordEncoder )
+    {
+        this.tokenPasswordEncoder = tokenPasswordEncoder;
     }
 
     private UsernameSaltSource usernameSaltSource;
@@ -61,8 +68,18 @@ public class SpringSecurityPasswordManager
     // PasswordManager implementation
     // -------------------------------------------------------------------------
 
-    public final String encodePassword( String username, String password )
+    public final String legacyEncodePassword( String username, String password )
     {
         return passwordEncoder.encodePassword( password, usernameSaltSource.getSalt( username ) );
+    }
+
+    @Override public String encodePassword( String password )
+    {
+        return null;
+    }
+
+    @Override public String encodeToken( String token, String salt )
+    {
+        return tokenPasswordEncoder.encodePassword( token, usernameSaltSource.getSalt( salt ) );
     }
 }
