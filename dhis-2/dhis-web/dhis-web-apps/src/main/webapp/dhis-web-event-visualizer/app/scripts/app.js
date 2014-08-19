@@ -6711,20 +6711,22 @@ Ext.onReady( function() {
 							success: function(r) {
 								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
-								// i18n
-								requests.push({
-									url: init.contextPath + '/api/i18n?package=org.hisp.dhis.eventvisualizer',
-									method: 'POST',
-									headers: {
-										'Content-Type': 'application/json',
-										'Accepts': 'application/json'
-									},
-									params: Ext.encode(i18nArray),
-									success: function(r) {
-										NS.i18n = Ext.decode(r.responseText);
-										fn();
-									}
-								});
+                                // user info, i18n
+                                requests.push({
+                                    url: init.contextPath + '/api/me/user-account.json',
+                                    success: function(r) {
+                                        init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
+
+                                        // i18n
+                                        Ext.Ajax.request({
+                                            url: 'i18n/' + init.keyUiLocale + '.json',
+                                            success: function(r) {
+                                                NS.i18n = Ext.decode(r.responseText);
+                                                fn();
+                                            }
+                                        });
+                                    }
+                                });
 
 								// root nodes
 								requests.push({
