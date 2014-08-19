@@ -64,10 +64,10 @@ public class MessageConversation
     private Date lastMessage;
 
     @Scanned
-    private Set<UserMessage> userMessages = new HashSet<UserMessage>();
+    private Set<UserMessage> userMessages = new HashSet<>();
 
     @Scanned
-    private List<Message> messages = new ArrayList<Message>();
+    private List<Message> messages = new ArrayList<>();
 
     // --------------------------------------------------------------------------
     // Transient fields
@@ -233,7 +233,7 @@ public class MessageConversation
 
     public Set<User> getUsers()
     {
-        Set<User> users = new HashSet<User>();
+        Set<User> users = new HashSet<>();
 
         for ( UserMessage userMessage : userMessages )
         {
@@ -262,7 +262,7 @@ public class MessageConversation
     
     public Set<User> getTopRecipients()
     {
-        Set<User> recipients = new HashSet<User>();
+        Set<User> recipients = new HashSet<>();
         
         for ( UserMessage userMessage : userMessages )
         {

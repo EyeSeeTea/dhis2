@@ -40,13 +40,7 @@ import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dataelement.DataElementCategory;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.mock.MockCurrentUserService;
@@ -60,6 +54,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * @author Jim Grace
@@ -407,14 +402,14 @@ public class DataApprovalServiceTest
     // -------------------------------------------------------------------------
 
     @Test
-    public void testAddAndGetDataApproval() throws Exception
+    public void testAddAllAndGetDataApproval() throws Exception
     {
         dataApprovalLevelService.addDataApprovalLevel( level1, 1 );
         dataApprovalLevelService.addDataApprovalLevel( level2, 2 );
         dataApprovalLevelService.addDataApprovalLevel( level3, 3 );
         dataApprovalLevelService.addDataApprovalLevel( level4, 4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -425,10 +420,7 @@ public class DataApprovalServiceTest
         DataApproval dataApprovalC = new DataApproval( level1, dataSetA, periodB, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
         DataApproval dataApprovalD = new DataApproval( level1, dataSetB, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
 
-        dataApprovalService.addDataApproval( dataApprovalA );
-        dataApprovalService.addDataApproval( dataApprovalB );
-        dataApprovalService.addDataApproval( dataApprovalC );
-        dataApprovalService.addDataApproval( dataApprovalD );
+        dataApprovalService.addAllDataApprovals( newArrayList(dataApprovalA, dataApprovalB, dataApprovalC, dataApprovalD) );
 
         dataSetA.setApproveData( true );
         dataSetB.setApproveData( true );
@@ -503,7 +495,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -533,7 +525,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -581,7 +573,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -672,7 +664,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -731,7 +723,7 @@ public class DataApprovalServiceTest
         dataApprovalLevelService.addDataApprovalLevel( level3 );
         dataApprovalLevelService.addDataApprovalLevel( level4 );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -764,7 +756,7 @@ public class DataApprovalServiceTest
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -799,7 +791,7 @@ public class DataApprovalServiceTest
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -834,7 +826,7 @@ public class DataApprovalServiceTest
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -869,7 +861,7 @@ public class DataApprovalServiceTest
         organisationUnitC.addDataSet( dataSetA );
         organisationUnitD.addDataSet( dataSetA );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -899,7 +891,7 @@ public class DataApprovalServiceTest
 
         dataSetA.setApproveData( true );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -948,7 +940,7 @@ public class DataApprovalServiceTest
 
         dataSetA.setApproveData( true );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -997,7 +989,7 @@ public class DataApprovalServiceTest
 
         dataSetA.setApproveData( true );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -1046,7 +1038,7 @@ public class DataApprovalServiceTest
 
         dataSetA.setApproveData( true );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitB );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -1101,7 +1093,7 @@ public class DataApprovalServiceTest
 
         Date date = new Date();
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, AUTH_APPR_LEVEL, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, DataApproval.AUTH_ACCEPT_LOWER_LEVELS );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
@@ -1156,12 +1148,12 @@ public class DataApprovalServiceTest
     {
         setUpCategories();
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );
 
-        Set<CategoryOptionGroup> groupABSet = new HashSet<CategoryOptionGroup>();
+        Set<CategoryOptionGroup> groupABSet = new HashSet<>();
         groupABSet.add( groupAB );
 
         dataSetA.setApproveData( true );
@@ -1243,20 +1235,20 @@ public class DataApprovalServiceTest
         organisationUnitA.addDataSet( dataSetA );
         organisationUnitB.addDataSet( dataSetA );
 
-        Set<CategoryOptionGroup> groupASet = new HashSet<CategoryOptionGroup>();
+        Set<CategoryOptionGroup> groupASet = new HashSet<>();
         groupASet.add( groupAB ); // GroupA is a member of DataSetA
 
-        Set<CategoryOptionGroup> groupBSet = new HashSet<CategoryOptionGroup>();
+        Set<CategoryOptionGroup> groupBSet = new HashSet<>();
         groupBSet.add ( groupCD );
 
-        Set<CategoryOptionGroup> groupCSet = new HashSet<CategoryOptionGroup>();
+        Set<CategoryOptionGroup> groupCSet = new HashSet<>();
         groupCSet.add ( groupEF );
 
-        Set<CategoryOptionGroup> groupXSet = new HashSet<CategoryOptionGroup>();
+        Set<CategoryOptionGroup> groupXSet = new HashSet<>();
         groupXSet.add ( groupAB );
         groupXSet.add( groupEF );
 
-        Set<OrganisationUnit> units = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> units = new HashSet<>();
         units.add( organisationUnitA );
         CurrentUserService currentUserService = new MockCurrentUserService( units, null, DataApproval.AUTH_APPROVE, DataApproval.AUTH_APPROVE_LOWER_LEVELS, AUTH_APPR_LEVEL );
         setDependency( dataApprovalService, "currentUserService", currentUserService, CurrentUserService.class );

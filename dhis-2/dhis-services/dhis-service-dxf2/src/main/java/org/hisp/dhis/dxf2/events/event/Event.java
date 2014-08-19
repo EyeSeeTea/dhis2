@@ -55,6 +55,8 @@ public class Event extends BaseLinkableObject
 
     private String enrollment;
 
+    private EventStatus enrollmentStatus;
+
     private String orgUnit;
 
     private String trackedEntityInstance;
@@ -67,9 +69,9 @@ public class Event extends BaseLinkableObject
 
     private Coordinate coordinate;
 
-    private List<DataValue> dataValues = new ArrayList<DataValue>();
+    private List<DataValue> dataValues = new ArrayList<>();
 
-    private List<Note> notes = new ArrayList<Note>();
+    private List<Note> notes = new ArrayList<>();
 
     public Event()
     {
@@ -85,6 +87,18 @@ public class Event extends BaseLinkableObject
     public void setEvent( String event )
     {
         this.event = event;
+    }
+
+    @JsonProperty( required = true )
+    @JacksonXmlProperty( isAttribute = true )
+    public EventStatus getEnrollmentStatus()
+    {
+        return enrollmentStatus;
+    }
+
+    public void setEnrollmentStatus( EventStatus programStatus )
+    {
+        this.enrollmentStatus = programStatus;
     }
 
     @JsonProperty( required = true )

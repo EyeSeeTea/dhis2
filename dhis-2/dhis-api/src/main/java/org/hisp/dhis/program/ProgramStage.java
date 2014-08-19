@@ -75,9 +75,9 @@ public class ProgramStage
 
     private Program program;
 
-    private Set<ProgramStageDataElement> programStageDataElements = new HashSet<ProgramStageDataElement>();
+    private Set<ProgramStageDataElement> programStageDataElements = new HashSet<>();
     
-    private List<ProgramIndicator> programIndicators = new ArrayList<ProgramIndicator>();
+    private List<ProgramIndicator> programIndicators = new ArrayList<>();
 
     @Scanned
     private Set<ProgramStageSection> programStageSections = new HashSet<>();
@@ -99,6 +99,8 @@ public class ProgramStage
     private Boolean captureCoordinates = false;
 
     private Boolean blockEntryForm = false;
+    
+    private Boolean preGenerateUID = false;
 
     /**
      * Enabled this property to show a pop-up for confirming Complete a program
@@ -438,6 +440,19 @@ public class ProgramStage
         this.programIndicators = programIndicators;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getPreGenerateUID()
+    {
+        return preGenerateUID;
+    }
+
+    public void setPreGenerateUID( Boolean preGenerateUID )
+    {
+        this.preGenerateUID = preGenerateUID;
+    }
+    
     @Override
     public void mergeWith( IdentifiableObject other )
     {
@@ -464,6 +479,7 @@ public class ProgramStage
             allowGenerateNextVisit = programStage.getAllowGenerateNextVisit();
             openAfterEnrollment = programStage.getOpenAfterEnrollment();
             reportDateToUse = programStage.getReportDateToUse();
+            preGenerateUID = programStage.getPreGenerateUID();
 
             programStageDataElements.clear();
             programStageDataElements.addAll( programStage.getProgramStageDataElements() );

@@ -29,16 +29,19 @@ package org.hisp.dhis.webapi.controller.user;
  */
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.interpretation.InterpretationService;
+import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -134,6 +137,9 @@ public class CurrentUserController
     @Autowired
     private I18nService i18nService;
 
+    @Autowired
+    protected AclService aclService;
+
     @RequestMapping( produces = { "application/json", "text/*" } )
     public void getCurrentUser( HttpServletResponse response ) throws Exception
     {
@@ -158,12 +164,20 @@ public class CurrentUserController
             throw new NotAuthenticatedException();
         }
 
-        Map<String, List<?>> output = Maps.newHashMap();
         List<org.hisp.dhis.dashboard.Dashboard> dashboards = Lists.newArrayList( manager.getAll( org.hisp.dhis.dashboard.Dashboard.class ) );
-        output.put( "dashboards", dashboards );
+
+        for ( org.hisp.dhis.dashboard.Dashboard dashboard : dashboards )
+        {
+            dashboard.setAccess( aclService.getAccess( dashboard ) );
+
+            for ( DashboardItem dashboardItem : dashboard.getItems() )
+            {
+                dashboardItem.setAccess( aclService.getAccess( dashboardItem ) );
+            }
+        }
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
-        JacksonUtils.toJsonWithView( response.getOutputStream(), output, DetailedView.class );
+        JacksonUtils.toJsonWithView( response.getOutputStream(), dashboards, DetailedView.class );
     }
 
     @RequestMapping( value = "/inbox", produces = { "application/json", "text/*" } )
@@ -180,6 +194,16 @@ public class CurrentUserController
         inbox.setMessageConversations( new ArrayList<>( messageService.getMessageConversations( 0, MAX_OBJECTS ) ) );
         inbox.setInterpretations( new ArrayList<>( interpretationService.getInterpretations( 0, MAX_OBJECTS ) ) );
 
+        for ( org.hisp.dhis.message.MessageConversation messageConversation : inbox.getMessageConversations() )
+        {
+            messageConversation.setAccess( aclService.getAccess( messageConversation ) );
+        }
+
+        for ( Interpretation interpretation : inbox.getInterpretations() )
+        {
+            interpretation.setAccess( aclService.getAccess( interpretation ) );
+        }
+
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
         JacksonUtils.toJson( response.getOutputStream(), inbox );
     }
@@ -195,7 +219,15 @@ public class CurrentUserController
         }
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
-        JacksonUtils.toJson( response.getOutputStream(), new ArrayList<>( messageService.getMessageConversations( 0, MAX_OBJECTS ) ) );
+
+        List<MessageConversation> messageConversations = new ArrayList<>( messageService.getMessageConversations( 0, MAX_OBJECTS ) );
+
+        for ( org.hisp.dhis.message.MessageConversation messageConversation : messageConversations )
+        {
+            messageConversation.setAccess( aclService.getAccess( messageConversation ) );
+        }
+
+        JacksonUtils.toJson( response.getOutputStream(), messageConversations );
     }
 
     @RequestMapping( value = "/inbox/interpretations", produces = { "application/json", "text/*" } )
@@ -209,7 +241,14 @@ public class CurrentUserController
         }
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
-        JacksonUtils.toJson( response.getOutputStream(), new ArrayList<>( interpretationService.getInterpretations( 0, MAX_OBJECTS ) ) );
+        List<Interpretation> interpretations = new ArrayList<>( interpretationService.getInterpretations( 0, MAX_OBJECTS ) );
+
+        for ( Interpretation interpretation : interpretations )
+        {
+            interpretation.setAccess( aclService.getAccess( interpretation ) );
+        }
+
+        JacksonUtils.toJson( response.getOutputStream(), interpretations );
     }
 
     @RequestMapping( value = "/dashboard", produces = { "application/json", "text/*" } )
@@ -349,10 +388,10 @@ public class CurrentUserController
         }
 
         Recipients recipients = new Recipients();
-        recipients.setOrganisationUnits( new HashSet<OrganisationUnit>( organisationUnitService.getOrganisationUnitsBetweenByName( filter, 0, MAX_OBJECTS ) ) );
+        recipients.setOrganisationUnits( new HashSet<>( organisationUnitService.getOrganisationUnitsBetweenByName( filter, 0, MAX_OBJECTS ) ) );
 
-        recipients.setUsers( new HashSet<User>( userService.getAllUsersBetweenByName( filter, 0, MAX_OBJECTS ) ) );
-        recipients.setUserGroups( new HashSet<UserGroup>( userGroupService.getUserGroupsBetweenByName( filter, 0, MAX_OBJECTS ) ) );
+        recipients.setUsers( new HashSet<>( userService.getAllUsersBetweenByName( filter, 0, MAX_OBJECTS ) ) );
+        recipients.setUserGroups( new HashSet<>( userGroupService.getUserGroupsBetweenByName( filter, 0, MAX_OBJECTS ) ) );
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
         JacksonUtils.toJson( response.getOutputStream(), recipients );
@@ -368,12 +407,12 @@ public class CurrentUserController
             throw new NotAuthenticatedException();
         }
 
-        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<>();
         userOrganisationUnits.add( currentUser.getOrganisationUnit() );
 
         if ( parameters.containsKey( "includeChildren" ) && Boolean.parseBoolean( parameters.get( "includeChildren" ) ) )
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
@@ -384,7 +423,7 @@ public class CurrentUserController
         }
         else if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
@@ -419,19 +458,19 @@ public class CurrentUserController
             throw new NotAuthenticatedException();
         }
 
-        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>();
-        Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
-        Set<Program> programs = new HashSet<Program>();
-        Map<String, List<Program>> programAssociations = new HashMap<String, List<Program>>();
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<>();
+        Set<OrganisationUnit> organisationUnits = new HashSet<>();
+        Set<Program> programs = new HashSet<>();
+        Map<String, List<Program>> programAssociations = new HashMap<>();
         List<Program> userPrograms;
 
         if ( type == null )
         {
-            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser() );
+            userPrograms = new ArrayList<>( programService.getProgramsByCurrentUser() );
         }
         else
         {
-            userPrograms = new ArrayList<Program>( programService.getProgramsByCurrentUser( type ) );
+            userPrograms = new ArrayList<>( programService.getProgramsByCurrentUser( type ) );
         }
 
         if ( currentUserService.currentUserIsSuper() && currentUser.getOrganisationUnits().isEmpty() )
@@ -445,7 +484,7 @@ public class CurrentUserController
 
         if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
@@ -456,7 +495,7 @@ public class CurrentUserController
         }
         else
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
@@ -468,7 +507,7 @@ public class CurrentUserController
 
         for ( OrganisationUnit organisationUnit : userOrganisationUnits )
         {
-            List<Program> ouPrograms = new ArrayList<Program>( programService.getPrograms( organisationUnit ) );
+            List<Program> ouPrograms = new ArrayList<>( programService.getPrograms( organisationUnit ) );
 
             if ( !ouPrograms.isEmpty() )
             {
@@ -541,17 +580,17 @@ public class CurrentUserController
 
         Forms forms = new Forms();
 
-        Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
+        Set<OrganisationUnit> organisationUnits = new HashSet<>();
         Set<DataSet> userDataSets;
-        Set<OrganisationUnit> userOrganisationUnits = new HashSet<OrganisationUnit>( currentUser.getOrganisationUnits() );
+        Set<OrganisationUnit> userOrganisationUnits = new HashSet<>( currentUser.getOrganisationUnits() );
 
         if ( currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
         {
-            userDataSets = new HashSet<DataSet>( dataSetService.getAllDataSets() );
+            userDataSets = new HashSet<>( dataSetService.getAllDataSets() );
 
             if ( userOrganisationUnits.isEmpty() )
             {
-                userOrganisationUnits = new HashSet<OrganisationUnit>( organisationUnitService.getRootOrganisationUnits() );
+                userOrganisationUnits = new HashSet<>( organisationUnitService.getRootOrganisationUnits() );
             }
         }
         else
@@ -561,7 +600,7 @@ public class CurrentUserController
 
         if ( parameters.containsKey( "includeDescendants" ) && Boolean.parseBoolean( parameters.get( "includeDescendants" ) ) )
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
@@ -572,7 +611,7 @@ public class CurrentUserController
         }
         else
         {
-            List<OrganisationUnit> children = new ArrayList<OrganisationUnit>();
+            List<OrganisationUnit> children = new ArrayList<>();
 
             for ( OrganisationUnit organisationUnit : userOrganisationUnits )
             {
