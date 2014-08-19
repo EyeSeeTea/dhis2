@@ -6701,99 +6701,92 @@ Ext.onReady( function() {
 			success: function(r) {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
-				Ext.Ajax.request({
-					url: 'i18n.json',
-					success: function(r) {
-						var i18nArray = Ext.decode(r.responseText);
+                Ext.Ajax.request({
+                    url: init.contextPath + '/api/system/info.json',
+                    success: function(r) {
+                        init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
 
-						Ext.Ajax.request({
-							url: init.contextPath + '/api/system/info.json',
-							success: function(r) {
-								init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
+                        // user info, i18n
+                        requests.push({
+                            url: init.contextPath + '/api/me/user-account.json',
+                            success: function(r) {
+                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
 
-                                // user info, i18n
-                                requests.push({
-                                    url: init.contextPath + '/api/me/user-account.json',
+                                // i18n
+                                Ext.Ajax.request({
+                                    url: 'i18n/' + init.keyUiLocale + '.json',
                                     success: function(r) {
-                                        init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
-
-                                        // i18n
-                                        Ext.Ajax.request({
-                                            url: 'i18n/' + init.keyUiLocale + '.json',
-                                            success: function(r) {
-                                                NS.i18n = Ext.decode(r.responseText);
-                                                fn();
-                                            }
-                                        });
+                                        NS.i18n = Ext.decode(r.responseText);
+                                        fn();
                                     }
                                 });
+                            }
+                        });
 
-								// root nodes
-								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&fields=id,name,children[id,name]',
-									success: function(r) {
-										init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
-										fn();
-									}
-								});
+                        // root nodes
+                        requests.push({
+                            url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&fields=id,name,children[id,name]',
+                            success: function(r) {
+                                init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+                                fn();
+                            }
+                        });
 
-								// organisation unit levels
-								requests.push({
-									url: init.contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
-									success: function(r) {
-										init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-										fn();
-									}
-								});
+                        // organisation unit levels
+                        requests.push({
+                            url: init.contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
+                            success: function(r) {
+                                init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+                                fn();
+                            }
+                        });
 
-								// user orgunits and children
-								requests.push({
-									url: init.contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,name,children[id,name]&paging=false',
-									success: function(r) {
-										var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
-											ou = [],
-											ouc = [];
+                        // user orgunits and children
+                        requests.push({
+                            url: init.contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,name,children[id,name]&paging=false',
+                            success: function(r) {
+                                var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
+                                    ou = [],
+                                    ouc = [];
 
-										if (organisationUnits.length) {
-											for (var i = 0, org; i < organisationUnits.length; i++) {
-												org = organisationUnits[i];
+                                if (organisationUnits.length) {
+                                    for (var i = 0, org; i < organisationUnits.length; i++) {
+                                        org = organisationUnits[i];
 
-												ou.push(org.id);
+                                        ou.push(org.id);
 
-                                                if (org.children) {
-                                                    ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
-                                                }
-											}
+                                        if (org.children) {
+                                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                        }
+                                    }
 
-											init.user = {
-												ou: ou,
-												ouc: ouc
-											}
-										}
-										else {
-											alert('User is not assigned to any organisation units');
-										}
+                                    init.user = {
+                                        ou: ou,
+                                        ouc: ouc
+                                    }
+                                }
+                                else {
+                                    alert('User is not assigned to any organisation units');
+                                }
 
-										fn();
-									}
-								});
+                                fn();
+                            }
+                        });
 
-								// dimensions
-								requests.push({
-									url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
-									success: function(r) {
-										init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
-										fn();
-									}
-								});
+                        // dimensions
+                        requests.push({
+                            url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
+                            success: function(r) {
+                                init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
+                                fn();
+                            }
+                        });
 
-								for (var i = 0; i < requests.length; i++) {
-									Ext.Ajax.request(requests[i]);
-								}
-							}
-						});
-					}
-				});
+                        for (var i = 0; i < requests.length; i++) {
+                            Ext.Ajax.request(requests[i]);
+                        }
+                    }
+                });
 			}
 		});
 	}());
