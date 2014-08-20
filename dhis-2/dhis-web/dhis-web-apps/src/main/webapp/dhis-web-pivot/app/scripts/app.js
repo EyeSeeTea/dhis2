@@ -929,13 +929,13 @@ Ext.onReady( function() {
                 delete favorite.id;
 
 				// Replace operand id characters
-				//for (var i = 0; i < dimensions.length; i++) {
-					//if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
-						//for (var j = 0; j < dimensions[i].items.length; j++) {
-							//dimensions[i].items[j].id = dimensions[i].items[j].id.replace('-', '.');
-						//}
-					//}
-				//}
+				for (var i = 0; i < dimensions.length; i++) {
+					if (dimensions[i].dimension === ns.core.conf.finals.dimension.operand.objectName) {
+						for (var j = 0; j < dimensions[i].items.length; j++) {
+							dimensions[i].items[j].id = dimensions[i].items[j].id.replace('#', '.');
+						}
+					}
+				}
 			}
 
 			return favorite;
@@ -2642,6 +2642,7 @@ Ext.onReady( function() {
 				}
 
                 store.isPending = true;
+                ns.core.web.mask.show(indicatorAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
@@ -2649,15 +2650,16 @@ Ext.onReady( function() {
                         page: store.nextPage,
                         pageSize: 50
                     },
-                    failure: function() {
-                        store.isPending = false;
-                    },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.indicators || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
+                    },
+                    callback: function() {
+                        store.isPending = false;
+                        ns.core.web.mask.hide(indicatorAvailable.boundList);
                     }
                 });
             },
@@ -2770,6 +2772,7 @@ Ext.onReady( function() {
 				}
 
                 store.isPending = true;
+                ns.core.web.mask.show(dataElementAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
@@ -2777,15 +2780,16 @@ Ext.onReady( function() {
                         page: store.nextPage,
                         pageSize: 50
                     },
-                    failure: function() {
-                        store.isPending = false;
-                    },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataElements || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
+                    },
+                    callback: function() {
+                        store.isPending = false;
+                        ns.core.web.mask.hide(dataElementAvailable.boundList);
                     }
                 });
             },
@@ -2798,7 +2802,6 @@ Ext.onReady( function() {
                 }
 
 				if (Ext.isString(uid)) {
-					//path = '/dataElementGroups/' + uid + '/operands' + (filter ? '/query/' + filter : '') + '.json';
 					path = '/dataElementOperands.json?fields=id,name&filter=dataElement.dataElementGroups.id:eq:' + uid + (filter ? '&filter=name:like:' + filter : '');
 				}
 				else if (uid === 0) {
@@ -2811,6 +2814,7 @@ Ext.onReady( function() {
 				}
 
                 store.isPending = true;
+                ns.core.web.mask.show(dataElementAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
@@ -2818,19 +2822,20 @@ Ext.onReady( function() {
                         page: store.nextPage,
                         pageSize: 50
                     },
-                    failure: function() {
-                        store.isPending = false;
-                    },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
 							data = response.objects || response.dataElementOperands || [],
                             pager = response.pager;
 
-						//for (var i = 0; i < data.length; i++) {
-							//data[i].id = data[i].id.split('.').join('-');
-						//}
+						for (var i = 0; i < data.length; i++) {
+							data[i].id = data[i].id.split('.').join('#');
+						}
 
                         store.loadStore(data, pager, append);
+                    },
+                    callback: function() {
+                        store.isPending = false;
+                        ns.core.web.mask.hide(dataElementAvailable.boundList);
                     }
                 });
 			},
@@ -2915,6 +2920,7 @@ Ext.onReady( function() {
                 }
 
                 store.isPending = true;
+                ns.core.web.mask.show(dataSetAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
@@ -2922,15 +2928,16 @@ Ext.onReady( function() {
                         page: store.nextPage,
                         pageSize: 50
                     },
-                    failure: function() {
-                        store.isPending = false;
-                    },
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataSets || [],
                             pager = response.pager;
 
                         store.loadStore(data, pager, append);
+                    },
+                    callback: function() {
+                        store.isPending = false;
+                        ns.core.web.mask.hide(dataSetAvailable.boundList);
                     }
                 });
             },
@@ -4865,6 +4872,7 @@ Ext.onReady( function() {
 					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
 
 					store.isPending = true;
+                    ns.core.web.mask.show(available.boundList);
 
 					Ext.Ajax.request({
 						url: ns.core.init.contextPath + '/api' + path,
@@ -4872,15 +4880,16 @@ Ext.onReady( function() {
 							page: store.nextPage,
 							pageSize: 50
 						},
-						failure: function() {
-							store.isPending = false;
-						},
 						success: function(r) {
 							var response = Ext.decode(r.responseText),
 								data = response.items || [],
 								pager = response.pager;
 
 							store.loadStore(data, pager, append);
+						},
+						callback: function() {
+							store.isPending = false;
+                            ns.core.web.mask.hide(available.boundList);
 						}
 					});
 				},
