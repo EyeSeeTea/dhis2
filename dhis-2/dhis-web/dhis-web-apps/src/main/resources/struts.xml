@@ -46,6 +46,11 @@
 		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
 			<result name="success" type="redirect">index.html</result>
 		</action>
+    </package>    
+    <package name="dhis-web-hrhr" extends="dhis-web-commons" namespace="/dhis-web-hrhr">
+		<action name="index" class="org.hisp.dhis.commons.action.NoAction">
+			<result name="success" type="redirect">index.html</result>
+		</action>
     </package>
     
 </struts>
