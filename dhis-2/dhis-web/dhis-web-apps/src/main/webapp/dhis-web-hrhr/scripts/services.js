@@ -156,8 +156,20 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .service('EnrollmentService', function($http) {
     
     return {        
-        get: function( entity ){
+        get: function( enrollmentUid ){
+            var promise = $http.get(  '../api/enrollments/' + enrollmentUid ).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        getByEntity: function( entity ){
             var promise = $http.get(  '../api/enrollments?trackedEntityInstance=' + entity ).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        getByEntityAndProgram: function( entity, program, status ){
+            var promise = $http.get(  '../api/enrollments?trackedEntityInstance=' + entity + '&program=' + program + '&status=' + status).then(function(response){
                 return response.data;
             });
             return promise;
@@ -167,7 +179,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return response.data;
             });
             return promise;
-        }        
+        },
+        update: function( enrollment){
+            var promise = $http.put( '../api/enrollments/' + enrollment.enrollment , enrollment).then(function(response){
+                return response.data;
+            });
+            return promise;
+        },
+        cancelled: function(enrollment){
+            var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/cancelled').then(function(response){
+                return response.data;               
+            });
+            return promise;           
+        },
+        completed: function(enrollment){
+            var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/completed').then(function(response){
+                return response.data;               
+            });
+            return promise;           
+        }         
     };   
 })
 
@@ -196,10 +226,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
     var promise;
     return {        
-        get: function(entityUid) {
-            promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid ).then(function(response){     
+        get: function(teiId) {
+            promise = $http.get(  '../api/trackedEntityInstances/' +  teiId ).then(function(response){     
                 var tei = response.data;
-                
                 angular.forEach(tei.attributes, function(attribute){                   
                    if(attribute.type && attribute.value){                       
                        if(attribute.type === 'date'){                           
@@ -535,6 +564,24 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getEI: function() {            
             if( !ei || !promise ){
                 promise = $http.get('data/EI_All.json').then(function(response){                    
+                    ei = response.data;
+                    return ei;
+                });
+            }
+            return promise;            
+        }
+    };
+})
+
+
+/* Factory for loading based fundalheight chart values */
+.factory('FundalHeight', function($http) {
+    
+    var ei, promise;
+    return {
+        getBaseValues: function() {            
+            if( !ei || !promise ){
+                promise = $http.get('data/LHTable.json').then(function(response){                    
                     ei = response.data;
                     return ei;
                 });

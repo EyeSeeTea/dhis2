@@ -1,27 +1,40 @@
 trackerCapture.controller('NotesController',
         function($scope,
-                $rootScope,
+                $filter,
                 storage,
-                DHIS2EventFactory,
                 orderByFilter,
+                CurrentSelection,
+                EnrollmentService,
                 NotesDialogService,
                 TranslationService) {
 
     TranslationService.translate();
     
+    var loginDetails = storage.get('LOGIN_DETAILS');
+    var storedBy = '';
+    if(loginDetails){
+        storedBy = loginDetails.userCredentials.username;
+    }
+    
+    var today = moment();
+    today = Date.parse(today);
+    today = $filter('date')(today, 'yyyy-MM-dd');
+    
     $scope.$on('noteController', function(event, args) {
-        DHIS2EventFactory.get(args.currentEvent.event).then(function(data){    
-            $scope.currentEvent = data;   
-            
-            if(angular.isUndefined( $scope.currentEvent.notes)){
-                
-                $scope.currentEvent.notes = orderByFilter($scope.currentEvent.notes, '-storedDate');
-            
-                angular.forEach($scope.currentEvent.notes, function(note){
-                    note.storedDate = moment(note.storedDate).format('YYYY-MM-DD @ hh:mm:ss A');
-                });
-            }
-        });          
+        
+        var selections = CurrentSelection.get(); 
+        $scope.selectedEnrollmentId = selections.enrollment;
+        if($scope.selectedEnrollmentId){
+            EnrollmentService.get($scope.selectedEnrollmentId).then(function(data){    
+                $scope.selectedEnrollment = data;   
+                if(!angular.isUndefined( $scope.selectedEnrollment.notes)){
+                    $scope.selectedEnrollment.notes = orderByFilter($scope.selectedEnrollment.notes, '-storedDate');            
+                    angular.forEach($scope.selectedEnrollment.notes, function(note){
+                        note.storedDate = moment(note.storedDate).format('YYYY-MM-DD @ hh:mm A');
+                    });
+                }
+            });         
+        }                
     });
    
     $scope.searchNoteField = false;
@@ -37,20 +50,21 @@ trackerCapture.controller('NotesController',
             
             var newNote = {value: $scope.note};
 
-            if(angular.isUndefined( $scope.currentEvent.notes) ){
-                $scope.currentEvent.notes = [newNote];
+            if(angular.isUndefined( $scope.selectedEnrollment.notes) ){
+                $scope.selectedEnrollment.notes = [{value: $scope.note, storedDate: today, storedBy: storedBy}];
+                
             }
             else{
-                $scope.currentEvent.notes.splice(0,0,newNote);
+                $scope.selectedEnrollment.notes.splice(0,0,{value: $scope.note, storedDate: today, storedBy: storedBy});
             }
 
-            var e = $scope.currentEvent;
-            //e.notes = [newNote];
-            DHIS2EventFactory.update(e).then(function(data){
+            var e = angular.copy($scope.selectedEnrollment);
+
+            e.notes = [newNote];
+            EnrollmentService.update(e).then(function(data){
                 $scope.note = '';
-                $scope.addNoteField = false; //note is added, hence no need to show note field.
-                $rootScope.$broadcast('noteController', {currentEvent: $scope.currentEvent});
-            });   
+                $scope.addNoteField = false; //note is added, hence no need to show note field.                
+            });
         }        
     };
     

@@ -14,9 +14,7 @@ trackerCapture.controller('InterventionsController',
     TranslationService.translate();      
    
     $scope.$on('sharedData', function(event, args) {
-        
-        console.log('interventions is called');
-        
+       
         //pick selected orgUnit and program
         var selectedOrgUnit = storage.get('SELECTED_OU');
         var selectedProgram = storage.get('SELECTED_PROGRAM');

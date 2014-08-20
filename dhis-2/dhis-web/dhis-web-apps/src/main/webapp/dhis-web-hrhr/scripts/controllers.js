@@ -239,6 +239,12 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         $location.path('/registration').search({});  
     }; 
     
+    $scope.showFundalheight = function(){
+        var tei = ContextMenuSelectedItem.getSelectedItem();  
+        CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});
+        $location.path('/fundalheight').search({tei: tei.id});
+    };
+    
     $scope.editEntity = function(){
         var tei = ContextMenuSelectedItem.getSelectedItem();  
         CurrentSelection.set({tei: tei, pr: $scope.selectedProgram ? $scope.selectedProgram: null});

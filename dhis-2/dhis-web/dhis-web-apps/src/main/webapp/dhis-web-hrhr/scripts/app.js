@@ -8,10 +8,10 @@ var trackerCapture = angular.module('trackerCapture',
 		  'ngCookies',  
 		  'trackerCaptureServices',
 		  'trackerCaptureFilters',
-                  'trackerCaptureDirectives', 
-                  'trackerCaptureControllers',
+          'trackerCaptureDirectives', 
+          'trackerCaptureControllers',
 		  'angularLocalStorage',
-                  'ui.select2',
+          'ui.select2',
 		  'pascalprecht.translate'])
               
 .value('DHIS2URL', '..')
@@ -36,6 +36,9 @@ var trackerCapture = angular.module('trackerCapture',
     }).when('/profile',{
         templateUrl:'anc/profile/profile.html',
         controller: 'ProfileController'
+    }).when('/fundalheight',{
+        templateUrl:'anc/fundalheight/fundalheight.html',
+        controller: 'FundalheightController'
     }).otherwise({
         redirectTo : '/'
     });  

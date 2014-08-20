@@ -3,8 +3,7 @@ trackerCapture.controller('ProfileController',
                 $scope,
                 $location,
                 ExpressionService,
-                storage,
-                DHIS2EventFactory,
+                storage,                
                 CurrentSelection,
                 AttributesFactory,
                 TranslationService) {
@@ -27,9 +26,6 @@ trackerCapture.controller('ProfileController',
     $rootScope.gestationalAge = {displayName: 'Gestational Age', value: 'UNKNOWN', code: 'UNKNOWN'};
     
     $scope.$on('selectedEntity', function(event, args) {  
-
-        console.log('profile is called');
-        
         var selections = CurrentSelection.get();                  
         $scope.pregnantWoman = selections.tei;     
         $scope.contactPerson = selections.contact ? selections.contact : null;

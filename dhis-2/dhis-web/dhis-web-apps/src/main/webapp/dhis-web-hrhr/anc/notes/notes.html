@@ -2,7 +2,7 @@
     <div class="panel-heading">
         {{'notes'| translate}}
         <span class="btn-group-sm right">
-            <span ng-show="currentEvent.notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
+            <span ng-show="selectedEnrollment.notes.length > 5"><a href ng-click="searchNote()" title="{{'search_note'| translate}}"><i class="fa fa-search fa-lg"></i></a></span> 
             &nbsp;&nbsp;
             <a href ng-click="showAddNote()" title="{{'add_note'| translate}}"><i class="fa fa-plus fa-lg"></i></a>   
         </span>
@@ -24,11 +24,28 @@
             {{'cancel'| translate}}
         </button>
     </div>
-
-    <div class="list-group" ng-repeat="note in currentEvent.notes| filter:noteSearchText">
+    <!--<div class="list-group" ng-repeat="note in selectedEnrollment.notes| filter:noteSearchText">
         <div class="over-flow-hidden">
             <a href ng-click="displayNote(note)" title="{{'details'| translate}}" class="list-group-item"><i>{{note.storedDate}}</i> - {{note.value}}</a> 
         </div>
-    </div>  
+    </div>  -->
+
+    <div ng-show='selectedEnrollment' class='remove-default-padding overflow-ellipsis'>
+        <table class="table table-striped dhis2-table-hover">
+            <tr ng-repeat="note in selectedEnrollment.notes| filter:noteSearchText">
+                <td>
+            <d2-pop-over content="note" template="note.html" details="{{'details'| translate}}">
+                <div>{{note.value}}</div>
+            </d2-pop-over>
+            <script type="text/ng-template" id="note.html">
+                <p>{{content.value}}</p>
+                <hr>
+                <p><strong>{{'created_by' | translate}}: </strong>{{content.storedBy}}</p>
+                <p><strong>{{'date' | translate}}: </strong>{{content.storedDate}}</p>                           
+            </script>
+            </td> 
+            </tr>
+        </table>
+    </div>
 
 </div>

@@ -38,8 +38,9 @@ trackerCapture.controller('VisitController',
     $scope.invalidDate = false;
     
     //get the selected event and person
-    $scope.eventUid = ($location.search()).eventUid;   
-    $scope.selectedEntityId = ($location.search()).tei;   
+    $scope.eventUid = ($location.search()).event;   
+    $scope.selectedEntityId = ($location.search()).tei;
+    $scope.selectedEnrollment = ($location.search()).enrollment;
     
     $scope.dhis2Events = [];
     $scope.currentEvent = '';
@@ -49,24 +50,26 @@ trackerCapture.controller('VisitController',
     $scope.programStage = '';    
     
     if($scope.selectedEntityId && $scope.selectedOrgUnit && $scope.eventUid && $scope.selectedProgram){
-        
-        console.log('visit is called');
+
         //Fetch the selected entity
         TEIService.get($scope.selectedEntityId).then(function(tei){     
 
             $scope.pregnantWoman = tei;
             if(!angular.isUndefined($scope.pregnantWoman.relationships)){
-                TEIService.get($scope.pregnantWoman.relationships[0].trackedEntityInstance).then(function(contact){
-                    CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram});
+                TEIService.get($scope.pregnantWoman.relationships[0].trackedEntityInstanceB).then(function(contact){
+                    
+                    CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
                     $timeout(function() { 
                         $rootScope.$broadcast('selectedEntity', {});
+                        $rootScope.$broadcast('noteController', {});
                     }, 100);
                 });
             }
             else{
-                CurrentSelection.set({tei: tei, pr: $scope.selectedProgram});
+                CurrentSelection.set({tei: tei, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
                 $timeout(function() { 
                     $rootScope.$broadcast('selectedEntity', {});
+                    $rootScope.$broadcast('noteController', {});
                 }, 100);
             }
             

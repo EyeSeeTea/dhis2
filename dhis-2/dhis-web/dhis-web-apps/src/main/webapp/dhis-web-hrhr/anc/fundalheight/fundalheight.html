@@ -1,0 +1,23 @@
+<div class="information_bar">
+    <div ng-include="'anc/profile/profile.html'"></div>	
+</div>
+
+<div class="main_content" id="for_pdf_content">
+    <br>
+    <h2>
+        {{'fundal_height_chart'| translate}}
+    </h2>
+    <br>
+    <div class="flot-chart">
+        <!--<d2-flot-chart ng-model="fundalChart" id="placeholder" width="100%" height="300px" ></d2-flot-chart>-->
+        <flot dataset="myData" options="myChartOptions"></flot>
+    </div>
+
+</div>
+
+<div style="clear:both"></div>
+<br>
+<div>
+    <button ng-click="close()" class="big-button grey">{{'close'| translate}}</button>
+    <button onclick="pdfGenerator()" class="big-button lightblue">{{'save_pdf'| translate}}</button>
+</div>
