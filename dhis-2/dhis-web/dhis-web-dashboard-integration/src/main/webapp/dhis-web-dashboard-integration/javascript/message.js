@@ -24,7 +24,7 @@ function removeMessages( messages )
 
         $.ajax(
         {
-            url: "../../api/messageConversations?" + $.param( { uid: messages }, true ),
+            url: "../../api/messageConversations?" + $.param( { mc: messages }, true ),
             contentType: "application/json",
             dataType: "json",
             type: "DELETE",
@@ -196,7 +196,6 @@ function formatItem( item )
 }
 
 // Experimental jquery extension to provide multi select button and friends
-// Test fiddle: http://jsfiddle.net/g6awde3z/
 jQuery.fn.extend(
 {
     _multiCheckbox: function( $checkboxContainer )
@@ -359,6 +358,7 @@ jQuery.fn.extend(
                 });
                 return checked;
             };
+
             this.onAction = function()
             {
                 $cb.removeAttr( "checked" );

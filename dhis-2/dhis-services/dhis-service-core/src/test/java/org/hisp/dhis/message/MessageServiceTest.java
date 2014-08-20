@@ -221,9 +221,7 @@ public class MessageServiceTest
         messageService.saveMessageConversation( conversationB );
         messageService.saveMessageConversation( conversationC );
 
-        Collection<String> uids = new ArrayList<String>();
-        uids.add( uidA );
-        uids.add( uidB );
+        String[] uids = { uidA, uidB };
 
         Collection<MessageConversation> conversations = messageService.getMessageConversations( uids );
 

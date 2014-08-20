@@ -273,7 +273,7 @@ public class DefaultMessageService
             unreadOnly, first, max );
     }
 
-    public Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids )
+    public Collection<MessageConversation> getMessageConversations( String[] messageConversationUids )
     {
         return messageConversationStore.getMessageConversations( messageConversationUids );
     }

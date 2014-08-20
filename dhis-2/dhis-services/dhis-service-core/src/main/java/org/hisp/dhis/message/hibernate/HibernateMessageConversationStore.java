@@ -126,11 +126,8 @@ public class HibernateMessageConversationStore
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids )
+    public Collection<MessageConversation> getMessageConversations( String[] messageConversationUids )
     {
-        int[] ids;
-
         String hql = ( "FROM MessageConversation where uid in :messageConversationUids" );
 
         Query query = getQuery( hql );

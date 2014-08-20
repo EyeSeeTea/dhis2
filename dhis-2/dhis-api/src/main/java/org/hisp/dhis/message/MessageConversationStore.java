@@ -57,7 +57,7 @@ public interface MessageConversationStore
      * @param messageConversationUids the UIDs of the MessageConversations to get.
      * @return a collection of MessageConversations.
      */
-    Collection<MessageConversation> getMessageConversations( Collection<String> messageConversationUids );
+    Collection<MessageConversation> getMessageConversations( String[] messageConversationUids );
     
     int getMessageConversationCount( User user, boolean followUpOnly, boolean unreadOnly );
     
