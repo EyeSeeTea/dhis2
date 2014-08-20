@@ -28,12 +28,12 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -50,12 +50,11 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.validation.ValidationCriteria;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Abyot Asalefew
@@ -66,11 +65,11 @@ public class Program
 {
     public static final List<String> TYPE_LOOKUP = Arrays.asList( "", "MULTIPLE_EVENTS_WITH_REGISTRATION",
         "SINGLE_EVENT_WITH_REGISTRATION", "SINGLE_EVENT_WITHOUT_REGISTRATION" );
-    
+
     public static final int MULTIPLE_EVENTS_WITH_REGISTRATION = 1;
     public static final int SINGLE_EVENT_WITH_REGISTRATION = 2;
     public static final int SINGLE_EVENT_WITHOUT_REGISTRATION = 3;
-    
+
     private String description;
 
     private Integer version;
@@ -80,13 +79,13 @@ public class Program
     private String dateOfIncidentDescription;
 
     @Scanned
-    private Set<OrganisationUnit> organisationUnits = new HashSet<OrganisationUnit>();
-    
-    @Scanned
-    private List<ProgramStage> programStages = new ArrayList<ProgramStage>();
+    private Set<OrganisationUnit> organisationUnits = new HashSet<>();
 
     @Scanned
-    private Set<ValidationCriteria> validationCriteria = new HashSet<ValidationCriteria>();
+    private List<ProgramStage> programStages = new ArrayList<>();
+
+    @Scanned
+    private Set<ValidationCriteria> validationCriteria = new HashSet<>();
 
     private Integer type;
 
@@ -94,18 +93,18 @@ public class Program
 
     private Boolean ignoreOverdueEvents = false;
 
-    private List<ProgramTrackedEntityAttribute> programAttributes = new ArrayList<ProgramTrackedEntityAttribute>(); //TODO use List?
+    private List<ProgramTrackedEntityAttribute> programAttributes = new ArrayList<>();
 
     @Scanned
-    private Set<UserAuthorityGroup> userRoles = new HashSet<UserAuthorityGroup>();
+    private Set<UserAuthorityGroup> userRoles = new HashSet<>();
 
     private Boolean onlyEnrollOnce = false;
 
     @Scanned
-    private Set<TrackedEntityInstanceReminder> instanceReminders = new HashSet<TrackedEntityInstanceReminder>();
+    private Set<TrackedEntityInstanceReminder> instanceReminders = new HashSet<>();
 
     /**
-     * Allow enrolling tracked entity to all org units disregarding whether the 
+     * Allow enrolling tracked entity to all org units disregarding whether the
      * program is assigned for the org unit or not.
      */
     private Boolean displayOnAllOrgunit = true;
@@ -168,7 +167,7 @@ public class Program
      */
     public Set<DataElement> getAllDataElements()
     {
-        Set<DataElement> elements = new HashSet<DataElement>();
+        Set<DataElement> elements = new HashSet<>();
 
         for ( ProgramStage stage : programStages )
         {
@@ -187,10 +186,10 @@ public class Program
      */
     public List<TrackedEntityAttribute> getTrackedEntityAttributes()
     {
-        List<TrackedEntityAttribute> entityAttributes = new ArrayList<TrackedEntityAttribute>();
+        List<TrackedEntityAttribute> entityAttributes = new ArrayList<>();
         for ( ProgramTrackedEntityAttribute programAttribute : programAttributes )
         {
-        	entityAttributes.add( programAttribute.getAttribute() );
+            entityAttributes.add( programAttribute.getAttribute() );
         }
 
         return entityAttributes;
@@ -212,7 +211,7 @@ public class Program
 
         return null;
     }
-    
+
     public Program increaseVersion()
     {
         version = version != null ? version + 1 : 1;
@@ -530,16 +529,18 @@ public class Program
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlElementWrapper( localName = "programTrackedEntityAttributes", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
-    public List<ProgramTrackedEntityAttribute> getProgramAttributes() {
-		return programAttributes;
-	}
+    public List<ProgramTrackedEntityAttribute> getProgramAttributes()
+    {
+        return programAttributes;
+    }
 
-	public void setProgramAttributes(
-			List<ProgramTrackedEntityAttribute> programAttributes) {
-		this.programAttributes = programAttributes;
-	}
+    public void setProgramAttributes(
+        List<ProgramTrackedEntityAttribute> programAttributes )
+    {
+        this.programAttributes = programAttributes;
+    }
 
-	@JsonProperty
+    @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "trackedEntity", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "trackedEntity", namespace = DxfNamespaces.DXF_2_0 )
