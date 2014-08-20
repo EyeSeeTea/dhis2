@@ -29,6 +29,7 @@ package org.hisp.dhis.period;
  */
 
 import com.google.common.collect.Lists;
+import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.calendar.DateUnit;
 
 import java.util.Date;
@@ -60,7 +61,7 @@ public class BiMonthlyPeriodType
     }
 
     @Override
-    public Period createPeriod( DateUnit dateUnit )
+    public Period createPeriod( DateUnit dateUnit, Calendar calendar )
     {
         DateUnit start = new DateUnit( dateUnit );
         start.setMonth( ((start.getMonth() - 1) - (start.getMonth() - 1) % 2) + 1 );
@@ -68,10 +69,10 @@ public class BiMonthlyPeriodType
 
         DateUnit end = new DateUnit( start );
 
-        end = getCalendar().plusMonths( end, 1 );
-        end.setDay( getCalendar().daysInMonth( end.getYear(), end.getMonth() ) );
+        end = calendar.plusMonths( end, 1 );
+        end.setDay( calendar.daysInMonth( end.getYear(), end.getMonth() ) );
 
-        return toIsoPeriod( start, end );
+        return toIsoPeriod( start, end, calendar );
     }
 
     @Override
@@ -87,19 +88,23 @@ public class BiMonthlyPeriodType
     @Override
     public Period getNextPeriod( Period period )
     {
-        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
-        dateUnit = getCalendar().plusMonths( dateUnit, 2 );
+        Calendar cal = getCalendar();
 
-        return createPeriod( getCalendar().toIso( dateUnit ) );
+        DateUnit dateUnit = cal.fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
+        dateUnit = cal.plusMonths( dateUnit, 2 );
+
+        return createPeriod( cal.toIso( dateUnit ), cal );
     }
 
     @Override
     public Period getPreviousPeriod( Period period )
     {
-        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
-        dateUnit = getCalendar().minusMonths( dateUnit, 2 );
+        Calendar cal = getCalendar();
 
-        return createPeriod( getCalendar().toIso( dateUnit ) );
+        DateUnit dateUnit = cal.fromIso( DateUnit.fromJdkDate( period.getStartDate() ) );
+        dateUnit = cal.minusMonths( dateUnit, 2 );
+
+        return createPeriod( cal.toIso( dateUnit ), cal );
     }
 
     /**
@@ -109,6 +114,8 @@ public class BiMonthlyPeriodType
     @Override
     public List<Period> generatePeriods( DateUnit dateUnit )
     {
+        Calendar cal = getCalendar();
+
         dateUnit.setMonth( 1 );
         dateUnit.setDay( 1 );
 
@@ -118,8 +125,8 @@ public class BiMonthlyPeriodType
 
         while ( dateUnit.getYear() == year )
         {
-            periods.add( createPeriod( dateUnit ) );
-            dateUnit = getCalendar().plusMonths( dateUnit, 2 );
+            periods.add( createPeriod( dateUnit, cal ) );
+            dateUnit = cal.plusMonths( dateUnit, 2 );
         }
 
         return periods;
@@ -132,15 +139,17 @@ public class BiMonthlyPeriodType
     @Override
     public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
+        Calendar cal = getCalendar();
+
         dateUnit.setDay( 1 );
-        dateUnit = getCalendar().minusMonths( dateUnit, (dateUnit.getMonth() % 2) + 10 );
+        dateUnit = cal.minusMonths( dateUnit, (dateUnit.getMonth() % 2) + 10 );
 
         List<Period> periods = Lists.newArrayList();
 
         for ( int i = 0; i < 6; i++ )
         {
-            periods.add( createPeriod( dateUnit ) );
-            dateUnit = getCalendar().plusMonths( dateUnit, 2 );
+            periods.add( createPeriod( dateUnit, cal ) );
+            dateUnit = cal.plusMonths( dateUnit, 2 );
         }
 
         return periods;
@@ -149,7 +158,7 @@ public class BiMonthlyPeriodType
     @Override
     public String getIsoDate( DateUnit dateUnit )
     {
-        return String.format( "%d%02dB", dateUnit.getYear(), dateUnit.getMonth() );
+        return String.format( "%d%02dB", dateUnit.getYear(), (dateUnit.getMonth() + 1) / 2 );
     }
 
     @Override
@@ -161,12 +170,14 @@ public class BiMonthlyPeriodType
     @Override
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
+        Calendar cal = getCalendar();
+
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
-        dateUnit = getCalendar().minusMonths( dateUnit, rewindedPeriods );
+        DateUnit dateUnit = cal.fromIso( DateUnit.fromJdkDate( date ) );
+        dateUnit = cal.minusMonths( dateUnit, rewindedPeriods );
 
-        return getCalendar().toIso( dateUnit ).toJdkDate();
+        return cal.toIso( dateUnit ).toJdkDate();
     }
 }

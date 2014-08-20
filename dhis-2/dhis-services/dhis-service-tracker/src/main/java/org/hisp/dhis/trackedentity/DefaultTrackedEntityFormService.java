@@ -35,8 +35,10 @@ import java.util.regex.Matcher;
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.option.Option;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.user.User;
@@ -276,10 +278,13 @@ public class DefaultTrackedEntityFormService
         String value, I18n i18n, int index, String hidden, String style )
     {
         boolean mandatory = false;
+        boolean allowDateInFuture = false;
 
         if ( program != null && program.getAttribute( attribute ) != null )
         {
-            mandatory = program.getAttribute( attribute ).isMandatory();
+            ProgramTrackedEntityAttribute programAttribute = program.getAttribute( attribute );
+            mandatory = programAttribute.isMandatory();
+            allowDateInFuture = programAttribute.getAllowFutureDate();
         }
 
         inputHtml = TAG_OPEN + "input id=\"attr" + attribute.getId() + "\" name=\"attr" + attribute.getId()
@@ -290,9 +295,18 @@ public class DefaultTrackedEntityFormService
         {
             inputHtml += ",number:true";
         }
+        else   if ( TrackedEntityAttribute.TYPE_PHONE_NUMBER.equals( attribute.getValueType() ) )
+        {
+            inputHtml += ",phone:true";
+        }
         inputHtml += "}}\" ";
 
-        if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_TRUE_ONLY ) )
+
+        if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_PHONE_NUMBER ) )
+        {
+            inputHtml += " phoneNumber ";
+        }
+        else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_TRUE_ONLY ) )
         {
             inputHtml += " type='checkbox' value='true' ";
             if ( value.equals( "true" ) )
@@ -329,21 +343,30 @@ public class DefaultTrackedEntityFormService
         {
             inputHtml = inputHtml.replaceFirst( "input", "select" ) + ">";
             inputHtml += "<option value=\"\" selected>" + i18n.getString( "no_value" ) + "</option>";
-            for ( String option : attribute.getOptionSet().getOptions() )
+            for ( Option option : attribute.getOptionSet().getOptions() )
             {
-                inputHtml += "<option value=\"" + option + "\" ";
-                if ( option.equals( value ) )
+                String optionValue = option.getName();
+                inputHtml += "<option value=\"" + optionValue + "\" ";
+                if ( optionValue.equals( value ) )
                 {
                     inputHtml += " selected ";
                 }
-                inputHtml += ">" + option + "</option>";
+                inputHtml += ">" + optionValue + "</option>";
             }
             inputHtml += "</select>";
         }
         else if ( attribute.getValueType().equals( TrackedEntityAttribute.TYPE_DATE ) )
         {
-            String jQueryCalendar = "<script>datePicker(\"attr" + attribute.getId() + "\", false);</script>";
-            inputHtml += " value=\"" + value + "\"" + TAG_CLOSE;
+            String jQueryCalendar = "<script>";
+            if( allowDateInFuture ){
+                jQueryCalendar += "datePicker";
+            }
+            else{
+                jQueryCalendar += "datePickerValid";
+            }
+            jQueryCalendar += "(\"attr" + attribute.getId() + "\", false, false);</script>";
+            
+           inputHtml += " value=\"" + value + "\"" + TAG_CLOSE;
             inputHtml += jQueryCalendar;
         }
         else

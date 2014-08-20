@@ -57,7 +57,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementGroupSetStore"
-    class="org.hisp.dhis.dataelement.hibernate.HibernateDataElementGroupSetStore">
+    class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.dataelement.DataElementGroupSet" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -87,7 +87,7 @@
     <property name="cacheable" value="true" />
   </bean>
 
-    <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.metadatafilter.hibernate.HibernateMetaDataFilterStore">
+  <bean id="org.hisp.dhis.filter.MetaDataFilterStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.filter.MetaDataFilter" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="cacheable" value="true" />
@@ -251,6 +251,7 @@
 
   <bean id="org.hisp.dhis.datavalue.DataValueAuditStore" class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueAuditStore">
     <property name="sessionFactory" ref="sessionFactory" />
+    <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserStore" class="org.hisp.dhis.user.hibernate.HibernateUserStore">
@@ -354,6 +355,11 @@
     <property name="clazz" value="org.hisp.dhis.option.OptionSet" />
     <property name="sessionFactory" ref="sessionFactory" />
   </bean>
+  
+   <bean id="org.hisp.dhis.option.OptionValueStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
+    <property name="clazz" value="org.hisp.dhis.option.Option" />
+    <property name="sessionFactory" ref="sessionFactory" />
+  </bean>
 
   <bean id="org.hisp.dhis.mapping.MapStore" class="org.hisp.dhis.mapping.hibernate.HibernateMapStore">
     <property name="clazz" value="org.hisp.dhis.mapping.Map" />
@@ -412,6 +418,8 @@
 
   <bean id="org.hisp.dhis.datavalue.DataValueService" class="org.hisp.dhis.datavalue.DefaultDataValueService">
     <property name="dataValueStore" ref="org.hisp.dhis.datavalue.DataValueStore" />
+    <property name="dataValueAuditService" ref="org.hisp.dhis.datavalue.DataValueAuditService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
@@ -477,6 +485,7 @@
     class="org.hisp.dhis.dataset.DefaultCompleteDataSetRegistrationService">
     <property name="completeDataSetRegistrationStore" ref="org.hisp.dhis.dataset.CompleteDataSetRegistrationStore" />
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataset.SectionService" class="org.hisp.dhis.dataset.DefaultSectionService">
@@ -634,7 +643,14 @@
 
   <bean id="emailMessageSender" class="org.hisp.dhis.message.EmailMessageSender">
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+    <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.email.EmailService" class="org.hisp.dhis.email.DefaultEmailService">
+    <property name="emailMessageSender" ref="emailMessageSender" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.concept.ConceptService" class="org.hisp.dhis.concept.DefaultConceptService">
@@ -666,6 +682,7 @@
 
   <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
+    <property name="optionValueStore" ref="org.hisp.dhis.option.OptionValueStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -788,6 +805,12 @@
         </entry>
         <entry>
           <key>
+            <value>myanmar</value>
+          </key>
+          <value>myanmar/myanmar.css</value>
+        </entry>
+        <entry>
+          <key>
             <value>vietnam</value>
           </key>
           <value>vietnam/vietnam.css</value>
@@ -811,7 +834,7 @@
   <bean id="org.hisp.dhis.system.SystemService" class="org.hisp.dhis.system.DefaultSystemService" />
 
   <!-- SMS Services -->
-
+  
   <bean id="org.hisp.dhis.sms.MessageQueue" class="org.hisp.dhis.sms.DatabaseSupportedInternalMemoryMessageQueue">
     <property name="smsStore" ref="org.hisp.dhis.sms.hibernate.IncomingSmsStore" />
   </bean>
@@ -902,9 +925,24 @@
     <property name="localeStore" ref="org.hisp.dhis.i18n.I18nLocaleStore" />
   </bean>
 
-  <!--
-  <bean id="hibernateEntityInterceptorWiring" class="org.hisp.dhis.hibernate.HibernateEventListenerWiring" />
-  -->
+  <!-- I18n UI -->
+
+  <bean id="org.hisp.dhis.i18n.locale.LocaleManager" class="org.hisp.dhis.i18n.ui.locale.UserSettingLocaleManager">
+    <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
+    <property name="resourceBundleManager" ref="org.hisp.dhis.i18n.ui.resourcebundle.ResourceBundleManager" />
+  </bean>
+
+  <bean id="org.hisp.dhis.i18n.I18nManager" class="org.hisp.dhis.i18n.ui.DefaultI18nManager">
+    <property name="resourceBundleManager" ref="org.hisp.dhis.i18n.ui.resourcebundle.ResourceBundleManager" />
+    <property name="localeManager">
+      <ref local="org.hisp.dhis.i18n.locale.LocaleManager" />
+    </property>
+  </bean>
+
+  <bean id="org.hisp.dhis.i18n.ui.resourcebundle.ResourceBundleManager" class="org.hisp.dhis.i18n.ui.resourcebundle.DefaultResourceBundleManager">
+    <property name="globalResourceBundleName" value="i18n_global" />
+    <property name="specificResourceBundleName" value="i18n_module" />
+  </bean>
 
   <!-- Scheduled task for data monitoring -->
 
@@ -912,10 +950,16 @@
 
   <!-- Startup routine definitions -->
 
+  <bean id="org.hisp.dhis.startup.InitTableAlteror" class="org.hisp.dhis.startup.InitTableAlteror">
+    <property name="name" value="TableAlteror" />
+    <property name="runlevel" value="1" />
+    <property name="skipInTests" value="true" />
+  </bean>
+
   <bean id="org.hisp.dhis.period.PeriodTypePopulator" class="org.hisp.dhis.period.PeriodTypePopulator">
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
     <property name="name" value="PeriodTypePopulator" />
-    <property name="runlevel" value="1" />
+    <property name="runlevel" value="2" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"
@@ -924,18 +968,18 @@
     <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="name" value="DataElementDefaultDimensionPopulator" />
-    <property name="runlevel" value="1" />
+    <property name="runlevel" value="2" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.TableAlteror" class="org.hisp.dhis.startup.TableAlteror">
     <property name="name" value="TableAlteror" />
-    <property name="runlevel" value="2" />
+    <property name="runlevel" value="3" />
     <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.common.IdentityPopulator" class="org.hisp.dhis.common.IdentityPopulator">
     <property name="name" value="IdentityPopulator" />
-    <property name="runlevel" value="3" />
+    <property name="runlevel" value="4" />
     <property name="skipInTests" value="true" />
     <property name="tables">
       <list>
@@ -968,6 +1012,7 @@
         <value>usergroup</value>
         <value>userrole</value>
         <value>optionset</value>
+        <value>optionvalue</value>
         <value>validationcriteria</value>
       </list>
     </property>
@@ -975,35 +1020,35 @@
 
   <bean id="org.hisp.dhis.startup.TableCreator" class="org.hisp.dhis.startup.TableCreator">
     <property name="name" value="TableCreator" />
-    <property name="runlevel" value="3" />
+    <property name="runlevel" value="5" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.MapViewUpgrader" class="org.hisp.dhis.startup.MapViewUpgrader">
     <property name="statementManager" ref="statementManager" />
     <property name="batchHandlerFactory" ref="batchHandlerFactory" />
     <property name="name" value="MapViewUpgrader" />
-    <property name="runlevel" value="4" />
+    <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.dataentryform.DataEntryFormUpgrader" class="org.hisp.dhis.dataentryform.DataEntryFormUpgrader">
     <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
-    <property name="runlevel" value="5" />
+    <property name="runlevel" value="7" />
     <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.ExpressionUpgrader" class="org.hisp.dhis.startup.ExpressionUpgrader">
-    <property name="runlevel" value="6" />
+    <property name="runlevel" value="8" />
     <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.ConfigurationPopulator" class="org.hisp.dhis.startup.ConfigurationPopulator">
-    <property name="runlevel" value="7" />
+    <property name="runlevel" value="9" />
     <property name="skipInTests" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.startup.I18nLocalePopulator" class="org.hisp.dhis.startup.I18nLocalePopulator">
-    <property name="runlevel" value="7" />
+    <property name="runlevel" value="9" />
     <property name="skipInTests" value="true" />
   </bean>
 
@@ -1013,6 +1058,7 @@
     <property name="arguments">
       <list>
         <list>
+          <ref local="org.hisp.dhis.startup.InitTableAlteror" />
           <ref local="org.hisp.dhis.startup.TableAlteror" />
           <ref local="org.hisp.dhis.startup.MapViewUpgrader" />
           <ref local="org.hisp.dhis.common.IdentityPopulator" />

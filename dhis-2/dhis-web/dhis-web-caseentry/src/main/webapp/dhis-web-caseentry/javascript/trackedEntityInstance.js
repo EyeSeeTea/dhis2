@@ -583,15 +583,12 @@ function loadDataEntry(programStageInstanceId) {
 					if (executionDate == '') {
 						disable('validationBtn');
 					} else if (executionDate != '') {
-						if (completed == 'false') {
-							disableCompletedButton(false);
-						} else if (completed == 'true') {
-							disableCompletedButton(true);
-						}
+						disableCompletedButton(completed);
 					}
 					$(window).scrollTop(200);
 				} else {
 					blockEntryForm();
+					disableCompletedButton(completed);
 					disable('executionDate');
 					hideById('inputCriteriaDiv');
 				}
@@ -613,22 +610,33 @@ function loadDataEntry(programStageInstanceId) {
 
 function searchByIdsOnclick()
 {
-	if( getFieldValue('searchPatientByAttributes')==''){
+	if( getFieldValue('searchTeiByAttributes')==''){
 		return;
 	}
+	var params = "ou=" + getFieldValue("orgunitId");
+	params += "&page=1";
+	if (getFieldValue('program') != '') {
+		params += "&program=" + getFieldValue('program');
+		if( getFieldValue('programStatus')!=""){
+			params += "&programStatus=" + getFieldValue('programStatus');
+		}
+	}
 	
-	jQuery('#listEntityInstanceDiv').load(
-		'searchTrackedEntityInstance.action', {
-			orgunitId: getFieldValue('orgunitId'),
-			attributeValue: getFieldValue('searchPatientByAttributes'),
-			programId: getFieldValue('program')
-		}, function() {
-			setInnerHTML('orgunitInfor', getFieldValue('orgunitName'));
-			if( getFieldValue('program')!= ''){
-				var programName = jQuery('#programIdAddTrackedEntity option:selected').text();
-				setInnerHTML('enrollmentInfor', i18n_enrollments_in + " " + programName + " " + i18n_program);
-			}
+	params += "&query=LIKE:" + getFieldValue('searchTeiByAttributes');
+	
+	$('#attributeIds option').each(function(i, item) {
+		params += "&attribute=" + item.value;
+	}); 
+	
+	$.ajax({
+		url : '../api/trackedEntityInstances.json',
+		type : "GET",
+		data : params,
+		success : function(json) {
+			setInnerHTML('listEntityInstanceDiv', displayTEIList(json, 1));
 			showById('listEntityInstanceDiv');
 			jQuery('#loaderDiv').hide();
-		});
+			setTableStyles();
+		}
+	});
 }

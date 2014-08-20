@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.hisp.dhis</groupId>
     <artifactId>dhis-services</artifactId>
-    <version>2.16-SNAPSHOT</version>
+    <version>2.17-SNAPSHOT</version>
   </parent>
 
   <artifactId>dhis-service-tracker</artifactId>
@@ -20,10 +20,6 @@
     <dependency>
       <groupId>org.hisp.dhis</groupId>
       <artifactId>dhis-service-core</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.hisp.dhis</groupId>
-      <artifactId>dhis-service-i18n</artifactId>
     </dependency>
 	
   </dependencies>

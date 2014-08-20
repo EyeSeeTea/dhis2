@@ -121,7 +121,7 @@ public class DefaultModuleManager
     {
         detectModules();
 
-        return menuModules;
+        return new ArrayList<Module>( menuModules );
     }
 
     public List<Module> getAccessibleMenuModules()
@@ -149,7 +149,7 @@ public class DefaultModuleManager
     {
         detectModules();
 
-        return modulesByName.values();
+        return new ArrayList<Module>( modulesByName.values() );
     }
     
     public Module getCurrentModule()
@@ -245,16 +245,24 @@ public class DefaultModuleManager
     
     private List<Module> getAccessibleModules( List<Module> modules )
     {
-        List<Module> list = new ArrayList<Module>();
+        List<Module> allowed = new ArrayList<Module>();
         
         for ( Module module : modules )
         {
             if ( module != null && actionAccessResolver.hasAccess( module.getName(), defaultActionName ) )
             {
-                list.add( module );
+                allowed.add( module );
             }
         }
         
-        return list;
+        if ( modules.size() > allowed.size() )
+        {
+            List<Module> denied = new ArrayList<Module>( modules );
+            denied.removeAll( allowed );
+            
+            log.debug( "User denied access to modules: " + denied );
+        }
+        
+        return allowed;
     }
 }

@@ -66,14 +66,6 @@ public interface DataElementStore
     Collection<DataElement> getAggregateableDataElements();
 
     /**
-     * Returns all active DataElements.
-     * 
-     * @return a collection of all active DataElements, or an empty collection
-     *         if there are no active DataElements.
-     */
-    Collection<DataElement> getAllActiveDataElements();
-
-    /**
      * Returns all DataElements with a given aggregation operator.
      * 
      * @param aggregationOperator the aggregation operator of the DataElements
@@ -90,7 +82,7 @@ public interface DataElementStore
      * @param domainType the domainType.
      * @return all DataElements with the given domainType.
      */
-    Collection<DataElement> getDataElementsByDomainType( String domainType );
+    Collection<DataElement> getDataElementsByDomainType( DataElementDomain domainType );
 
     /**
      * Returns all DataElements with the given domain type.
@@ -98,7 +90,7 @@ public interface DataElementStore
      * @param domainType the domainType.
      * @return all DataElements with the given domainType.
      */
-    Collection<DataElement> getDataElementsByDomainType( String domainType, int first, int max );
+    Collection<DataElement> getDataElementsByDomainType( DataElementDomain domainType, int first, int max );
 
     /**
      * Returns all DataElements with the given type.
@@ -188,5 +180,5 @@ public interface DataElementStore
     
     Collection<DataElement> get( DataSet dataSet, String key, Integer max );
 
-    int getCountByDomainType( String domainType );
+    int getCountByDomainType( DataElementDomain domainType );
 }

@@ -33,10 +33,10 @@ import java.io.InputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dxf2.csv.CsvImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.dxf2.utils.CsvObjectUtils;
 import org.hisp.dhis.scheduling.TaskId;
 
 /**
@@ -48,7 +48,9 @@ public class ImportMetaDataCsvTask
     private static final Log log = LogFactory.getLog( ImportMetaDataTask.class );
 
     private ImportService importService;
-
+    
+    private CsvImportService csvImportService;
+    
     private ImportOptions importOptions;
 
     private InputStream inputStream;
@@ -59,11 +61,14 @@ public class ImportMetaDataCsvTask
     
     private Class<?> clazz;
 
-    public ImportMetaDataCsvTask( String userUid, ImportService importService, ImportOptions importOptions, InputStream inputStream,
+    public ImportMetaDataCsvTask( String userUid, ImportService importService, 
+        CsvImportService csvImportService,
+        ImportOptions importOptions, InputStream inputStream,
         TaskId taskId, Class<?> clazz )
     {
         this.userUid = userUid;
         this.importService = importService;
+        this.csvImportService = csvImportService;
         this.importOptions = importOptions;
         this.inputStream = inputStream;
         this.taskId = taskId;
@@ -74,10 +79,10 @@ public class ImportMetaDataCsvTask
     public void run()
     {
         MetaData metaData = null;
-        
+                
         try
         {
-            metaData = CsvObjectUtils.fromCsv( inputStream, clazz );
+            metaData = csvImportService.fromCsv( inputStream, clazz );
         }
         catch ( IOException ex )
         {

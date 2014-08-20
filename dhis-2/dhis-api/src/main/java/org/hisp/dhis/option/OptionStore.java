@@ -28,6 +28,7 @@ package org.hisp.dhis.option;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
 import java.util.List;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
@@ -39,6 +40,10 @@ import org.hisp.dhis.common.GenericIdentifiableObjectStore;
  */
 public interface OptionStore extends GenericIdentifiableObjectStore<OptionSet>
 {
-    List<String> getOptions( int optionSetId, String key, Integer max  );
+    List<Option> getOptions( int optionSetId, String key, Integer max  );
+   
+    Option getOptionValueByName( OptionSet optionSet, String name );
+
+    Collection<Option> getOptionValues( OptionSet optionSet, String option, Integer min, Integer max );
 }
 

@@ -275,7 +275,43 @@ Ext.onReady(function() {
                     ok: 'ok.png'
                 }
             };
-
+            
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,name]]',
+                    'rows[dimension,filter,items[id,name]]',
+                    'filters[dimension,filter,items[id,name]]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
+            };
         }());
 
         // api
@@ -631,6 +667,8 @@ Ext.onReady(function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
+                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
+
 					if (!validateSpecialCases()) {
 						return;
 					}
@@ -694,10 +732,12 @@ Ext.onReady(function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-
+                    
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
-						return;
+                        if (!DV.plugin) {
+                            alert('No values found');
+                        }
+                        return;
 					}
 
 					if (config.headers.length !== config.rows[0].length) {
@@ -813,8 +853,17 @@ Ext.onReady(function() {
 				// str
 			support.prototype.str = {};
 
-			support.prototype.str.replaceAll = function(str, find, replace) {
-				return str.replace(new RegExp(find, 'g'), replace);
+			support.prototype.str.replaceAll = function(variable, find, replace) {
+                if (Ext.isString(variable)) {
+                    variable = variable.split(find).join(replace);
+                }
+                else if (Ext.isArray(variable)) {
+                    for (var i = 0; i < variable.length; i++) {
+                        variable[i] = variable[i].split(find).join(replace);
+                    }
+                }
+
+                return variable;
 			};
 		}());
 
@@ -915,209 +964,225 @@ Ext.onReady(function() {
 			};
 
 			service.layout.getExtendedLayout = function(layout) {
-                var layout = Ext.clone(layout),
-                    xLayout = {
-                        columns: [],
-                        rows: [],
-                        filters: [],
+				var layout = Ext.clone(layout),
+					xLayout;
 
-                        columnObjectNames: [],
-                        columnDimensionNames: [],
-                        columnItems: [],
-                        columnIds: [],
-                        rowObjectNames: [],
-                        rowDimensionNames: [],
-                        rowItems: [],
-                        rowIds: [],
+				xLayout = {
+					columns: [],
+					rows: [],
+					filters: [],
 
-                        // Axis
-                        axisDimensions: [],
-                        axisObjectNames: [],
-                        axisDimensionNames: [],
+					columnObjectNames: [],
+					columnDimensionNames: [],
+					rowObjectNames: [],
+					rowDimensionNames: [],
 
-                            // For param string
-                        sortedAxisDimensionNames: [],
+					// axis
+					axisDimensions: [],
+					axisObjectNames: [],
+					axisDimensionNames: [],
 
-                        // Filter
-                        filterDimensions: [],
-                        filterObjectNames: [],
-                        filterDimensionNames: [],
-                        filterItems: [],
-                        filterIds: [],
+						// for param string
+					sortedAxisDimensionNames: [],
 
-                            // For param string
-                        sortedFilterDimensions: [],
+					// Filter
+					filterDimensions: [],
+					filterObjectNames: [],
+					filterDimensionNames: [],
 
-                        // All
-                        dimensions: [],
-                        objectNames: [],
-                        dimensionNames: [],
+						// for param string
+					sortedFilterDimensions: [],
 
-                        // Object name maps
-                        objectNameDimensionsMap: {},
-                        objectNameItemsMap: {},
-                        objectNameIdsMap: {},
+					// all
+					dimensions: [],
+					objectNames: [],
+					dimensionNames: [],
 
-                        // Dimension name maps
-                        dimensionNameDimensionsMap: {},
-                        dimensionNameItemsMap: {},
-                        dimensionNameIdsMap: {},
+					// oject name maps
+					objectNameDimensionsMap: {},
+					objectNameItemsMap: {},
+					objectNameIdsMap: {},
 
-                            // For param string
-                        dimensionNameSortedIdsMap: {}
-                    };
+					// dimension name maps
+					dimensionNameDimensionsMap: {},
+					dimensionNameItemsMap: {},
+					dimensionNameIdsMap: {},
 
-                Ext.applyIf(xLayout, layout);
+						// for param string
+					dimensionNameSortedIdsMap: {}
 
-                // Columns, rows, filters
-                if (layout.columns) {
-                    for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
-                        dim = layout.columns[i];
-                        items = dim.items;
-                        xDim = {};
+					// sort table by column
+					//sortableIdObjects: []
+				};
 
-                        xDim.dimension = dim.dimension;
-                        xDim.objectName = dim.dimension;
-                        xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+				Ext.applyIf(xLayout, layout);
 
-                        if (items) {
-                            xDim.items = items;
-                            xDim.ids = [];
+				// columns, rows, filters
+				if (layout.columns) {
+                    //layout.columns = support.prototype.array.uniqueByProperty(layout.columns, 'dimension');
 
-                            for (var j = 0; j < items.length; j++) {
-                                xDim.ids.push(items[j].id);
-                            }
-                        }
+					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
+						dim = layout.columns[i];
+						items = dim.items;
+						xDim = {};
 
-                        xLayout.columns.push(xDim);
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
-                        xLayout.columnObjectNames.push(xDim.objectName);
-                        xLayout.columnDimensionNames.push(xDim.dimensionName);
-                        xLayout.columnItems = xLayout.columnItems.concat(xDim.items);
-                        xLayout.columnIds = xLayout.columnIds.concat(xDim.ids);
+						xDim.items = [];
+						xDim.ids = [];
 
-                        xLayout.axisDimensions.push(xDim);
-                        xLayout.axisObjectNames.push(xDim.objectName);
-                        xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+						if (items) {
+							xDim.items = items;
 
-                        xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
-                        xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
-                        xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
-                    }
-                }
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
 
-                if (layout.rows) {
-                    for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
-                        dim = layout.rows[i];
-                        items = dim.items;
-                        xDim = {};
+						xLayout.columns.push(xDim);
 
-                        xDim.dimension = dim.dimension;
-                        xDim.objectName = dim.dimension;
-                        xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+						xLayout.columnObjectNames.push(xDim.objectName);
+						xLayout.columnDimensionNames.push(xDim.dimensionName);
 
-                        if (items) {
-                            xDim.items = items;
-                            xDim.ids = [];
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
-                            for (var j = 0; j < items.length; j++) {
-                                xDim.ids.push(items[j].id);
-                            }
-                        }
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
 
-                        xLayout.rows.push(xDim);
+				if (layout.rows) {
+                    //layout.rows = support.prototype.array.uniqueByProperty(layout.rows, 'dimension');
 
-                        xLayout.rowObjectNames.push(xDim.objectName);
-                        xLayout.rowDimensionNames.push(xDim.dimensionName);
-                        xLayout.rowItems = xLayout.rowItems.concat(xDim.items);
-                        xLayout.rowIds = xLayout.rowIds.concat(xDim.ids);
+					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
+						dim = Ext.clone(layout.rows[i]);
+						items = dim.items;
+						xDim = {};
 
-                        xLayout.axisDimensions.push(xDim);
-                        xLayout.axisObjectNames.push(xDim.objectName);
-                        xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
-                        xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
-                        xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
-                        xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
-                    }
-                }
+						xDim.items = [];
+						xDim.ids = [];
 
-                if (layout.filters) {
-                    for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
-                        dim = layout.filters[i];
-                        items = dim.items;
-                        xDim = {};
+						if (items) {
+							xDim.items = items;
 
-                        xDim.dimension = dim.dimension;
-                        xDim.objectName = dim.dimension;
-                        xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
 
-                        if (items) {
-                            xDim.items = items;
-                            xDim.ids = [];
+						xLayout.rows.push(xDim);
 
-                            for (var j = 0; j < items.length; j++) {
-                                xDim.ids.push(items[j].id);
-                            }
-                        }
+						xLayout.rowObjectNames.push(xDim.objectName);
+						xLayout.rowDimensionNames.push(xDim.dimensionName);
 
-                        xLayout.filters.push(xDim);
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
-                        xLayout.filterDimensions.push(xDim);
-                        xLayout.filterObjectNames.push(xDim.objectName);
-                        xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
-                        xLayout.filterItems = xLayout.filterItems.concat(xDim.items);
-                        xLayout.filterIds = xLayout.filterIds.concat(xDim.ids);
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
 
-                        xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
-                        xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
-                        xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
-                    }
-                }
+				if (layout.filters) {
+                    //layout.filters = support.prototype.array.uniqueByProperty(layout.filters, 'dimension');
 
-                // Unique dimension names
-                xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
-                xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
+						items = dim.items;
+						xDim = {};
 
-                xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
-                xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
-                xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
 
-                    // For param string
-                xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
-                xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
+						xDim.items = [];
+						xDim.ids = [];
 
-                // All
-                xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
-                xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
-                xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
+						if (items) {
+							xDim.items = items;
 
-                // Dimension name maps
-                for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
-                    dimName = xLayout.dimensionNames[i];
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
 
-                    xLayout.dimensionNameDimensionsMap[dimName] = [];
-                    xLayout.dimensionNameItemsMap[dimName] = [];
-                    xLayout.dimensionNameIdsMap[dimName] = [];
-                }
+						xLayout.filters.push(xDim);
 
-                for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
-                    xDim = xLayout.dimensions[i];
+						xLayout.filterDimensions.push(xDim);
+						xLayout.filterObjectNames.push(xDim.objectName);
+						xLayout.filterDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
 
-                    xLayout.dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
-                    xLayout.dimensionNameItemsMap[xDim.dimensionName] = xLayout.dimensionNameItemsMap[xDim.dimensionName].concat(xDim.items);
-                    xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
-                }
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
 
-                    // For param string
-                for (var key in xLayout.dimensionNameIdsMap) {
-                    if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
-                        xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
-                    }
-                }
+				// legend set
+				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
 
-                return xLayout;
-            };
+				if (layout.legendSet && layout.legendSet.mapLegends) {
+					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
+					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
+				}
+
+				// unique dimension names
+				xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+				xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+				xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+					// for param string
+				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
+				xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
+
+				// all
+				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
+				xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
+				xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
+
+				// dimension name maps
+				for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
+					dimName = xLayout.dimensionNames[i];
+
+					xLayout.dimensionNameDimensionsMap[dimName] = [];
+					xLayout.dimensionNameItemsMap[dimName] = [];
+					xLayout.dimensionNameIdsMap[dimName] = [];
+				}
+
+				for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
+					xDim = xLayout.dimensions[i];
+
+					xLayout.dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
+					xLayout.dimensionNameItemsMap[xDim.dimensionName] = xLayout.dimensionNameItemsMap[xDim.dimensionName].concat(xDim.items);
+					xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
+				}
+
+					// for param string
+				for (var key in xLayout.dimensionNameIdsMap) {
+					if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
+						xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
+					}
+				}
+
+				// Uuid
+				xLayout.tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
+
+				return xLayout;
+			};
 
 			service.layout.getSyncronizedXLayout = function(xLayout, response) {
 				var dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
@@ -1301,6 +1366,10 @@ Ext.onReady(function() {
 					}
 				}
 
+				if (!layout.hideEmptyRows) {
+					delete layout.hideEmptyRows;
+				}
+
 				if (!layout.showTrendLine) {
 					delete layout.showTrendLine;
 				}
@@ -1319,10 +1388,6 @@ Ext.onReady(function() {
 
 				if (!layout.baseLineTitle) {
 					delete layout.baseLineTitle;
-				}
-
-				if (layout.showValues) {
-					delete layout.showValues;
 				}
 
 				if (!layout.hideLegend) {
@@ -1345,8 +1410,34 @@ Ext.onReady(function() {
 					delete layout.rangeAxisTitle;
 				}
 
+				if (!layout.rangeAxisMaxValue) {
+					delete layout.rangeAxisMaxValue;
+				}
+
+				if (!layout.rangeAxisMinValue) {
+					delete layout.rangeAxisMinValue;
+				}
+
+				if (!layout.rangeAxisSteps) {
+					delete layout.rangeAxisSteps;
+				}
+
+				if (!layout.rangeAxisDecimals) {
+					delete layout.rangeAxisDecimals;
+				}
+
 				if (!layout.sorting) {
 					delete layout.sorting;
+				}
+
+				if (!layout.legend) {
+					delete layout.legend;
+				}
+
+                // default true
+
+				if (layout.showValues) {
+					delete layout.showValues;
 				}
 
 				delete layout.parentGraphMap;
@@ -1730,8 +1821,39 @@ Ext.onReady(function() {
 			web.chart = {};
 
 			web.chart.createChart = function(ns) {
-				var xResponse = ns.app.xResponse,
-					xLayout = ns.app.xLayout,
+                var xLayout = ns.app.xLayout,
+                    xResponse = ns.app.xResponse,
+                    //columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
+                    columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
+                    replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
+                    //rowIds = xLayout.rows[0] ? xLayout.rows[0].ids : [],
+                    rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
+                    replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
+                    filterIds = function() {
+                        var ids = [];
+                        
+                        if (xLayout.filters) {
+                            for (var i = 0; i < xLayout.filters.length; i++) {
+                                ids = ids.concat(xLayout.filters[i].ids || []);
+                            }
+                        }
+
+                        return ids;
+                    }(),
+                    replacedFilterIds = support.prototype.str.replaceAll(Ext.clone(filterIds), '.', ''),
+
+                    replacedIdMap = function() {
+                        var map = {},
+                            names = xResponse.metaData.names,
+                            ids = Ext.clean([].concat(columnIds || [], rowIds || [], filterIds || [])),
+                            replacedIds = Ext.clean([].concat(replacedColumnIds || [], replacedRowIds || [], replacedFilterIds || []));
+
+                        for (var i = 0; i < replacedIds.length; i++) {
+                            map[replacedIds[i]] = ids[i];
+                        }
+
+                        return map;
+                    }(),
 
 					getSyncronizedXLayout,
                     getExtendedResponse,
@@ -1761,8 +1883,8 @@ Ext.onReady(function() {
                         rowDimensionName = xLayout.rows[0].dimensionName,
 
                         data = [],
-                        columnIds = xLayout.columnIds,
-                        rowIds = xLayout.rowIds,
+                        //columnIds = xLayout.columnIds,
+                        //rowIds = xLayout.rowIds,
                         trendLineFields = [],
                         targetLineFields = [],
                         baseLineFields = [],
@@ -1799,8 +1921,9 @@ Ext.onReady(function() {
                             regression = new SimpleRegression();
                             key = conf.finals.data.trendLine + columnIds[i];
 
-                            for (var j = 0; j < data.length; j++) {
-                                regression.addData(j, data[j][columnIds[i]]);
+                            for (var j = 0, value; j < data.length; j++) {
+                                value = data[j][replacedColumnIds[i]];
+                                regression.addData(j, parseFloat(value));
                             }
 
                             for (var j = 0; j < data.length; j++) {
@@ -1862,7 +1985,7 @@ Ext.onReady(function() {
                         var minimums = [];
 
                         for (var i = 0; i < store.numericFields.length; i++) {
-                            minimums.push(store.max(store.numericFields[i]));
+                            minimums.push(store.min(store.numericFields[i]));
                         }
 
                         return Ext.Array.min(minimums);
@@ -2032,13 +2155,28 @@ Ext.onReady(function() {
                 getDefaultSeriesTitle = function(store) {
                     var a = [];
 
-                    for (var i = 0, id, ids; i < store.rangeFields.length; i++) {
-                        id = store.rangeFields[i];
-                        a.push(xResponse.metaData.names[id]);
+                    if (Ext.isObject(xLayout.legend) && Ext.isArray(xLayout.legend.seriesNames)) {
+                        return xLayout.legend.seriesNames;
+                    }
+                    else {
+                        for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
+                            id = store.rangeFields[i];
+                            name = xResponse.metaData.names[id];
+
+                            if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
+                                var mxl = parseInt(xLayout.legend.maxLength);
+
+                                if (Ext.isNumber(mxl)) {
+                                    name = name.substr(0, mxl) + '..';
+                                }
+                            }
+                            
+                            a.push(name);
+                        }
                     }
 
                     return a;
-                };
+				};
 
                 getDefaultSeries = function(store) {
                     var main = {
@@ -2065,7 +2203,7 @@ Ext.onReady(function() {
                             field: store.rangeFields,
                             font: conf.chart.style.fontFamily,
                             renderer: function(n) {
-                                return n === '0.0' ? '-' : n;                                    
+                                return n === '0.0' ? '' : n;                                    
                             }
                         };
                     }
@@ -2177,7 +2315,9 @@ Ext.onReady(function() {
                         width,
                         isVertical = false,
                         position = 'top',
-                        padding = 0;
+                        fontSize = 12,
+                        padding = 0,
+                        positions = ['top', 'right', 'bottom', 'left'];
 
                     if (xLayout.type === conf.finals.chart.pie) {
                         numberOfItems = store.getCount();
@@ -2214,10 +2354,20 @@ Ext.onReady(function() {
                         padding = 5;
                     }
 
+                    // legend
+                    if (xLayout.legend) {
+                        if (Ext.Array.contains(positions, xLayout.legend.position)) {
+                            position = xLayout.legend.position;
+                        }
+
+                        fontSize = parseInt(xLayout.legend.fontSize) || fontSize;
+                        fontSize = fontSize + 'px';
+                    }
+
                     return Ext.create('Ext.chart.Legend', {
                         position: position,
                         isVertical: isVertical,
-                        labelFont: '13px ' + conf.chart.style.fontFamily,
+                        labelFont: fontSize + ' ' + conf.chart.style.fontFamily,
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding
@@ -2225,13 +2375,13 @@ Ext.onReady(function() {
                 };
 
                 getDefaultChartTitle = function(store) {
-                    var ids = xLayout.filterIds,
+                    var ids = filterIds,
                         a = [],
                         text = '',
                         fontSize;
 
                     if (xLayout.type === conf.finals.chart.pie) {
-                        ids = ids.concat(xLayout.columnIds);
+                        ids = ids.concat(columnIds);
                     }
 
                     if (Ext.isArray(ids) && ids.length) {
@@ -2783,7 +2933,7 @@ Ext.onReady(function() {
 		});
 
 		requests.push({
-			url: url + '/api/organisationUnits.jsonp?userOnly=true&viewClass=detailed&paging=false&links=false',
+			url: url + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
 			success: function(r) {
 				var organisationUnits = r.organisationUnits || [],
                     ou = [],
@@ -2794,7 +2944,10 @@ Ext.onReady(function() {
                         org = organisationUnits[i];
 
                         ou.push(org.id);
-                        ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+
+                        if (org.children) {
+                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                        }
                     }
 
                     init.user = {
@@ -2809,14 +2962,6 @@ Ext.onReady(function() {
                 fn();
 			}
 		});
-
-		//requests.push({
-			//url: url + '/api/mapLegendSets.jsonp?viewClass=detailed&links=false&paging=false',
-			//success: function(r) {
-				//init.legendSets = r.mapLegendSets;
-				//fn();
-			//}
-		//});
 
 		requests.push({
 			url: url + '/api/dimensions.jsonp?links=false&paging=false',
@@ -2860,6 +3005,7 @@ Ext.onReady(function() {
         extendInstance = function(ns) {
             var init = ns.core.init,
 				api = ns.core.api,
+                conf = ns.core.conf,
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web;
@@ -2869,18 +3015,20 @@ Ext.onReady(function() {
 
 			web.chart = web.chart || {};
 
-            web.chart.loadChart = function(id) {
+            web.chart.loadChart = function(id, config) {
 				if (!Ext.isString(id)) {
 					alert('Invalid chart id');
 					return;
 				}
 
 				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/charts/' + id + '.jsonp?viewClass=dimensional&links=false',
+					url: init.contextPath + '/api/charts/' + id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
-						window.open(init.contextPath + '/api/charts/' + id + '.json?viewClass=dimensional&links=false', '_blank');
+						window.open(init.contextPath + '/api/charts/' + id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
 					},
 					success: function(r) {
+                        Ext.apply(r, config);
+                        
 						var layout = api.layout.Layout(r);
 
 						if (layout) {
@@ -3021,7 +3169,7 @@ Ext.onReady(function() {
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
 			if (config.id) {
-				ns.core.web.chart.loadChart(config.id);
+				ns.core.web.chart.loadChart(config.id, config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);

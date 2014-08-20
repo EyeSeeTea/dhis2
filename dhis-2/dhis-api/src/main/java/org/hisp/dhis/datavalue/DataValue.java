@@ -55,6 +55,10 @@ public class DataValue
     public static final String TRUE = "true";
     public static final String FALSE = "false";
 
+    // -------------------------------------------------------------------------
+    // Persistent properties
+    // -------------------------------------------------------------------------
+
     private DataElement dataElement;
 
     private Period period;
@@ -69,11 +73,23 @@ public class DataValue
 
     private String storedBy;
 
-    private Date timestamp;
+    private Date created;
+
+    private Date lastUpdated;
 
     private String comment;
 
     private Boolean followup;
+
+    // -------------------------------------------------------------------------
+    // Transient properties
+    // -------------------------------------------------------------------------
+
+    private transient boolean auditValueIsSet = false;
+
+    private transient boolean valueIsSet = false;
+
+    private transient String auditValue;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -81,6 +97,7 @@ public class DataValue
 
     public DataValue()
     {
+        this.created = new Date();
     }
 
     /**
@@ -97,6 +114,7 @@ public class DataValue
         this.source = source;
         this.categoryOptionCombo = categoryOptionCombo;
         this.attributeOptionCombo = attributeOptionCombo;
+        this.created = new Date();
     }
 
     /**
@@ -107,11 +125,11 @@ public class DataValue
      * @param attributeOptionCombo the attribute option combo.
      * @param value the value.
      * @param storedBy the user that stored this data value.
-     * @param timestamp the time of creation of this data value.
+     * @param lastUpdated the time of the last update to this data value.
      * @param comment the comment.
      */
     public DataValue( DataElement dataElement, Period period, OrganisationUnit source, DataElementCategoryOptionCombo categoryOptionCombo, 
-        DataElementCategoryOptionCombo attributeOptionCombo, String value, String storedBy, Date timestamp, String comment )
+        DataElementCategoryOptionCombo attributeOptionCombo, String value, String storedBy, Date lastUpdated, String comment )
     {
         this.dataElement = dataElement;
         this.period = period;
@@ -120,7 +138,8 @@ public class DataValue
         this.attributeOptionCombo = attributeOptionCombo;
         this.value = value;
         this.storedBy = storedBy;
-        this.timestamp = timestamp;
+        this.created = new Date();
+        this.lastUpdated = lastUpdated;
         this.comment = comment;
     }
 
@@ -229,6 +248,16 @@ public class DataValue
 
         return result;
     }
+    
+    @Override
+    public String toString()
+    {
+        return "[Data element: " + dataElement.getUid() +
+            ", period: " + period.getUid() +
+            ", source: " + source.getUid() +
+            ", category option combo: " + categoryOptionCombo.getUid() +
+            ", attribute option combo: " + attributeOptionCombo.getUid() + "]";
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -291,6 +320,14 @@ public class DataValue
 
     public void setValue( String value )
     {
+        if( !auditValueIsSet )
+        {
+            this.auditValue = valueIsSet ? this.value : value;
+            auditValueIsSet = true;
+        }
+
+        valueIsSet = true;
+
         this.value = value;
     }
 
@@ -304,16 +341,26 @@ public class DataValue
         this.storedBy = storedBy;
     }
 
-    public Date getTimestamp()
+    public Date getCreated()
     {
-        return timestamp;
+        return created;
     }
 
-    public void setTimestamp( Date timestamp )
+    public void setCreated( Date created )
     {
-        this.timestamp = timestamp;
+        this.created = created;
     }
 
+    public Date getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    public void setLastUpdated( Date lastUpdated )
+    {
+        this.lastUpdated = lastUpdated;
+    }
+    
     public String getComment()
     {
         return comment;
@@ -332,5 +379,10 @@ public class DataValue
     public void setFollowup( Boolean followup )
     {
         this.followup = followup;
+    }
+
+    public String getAuditValue()
+    {
+        return auditValue;
     }
 }

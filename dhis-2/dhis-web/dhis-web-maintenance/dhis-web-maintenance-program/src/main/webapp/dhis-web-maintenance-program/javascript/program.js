@@ -47,6 +47,7 @@ function showProgramDetails( context ) {
   }, function( json ) {
     setInnerHTML('nameField', json.program.name);
     setInnerHTML('descriptionField', json.program.description);
+    setInnerHTML('idField', json.program.uid);
 
     var type = i18n_multiple_events_with_registration;
     if( json.program.type == "2" )
@@ -108,7 +109,6 @@ function relationshipTypeOnchange() {
 
 function programOnChange() {
   var type = getFieldValue('type');
-  var isShowAdvancedOptions = jQuery('#showAdvancedOptionLink').is(':hidden');
   
   // anonymous
   if( type == "3" ) {
@@ -127,6 +127,7 @@ function programOnChange() {
     jQuery("[name=displayed]").removeAttr("checked");
 
     jQuery("[name=nonAnonymous]").hide();
+    jQuery('.multiEvents').hide();
   }
   else {
     enable('onlyEnrollOnce');
@@ -153,13 +154,7 @@ function programOnChange() {
     else {
       disable("dateOfIncidentDescription");
     }
-  }
-  
-  if( isShowAdvancedOptions ){
-	showAdvancedOptions();
-  }
-  else{
-	hideAdvancedOptions();
+	jQuery('.multiEvents').show();
   }
 }
 
@@ -171,10 +166,18 @@ function selectProperties() {
   var selectedList = jQuery("#selectedList");
   jQuery("#availablePropertyIds").children().each(function( i, item ) {
     if( item.selected ) {
-      html  = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectProperties( this )'><td onmousedown='select(event,this)'>" + item.text + "</td>";
-      html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'";
-      html += "></td>"
-	  html += "<td align='center'><input type='checkbox' name='mandatory'></tr>";
+      html  = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectProperties( this )'>";
+	  html += "<td onmousedown='select(event,this)'>" + item.text + "</td>";
+      html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'></td>"
+	  html += "<td align='center'><input type='checkbox' name='mandatory'></td>";
+	  if( jQuery(item).attr('valuetype') =='date'){
+		html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
+	  }
+	  else{
+		html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
+	  }
+	  html += "</tr>";
+		
       selectedList.append(html);
       jQuery(item).remove();
     }
@@ -188,10 +191,18 @@ function selectProperties() {
 function selectAllProperties() {
   var selectedList = jQuery("#selectedList");
   jQuery("#availablePropertyIds").children().each(function( i, item ) {
-    html = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectDataElement( this )'><td onmousedown='select(this)'>" + item.text + "</td>";
-    html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'";
-    html += "><td align='center'><input type='checkbox' name='mandatory'></td></tr>";
-    
+    html = "<tr class='selected' id='" + item.value + "' ondblclick='unSelectDataElement( this )'>";
+	html += "<td onmousedown='select(this)'>" + item.text + "</td>";
+    html += "<td align='center'><input type='checkbox' name='displayed' value='" + item.value + "'></td>";
+    html += "<td align='center'><input type='checkbox' name='mandatory'></td>";
+    if( jQuery(item).attr('valuetype') =='date'){
+		html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
+	}
+	else{
+		html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
+	}
+	html += "</tr>";
+	
 	selectedList.append(html);
     jQuery(item).remove();
   });
@@ -283,33 +294,4 @@ function moveDownPropertyList() {
       }
     }
   }
-}
-
-function showAdvancedOptions()
-{
-	jQuery('[name=advanced]').show();
-	if( getFieldValue('type')!=3){
-		jQuery('[name=nonAnonymous]').show();
-		jQuery('.multiEvents').show();
-	}
-	else{
-		jQuery('.multiEvents').hide();
-	}
-	hideById('showAdvancedOptionLink');
-	showById('hideAdvancedOptionLink');
-}
-
-function hideAdvancedOptions()
-{
-	jQuery('[name=advanced]').hide();
-	if( getFieldValue('type')!=3){
-		jQuery('[name=nonAnonymous]').hide();
-		jQuery('.multiEvents').show();
-	}
-	else{
-		jQuery('.multiEvents').hide();
-	}
-	
-	hideById('hideAdvancedOptionLink');
-	showById('showAdvancedOptionLink');
 }

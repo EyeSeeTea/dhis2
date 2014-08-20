@@ -270,6 +270,13 @@ public class GetTrackedEntityInstanceAction
         return mandatoryMap;
     }
 
+    private Map<Integer, Boolean> allowFutureDateMap = new HashMap<Integer, Boolean>();
+
+    public void setAllowFutureDateMap( Map<Integer, Boolean> allowFutureDateMap )
+    {
+        this.allowFutureDateMap = allowFutureDateMap;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -302,9 +309,9 @@ public class GetTrackedEntityInstanceAction
 
             Collection<ProgramInstance> programInstances = programInstanceService.getProgramInstances( entityInstance,
                 program, ProgramInstance.STATUS_ACTIVE );
-            
+
             ProgramInstance programInstance = null;
-            
+
             if ( programInstances != null && !programInstances.isEmpty() )
             {
                 programInstance = programInstances.iterator().next();
@@ -330,18 +337,21 @@ public class GetTrackedEntityInstanceAction
                 attributes = new ArrayList<TrackedEntityAttribute>(
                     attributeService.getTrackedEntityAttributesDisplayInList() );
                 Collections.sort( attributes, new TrackedEntityAttributeSortOrderInListNoProgramComparator() );
-                
+
                 for ( TrackedEntityAttribute attribute : attributes )
                 {
                     mandatoryMap.put( attribute.getId(), false );
+                    allowFutureDateMap.put( attribute.getId(), false );
                 }
             }
             else
             {
                 attributes = program.getTrackedEntityAttributes();
-                for ( ProgramTrackedEntityAttribute programAttribute : program.getAttributes() )
+                for ( ProgramTrackedEntityAttribute programAttribute : program.getProgramAttributes() )
                 {
                     mandatoryMap.put( programAttribute.getAttribute().getId(), programAttribute.isMandatory() );
+                    allowFutureDateMap.put( programAttribute.getAttribute().getId(),
+                        programAttribute.getAllowFutureDate() );
                 }
             }
 

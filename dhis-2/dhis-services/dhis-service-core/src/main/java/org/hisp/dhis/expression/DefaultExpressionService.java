@@ -63,6 +63,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.MathUtils;
+import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -196,19 +197,27 @@ public class DefaultExpressionService
     public Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap,
         Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days )
     {
-        final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, 
+        final String expressionString = generateExpression( expression.getExplodedExpressionFallback(), valueMap, constantMap, 
             orgUnitCountMap, days, expression.isNullIfBlank() );
 
-        return expressionString != null ? calculateExpression( expressionString ) : null;
+        Double result = expressionString != null ? calculateExpression( expressionString ) : null;
+
+        log.debug( "Expression: " + expression.getExplodedExpressionFallback() + ", generated: " + expressionString + ", result: " + result );
+        
+        return result;
     }
 
     public Double getExpressionValue( Expression expression, Map<DataElementOperand, Double> valueMap,
         Map<String, Double> constantMap, Map<String, Integer> orgUnitCountMap, Integer days, Set<DataElementOperand> incompleteValues )
     {
-        final String expressionString = generateExpression( expression.getExpression(), valueMap, constantMap, orgUnitCountMap, days,
+        final String expressionString = generateExpression( expression.getExplodedExpressionFallback(), valueMap, constantMap, orgUnitCountMap, days,
             expression.isNullIfBlank(), incompleteValues );
 
-        return expressionString != null ? calculateExpression( expressionString ) : null;
+        Double result = expressionString != null ? calculateExpression( expressionString ) : null;
+        
+        log.debug( "Expression: " + expression.getExplodedExpressionFallback() + ", generated: " + expressionString + ", result: " + result );
+        
+        return result;
     }
 
     @Transactional
@@ -334,7 +343,12 @@ public class DefaultExpressionService
 
             while ( matcher.find() )
             {
-                operandsInExpression.add( DataElementOperand.getOperand( matcher.group() ) );
+                DataElementOperand operand = DataElementOperand.getOperand( matcher.group() );
+                
+                if ( operand.getOptionComboId() != null )
+                {
+                    operandsInExpression.add( operand );
+                }
             }
         }
 
@@ -594,16 +608,25 @@ public class DefaultExpressionService
     {
         if ( indicators != null && !indicators.isEmpty() )
         {
-            for ( Indicator indicator : indicators )
-            {
-                indicator.setExplodedNumerator( substituteExpression( indicator.getNumerator(), days ) );
-                indicator.setExplodedDenominator( substituteExpression( indicator.getDenominator(), days ) );
-            }
+            substituteExpressions( indicators, days );
 
             explodeExpressions( indicators );
         }
     }
 
+    @Transactional
+    public void substituteExpressions( Collection<Indicator> indicators, Integer days )
+    {
+        if ( indicators != null && !indicators.isEmpty() )
+        {
+            for ( Indicator indicator : indicators )
+            {
+                indicator.setExplodedNumerator( substituteExpression( indicator.getNumerator(), days ) );
+                indicator.setExplodedDenominator( substituteExpression( indicator.getDenominator(), days ) );
+            }
+        }                
+    }
+    
     @Transactional
     public void explodeExpressions( Collection<Indicator> indicators )
     {
@@ -632,7 +655,36 @@ public class DefaultExpressionService
             }
         }
     }
-    
+
+    @Transactional
+    public void explodeValidationRuleExpressions( Collection<ValidationRule> validationRules )
+    {
+        if ( validationRules != null && !validationRules.isEmpty() )
+        {
+            Set<String> dataElementTotals = new HashSet<String>();
+            
+            for ( ValidationRule rule : validationRules )
+            {
+                dataElementTotals.addAll( getDataElementTotalUids( rule.getLeftSide().getExpression() ) );
+                dataElementTotals.addAll( getDataElementTotalUids( rule.getRightSide().getExpression() ) );
+            }
+
+            if ( !dataElementTotals.isEmpty() )
+            {
+                final ListMap<String, String> dataElementMap = dataElementService.getDataElementCategoryOptionComboMap( dataElementTotals );
+                
+                if ( !dataElementMap.isEmpty() )
+                {
+                    for ( ValidationRule rule : validationRules )
+                    {
+                        rule.getLeftSide().setExplodedExpression( explodeExpression( rule.getLeftSide().getExplodedExpressionFallback(), dataElementMap ) );
+                        rule.getRightSide().setExplodedExpression( explodeExpression( rule.getRightSide().getExplodedExpressionFallback(), dataElementMap ) );
+                    }
+                }
+            }            
+        }
+    }
+
     private String explodeExpression( String expression, ListMap<String, String> dataElementOptionComboMap )
     {
         if ( expression == null || expression.isEmpty() )
@@ -655,7 +707,7 @@ public class DefaultExpressionService
                 
                 for ( String coc : cocs )
                 {
-                    replace.append( EXP_OPEN ).append( matcher.group( 1 ) ).append( SEPARATOR ).append(
+                    replace.append( EXP_OPEN ).append( de ).append( SEPARATOR ).append(
                         coc ).append( EXP_CLOSE ).append( "+" );
                 }
 

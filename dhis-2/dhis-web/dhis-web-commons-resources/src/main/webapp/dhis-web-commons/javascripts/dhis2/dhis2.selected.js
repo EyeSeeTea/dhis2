@@ -60,16 +60,21 @@
       context.source.data('selected', context);
       context.target.data('selected', context);
 
-      context.page = 1;
-      context.defaultProgressiveLoader(context);
-
       context.source.on('dblclick', 'option', context.defaultSourceDblClickHandler);
       context.target.on('dblclick', 'option', context.defaultTargetDblClickHandler);
       context.source.on('scroll', context.makeScrollHandler(context));
 
       if( context.search instanceof $ ) {
-        context.search.on('keypress', context.makeSearchHandler(context));
+        context.search.on('keyup', context.makeSearchHandler(context));
+        context.searchButton = $("#" + context.search.attr('id') + "Button");
+
+        context.searchButton.on('click', function() {
+          context.search.trigger({type: 'keyup', which: 13, keyCode: 13});
+        });
       }
+
+      context.page = 1;
+      context.defaultProgressiveLoader(context);
     }
   };
 
@@ -147,7 +152,7 @@
         url: context.url,
         data: {
           paging: true,
-          pageSize: 50,
+          pageSize: 100 + context.target.children().length,
           page: context.page
         },
         dataType: 'json'
@@ -156,6 +161,10 @@
       if( context.like !== undefined && context.like.length > 0 ) {
         request.data.filter = 'name:like:' + context.like;
       }
+
+      context.searchButton.find('i').removeClass('fa-search');
+      context.searchButton.find('i').addClass('fa-spinner fa-spin');
+      context.searchButton.attr('disabled', true);
 
       return $.ajax(request).done(function( data ) {
         if( data.pager ) {
@@ -185,6 +194,10 @@
         });
       }).fail(function() {
         context.source.children().remove();
+      }).always(function() {
+         context.searchButton.find('i').removeClass('fa-spinner fa-spin');
+         context.searchButton.find('i').addClass('fa-search');
+         context.searchButton.removeAttr('disabled');
       });
     }
   };

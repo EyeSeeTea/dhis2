@@ -279,7 +279,12 @@ function showEvents( teiUid){
 			for ( var i in json.events) {
 				var row = json.events[i];
 				var uid = row.event;
+				
 				var eventDate = row.eventDate;
+				if(eventDate===undefined){
+					eventDate = row.dueDate;
+				}
+				eventDate = eventDate.substring(0,10);
 				table += "<tr><td><a href='javascript:loadDataEntryDialog( \"" + uid + "\") ' >" + eventDate + "</a></td></tr>";
 			}
 			table += "</table>";
@@ -298,26 +303,22 @@ function showEvents( teiUid){
 
 function exportActitityList( type )
 {
-    var facilityLB = $('input[name=facilityLB]:checked').val();
-    var params = "programId=" + getFieldValue('program');
-
-    params += "&type=xls";
-    params += "&searchTexts=stat_" + getFieldValue('program')
-        + "_" + getFieldValue('startDueDate')
-        + "_" + getFieldValue('endDueDate');
-
-    if( facilityLB == 'selected' ) {
-        params += "_" + getFieldValue('orgunitId');
-    }
-    else if( facilityLB == 'all' ) {
-        params += "_0";
-    }
-    else if( facilityLB == 'childrenOnly' ) {
-        params += "_-1";
-    }
-
-    params += "_false_" + getFieldValue('status');
-    window.location.href = "getActivityPlanRecords.action?" + params;
+	var params = "?ou=" + getFieldValue("orgunitId");
+	params += "&program=" + getFieldValue('program');
+	params += "&ouMode=" + $('input[name=ouMode]:checked').val();
+	params += "&programStatus=ACTIVE";
+	params += "&eventStartDate=" + getFieldValue('startDueDate');
+	params += "&eventEndDate=" + getFieldValue('endDueDate');
+	
+	if(getFieldValue('status')!=''){
+		params += '&eventStatus=' + getFieldValue('status');
+	}
+	
+	$('#attributeIds option').each(function(i, item){
+		params += "&attribute=" + item.value;
+	});
+	
+    window.location.href = "../api/trackedEntityInstances." + type + params;
 }
 
 // --------------------------------------------------------------------
@@ -338,13 +339,11 @@ function loadDataEntryDialog( programStageInstanceId )
 					
 			$('#contentDataRecord' ).load("viewProgramStageRecords.action", {
 					programStageInstanceId: psiid
-				}, function( html ) {
-					setInnerHTML('contentDataRecord',html);
+				}, function( ) {
 					showById('reportDateDiv');
 					showById('entityInstanceInforTB');
 					showById('entryForm');
 					showById('inputCriteriaDiv');
-					entryFormContainerOnReady();
 				}).dialog({
 					title:i18n_program_stage,
 					maximize:true,
@@ -367,14 +366,12 @@ function statusEventOnChange()
 	{
 		var status = getFieldValue("status");
 
-		if( status == '1_2_3_4'
-			|| status == '3_4'
-			|| status == '2_3_4' ){
+		if( status == '' || status == 'SKIPPED' ){
 			enable('showEventSince');
 			enable('showEventUpTo');
 			setDateRange();
 		}
-		else if( status == '3' ){
+		else if( status == 'SCHEDULE' ){
 			disable('showEventSince');
 			enable('showEventUpTo');
 			setDateRange();
@@ -426,13 +423,12 @@ function setDateRange()
 	}
 
 	// check status to get date-range
-    if( status == '1_2_3_4'
-        || status == '3_4'
-        || status == '2_3_4' ) {
+    if( status == ''
+        || status == 'SKIPPED' ) {
         startDate = startDateSince;
         endDate = endDateUpTo;
 
-    } else if( status == '3' ) {
+    } else if( status == 'SCHEDULE' ) {
         startDate = startDateUpTo;
         endDate = endDateUpTo;
     }

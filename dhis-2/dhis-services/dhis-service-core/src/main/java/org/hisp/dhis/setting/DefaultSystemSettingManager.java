@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Stian Strandli
@@ -145,11 +146,6 @@ public class DefaultSystemSettingManager
         return (Integer) getSystemSetting( KEY_EMAIL_PORT, DEFAULT_EMAIL_PORT );
     }
 
-    public String getEmailPassword()
-    {
-        return StringUtils.trimToNull( (String) getSystemSetting( KEY_EMAIL_PASSWORD ) );
-    }
-
     public String getEmailUsername()
     {
         return StringUtils.trimToNull( (String) getSystemSetting( KEY_EMAIL_USERNAME ) );
@@ -209,4 +205,21 @@ public class DefaultSystemSettingManager
 
         return settingsMap;
     }
+
+    public Map<String, Serializable> getSystemSettings( Set<String> names )
+    {
+        Map<String, Serializable> map = new HashMap<>();
+        
+        for ( String name : names )
+        {
+            Serializable setting = getSystemSetting( name );
+            
+            if ( setting != null )
+            {
+                map.put( name, setting );
+            }
+        }
+        
+        return map;
+    }    
 }

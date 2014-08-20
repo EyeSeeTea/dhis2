@@ -28,14 +28,31 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATAELEMENT_OPERAND_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATASET_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DATA_X_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.DIMENSION_SEP;
+import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
+import static org.hisp.dhis.common.DimensionalObject.STATIC_DIMS;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_LEVEL;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_ORGUNIT_GROUP;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_CHILDREN;
+import static org.hisp.dhis.organisationunit.OrganisationUnit.KEY_USER_ORGUNIT_GRANDCHILDREN;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.adapter.JacksonPeriodDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodSerializer;
@@ -63,17 +80,14 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeDimension;
 import org.hisp.dhis.trackedentity.TrackedEntityDataElementDimension;
 import org.hisp.dhis.user.User;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hisp.dhis.common.DimensionalObject.*;
-import static org.hisp.dhis.organisationunit.OrganisationUnit.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * This class contains associations to dimensional meta-data. Should typically
@@ -87,7 +101,8 @@ import static org.hisp.dhis.organisationunit.OrganisationUnit.*;
  */
 @JacksonXmlRootElement( localName = "analyticalObject", namespace = DxfNamespaces.DXF_2_0 )
 public abstract class BaseAnalyticalObject
-    extends BaseIdentifiableObject
+    extends BaseIdentifiableObject 
+    implements AnalyticalObject
 {
     public static final String NUMBER_FORMATTING_COMMA = "comma";
     public static final String NUMBER_FORMATTING_SPACE = "space";
@@ -227,7 +242,7 @@ public abstract class BaseAnalyticalObject
             this.transientOrganisationUnits.add( organisationUnit );
         }
     }
-
+    
     /**
      * Assembles a DimensionalObject based on the persisted properties of this
      * AnalyticalObject. Collapses indicators, data elements, data element
@@ -409,7 +424,7 @@ public abstract class BaseAnalyticalObject
             // Tracked entity data element
 
             Map<String, TrackedEntityDataElementDimension> dataElements = new HashMap<String, TrackedEntityDataElementDimension>();
-
+            
             for ( TrackedEntityDataElementDimension dataElement : dataElementDimensions )
             {
                 dataElements.put( dataElement.getUid(), dataElement );
@@ -654,11 +669,12 @@ public abstract class BaseAnalyticalObject
             RelativePeriods.setName( period, null, dynamicNames, format );
         }
     }
-
+    
     /**
-     * Splits the keys of the given map on the dimension identifier separator,
-     * sorts the identifiers, writes them out as a key and puts the key back into
-     * the map.
+     * Sorts the keys in the given map by splitting on the '-' character and 
+     * sorting the components alphabetically.
+     * 
+     * @param valueMap the mapping of keys and values.
      */
     public static void sortKeys( Map<String, Double> valueMap )
     {
@@ -666,20 +682,36 @@ public abstract class BaseAnalyticalObject
 
         for ( String key : valueMap.keySet() )
         {
-            if ( key != null )
+            String sortKey = sortKey( key );
+            
+            if ( sortKey != null )
             {
-                String[] ids = key.split( DIMENSION_SEP );
-
-                Collections.sort( Arrays.asList( ids ) );
-
-                String sortedKey = StringUtils.join( ids, DIMENSION_SEP );
-
-                map.put( sortedKey, valueMap.get( key ) );
+                map.put( sortKey, valueMap.get( key ) );
             }
         }
 
         valueMap.clear();
         valueMap.putAll( map );
+    }
+
+    /**
+     * Sorts the given key by splitting on the '-' character and sorting the 
+     * components alphabetically.
+     * 
+     * @param valueMap the mapping of keys and values.
+     */
+    public static String sortKey( String key )
+    {
+        if ( key != null )
+        {
+            String[] ids = key.split( DIMENSION_SEP );
+
+            Collections.sort( Arrays.asList( ids ) );
+
+            key = StringUtils.join( ids, DIMENSION_SEP );
+        }
+        
+        return key;
     }
 
     /**
@@ -754,6 +786,8 @@ public abstract class BaseAnalyticalObject
         dataElementGroups.clear();
         organisationUnitGroups.clear();
         categoryOptionGroups.clear();
+        attributeDimensions.clear();
+        dataElementDimensions.clear();
         userOrganisationUnit = false;
         userOrganisationUnitChildren = false;
         userOrganisationUnitGrandChildren = false;
@@ -943,7 +977,10 @@ public abstract class BaseAnalyticalObject
         this.organisationUnitGroups = organisationUnitGroups;
     }
 
-    //TODO json annotations
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "categoryOptionGroups", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "categoryOptionGroup", namespace = DxfNamespaces.DXF_2_0 )
     public List<CategoryOptionGroup> getCategoryOptionGroups()
     {
         return categoryOptionGroups;
@@ -954,6 +991,10 @@ public abstract class BaseAnalyticalObject
         this.categoryOptionGroups = categoryOptionGroups;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "attributeDimensions", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "attributeDimension", namespace = DxfNamespaces.DXF_2_0 )
     public List<TrackedEntityAttributeDimension> getAttributeDimensions()
     {
         return attributeDimensions;
@@ -964,6 +1005,10 @@ public abstract class BaseAnalyticalObject
         this.attributeDimensions = attributeDimensions;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "dataElementDimensions", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "dataElementDimension", namespace = DxfNamespaces.DXF_2_0 )
     public List<TrackedEntityDataElementDimension> getDataElementDimensions()
     {
         return dataElementDimensions;

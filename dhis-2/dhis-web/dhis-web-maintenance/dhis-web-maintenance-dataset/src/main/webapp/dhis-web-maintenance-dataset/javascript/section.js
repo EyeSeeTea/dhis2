@@ -3,11 +3,11 @@
 // -----------------------------------------------------------------------------
 
 function editSectionShow( context ) {
-  location.href = 'editSection.action?sectionId=' + context.id;
+    location.href = 'editSection.action?sectionId=' + context.id;
 }
 
 function greySectionShow( context ) {
-  location.href = 'greySection.action?sectionId=' + context.id;
+    location.href = 'greySection.action?sectionId=' + context.id;
 }
 
 function showSectionDetails( context )
@@ -17,6 +17,7 @@ function showSectionDetails( context )
 		setInnerHTML( 'dataSetField', json.section.dataSet );
 		setInnerHTML( 'categoryComboField', json.section.categoryCombo );
 		setInnerHTML( 'dataElementCountField', json.section.dataElementCount );  
+		setInnerHTML( 'idField', json.section.uid ); 
 		
 		showDetails();
 	} );

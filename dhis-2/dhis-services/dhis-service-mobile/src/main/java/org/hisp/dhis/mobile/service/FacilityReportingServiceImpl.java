@@ -378,8 +378,10 @@ public class FacilityReportingServiceImpl
 
         }
 
+        DataElementCategoryOptionCombo optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+        
         CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period,
-            unit );
+            unit, optionCombo );
 
         if ( registration != null )
         {
@@ -494,7 +496,7 @@ public class FacilityReportingServiceImpl
         else
         {
             dataValue.setValue( value );
-            dataValue.setTimestamp( new Date() );
+            dataValue.setLastUpdated( new Date() );
             dataValueService.updateDataValue( dataValue );
         }
     }

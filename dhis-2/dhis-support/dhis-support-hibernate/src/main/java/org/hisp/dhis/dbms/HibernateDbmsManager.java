@@ -82,6 +82,7 @@ public class HibernateDbmsManager
         emptyTable( "sqlview" );
 
         emptyTable( "datavalue_audit" );
+        emptyTable( "datavalueaudit" );
         emptyTable( "datavalue" );
         emptyTable( "completedatasetregistration" );
 
@@ -192,7 +193,7 @@ public class HibernateDbmsManager
         emptyTable( "dataelementcategory" );
         emptyTable( "dataelementcategoryoption" );
 
-        emptyTable( "optionsetmembers" );
+        emptyTable( "optionvalue" );
         emptyTable( "optionset" );
 
         dropTable( "aggregateddatavalue" );

@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import org.hisp.dhis.api.mobile.ActivityReportingService;
 import org.hisp.dhis.api.mobile.NotAllowedException;
 import org.hisp.dhis.api.mobile.model.Activity;
@@ -48,6 +49,8 @@ import org.hisp.dhis.api.mobile.model.ActivityPlan;
 import org.hisp.dhis.api.mobile.model.ActivityValue;
 import org.hisp.dhis.api.mobile.model.Beneficiary;
 import org.hisp.dhis.api.mobile.model.DataValue;
+import org.hisp.dhis.api.mobile.model.Interpretation;
+import org.hisp.dhis.api.mobile.model.InterpretationComment;
 import org.hisp.dhis.api.mobile.model.OptionSet;
 import org.hisp.dhis.api.mobile.model.PatientAttribute;
 import org.hisp.dhis.api.mobile.model.Task;
@@ -57,11 +60,16 @@ import org.hisp.dhis.api.mobile.model.LWUITmodel.Patient;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.PatientList;
 import org.hisp.dhis.api.mobile.model.LWUITmodel.Section;
 import org.hisp.dhis.api.mobile.model.comparator.ActivityComparator;
+import org.hisp.dhis.chart.Chart;
+import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.event.EventStatus;
+import org.hisp.dhis.interpretation.InterpretationService;
+import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.message.Message;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
@@ -84,13 +92,18 @@ import org.hisp.dhis.relationship.RelationshipService;
 import org.hisp.dhis.relationship.RelationshipType;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.sms.SmsSender;
+import org.hisp.dhis.sms.SmsServiceException;
+import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
+import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.hisp.dhis.trackedentity.TrackedEntityService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
@@ -112,9 +125,15 @@ public class ActivityReportingServiceImpl
 
     private static final String SINGLE_EVENT_WITHOUT_REGISTRATION_UPLOADED = "single_event_without_registration_uploaded";
 
+    private static final String PROGRAM_COMPLETED = "program_completed";
+
     private static final String FEEDBACK_SENT = "feedback_sent";
 
     private static final String MESSAGE_SENT = "message_sent";
+
+    private static final String INTERPRETATION_SENT = "interpretation_sent";
+
+    private static final String COMMENT_SENT = "comment_sent";
 
     private ActivityComparator activityComparator = new ActivityComparator();
 
@@ -152,7 +171,17 @@ public class ActivityReportingServiceImpl
 
     private TrackedEntityAttributeService attributeService;
 
+    private TrackedEntityService trackedEntityService;
+
+    private I18nManager i18nManager;
+
+    private TrackedEntityInstanceReminderService reminderService;
+
     private UserService userService;
+
+    private InterpretationService interpretationService;
+
+    private ChartService chartService;
 
     private Integer patientId;
 
@@ -252,6 +281,16 @@ public class ActivityReportingServiceImpl
     // -------------------------------------------------------------------------
     // MobileDataSetService
     // -------------------------------------------------------------------------
+    @Required
+    public void setInterpretationService( InterpretationService interpretationService )
+    {
+        this.interpretationService = interpretationService;
+    }
+
+    public void setChartService( ChartService chartService )
+    {
+        this.chartService = chartService;
+    }
 
     private TrackedEntityAttribute groupByAttribute;
 
@@ -279,7 +318,7 @@ public class ActivityReportingServiceImpl
             TrackedEntityInstance trackedEntityInstance = entityInstanceService
                 .getTrackedEntityInstance( entityInstance.get( 0 ).toString() );
             for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
-                trackedEntityInstance, false ) )
+                trackedEntityInstance, EventStatus.ACTIVE ) )
             {
                 if ( programStageInstance.getDueDate().getTime() >= lowerBound
                     && programStageInstance.getDueDate().getTime() <= upperBound )
@@ -316,7 +355,7 @@ public class ActivityReportingServiceImpl
             TrackedEntityInstance trackedEntityInstance = entityInstanceService
                 .getTrackedEntityInstance( entityInstance.get( 0 ).toString() );
             for ( ProgramStageInstance programStageInstance : programStageInstanceService.getProgramStageInstances(
-                trackedEntityInstance, false ) )
+                trackedEntityInstance, EventStatus.ACTIVE ) )
             {
 
                 items.add( getActivity( programStageInstance, false ) );
@@ -396,7 +435,7 @@ public class ActivityReportingServiceImpl
         // Set ProgramStageInstance to completed
         if ( programStageSectionId == 0 )
         {
-            programStageInstance.setCompleted( true );
+            programStageInstance.setStatus( EventStatus.COMPLETED );
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
 
@@ -442,7 +481,7 @@ public class ActivityReportingServiceImpl
             programStageInstance.setDueDate( new Date() );
             programStageInstance.setExecutionDate( new Date() );
             programStageInstance.setOrganisationUnit( organisationUnit );
-            programStageInstance.setCompleted( true );
+            programStageInstance.setStatus( EventStatus.COMPLETED );
             programStageInstanceService.addProgramStageInstance( programStageInstance );
 
             // ---------------------------------------------------------------------
@@ -534,12 +573,12 @@ public class ActivityReportingServiceImpl
             }
             else
             {
-                programStageInstance.setCompleted( mobileProgramStage.isCompleted() );
+                // programStageInstance.setCompleted(
+                // mobileProgramStage.isCompleted() );
                 programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
                 // check if all belonged program stage are completed
-
-                if ( isAllProgramStageFinished( programStageInstance ) == true )
+                if ( !mobileProgramStage.isRepeatable() && isAllProgramStageFinished( programStageInstance ) == true )
                 {
 
                     ProgramInstance programInstance = programStageInstance.getProgramInstance();
@@ -652,8 +691,8 @@ public class ActivityReportingServiceImpl
         programInstanceService.updateProgramInstance( programInstance );
         patient.getProgramInstances().add( programInstance );
         entityInstanceService.updateTrackedEntityInstance( patient );
-
         patient = entityInstanceService.getTrackedEntityInstance( patientId );
+        this.sendMessages( programInstance, TrackedEntityInstanceReminder.SEND_WHEN_TO_EMROLLEMENT );
         return getPatientModel( patient );
     }
 
@@ -865,6 +904,16 @@ public class ActivityReportingServiceImpl
                 else
                 {
                     mobileProgramStage.setReportDateDescription( programStage.getReportDateDescription() );
+                }
+
+                // get due date
+                if ( eachProgramStageInstance.getDueDate() != null )
+                {
+                    mobileProgramStage.setDueDate( PeriodUtil.dateToString( eachProgramStageInstance.getDueDate() ) );
+                }
+                else
+                {
+                    mobileProgramStage.setDueDate( "" );
                 }
 
                 // is repeatable
@@ -1417,6 +1466,7 @@ public class ActivityReportingServiceImpl
             }
         }
 
+        patientWeb.setTrackedEntity( trackedEntityService.getTrackedEntityByName( "Person" ) );
         patientId = entityInstanceService.createTrackedEntityInstance( patientWeb, null, null, patientAttributeValues );
         TrackedEntityInstance newTrackedEntityInstance = entityInstanceService
             .getTrackedEntityInstance( this.patientId );
@@ -1447,12 +1497,12 @@ public class ActivityReportingServiceImpl
         org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile = getPatientModel( patient );
         return patientMobile;
     }
-    
+
     public org.hisp.dhis.api.mobile.model.LWUITmodel.PatientList findPatients( String patientIds )
         throws NotAllowedException
     {
         PatientList patientlist = new PatientList();
-        
+
         while ( patientIds.length() > 0 )
         {
             int patientId = Integer.parseInt( patientIds.substring( 0, patientIds.indexOf( "$" ) ) );
@@ -1460,7 +1510,7 @@ public class ActivityReportingServiceImpl
             patientlist.getPatientList().add( getPatientModel( patient ) );
             patientIds = patientIds.substring( patientIds.indexOf( "$" ) + 1, patientIds.length() );
         }
-        
+
         return patientlist;
     }
 
@@ -1570,11 +1620,11 @@ public class ActivityReportingServiceImpl
 
         if ( searchEventInfosArray[1].equalsIgnoreCase( "Scheduled in future" ) )
         {
-            eventStatus = EventStatus.FUTURE_VISIT;
+            eventStatus = EventStatus.SCHEDULE;
         }
         else if ( searchEventInfosArray[1].equalsIgnoreCase( "Overdue" ) )
         {
-            eventStatus = EventStatus.LATE_VISIT;
+            eventStatus = EventStatus.OVERDUE;
         }
 
         String eventsInfo = "";
@@ -1647,7 +1697,7 @@ public class ActivityReportingServiceImpl
             ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( lostEvent
                 .getId() );
             programStageInstance.setDueDate( PeriodUtil.stringToDate( lostEvent.getDueDate() ) );
-            programStageInstance.setStatus( lostEvent.getStatus() );
+            programStageInstance.setStatus( EventStatus.fromInt( lostEvent.getStatus() ) );
 
             if ( lostEvent.getComment() != null )
             {
@@ -1777,7 +1827,7 @@ public class ActivityReportingServiceImpl
 
         programStageInstance.setExecutionDate( new Date() );
 
-        programStageInstance.setCompleted( true );
+        programStageInstance.setStatus( EventStatus.COMPLETED );
 
         programStageInstance.setOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
 
@@ -1873,11 +1923,11 @@ public class ActivityReportingServiceImpl
 
         if ( status.equals( "Schedule in future" ) )
         {
-            eventStatus = EventStatus.FUTURE_VISIT;
+            eventStatus = EventStatus.SCHEDULE;
         }
         else if ( status.equals( "Overdue" ) )
         {
-            eventStatus = EventStatus.LATE_VISIT;
+            eventStatus = EventStatus.OVERDUE;
         }
         else if ( status.equals( "Incomplete" ) )
         {
@@ -2054,4 +2104,173 @@ public class ActivityReportingServiceImpl
 
         return MESSAGE_SENT;
     }
+
+    @Override
+    public Interpretation getInterpretation( String uId )
+        throws NotAllowedException
+    {
+        Chart chart = chartService.getChart( uId );
+        org.hisp.dhis.interpretation.Interpretation interpretationCore = interpretationService
+            .getInterpretationByChartId( chart.getId() );
+
+        Collection<InterpretationComment> interComments = new HashSet<InterpretationComment>();
+
+        for ( org.hisp.dhis.interpretation.InterpretationComment interCommentsCore : interpretationCore.getComments() )
+        {
+
+            InterpretationComment interComment = new InterpretationComment();
+            interComment.setText( interCommentsCore.getText() );
+            interComments.add( interComment );
+        }
+
+        Interpretation interpretation = new Interpretation();
+        interpretation.setId( interpretationCore.getId() );
+        interpretation.setText( interpretationCore.getText() );
+        interpretation.setInComments( interComments );
+
+        return interpretation;
+    }
+
+    private org.hisp.dhis.interpretation.Interpretation interpretation;
+
+    public void setInterpretation( org.hisp.dhis.interpretation.Interpretation interpretation )
+    {
+        this.interpretation = interpretation;
+    }
+
+    public org.hisp.dhis.interpretation.Interpretation getInterpretation()
+    {
+        return interpretation;
+    }
+
+    @Override
+    public String postInterpretation( String data )
+        throws NotAllowedException
+    {
+
+        String uId = data.substring( 0, 11 );
+
+        String interpretation = data.substring( 11, data.length() - 0 );
+
+        Chart c = chartService.getChart( uId );
+
+        org.hisp.dhis.interpretation.Interpretation i = new org.hisp.dhis.interpretation.Interpretation( c, null,
+            interpretation );
+
+        i.setUser( currentUserService.getCurrentUser() );
+
+        interpretationService.saveInterpretation( i );
+
+        return INTERPRETATION_SENT;
+    }
+
+    @Override
+    public String postInterpretationComment( String data )
+        throws NotAllowedException
+    {
+        int interpretationId = Integer.parseInt( data.substring( 0, 7 ) );
+        String comment = data.substring( 7, data.length() - 0 );
+
+        setInterpretation( interpretationService.getInterpretation( interpretationId ) );
+        interpretationService.addInterpretationComment( interpretation.getUid(), comment );
+
+        return COMMENT_SENT;
+    }
+
+    @Override
+    public String completeProgramInstance( int programId )
+        throws NotAllowedException
+    {
+        ProgramInstance programInstance = programInstanceService.getProgramInstance( programId );
+        programInstance.setStatus( ProgramInstance.STATUS_COMPLETED );
+        programInstanceService.updateProgramInstance( programInstance );
+
+        return PROGRAM_COMPLETED;
+    }
+
+    private Collection<OutboundSms> sendMessages( ProgramInstance programInstance, int status )
+    {
+        TrackedEntityInstance entityInstance = programInstance.getEntityInstance();
+        Collection<OutboundSms> outboundSmsList = new HashSet<OutboundSms>();
+
+        Collection<TrackedEntityInstanceReminder> reminders = programInstance.getProgram().getInstanceReminders();
+
+        for ( TrackedEntityInstanceReminder rm : reminders )
+        {
+            if ( rm != null
+                && rm.getWhenToSend() != null
+                && rm.getWhenToSend() == status
+                && (rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_DIRECT_SMS || rm.getMessageType() == TrackedEntityInstanceReminder.MESSAGE_TYPE_BOTH) )
+            {
+                OutboundSms outboundSms = sendProgramMessage( rm, programInstance, entityInstance );
+
+                if ( outboundSms != null )
+                {
+                    outboundSmsList.add( outboundSms );
+                }
+            }
+        }
+
+        return outboundSmsList;
+    }
+
+    private OutboundSms sendProgramMessage( TrackedEntityInstanceReminder reminder, ProgramInstance programInstance,
+        TrackedEntityInstance entityInstance )
+    {
+        I18nFormat format = i18nManager.getI18nFormat();
+
+        Set<String> phoneNumbers = reminderService.getPhonenumbers( reminder, entityInstance );
+        OutboundSms outboundSms = null;
+
+        if ( phoneNumbers.size() > 0 )
+        {
+            String msg = reminderService.getMessageFromTemplate( reminder, programInstance, format );
+
+            try
+            {
+                outboundSms = new OutboundSms();
+                outboundSms.setMessage( msg );
+                outboundSms.setRecipients( phoneNumbers );
+                outboundSms.setSender( currentUserService.getCurrentUsername() );
+                smsSender.sendMessage( outboundSms, null );
+            }
+            catch ( SmsServiceException e )
+            {
+                e.printStackTrace();
+            }
+        }
+
+        return outboundSms;
+    }
+
+    public I18nManager getI18nManager()
+    {
+        return i18nManager;
+    }
+
+    public void setI18nManager( I18nManager i18nManager )
+    {
+        this.i18nManager = i18nManager;
+    }
+
+    public TrackedEntityInstanceReminderService getReminderService()
+    {
+        return reminderService;
+    }
+
+    public void setReminderService( TrackedEntityInstanceReminderService reminderService )
+    {
+        this.reminderService = reminderService;
+    }
+
+    public TrackedEntityService getTrackedEntityService()
+    {
+        return trackedEntityService;
+    }
+
+    public void setTrackedEntityService( TrackedEntityService trackedEntityService )
+    {
+        this.trackedEntityService = trackedEntityService;
+    }
+
 }

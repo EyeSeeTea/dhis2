@@ -3,11 +3,15 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation=
   "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
 
+  <bean id="org.hisp.dhis.dxf2.csv.CsvImportService" class="org.hisp.dhis.dxf2.csv.DefaultCsvImportService" />
+
   <bean id="org.hisp.dhis.dxf2.render.RenderService" class="org.hisp.dhis.dxf2.render.DefaultRenderService" />
 
-  <bean id="org.hisp.dhis.dxf2.filter.FilterService" class="org.hisp.dhis.dxf2.filter.DefaultFilterService" />
+  <bean id="org.hisp.dhis.dxf2.objectfilter.ObjectFilterService" class="org.hisp.dhis.dxf2.objectfilter.DefaultObjectFilterService" />
 
-  <bean id="org.hisp.dhis.dxf2.filter.ParserService" class="org.hisp.dhis.dxf2.filter.DefaultParserService" />
+  <bean id="org.hisp.dhis.dxf2.fieldfilter.FieldFilterService" class="org.hisp.dhis.dxf2.fieldfilter.DefaultFieldFilterService" />
+
+  <bean id="org.hisp.dhis.dxf2.parser.ParserService" class="org.hisp.dhis.dxf2.parser.DefaultParserService" />
 
   <bean id="org.hisp.dhis.dxf2.metadata.ExportService" class="org.hisp.dhis.dxf2.metadata.DefaultExportService" scope="prototype" />
 
@@ -34,6 +38,10 @@
 
   <bean id="org.hisp.dhis.dxf2.metadata.MetaDataDependencyService" class="org.hisp.dhis.dxf2.metadata.DefaultMetaDataDependencyService"
     scope="prototype" />
+
+  <bean id="org.hisp.dhis.dxf2.synch.SynchronizationManager" class="org.hisp.dhis.dxf2.synch.DefaultSynchronizationManager" />
+
+  <bean id="dataSynchTask" class="org.hisp.dhis.dxf2.synch.DataSynchronizationTask" />
 
   <!-- register idObject handlers -->
 

@@ -33,6 +33,7 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
@@ -274,8 +275,7 @@ public class DataElementConverter
         element.setName( values.get( FIELD_NAME ) );
         element.setShortName( values.get( FIELD_SHORT_NAME ) );
         element.setDescription( Dhis14ParsingUtils.removeNewLine( values.get( FIELD_DESCRIPTION ) ) );
-        element.setActive( true );
-        element.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
+        element.setDomainType( DataElementDomain.AGGREGATE );
         element.setZeroIsSignificant( false );
         element.setType( Dhis14ObjectMappingUtil.getDataElementTypeMap().get(
             Integer.parseInt( values.get( FIELD_DATA_TYPE ) ) ) );

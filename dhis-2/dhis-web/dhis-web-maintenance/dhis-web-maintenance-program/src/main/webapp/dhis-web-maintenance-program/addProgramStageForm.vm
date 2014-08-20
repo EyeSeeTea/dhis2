@@ -21,18 +21,18 @@
 		
 	<tr>
 		<td><label for="name">$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="name" name="name" class="{validate:{required:true,rangelength:[4,160]}}"/></td>
+		<td><input type="text" id="name" name="name" /></td>
 	</tr>	
 	
 	<tr>
 		<td><label for="description">$i18n.getString( "description" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="description" name="description" class="{validate:{required:true,minlength:4}}"/></td>
+		<td><input type="text" id="description" name="description" /></td>
 	</tr>
 	
 	#if( $program.type == 1 )
 	<tr>
 		<td><label for="minDaysFromStart">$i18n.getString( "scheduled_days_from_start" )</label></td>
-		<td><input type="text" id="minDaysFromStart" name="minDaysFromStart" value="0" class="{validate:{number:true,min:0}}"/></td>
+		<td><input type="text" id="minDaysFromStart" name="minDaysFromStart" value="0" /></td>
 	</tr>
 	
 	<tr><th colspan="2">$i18n.getString( "repeatable_program_stage_details" )</th></tr>
@@ -49,7 +49,7 @@
 	
 	<tr>
 		<td><label for="standardInterval">$i18n.getString( "standard_interval_days" )</label></td>
-		<td><input type="text" id="standardInterval" name="standardInterval" class="{validate:{number:true}}" disabled /></td>
+		<td><input type="text" id="standardInterval" name="standardInterval" disabled /></td>
 	</tr>
 	
 	#end
@@ -89,7 +89,7 @@
 		<tr>
 			<td><label for="reportDateToUse">$i18n.getString( "report_date_to_use" )</label></td>
 			<td>
-				<select id="reportDateToUse" name="reportDateToUse" class="{validate:{required:true}}" disabled>
+				<select id="reportDateToUse" name="reportDateToUse" disabled>
 					<option value=''>[$i18n.getString('please_select')]</option>
 					<option value='dateOfIncident'>$i18n.getString("date_of_incident")</option>
 					<option value='enrollmentDate'>$i18n.getString("date_of_enrollment")</option>
@@ -137,7 +137,7 @@
 	
 	<tr>
 		<td><label for="reportDateDescription">$i18n.getString( "report_date_description" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="reportDateDescription" name="reportDateDescription" class="{validate:{required:true}}" value="$i18n.getString( 'report_date' )" /></td>
+		<td><input type="text" id="reportDateDescription" name="reportDateDescription" value="$i18n.getString( 'report_date' )" /></td>
 	</tr>
 	
 	<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
@@ -159,7 +159,7 @@
 			<select id="compulsories" name='compulsories' multiple="multiple" class="hidden"></select>     
 			<select id="allowProvidedElsewhere" name='allowProvidedElsewhere' multiple="multiple" class="hidden"></select>     
 			<select id="displayInReports" name='displayInReports' multiple="multiple" class="hidden"></select>     
-			<select id="allowDateInFutures" name='allowDateInFutures' multiple="multiple" class="hidden"></select>   
+			<select id="allowFutureDates" name='allowFutureDates' multiple="multiple" class="hidden"></select>   
 		</th>
       </tr>
     </thead>
@@ -206,6 +206,42 @@
         </td>  
 		</tr>
     </tbody>
+</table>
+
+<table>
+	<colgroup>
+		<col style='width:500px'/>
+		<col/>
+		<col style='width:500px'/>
+	</colgroup>
+	<tr>
+		<th>$i18n.getString( "available_indicators" )</th>
+		<th>$i18n.getString( "filter" )</th>
+		<th>$i18n.getString( "selected_indicators" )</th>
+	</tr>
+	
+	<tr>
+		<td>
+			<select style="height: 200px; width: 100%;" multiple="multiple" id="availableIndicators" name="availableIndicators" ondblclick="moveSelectedById( 'availableIndicators', 'selectedIndicators' )" >
+				#foreach( $indicator in $programIndicators )
+					<option value="$indicator.id">$encoder.htmlEncode( $indicator.displayName )</option>
+				#end
+			</select>
+		</td>
+		<td>
+			<input type="button" value="&gt;" title="$i18n.getString('move_selected')" onclick="moveSelectedById( 'availableIndicators', 'selectedIndicators' )" class='filterButton'/><br/>
+			<input type="button" value="&lt;" title="$i18n.getString('remove_selected')" onclick="moveSelectedById( 'selectedIndicators', 'availableIndicators' )" class='filterButton'/><br/>
+			<input type="button" value="&gt;&gt;" onclick="moveAllById( 'availableIndicators', 'selectedIndicators' )" class='filterButton' /><br/>
+			<input type="button" value="&lt;&lt;" onclick="moveAllById( 'selectedIndicators', 'availableIndicators' )" class='filterButton' />
+		</td>
+		<td>
+			<select style="height: 200px; width: 100%; margin-top: 22px;" multiple="multiple" id="selectedIndicators" name="selectedIndicators" ondblclick="moveSelectedById( 'selectedIndicators', 'availableIndicators' )"></select>
+		</td>
+		<td>
+			<a href="javascript:moveUpSelectedOption( 'selectedIndicators')" title="$i18n.getString( 'move_up' )"><img src="../images/move_up.png" alt="$i18n.getString( 'move_up' )"/></a><br/><br/>
+			<a href="javascript:moveDownSelectedOption( 'selectedIndicators' )" title="$i18n.getString( 'move_down' )"><img src="../images/move_down.png" alt="$i18n.getString( 'move_up' )"/></a>
+		</td>
+	</tr>
 </table>
 
 <p>
@@ -256,7 +292,7 @@
 	#end
 	
 	var attrOptions = "";
-	#foreach($programAttribute in $program.attributes)
+	#foreach($programAttribute in $program.programAttributes)
 		attrOptions+="<option value={attributeid=$programAttribute.attribute.uid}>$programAttribute.attribute.displayName</option>";
 	#end
 </script>

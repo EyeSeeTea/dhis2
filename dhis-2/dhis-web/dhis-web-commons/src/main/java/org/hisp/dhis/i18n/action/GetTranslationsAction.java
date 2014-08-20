@@ -28,6 +28,8 @@ package org.hisp.dhis.i18n.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.IdentifiableObjectUtils.CLASS_ALIAS;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -41,11 +43,10 @@ import com.opensymphony.xwork2.ActionSupport;
  */
 public class GetTranslationsAction 
     extends ActionSupport
-
 {
     private String className;
 
-    private String uid;
+    private String objectUid;
 
     private String loc;
 
@@ -71,9 +72,9 @@ public class GetTranslationsAction
         this.className = className;
     }
 
-    public void setUid( String uid )
+    public void setObjectUid( String objectUid )
     {
-        this.uid = uid;
+        this.objectUid = objectUid;
     }
 
     public void setLoc( String locale )
@@ -93,9 +94,11 @@ public class GetTranslationsAction
     public String execute()
         throws Exception
     {
+        className = className != null && CLASS_ALIAS.containsKey( className ) ? CLASS_ALIAS.get( className ) : className;
+        
         Locale locale = LocaleUtils.getLocale( loc );
 
-        translations = i18nService.getTranslationsNoFallback( className, uid, locale );
+        translations = i18nService.getTranslationsNoFallback( className, objectUid, locale );
         
         return SUCCESS;
     }

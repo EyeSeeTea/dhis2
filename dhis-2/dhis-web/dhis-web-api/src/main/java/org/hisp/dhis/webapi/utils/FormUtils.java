@@ -28,73 +28,94 @@ package org.hisp.dhis.webapi.utils;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.webapi.webdomain.form.Field;
-import org.hisp.dhis.webapi.webdomain.form.Form;
-import org.hisp.dhis.webapi.webdomain.form.Group;
-import org.hisp.dhis.webapi.webdomain.form.InputType;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramStageSection;
+import org.hisp.dhis.webapi.webdomain.form.Field;
+import org.hisp.dhis.webapi.webdomain.form.Form;
+import org.hisp.dhis.webapi.webdomain.form.Group;
+import org.hisp.dhis.webapi.webdomain.form.InputType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class FormUtils
 {
-    public static Form fromDataSet( DataSet dataSet )
+    private static final String KEY_PERIOD_TYPE = "periodType";
+    private static final String KEY_ALLOW_FUTURE_PERIODS = "allowFuturePeriods";
+    private static final String KEY_DATA_ELEMENTS = "dataElements";
+    
+    public static Form fromDataSet( DataSet dataSet, boolean metaData )
     {
         Form form = new Form();
         form.setLabel( dataSet.getDisplayName() );
+        form.setSubtitle( dataSet.getDisplayShortName() );
 
-        form.getOptions().put( "periodType", dataSet.getPeriodType().getName() );
-        form.getOptions().put( "allowFuturePeriods", dataSet.isAllowFuturePeriods() );
+        form.getOptions().put( KEY_PERIOD_TYPE, dataSet.getPeriodType().getName() );
+        form.getOptions().put( KEY_ALLOW_FUTURE_PERIODS, dataSet.isAllowFuturePeriods() );
 
         if ( dataSet.getSections().size() > 0 )
         {
-            for ( Section section : dataSet.getSections() )
+            List<Section> sections = new ArrayList<>( dataSet.getSections() );
+            Collections.sort( sections, SectionOrderComparator.INSTANCE );
+            
+            for ( Section section : sections )
             {
-                List<Field> fields = inputsFromDataElements( new ArrayList<DataElement>( section.getDataElements() ), new ArrayList<DataElementOperand>( section.getGreyedFields() ) );
+                List<Field> fields = inputsFromDataElements( new ArrayList<>( section.getDataElements() ), new ArrayList<>( section.getGreyedFields() ) );
 
-                if ( !fields.isEmpty() )
+                Group group = new Group();
+                group.setLabel( section.getDisplayName() );
+                group.setDescription( section.getDescription() );
+                group.setDataElementCount( section.getDataElements().size() );
+                group.setFields( fields );
+                
+                if ( metaData )
                 {
-                    Group s = new Group();
-                    s.setLabel( section.getDisplayName() );
-                    s.setFields( fields );
-                    form.getGroups().add( s );
+                    group.getMetaData().put( KEY_DATA_ELEMENTS, NameableObjectUtils.getAsNameableObjects( section.getDataElements() ) );
                 }
+                
+                form.getGroups().add( group );
             }
         }
         else
         {
-            List<Field> fields = inputsFromDataElements( new ArrayList<DataElement>( dataSet.getDataElements() ) );
+            List<Field> fields = inputsFromDataElements( new ArrayList<>( dataSet.getDataElements() ) );
 
-            if ( !fields.isEmpty() )
+            Group group = new Group();
+            group.setLabel( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
+            group.setDescription( DataElementCategoryCombo.DEFAULT_CATEGORY_COMBO_NAME );
+            group.setDataElementCount( dataSet.getDataElements().size() );
+            group.setFields( fields );
+
+            if ( metaData )
             {
-                Group s = new Group();
-                s.setLabel( "default" );
-                s.setFields( fields );
-                form.getGroups().add( s );
+                group.getMetaData().put( KEY_DATA_ELEMENTS, NameableObjectUtils.getAsNameableObjects( new ArrayList<>( dataSet.getDataElements() ) ) );
             }
+            
+            form.getGroups().add( group );
         }
 
         return form;
     }
-
 
     public static Form fromProgram( Program program )
     {
@@ -143,27 +164,23 @@ public class FormUtils
             {
                 List<Field> fields = inputsFromProgramStageDataElements( section.getProgramStageDataElements() );
 
-                if ( !fields.isEmpty() )
-                {
-                    Group s = new Group();
-                    s.setLabel( section.getDisplayName() );
-                    s.setFields( fields );
-                    form.getGroups().add( s );
-                }
+                Group group = new Group();
+                group.setLabel( section.getDisplayName() );
+                group.setDataElementCount( section.getProgramStageDataElements().size() );
+                group.setFields( fields );
+                form.getGroups().add( group );
             }
         }
         else
         {
             List<Field> fields = inputsFromProgramStageDataElements(
-                new ArrayList<ProgramStageDataElement>( programStage.getProgramStageDataElements() ) );
+                new ArrayList<>( programStage.getProgramStageDataElements() ) );
 
-            if ( !fields.isEmpty() )
-            {
-                Group s = new Group();
-                s.setLabel( "default" );
-                s.setFields( fields );
-                form.getGroups().add( s );
-            }
+            Group group = new Group();
+            group.setLabel( "default" );
+            group.setFields( fields );
+            group.setDataElementCount( programStage.getProgramStageDataElements().size() );
+            form.getGroups().add( group );
         }
 
         return form;
@@ -171,7 +188,7 @@ public class FormUtils
 
     private static List<Field> inputsFromProgramStageDataElements( List<ProgramStageDataElement> programStageDataElements )
     {
-        List<DataElement> dataElements = new ArrayList<DataElement>();
+        List<DataElement> dataElements = new ArrayList<>();
 
         for ( ProgramStageDataElement programStageDataElement : programStageDataElements )
         {
@@ -188,7 +205,7 @@ public class FormUtils
 
     private static List<Field> inputsFromDataElements( List<DataElement> dataElements, final List<DataElementOperand> greyedFields )
     {
-        List<Field> fields = new ArrayList<Field>();
+        List<Field> fields = new ArrayList<>();
 
         for ( DataElement dataElement : dataElements )
         {
@@ -200,16 +217,17 @@ public class FormUtils
 
                     if ( categoryOptionCombo.isDefault() )
                     {
-                        field.setLabel( dataElement.getDisplayName() );
+                        field.setLabel( dataElement.getFormNameFallback() );
                     }
                     else
                     {
-                        field.setLabel( dataElement.getDisplayName() + " " + categoryOptionCombo.getDisplayName() );
+                        field.setLabel( dataElement.getFormNameFallback() + " " + categoryOptionCombo.getDisplayName() );
                     }
 
                     field.setDataElement( dataElement.getUid() );
                     field.setCategoryOptionCombo( categoryOptionCombo.getUid() );
                     field.setType( inputTypeFromDataElement( dataElement ) );
+                    field.setSortOrder( dataElement.getSortOrder() );
 
                     if ( dataElement.getOptionSet() != null )
                     {
@@ -240,6 +258,8 @@ public class FormUtils
 
     private static InputType inputTypeFromDataElement( DataElement dataElement )
     {
+        //TODO harmonize / use map
+        
         if ( DataElement.VALUE_TYPE_STRING.equals( dataElement.getType() ) )
         {
             if ( DataElement.VALUE_TYPE_TEXT.equals( dataElement.getTextType() ) )
@@ -273,6 +293,14 @@ public class FormUtils
             {
                 return InputType.INTEGER_NEGATIVE;
             }
+            else if ( DataElement.VALUE_TYPE_UNIT_INTERVAL.equals( dataElement.getNumberType() ) )
+            {
+                return InputType.UNIT_INTERVAL;
+            }
+            else if ( DataElement.VALUE_TYPE_PERCENTAGE.equals( dataElement.getNumberType() ) )
+            {
+                return InputType.PERCENTAGE;
+            }
         }
         else if ( DataElement.VALUE_TYPE_BOOL.equals( dataElement.getType() ) )
         {
@@ -305,7 +333,7 @@ public class FormUtils
 
     private static Map<String, Field> buildCacheMap( Form form )
     {
-        Map<String, Field> cacheMap = new HashMap<String, Field>();
+        Map<String, Field> cacheMap = new HashMap<>();
 
         for ( Group group : form.getGroups() )
         {

@@ -28,6 +28,7 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Enums;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.acl.Access;
@@ -38,14 +39,17 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
-import org.hisp.dhis.dxf2.filter.FilterService;
+import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
+import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
@@ -53,10 +57,11 @@ import org.hisp.dhis.node.types.SimpleNode;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.webapi.controller.exception.NotFoundException;
-import org.hisp.dhis.webapi.utils.ContextService;
+import org.hisp.dhis.webapi.service.ContextService;
+import org.hisp.dhis.webapi.service.LinkService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.utils.LinkService;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +73,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.servlet.HandlerMapping;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -77,6 +81,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -96,7 +101,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected CurrentUserService currentUserService;
 
     @Autowired
-    protected FilterService filterService;
+    protected ObjectFilterService objectFilterService;
+
+    @Autowired
+    protected FieldFilterService fieldFilterService;
 
     @Autowired
     protected AclService aclService;
@@ -137,25 +145,62 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         boolean hasPaging = options.hasPaging();
 
-        // get full list if we are using filters
-        if ( filters != null && !filters.isEmpty() )
-        {
-            options.getOptions().put( "links", "false" );
+        List<T> entityList;
 
-            if ( options.hasPaging() )
+        if ( filters.isEmpty() )
+        {
+            entityList = getEntityList( metaData, options );
+        }
+        else
+        {
+            Iterator<String> iterator = filters.iterator();
+            String name = null;
+
+            while ( iterator.hasNext() )
             {
-                hasPaging = true;
-                options.getOptions().put( "paging", "false" );
+                String filter = iterator.next();
+
+                if ( filter.startsWith( "name:like:" ) )
+                {
+                    name = filter.substring( "name:like:".length() );
+                    iterator.remove();
+                    break;
+                }
+            }
+
+            if ( name != null )
+            {
+                int count = manager.getCountByName( getEntityClass(), name );
+
+                Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+                metaData.setPager( pager );
+
+                entityList = Lists.newArrayList( manager.getBetweenByName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
+            }
+            else
+            {
+                // get full list if we are using filters
+                if ( !filters.isEmpty() )
+                {
+                    options.getOptions().put( "links", "false" );
+
+                    if ( options.hasPaging() )
+                    {
+                        hasPaging = true;
+                        options.getOptions().put( "paging", "false" );
+                    }
+                }
+
+                entityList = getEntityList( metaData, options );
             }
         }
 
-        List<T> entityList = getEntityList( metaData, options );
         Pager pager = metaData.getPager();
 
         // enable object filter
         if ( !filters.isEmpty() )
         {
-            entityList = filterService.objectFilter( entityList, filters );
+            entityList = objectFilterService.filter( entityList, filters );
 
             if ( hasPaging )
             {
@@ -172,11 +217,15 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             options.getOptions().put( "viewClass", "sharing" );
         }
 
-        handleLinksAndAccess( options, entityList );
+        handleLinksAndAccess( options, entityList, false );
+
+        linkService.generatePagerLinks( pager, getEntityClass() );
 
         RootNode rootNode = new RootNode( "metadata" );
         rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
         rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+
+        rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
 
         if ( pager != null )
         {
@@ -188,37 +237,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             pagerNode.addChild( new SimpleNode( "prevPage", pager.getPrevPage() ) );
         }
 
-        rootNode.addChild( filterService.fieldFilter( getEntityClass(), entityList, fields ) );
+        rootNode.addChild( fieldFilterService.filter( getEntityClass(), entityList, fields ) );
 
         return rootNode;
     }
 
-    @RequestMapping( value = "/{uid}/**", method = RequestMethod.GET )
-    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid,
+    @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
+    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid, @PathVariable( "property" ) String property,
         @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        String requestUrl = (String) request.getAttribute( HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE );
-        String[] fields = requestUrl.split( "/" );
-
-        String field = "";
-        String postfix = "";
-
-        for ( int i = 3; i < fields.length; i++ )
-        {
-            if ( i > 3 )
-            {
-                field += "[" + fields[i];
-                postfix += "]";
-            }
-            else
-            {
-                field = fields[i];
-            }
-        }
-
-        field += postfix;
-
-        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( field ) );
+        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( property ) );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
@@ -247,11 +275,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new NotFoundException( uid );
         }
 
-        entities = filterService.objectFilter( entities, filters );
+        entities = objectFilterService.filter( entities, filters );
 
         if ( options.hasLinks() )
         {
-            linkService.generateLinks( entities );
+            linkService.generateLinks( entities, true );
         }
 
         if ( aclService.isSupported( getEntityClass() ) )
@@ -265,14 +293,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             postProcessEntity( entity, options, parameters );
         }
 
-        CollectionNode collectionNode = filterService.fieldFilter( getEntityClass(), entities, fields );
+        CollectionNode collectionNode = fieldFilterService.filter( getEntityClass(), entities, fields );
 
-        if ( options.booleanTrue( "useWrapper" ) || entities.size() > 1 )
+        if ( options.isTrue( "useWrapper" ) || entities.size() > 1 )
         {
             RootNode rootNode = new RootNode( "metadata" );
             rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
             rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
             rootNode.addChild( collectionNode );
+
+            rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
 
             return rootNode;
         }
@@ -281,6 +311,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             RootNode rootNode = new RootNode( collectionNode.getChildren().get( 0 ) );
             rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
             rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
+
+            rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
 
             return rootNode;
         }
@@ -300,7 +332,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
-        renderService.toJson( response.getOutputStream(), summary );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postCreateEntity( parsed );
+        }
+
+        renderService.toXml( response.getOutputStream(), summary );
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
@@ -313,6 +351,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postCreateEntity( parsed );
+        }
+
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -342,7 +386,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
-        renderService.toJson( response.getOutputStream(), summary );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postUpdateEntity( parsed );
+        }
+
+        renderService.toXml( response.getOutputStream(), summary );
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
@@ -367,6 +417,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+
+        if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
+        {
+            postUpdateEntity( parsed );
+        }
+
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -435,6 +491,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
     }
 
+    // TODO replace with hooks directly in idManager
+    protected void postCreateEntity( T entity )
+    {
+    }
+
+    // TODO replace with hooks directly in idManager
+    protected void postUpdateEntity( T entity )
+    {
+    }
+
     //--------------------------------------------------------------------------
     // Helpers
     //--------------------------------------------------------------------------
@@ -472,7 +538,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     protected List<T> getEntity( String uid, WebOptions options )
     {
         ArrayList<T> list = new ArrayList<>();
-        Optional<T> identifiableObject = Optional.of( manager.getNoAcl( getEntityClass(), uid ) );
+        Optional<T> identifiableObject = Optional.fromNullable( manager.getNoAcl( getEntityClass(), uid ) );
 
         if ( identifiableObject.isPresent() )
         {
@@ -489,25 +555,27 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     protected void addAccessProperties( List<T> objects )
     {
+        User user = currentUserService.getCurrentUser();
+
         for ( T object : objects )
         {
             Access access = new Access();
-            access.setManage( aclService.canManage( currentUserService.getCurrentUser(), object ) );
-            access.setExternalize( aclService.canExternalize( currentUserService.getCurrentUser(), object.getClass() ) );
-            access.setWrite( aclService.canWrite( currentUserService.getCurrentUser(), object ) );
-            access.setRead( aclService.canRead( currentUserService.getCurrentUser(), object ) );
-            access.setUpdate( aclService.canUpdate( currentUserService.getCurrentUser(), object ) );
-            access.setDelete( aclService.canDelete( currentUserService.getCurrentUser(), object ) );
+            access.setManage( aclService.canManage( user, object ) );
+            access.setExternalize( aclService.canExternalize( user, object.getClass() ) );
+            access.setWrite( aclService.canWrite( user, object ) );
+            access.setRead( aclService.canRead( user, object ) );
+            access.setUpdate( aclService.canUpdate( user, object ) );
+            access.setDelete( aclService.canDelete( user, object ) );
 
             ((BaseIdentifiableObject) object).setAccess( access );
         }
     }
 
-    protected void handleLinksAndAccess( WebOptions options, List<T> entityList )
+    protected void handleLinksAndAccess( WebOptions options, List<T> entityList, boolean deepScan )
     {
         if ( options != null && options.hasLinks() )
         {
-            linkService.generateLinks( entityList );
+            linkService.generateLinks( entityList, deepScan );
         }
 
         if ( entityList != null && aclService.isSupported( getEntityClass() ) )
@@ -569,5 +637,20 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             throw new RuntimeException( ex );
         }
+    }
+
+    private InclusionStrategy.Include getInclusionStrategy( String inclusionStrategy )
+    {
+        if ( inclusionStrategy != null )
+        {
+            Optional<InclusionStrategy.Include> optional = Enums.getIfPresent( InclusionStrategy.Include.class, inclusionStrategy );
+
+            if ( optional.isPresent() )
+            {
+                return optional.get();
+            }
+        }
+
+        return InclusionStrategy.Include.NON_NULL;
     }
 }

@@ -78,6 +78,46 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
     };
 })
 
+.directive('d2CustomForm', function($compile, $parse, CustomFormService) {
+    return{ 
+        restrict: 'E',
+        link: function(scope, elm, attrs){   
+            
+            var customFormType = attrs.customFormType;
+            var customFormObject = $parse(attrs.customFormObject)(scope);
+            
+            if(customFormType === 'PROGRAM_STAGE'){                
+                var customForm = CustomFormService.getForProgramStage(customFormObject);  
+                elm.html(customForm ? customForm : '');
+                $compile(elm.contents())(scope);     
+            }
+        }
+    };
+})
+
+.directive('d2PopOver', function($compile, $templateCache){
+    return {        
+        restrict: 'EA',
+        link: function(scope, element, attrs){
+            var content = $templateCache.get("note.html");
+            content = $compile(content)(scope);
+            var options = {
+                    content: content,
+                    placement: 'bottom',
+                    trigger: 'hover',
+                    html: true,
+                    title: scope.title               
+                };            
+            $(element).popover(options);
+        },
+        scope: {
+            content: '=',
+            title: '@details',
+            template: "@template"
+        }
+    };
+})
+
 .directive('sortable', function() {        
 
     return {        
@@ -86,7 +126,8 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
             element.sortable({
                 connectWith: ".connectedSortable",
                 placeholder: "ui-state-highlight",
-                tolerance: "pointer"
+                tolerance: "pointer",
+                handle: '.handle'
             }).disableSelection();  
             //scope.$apply();
         }  
@@ -154,6 +195,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                 changeYear: true,
                 changeMonth: true,
                 dateFormat: 'yy-mm-dd',
+                yearRange: '-120:+0',
                 onSelect: function(date) {
                     //scope.date = date;
                     ctrl.$setViewValue(date);
@@ -202,9 +244,13 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
   return {
     require: ['typeahead', 'ngModel'],
     link: function (scope, element, attr, ctrls) {        
-      element.bind('focus', function () {          
-        ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
-        //scope.$apply();
+        element.bind('focus', function () {          
+            ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
+            scope.$watch(attr.ngModel, function(value) {
+                if(value === '' || angular.isUndefined(value)){
+                    ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
+                }                
+            });
       });
     }
   };
@@ -227,5 +273,38 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
         element.draggable();
       }
     };  
+})
+
+.directive('serversidePaginator', function factory() {
+    return {
+        restrict: 'E',
+        controller: function ($scope, Paginator) {
+            $scope.paginator = Paginator;
+        },
+        templateUrl: 'views/serverside-pagination.html'
+    };
+})
+
+.directive('clientsidePaginator', function factory() {
+    return {
+        restrict: 'E',
+        controller: function ($scope, Paginator) {
+            $scope.paginator = Paginator;
+        },
+        templateUrl: 'views/clientside-pagination.html'
+    };
+})
+
+.directive('d2Enter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.d2Enter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
 });
 

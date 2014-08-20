@@ -5,7 +5,6 @@
 dhis2.util.namespace( 'dhis2.dsr' );
 
 dhis2.dsr.currentPeriodOffset = 0;
-dhis2.dsr.periodTypeFactory = new PeriodType();
 dhis2.dsr.currentDataSetReport = null;
 
 //------------------------------------------------------------------------------
@@ -44,7 +43,7 @@ dhis2.dsr.getDataSetReport = function()
     dataSetReport.cp = cps;
     
     return dataSetReport;
-}
+};
 
 dhis2.dsr.setDataSetReport = function( dataSetReport )
 {
@@ -76,103 +75,51 @@ dhis2.dsr.setDataSetReport = function( dataSetReport )
 dhis2.dsr.dataSetSelected = function()
 {
 	var ds = $( "#dataSetId" ).val();
-	var cc = dhis2.dsr.metaData.dataSets[ds].categoryCombo;
-	var cogs = dhis2.dsr.metaData.dataSets[ds].categoryOptionGroupSets;
 	
-	if ( cc && cc != dhis2.dsr.metaData.defaultCategoryCombo ) {
-		var categoryCombo = dhis2.dsr.metaData.categoryCombos[cc];
-		var categoryIds = categoryCombo.categories;
+	var html = '';
+	
+	$.getJSON( "../api/dimensions/dataSet/" + ds, function( json ) {
 		
-		dhis2.dsr.setAttributesMarkup( categoryIds );		
-	}
-	else {
-		$( "#attributeComboDiv" ).empty().hide();
-	}
-	
-	if ( cogs && cogs.length ) {
-		dhis2.dsr.setCategoryOptionGroupSetsMarkup( cogs );
-	}
-	else {
-		$( "#categoryOptionGroupSetDiv" ).empty().hide();
-	}
-}
-
-/**
- * Sets markup for drop down boxes for the given category option group sets in the
- * selection div.
- */
-dhis2.dsr.setCategoryOptionGroupSetsMarkup = function( groupSetIds )
-{
-	if ( !groupSetIds || groupSetIds.length == 0 ) {
-		return;
-	}
-	
-	var cogsRx = [];
-	$.each( groupSetIds, function( idx, id ) {
-		cogsRx.push( $.get( "../api/categoryOptionGroupSets/" + id + ".json" ) );
-	} );
-	
-	$.when.apply( $, cogsRx ).done( function() {
-		var html = '';
-		var args = dhis2.util.normalizeArguments( arguments );
-		
-		$.each( args, function( idx, cogs ) {
-			var groupSet = cogs[0];			
-
-			html += '<div class="inputSection">';
-			html += '<div><label>' + groupSet.name + '</label></div>';
-			html += '<select class="dimension" data-uid="' + groupSet.id + '" style="width:330px">';
-			html += '<option value="-1">[ ' + i18n_select_option_view_all + ' ]</option>';
+		if ( !json.dimensions ) {
+			$( "#dimensionsDiv" ).hide();
+		}
+		else
+		{
+			var rx = [];
 			
-			$.each( groupSet.items, function( idx, option ) {
-				html += '<option value="' + option.id + '">' + option.name + '</option>';
+			$.each( json.dimensions, function( idx, dim ) {
+				rx.push( $.get( "../api/dimensions/" + dim.id + ".json" ) );
 			} );
 			
-			html += '</select>';
-			html += '</div>';
-		} );
-
-		$( "#categoryOptionGroupSetDiv" ).show().html( html );
-	} );
-}
-
-/**
-* Sets markup for drop down boxes for the given categories in the selection div.
-*/
-dhis2.dsr.setAttributesMarkup = function( categoryIds )
-{
-	if ( !categoryIds || categoryIds.length == 0 ) {
-		return;
-	}
+			$.when.apply( $, rx ).done( function() {
+				var html = '';
+				var response = dhis2.util.normalizeArguments( arguments );
 	
-	var categoryRx = [];	
-	$.each( categoryIds, function( idx, id ) {
-		categoryRx.push( $.get( "../api/categories/" + id + ".json" ) );
-	} );
-
-	$.when.apply( $, categoryRx ).done( function() {
-		var html = '';
-		var args = dhis2.util.normalizeArguments( arguments );
-		
-		$.each( args, function( idx, cat ) {
-			var category = cat[0];
-			
-			html += '<div class="inputSection">';
-			html += '<div><label>' + category.name + '</label></div>';
-			html += '<select class="dimension" data-uid="' + category.id + '" style="width:330px">';
-			html += '<option value="-1">[ ' + i18n_select_option_view_all + ' ]</option>';
-			
-			$.each( category.items, function( idx, option ) {
-				html += '<option value="' + option.id + '">' + option.name + '</option>';
+				$.each( response, function( idx, dimension ) {
+					var dim = dimension[0];
+	
+					if ( dim.hasOwnProperty( 'items' ) ) {
+						html += '<div class="inputSection">';
+						html += '<div><label>' + dim.name + '</label></div>';
+						html += '<select class="dimension" data-uid="' + dim.id + '" style="width:330px">';
+						html += '<option value="-1">[ ' + i18n_select_option_view_all + ' ]</option>';
+											
+						$.each( dim.items, function( idx, option ) {
+							html += '<option value="' + option.id + '">' + option.name + '</option>';
+						} );
+						
+						html += '</select>';
+						html += '</div>';
+					}
+				} );
+	
+				$( "#dimensionsDiv" ).show().html( html );
 			} );
-			
-			html += '</select>';
-			html += '</div>';
-		} );
-
-		$( "#attributeComboDiv" ).show().html( html );
+		}
+	} ).fail( function() {
+		$( "#dimensionsDiv" ).hide();
 	} );
-}
+};
 
 //------------------------------------------------------------------------------
 // Period
@@ -182,13 +129,12 @@ dhis2.dsr.displayPeriods = function()
 {
     var periodType = $( "#periodType" ).val();
     dhis2.dsr.displayPeriodsInternal( periodType, dhis2.dsr.currentPeriodOffset );
-}
+};
 
 dhis2.dsr.displayPeriodsInternal = function( periodType, offset )
 {
-	var periods = dhis2.dsr.periodTypeFactory.get( periodType ).generatePeriods( offset );
-    periods = dhis2.dsr.periodTypeFactory.reverse( periods );
-    periods = dhis2.dsr.periodTypeFactory.filterFuturePeriodsExceptCurrent( periods );
+    var periods = dhis2.period.generator.generateReversedPeriods(periodType, offset);
+    periods = dhis2.period.generator.filterFuturePeriodsExceptCurrent( periods );
 
     $( "#periodId" ).removeAttr( "disabled" );
     clearListById( "periodId" );
@@ -197,7 +143,7 @@ dhis2.dsr.displayPeriodsInternal = function( periodType, offset )
     {
         addOptionById( "periodId", periods[i].iso, periods[i].name );
     }
-}
+};
 
 dhis2.dsr.displayNextPeriods = function()
 {
@@ -206,13 +152,13 @@ dhis2.dsr.displayNextPeriods = function()
         dhis2.dsr.currentPeriodOffset++;
         dhis2.dsr.displayPeriods();
     }
-}
+};
 
 dhis2.dsr.displayPreviousPeriods = function()
 {
     dhis2.dsr.currentPeriodOffset--;
     dhis2.dsr.displayPeriods();
-}
+};
 
 //------------------------------------------------------------------------------
 // Run report
@@ -238,17 +184,17 @@ dhis2.dsr.displayDataSetReport = function( dataSetReport )
 {	
     if ( !dataSetReport.ds )
     {
-        setHeaderMessage( i18n_select_data_set );
+    	setHeaderDelayMessage( i18n_select_data_set );
         return false;
     }
     if ( !dataSetReport.pe )
     {
-        setHeaderMessage( i18n_select_period );
+    	setHeaderDelayMessage( i18n_select_period );
         return false;
     }
     if ( !selectionTreeSelection.isSelected() )
     {
-        setHeaderMessage( i18n_select_organisation_unit );
+    	setHeaderDelayMessage( i18n_select_organisation_unit );
         return false;
     }
     
@@ -311,11 +257,13 @@ dhis2.dsr.setUserInfo = function( username )
 dhis2.dsr.showCriteria = function()
 {
 	$( "#criteria" ).show( "fast" );
+	$( "#dataButton" ).attr( "disabled", "disabled" );
 }
 
 dhis2.dsr.hideCriteria = function()
 {
 	$( "#criteria" ).hide( "fast" );
+	$( "#dataButton" ).removeAttr( "disabled" );
 }
 
 dhis2.dsr.showContent = function()
@@ -334,14 +282,14 @@ dhis2.dsr.hideContent = function()
 dhis2.dsr.showMoreOptions = function()
 {
 	$( "#moreOptionsLink" ).hide();
-	$( "#lessOptionsLink" ).show();
+	$( "#fewerOptionsLink" ).show();
 	$( "#advancedOptions" ).show();
 }
 
-dhis2.dsr.showLessOptions = function()
+dhis2.dsr.showFewerOptions = function()
 {
 	$( "#moreOptionsLink" ).show();
-	$( "#lessOptionsLink" ).hide();
+	$( "#fewerOptionsLink" ).hide();
 	$( "#advancedOptions" ).hide();
 }
 

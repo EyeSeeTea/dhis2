@@ -44,33 +44,6 @@ function addProgramStage()
 	}
 }
 
-function sortProgramStages()
-{
-	var programId = getFieldValue('id');
-	if( programId == "null"  || programId == "" )
-	{
-		showWarningMessage( i18n_please_select_program );
-	}
-	else
-	{
-		jQuery.getJSON( 'saveProgramStageSortOder.action', { id: programId }, 
-			function ( json ) {
-				showSuccessMessage( i18n_success );
-				loadProgramStageList( programId );
-			});
-	}
-}
-
-function loadProgramStageList( programId )
-{
-	jQuery('#programStageListDiv').load('programStageList.action',{
-			id: programId
-		},
-		function( html ){
-			setInnerHTML('programStageListDiv', html );
-		});
-}
-
 // -----------------------------------------------------------------------------
 // View details
 // -----------------------------------------------------------------------------
@@ -81,6 +54,7 @@ function showProgramStageDetails( context )
 		setInnerHTML( 'nameField', json.programStage.name );	
 		setInnerHTML( 'descriptionField', json.programStage.description );
 		setInnerHTML( 'scheduledDaysFromStartField', json.programStage.minDaysFromStart ); 
+		setInnerHTML( 'idField', json.programStage.uid ); 
 		
 		var irregular = (json.programStage.irregular=='true') ? i18n_yes : i18n_no;
 		setInnerHTML( 'irregularField', irregular );  
@@ -139,10 +113,10 @@ function selectDataElements()
 			html += "<td align='center'><input type='checkbox' name='allowProvided'></td>";
 			html += "<td align='center'><input type='checkbox' name='displayInReport'></td>";
 			if( jQuery(item).attr('valuetype') =='date'){
-				html += "<td align='center'><input type='checkbox' name='allowDateInFuture'></td>";
+				html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
 			}
 			else{
-				html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
+				html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
 			}
 			
 			html += "</tr>";
@@ -163,10 +137,10 @@ function selectAllDataElements()
 		html += "<td align='center'><input type='checkbox' name='displayInReport'></td>";
 		
 		if( jQuery(item).attr('valuetype') =='date'){
-			html += "<td align='center'><input type='checkbox' name='allowDateInFuture'></td>";
+			html += "<td align='center'><input type='checkbox' name='allowFutureDate'></td>";
 		}
 		else{
-			html += "<td align='center'><input type='hidden' name='allowDateInFuture'></td>";
+			html += "<td align='center'><input type='hidden' name='allowFutureDate'></td>";
 		}
 		
 		html += "</tr>";

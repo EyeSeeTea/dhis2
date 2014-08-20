@@ -36,6 +36,7 @@ import org.amplecode.staxwax.reader.XMLReader;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.importexport.ExportParams;
 import org.hisp.dhis.importexport.ImportObjectService;
@@ -61,7 +62,6 @@ public class DataElementConverter
     private static final String FIELD_NAME = "name";
     private static final String FIELD_SHORT_NAME = "shortName";
     private static final String FIELD_DESCRIPTION = "description";
-    private static final String FIELD_ACTIVE = "active";
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_DOMAIN_TYPE = "domainType";
     private static final String FIELD_AGGREGATION_OPERATOR = "aggregationOperator";
@@ -129,9 +129,8 @@ public class DataElementConverter
                 writer.writeElement( FIELD_SHORT_NAME, element.getShortName() );
                 writer.writeElement( FIELD_CODE, element.getCode() ); // historic positioning from v1.2
                 writer.writeElement( FIELD_DESCRIPTION, element.getDescription() );
-                writer.writeElement( FIELD_ACTIVE, String.valueOf( element.isActive() ) );
                 writer.writeElement( FIELD_TYPE, element.getType() );
-                writer.writeElement( FIELD_DOMAIN_TYPE, element.getDomainType() );
+                writer.writeElement( FIELD_DOMAIN_TYPE, element.getDomainType().getValue() );
                 writer.writeElement( FIELD_AGGREGATION_OPERATOR, element.getAggregationOperator() );
                 writer.writeElement( FIELD_CATEGORY_COMBO, String.valueOf( element.getCategoryCombo().getId() ) );
                 writer.writeElement( FIELD_LAST_UPDATED, DateUtils.getMediumDateString( element.getLastUpdated(), EMPTY ) );
@@ -169,9 +168,9 @@ public class DataElementConverter
             }
             
             element.setDescription( values.get( FIELD_DESCRIPTION ) );
-            element.setActive( Boolean.parseBoolean( values.get( FIELD_ACTIVE ) ) );
             element.setType( values.get( FIELD_TYPE ) );
-            element.setDomainType( values.get( FIELD_DOMAIN_TYPE ) );
+            
+            element.setDomainType( DataElementDomain.fromValue(values.get( FIELD_DOMAIN_TYPE ) ) );
             element.setAggregationOperator( values.get( FIELD_AGGREGATION_OPERATOR ) );
             element.getCategoryCombo().setId( categoryComboMapping.get( Integer.parseInt( values.get( FIELD_CATEGORY_COMBO ) ) ) );
             element.setLastUpdated( DateUtils.getMediumDate( values.get( FIELD_LAST_UPDATED ) ) );            

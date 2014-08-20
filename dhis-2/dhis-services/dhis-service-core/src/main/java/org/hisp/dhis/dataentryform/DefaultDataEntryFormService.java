@@ -138,6 +138,11 @@ public class DefaultDataEntryFormService
 
     public String prepareDataEntryFormForSave( String htmlCode )
     {
+        if ( htmlCode == null )
+        {
+            return null;
+        }
+        
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
@@ -175,6 +180,11 @@ public class DefaultDataEntryFormService
     {
         //TODO HTML encode names
 
+        if ( htmlCode == null )
+        {
+            return null;
+        }
+        
         StringBuffer sb = new StringBuffer();
 
         Matcher inputMatcher = INPUT_PATTERN.matcher( htmlCode );
@@ -234,8 +244,8 @@ public class DefaultDataEntryFormService
                 continue;
             }
 
-            inputHtml = inputHtml.contains( EMPTY_VALUE_TAG ) ? inputHtml.replace( EMPTY_VALUE_TAG, displayValue ) : inputHtml + " " + displayValue;
-            inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, displayTitle ) : inputHtml + " " + displayTitle;
+            inputHtml = inputHtml.contains( EMPTY_VALUE_TAG ) ? inputHtml.replace( EMPTY_VALUE_TAG, displayValue ) : inputHtml.replace( TAG_CLOSE, ( displayValue + TAG_CLOSE ) );
+            inputHtml = inputHtml.contains( EMPTY_TITLE_TAG ) ? inputHtml.replace( EMPTY_TITLE_TAG, displayTitle ) : inputHtml.replace( TAG_CLOSE, ( displayTitle + TAG_CLOSE ) );
 
             inputMatcher.appendReplacement( sb, inputHtml );
         }
@@ -249,6 +259,11 @@ public class DefaultDataEntryFormService
     {
         //TODO HTML encode names
 
+        if ( htmlCode == null )
+        {
+            return null;
+        }
+        
         // ---------------------------------------------------------------------
         // Inline javascript/html to add to HTML before output
         // ---------------------------------------------------------------------
@@ -329,7 +344,7 @@ public class DefaultDataEntryFormService
                 }
                 else
                 {
-                    appendCode += " name=\"entryfield\" class=\"entryfield\" tabindex=\"" + i++ + "\"" + TAG_CLOSE;
+                    appendCode += " type=\"text\" name=\"entryfield\" class=\"entryfield\" tabindex=\"" + i++ + "\"" + TAG_CLOSE;
                 }
                 
                 inputHtml = inputHtml.replace( TAG_CLOSE, appendCode );
@@ -339,11 +354,11 @@ public class DefaultDataEntryFormService
             }
             else if ( dataElementTotalMatcher.find() && dataElementTotalMatcher.groupCount() > 0 )
             {
-                inputHtml = inputHtml.replace( TAG_CLOSE, " class=\"dataelementtotal\"" + TAG_CLOSE );
+                inputHtml = inputHtml.replace( TAG_CLOSE, " type=\"text\" class=\"dataelementtotal\"" + TAG_CLOSE );
             }
             else if ( indicatorMatcher.find() && indicatorMatcher.groupCount() > 0 )
             {
-                inputHtml = inputHtml.replace( TAG_CLOSE, " class=\"indicator\"" + TAG_CLOSE );
+                inputHtml = inputHtml.replace( TAG_CLOSE, " type=\"text\" class=\"indicator\"" + TAG_CLOSE );
             }
 
             inputMatcher.appendReplacement( sb, inputHtml );            
@@ -356,7 +371,7 @@ public class DefaultDataEntryFormService
 
     public Set<DataElement> getDataElementsInDataEntryForm( DataSet dataSet )
     {
-        if ( dataSet == null || dataSet.getDataEntryForm() == null )
+        if ( dataSet == null || !dataSet.hasDataEntryForm() )
         {
             return null;
         }
@@ -398,7 +413,7 @@ public class DefaultDataEntryFormService
 
     public Set<DataElementOperand> getOperandsInDataEntryForm( DataSet dataSet )
     {
-        if ( dataSet == null || dataSet.getDataEntryForm() == null )
+        if ( dataSet == null || !dataSet.hasDataEntryForm() )
         {
             return null;
         }

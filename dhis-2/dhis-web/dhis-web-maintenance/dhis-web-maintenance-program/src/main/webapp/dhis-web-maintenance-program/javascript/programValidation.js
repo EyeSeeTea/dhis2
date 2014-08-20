@@ -2,14 +2,18 @@ var COLOR_GREEN = '#b9ffb9';
 var COLOR_WHITE = '#ffffff'
 
 jQuery(document).ready(function() {
-  validation('programValidationForm', function( form ) {
-    form.submit();
-  });
+ 
+    validation2( 'programValidationForm', function( form )
+	{
+		form.submit();
+	},{
+		'rules' : getValidationRules( "programValidation" )
+	});
 
-  dhis2.contextmenu.makeContextMenu({
-    menuId: 'contextMenu',
-    menuItemActiveClass: 'contextMenuItemActive'
-  });
+	dhis2.contextmenu.makeContextMenu({
+		menuId: 'contextMenu',
+		menuItemActiveClass: 'contextMenuItemActive'
+    });
 });
 
 // -----------------------------------------------------------------------------
@@ -23,6 +27,7 @@ function showUpdateSingleProgramValidationForm( context ) {
 function showProgramValidationDetails( context ) {
   jQuery.getJSON('getProgramValidation.action', { validationId: context.id }, function( json ) {
     setInnerHTML('descriptionField', json.validation.description);
+    setInnerHTML('idField', json.validation.uid);
 
     var operator = json.validation.operator;
     setInnerHTML('operatorField', i18nalizeOperator(operator));

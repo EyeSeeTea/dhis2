@@ -57,7 +57,7 @@ public class Validator
      * Evaluates validation rules for a collection of organisation units.
      * This method breaks the job down by organisation unit. It assigns the
      * evaluation for each organisation unit to a task that can be evaluated
-     * independently in a multithreaded environment.
+     * independently in a multi-threaded environment.
      * 
      * @param sources the organisation units in which to run the validation rules
      * @param periods the periods of data to check
@@ -80,7 +80,7 @@ public class Validator
         DataValueService dataValueService, DataElementCategoryService dataElementCategoryService,
         UserService userService, CurrentUserService currentUserService )
     {
-        ValidationRunContext context = ValidationRunContext.getNewValidationRunContext( sources, periods,
+        ValidationRunContext context = ValidationRunContext.getNewContext( sources, periods,
             attributeCombo, rules, constantService.getConstantMap(), ValidationRunType.SCHEDULED, lastScheduledRun,
             expressionService, periodService, dataValueService, dataElementCategoryService, userService, currentUserService );
 

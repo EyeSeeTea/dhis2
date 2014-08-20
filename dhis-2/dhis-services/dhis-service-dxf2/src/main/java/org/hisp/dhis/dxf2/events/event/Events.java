@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.Pager;
 
@@ -42,6 +43,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "events", namespace = DxfNamespaces.DXF_2_0 )
 public class Events
 {
     private String program;
@@ -83,7 +85,7 @@ public class Events
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "events", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "events", useWrapping = false, namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "event", namespace = DxfNamespaces.DXF_2_0 )
     public List<Event> getEvents()
     {
@@ -96,7 +98,7 @@ public class Events
     }
 
     @JsonProperty
-    @JacksonXmlProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Map<Object, Object> getMetaData()
     {
         return metaData;
@@ -108,7 +110,7 @@ public class Events
     }
 
     @JsonProperty
-    @JacksonXmlProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Pager getPager()
     {
         return pager;

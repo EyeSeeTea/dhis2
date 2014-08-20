@@ -75,9 +75,9 @@ public class DefaultDataElementService
         this.dataElementGroupStore = dataElementGroupStore;
     }
 
-    private DataElementGroupSetStore dataElementGroupSetStore;
+    private GenericNameableObjectStore<DataElementGroupSet> dataElementGroupSetStore;
 
-    public void setDataElementGroupSetStore( DataElementGroupSetStore dataElementGroupSetStore )
+    public void setDataElementGroupSetStore( GenericNameableObjectStore<DataElementGroupSet> dataElementGroupSetStore )
     {
         this.dataElementGroupSetStore = dataElementGroupSetStore;
     }
@@ -180,11 +180,6 @@ public class DefaultDataElementService
         return i18n( i18nService, dataElementStore.getAggregateableDataElements() );
     }
 
-    public Collection<DataElement> getAllActiveDataElements()
-    {
-        return i18n( i18nService, dataElementStore.getAllActiveDataElements() );
-    }
-
     public DataElement getDataElementByName( String name )
     {
         List<DataElement> dataElements = new ArrayList<DataElement>( dataElementStore.getAllEqName( name ) );
@@ -237,12 +232,12 @@ public class DefaultDataElementService
         } );
     }
 
-    public Collection<DataElement> getDataElementsByDomainType( String domainType )
+    public Collection<DataElement> getDataElementsByDomainType( DataElementDomain domainType )
     {
         return i18n( i18nService, dataElementStore.getDataElementsByDomainType( domainType ) );
     }
 
-    public Collection<DataElement> getDataElementsByDomainType( String domainType, int first, int max )
+    public Collection<DataElement> getDataElementsByDomainType( DataElementDomain domainType, int first, int max )
     {
         return i18n( i18nService, dataElementStore.getDataElementsByDomainType( domainType, first, max ) );
     }
@@ -326,7 +321,7 @@ public class DefaultDataElementService
         return getCountByName( i18nService, dataElementStore, name );
     }
 
-    public int getDataElementCountByDomainType( String domainType )
+    public int getDataElementCountByDomainType( DataElementDomain domainType )
     {
         return dataElementStore.getCountByDomainType( domainType );
     }

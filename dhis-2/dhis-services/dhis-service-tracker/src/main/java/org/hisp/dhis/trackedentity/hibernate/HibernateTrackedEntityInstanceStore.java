@@ -29,7 +29,6 @@ package org.hisp.dhis.trackedentity.hibernate;
  */
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
-import static org.hisp.dhis.program.ProgramStageInstance.SKIPPED_STATUS;
 import static org.hisp.dhis.system.util.DateUtils.getMediumDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.getTokens;
@@ -56,6 +55,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.common.SetMap;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.event.EventStatus;
@@ -215,6 +215,7 @@ public class HibernateTrackedEntityInstanceStore
         final String regexp = statementBuilder.getRegexpMatch();
         final String wordStart = statementBuilder.getRegexpWordStart();
         final String wordEnd = statementBuilder.getRegexpWordEnd();
+        final String anyChar = "\\.*?";
 
         String sql = "from trackedentityinstance tei " + 
             "inner join trackedentity te on tei.trackedentityid = te.trackedentityid " +
@@ -233,7 +234,7 @@ public class HibernateTrackedEntityInstanceStore
             if ( !params.isOrQuery() && item.hasFilter() )
             {
                 for ( QueryFilter filter : item.getFilters() )
-                {
+                {                    
                     final String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
 
                     final String queryCol = item.isNumeric() ? (col + ".value") : "lower(" + col + ".value)";
@@ -322,9 +323,12 @@ public class HibernateTrackedEntityInstanceStore
 
         if ( params.isOrQuery() && params.hasAttributesOrFilters() )
         {
+            final String start = params.getQuery().isOperator( QueryOperator.LIKE ) ? anyChar : wordStart;
+            final String end = params.getQuery().isOperator( QueryOperator.LIKE ) ? anyChar : wordEnd;
+            
             sql += hlp.whereAnd() + " (";
 
-            List<String> queryTokens = getTokens( params.getQuery() );
+            List<String> queryTokens = getTokens( params.getQuery().getFilter() );
 
             for ( String queryToken : queryTokens )
             {
@@ -337,8 +341,8 @@ public class HibernateTrackedEntityInstanceStore
                     final String col = statementBuilder.columnQuote( item.getItemId() );
 
                     sql += 
-                        "lower(" + col + ".value) " + regexp + " '" + wordStart + 
-                        StringUtils.lowerCase( query ) + wordEnd + "' or ";
+                        col + ".value " + regexp + " '" + start + 
+                        StringUtils.lowerCase( query ) + end + "' or ";
                 }
 
                 sql = removeLastOr( sql ) + ") and ";
@@ -361,21 +365,21 @@ public class HibernateTrackedEntityInstanceStore
         {
             sql = 
                 "and psi.executiondate >= '" + start + "' and psi.executiondate <= '" + end + "' " +
-                "and psi.completed = true ";
+                "and psi.status = '" + EventStatus.COMPLETED.name() + "' ";
         }
         else if ( params.isEventStatus( EventStatus.VISITED ) )
         {
             sql = 
                 "and psi.executiondate >= '" + start + "' and psi.executiondate <= '" + end + "' " + 
-                "and psi.completed = false ";
+                "and psi.status = '" + EventStatus.ACTIVE.name() + "' ";
         }
-        else if ( params.isEventStatus( EventStatus.FUTURE_VISIT ) )
+        else if ( params.isEventStatus( EventStatus.SCHEDULE ) )
         {
             sql = 
                 "and psi.executiondate is null and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' " +
                 "and psi.status is not null and date(now()) <= date(psi.duedate) ";
         }
-        else if ( params.isEventStatus( EventStatus.LATE_VISIT ) )
+        else if ( params.isEventStatus( EventStatus.OVERDUE ) )
         {
             sql = 
                 "and psi.executiondate is null and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' " +
@@ -385,7 +389,7 @@ public class HibernateTrackedEntityInstanceStore
         {
             sql = 
                 "and psi.duedate >= '" + start + "' and psi.duedate <= '" + end + "' " +
-                "and psi.status = " + SKIPPED_STATUS + " ";
+                "and psi.status = '" + EventStatus.SKIPPED.name() + "' ";
         }
 
         return sql;

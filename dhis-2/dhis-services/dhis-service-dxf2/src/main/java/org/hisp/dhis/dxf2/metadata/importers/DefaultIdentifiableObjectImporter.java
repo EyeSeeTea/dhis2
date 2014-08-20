@@ -126,7 +126,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     @Autowired
     private SchemaService schemaService;
 
-    @Autowired( required = false )
+    @Autowired(required = false)
     private List<ObjectHandler<T>> objectHandlers;
 
     //-------------------------------------------------------------------------------------------------------
@@ -252,9 +252,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Expression extractExpression( T object, String fieldName )
         {
+            Expression expression = null;
+            
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
             {
-                Object expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
+                expression = ReflectionUtils.invokeGetterMethod( fieldName, object );
 
                 if ( expression != null && Expression.class.isAssignableFrom( expression.getClass() ) )
                 {
@@ -262,7 +264,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
                 }
             }
 
-            return null;
+            return expression;
         }
 
         private Set<DataElementOperand> extractDataElementOperands( T object, String fieldName )
@@ -416,6 +418,12 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             if ( ReflectionUtils.isCollection( "attributes", object, ProgramTrackedEntityAttribute.class ) )
             {
                 Set<ProgramTrackedEntityAttribute> programTrackedEntityAttributes = ReflectionUtils.invokeGetterMethod( "attributes", object );
+
+                if ( programTrackedEntityAttributes == null )
+                {
+                    programTrackedEntityAttributes = Sets.newHashSet();
+                    ReflectionUtils.invokeSetterMethod( "attributes", object, programTrackedEntityAttributes );
+                }
 
                 for ( ProgramTrackedEntityAttribute trackedEntityAttribute : programTrackedEntityAttributes )
                 {
@@ -707,18 +715,18 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         objectBridge.updateObject( persistedObject );
 
-        if ( object instanceof User && !options.isDryRun() )
-        {
-            Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
-
-            ((User) persistedObject).getUserCredentials().mergeWith( userCredentials );
-            reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials );
-
-            sessionFactory.getCurrentSession().saveOrUpdate( ((User) persistedObject).getUserCredentials() );
-        }
-
         if ( !options.isDryRun() )
         {
+            if ( object instanceof User )
+            {
+                Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
+
+                ((User) persistedObject).getUserCredentials().mergeWith( userCredentials );
+                reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials );
+
+                sessionFactory.getCurrentSession().saveOrUpdate( ((User) persistedObject).getUserCredentials() );
+            }
+
             nonIdentifiableObjects.save( persistedObject );
         }
 

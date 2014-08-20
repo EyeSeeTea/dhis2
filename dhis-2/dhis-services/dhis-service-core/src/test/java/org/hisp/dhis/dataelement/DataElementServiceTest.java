@@ -304,39 +304,6 @@ public class DataElementServiceTest
     }
 
     @Test
-    public void testGetAllActiveDataElements()
-        throws Exception
-    {
-        assertEquals( 0, dataElementService.getAllActiveDataElements().size() );
-
-        DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setActive( true );
-        DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setActive( true );
-        DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setActive( true );
-        DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setActive( false );
-
-        dataElementService.addDataElement( dataElementA );
-        dataElementService.addDataElement( dataElementB );
-        dataElementService.addDataElement( dataElementC );
-        dataElementService.addDataElement( dataElementD );
-
-        Collection<DataElement> dataElementsRef = new HashSet<DataElement>();
-        dataElementsRef.add( dataElementA );
-        dataElementsRef.add( dataElementB );
-        dataElementsRef.add( dataElementC );
-
-        assertEquals( dataElementsRef.size() + 1, dataElementService.getAllDataElements().size() );
-
-        Collection<DataElement> dataElements = dataElementService.getAllActiveDataElements();
-        assertNotNull( dataElements );
-        assertEquals( dataElementsRef.size(), dataElements.size() );
-        assertTrue( dataElements.containsAll( dataElementsRef ) );
-    }
-
-    @Test
     public void testGetDataElementsByAggregationOperator()
         throws Exception
     {
@@ -368,25 +335,25 @@ public class DataElementServiceTest
     @Test
     public void testGetDataElementsByDomainType()
     {
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.DOMAIN_TYPE_AGGREGATE ).size() );
-        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.DOMAIN_TYPE_PATIENT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
+        assertEquals( 0, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setType( DataElement.DOMAIN_TYPE_AGGREGATE );
+        dataElementA.setType( DataElement.VALUE_TYPE_INT );
         DataElement dataElementB = createDataElement( 'B' );
-        dataElementB.setType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElementB.setType( DataElement.VALUE_TYPE_BOOL );
         DataElement dataElementC = createDataElement( 'C' );
-        dataElementC.setType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElementC.setType( DataElement.VALUE_TYPE_BOOL );
         DataElement dataElementD = createDataElement( 'D' );
-        dataElementD.setType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElementD.setType( DataElement.VALUE_TYPE_BOOL );
 
         dataElementService.addDataElement( dataElementA );
         dataElementService.addDataElement( dataElementB );
         dataElementService.addDataElement( dataElementC );
         dataElementService.addDataElement( dataElementD );
 
-        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.DOMAIN_TYPE_AGGREGATE ).size() );
-        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.DOMAIN_TYPE_PATIENT ).size() );
+        assertEquals( 1, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_INT ).size() );
+        assertEquals( 3, dataElementService.getDataElementsByType( DataElement.VALUE_TYPE_BOOL ).size() );
     }
 
     @Test

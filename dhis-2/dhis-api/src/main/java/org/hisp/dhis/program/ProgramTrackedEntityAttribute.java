@@ -45,7 +45,7 @@ import java.io.Serializable;
 /**
  * @author Chau Thu Tran
  */
-@JacksonXmlRootElement(localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "programTrackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramTrackedEntityAttribute
     implements Serializable
 {
@@ -55,11 +55,11 @@ public class ProgramTrackedEntityAttribute
 
     private TrackedEntityAttribute attribute;
 
-    private Integer sortOrder;
-
     private boolean displayInList;
 
     private Boolean mandatory;
+
+    private Boolean allowFutureDate;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -72,17 +72,24 @@ public class ProgramTrackedEntityAttribute
     public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, int sortOrder, boolean displayInList )
     {
         this.attribute = attribute;
-        this.sortOrder = sortOrder;
         this.displayInList = displayInList;
     }
 
-    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, Integer sortOrder, boolean displayInList,
+    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
         Boolean mandatory )
     {
         this.attribute = attribute;
-        this.sortOrder = sortOrder;
         this.displayInList = displayInList;
         this.mandatory = mandatory;
+    }
+
+    public ProgramTrackedEntityAttribute( TrackedEntityAttribute attribute, boolean displayInList,
+        Boolean mandatory, Boolean allowFutureDate )
+    {
+        this.attribute = attribute;
+        this.displayInList = displayInList;
+        this.mandatory = mandatory;
+        this.allowFutureDate = allowFutureDate;
     }
 
     // -------------------------------------------------------------------------
@@ -100,8 +107,8 @@ public class ProgramTrackedEntityAttribute
     }
 
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlProperty(namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean isMandatory()
     {
         return mandatory;
@@ -112,10 +119,10 @@ public class ProgramTrackedEntityAttribute
         this.mandatory = mandatory;
     }
 
-    @JsonProperty
-    @JsonSerialize(as = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
-    @JacksonXmlProperty(localName = "personAttribute", namespace = DxfNamespaces.DXF_2_0)
+    @JsonProperty( "trackedEntityAttribute" )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
+    @JacksonXmlProperty( localName = "trackedEntityAttribute", namespace = DxfNamespaces.DXF_2_0 )
     public TrackedEntityAttribute getAttribute()
     {
         return attribute;
@@ -126,28 +133,31 @@ public class ProgramTrackedEntityAttribute
         this.attribute = attribute;
     }
 
-    public Integer getSortOrder()
-    {
-        return sortOrder;
-    }
-
-    public void setSortOrder( Integer sortOrder )
-    {
-        this.sortOrder = sortOrder;
-    }
-
     @JsonProperty
-    @JsonView({ DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class })
-    @JacksonXmlProperty(localName = "displayInList", namespace = DxfNamespaces.DXF_2_0)
+    @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
+    @JacksonXmlProperty( localName = "displayInList", namespace = DxfNamespaces.DXF_2_0 )
     public boolean isDisplayInList()
     {
         return displayInList;
     }
 
-
     public void setDisplayInList( boolean displayInList )
     {
         this.displayInList = displayInList;
+    }
+
+    @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Boolean getAllowFutureDate()
+    {
+        return allowFutureDate;
+    }
+
+    public void setAllowFutureDate( Boolean allowFutureDate )
+    {
+        this.allowFutureDate = allowFutureDate;
     }
 
 }

@@ -11,8 +11,13 @@ function showOptionSetDetails( context ) {
     function( json ) {
       setInnerHTML('nameField', json.optionSet.name);
       setInnerHTML('optionCount', json.optionSet.optionCount);
+      setInnerHTML('idField', json.optionSet.uid);
       showDetails();
     });
+}
+
+function showOptionList( context ) {
+  location.href = 'option.action?optionSetId=' + context.id;
 }
 
 // -----------------------------------------------------------------------------

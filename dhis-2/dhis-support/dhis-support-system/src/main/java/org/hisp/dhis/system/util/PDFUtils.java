@@ -401,10 +401,7 @@ public class PDFUtils
             table.addCell( getItalicCell( i18n.getString( "description" ) ) );
             table.addCell( getTextCell( element.getDescription() ) );
         }
-
-        table.addCell( getItalicCell( i18n.getString( "active" ) ) );
-        table.addCell( getTextCell( i18n.getString( getBoolean().get( element.isActive() ) ) ) );
-
+        
         if ( nullIfEmpty( element.getType() ) != null )
         {
             table.addCell( getItalicCell( i18n.getString( "value_type" ) ) );
@@ -655,9 +652,6 @@ public class PDFUtils
             table.addCell( getItalicCell( i18n.getString( "description" ) ) );
             table.addCell( getTextCell( validationRule.getDescription() ) );
         }
-
-        table.addCell( getItalicCell( i18n.getString( "type" ) ) );
-        table.addCell( getTextCell( i18n.getString( validationRule.getType() ) ) );
 
         table.addCell( getItalicCell( i18n.getString( "operator" ) ) );
         table.addCell( getTextCell( i18n.getString( validationRule.getOperator().toString() ) ) );

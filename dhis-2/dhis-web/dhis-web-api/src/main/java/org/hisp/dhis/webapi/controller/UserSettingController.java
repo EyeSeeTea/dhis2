@@ -28,13 +28,20 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.user.UserSettingService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletResponse;
+import org.hisp.dhis.system.util.LocaleUtils;
+import java.io.Serializable;
+import java.util.Locale;
 
 /**
  * @author Lars Helge Overland
@@ -49,9 +56,9 @@ public class UserSettingController
     @RequestMapping( value = "/{key}", method = RequestMethod.POST, consumes = { ContextUtils.CONTENT_TYPE_TEXT, ContextUtils.CONTENT_TYPE_HTML } )
     public void setUserSetting(
         @PathVariable String key,
-        @RequestParam(value = "user", required = false) String username,
-        @RequestParam(value = "value",required = false) String value,
-        @RequestBody(required=false) String valuePayload, HttpServletResponse response )
+        @RequestParam( value = "user", required = false ) String username,
+        @RequestParam( value = "value", required = false ) String value,
+        @RequestBody( required = false ) String valuePayload, HttpServletResponse response )
     {
         if ( key == null )
         {
@@ -67,22 +74,20 @@ public class UserSettingController
 
         value = value != null ? value : valuePayload;
 
-        if ( username == null )
-        {
-            userSettingService.saveUserSetting( key, value );
-        }
-        else
-        {
-            userSettingService.saveUserSetting( key, value, username );
+        if (username == null) {
+            userSettingService.saveUserSetting(key, valueToSet(key, value));
+
+        } else {
+            userSettingService.saveUserSetting(key, valueToSet(key, value), username);
         }
 
         ContextUtils.okResponse( response, "User setting saved" );
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_TEXT )
-    public @ResponseBody String getSystemSetting( @PathVariable( "key" ) String key, @RequestParam(value = "user", required = false) String username ) 
+    public @ResponseBody String getSystemSetting( @PathVariable( "key" ) String key, @RequestParam( value = "user", required = false ) String username )
     {
-        return (String) ( username == null ? userSettingService.getUserSetting( key ) : userSettingService.getUserSetting( key, username ) );
+        return username == null ? getStringValue(key, userSettingService.getUserSetting( key )) : getStringValue( key,userSettingService.getUserSetting( key, username ));
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )
@@ -90,4 +95,20 @@ public class UserSettingController
     {
         userSettingService.deleteUserSetting( key );
     }
+
+    private Serializable valueToSet(String key, String value){
+        if (key.equals(UserSettingService.KEY_UI_LOCALE) || key.equals(UserSettingService.KEY_DB_LOCALE)) {
+            return LocaleUtils.getLocale(value);
+        } else {
+            return value;
+        }
+    }
+
+    private String getStringValue(String key, Serializable value) {
+        if (key.equals(UserSettingService.KEY_UI_LOCALE) || key.equals(UserSettingService.KEY_DB_LOCALE))
+            return ((Locale) value).getLanguage();
+        else
+            return (String) value;
+    }
+
 }

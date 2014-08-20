@@ -37,7 +37,6 @@
 			<tr>
 				<td>#filterDiv( "dataSet" )</td>
 				<td colspan="9" style="text-align:right">
-					<input type="button" value="$i18n.getString( 'sort' )" onclick="window.location.href='showSortDataSetForm.action'" style="width:80px"/></a>
 					<input type="button" value="$i18n.getString( 'add_new' )" onclick="window.location.href='addDataSetForm.action'" style="width:80px"/></a>
 				</td>
 			</tr>
@@ -75,6 +74,7 @@
 				<p><label>$i18n.getString( "frequency" ):</label><br/><span id="frequencyField"></span></p>
 				<p><label>$i18n.getString( "number_of_data_elements" ):</label><br/><span id="dataElementCountField"></span></p>
 				<p><label>$i18n.getString( "dataentryform" ):</label><br/><span id="dataEntryFormField"></span></p>
+				<p><label>$i18n.getString( "id" ):</label><br/><span id="idField"></span></p>
 			</div>
 			
       <div id="warningArea">

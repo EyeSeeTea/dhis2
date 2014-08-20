@@ -12,11 +12,10 @@ var trackerCapture = angular.module('trackerCapture',
                   'trackerCaptureControllers',
 		  'angularLocalStorage',
                   'ui.select2',
+                  'd2Menu',
 		  'pascalprecht.translate'])
               
 .value('DHIS2URL', '..')
-
-
 
 .config(function($httpProvider, $routeProvider, $translateProvider) {    
             
@@ -27,7 +26,7 @@ var trackerCapture = angular.module('trackerCapture',
         templateUrl:'views/home.html',
         controller: 'SelectionController'
     }).when('/dashboard',{
-        templateUrl:'views/dashboard.html',
+        templateUrl:'components/dashboard/dashboard.html',
         controller: 'DashboardController'
     }).otherwise({
         redirectTo : '/'

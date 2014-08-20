@@ -49,14 +49,12 @@
 	</bean>
 
 	<bean
-		id="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstancesAction"
-		class="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstancesAction"
+		id="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstanceAction"
+		class="org.hisp.dhis.caseentry.action.caseentry.LoadProgramStageInstanceAction"
 		scope="prototype">
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
 		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-		<property name="programStageInstanceService"
-			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 	</bean>
 
 	<bean id="org.hisp.dhis.caseentry.action.caseentry.LoadDataEntryAction"
@@ -83,7 +81,6 @@
 		scope="prototype">
 		<property name="programStageInstanceService"
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
-		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
 	</bean>
 
 	<bean
@@ -295,8 +292,6 @@
 		<property name="categoryService"
 			ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
 		<property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
-		<property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-
 	</bean>
 
 	<bean
@@ -493,10 +488,6 @@
 		<property name="selectionTreeManager"
 			ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 	</bean>
-
-	<bean id="org.hisp.dhis.caseentry.action.trackedentity.SearchTrackedEntityInstanceAction"
-		class="org.hisp.dhis.caseentry.action.trackedentity.SearchTrackedEntityInstanceAction" scope="prototype">
-	</bean>
 	
 	<!-- Program Enrollment -->
 
@@ -506,7 +497,6 @@
 		scope="prototype">
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
 		<property name="selectionManager"
 			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
 	</bean>
@@ -525,9 +515,8 @@
 		scope="prototype">
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="programService" ref="org.hisp.dhis.program.ProgramService" />
-		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
-		<property name="selectionManager"
-			ref="org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager" />
+		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" /> 
+		<property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
 	</bean>
 
 	<bean id="org.hisp.dhis.caseentry.action.trackedentity.SaveDueDateAction"
@@ -619,19 +608,6 @@
 		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
 		<property name="attributeValueService"
 			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
-	</bean>
-
-	<bean
-		id="org.hisp.dhis.caseentry.action.trackedentity.SearchRelationshipEntityInstanceAction"
-		class="org.hisp.dhis.caseentry.action.trackedentity.SearchRelationshipEntityInstanceAction"
-		scope="prototype">
-		<property name="entityInstanceService" ref="org.hisp.dhis.trackedentity.TrackedEntityInstanceService" />
-		<property name="attributeService"
-			ref="org.hisp.dhis.trackedentity.TrackedEntityAttributeService" />
-		<property name="attributeValueService"
-			ref="org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService" />
-		<property name="relationshipService"
-			ref="org.hisp.dhis.relationship.RelationshipService" />
 	</bean>
 
 	<bean

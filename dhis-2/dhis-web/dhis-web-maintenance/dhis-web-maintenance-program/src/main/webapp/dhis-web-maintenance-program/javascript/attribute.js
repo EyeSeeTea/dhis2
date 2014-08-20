@@ -20,12 +20,16 @@ function showAttributeDetails( context ) {
 			setInnerHTML( 'nameField', json.attribute.name );	
 			setInnerHTML( 'descriptionField', json.attribute.description );
 			setInnerHTML( 'optionSetField', json.attribute.optionSet );
+			setInnerHTML( 'idField', json.attribute.uid );
 			
 			var unique = ( json.attribute.unique == 'true') ? i18n_yes : i18n_no;
 			setInnerHTML( 'uniqueField', unique );
 			
 			var inherit = ( json.attribute.inherit == 'true') ? i18n_yes : i18n_no;
 			setInnerHTML( 'inheritField', inherit );
+			
+			var confidential = ( json.attribute.confidential == 'true') ? i18n_yes : i18n_no;
+			setInnerHTML( 'confidentialField', confidential );
 			
 			var valueType = json.attribute.valueType;
 			var typeMap = attributeTypeMap();

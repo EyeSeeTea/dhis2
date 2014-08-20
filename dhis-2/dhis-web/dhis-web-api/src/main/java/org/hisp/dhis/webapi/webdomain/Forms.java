@@ -28,15 +28,23 @@ package org.hisp.dhis.webapi.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.webapi.webdomain.form.Form;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.Maps;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@JacksonXmlRootElement( localName = "forms", namespace = DxfNamespaces.DXF_2_0 )
 public class Forms
 {
     // maps ou.uid => org unit.
@@ -45,11 +53,15 @@ public class Forms
     // maps dataSet.uid => form instance
     private Map<String, Form> forms = new HashMap<String, Form>();
 
+    private Map<String, List<String>> optionSets = Maps.newHashMap();
+
     public Forms()
     {
     }
 
-    @JsonProperty
+    @JsonProperty( value = "organisationUnits" )
+    @JacksonXmlElementWrapper( localName = "organisationUnits", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "organisationUnit", namespace = DxfNamespaces.DXF_2_0 )
     public Map<String, FormOrganisationUnit> getOrganisationUnits()
     {
         return organisationUnits;
@@ -60,7 +72,9 @@ public class Forms
         this.organisationUnits = organisationUnits;
     }
 
-    @JsonProperty
+    @JsonProperty( value = "forms" )
+    @JacksonXmlElementWrapper( localName = "forms", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "form", namespace = DxfNamespaces.DXF_2_0 )
     public Map<String, Form> getForms()
     {
         return forms;
@@ -69,5 +83,18 @@ public class Forms
     public void setForms( Map<String, Form> forms )
     {
         this.forms = forms;
+    }
+
+    @JsonProperty( value = "optionSets" )
+    @JacksonXmlElementWrapper( localName = "optionSets", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "optionSet", namespace = DxfNamespaces.DXF_2_0 )
+    public Map<String, List<String>> getOptionSets()
+    {
+        return optionSets;
+    }
+
+    public void setOptionSets( Map<String, List<String>> optionSets )
+    {
+        this.optionSets = optionSets;
     }
 }

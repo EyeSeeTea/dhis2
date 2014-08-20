@@ -40,6 +40,7 @@ import java.util.Set;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.GridHeader;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
@@ -140,14 +141,14 @@ public class DefaultProgramInstanceService
     }
 
     private TrackedEntityInstanceService trackedEntityInstanceService;
-    
+
     public void setTrackedEntityInstanceService( TrackedEntityInstanceService trackedEntityInstanceService )
     {
         this.trackedEntityInstanceService = trackedEntityInstanceService;
     }
 
     private I18nManager i18nManager;
-    
+
     public void setI18nManager( I18nManager i18nManager )
     {
         this.i18nManager = i18nManager;
@@ -255,7 +256,7 @@ public class DefaultProgramInstanceService
 
     public List<Grid> getProgramInstanceReport( TrackedEntityInstance instance, I18n i18n )
     {
-        
+
         List<Grid> grids = new ArrayList<Grid>();
 
         // ---------------------------------------------------------------------
@@ -323,7 +324,7 @@ public class DefaultProgramInstanceService
     public Grid getProgramInstanceReport( ProgramInstance programInstance, I18n i18n )
     {
         I18nFormat format = i18nManager.getI18nFormat();
-        
+
         Grid grid = new ListGrid();
 
         // ---------------------------------------------------------------------
@@ -368,8 +369,9 @@ public class DefaultProgramInstanceService
 
         // Get entityInstance comments for the program instance
 
-        TrackedEntityComment comment = programInstance.getComment();
-        if ( comment != null )
+        List<TrackedEntityComment> comments = programInstance.getComments();
+
+        for ( TrackedEntityComment comment : comments )
         {
             grid.addRow();
             grid.addValue( i18n.getString( "comment" ) + " " + i18n.getString( "on" ) + " "
@@ -438,7 +440,7 @@ public class DefaultProgramInstanceService
 
         return result;
     }
-    
+
     @Override
     public ProgramInstance enrollTrackedEntityInstance( TrackedEntityInstance entityInstance, Program program,
         Date enrollmentDate, Date dateOfIncident, OrganisationUnit organisationUnit )
@@ -514,7 +516,8 @@ public class DefaultProgramInstanceService
             messages = new ArrayList<MessageConversation>();
         }
 
-        messages.addAll( sendMessageConversations( programInstance, TrackedEntityInstanceReminder.SEND_WHEN_TO_EMROLLEMENT ) );
+        messages.addAll( sendMessageConversations( programInstance,
+            TrackedEntityInstanceReminder.SEND_WHEN_TO_EMROLLEMENT ) );
 
         updateProgramInstance( programInstance );
         trackedEntityInstanceService.updateTrackedEntityInstance( entityInstance );
@@ -529,7 +532,8 @@ public class DefaultProgramInstanceService
 
         for ( ProgramStageInstance stageInstance : stageInstances )
         {
-            if ( !stageInstance.isCompleted() || stageInstance.getProgramStage().getIrregular() )
+            if ( (!stageInstance.isCompleted() && stageInstance.getStatus() != EventStatus.SKIPPED)
+                || stageInstance.getProgramStage().getIrregular() )
             {
                 return false;
             }
@@ -552,8 +556,8 @@ public class DefaultProgramInstanceService
             outboundSms = new ArrayList<OutboundSms>();
         }
 
-        outboundSms.addAll( sendMessages( programInstance,
-            TrackedEntityInstanceReminder.SEND_WHEN_TO_C0MPLETED_PROGRAM ) );
+        outboundSms
+            .addAll( sendMessages( programInstance, TrackedEntityInstanceReminder.SEND_WHEN_TO_C0MPLETED_PROGRAM ) );
 
         // -----------------------------------------------------------------
         // Send DHIS message when to completed the program
@@ -606,7 +610,7 @@ public class DefaultProgramInstanceService
                 // ---------------------------------------------------------------------
                 if ( programStageInstance.getDueDate().before( currentDate ) )
                 {
-                    programStageInstance.setStatus( ProgramStageInstance.SKIPPED_STATUS );
+                    programStageInstance.setStatus( EventStatus.SKIPPED );
                     programStageInstanceService.updateProgramStageInstance( programStageInstance );
                 }
 
@@ -664,7 +668,7 @@ public class DefaultProgramInstanceService
     private void getProgramStageInstancesReport( Grid grid, ProgramInstance programInstance, I18n i18n )
     {
         I18nFormat format = i18nManager.getI18nFormat();
-        
+
         Collection<ProgramStageInstance> programStageInstances = programInstance.getProgramStageInstances();
 
         for ( ProgramStageInstance programStageInstance : programStageInstances )
@@ -732,7 +736,7 @@ public class DefaultProgramInstanceService
         TrackedEntityInstance entityInstance )
     {
         I18nFormat format = i18nManager.getI18nFormat();
-        
+
         Set<String> phoneNumbers = reminderService.getPhonenumbers( reminder, entityInstance );
         OutboundSms outboundSms = null;
 
@@ -786,7 +790,7 @@ public class DefaultProgramInstanceService
     private Collection<MessageConversation> sendMessageConversations( ProgramInstance programInstance, int status )
     {
         I18nFormat format = i18nManager.getI18nFormat();
-        
+
         Collection<MessageConversation> messageConversations = new HashSet<MessageConversation>();
 
         Collection<TrackedEntityInstanceReminder> reminders = programInstance.getProgram().getInstanceReminders();

@@ -38,7 +38,7 @@ Ext.onReady( function() {
 						}
 					},
 					category: {
-						name: NS.i18n.categories,
+						name: NS.i18n.assigned_categories,
 						dimensionName: 'co',
 						objectName: 'co',
 					},
@@ -188,6 +188,43 @@ Ext.onReady( function() {
 					'large': '13px'
 				}
 			};
+
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,name]]',
+                    'rows[dimension,filter,items[id,name]]',
+                    'filters[dimension,filter,items[id,name]]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
+            };
 		}());
 
 		// api
@@ -381,7 +418,7 @@ Ext.onReady( function() {
 
 					// dc and co
 					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
-						web.message.alert('Categories and detailed data elements cannot be specified together');
+						web.message.alert('Assigned categories and detailed data elements cannot be specified together');
 						return;
 					}
 
@@ -1039,7 +1076,6 @@ Ext.onReady( function() {
 
 			service.layout.getSyncronizedXLayout = function(xLayout, response) {
 				var removeDimensionFromXLayout,
-                    addOuHierarchyDimensions,
 					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
                     xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
                     isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
@@ -1110,94 +1146,6 @@ Ext.onReady( function() {
 						xLayout.filters = getUpdatedAxis(xLayout.filters);
 					}
 				};
-
-                addOuHierarchyDimensions = function() {
-                    var axis = xLayout.dimensionNameAxisMap[ou],
-                        ouHierarchy = response.metaData.ouHierarchy,
-                        idsByLevel = [],
-                        objectsByLevel = [],
-                        ouIndex,
-                        numLevels = 0,
-                        a;
-
-                    // get ou index
-                    for (var i = 0; i < axis.length; i++) {
-                        if (axis[i].dimensionName === ou) {
-                            ouIndex = i;
-                            break;
-                        }
-                    }
-
-                    // number of levels
-                    for (var key in ouHierarchy) {
-                        if (ouHierarchy.hasOwnProperty(key)) {
-                            a = Ext.Array.clean(ouHierarchy[key].split('/'));
-
-                            numLevels = Math.max(a.length, numLevels);
-                        }
-                    }
-
-                    numLevels = numLevels + 1;
-
-                    // create level arrays
-                    for (var i = 0; i < numLevels; i++) {
-                        idsByLevel.push([]);
-                        objectsByLevel.push([]);
-                    }
-
-                    // populate levels
-                    for (var key in ouHierarchy) {
-                        if (ouHierarchy.hasOwnProperty(key)) {
-                            a = Ext.Array.clean(ouHierarchy[key].split('/'));
-                            a.push(key);
-
-                            if (a.length === numLevels) {
-                                for (var i = 0, id; i < a.length; i++) {
-                                    id = a[i];
-
-                                    idsByLevel[i].push(id);
-                                }
-                            }
-                        }
-                    }
-
-                    // unique only, create objects
-                    for (var i = 0, idLevel; i < idsByLevel.length; i++) {
-                        idLevel = idsByLevel[i];
-                        idLevel = Ext.Array.unique(idLevel);
-
-                        for (var j = 0; j < idLevel.length; j++) {
-                            objectsByLevel[i].push({
-                                id: idLevel[j],
-                                name: response.metaData.names[idLevel[j]]
-                            });
-                        }
-                    }
-
-                    objectsByLevel = Ext.Array.clean(objectsByLevel);
-                    objectsByLevel.shift();
-
-                    // remove ou dimension
-                    axis = Ext.Array.erase(axis, ouIndex, 1);
-
-                    // insert levels
-                    for (var i = 0; i < objectsByLevel.length; i++) {
-                        Ext.Array.insert(axis, ouIndex, [{
-                            dimension: 'ou' + (i + 1),
-                            dimensionName: 'ou' + (i + 1),
-                            objectName: 'ou' + (i + 1),
-                            ids: idsByLevel[i],
-                            items: objectsByLevel[i]
-                        }]);
-
-                        ouIndex = ouIndex + 1;
-                    }
-
-                console.log("axis", axis);
-                console.log("objectsByLevel", objectsByLevel);
-
-
-                };
 
                 // Set items from init/metaData/xLayout
                 for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
@@ -1719,6 +1667,7 @@ Ext.onReady( function() {
 				delete layout.cumulative;
 				delete layout.sortOrder;
 				delete layout.topLimit;
+                delete layout.aggregationType;
 
 				return layout;
 			};
@@ -1804,7 +1753,7 @@ Ext.onReady( function() {
 						for (var j = 0, index; j < idIndexOrder.length; j++) {
 							index = idIndexOrder[j];
 
-							id += response.headers[index].name === co ? '.' : '';
+							//id += response.headers[index].name === co ? '.' : '';
 							id += row[index];
 						}
 
@@ -1814,7 +1763,63 @@ Ext.onReady( function() {
 
 				return response;
 			};
-		}());
+
+            service.response.addOuHierarchyDimensions = function(response) {
+                var headers = response.headers,
+                    ouHierarchy = response.metaData.ouHierarchy,
+                    rows = response.rows,
+                    ouIndex,
+                    numLevels = 0,
+                    initArray = [],
+                    newHeaders = [],
+                    a;
+
+                if (!ouHierarchy) {
+                    return;
+                }
+
+                // get ou index
+                for (var i = 0; i < headers.length; i++) {
+                    if (headers[i].name === 'ou') {
+                        ouIndex = i;
+                        break;
+                    }
+                }
+
+                // get numLevels
+                for (var i = 0; i < rows.length; i++) {
+                    numLevels = Math.max(numLevels, Ext.Array.clean(ouHierarchy[rows[i][ouIndex]].split('/')).length);
+                }
+
+                // init array
+                for (var i = 0; i < numLevels; i++) {
+                    initArray.push('');
+                }
+
+                // extend rows
+                for (var i = 0, row, ouArray; i < rows.length; i++) {
+                    row = rows[i];
+                    ouArray = Ext.applyIf(Ext.Array.clean(ouHierarchy[row[ouIndex]].split('/')), Ext.clone(initArray));
+
+                    Ext.Array.insert(row, ouIndex, ouArray);
+                }
+
+                // create new headers
+                for (var i = 0; i < numLevels; i++) {
+                    newHeaders.push({
+                        column: 'Organisation unit',
+                        hidden: false,
+                        meta: true,
+                        name: 'ou',
+                        type: 'java.lang.String'
+                    });
+                }
+
+                Ext.Array.insert(headers, ouIndex, newHeaders);
+
+                return response;
+            };
+        }());
 
 		// web
 		(function() {
@@ -1830,7 +1835,7 @@ Ext.onReady( function() {
 
 				message = message || 'Loading..';
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
@@ -1880,7 +1885,9 @@ Ext.onReady( function() {
                         'count': 'COUNT',
                         'sum': 'SUM',
                         'stddev': 'STDDEV',
-                        'variance': 'VARIANCE'
+                        'variance': 'VARIANCE',
+                        'min': 'MIN',
+                        'max': 'MAX'
                     };
 
 				for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {

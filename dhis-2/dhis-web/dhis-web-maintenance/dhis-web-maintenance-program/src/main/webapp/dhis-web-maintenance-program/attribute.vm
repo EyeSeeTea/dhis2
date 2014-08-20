@@ -43,8 +43,10 @@
                 <td>$encoder.htmlEncode( $!attribute.displayName )</td>
             </tr>
           #end
+		 
       </tbody>
       </table>
+		<p></p>
 		#parse( "/dhis-web-commons/paging/paging.vm" )
 		</td>
 
@@ -52,16 +54,17 @@
       <div id="detailsArea">
         <div id="hideDetailsArea">
           <a href="javascript:hideDetails()" title="$i18n.getString( 'hide_details' )"><img src="../images/hide.png" alt="$i18n.getString( 'hide_details' )"></a>
-				</div>
-        <p><label class="bold">$i18n.getString( "name" ):</label><br><span id="nameField"></span></p>
-        <p><label class="bold">$i18n.getString( "description" ):</label><br><span id="descriptionField"></span></p>
-        <p><label class="bold">$i18n.getString( "unique" ):</label><br><span id="uniqueField"></span></p>
-        <p><label class="bold">$i18n.getString( "scope" ):</label><br><span id="scopeField"></span></p>
-        <p><label class="bold">$i18n.getString( "inherit" ):</label><br><span id="inheritField"></span></p>
-		<p><label class="bold">$i18n.getString( "value_type" ):</label><br><span id="valueTypeField"></span></p>
-		<p><label class="bold">$i18n.getString( "option_set" ):</label><br><span id="optionSetField"></span></p>
-       	
-		</div>
+			</div>
+				<p><label class="bold">$i18n.getString( "name" ):</label><br><span id="nameField"></span></p>
+				<p><label class="bold">$i18n.getString( "description" ):</label><br><span id="descriptionField"></span></p>
+				<p><label class="bold">$i18n.getString( "unique" ):</label><br><span id="uniqueField"></span></p>
+				<p><label class="bold">$i18n.getString( "scope" ):</label><br><span id="scopeField"></span></p>
+				<p><label class="bold">$i18n.getString( "inherit" ):</label><br><span id="inheritField"></span></p>
+				<p><label class="bold">$i18n.getString( "confidential" ):</label><br><span id="confidentialField"></span></p>
+				<p><label class="bold">$i18n.getString( "value_type" ):</label><br><span id="valueTypeField"></span></p>
+				<p><label class="bold">$i18n.getString( "option_set" ):</label><br><span id="optionSetField"></span></p>
+				<p><label class="bold">$i18n.getString( "id" ):</label><br><span id="idField"></span></p>
+			</div>
 
 		</td>
   </tr>

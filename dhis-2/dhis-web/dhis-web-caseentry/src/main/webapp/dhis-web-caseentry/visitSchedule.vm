@@ -25,8 +25,6 @@
 		<td style="height:24px" valign="bottom" >
             <div class="commentHeader">$i18n.getString( "comment" )</div>
 		</td>
-		<td colspan='2' style="background-color: #e0e0e0; height:26px;">$i18n.getString( "updated_by" ): $!encoder.htmlEncode( $programInstance.comment.creator )</td>
-		<td colspan='2' style="background-color: #e0e0e0; height:26px;">$i18n.getString( "updated_date" ): $!format.formatDate( $programInstance.comment.createdDate )</td>
     </tr>
    
    <tr>
@@ -42,7 +40,7 @@
 			<a href='javascript:markForFollowup($programInstance.id, true)' #if( $followup == 'true') class='hidden' #end name='imgUnmarkFollowup' title='$i18n.getString("toggle_risk_status")' ><img src='images/unrisk_large.png'></a>			
 		</td>
 		<td rowspan='3' colspan='8'>
-			<textarea id="comment" name='comment' maxlength="360" style="height:100px;width:100%">$!encoder.htmlEncode( $programInstance.comment.commentText )</textarea>
+			<textarea id="comment" name='comment' maxlength="360" style="height:100px;width:100%"></textarea>
 		</td>
    </tr>
    
@@ -63,7 +61,7 @@
 		<td></td>
 		<td>
 			#if( $auth.hasAccess( "dhis-web-caseentry", "saveProgramEnrollment" ) )
-				<input type="button" style='width:80px' value="$i18n.getString( 'update' )" onclick='updateEnrollment($programInstance.entityInstance.id, $programInstance.program.id, $programInstance.id, "$programInstance.program.displayName")'/>
+				<input type="button" style='width:80px' value="$i18n.getString( 'update' )" onclick='updateEnrollment($programInstance.entityInstance.id, "$programInstance.program.uid", $programInstance.id, "$programInstance.program.displayName")'/>
 			#end
 			<input type="button" style='width:80px' id='completeProgram' value="$i18n.getString( 'complete' )" onclick='unenrollmentForm($programInstance.id, 1)' />
 			<input type="button" style='width:80px' id='cancelProgram' value="$i18n.getString( 'quit' )" onclick='unenrollmentForm($programInstance.id, 2)' />
@@ -72,7 +70,7 @@
 			#foreach( $programStageInstance in $programStageInstances )
 				#if( $!programStageInstance.executionDate 
 					|| $!programStageInstance.outboundSms.size() > 0 
-					|| $!programStageInstance.comment )
+					|| $!programStageInstance.comments )
 					
 					#set($allowRemove = 'false')
 				#end
@@ -88,14 +86,15 @@
 		</td>
 		
 		<td valign="top" colspan='4'>
-			<input type="button" id='updateCommentBtn' name='updateCommentBtn' #if($!programStageInstance.comment) value="$i18n.getString( 'update_comment' )" #else value="$i18n.getString( 'save_comment' )" #end style="width:130px" onclick="saveComment($programInstance.id);">
+			<input type="button" id='updateCommentBtn' name='updateCommentBtn' value="$i18n.getString( 'save_comment' )" style="width:130px" onclick="saveComment($programInstance.id);">
 			<input type="button" id='sendProgramSMSBtn' name='sendProgramSMSBtn' value="$i18n.getString( 'send_message' )" style="width:130px" onclick="setFieldValue('sendFromEvent','false');sendSmsOneTrackedEntityInstanceForm();">
 		</td>
 	</tr>
 
 </table>
 
-#if( $programInstance.outboundSms.size() > 0 )
+#if( $programInstance.outboundSms.size() > 0 
+	|| $programInstance.comments.size() > 0 )
 	<table>
 		<tr>
 			<td><span class="commentHeader">$i18n.getString('message')</span><td>
@@ -106,6 +105,14 @@
 				<td>
 					($format.formatDateTime($!sms.date) - $encoder.htmlEncode($sms.sender) )
 					$encoder.htmlEncode($sms.message)
+				</td>
+			</tr>
+		#end
+		#foreach($comment in $programInstance.comments)
+			<tr>
+				<td>
+					($format.formatDateTime($!comment.createdDate) - $encoder.htmlEncode($comment.creator) )
+					$encoder.htmlEncode($comment.commentText)
 				</td>
 			</tr>
 		#end
@@ -147,7 +154,7 @@
 				$encoder.htmlEncode( $programStageInstance.programStage.displayName )						
 			</td>
 			#set( $duedateId = "value_" + $programStageInstance.id + "_date" )        
-			#set($status = $programStageInstance.getEventStatus())
+			#set($status = $programStageInstance.getEventStatus().getValue())
 			<td>        
 				<input type="text" id="$duedateId" style='width:80%;' value="$!format.formatDate( $programStageInstance.dueDate )" onchange="saveDueDate( $programInstance.id, $programStageInstance.id, '$encoder.jsEncode( $programStageInstance.programStage.displayName )' )" />
 				<script type="text/javascript">
@@ -176,7 +183,7 @@
 				</script>
 			</td>
 			<td>
-				<input type='text' value='$!programStageInstance.comment.commentText' id='message_$programStageInstance.id' name='message_$programStageInstance.id' class="{validate:{required:true,maxlength:160}}" style="width:100%" onchange="addComment(byId('message_$programStageInstance.id'),'$programStageInstance.id')" >
+				<input type='text' id='message_$programStageInstance.id' name='message_$programStageInstance.id' class="{validate:{required:true,maxlength:160}}" style="width:100%" >
 			</td>
 			<td>
 				<input type='button' class='normal-button' onclick="addComment(byId('message_$programStageInstance.id'),'$programStageInstance.id')" value="$i18n.getString('save')" >
@@ -273,7 +280,7 @@
 			<tr>
 				<td></td>
 				<td>
-					<input type='button' value="$i18n.getString('send')" onclick="var id=getFieldValue('programStageInstanceId');if(getFieldValue('sendFromEvent')=='false'){id=$programInstance.id};sendSmsOneEntityInstance(byId('smsField'),id );">
+					<input type='button' value="$i18n.getString('send')" onclick="var id=getFieldValue('programStageInstanceId');if(getFieldValue('sendFromEvent')=='false'){id=$programInstance.id};sendSmsOneTrackedEntityInstance(byId('smsField'),id );">
 					<input type='button' value="$i18n.getString('cancel')" onclick="jQuery('#smsDiv').dialog('close');">
 				</td>
 			</tr>
@@ -291,7 +298,7 @@
 		
 		jQuery("#incompleteProgram").attr('disabled', true);
 	#else
-		jQuery(":input").attr('disabled', true);
+		jQuery("[id=tab-3] :input").attr('disabled', true);
 		jQuery("#incompleteProgram").attr('disabled', false);
 		$('[id=tab-3]').find('img').parent().removeAttr("href");
 	#end

@@ -28,13 +28,24 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.webapi.utils.LinkService;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.webapi.service.LinkService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,12 +55,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping( value = DimensionController.RESOURCE_PATH )
@@ -65,6 +70,9 @@ public class DimensionController
     private DimensionService dimensionService;
 
     @Autowired
+    private IdentifiableObjectManager identifiableObjectManager;
+    
+    @Autowired
     private LinkService linkService;
 
     // -------------------------------------------------------------------------
@@ -76,14 +84,14 @@ public class DimensionController
         @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
         Model model )
     {
-        DimensionalObject dimension = dimensionService.getDimension( uid );
+        DimensionalObject dimension = dimensionService.getDimensionalObjectCopy( uid, true );
 
         model.addAttribute( "model", dimension );
         model.addAttribute( "viewClass", "dimensional" );
 
         if ( links )
         {
-            linkService.generateLinks( dimension );
+            linkService.generateLinks( dimension, true );
         }
 
         return "dimension";
@@ -115,8 +123,7 @@ public class DimensionController
     }
 
     @RequestMapping( method = RequestMethod.GET )
-    public String getDimensions(
-        @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
+    public String getDimensions( @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
         Model model )
     {
         WebMetaData metaData = new WebMetaData();
@@ -127,15 +134,14 @@ public class DimensionController
 
         if ( links )
         {
-            linkService.generateLinks( metaData );
+            linkService.generateLinks( metaData, false );
         }
 
         return "dimensions";
     }
 
     @RequestMapping( value = "/constraints", method = RequestMethod.GET )
-    public String getDimensionConstraints(
-        @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
+    public String getDimensionConstraints( @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
         Model model )
     {
         WebMetaData metaData = new WebMetaData();
@@ -146,7 +152,49 @@ public class DimensionController
 
         if ( links )
         {
-            linkService.generateLinks( metaData );
+            linkService.generateLinks( metaData, false );
+        }
+
+        return "dimensions";
+    }
+
+    @RequestMapping( value = "/dataSet/{uid}", method = RequestMethod.GET )
+    public String getDimensionsForDataSet( @PathVariable String uid, 
+        @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
+        Model model, HttpServletResponse response )
+    {
+        WebMetaData metaData = new WebMetaData();
+
+        DataSet dataSet = identifiableObjectManager.get( DataSet.class, uid );
+        
+        if ( dataSet == null )
+        {
+            ContextUtils.notFoundResponse( response, "Data set does not exist: " + uid );
+            return null;
+        }
+        
+        if ( !dataSet.hasCategoryCombo() )
+        {
+            ContextUtils.conflictResponse( response, "Data set does not have a category combination: " + uid );
+            return null;
+        }
+        
+        List<DimensionalObject> dimensions = new ArrayList<>();
+        dimensions.addAll( dataSet.getCategoryCombo().getCategories() );
+        dimensions.addAll( dataSet.getCategoryOptionGroupSets() );
+        
+        dimensions = dimensionService.getCanReadObjects( dimensions );
+        
+        for ( DimensionalObject dim : dimensions )
+        {
+            metaData.getDimensions().add( dimensionService.getDimensionalObjectCopy( dim.getUid(), true ) );
+        }
+        
+        model.addAttribute( "model", metaData );
+
+        if ( links )
+        {
+            linkService.generateLinks( metaData, false );
         }
 
         return "dimensions";

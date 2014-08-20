@@ -6,12 +6,8 @@
 	"name": "$!encoder.jsonEncode( ${dataElement.name} )",
 	"code": "$!encoder.jsonEncode( ${dataElement.code} )",
 	"type": "${dataElement.type}",
-	"optionset": 
-		#if( $!dataElement.optionSet )
-			"$encoder.xmlEncode($!dataElement.optionSet.options.toString())"
-		#else
-			""
-		#end
+	"optionset": #if( $!dataElement.optionSet ) "$!dataElement.optionSet.uid" #else "" #end
+		
   }#if( $velocityCount < $size ),#end
   #end
   ]

@@ -5,7 +5,7 @@ var MAX_DROPDOWN_DISPLAYED = 30;
 // Save value
 //------------------------------------------------------------------------------
 
-function saveVal( dataElementUid )
+function saveVal( dataElementUid, fieldValue )
 {
     var programStageUid = getProgramStageUid();
     var fieldId = programStageUid + '-' + dataElementUid + '-val';
@@ -13,7 +13,6 @@ function saveVal( dataElementUid )
 
     if( field == null) return;
 
-    var fieldValue = jQuery.trim( field.value );
     var arrData = jQuery( "#" + fieldId ).attr( 'data' ).replace( '{', '' ).replace( '}', '' ).replace( /'/g, "" ).split( ',' );
     var data = [];
 
@@ -257,7 +256,7 @@ function ValueSaver( dataElementId_, value_, dataElementType_, resultColor_  )
 			params += byId( providedElsewhereId ).checked;
 		
 		params += '&value=';
-
+		
         if ( value != '' )
             params += htmlEncode( value );
 
@@ -508,15 +507,16 @@ function doComplete( isCreateEvent ) {
 		});
 
 		$("#loading-bar").siblings(".ui-dialog-titlebar").hide();
-
+		
 		$.get( 'validateProgram.action', 
 			{
 				programStageInstanceId: jQuery('.stage-object-selected').attr('id').split('_')[1]
 			}).done(function(html){
             $("#loading-bar").dialog("close");
             $('#validateProgramDiv').html(html);
+ 
             if( getFieldValue('violateValidation') == 'true' ) {
-                $('#validateProgramDiv').dialog({
+				$('#validateProgramDiv').dialog({
                     title: i18n_violate_validation,
                     maximize: true,
                     closable: true,
@@ -537,7 +537,7 @@ function doComplete( isCreateEvent ) {
         });
     }
     else {
-        runCompleteEvent(isCreateEvent);
+		runCompleteEvent(isCreateEvent);
     }
 }
 
@@ -569,12 +569,13 @@ function runCompleteEvent( isCreateEvent ) {
         return;
     } else {
         if( confirm(i18n_complete_confirm_message) ) {
+			var programStageInstanceId = getFieldValue( 'programStageInstanceId' );
             $.ajax({
                 url: 'completeDataEntry.action',
                 dataType: 'json',
                 cache: false,
                 data: {
-                    programStageInstanceId: getFieldValue( 'programStageInstanceId' )
+                    programStageInstanceId: programStageInstanceId
                 },
                 type: 'POST'
             } ).done(function(json) {
@@ -591,9 +592,8 @@ function runCompleteEvent( isCreateEvent ) {
                     showCreateNewEvent(programInstanceId, programStageUid);
                 }
 
-                if( getProgramType() == '2' || json.response == 'programcompleted' ) {
-                    var completedRow = $('#td_' + programInstanceId).html();
-                    $('#completedList').append('<option value="' + programInstanceId + '">' + getInnerHTML('infor_' + programInstanceId) + '</option>');
+                if( getProgramType() == '2' || json.response == 'programCompleted' ) {
+                   moveToCompleteDiv( programInstanceId, programStageInstanceId );
                 }
 
                 var blocked = $('#entryFormContainer [id=blockEntryForm]').val();
@@ -868,9 +868,13 @@ function loadProgramStageFromServer( programStageInstanceId ) {
 
 			$( "input[id='dueDate']" ).val( data.dueDate );
 			$( "input[id='executionDate']" ).val( data.executionDate );
-			$( "#commentInput" ).val( data.comment );
-			$( "#commentInput" ).height(data.comment.split('\n').length * 15  + 12);
-
+			
+			for( var i in data.comments ){
+				var date = data.comments[i].date.substring(0,16);
+				var tr = "<tr><td>" + date + "</td><td>" + data.comments[i].creator + "</td><td>"+ i18n_comment + "</td><td>" + data.comments[i].text + "</td></tr>";
+				$( "#commentTB" ).append(tr);
+			}
+			
 			if ( data.program.type != '1' ) {
 				hideById( 'newEncounterBtn' );
 			}
@@ -882,6 +886,8 @@ function loadProgramStageFromServer( programStageInstanceId ) {
 				}
 			}
 
+			disableCompletedButton(eval(data.completed));
+			
 			if(data.executionDate) {
 				$( '#executionDate' ).val(data.executionDate);
 				$( '#entryForm' ).removeClass( 'hidden' ).addClass( 'visible' );
@@ -928,32 +934,6 @@ function entryFormContainerOnReady()
             else if ( jQuery( "#executionDate" ).val() != '' ) {
                 toggleContentForReportDate( true );
             }
-
-            // Set buttons by completed-status of program-stage-instance
-            var completed = $( "#entryFormContainer input[id='completed']" ).val();
-            var blockEntry = $( "#entryFormContainer input[id='blockEntryForm']" ).val();
-
-            if ( completed == 'true' ) {
-                disable( 'completeBtn' );
-                enable( 'uncompleteBtn' );
-                if ( blockEntry == 'true' ) {
-                    blockEntryForm();
-                }
-            }
-            else {
-                enable( 'completeBtn' );
-                disable( 'uncompleteBtn' );
-            }
-
-            jQuery( "input[name='entryfield'],select[name='entryselect']" ).each( function () {
-                jQuery( this ).focus( function () {
-                    currentFocus = this;
-                } );
-
-                jQuery( this ).addClass( "inputText" );
-            } );
-
-            TOGGLE.init();
 
             jQuery( "#entryForm :input" ).each( function () {
                 if ( jQuery( this ).attr( 'options' ) != null 
@@ -1050,8 +1030,8 @@ function getOptions( uid, query, success ) {
         success: function ( data ) {
             success( $.map( data.options, function ( item ) {
                 return {
-                    label: item.o,
-                    id: item.o
+                    label: item.n,
+                    id: item.c
                 };
             } ) );
         }
@@ -1078,6 +1058,10 @@ function autocompletedField( idField )
 		minLength: 0,
 		select: function( event, ui ) {
 			var fieldValue = ui.item.value;
+			var fieldCode = "";
+			if(ui.item.id!=null){
+				fieldCode = ui.item.id; 
+			}
 
 			if ( !dhis2.trigger.invoke( "caseentry-value-selected", [dataElementUid, fieldValue] ) ) {
 				input.val( "" );
@@ -1086,7 +1070,7 @@ function autocompletedField( idField )
 
 			input.val( fieldValue );
 			if ( !unSave ) {
-				saveVal( dataElementUid );
+				saveVal( dataElementUid, fieldCode );
 			}
 			input.autocomplete( "close" );
 		},
@@ -1096,8 +1080,10 @@ function autocompletedField( idField )
 					valid = false;
 				if ( !valid ) {
 					$( this ).val( "" );
-					if(!unSave)
-						saveVal( dataElementUid );
+					if(!unSave){
+						var fieldCode = ui.item.id;
+						saveVal( dataElementUid, fieldCode );
+					}
 					input.data( "uiAutocomplete" ).term = "";
 					return false;
 				}
@@ -1213,7 +1199,7 @@ function autocompletedUsernameField( idField )
 			
 			input.val( fieldValue );			
 			if ( !unSave ) {
-				saveVal( dataElementUid );
+				saveVal( dataElementUid, fieldValue );
 			}
 			input.autocomplete( "close" );
 		},
@@ -1224,7 +1210,7 @@ function autocompletedUsernameField( idField )
 				if ( !valid ) {
 					$( this ).val( "" );
 					if(!unSave)
-						saveVal( dataElementUid );
+						saveVal( dataElementUid, fieldValue );
 					input.data( "uiAutocomplete" ).term = "";
 					return false;
 				}
@@ -1279,4 +1265,10 @@ function filterOnSection()
         $( '.formSection' ).hide();
         $( '#sec_' + value ).show();
     }
+}
+
+function isNumber( value )
+{
+	var regex = /^(-?0|-?[1-9]\d*)(\.\d+)?(E\d+)?$/;
+	return regex.test( value );
 }

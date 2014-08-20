@@ -132,7 +132,7 @@ function clearFilter() {
 <tr>
 	<td style="width: 200px;"><label for="$!args.id">$!args.text #if($args.mandatory)<em title="$i18n.getString( 'required' )" class="required">*</em>#end</label></td>
 	<td>
-		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,rangelength:[2,230]}}" />
+		<input type="text" id="$!args.id" name="$!name" value="$!args.value" class="{validate:{required:$args.mandatory,rangelength:[1,230]}}" />
 	</td>
 </tr>
 #end
@@ -438,8 +438,12 @@ jQuery.each(attributes, function(i, item) {
     </thead>
     <tbody>
     <tr>
-      <td><input id="${args.prefix}AvailableSearch" type="text" placeholder=" Search.." style="width: 100%; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" /></td>
-      <td></td>
+      <td>
+        <input id="${args.prefix}AvailableSearch" type="text" placeholder=" Search.." style="width: 100%; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0;" />
+      </td>
+      <td>
+        <button id="${args.prefix}AvailableSearchButton" type="button"><i class="fa fa-search"></i></button>
+      </td>
       <td></td>
     </tr>
     <tr>

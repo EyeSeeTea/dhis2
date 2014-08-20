@@ -157,24 +157,19 @@ Ext.onReady( function() {
 			conf.layout = {
 				west_width: 452,
 				west_fill: 2,
-				west_fill_accordion_indicator: 59,
-				west_fill_accordion_dataelement: 59,
-				west_fill_accordion_dataset: 33,
-				west_fill_accordion_period: 296,
-				west_fill_accordion_organisationunit: 62,
-				west_maxheight_accordion_indicator: 400,
-				west_maxheight_accordion_dataelement: 400,
-				west_maxheight_accordion_dataset: 400,
-				west_maxheight_accordion_period: 513,
-				west_maxheight_accordion_organisationunit: 900,
-				west_maxheight_accordion_group: 340,
-				west_maxheight_accordion_options: 449,
-				west_scrollbarheight_accordion_indicator: 300,
-				west_scrollbarheight_accordion_dataelement: 300,
-				west_scrollbarheight_accordion_dataset: 300,
-				west_scrollbarheight_accordion_period: 450,
-				west_scrollbarheight_accordion_organisationunit: 450,
-				west_scrollbarheight_accordion_group: 300,
+                west_fill_accordion_indicator: 56,
+                west_fill_accordion_dataelement: 59,
+                west_fill_accordion_dataset: 31,
+                west_fill_accordion_period: 307,
+                west_fill_accordion_organisationunit: 58,
+                west_maxheight_accordion_indicator: 450,
+                west_maxheight_accordion_dataset: 350,
+                west_maxheight_accordion_period: 405,
+                west_maxheight_accordion_organisationunit: 500,
+                west_scrollbarheight_accordion_indicator: 300,
+                west_scrollbarheight_accordion_dataset: 250,
+                west_scrollbarheight_accordion_period: 405,
+                west_scrollbarheight_accordion_organisationunit: 350,
 				east_tbar_height: 31,
 				east_gridcolumn_height: 30,
 				form_label_width: 55,
@@ -202,6 +197,43 @@ Ext.onReady( function() {
                 theme: {
                     dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                 }
+            };
+
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,name]]',
+                    'rows[dimension,filter,items[id,name]]',
+                    'filters[dimension,filter,items[id,name]]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
             };
 		}());
 
@@ -446,22 +478,7 @@ Ext.onReady( function() {
 
 					// config must be an object
 					if (!(config && Ext.isObject(config))) {
-						alert('Layout: config is not an object (' + init.el + ')');
-						return;
-					}
-
-					config.columns = getValidatedDimensionArray(config.columns);
-					config.rows = getValidatedDimensionArray(config.rows);
-					config.filters = getValidatedDimensionArray(config.filters);
-
-					// at least one dimension specified as column or row
-					if (!config.columns) {
-						alert('No series items selected');
-						return;
-					}
-
-					if (!config.rows) {
-						alert('No category items selected');
+						console.log('Layout: config is not an object (' + init.el + ')');
 						return;
 					}
 
@@ -474,11 +491,39 @@ Ext.onReady( function() {
 						}
 					}
 
-					// at least one period
-					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
-						//alert(NS.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
-						//return;
+                    // period
+                    if (!Ext.Array.contains(objectNames, 'pe') && !(config.startDate && config.endDate)) {
+                        alert('At least one fixed period, one relative period or start/end dates must be specified');
+                        return;
+                    }
+                    
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					// column
+					if (!config.columns) {
+						alert('No series items selected');
+						return;
 					}
+
+                    if (config.columns.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.columns.splice(1));
+                    }
+
+					// row
+					if (!config.rows) {
+						alert('No category items selected');
+						return;
+					}
+
+                    if (config.rows.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.rows.splice(1));
+                    }
 
 					// favorite
 					if (config.id) {
@@ -490,15 +535,15 @@ Ext.onReady( function() {
 					}
 
 					// layout
-                    layout.type = config.type;
-
-                    layout.program = config.program;
-                    layout.programStage = config.programStage;
-                    
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
+                    
+                    layout.type = Ext.isString(config.type) ? config.type : 'column';
+                    layout.program = config.program;
+                    layout.programStage = config.programStage;
 
+                    // dates
                     if (config.startDate && config.endDate) {
                         layout.startDate = config.startDate;
                         layout.endDate = config.endDate;
@@ -529,6 +574,8 @@ Ext.onReady( function() {
                     layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
 
 					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
@@ -1149,7 +1196,9 @@ Ext.onReady( function() {
 			service.layout.getSyncronizedXLayout = function(xLayout, xResponse) {
 				var removeDimensionFromXLayout,
 					getHeaderNames,
-					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
+                    getSeriesValidatedLayout,
+                    layout;
 
 				removeDimensionFromXLayout = function(objectName) {
 					var getUpdatedAxis;
@@ -1192,6 +1241,19 @@ Ext.onReady( function() {
 					return headerNames;
 				};
 
+                getSeriesValidatedLayout = function(xLayout) {
+                    var nSeries = xLayout.columns[0].ids.length * xLayout.rows[0].ids.length,
+                        message = 'This chart is potentially very large due to the high number of series and category items. Create the chart anyway?';
+
+                    if (nSeries > 200) {
+                        if (!confirm(message))  {
+                            return null;
+                        }
+                    }
+
+                    return xLayout;
+                };
+
 				return function() {
 
 					// items
@@ -1215,11 +1277,20 @@ Ext.onReady( function() {
 					// Re-layout
 					layout = api.layout.Layout(xLayout);
 
-					if (layout) {
-						return service.layout.getExtendedLayout(layout);
-					}
+                    if (!layout) {
+                        return null;
+                    }
 
-					return null;
+                    xLayout = service.layout.getExtendedLayout(layout);
+
+                    // validate number of series
+                    xLayout = getSeriesValidatedLayout(xLayout);
+
+                    if (!xLayout) {
+                        return null;
+                    }
+
+                    return xLayout;
 				}();
 			};
 
@@ -1811,16 +1882,16 @@ Ext.onReady( function() {
 			// analytics
 			web.analytics = {};
 
-			web.analytics.getParamString = function(view, format) {
+			web.analytics.getParamString = function(layout, format) {
                 var paramString,
-                    dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [])),
+                    dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [])),
                     ignoreKeys = ['longitude', 'latitude'],
                     nameItemsMap;
 
-                paramString = '/api/analytics/events/aggregate/' + view.program.id + '.' + (format || 'json') + '?';
+                paramString = '/api/analytics/events/aggregate/' + layout.program.id + '.' + (format || 'json') + '?';
 
 				// stage
-				paramString += 'stage=' + view.programStage.id;
+				paramString += 'stage=' + layout.programStage.id;
 
                 // dimensions
                 if (dimensions) {
@@ -1849,18 +1920,18 @@ Ext.onReady( function() {
 				}
 
                 // filters
-                if (view.filters) {                    
-					for (var i = 0, dim; i < view.filters.length; i++) {
-						dim = view.filters[i];
+                if (layout.filters) {                    
+					for (var i = 0, dim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
 
                         paramString += '&filter=' + dim.dimension;
 
-                        if (dim.items) {
+                        if (Ext.isArray(dim.items) && dim.items.length) {
                             paramString += ':';
 
-                            for (var i = 0; i < dim.items.length; i++) {
-                                paramString += encodeURIComponent(dim.items[i].id);
-                                paramString += i < dim.items.length - 1 ? ';' : '';
+                            for (var j = 0; j < dim.items.length; j++) {
+                                paramString += encodeURIComponent(dim.items[j].id);
+                                paramString += j < dim.items.length - 1 ? ';' : '';
                             }
                         }
                         else {
@@ -1870,29 +1941,8 @@ Ext.onReady( function() {
 				}
 
                 // dates
-                if (view.startDate && view.endDate) {
-                    paramString += '&startDate=' + view.startDate + '&endDate=' + view.endDate;
-                }
-
-				// hierarchy
-				paramString += view.showHierarchy ? '&hierarchyMeta=true' : '';
-
-                // limit
-                if (view.dataType === 'aggregated_values' && (view.sortOrder && view.topLimit)) {
-                    paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
-                }
-
-                // sorting
-                if (view.dataType === 'individual_cases' && view.sorting) {
-                    if (view.sorting.id && view.sorting.direction) {
-                        paramString += '&' + view.sorting.direction.toLowerCase() + '=' + view.sorting.id;
-                    }
-                }
-
-                // paging
-                if (view.dataType === 'individual_cases' && view.paging) {
-                    paramString += view.paging.pageSize ? '&pageSize=' + view.paging.pageSize : '';
-                    paramString += view.paging.page ? '&page=' + view.paging.page : '';
+                if (layout.startDate && layout.endDate) {
+                    paramString += '&startDate=' + layout.startDate + '&endDate=' + layout.endDate;
                 }
 
                 return paramString;
@@ -1965,9 +2015,9 @@ Ext.onReady( function() {
 			};
 
 			web.report.aggregate.createChart = function(layout, xLayout, xResponse, centerRegion) {
-                var columnIds = xLayout.columns[0].ids,
+                var columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
                     replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
-                    rowIds = xLayout.rows[0].ids,
+                    rowIds = xLayout.rows[0] ? xLayout.rows[0].ids : [],
                     replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
                     filterIds = function() {
                         var ids = [];
@@ -2059,8 +2109,9 @@ Ext.onReady( function() {
                             regression = new SimpleRegression();
                             key = conf.finals.data.trendLine + replacedColumnIds[i];
 
-                            for (var j = 0; j < data.length; j++) {
-                                regression.addData(j, data[j][replacedColumnIds[i]]);
+                            for (var j = 0, value; j < data.length; j++) {
+                                value = data[j][replacedColumnIds[i]];
+                                regression.addData(j, parseFloat(value));
                             }
 
                             for (var j = 0; j < data.length; j++) {
@@ -2325,7 +2376,7 @@ Ext.onReady( function() {
                             field: store.rangeFields,
                             font: conf.chart.style.fontFamily,
                             renderer: function(n) {
-                                return n === '0.0' ? '-' : n;                                    
+                                return n === '0.0' ? '' : n;                                    
                             }
                         };
                     }

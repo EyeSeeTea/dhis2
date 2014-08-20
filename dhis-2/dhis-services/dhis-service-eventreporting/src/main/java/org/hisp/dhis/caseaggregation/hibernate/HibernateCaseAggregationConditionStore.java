@@ -29,13 +29,13 @@ package org.hisp.dhis.caseaggregation.hibernate;
  */
 
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE_DATAELEMENT;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE_PROPERTY;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_ID;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_OBJECT;
 import static org.hisp.dhis.scheduling.CaseAggregateConditionSchedulingManager.TASK_AGGREGATE_QUERY_BUILDER_LAST_12_MONTH;
@@ -55,6 +55,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.hibernate.Criteria;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.caseaggregation.CaseAggregateSchedule;
 import org.hisp.dhis.caseaggregation.CaseAggregationCondition;
@@ -124,7 +127,7 @@ public class HibernateCaseAggregationConditionStore
     {
         this.dataElementService = dataElementService;
     }
-
+    
     // -------------------------------------------------------------------------
     // Implementation Methods
     // -------------------------------------------------------------------------
@@ -137,6 +140,24 @@ public class HibernateCaseAggregationConditionStore
     }
 
     @Override
+    public int count( Collection<DataElement> dataElements, String key )
+    {
+        Criteria criteria = getCriteria();
+        
+        if( dataElements!= null )
+        {
+            criteria.add(  Restrictions.in( "aggregationDataElement", dataElements ) );
+        }
+        if( key != null )
+        {
+            criteria.add(  Restrictions.ilike( "name", "%" + key + "%" ) );
+        }
+        
+        Number rs = ( Number ) criteria.setProjection(Projections.rowCount()).uniqueResult();
+        return rs != null ? rs.intValue() : 0;
+    }
+    
+    @Override
     public CaseAggregationCondition get( DataElement dataElement, DataElementCategoryOptionCombo optionCombo )
     {
         return (CaseAggregationCondition) getCriteria( Restrictions.eq( "aggregationDataElement", dataElement ),
@@ -145,13 +166,32 @@ public class HibernateCaseAggregationConditionStore
 
     @SuppressWarnings( "unchecked" )
     @Override
-    public Collection<CaseAggregationCondition> get( Collection<DataElement> dataElements )
+    public Collection<CaseAggregationCondition> get( Collection<DataElement> dataElements, String key, Integer first, Integer max )
     {
-        return getCriteria( Restrictions.in( "aggregationDataElement", dataElements ) ).list();
+        Criteria criteria = getCriteria();
+        
+        if( dataElements!= null )
+        {
+            criteria.add(  Restrictions.in( "aggregationDataElement", dataElements ) );
+        }
+        if( key != null )
+        {
+            criteria.add(  Restrictions.ilike( "name", "%" + key + "%" ) );
+        }
+        
+        if( first != null && max != null )
+        {
+            criteria.setFirstResult( first );
+            criteria.setMaxResults( max );
+        }
+        
+        criteria.addOrder(Order.desc("name"));
+        
+        return criteria.list();
     }
 
     public Grid getAggregateValue( CaseAggregationCondition caseAggregationCondition, Collection<Integer> orgunitIds,
-        Period period, I18nFormat format, I18n i18n )
+        Period period, int attributeOptioncomboId, I18nFormat format, I18n i18n )
     {
         Collection<Integer> _orgunitIds = getServiceOrgunit();
         _orgunitIds.retainAll( orgunitIds );
@@ -166,7 +206,7 @@ public class HibernateCaseAggregationConditionStore
             grid.addHeader( new GridHeader( i18n.getString( "categoryoptioncomboid" ), true, true ) );
             grid.addHeader( new GridHeader( i18n.getString( "periodid" ), true, true ) );
             grid.addHeader( new GridHeader( i18n.getString( "organisationunitid" ), true, true ) );
-            grid.addHeader( new GridHeader( i18n.getString( "comment" ), true, true ) );
+            grid.addHeader( new GridHeader( i18n.getString( "storedby" ), true, true ) );
             grid.addHeader( new GridHeader( i18n.getString( "dataelementname" ), false, true ) );
             grid.addHeader( new GridHeader( i18n.getString( "categoryoptioncomboname" ), false, true ) );
             grid.addHeader( new GridHeader( i18n.getString( "organisationunitname" ), false, true ) );
@@ -177,7 +217,7 @@ public class HibernateCaseAggregationConditionStore
             String sql = parseExpressionToSql( false, caseAggregationCondition.getAggregationExpression(),
                 caseAggregationCondition.getOperator(), caseAggregationCondition.getAggregationDataElement().getId(),
                 caseAggregationCondition.getAggregationDataElement().getDisplayName(), caseAggregationCondition
-                    .getOptionCombo().getId(), caseAggregationCondition.getOptionCombo().getDisplayName(), deSumId,
+                    .getOptionCombo().getId(), caseAggregationCondition.getOptionCombo().getDisplayName(), attributeOptioncomboId, deSumId,
                 _orgunitIds, period );
 
             SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
@@ -212,7 +252,7 @@ public class HibernateCaseAggregationConditionStore
         return grid;
     }
 
-    public void insertAggregateValue( String expression, String operator, Integer dataElementId, Integer optionComboId,
+    public void insertAggregateValue( String expression, String operator, Integer dataElementId, Integer optionComboId, int attributeOptioncomboId, 
         Integer deSumId, Collection<Integer> orgunitIds, Period period )
     {
         // Delete all data value from this period which created from DHIS-system
@@ -254,23 +294,23 @@ public class HibernateCaseAggregationConditionStore
         // insert data elements into database directly
 
         String sql = parseExpressionToSql( true, expression, operator, dataElementId, "dataelementname", optionComboId,
-            "optionComboname", deSumId, orgunitIds, period );
+            "optionComboname", attributeOptioncomboId, deSumId, orgunitIds, period );
         jdbcTemplate.execute( sql );
     }
 
     @Override
     public String parseExpressionToSql( boolean isInsert, String caseExpression, String operator,
-        Integer aggregateDeId, String aggregateDeName, Integer optionComboId, String optionComboName, Integer deSumId,
+        Integer aggregateDeId, String aggregateDeName, Integer optionComboId, String optionComboName, int attributeOptioncomboId, Integer deSumId,
         Collection<Integer> orgunitIds, Period period )
-    {
+    { 
         String sql = "SELECT '" + aggregateDeId + "' as dataelementid, '" + optionComboId
-            + "' as categoryoptioncomboid, '" + optionComboId
+            + "' as categoryoptioncomboid, '" + attributeOptioncomboId
             + "' as attributeoptioncomboid, ou.organisationunitid as sourceid, '" + period.getId() + "' as periodid,'"
-            + CaseAggregationCondition.AUTO_STORED_BY + "' as comment, ";
+            + CaseAggregationCondition.AUTO_STORED_BY + "' as storedby, ";
 
         if ( isInsert )
         {
-            sql = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, attributeoptioncomboid, sourceid, periodid, comment, value) "
+            sql = "INSERT INTO datavalue (dataelementid, categoryoptioncomboid, attributeoptioncomboid, sourceid, periodid, storedby, value) "
                 + sql;
         }
         else
@@ -360,7 +400,7 @@ public class HibernateCaseAggregationConditionStore
     }
 
     @Override
-    public void runAggregate( Collection<Integer> orgunitIds, CaseAggregateSchedule dataSet, Collection<Period> periods )
+    public void runAggregate( Collection<Integer> orgunitIds, CaseAggregateSchedule dataSet, Collection<Period> periods, int attributeOptioncomboId )
     {
         String sql = "select caseaggregationconditionid, aggregationdataelementid, optioncomboid, "
             + " cagg.aggregationexpression as caseexpression, cagg.operator as caseoperator, cagg.desum as desumid "
@@ -372,7 +412,7 @@ public class HibernateCaseAggregationConditionStore
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
-        while ( rs.next() )
+         while ( rs.next() )
         {
             for ( Period period : periods )
             {
@@ -404,7 +444,7 @@ public class HibernateCaseAggregationConditionStore
 
                 if ( !orgunitIds.isEmpty() )
                 {
-                    insertAggregateValue( caseExpression, caseOperator, dataelementId, optionComboId, deSumId,
+                    insertAggregateValue( caseExpression, caseOperator, dataelementId, optionComboId, attributeOptioncomboId, deSumId,
                         orgunitIds, period );
                 }
             }
@@ -428,6 +468,7 @@ public class HibernateCaseAggregationConditionStore
     private String createSQL( String caseExpression, String operator, Collection<Integer> orgunitIds, String startDate,
         String endDate )
     {
+        caseExpression = caseExpression.replaceAll( "\"", "'" );
         boolean orgunitCompletedProgramStage = false;
 
         StringBuffer sqlResult = new StringBuffer();
@@ -675,7 +716,12 @@ public class HibernateCaseAggregationConditionStore
         }
         else
         {
-            sql += " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid AND _pav.trackedentityattributeid=" + attributeId + " AND _pav.value ";
+            sql += " WHERE _pav.trackedentityinstanceid=pi.trackedentityinstanceid AND _pav.trackedentityattributeid=" + attributeId;
+            
+            if( isExist )
+            {
+                sql += " AND _pav.value ";
+            }
         }
 
         if ( isExist )
@@ -684,7 +730,7 @@ public class HibernateCaseAggregationConditionStore
         }
         else
         {
-            sql = " NOT ( " + sql;
+            sql = " NOT EXISTS ( " + sql;
         }
 
         return sql;

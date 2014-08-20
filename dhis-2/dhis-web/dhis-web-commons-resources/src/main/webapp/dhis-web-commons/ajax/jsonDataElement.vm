@@ -1,13 +1,12 @@
 { "dataElement": 
   {
-    "id": $!{dataElement.id},
+    "id": "$!{dataElement.id}",
 	"uid": "$!dataElement.uid",
     "name": "$!encoder.jsonEncode( ${dataElement.displayName} )",
     "alternativeName": "$!encoder.jsonEncode( ${dataElement.alternativeNamee} )",
     "shortName": "$!encoder.jsonEncode( ${dataElement.displayShortName} )",
     "code": "$!encoder.jsonEncode( ${dataElement.code} )",
     "description": "$!encoder.jsonEncode( ${dataElement.displayDescription} )",
-    "active": "$!{dataElement.active}",
     "type": "$!{dataElement.type}",
 	"valueType": "$!{dataElement.type}",
 	"domainType": "${dataElement.getDomainTypeNullSafe()}",

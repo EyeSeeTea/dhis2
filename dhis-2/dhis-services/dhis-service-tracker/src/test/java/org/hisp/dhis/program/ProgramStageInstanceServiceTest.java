@@ -33,18 +33,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.mock.MockI18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -184,7 +184,7 @@ public class ProgramStageInstanceServiceTest
         /**
          * Program A
          */
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
         programService.addProgram( programA );
 
         stageA = new ProgramStage( "A", programA );
@@ -216,7 +216,7 @@ public class ProgramStageInstanceServiceTest
         stageB.setReminders( reminders );
         programStageService.saveProgramStage( stageB );
 
-        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+        List<ProgramStage> programStages = new ArrayList<ProgramStage>();
         programStages.add( stageA );
         programStages.add( stageB );
         programA.setProgramStages( programStages );
@@ -242,7 +242,7 @@ public class ProgramStageInstanceServiceTest
          * Program B
          */
 
-        Program programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnitB );
+        Program programB = createProgram( 'B', new ArrayList<ProgramStage>(), organisationUnitB );
         programService.addProgram( programB );
 
         stageC = new ProgramStage( "C", programB );
@@ -252,7 +252,7 @@ public class ProgramStageInstanceServiceTest
         stageC.setIrregular( true );
         programStageService.saveProgramStage( stageD );
 
-        programStages = new HashSet<ProgramStage>();
+        programStages = new ArrayList<ProgramStage>();
         programStages.add( stageC );
         programStages.add( stageD );
         programB.setProgramStages( programStages );
@@ -382,10 +382,10 @@ public class ProgramStageInstanceServiceTest
     @Test
     public void testGetProgramStageInstancesByInstanceListComplete()
     {
-        programStageInstanceA.setCompleted( true );
-        programStageInstanceB.setCompleted( false );
-        programStageInstanceC.setCompleted( true );
-        programStageInstanceD1.setCompleted( false );
+        programStageInstanceA.setStatus( EventStatus.COMPLETED );
+        programStageInstanceB.setStatus( EventStatus.ACTIVE );
+        programStageInstanceC.setStatus( EventStatus.COMPLETED );
+        programStageInstanceD1.setStatus( EventStatus.ACTIVE );
 
         programStageInstanceService.addProgramStageInstance( programStageInstanceA );
         programStageInstanceService.addProgramStageInstance( programStageInstanceB );
@@ -397,52 +397,24 @@ public class ProgramStageInstanceServiceTest
         programInstances.add( programInstanceB );
 
         Collection<ProgramStageInstance> stageInstances = programStageInstanceService.getProgramStageInstances(
-            programInstances, true );
+            programInstances, EventStatus.COMPLETED );
         assertEquals( 2, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceA ) );
         assertTrue( stageInstances.contains( programStageInstanceC ) );
 
-        stageInstances = programStageInstanceService.getProgramStageInstances( programInstances, false );
+        stageInstances = programStageInstanceService.getProgramStageInstances( programInstances, EventStatus.ACTIVE );
         assertEquals( 2, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceB ) );
         assertTrue( stageInstances.contains( programStageInstanceD1 ) );
     }
 
     @Test
-    public void testStatusProgramStageInstances()
-    {
-        programStageInstanceA.setCompleted( true );
-        programStageInstanceC.setStatus( ProgramStageInstance.SKIPPED_STATUS );
-
-        int idA = programStageInstanceService.addProgramStageInstance( programStageInstanceA );
-        int idB = programStageInstanceService.addProgramStageInstance( programStageInstanceB );
-        int idC = programStageInstanceService.addProgramStageInstance( programStageInstanceC );
-        int idD = programStageInstanceService.addProgramStageInstance( programStageInstanceD1 );
-
-        Collection<ProgramStageInstance> programStageInstances = new HashSet<ProgramStageInstance>();
-        programStageInstances.add( programStageInstanceA );
-        programStageInstances.add( programStageInstanceB );
-        programStageInstances.add( programStageInstanceC );
-        programStageInstances.add( programStageInstanceD1 );
-
-        Map<Integer, Integer> expectedMap = new HashMap<Integer, Integer>();
-        expectedMap.put( idA, ProgramStageInstance.COMPLETED_STATUS );
-        expectedMap.put( idB, ProgramStageInstance.FUTURE_VISIT_STATUS );
-        expectedMap.put( idC, ProgramStageInstance.SKIPPED_STATUS );
-        expectedMap.put( idD, ProgramStageInstance.FUTURE_VISIT_STATUS );
-
-        Map<Integer, Integer> actualMap = programStageInstanceService
-            .statusProgramStageInstances( programStageInstances );
-        assertEquals( expectedMap, actualMap );
-    }
-
-    @Test
     public void testGetProgramStageInstancesByStatus()
     {
-        programStageInstanceA.setCompleted( true );
-        programStageInstanceB.setCompleted( false );
-        programStageInstanceC.setCompleted( true );
-        programStageInstanceD1.setCompleted( true );
+        programStageInstanceA.setStatus( EventStatus.COMPLETED );
+        programStageInstanceB.setStatus( EventStatus.ACTIVE );
+        programStageInstanceC.setStatus( EventStatus.COMPLETED );
+        programStageInstanceD1.setStatus( EventStatus.ACTIVE );
 
         programStageInstanceService.addProgramStageInstance( programStageInstanceA );
         programStageInstanceService.addProgramStageInstance( programStageInstanceB );
@@ -450,11 +422,11 @@ public class ProgramStageInstanceServiceTest
         programStageInstanceService.addProgramStageInstance( programStageInstanceD1 );
 
         List<ProgramStageInstance> stageInstances = programStageInstanceService.getProgramStageInstances( entityInstanceA,
-            true );
+            EventStatus.COMPLETED );
         assertEquals( 1, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceA ) );
 
-        stageInstances = programStageInstanceService.getProgramStageInstances( entityInstanceA, false );
+        stageInstances = programStageInstanceService.getProgramStageInstances( entityInstanceA, EventStatus.ACTIVE );
         assertEquals( 1, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceB ) );
     }
@@ -469,6 +441,7 @@ public class ProgramStageInstanceServiceTest
         int idA = programStageInstanceService.addProgramStageInstance( programStageInstanceA );
 
         programStageInstanceService.completeProgramStageInstance( programStageInstanceA, mockFormat );
+        
         assertEquals( true, programStageInstanceService.getProgramStageInstance( idA ).isCompleted() );
     }
 

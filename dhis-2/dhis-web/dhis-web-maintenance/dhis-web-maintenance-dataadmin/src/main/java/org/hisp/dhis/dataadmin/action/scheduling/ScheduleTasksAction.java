@@ -30,21 +30,21 @@ package org.hisp.dhis.dataadmin.action.scheduling;
 
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_ANALYTICS_ALL;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_ANALYTICS_LAST_3_YEARS;
-import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATAMART_FROM_6_TO_12_MONTS;
-import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATAMART_LAST_12_MONTHS;
-import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATAMART_LAST_6_MONTHS;
+import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATAMART_LAST_YEAR;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_RESOURCE_TABLE;
 import static org.hisp.dhis.scheduling.SchedulingManager.TASK_MONITORING_LAST_DAY;
+import static org.hisp.dhis.scheduling.SchedulingManager.TASK_DATA_SYNCH;
 import static org.hisp.dhis.setting.SystemSettingManager.DEFAULT_ORGUNITGROUPSET_AGG_LEVEL;
 import static org.hisp.dhis.setting.SystemSettingManager.DEFAULT_SCHEDULED_PERIOD_TYPES;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ORGUNITGROUPSET_AGG_LEVEL;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_SCHEDULED_PERIOD_TYPES;
-import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_0AM_EXCEPT_SUNDAY;
-import static org.hisp.dhis.system.scheduling.Scheduler.CRON_WEEKLY_SUNDAY_0AM;
+import static org.hisp.dhis.setting.SystemSettingManager.*;
+import static org.hisp.dhis.system.scheduling.Scheduler.CRON_DAILY_0AM;
+import static org.hisp.dhis.system.scheduling.Scheduler.CRON_EVERY_MIN;
 import static org.hisp.dhis.system.scheduling.Scheduler.STATUS_RUNNING;
 import static org.hisp.dhis.system.util.CollectionUtils.emptyIfNull;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,11 +52,13 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ListMap;
+import org.hisp.dhis.dxf2.synch.SynchronizationManager;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.scheduling.SchedulingManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.scheduling.Scheduler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
@@ -66,10 +68,9 @@ import com.opensymphony.xwork2.Action;
 public class ScheduleTasksAction
     implements Action
 {
-    private static final String STRATEGY_LAST_12_DAILY = "last12Daily";
-    private static final String STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY = "last6Daily6To12Weekly";
     private static final String STRATEGY_ALL_DAILY = "allDaily";
     private static final String STRATEGY_LAST_3_YEARS_DAILY = "last3YearsDaily";
+    private static final String STRATEGY_ENABLED = "enabled";
     
     private static final Log log = LogFactory.getLog( ScheduleTasksAction.class );
     
@@ -77,26 +78,17 @@ public class ScheduleTasksAction
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private SystemSettingManager systemSettingManager;
     
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
-    
+    @Autowired
     private SchedulingManager schedulingManager;
 
-    public void setSchedulingManager( SchedulingManager schedulingManager )
-    {
-        this.schedulingManager = schedulingManager;
-    }
-    
+    @Autowired
     private OrganisationUnitService organisationUnitService;
 
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
+    @Autowired
+    private SynchronizationManager synchronizationManager;
 
     // -------------------------------------------------------------------------
     // Input
@@ -181,6 +173,18 @@ public class ScheduleTasksAction
         this.monitoringStrategy = monitoringStrategy;
     }
 
+    private String dataSynchStrategy;
+
+    public String getDataSynchStrategy()
+    {
+        return dataSynchStrategy;
+    }
+    
+    public void setDataSynchStrategy( String dataSynchStrategy )
+    {
+        this.dataSynchStrategy = dataSynchStrategy;
+    }
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -205,7 +209,28 @@ public class ScheduleTasksAction
     {
         return levels;
     }
+    
+    private Date lastResourceTableSuccess;
 
+    public Date getLastResourceTableSuccess()
+    {
+        return lastResourceTableSuccess;
+    }
+    
+    private Date lastAnalyticsTableSuccess;
+
+    public Date getLastAnalyticsTableSuccess()
+    {
+        return lastAnalyticsTableSuccess;
+    }
+    
+    private Date lastDataSyncSuccess;
+    
+    public Date getLastDataSyncSuccess()
+    {
+        return lastDataSyncSuccess;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -232,8 +257,7 @@ public class ScheduleTasksAction
 
                 if ( STRATEGY_ALL_DAILY.equals( resourceTableStrategy ) )
                 {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_RESOURCE_TABLE );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_RESOURCE_TABLE );
+                    cronKeyMap.putValue( CRON_DAILY_0AM, TASK_RESOURCE_TABLE );
                 }
                 
                 // -------------------------------------------------------------
@@ -242,28 +266,20 @@ public class ScheduleTasksAction
 
                 if ( STRATEGY_ALL_DAILY.equals( analyticsStrategy ) )
                 {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_ANALYTICS_ALL );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_ANALYTICS_ALL );
+                    cronKeyMap.putValue( CRON_DAILY_0AM, TASK_ANALYTICS_ALL );
                 }
                 else if ( STRATEGY_LAST_3_YEARS_DAILY.equals( analyticsStrategy ) )
                 {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_ANALYTICS_LAST_3_YEARS );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_ANALYTICS_LAST_3_YEARS );
+                    cronKeyMap.putValue( CRON_DAILY_0AM, TASK_ANALYTICS_LAST_3_YEARS );
                 }
                 
                 // -------------------------------------------------------------
                 // Data mart
                 // -------------------------------------------------------------
                 
-                if ( STRATEGY_LAST_12_DAILY.equals( dataMartStrategy ) )
+                if ( STRATEGY_ALL_DAILY.equals( dataMartStrategy ) )
                 {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_DATAMART_LAST_12_MONTHS );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_DATAMART_LAST_12_MONTHS );
-                }
-                else if ( STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY.equals( dataMartStrategy ) )
-                {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_DATAMART_LAST_6_MONTHS );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_DATAMART_FROM_6_TO_12_MONTS );
+                    cronKeyMap.putValue( CRON_DAILY_0AM, TASK_DATAMART_LAST_YEAR );
                 }
 
                 // -------------------------------------------------------------
@@ -272,8 +288,16 @@ public class ScheduleTasksAction
                 
                 if ( STRATEGY_ALL_DAILY.equals( monitoringStrategy ) )
                 {
-                    cronKeyMap.putValue( CRON_DAILY_0AM_EXCEPT_SUNDAY, TASK_MONITORING_LAST_DAY );
-                    cronKeyMap.putValue( CRON_WEEKLY_SUNDAY_0AM, TASK_MONITORING_LAST_DAY );
+                    cronKeyMap.putValue( CRON_DAILY_0AM, TASK_MONITORING_LAST_DAY );
+                }
+
+                // -------------------------------------------------------------
+                // Data synch
+                // -------------------------------------------------------------
+                
+                if ( STRATEGY_ENABLED.equals( dataSynchStrategy ) )
+                {
+                    cronKeyMap.putValue( CRON_EVERY_MIN, TASK_DATA_SYNCH );
                 }
                 
                 schedulingManager.scheduleTasks( cronKeyMap );
@@ -281,7 +305,7 @@ public class ScheduleTasksAction
         }
         else
         {
-            Collection<String> keys = emptyIfNull( schedulingManager.getCronKeyMap().get( CRON_DAILY_0AM_EXCEPT_SUNDAY ) );
+            Collection<String> keys = emptyIfNull( schedulingManager.getScheduledKeys() );
             
             // -----------------------------------------------------------------
             // Resource tables
@@ -309,13 +333,9 @@ public class ScheduleTasksAction
             // Data mart
             // -----------------------------------------------------------------
 
-            if ( keys.contains( TASK_DATAMART_LAST_12_MONTHS ) )
+            if ( keys.contains( TASK_DATAMART_LAST_YEAR ) )
             {
-                dataMartStrategy = STRATEGY_LAST_12_DAILY;
-            }
-            else if ( keys.contains( TASK_DATAMART_LAST_6_MONTHS ) )
-            {
-                dataMartStrategy = STRATEGY_LAST_6_DAILY_6_TO_12_WEEKLY;
+                dataMartStrategy = STRATEGY_ALL_DAILY;
             }
 
             // -------------------------------------------------------------
@@ -326,6 +346,15 @@ public class ScheduleTasksAction
             {
                 monitoringStrategy = STRATEGY_ALL_DAILY;
             }
+            
+            // -------------------------------------------------------------
+            // Data synch
+            // -------------------------------------------------------------
+            
+            if ( keys.contains( TASK_DATA_SYNCH ) )
+            {
+                dataSynchStrategy = STRATEGY_ENABLED;
+            }            
         }
         
         scheduledPeriodTypes = (Set<String>) systemSettingManager.getSystemSetting( KEY_SCHEDULED_PERIOD_TYPES, DEFAULT_SCHEDULED_PERIOD_TYPES );
@@ -335,6 +364,10 @@ public class ScheduleTasksAction
         running = STATUS_RUNNING.equals( status );
         
         levels = organisationUnitService.getOrganisationUnitLevels();
+        
+        lastResourceTableSuccess = (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE );
+        lastAnalyticsTableSuccess = (Date) systemSettingManager.getSystemSetting( KEY_LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE );
+        lastDataSyncSuccess = synchronizationManager.getLastSynchSuccess();
 
         log.info( "Status: " + status );
         log.info( "Running: " + running );

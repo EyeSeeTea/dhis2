@@ -34,6 +34,8 @@ import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION
 import static org.hisp.dhis.analytics.AggregationType.COUNT;
 import static org.hisp.dhis.analytics.AggregationType.STDDEV;
 import static org.hisp.dhis.analytics.AggregationType.VARIANCE;
+import static org.hisp.dhis.analytics.AggregationType.MIN;
+import static org.hisp.dhis.analytics.AggregationType.MAX;
 import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
 import static org.hisp.dhis.analytics.MeasureFilter.EQ;
 import static org.hisp.dhis.analytics.MeasureFilter.GE;
@@ -68,6 +70,7 @@ import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
@@ -109,41 +112,50 @@ public class JdbcAnalyticsManager
     @Async
     public Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params )
     {
-        ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
-        
-        params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
-        
-        String sql = getSelectClause( params );
-        
-        if ( params.spansMultiplePartitions() )
-        {
-            sql += getFromWhereClauseMultiplePartitionFilters( params );
-        }
-        else
-        {
-            sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
-        }
-        
-        sql += getGroupByClause( params );
-    
-        log.debug( sql );
-
-        Map<String, Double> map = null;
-        
         try
         {
-            map = getKeyValueMap( params, sql );
-        }
-        catch ( BadSqlGrammarException ex )
-        {
-            log.info( "Query failed, likely because the requested analytics table does not exist", ex );
+            ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap = params.getDataPeriodAggregationPeriodMap();
             
-            return new AsyncResult<Map<String, Double>>( new HashMap<String, Double>() );
+            params.replaceAggregationPeriodsWithDataPeriods( dataPeriodAggregationPeriodMap );
+            
+            String sql = getSelectClause( params );
+            
+            if ( params.spansMultiplePartitions() )
+            {
+                sql += getFromWhereClauseMultiplePartitionFilters( params );
+            }
+            else
+            {
+                sql += getFromWhereClause( params, params.getPartitions().getSinglePartition() );
+            }
+            
+            sql += getGroupByClause( params );
+        
+            log.debug( sql );
+    
+            Map<String, Double> map = null;
+            
+            try
+            {
+                map = getKeyValueMap( params, sql );
+            }
+            catch ( BadSqlGrammarException ex )
+            {
+                log.info( "Query failed, likely because the requested analytics table does not exist", ex );
+                
+                return new AsyncResult<Map<String, Double>>( new HashMap<String, Double>() );
+            }
+            
+            replaceDataPeriodsWithAggregationPeriods( map, params, dataPeriodAggregationPeriodMap );
+            
+            return new AsyncResult<Map<String, Double>>( map );
         }
-        
-        replaceDataPeriodsWithAggregationPeriods( map, params, dataPeriodAggregationPeriodMap );
-        
-        return new AsyncResult<Map<String, Double>>( map );   
+        catch ( RuntimeException ex )
+        {
+            log.error( DebugUtils.getStackTrace( ex ) );
+            
+            throw ex;
+        }
     }
     
     public void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
@@ -215,6 +227,14 @@ public class JdbcAnalyticsManager
         else if ( params.isAggregationType( VARIANCE ) )
         {
             sql += "variance(value)";
+        }
+        else if ( params.isAggregationType( MIN ) )
+        {
+            sql += "min(value)";
+        }
+        else if ( params.isAggregationType( MAX ) )
+        {
+            sql += "max(value)";
         }
         else // SUM, AVERAGE_DISAGGREGATION and undefined //TODO
         {

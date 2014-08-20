@@ -28,6 +28,7 @@ package org.hisp.dhis.caseentry.action.caseentry;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStageInstance;
@@ -65,24 +66,7 @@ public class UncompleteDataEntryAction
     // Input / Output
     // -------------------------------------------------------------------------
 
-    private Integer programStageId;
-
-    public Integer getProgramStageId()
-    {
-        return programStageId;
-    }
-
-    public void setProgramStageId( Integer programStageId )
-    {
-        this.programStageId = programStageId;
-    }
-
     public Integer programStageInstanceId;
-
-    public Integer getProgramStageInstanceId()
-    {
-        return programStageInstanceId;
-    }
 
     public void setProgramStageInstanceId( Integer programStageInstanceId )
     {
@@ -98,16 +82,16 @@ public class UncompleteDataEntryAction
     {
         ProgramStageInstance programStageInstance = programStageInstanceService
             .getProgramStageInstance( programStageInstanceId );
-
+        
         if ( programStageInstance == null )
         {
             return SUCCESS;
         }
 
-        programStageInstance.setCompleted( false );
+        programStageInstance.setStatus( EventStatus.ACTIVE );
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
-
+        
         // ----------------------------------------------------------------------
         // Check Completed status for all of ProgramStageInstance of
         // ProgramInstance

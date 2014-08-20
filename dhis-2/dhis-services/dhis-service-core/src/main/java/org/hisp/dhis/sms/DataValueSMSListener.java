@@ -73,7 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DataValueSMSListener
     implements IncomingSmsListener
 {
-   
+
     private static final String defaultPattern = "([a-zA-Z]+)\\s*(\\d+)";
 
     private CompleteDataSetRegistrationService registrationService;
@@ -407,7 +407,7 @@ public class DataValueSMSListener
             }
 
             dv.setValue( value );
-            dv.setTimestamp( new java.util.Date() );
+            dv.setLastUpdated( new java.util.Date() );
             dv.setStoredBy( storedBy );
 
             if ( newDataValue )
@@ -580,14 +580,22 @@ public class DataValueSMSListener
         }
         notInReport = notInReport.substring( 0, notInReport.length() - 1 );
 
-        if ( codesWithoutDataValues.size() > 0 )
+        if ( command.getSuccessMessage() != null && !StringUtils.isEmpty( command.getSuccessMessage() ) )
         {
-            smsSender.sendMessage( reportBack + notInReport, sender );
+            smsSender.sendMessage( command.getSuccessMessage(), sender );
         }
         else
         {
-            smsSender.sendMessage( reportBack, sender );
+            if ( codesWithoutDataValues.size() > 0 )
+            {
+                smsSender.sendMessage( reportBack + notInReport, sender );
+            }
+            else
+            {
+                smsSender.sendMessage( reportBack, sender );
+            }
         }
+
     }
 
     private void registerCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit,
@@ -595,7 +603,10 @@ public class DataValueSMSListener
     {
         CompleteDataSetRegistration registration = new CompleteDataSetRegistration();
 
-        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit ) == null )
+        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
+            .getDefaultDataElementCategoryOptionCombo(); // TODO
+
+        if ( registrationService.getCompleteDataSetRegistration( dataSet, period, organisationUnit, optionCombo ) == null )
         {
             registration.setDataSet( dataSet );
             registration.setPeriod( period );
@@ -609,8 +620,11 @@ public class DataValueSMSListener
 
     private void deregisterCompleteDataSet( DataSet dataSet, Period period, OrganisationUnit organisationUnit )
     {
+        DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
+            .getDefaultDataElementCategoryOptionCombo(); // TODO
+
         CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dataSet, period,
-            organisationUnit );
+            organisationUnit, optionCombo );
 
         if ( registration != null )
         {

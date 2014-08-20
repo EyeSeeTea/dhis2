@@ -33,9 +33,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
@@ -46,6 +48,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -194,17 +197,17 @@ public class CaseAggregationConditionServiceTest
 
         dataElementA = createDataElement( 'A' );
         dataElementA.setType( DataElement.VALUE_TYPE_STRING );
-        dataElementA.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElementA.setDomainType( DataElementDomain.TRACKER );
 
         dataElementB = createDataElement( 'B' );
         dataElementB.setType( DataElement.VALUE_TYPE_STRING );
-        dataElementB.setDomainType( DataElement.DOMAIN_TYPE_PATIENT );
+        dataElementB.setDomainType( DataElementDomain.TRACKER );
 
         dataElementC = createDataElement( 'C' );
-        dataElementC.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
+        dataElementC.setDomainType( DataElementDomain.AGGREGATE );
 
         dataElementD = createDataElement( 'D' );
-        dataElementD.setDomainType( DataElement.DOMAIN_TYPE_AGGREGATE );
+        dataElementD.setDomainType( DataElementDomain.AGGREGATE );
 
         int deAId = dataElementService.addDataElement( dataElementA );
         int deBId = dataElementService.addDataElement( dataElementB );
@@ -233,7 +236,7 @@ public class CaseAggregationConditionServiceTest
         // Program && Program stages
         // ---------------------------------------------------------------------
 
-        program = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
+        program = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnit );
         int programId = programService.addProgram( program );
 
         ProgramStage stageA = new ProgramStage( "Stage-A", program );
@@ -242,7 +245,7 @@ public class CaseAggregationConditionServiceTest
         ProgramStage stageB = new ProgramStage( "Stage-B", program );
         stageBId = programStageService.saveProgramStage( stageB );
 
-        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+        List<ProgramStage> programStages = new ArrayList<ProgramStage>();
         programStages.add( stageA );
         programStages.add( stageB );
         program.setProgramStages( programStages );
@@ -407,7 +410,7 @@ public class CaseAggregationConditionServiceTest
         dataElements.add( dataElementC );
         dataElements.add( dataElementD );
 
-        assertTrue( equals( aggConditionServiceService.getCaseAggregationCondition( dataElements ), conditionA,
+        assertTrue( equals( aggConditionServiceService.getCaseAggregationConditions( dataElements , null, null, null ), conditionA,
             conditionB ) );
     }
 

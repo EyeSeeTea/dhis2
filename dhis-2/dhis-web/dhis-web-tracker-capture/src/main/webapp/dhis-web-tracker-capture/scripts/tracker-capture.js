@@ -23,7 +23,7 @@ var TRACKER_VALUES = 'TRACKER_VALUES';
 dhis2.tc.store = new dhis2.storage.Store({
     name: TC_STORE_NAME,
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities','attributes','optionSets']
+    objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities', 'attributes', 'relationshipTypes', 'optionSets']
 });
 
 (function($) {
@@ -58,6 +58,8 @@ $(document).ready(function()
         
         promise = promise.then( dhis2.tc.store.open );
         promise = promise.then( getUserProfile );
+        promise = promise.then( getLoginDetails );
+        promise = promise.then( getRelationships );
         promise = promise.then( getAttributes );
         promise = promise.then( getOptionSetsForAttributes );
         promise = promise.then( getTrackedEntities );
@@ -124,20 +126,27 @@ $(document).ready(function()
         }
     });
 
-    //dhis2.availability.startAvailabilityCheck();
-
-    //drop down menu for advanced search
-    $("#searchDropDown").width($("#searchDropDownParent").width());
-    $('#searchDropDown').on('click', "[data-stop-propagation]", function(e) {
-        e.stopPropagation();
-    });
-
-    //drop down menu for program selection
-    $("#selectDropDown").width($("#selectDropDownParent").width());
-    $(".select-drop-down-button").on('click', function(e) {
+    //dhis2.availability.startAvailabilityCheck();    
+    
+    $(".select-dropdown-button").on('click', function(e) {
+        $("#selectDropDown").width($("#selectDropDownParent").width());
         e.stopPropagation();
         $("#selectDropDown").dropdown('toggle');
-    });
+    });  
+    
+    $(".select-dropdown-caret").on('click', function(e) {
+        $("#selectDropDown").width($("#selectDropDownParent").width());
+        e.stopPropagation();
+        $("#selectDropDown").dropdown('toggle');
+    }); 
+    
+    $(".search-dropdown-button").on('click', function() {
+        $("#searchDropDown").width($("#searchDropDownParent").width());
+    }); 
+    
+    $('#searchDropDown').on('click', "[data-stop-propagation]", function(e) {
+        e.stopPropagation();
+    });   
 
 });
 
@@ -179,6 +188,36 @@ function getUserProfile()
     }).done(function(response) {
         localStorage['USER_PROFILE'] = JSON.stringify(response);
         def.resolve();
+    });
+
+    return def.promise();
+}
+
+function getLoginDetails()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/me',
+        type: 'GET'
+    }).done( function(response) {            
+        localStorage['LOGIN_DETAILS'] = JSON.stringify(response);           
+        def.resolve();
+    });
+    
+    return def.promise(); 
+}
+
+function getRelationships()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/relationshipTypes.json?paging=false&fields=id,name,aIsToB,bIsToA,displayName',
+        type: 'GET'
+    }).done(function(response) {        
+        dhis2.tc.store.setAll( 'relationshipTypes', response.relationshipTypes );
+        def.resolve();        
     });
 
     return def.promise();
@@ -268,7 +307,7 @@ function getMetaPrograms()
     $.ajax({
         url: '../api/programs.json',
         type: 'GET',
-        data:'type=1&paging=false&fields=id,name,version,programTrackedEntityAttributes[displayInList,mandatory,attribute[id]],programStages[id,version,programStageDataElements[dataElement[id,optionSet[id,version]]]]'
+        data:'type=1&userFilter=true&paging=false&fields=id,name,version,programTrackedEntityAttributes[displayInList,mandatory,trackedEntityAttribute[id]],programStages[id,version,programStageDataElements[dataElement[id,optionSet[id,version]]]]'
     }).done( function(response) {          
         var programs = [];
         _.each( _.values( response.programs ), function ( program ) { 
@@ -338,7 +377,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs.json',
             type: 'GET',
-            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,description,minDaysFromStart,repeatable],programTrackedEntityAttributes[displayInList,mandatory,attribute[id]]'
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,relationshipText,relationshipFromA,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,minDaysFromStart,reportDateDescription,repeatable,autoGenerateEvent],programTrackedEntityAttributes[displayInList,mandatory,trackedEntityAttribute[id]]'
         }).done( function( response ){
             
             _.each( _.values( response.programs ), function ( program ) { 
@@ -415,9 +454,9 @@ function getProgramStage( id )
         return $.ajax( {
             url: '../api/programStages.json',
             type: 'GET',
-            data: 'filter=id:eq:' + id +'&fields=id,name,dataEntryForm,description,minDaysFromStart,repeatable,programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,type,optionSet[id]]]'
+            data: 'filter=id:eq:' + id +'&fields=id,name,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,reportDateDescription,minDaysFromStart,repeatable,programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,formName,type,optionSet[id]]]'
         }).done( function( response ){            
-            _.each( _.values( response.programStages ), function( programStage ) {                
+            _.each( _.values( response.programStages ), function( programStage ) {
                 dhis2.tc.store.set( 'programStages', programStage );
             });
         });
@@ -477,7 +516,7 @@ function getOptionSet( id )
         return $.ajax( {
             url: '../api/optionSets.json',
             type: 'GET',
-            data: 'filter=id:eq:' + id +'&fields=id,name,version,options'
+            data: 'filter=id:eq:' + id +'&fields=id,name,version,options[id,name,code]'
         }).done( function( response ){            
             _.each( _.values( response.optionSets ), function( optionSet ) {                
                 dhis2.tc.store.set( 'optionSets', optionSet );

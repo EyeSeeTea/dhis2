@@ -47,14 +47,14 @@ dhis2.appr.dataSetSelected = function()
 dhis2.appr.orgUnitSelected = function( orgUnits, orgUnitNames, children )
 {
 	dhis2.appr.displayCategoryOptionGroups();
-}
+};
 
 dhis2.appr.displayPeriods = function()
 {
     var periodType = $( "#periodType" ).val();
     dhis2.dsr.displayPeriodsInternal( periodType, dhis2.appr.currentPeriodOffset );
     dhis2.appr.displayCategoryOptionGroups();
-}
+};
 
 dhis2.appr.displayNextPeriods = function()
 {	
@@ -63,18 +63,18 @@ dhis2.appr.displayNextPeriods = function()
         dhis2.appr.currentPeriodOffset++;
         dhis2.appr.displayPeriods();
     }
-}
+};
 
 dhis2.appr.displayPreviousPeriods = function()
 {
     dhis2.appr.currentPeriodOffset--;
     dhis2.appr.displayPeriods();
-}
+};
 
 dhis2.appr.periodSelected = function()
 {
     dhis2.appr.displayCategoryOptionGroups();
-}
+};
 
 dhis2.appr.displayCategoryOptionGroups = function()
 {
@@ -101,7 +101,7 @@ dhis2.appr.displayCategoryOptionGroups = function()
 			$( "#categoryOptionGroupSection" ).hide();			
 		}
 	} );
-}
+};
 
 dhis2.appr.getDataReport = function()
 {	
@@ -120,7 +120,7 @@ dhis2.appr.getDataReport = function()
     }
     
     return dataReport;
-}
+};
 
 dhis2.appr.generateDataReport = function()
 {
@@ -128,22 +128,22 @@ dhis2.appr.generateDataReport = function()
 	
 	if ( !dataReport.ds )
     {
-        setHeaderMessage( i18n_select_data_set );
+		setHeaderDelayMessage( i18n_select_data_set );
         return false;
     }
     if ( !dataReport.pe )
     {
-        setHeaderMessage( i18n_select_period );
+    	setHeaderDelayMessage( i18n_select_period );
         return false;
     }
     if ( !selection.isSelected() )
     {
-        setHeaderMessage( i18n_select_organisation_unit );
+    	setHeaderDelayMessage( i18n_select_organisation_unit );
         return false;
     }
 
     hideHeaderMessage();
-	$( "#criteria" ).hide( "fast" );
+    dhis2.appr.hideCriteria();
 	$( "#content" ).hide( "fast" );
     showLoader();
     
@@ -155,7 +155,13 @@ dhis2.appr.generateDataReport = function()
     	setTableStyles();
     	dhis2.appr.setApprovalState();
     } );
-}
+};
+
+dhis2.appr.hideCriteria = function()
+{
+	$( "#criteria" ).hide( "fast" );
+	$( "#dataButton" ).removeAttr( "disabled" );
+};
 
 //------------------------------------------------------------------------------
 // Approval
@@ -282,7 +288,7 @@ dhis2.appr.setApprovalState = function()
 		    }
 	           	
 		} );	
-}
+};
 
 dhis2.appr.approveData = function()
 {
@@ -300,7 +306,7 @@ dhis2.appr.approveData = function()
 			alert( xhr.responseText );
 		}
 	} );
-}
+};
 
 dhis2.appr.unapproveData = function()
 {
@@ -318,7 +324,7 @@ dhis2.appr.unapproveData = function()
 			alert( xhr.responseText );
 		}
 	} );
-}
+};
 
 dhis2.appr.acceptData = function()
 {
@@ -336,7 +342,7 @@ dhis2.appr.acceptData = function()
             alert( xhr.responseText );
         }
     } );
-}
+};
 
 dhis2.appr.unacceptData = function()
 {
@@ -354,18 +360,18 @@ dhis2.appr.unacceptData = function()
             alert( xhr.responseText );
         }
   } );
-}
+};
 
 dhis2.appr.getApprovalUrl = function()
 {
 	var data = dhis2.appr.getDataReport();
 	var url = "../api/dataApprovals?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;
 	return url;
-}
+};
 
 dhis2.appr.getAcceptanceUrl = function()
 {
 	var data = dhis2.appr.getDataReport();
 	var url = "../api/dataApprovals/acceptances?ds=" + data.ds + "&pe=" + data.pe + "&ou=" + data.ou + "&cog=" + data.cog;
 	return url;
-}
+};

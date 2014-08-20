@@ -44,4 +44,12 @@ public @interface NodeComplex
     String value() default "";
 
     String namespace() default "";
+
+    boolean isPersisted() default true;
+
+    boolean isOwner() default false;
+
+    boolean isWritable() default true;
+
+    boolean isReadable() default true;
 }

@@ -31,6 +31,7 @@ package org.hisp.dhis.analytics.event;
 import java.util.List;
 
 import org.hisp.dhis.common.IllegalQueryException;
+import org.hisp.dhis.common.MaintenanceModeException;
 
 /**
  * @author Lars Helge Overland
@@ -38,8 +39,8 @@ import org.hisp.dhis.common.IllegalQueryException;
 public interface EventQueryPlanner
 {    
     void validate( EventQueryParams params )
-        throws IllegalQueryException;
-    
+        throws IllegalQueryException, MaintenanceModeException;
+        
     /**
      * Plans the given params and returns a list of params.
      * 

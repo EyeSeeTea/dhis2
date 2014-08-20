@@ -31,6 +31,7 @@ package org.hisp.dhis.program;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -41,6 +42,7 @@ import java.util.Set;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
@@ -152,7 +154,7 @@ public class ProgramStageInstanceStoreTest
         /**
          * Program A
          */
-        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
         programService.addProgram( programA );
 
         stageA = new ProgramStage( "A", programA );
@@ -182,7 +184,7 @@ public class ProgramStageInstanceStoreTest
         stageB.setReminders( reminders );
         programStageService.saveProgramStage( stageB );
 
-        Set<ProgramStage> programStages = new HashSet<ProgramStage>();
+        List<ProgramStage> programStages = new ArrayList<ProgramStage>();
         programStages.add( stageA );
         programStages.add( stageB );
         programA.setProgramStages( programStages );
@@ -208,7 +210,7 @@ public class ProgramStageInstanceStoreTest
          * Program B
          */
 
-        Program programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnitB );
+        Program programB = createProgram( 'B', new ArrayList<ProgramStage>(), organisationUnitB );
         programService.addProgram( programB );
 
         stageC = new ProgramStage( "C", programB );
@@ -218,7 +220,7 @@ public class ProgramStageInstanceStoreTest
         stageC.setIrregular( true );
         programStageService.saveProgramStage( stageD );
 
-        programStages = new HashSet<ProgramStage>();
+        programStages = new ArrayList<ProgramStage>();
         programStages.add( stageC );
         programStages.add( stageD );
         programB.setProgramStages( programStages );
@@ -281,10 +283,10 @@ public class ProgramStageInstanceStoreTest
     @Test
     public void testGetProgramStageInstancesByInstanceListComplete()
     {
-        programStageInstanceA.setCompleted( true );
-        programStageInstanceB.setCompleted( false );
-        programStageInstanceC.setCompleted( true );
-        programStageInstanceD1.setCompleted( false );
+        programStageInstanceA.setStatus( EventStatus.COMPLETED );
+        programStageInstanceB.setStatus( EventStatus.ACTIVE );
+        programStageInstanceC.setStatus( EventStatus.COMPLETED );
+        programStageInstanceD1.setStatus( EventStatus.ACTIVE );
 
         programStageInstanceStore.save( programStageInstanceA );
         programStageInstanceStore.save( programStageInstanceB );
@@ -295,37 +297,15 @@ public class ProgramStageInstanceStoreTest
         programInstances.add( programInstanceA );
         programInstances.add( programInstanceB );
 
-        Collection<ProgramStageInstance> stageInstances = programStageInstanceStore.get( programInstances, true );
+        Collection<ProgramStageInstance> stageInstances = programStageInstanceStore.get( programInstances, EventStatus.COMPLETED );
         assertEquals( 2, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceA ) );
         assertTrue( stageInstances.contains( programStageInstanceC ) );
 
-        stageInstances = programStageInstanceStore.get( programInstances, false );
+        stageInstances = programStageInstanceStore.get( programInstances, EventStatus.ACTIVE );
         assertEquals( 2, stageInstances.size() );
         assertTrue( stageInstances.contains( programStageInstanceB ) );
         assertTrue( stageInstances.contains( programStageInstanceD1 ) );
-    }
-
-    @Test
-    public void testGetProgramStageInstancesByEntityInstanceStatus()
-    {
-        programStageInstanceA.setCompleted( true );
-        programStageInstanceB.setCompleted( false );
-        programStageInstanceC.setCompleted( true );
-        programStageInstanceD1.setCompleted( true );
-
-        programStageInstanceStore.save( programStageInstanceA );
-        programStageInstanceStore.save( programStageInstanceB );
-        programStageInstanceStore.save( programStageInstanceC );
-        programStageInstanceStore.save( programStageInstanceD1 );
-
-        List<ProgramStageInstance> stageInstances = programStageInstanceStore.get( entityInstanceA, true );
-        assertEquals( 1, stageInstances.size() );
-        assertTrue( stageInstances.contains( programStageInstanceA ) );
-
-        stageInstances = programStageInstanceStore.get( entityInstanceA, false );
-        assertEquals( 1, stageInstances.size() );
-        assertTrue( stageInstances.contains( programStageInstanceB ) );
     }
     
     @Test
