@@ -323,7 +323,18 @@ public abstract class PeriodType
      */
     public static DateUnit createLocalDateUnitInstance( Date date )
     {
-        return getCalendar().fromIso( DateUnit.fromJdkDate( date ) );
+        return createLocalDateUnitInstance( date, getCalendar() );
+    }
+
+    /**
+     * Returns an instance of a DateUnit.
+     *
+     * @param date date of calendar in local calendar
+     * @return an instance of a Calendar without any time of day.
+     */
+    public static DateUnit createLocalDateUnitInstance( Date date, org.hisp.dhis.calendar.Calendar calendar )
+    {
+        return calendar.fromIso( DateUnit.fromJdkDate( date ) );
     }
 
     /**
