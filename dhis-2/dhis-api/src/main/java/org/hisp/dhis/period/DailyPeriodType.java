@@ -87,7 +87,7 @@ public class DailyPeriodType
     @Override
     public Period getNextPeriod( Period period, Calendar calendar )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
         dateUnit = calendar.plusDays( dateUnit, 1 );
 
         Date date = calendar.toIso( dateUnit ).toJdkDate();
@@ -98,7 +98,7 @@ public class DailyPeriodType
     @Override
     public Period getPreviousPeriod( Period period, Calendar calendar )
     {
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
         dateUnit = calendar.minusDays( dateUnit, 1 );
 
         Date date = calendar.toIso( dateUnit ).toJdkDate();
@@ -120,10 +120,12 @@ public class DailyPeriodType
 
         int year = dateUnit.getYear();
 
+        Calendar calendar = getCalendar();
+
         while ( year == dateUnit.getYear() )
         {
             periods.add( createPeriod( dateUnit, null ) );
-            dateUnit = getCalendar().plusDays( dateUnit, 1 );
+            dateUnit = calendar.plusDays( dateUnit, 1 );
         }
 
         return periods;
@@ -171,7 +173,7 @@ public class DailyPeriodType
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date, cal );
         dateUnit = cal.minusDays( dateUnit, rewindedPeriods );
 
         return cal.toIso( dateUnit ).toJdkDate();
