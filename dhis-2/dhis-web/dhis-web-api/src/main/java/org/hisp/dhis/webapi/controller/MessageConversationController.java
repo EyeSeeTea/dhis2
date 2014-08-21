@@ -28,8 +28,6 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.message.Message;
@@ -54,8 +52,6 @@ import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -361,11 +357,45 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // Remove a user from one or more messageConversations
+    // Remove a user from a MessageConversation
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{mc-uid}/{user-uid}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
+    public @ResponseBody RootNode removeUserFromMessageConversation(
+        @PathVariable( value = "mc-uid" ) String mcUid, @PathVariable( value = "user-uid" ) String userUid, HttpServletResponse response )
+        throws UpdateAccessDeniedException
+    {
+        RootNode responseNode = new RootNode( "reply" );
+
+        MessageConversation messageConversation = messageService.getMessageConversation( mcUid );
+        User user = userService.getUser( userUid );
+        User currentUser = currentUserService.getCurrentUser();
+
+        if( messageConversation == null || user == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            return responseNode;
+        }
+
+        if( !aclService.canUpdate( currentUser, messageConversation ) || !aclService.canUpdate( currentUser, user ) )
+        {
+            throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
+        }
+
+        messageConversation.remove( user );
+        messageService.updateMessageConversation( messageConversation );
+
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+
+        return responseNode;
+    }
+
+    //--------------------------------------------------------------------------
+    // Remove a user from one or more MessageConversations
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
-    public @ResponseBody RootNode removeMessageConversations(
+    public @ResponseBody RootNode removeUserFromMessageConversations(
         @RequestParam( "mc" ) String[] mcUids, @RequestParam( value = "user", required = false ) String userUid, HttpServletResponse response )
         throws DeleteAccessDeniedException
     {
@@ -396,7 +426,7 @@ public class MessageConversationController
 
         if( !canUpdateAll( currentUser, messageConversations ) || !aclService.canUpdate( currentUser, user ) )
         {
-            throw new DeleteAccessDeniedException( "Not authorized to delete object." );
+            throw new DeleteAccessDeniedException( "Not authorized to modify this object." );
         }
 
         CollectionNode removed = responseNode.addChild( new CollectionNode( "removed" ) );
