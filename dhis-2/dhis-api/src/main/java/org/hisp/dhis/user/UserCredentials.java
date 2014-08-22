@@ -354,6 +354,7 @@ public class UserCredentials
      * @param date  the expiry date.
      * @return true or false.
      */
+/*
     public boolean canRestore( String token, String code, Date date )
     {
         if ( this.restoreToken == null || this.restoreCode == null || this.restoreExpiry == null )
@@ -373,6 +374,7 @@ public class UserCredentials
 
         return token.equals( this.restoreToken ) && code.equals( this.restoreCode );
     }
+*/
 
     /**
      * Returns the dimensions to use as constrains (filters) in data analytics

@@ -8,7 +8,7 @@
 
   <bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
-  <bean id="passwordEncoder" class="org.hisp.dhis.security.HashMethodMigrationPasswordEncoder">
+  <bean id="migrationPasswordEncoder" class="org.hisp.dhis.security.HashMethodMigrationPasswordEncoder">
     <property name="legacyPasswordEncoder" ref="md5PasswordEncoder" />
     <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
     <property name="jdbcTemplate" ref="jdbcTemplate" />
@@ -20,8 +20,7 @@
   </bean>
 
   <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.spring.SpringSecurityPasswordManager">
-    <property name="passwordEncoder" ref="md5PasswordEncoder" />
-    <property name="usernameSaltSource" ref="usernameSaltSource" />
+    <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
   </bean>
 
   <bean id="org.hisp.dhis.security.SecurityService" class="org.hisp.dhis.security.DefaultSecurityService">

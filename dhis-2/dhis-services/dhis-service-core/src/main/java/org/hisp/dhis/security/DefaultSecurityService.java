@@ -140,7 +140,7 @@ public class DefaultSecurityService
 
         user.setSurname( "(TBD)" );
         user.setFirstName( "(TBD)" );
-        user.getUserCredentials().setPassword( passwordManager.encodePassword( user.getUsername(), rawPassword ) );
+        user.getUserCredentials().setPassword( passwordManager.encodePassword( rawPassword ) );
 
         return true;
     }
@@ -223,8 +223,8 @@ public class DefaultSecurityService
         String token = restoreOptions.getTokenPrefix() + CodeGenerator.generateCode( RESTORE_TOKEN_LENGTH );
         String code = CodeGenerator.generateCode( RESTORE_CODE_LENGTH );
 
-        String hashedToken = passwordManager.encodePassword( credentials.getUsername(), token );
-        String hashedCode = passwordManager.encodePassword( credentials.getUsername(), code );
+        String hashedToken = passwordManager.encodePassword( token );
+        String hashedCode = passwordManager.encodePassword( code );
 
         RestoreType restoreType = restoreOptions.getRestoreType();
 
@@ -255,7 +255,7 @@ public class DefaultSecurityService
 
         String username = credentials.getUsername();
 
-        newPassword = passwordManager.encodePassword( username, newPassword );
+        newPassword = passwordManager.encodePassword( newPassword );
 
         credentials.setPassword( newPassword );
 
@@ -275,14 +275,31 @@ public class DefaultSecurityService
             return false;
         }
 
-        String username = credentials.getUsername();
+        String encodedToken = passwordManager.encodePassword( token );
+        String encodedCode = passwordManager.encodePassword( code );
 
-        String encodedToken = passwordManager.encodePassword( username, token );
-        String encodedCode = passwordManager.encodePassword( username, code );
+        Date currentTime = new Cal().now().time();
 
-        Date date = new Cal().now().time();
+        return canRestore( token, code, currentTime, credentials );
+    }
 
-        return credentials.canRestore( encodedToken, encodedCode, date );
+    public boolean canRestore( String token, String code, Date currentTime, UserCredentials credentials )
+    {
+        String restoreToken = credentials.getRestoreToken(), restoreCode = credentials.getRestoreCode();
+        Date restoreExpiry = credentials.getRestoreExpiry();
+
+        if( restoreToken == null || restoreCode == null || restoreExpiry == null ||
+            token == null || code == null || currentTime == null )
+        {
+            return false;
+        }
+
+        if( currentTime.after( restoreExpiry ))
+        {
+            return false;
+        }
+
+        return passwordManager.matches( token, restoreToken ) && passwordManager.matches( code, restoreCode );
     }
 
     public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
@@ -312,12 +329,14 @@ public class DefaultSecurityService
             return false;
         }
 
-        token = passwordManager.encodePassword( credentials.getUsername(), token );
+        //token = passwordManager.encodePassword( token );
 
         String restoreToken = credentials.getRestoreToken();
 
         //return credentials.getRestoreToken().equals( token );
-        return restoreToken.equals( token );
+        //return restoreToken.equals( token );
+
+        return passwordManager.matches( token, restoreToken );
     }
 
     @Override

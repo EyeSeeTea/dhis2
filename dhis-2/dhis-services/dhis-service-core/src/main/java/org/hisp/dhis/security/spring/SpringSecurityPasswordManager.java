@@ -29,8 +29,7 @@ package org.hisp.dhis.security.spring;
  */
 
 import org.hisp.dhis.security.PasswordManager;
-import org.hisp.dhis.security.UsernameSaltSource;
-import org.springframework.security.authentication.encoding.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -43,43 +42,25 @@ public class SpringSecurityPasswordManager
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private org.springframework.security.authentication.encoding.PasswordEncoder legacyPasswordEncoder;
+    private PasswordEncoder passwordEncoder;
 
-    public void setPasswordEncoder( PasswordEncoder legacyPasswordEncoder )
+    public void setPasswordEncoder( PasswordEncoder passwordEncoder )
     {
-        this.legacyPasswordEncoder = legacyPasswordEncoder;
-    }
-
-    private org.springframework.security.authentication.encoding.PasswordEncoder tokenPasswordEncoder;
-
-    public void setTokenPasswordEncoder( ShaPasswordEncoder tokenPasswordEncoder )
-    {
-        this.tokenPasswordEncoder = tokenPasswordEncoder;
-    }
-
-    private UsernameSaltSource usernameSaltSource;
-
-    public void setUsernameSaltSource( UsernameSaltSource saltSource )
-    {
-        this.usernameSaltSource = saltSource;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // -------------------------------------------------------------------------
     // PasswordManager implementation
     // -------------------------------------------------------------------------
 
-    public final String legacyEncodePassword( String username, String password )
+    @Override
+    public final String encodePassword( String password )
     {
-        return passwordEncoder.encodePassword( password, usernameSaltSource.getSalt( username ) );
+        return passwordEncoder.encode( password );
     }
 
-    @Override public String encodePassword( String password )
+    @Override public boolean matches( String rawPassword, String encodedPassword )
     {
-        return null;
-    }
-
-    @Override public String encodeToken( String token, String salt )
-    {
-        return tokenPasswordEncoder.encodePassword( token, usernameSaltSource.getSalt( salt ) );
+        return passwordEncoder.matches( rawPassword, encodedPassword );
     }
 }

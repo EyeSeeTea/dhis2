@@ -83,7 +83,7 @@ public class HashMethodMigrationPasswordEncoder
      */
     private void migrateUserPasswordHash( String legacyHash, String rawPassword )
     {
-        // Reset admin to md5:district for debugging
+        // Reset admin to md5(district) for debugging:
         // update users set password = '48e8f1207baef1ef7fe478a57d19f2e5' where username = 'admin'
 
         final String sql = "SELECT userid from users WHERE password = ?";

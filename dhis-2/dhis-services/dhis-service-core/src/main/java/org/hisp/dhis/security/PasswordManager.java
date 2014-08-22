@@ -38,25 +38,20 @@ public interface PasswordManager
 
     /**
      * Cryptographically hash a password.
+     * Salting (as well as the salt storage scheme) must be handled by the implementation.
+     *
      * @param password password to encode.
      * @return the hashed password.
      */
     String encodePassword( String password );
 
-    String legacyEncodePassword( String username, String password );
-
     /**
-     * Cryptographically encode a (restore or invite) token.
-     * The implementation must employ a hash function of satisfactory security level
-     * to perform the hashing such as SHA-2-family functions or better.
+     * Determines whether the supplied password equals the encoded password or not.
+     * Fetching and handling of any required salt value must be done by the implementation.
      *
-     * Depending on the implementation, the supplied salt can be used directly or
-     * as a seed for computing a different value. In any case, the salt must be known
-     * in order to re-compute the hash on token validation at a later time.
-     *
-     * @param token The token to encode.
-     * @param salt The salt to use.
-     * @return the hashed token.
+     * @param rawPassword the raw, unencoded password.
+     * @param encodedPassword the encoded password to match against.
+     * @return true if the passwords match, false otherwise.
      */
-    String encodeToken( String token, String salt );
+    boolean matches( String rawPassword, String encodedPassword );
 }

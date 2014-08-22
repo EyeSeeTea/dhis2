@@ -311,7 +311,7 @@ public class UpdateUserAction
 
         if ( rawPassword != null )
         {
-            userCredentials.setPassword( passwordManager.encodePassword( userCredentials.getUsername(), rawPassword ) );
+            userCredentials.setPassword( passwordManager.encodePassword( rawPassword ) );
         }
 
         if ( jsonAttributeValues != null )
