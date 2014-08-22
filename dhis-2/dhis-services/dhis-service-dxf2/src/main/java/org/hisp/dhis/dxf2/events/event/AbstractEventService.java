@@ -53,6 +53,7 @@ import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
@@ -186,8 +187,8 @@ public abstract class AbstractEventService
                     "Event.trackedEntityInstance does not point to a valid trackedEntityInstance." );
             }
 
-            List<ProgramInstance> programInstances = new ArrayList<>(
-                programInstanceService.getProgramInstances( entityInstance, program, ProgramInstance.STATUS_ACTIVE ) );
+            List<ProgramInstance> programInstances = new ArrayList<>( programInstanceService.getProgramInstances(
+                entityInstance, program, ProgramInstance.STATUS_ACTIVE ) );
 
             if ( programInstances.isEmpty() )
             {
@@ -237,7 +238,11 @@ public abstract class AbstractEventService
 
                         if ( programStageInstance == null )
                         {
-                            return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                            if ( !CodeGenerator.isValidCode( event.getEvent() ) )
+                            {
+                                return new ImportSummary( ImportStatus.ERROR,
+                                    "Event.event did not point to a valid event" );
+                            }
                         }
                     }
                 }
@@ -245,8 +250,8 @@ public abstract class AbstractEventService
         }
         else
         {
-            List<ProgramInstance> programInstances = new ArrayList<>(
-                programInstanceService.getProgramInstances( program, ProgramInstance.STATUS_ACTIVE ) );
+            List<ProgramInstance> programInstances = new ArrayList<>( programInstanceService.getProgramInstances(
+                program, ProgramInstance.STATUS_ACTIVE ) );
 
             if ( programInstances.isEmpty() )
             {
@@ -269,7 +274,10 @@ public abstract class AbstractEventService
 
                 if ( programStageInstance == null )
                 {
-                    return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                    if ( !CodeGenerator.isValidCode( event.getEvent() ) )
+                    {
+                        return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
+                    }
                 }
             }
         }
@@ -407,16 +415,19 @@ public abstract class AbstractEventService
         programStageInstance.setDueDate( dueDate );
         programStageInstance.setOrganisationUnit( organisationUnit );
 
-        if ( programStageInstance.getProgramStage().getCaptureCoordinates() && event.getCoordinate().isValid() )
+        if( !singleValue )
         {
-            programStageInstance.setLatitude( event.getCoordinate().getLatitude() );
-            programStageInstance.setLongitude( event.getCoordinate().getLongitude() );
-        }
-        else
-        {
-            programStageInstance.setLatitude( null );
-            programStageInstance.setLongitude( null );
-        }
+            if ( programStageInstance.getProgramStage().getCaptureCoordinates() && event.getCoordinate().isValid() )
+            {
+                programStageInstance.setLatitude( event.getCoordinate().getLatitude() );
+                programStageInstance.setLongitude( event.getCoordinate().getLongitude() );
+            }
+            else
+            {
+                programStageInstance.setLatitude( null );
+                programStageInstance.setLongitude( null );
+            }
+        }        
 
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
 
@@ -489,7 +500,7 @@ public abstract class AbstractEventService
 
         if ( event.getStatus() == EventStatus.ACTIVE )
         {
-            programStageInstance.setStatus( EventStatus.ACTIVE );
+            programStageInstance.setStatus( EventStatus.VISITED );
         }
         else if ( event.getStatus() == EventStatus.COMPLETED )
         {
@@ -497,11 +508,11 @@ public abstract class AbstractEventService
         }
         else if ( event.getStatus() == EventStatus.SCHEDULE )
         {
-            programStageInstance.setStatus( EventStatus.ACTIVE );
+            programStageInstance.setStatus( EventStatus.VISITED );
         }
         else if ( event.getStatus() == EventStatus.SKIPPED )
         {
-            programStageInstance.setStatus( EventStatus.ACTIVE );
+            programStageInstance.setStatus( EventStatus.VISITED );
         }
 
         programStageInstance.setExecutionDate( executionDate );
@@ -715,10 +726,15 @@ public abstract class AbstractEventService
 
     private ProgramStageInstance createProgramStageInstance( ProgramStage programStage,
 
-        ProgramInstance programInstance, OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status,
-        Coordinate coordinate, String storedBy )
+    ProgramInstance programInstance, OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status,
+        Coordinate coordinate, String storedBy, String programStageInstanceUid )
     {
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
+
+        if ( programStageInstanceUid != null )
+        {
+            programStageInstance.setUid( programStageInstanceUid );
+        }
 
         updateProgramStageInstance( programStage, programInstance, organisationUnit, dueDate, executionDate, status,
             coordinate, storedBy, programStageInstance );
@@ -728,7 +744,7 @@ public abstract class AbstractEventService
 
     private void updateProgramStageInstance( ProgramStage programStage, ProgramInstance programInstance,
 
-        OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
+    OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
         String storedBy, ProgramStageInstance programStageInstance )
     {
         programStageInstance.setProgramInstance( programInstance );
@@ -777,11 +793,6 @@ public abstract class AbstractEventService
 
         Date eventDate = DateUtils.getMediumDate( event.getEventDate() );
 
-        /*
-         * if ( eventDate == null ) { return new ImportSummary(
-         * ImportStatus.ERROR, "Event.eventDate is not in a valid format." ); }
-         */
-
         Date dueDate = DateUtils.getMediumDate( event.getDueDate() );
 
         String storedBy = getStoredBy( event, importSummary );
@@ -791,7 +802,7 @@ public abstract class AbstractEventService
             if ( programStageInstance == null )
             {
                 programStageInstance = createProgramStageInstance( programStage, programInstance, organisationUnit,
-                    dueDate, eventDate, event.getStatus().getValue(), event.getCoordinate(), storedBy );
+                    dueDate, eventDate, event.getStatus().getValue(), event.getCoordinate(), storedBy, event.getEvent() );
             }
             else
             {

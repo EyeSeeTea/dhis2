@@ -29,7 +29,6 @@ package org.hisp.dhis.period;
  */
 
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.calendar.DateUnit;
 
@@ -92,25 +91,21 @@ public abstract class FinancialPeriodType
     // -------------------------------------------------------------------------
 
     @Override
-    public Period getNextPeriod( Period period )
+    public Period getNextPeriod( Period period, Calendar calendar )
     {
-        Calendar cal = getCalendar();
-        
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = cal.plusYears( dateUnit, 1 );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
+        dateUnit = calendar.plusYears( dateUnit, 1 );
 
-        return createPeriod( dateUnit, cal );
+        return createPeriod( dateUnit, calendar );
     }
 
     @Override
-    public Period getPreviousPeriod( Period period )
+    public Period getPreviousPeriod( Period period, Calendar calendar )
     {
-        Calendar cal = getCalendar();
-        
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = cal.minusYears( dateUnit, 1 );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
+        dateUnit = calendar.minusYears( dateUnit, 1 );
 
-        return createPeriod( dateUnit, cal );
+        return createPeriod( dateUnit, calendar );
     }
 
     /**
@@ -121,7 +116,7 @@ public abstract class FinancialPeriodType
     public List<Period> generatePeriods( DateUnit dateUnit )
     {
         Calendar cal = getCalendar();
-        
+
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
         List<Period> periods = Lists.newArrayList();
@@ -130,10 +125,12 @@ public abstract class FinancialPeriodType
         dateUnit.setMonth( getBaseMonth() + 1 );
         dateUnit.setDay( 1 );
 
+        Calendar calendar = getCalendar();
+
         for ( int i = 0; i < 11; i++ )
         {
             periods.add( createPeriod( dateUnit, cal ) );
-            dateUnit = getCalendar().plusYears( dateUnit, 1 );
+            dateUnit = calendar.plusYears( dateUnit, 1 );
         }
 
         return periods;
@@ -159,8 +156,8 @@ public abstract class FinancialPeriodType
     public List<Period> generateLast5Years( Date date )
     {
         Calendar cal = getCalendar();
-        
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
+
+        DateUnit dateUnit = createLocalDateUnitInstance( date, cal );
         boolean past = dateUnit.getMonth() >= (getBaseMonth() + 1);
 
         List<Period> periods = Lists.newArrayList();
@@ -182,11 +179,11 @@ public abstract class FinancialPeriodType
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
         Calendar cal = getCalendar();
-        
+
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date, cal );
         dateUnit = cal.minusYears( dateUnit, rewindedPeriods );
 
         return cal.toIso( dateUnit ).toJdkDate();

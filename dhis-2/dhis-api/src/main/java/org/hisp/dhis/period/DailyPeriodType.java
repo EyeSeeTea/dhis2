@@ -29,7 +29,6 @@ package org.hisp.dhis.period;
  */
 
 import com.google.common.collect.Lists;
-
 import org.hisp.dhis.calendar.Calendar;
 import org.hisp.dhis.calendar.DateUnit;
 
@@ -86,27 +85,23 @@ public class DailyPeriodType
     // -------------------------------------------------------------------------
 
     @Override
-    public Period getNextPeriod( Period period )
+    public Period getNextPeriod( Period period, Calendar calendar )
     {
-        Calendar cal = getCalendar();
-        
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = cal.plusDays( dateUnit, 1 );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
+        dateUnit = calendar.plusDays( dateUnit, 1 );
 
-        Date date = cal.toIso( dateUnit ).toJdkDate();
+        Date date = calendar.toIso( dateUnit ).toJdkDate();
 
         return new Period( this, date, date );
     }
 
     @Override
-    public Period getPreviousPeriod( Period period )
+    public Period getPreviousPeriod( Period period, Calendar calendar )
     {
-        Calendar cal = getCalendar();
-        
-        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate() );
-        dateUnit = cal.minusDays( dateUnit, 1 );
+        DateUnit dateUnit = createLocalDateUnitInstance( period.getStartDate(), calendar );
+        dateUnit = calendar.minusDays( dateUnit, 1 );
 
-        Date date = cal.toIso( dateUnit ).toJdkDate();
+        Date date = calendar.toIso( dateUnit ).toJdkDate();
 
         return new Period( this, date, date );
     }
@@ -125,10 +120,12 @@ public class DailyPeriodType
 
         int year = dateUnit.getYear();
 
+        Calendar calendar = getCalendar();
+
         while ( year == dateUnit.getYear() )
         {
             periods.add( createPeriod( dateUnit, null ) );
-            dateUnit = getCalendar().plusDays( dateUnit, 1 );
+            dateUnit = calendar.plusDays( dateUnit, 1 );
         }
 
         return periods;
@@ -142,7 +139,7 @@ public class DailyPeriodType
     public List<Period> generateRollingPeriods( DateUnit dateUnit )
     {
         Calendar cal = getCalendar();
-        
+
         dateUnit = cal.minusDays( dateUnit, 364 );
 
         List<Period> periods = Lists.newArrayList();
@@ -172,11 +169,11 @@ public class DailyPeriodType
     public Date getRewindedDate( Date date, Integer rewindedPeriods )
     {
         Calendar cal = getCalendar();
-        
+
         date = date != null ? date : new Date();
         rewindedPeriods = rewindedPeriods != null ? rewindedPeriods : 1;
 
-        DateUnit dateUnit = createLocalDateUnitInstance( date );
+        DateUnit dateUnit = createLocalDateUnitInstance( date, cal );
         dateUnit = cal.minusDays( dateUnit, rewindedPeriods );
 
         return cal.toIso( dateUnit ).toJdkDate();
