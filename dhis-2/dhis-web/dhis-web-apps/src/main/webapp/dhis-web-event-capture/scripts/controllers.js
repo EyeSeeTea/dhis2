@@ -17,6 +17,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 DHIS2EventFactory,       
                 DHIS2EventService,
                 ContextMenuSelectedItem,
+                DateUtils,
                 ModalService,
                 DialogService) {   
    
@@ -123,7 +124,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             ProgramStageFactory.get($scope.selectedProgram.programStages[0].id).then(function (programStage){
                 
                 $scope.selectedProgramStage = programStage;   
-               
+                
+                angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
+                    section.open = true;
+                });
+
                 //$scope.customForm = CustomFormService.processCustomForm($scope.selectedProgramStage);
                 $scope.customForm = $scope.selectedProgramStage.dataEntryForm ? $scope.selectedProgramStage.dataEntryForm.htmlCode : null; 
 
@@ -134,10 +139,12 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $scope.newDhis2Event = {dataValues: []};
                 $scope.currentEvent = {dataValues: []};
                 
-                if($scope.selectedProgramStage.preGenerateUID){
-                    $scope.eventGridColumns.push({name: 'form_id', id: 'uid', type: 'string', compulsory: false, showFilter: false, show: true});
-                    $scope.filterTypes['uid'] = 'string';
-                }
+                $scope.eventGridColumns.push({name: 'form_id', id: 'uid', type: 'string', compulsory: false, showFilter: false, show: true});
+                $scope.filterTypes['uid'] = 'string';                
+                
+                $scope.eventGridColumns.push({name: $scope.selectedProgramStage.reportDateDescription ? $scope.selectedProgramStage.reportDateDescription : 'incident_date', id: 'event_date', type: 'date', compulsory: false, showFilter: false, show: true});
+                $scope.filterTypes['event_date'] = 'date';
+                $scope.filterText['event_date']= {};
 
                 angular.forEach($scope.selectedProgramStage.programStageDataElements, function(prStDe){
                     $scope.programStageDataElements[prStDe.dataElement.id] = prStDe; 
@@ -146,7 +153,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     //create a template for new event
                     //for date type dataelements, filtering is based on start and end dates
                     var dataElement = prStDe.dataElement;
-                    var name = dataElement.formName || dataElement.name;
+                    var name = dataElement.formName ? dataElement.formName : dataElement.name;
                     
                     $scope.newDhis2Event.dataValues.push({id: dataElement.id, value: ''});   
                     if($scope.selectedProgramStage.captureCoordinates){
@@ -158,7 +165,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     $scope.filterTypes[dataElement.id] = dataElement.type;
 
                     if(dataElement.type === 'date' || dataElement.type === 'int' ){
-                         $scope.filterText[dataElement.id]= {};
+                        $scope.filterText[dataElement.id]= {};
                     }
 
                 });           
@@ -227,7 +234,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                     $scope.dhis2Events[i][dataValue.dataElement] = dataValue.value; 
                                 });
                                 
-                                $scope.dhis2Events[i]['uid'] = $scope.dhis2Events[i].event;
+                                $scope.dhis2Events[i]['uid'] = $scope.dhis2Events[i].event;                                
+                                $scope.dhis2Events[i].eventDate = DateUtils.format($scope.dhis2Events[i].eventDate);                                
+                                $scope.dhis2Events[i]['event_date'] = $scope.dhis2Events[i].eventDate;
 
                                 delete $scope.dhis2Events[i].dataValues;
                             }
@@ -340,7 +349,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     
     $scope.showEventRegistration = function(){        
         $scope.displayCustomForm = $scope.customForm ? true:false;        
-        
+        $scope.currentEvent = {};
         $scope.eventRegistration = !$scope.eventRegistration;          
         $scope.currentEvent = angular.copy($scope.newDhis2Event);        
         $scope.outerForm.submitted = false;
@@ -349,15 +358,15 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         if($scope.selectedProgramStage.preGenerateUID){
             $scope.eventUID = dhis2.util.uid();
             $scope.currentEvent['uid'] = $scope.eventUID;
-        }
-        
-        //$scope.currentEvent = {};
+        }        
     };    
     
     $scope.showEditEventInGrid = function(){
         $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();  
-        $scope.currentEventOrginialValue = angular.copy($scope.currentEvent);
-        $scope.editingEventInGrid = !$scope.editingEventInGrid;                
+        $scope.currentEventOrginialValue = angular.copy($scope.currentEvent);        
+        $scope.editingEventInGrid = !$scope.editingEventInGrid;              
+        //$scope.currentEvent['uid'] = $scope.currentEvent.event;
+        
         $scope.outerForm.$valid = true;
     };
     
@@ -369,10 +378,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.currentEventOrginialValue = angular.copy($scope.currentEvent);
         $scope.editingEventInFull = !$scope.editingEventInFull;   
         $scope.eventRegistration = false;
-        
-        $scope.currentEvent.eventDate = moment($scope.currentEvent.eventDate, 'YYYY-MM-DD')._d;       
-        $scope.currentEvent.eventDate = Date.parse($scope.currentEvent.eventDate);
-        $scope.currentEvent.eventDate = $filter('date')($scope.currentEvent.eventDate, 'yyyy-MM-dd');
         
         angular.forEach($scope.selectedProgramStage.programStageDataElements, function(prStDe){
             if(!$scope.currentEvent.hasOwnProperty(prStDe.dataElement.id)){
@@ -389,7 +394,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         
         //check for form validity
         $scope.outerForm.submitted = true;        
-        if( $scope.outerForm.$invalid ){
+        if( $scope.outerForm.$invalid ){            
+            angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
+                section.open = true;
+            });
             return false;
         }
         
@@ -448,6 +456,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 if( !$scope.dhis2Events ){
                     $scope.dhis2Events = [];                   
                 }
+                newEvent['uid'] = newEvent.event;
+                newEvent['event_date'] = DateUtils.format(newEvent.eventDate); 
                 $scope.dhis2Events.splice(0,0,newEvent);
                 
                 $scope.eventLength++;
@@ -479,6 +489,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         //check for form validity
         $scope.outerForm.submitted = true;        
         if( $scope.outerForm.$invalid ){
+            angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
+                section.open = true;
+            });
             return false;
         }
         
@@ -497,10 +510,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             event: $scope.currentEvent.event, 
                             dataValues: dataValues
                         };
-                        
-        updatedEvent.eventDate = moment(updatedEvent.eventDate, 'YYYY-MM-DD')._d;       
-        updatedEvent.eventDate = Date.parse(updatedEvent.eventDate);
-        updatedEvent.eventDate = $filter('date')(updatedEvent.eventDate, 'yyyy-MM-dd'); 
+
+        updatedEvent.eventDate = DateUtils.format(updatedEvent.eventDate);
         
         if($scope.selectedProgramStage.captureCoordinates){
             updatedEvent.coordinate = {latitude: $scope.currentEvent.coordinate.latitude ? $scope.currentEvent.coordinate.latitude : '',
@@ -568,6 +579,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             
             var updatedSingleValueEvent = {event: currentEvent.event, dataValues: [{value: newValue, dataElement: dataElement}]};
             var updatedFullValueEvent = DHIS2EventService.reconstructEvent(currentEvent, $scope.selectedProgramStage.programStageDataElements);
+            console.log('single:  ', updatedSingleValueEvent);
+            console.log('full:  ', updatedFullValueEvent);
             DHIS2EventFactory.updateForSingleValue(updatedSingleValueEvent, updatedFullValueEvent).then(function(data){
                 
                 var continueLoop = true;
@@ -583,7 +596,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 
                 $scope.currentElement.updated = true;
                 $scope.updateSuccess = true;
-            });    
+            });
         }
     };
     
