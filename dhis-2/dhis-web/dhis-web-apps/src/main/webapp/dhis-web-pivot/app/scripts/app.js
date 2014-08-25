@@ -5426,7 +5426,7 @@ Ext.onReady( function() {
 		});
 
 		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			text: 'Embed in any webpage' + '&nbsp;&nbsp;',
 			iconCls: 'ns-menu-item-datasource',
 			disabled: true,
 			xable: function() {
@@ -5499,12 +5499,92 @@ Ext.onReady( function() {
 			}
 		});
 
+        favoriteUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'Favorite link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout.id) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+            handler: function() {
+                var url = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.app.layout.id,
+                    textField,
+                    window;
+
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'Favorite link',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					destroyOnBlur: true,
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff',
+                    items: textField,
+                    bbar: [
+                        '->',
+                        {
+                            text: 'Select',
+                            handler: function() {
+                                textField.selectText();
+                            }
+                        }
+                    ],
+					listeners: {
+						show: function(w) {
+                            //w.update('<a class="user-select" href="' + url + '" target="_blank">' + url + '</a>');
+                            w.doLayout();
+
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
+            }
+        });
+
+        apiUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'API link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout.id) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+            handler: function() {
+                alert(ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html');
+            }
+        });
+
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
             disabled: true,
 			xableItems: function() {
 				interpretationItem.xable();
 				pluginItem.xable();
+				favoriteUrlItem.xable();
+				apiUrlItem.xable();
 			},
 			menu: {
 				cls: 'ns-menu',
@@ -5512,7 +5592,9 @@ Ext.onReady( function() {
 				showSeparator: false,
 				items: [
 					interpretationItem,
-					pluginItem
+					pluginItem,
+                    favoriteUrlItem,
+                    apiUrlItem
 				],
 				listeners: {
 					afterrender: function() {
