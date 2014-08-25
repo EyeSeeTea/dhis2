@@ -8,19 +8,40 @@
 
   <bean id="bCryptPasswordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
-  <bean id="migrationPasswordEncoder" class="org.hisp.dhis.security.HashMethodMigrationPasswordEncoder">
-    <property name="legacyPasswordEncoder" ref="md5PasswordEncoder" />
-    <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
-    <property name="jdbcTemplate" ref="jdbcTemplate" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
-
   <bean id="userDetailsService" class="org.hisp.dhis.security.DefaultUserDetailsService">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
+  <!--
+    As of version 2.17 the password hashing method has been switched from MD5 to bCrypt. In order to migrate user records
+    seamlessly to the new hashing scheme, the MigrationSpringSecurityPasswordManager and MigrationAuthenticationProvider should
+    be used in lieu of SpringSecurityPasswordManager and the default spring AuthenticationProvider respectively.
+
+    As soon as migration is deemed complete (in a later version, most likely 2.18 or 2.19) the org.hisp.dhis.security.migration
+    package components should be replaced.
+
+    The (working) configuration SpringSecurityPasswordManager as it should be used in later versions is shown
+    (commented out) below. The authentication provider will need no bean definition as the default configuration (with bCryptPasswordEncoder
+    chosen as the password-encoder) should be used.
+  -->
+
+  <!--
   <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.spring.SpringSecurityPasswordManager">
     <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
+  </bean>
+  -->
+
+  <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.migration.MigrationSpringSecurityPasswordManager">
+    <property name="usernameSaltSource" ref="usernameSaltSource" />
+    <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
+    <property name="legacyPasswordEncoder" ref="md5PasswordEncoder" />
+  </bean>
+
+  <bean id="migrationAuthenticationProvider" class="org.hisp.dhis.security.migration.MigrationAuthenticationProvider">
+    <property name="passwordManager" ref="org.hisp.dhis.security.PasswordManager" />
+    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
+    <property name="userDetailsService" ref="userDetailsService" />
   </bean>
 
   <bean id="org.hisp.dhis.security.SecurityService" class="org.hisp.dhis.security.DefaultSecurityService">

@@ -33,11 +33,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * @author Torgeir Lorange Ostby
- * @version $Id: AcegiPasswordManager.java 3109 2007-03-19 17:05:21Z torgeilo $
+ * @author Halvdan Hoem Grelland
  */
 public class SpringSecurityPasswordManager
     implements PasswordManager
 {
+    private static String passwordEncoderClassName;
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -47,6 +49,7 @@ public class SpringSecurityPasswordManager
     public void setPasswordEncoder( PasswordEncoder passwordEncoder )
     {
         this.passwordEncoder = passwordEncoder;
+        passwordEncoderClassName = passwordEncoder.getClass().getName();
     }
 
     // -------------------------------------------------------------------------
@@ -59,8 +62,15 @@ public class SpringSecurityPasswordManager
         return passwordEncoder.encode( password );
     }
 
-    @Override public boolean matches( String rawPassword, String encodedPassword )
+    @Override
+    public boolean matches( String rawPassword, String encodedPassword )
     {
         return passwordEncoder.matches( rawPassword, encodedPassword );
+    }
+
+    @Override
+    public String getPasswordEncoderClassName()
+    {
+        return passwordEncoderClassName;
     }
 }

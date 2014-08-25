@@ -54,4 +54,10 @@ public interface PasswordManager
      * @return true if the passwords match, false otherwise.
      */
     boolean matches( String rawPassword, String encodedPassword );
+
+    /**
+     * Returns the class name of the password encoder used by this instance.
+     * @return the name of the password encoder class.
+     */
+    String getPasswordEncoderClassName();
 }

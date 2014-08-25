@@ -36,10 +36,11 @@ import  org.springframework.security.authentication.dao.SaltSource;
  * you only have the username to base the salt on. The alternative is to add the
  * user to database first and then encode and set the password later, but then
  * we need a User to UserDetails converter.
- * 
+ *
  * @author Torgeir Lorange Ostby
  * @version $Id: UsernameSaltSource.java 3109 2007-03-19 17:05:21Z torgeilo $
  */
+@Deprecated
 public interface UsernameSaltSource
     extends SaltSource
 {

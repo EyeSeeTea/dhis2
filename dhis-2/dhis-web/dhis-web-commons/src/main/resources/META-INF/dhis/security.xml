@@ -96,11 +96,7 @@
   <!-- Security : Authentication providers -->
 
   <sec:authentication-manager alias="authenticationManager">
-    <sec:authentication-provider user-service-ref="userDetailsService">
-      <sec:password-encoder ref="migrationPasswordEncoder">
-        <sec:salt-source ref="usernameSaltSource" />
-      </sec:password-encoder>
-    </sec:authentication-provider>
+    <sec:authentication-provider ref="migrationAuthenticationProvider" />
   </sec:authentication-manager>
 
   <!-- Security : AccessProvider -->

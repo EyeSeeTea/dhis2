@@ -329,12 +329,7 @@ public class DefaultSecurityService
             return false;
         }
 
-        //token = passwordManager.encodePassword( token );
-
         String restoreToken = credentials.getRestoreToken();
-
-        //return credentials.getRestoreToken().equals( token );
-        //return restoreToken.equals( token );
 
         return passwordManager.matches( token, restoreToken );
     }
