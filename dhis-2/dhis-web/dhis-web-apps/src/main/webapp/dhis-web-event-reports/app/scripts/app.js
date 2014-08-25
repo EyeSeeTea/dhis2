@@ -4336,13 +4336,13 @@ Ext.onReady( function() {
 		});
 
         onPeriodTypeSelect = function(value) {
-            var ptype = new PeriodType(),
+            var periodType = value,
+                generator = ns.core.init.periodGenerator,
+                periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
 
-                periods = ptype.get(value).generatePeriods({
-                    offset: periodType.periodOffset,
-                    filterFuturePeriods: true,
-                    reversePeriods: true
-                });
+            for (var i = 0; i < periods.length; i++) {
+                periods[i].id = periods[i].iso;
+            }
 
             fixedPeriodAvailableStore.setIndex(periods);
             fixedPeriodAvailableStore.loadData(periods);
