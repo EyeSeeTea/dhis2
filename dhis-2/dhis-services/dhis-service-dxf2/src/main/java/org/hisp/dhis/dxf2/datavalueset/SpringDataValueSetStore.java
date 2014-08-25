@@ -29,11 +29,13 @@ package org.hisp.dhis.dxf2.datavalueset;
  */
 
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getIdentifiers;
-import static org.hisp.dhis.system.util.DateUtils.*;
+import static org.hisp.dhis.system.util.DateUtils.getLongDateString;
 import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
 
 import java.io.OutputStream;
 import java.io.Writer;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
@@ -47,11 +49,12 @@ import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.system.cache.PeriodCache;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.jdbc.core.RowCallbackHandler;
 
 import com.csvreader.CsvWriter;
 
@@ -65,7 +68,10 @@ public class SpringDataValueSetStore
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
+    
+    @Autowired
+    private PeriodCache periodCache;
+    
     //--------------------------------------------------------------------------
     // DataValueSetStore implementation
     //--------------------------------------------------------------------------
@@ -76,33 +82,28 @@ public class SpringDataValueSetStore
     {
         DataValueSet dataValueSet = new StreamingDataValueSet( XMLFactory.getXMLWriter( out ) );
 
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet( getDataValueSql( dataSets, periods, orgUnits ) );
-
-        writeDataValueSet( sqlRowSet, dataSets, completeDate, period, orgUnit, periods, orgUnits, dataValueSet );
+        writeDataValueSet( getDataValueSql( dataSets, periods, orgUnits ), dataSets, completeDate, period, orgUnit, periods, orgUnits, dataValueSet );
 
         StreamUtils.closeOutputStream( out );
     }
 
     @Override
-    public void writeDataValueSetJson( Set<DataSet> dataSets, Date completeDate, Period period, OrganisationUnit orgUnit, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream outputStream )
+    public void writeDataValueSetJson( Set<DataSet> dataSets, Date completeDate, Period period, OrganisationUnit orgUnit, 
+        Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream outputStream )
     {
         DataValueSet dataValueSet = new StreamingJsonDataValueSet( outputStream );
 
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet( getDataValueSql( dataSets, periods, orgUnits ) );
-
-        writeDataValueSet( sqlRowSet, dataSets, completeDate, period, orgUnit, periods, orgUnits, dataValueSet );
+        writeDataValueSet( getDataValueSql( dataSets, periods, orgUnits ), dataSets, completeDate, period, orgUnit, periods, orgUnits, dataValueSet );
 
         StreamUtils.closeOutputStream( outputStream );
     }
 
     @Override
-    public void writeDataValueSetCsv( Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer )
+    public void writeDataValueSetCsv( Set<DataSet> dataSets, Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer )
     {
         DataValueSet dataValueSet = new StreamingCsvDataValueSet( new CsvWriter( writer, CSV_DELIM ) );
 
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet( getDataValueSql( null, periods, orgUnits ) );
-
-        writeDataValueSet( sqlRowSet, null, null, null, null, periods, orgUnits, dataValueSet );
+        writeDataValueSet( getDataValueSql( dataSets, periods, orgUnits ), dataSets, null, null, null, periods, orgUnits, dataValueSet );
     }
 
     @Override
@@ -121,46 +122,44 @@ public class SpringDataValueSetStore
             "join categoryoptioncombo aoc on (dv.attributeoptioncomboid=aoc.categoryoptioncomboid) " +
             "where dv.lastupdated >= '" + DateUtils.getLongDateString( lastUpdated ) + "'";
 
-        SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
-
-        writeDataValueSet( rowSet, null, null, null, null, null, null, dataValueSet );
+        writeDataValueSet( sql, null, null, null, null, null, null, dataValueSet );
     }
 
-    private void writeDataValueSet( SqlRowSet rowSet, Set<DataSet> dataSets, Date completeDate, Period period,
-        OrganisationUnit orgUnit, Set<Period> periods, Set<OrganisationUnit> orgUnits, DataValueSet dataValueSet )
+    private void writeDataValueSet( String sql, Set<DataSet> dataSets, Date completeDate, Period period,
+        OrganisationUnit orgUnit, Set<Period> periods, Set<OrganisationUnit> orgUnits, final DataValueSet dataValueSet )
     {
         dataValueSet.setDataSet( dataSets.size() == 1 ? dataSets.iterator().next().getUid() : null );
         dataValueSet.setCompleteDate( getLongDateString( completeDate ) );
         dataValueSet.setPeriod( period != null ? period.getIsoDate() : null );
         dataValueSet.setOrgUnit( orgUnit != null ? orgUnit.getUid() : null );
 
-        Calendar calendar = PeriodType.getCalendar();
+        final Calendar calendar = PeriodType.getCalendar();
         
-        while ( rowSet.next() )
+        jdbcTemplate.query( sql, new RowCallbackHandler()
         {
-            DataValue dataValue = dataValueSet.getDataValueInstance();
+            public void processRow( ResultSet rs ) throws SQLException
+            {
+                DataValue dataValue = dataValueSet.getDataValueInstance();
+                PeriodType pt = PeriodType.getPeriodTypeByName( rs.getString( "ptname" ) );
 
-            String periodType = rowSet.getString( "ptname" );
-            Date startDate = rowSet.getDate( "pestart" );
-            Period isoPeriod = PeriodType.getPeriodTypeByName( periodType ).createPeriod( startDate, calendar );
-            
-            dataValue.setDataElement( rowSet.getString( "deuid" ) );
-            dataValue.setPeriod( isoPeriod.getIsoDate() );
-            dataValue.setOrgUnit( rowSet.getString( "ouuid" ) );
-            dataValue.setCategoryOptionCombo( rowSet.getString( "cocuid" ) );
-            dataValue.setAttributeOptionCombo( rowSet.getString( "aocuid" ) );
-            dataValue.setValue( rowSet.getString( "value" ) );
-            dataValue.setStoredBy( rowSet.getString( "storedby" ) );
-            dataValue.setCreated( getLongDateString( rowSet.getDate( "created" ) ) );
-            dataValue.setLastUpdated( getLongDateString( rowSet.getDate( "lastupdated" ) ) );
-            dataValue.setComment( rowSet.getString( "comment" ) );
-            dataValue.setFollowup( rowSet.getBoolean( "followup" ) );
-            dataValue.close();
-        }
-
+                dataValue.setDataElement( rs.getString( "deuid" ) );
+                dataValue.setPeriod( periodCache.getIsoPeriod( pt, rs.getDate( "pestart" ), calendar ) );
+                dataValue.setOrgUnit( rs.getString( "ouuid" ) );
+                dataValue.setCategoryOptionCombo( rs.getString( "cocuid" ) );
+                dataValue.setAttributeOptionCombo( rs.getString( "aocuid" ) );
+                dataValue.setValue( rs.getString( "value" ) );
+                dataValue.setStoredBy( rs.getString( "storedby" ) );
+                dataValue.setCreated( getLongDateString( rs.getDate( "created" ) ) );
+                dataValue.setLastUpdated( getLongDateString( rs.getDate( "lastupdated" ) ) );
+                dataValue.setComment( rs.getString( "comment" ) );
+                dataValue.setFollowup( rs.getBoolean( "followup" ) );
+                dataValue.close();
+            }            
+        } );
+        
         dataValueSet.close();
     }
-
+        
     //--------------------------------------------------------------------------
     // DataValueSetStore implementation
     //--------------------------------------------------------------------------

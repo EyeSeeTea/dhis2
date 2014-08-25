@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.datavalueset;
+package org.hisp.dhis.system.cache;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,27 +28,51 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
-
-import java.io.OutputStream;
-import java.io.Writer;
 import java.util.Date;
-import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import javax.annotation.PostConstruct;
+
+import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.period.PeriodType;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 /**
  * @author Lars Helge Overland
  */
-public interface DataValueSetStore
+public class PeriodCache
 {
-    public void writeDataValueSetXml( Set<DataSet> dataSets, Date completeDate, Period period,
-        OrganisationUnit orgUnit, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
-
-    public void writeDataValueSetCsv( Set<DataSet> dataSets, Set<Period> periods, Set<OrganisationUnit> orgUnits, Writer writer );
-
-    public void writeDataValueSetJson( Set<DataSet> dataSets, Date completeDate, Period period,
-        OrganisationUnit orgUnit, Set<Period> periods, Set<OrganisationUnit> orgUnits, OutputStream out );
-
-    void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream );
+    private Cache<String, String> periodCache;
+    
+    /**
+     * TODO: In Spring 4 replace with org.springframework.cache.guava.GuavaCacheManager.
+     */
+    @PostConstruct
+    public void init()
+    {
+        periodCache = CacheBuilder.newBuilder().maximumSize( 30000 ).build();
+    }
+    
+    public String getIsoPeriod( final PeriodType periodType, final Date startDate, final Calendar calendar )
+    {
+        try
+        {
+            String key = calendar.name() + periodType.getName() + startDate.toString();
+            
+            return periodCache.get( key, new Callable<String>() 
+            {                
+                public String call()
+                {
+                    return periodType.createPeriod( startDate, calendar ).getIsoDate();
+                }
+            } );
+        }
+        catch ( ExecutionException ex )
+        {
+            throw new RuntimeException( ex );
+        }
+    }
 }
