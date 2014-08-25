@@ -3068,6 +3068,7 @@ Ext.onReady( function() {
             periodMode,
             onPeriodModeSelect,
             getDateLink,
+            onDateFieldRender,
 			startDate,
 			endDate,
             startEndDate,
@@ -3911,27 +3912,49 @@ Ext.onReady( function() {
             });
         };
 
-        startDate = Ext.create('Ext.form.field.Date', {
+        onDateFieldRender = function(c) {
+            $('#' + c.inputEl.id).calendarsPicker({
+                calendar: ns.core.init.calendar,
+                dateFormat: ns.core.init.dateFormat
+            });
+        };
+        
+        startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
-			labelCls: 'ns-form-item-label-top',
+			labelCls: 'ns-form-item-label-top ns-form-item-label-top-padding',
 			labelSeparator: '',
-            width: (accBaseWidth / 2) - 1,
-			style: 'margin:4px 1px 7px 0; color: #333;',
-			format: 'Y-m-d',
-			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
-		});
+            columnWidth: 0.5,
+            height: 44,
+            value: function() {
+                var greg = $.calendars.instance('gregorian'),
+                    date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
-		endDate = Ext.create('Ext.form.field.Date', {
+                date = ns.core.init.calendar.fromJD(date.toJD());
+                return ns.core.init.calendar.formatDate(ns.core.init.dateFormat, date);
+            }(),
+            listeners: {
+                render: function(c) {
+                    onDateFieldRender(c);
+                }
+            }
+        });
+
+        endDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
-			labelCls: 'ns-form-item-label-top',
+			labelCls: 'ns-form-item-label-top ns-form-item-label-top-padding',
 			labelSeparator: '',
-            width: (accBaseWidth / 2) - 1,
-			style: 'margin:4px 1px 7px 0; color: #333;',
-			format: 'Y-m-d',
-			value: new Date()
-		});
+            columnWidth: 0.5,
+            height: 44,
+            style: 'margin-left: 1px',
+            value: ns.core.init.calendar.today().toString(),
+            listeners: {
+                render: function(c) {
+                    onDateFieldRender(c);
+                }
+            }
+        });
 
         startEndDate = Ext.create('Ext.container.Container', {
             cls: 'ns-container-default',
