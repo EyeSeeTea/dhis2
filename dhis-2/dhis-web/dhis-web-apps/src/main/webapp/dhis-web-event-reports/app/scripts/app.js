@@ -7061,13 +7061,47 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: init.contextPath + '/api/system/info.json',
                     success: function(r) {
-                        init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
+                        var info = Ext.decode(r.responseText);
+
+                        // context path
+                        init.contextPath = info.contextPath || init.contextPath;
+
+                        // calendars
+                        init.dateFormat = info.dateFormat || 'yyyy-mm-dd';
+
+                        (function() {
+                            var dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                defaultCalendarId = 'gregorian',
+                                calendarIdMap = {'iso8601': defaultCalendarId},
+                                calendarId = calendarIdMap[info.calendar] || info.calendar || defaultCalendarId,
+                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                calendarScriptUrl,
+                                createGenerator;
+
+                            // calendar
+                            createGenerator = function() {
+                                init.calendar = $.calendars.instance(calendarId);
+                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.dateFormat);
+                            };
+
+                            if (Ext.Array.contains(calendarIds, calendarId)) {
+                                calendarScriptUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                });
+                            }
+                            else {
+                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                            }
+                        }());
 
                         // user info, i18n
                         requests.push({
                             url: init.contextPath + '/api/me/user-account.json',
                             success: function(r) {
-                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
+                                var defaultKeyUiLocale = 'en';                                
+                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
 
                                 // i18n
                                 Ext.Ajax.request({
@@ -7075,6 +7109,30 @@ Ext.onReady( function() {
                                     success: function(r) {
                                         NS.i18n = Ext.decode(r.responseText);
                                         fn();
+                                    },
+                                    failure: function() {
+                                        var failure = function() {
+                                            alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                        };
+
+                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                success: function(r) {
+                                                    console.log('No translations found for system locale (' + init.keyUiLocale + ').');
+                                                    NS.i18n = Ext.decode(r.responseText);
+                                                },
+                                                failure: function() {
+                                                    failure();
+                                                },
+                                                callback: function() {
+                                                    fn();
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            failure();
+                                        }
                                     }
                                 });
                             }
