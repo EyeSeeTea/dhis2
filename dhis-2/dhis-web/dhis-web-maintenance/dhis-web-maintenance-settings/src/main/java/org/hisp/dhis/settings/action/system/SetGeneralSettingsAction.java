@@ -203,6 +203,13 @@ public class SetGeneralSettingsAction
         this.dateFormat = dateFormat;
     }
 
+    private String helpPageLink;
+    
+    public void setHelpPageLink( String helpPageLink )
+    {
+        this.helpPageLink = helpPageLink;
+    }
+
     private String message;
 
     public String getMessage()
@@ -234,6 +241,7 @@ public class SetGeneralSettingsAction
         systemSettingManager.saveSystemSetting( KEY_CALENDAR, calendar );
         systemSettingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormat );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAINTENANCE_MODE, analyticsMaintenanceMode );
+        systemSettingManager.saveSystemSetting( KEY_HELP_PAGE_LINK, helpPageLink );
 
         Configuration configuration = configurationService.getConfiguration();
 

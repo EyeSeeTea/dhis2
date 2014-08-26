@@ -1710,27 +1710,13 @@ Ext.onReady( function() {
 				cls: 'ns-textarea',
 				height: 130,
 				fieldStyle: 'padding-left: 3px; padding-top: 3px',
-				emptyText: NS.i18n.write_your_interpretation,
+				emptyText: NS.i18n.write_your_interpretation + '..',
 				enableKeyEvents: true,
 				listeners: {
 					keyup: function() {
 						shareButton.xable();
 					}
 				}
-			});
-
-			linkPanel = Ext.create('Ext.panel.Panel', {
-				html: function() {
-					var url = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?id=' + ns.app.layout.id,
-						apiUrl = ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html',
-						html = '';
-
-					html += '<div><b>Table link: </b><span class="user-select"><a href="' + url + '" target="_blank">' + url + '</a></span></div>';
-					html += '<div style="padding-top:3px"><b>API link: </b><span class="user-select"><a href="' + apiUrl + '" target="_blank">' + apiUrl + '</a></span></div>';
-					return html;
-				}(),
-				style: 'padding:3px',
-				bodyStyle: 'border: 0 none'
 			});
 
 			shareButton = Ext.create('Ext.button.Button', {
@@ -1760,13 +1746,12 @@ Ext.onReady( function() {
 				layout: 'fit',
 				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
-				bodyStyle: 'padding:2px; background-color:#fff',
+				bodyStyle: 'padding:1px; background-color:#fff',
 				resizable: false,
 				destroyOnBlur: true,
 				modal: true,
 				items: [
-					textArea,
-					linkPanel
+					textArea
 				],
 				bbar: {
 					cls: 'ns-toolbar-bbar',
@@ -5526,22 +5511,10 @@ Ext.onReady( function() {
 					modal: true,
 					resizable: false,
 					destroyOnBlur: true,
-                    bodyStyle: 'padding: 12px 18px; background-color: #fff',
-                    items: textField,
-                    bbar: [
-                        '->',
-                        {
-                            text: 'Select',
-                            handler: function() {
-                                textField.selectText();
-                            }
-                        }
-                    ],
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
 					listeners: {
 						show: function(w) {
-                            //w.update('<a class="user-select" href="' + url + '" target="_blank">' + url + '</a>');
-                            w.doLayout();
-
 							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
 
 							document.body.oncontextmenu = true;
@@ -5573,7 +5546,39 @@ Ext.onReady( function() {
 				}
 			},
             handler: function() {
-                alert(ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html');
+                var url = ns.core.init.contextPath + '/api/reportTables/' + ns.app.layout.id + '/data.html',
+                    textField,
+                    window;
+
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'API link',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					destroyOnBlur: true,
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
+					listeners: {
+						show: function(w) {
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
             }
         });
 
