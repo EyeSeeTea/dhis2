@@ -4530,6 +4530,8 @@ Ext.onReady( function() {
                 calendar: gis.init.calendar,
                 dateFormat: gis.init.dateFormat
             });
+
+            Ext.get(c.id).setStyle('z-index', 100000);
         };
 
         startDate = Ext.create('Ext.form.field.Text', {
@@ -9075,7 +9077,8 @@ Ext.onReady( function() {
                         requests.push({
                             url: init.contextPath + '/api/me/user-account.json',
                             success: function(r) {
-                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
+                                var defaultKeyUiLocale = 'en';
+                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
 
                                 // i18n
                                 Ext.Ajax.request({
@@ -9083,6 +9086,31 @@ Ext.onReady( function() {
                                     success: function(r) {
                                         GIS.i18n = Ext.decode(r.responseText);
                                         fn();
+                                    },
+                                    failure: function() {
+                                        var failure = function() {
+                                            alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                        };
+
+                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                success: function(r) {
+                                                    console.log('No translations found for system locale (' + init.keyUiLocale + ').');
+                                                    GIS.i18n = Ext.decode(r.responseText);
+                                                },
+                                                failure: function() {
+                                                    failure();
+                                                },
+                                                callback: function() {
+                                                    fn();
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            fn();
+                                            failure();
+                                        }
                                     }
                                 });
                             }

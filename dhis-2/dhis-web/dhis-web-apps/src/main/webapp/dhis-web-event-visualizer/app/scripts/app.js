@@ -441,29 +441,29 @@ Ext.onReady( function() {
 						var store = this,
 							params = {};
 
-						params['max'] = pageSize || 15;
+                        optionSetId = optionSetId || container.dataElement.optionSet.id;
 
 						if (key) {
 							params['key'] = key;
 						}
+                        
+						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
 							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText).options,
-									data = [];
+								var options = Ext.decode(r.responseText).options;
 
-								Ext.each(options, function(option) {
-									data.push({
-										id: option,
-										name: option
-									});
-								});
-
+                                for (var i = 0; i < options.length; i++) {
+                                    options[i].id = options[i].name;
+                                }
+                                    
 								store.removeAll();
-								store.add(data);
+                                store.loadData(options);
+
+                                container.triggerCmp.storage = Ext.clone(options);
 							}
 						});
 					},
@@ -531,29 +531,9 @@ Ext.onReady( function() {
                             container.valueStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            Ext.Ajax.request({
-                                url: ns.core.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
-                                params: {
-                                    'max': 14
-                                },
-                                success: function(r) {
-                                    var options = Ext.decode(r.responseText).options,
-                                        data = [];
-
-                                    Ext.each(options, function(option) {
-                                        data.push({
-                                            id: option,
-                                            name: option
-                                        });
-                                    });
-
-                                    b.storage = Ext.clone(data);
-									container.valueStore.removeAll();
-                                    container.valueStore.add(data);
-                                }
-                            });
+                            container.valueStore.loadOptionSet();
                         }
-                    }
+                    }                    
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
@@ -2711,6 +2691,7 @@ Ext.onReady( function() {
             periodMode,
             onPeriodModeSelect,
             getDateLink,
+            onDateFieldRender,
 			startDate,
 			endDate,
             startEndDate,
@@ -3549,28 +3530,50 @@ Ext.onReady( function() {
                 }
             });
         };
-
-        startDate = Ext.create('Ext.form.field.Date', {
+        
+        onDateFieldRender = function(c) {
+            $('#' + c.inputEl.id).calendarsPicker({
+                calendar: ns.core.init.calendar,
+                dateFormat: ns.core.init.dateFormat
+            });
+        };
+        
+        startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
-			labelCls: 'ns-form-item-label-top',
+			labelCls: 'ns-form-item-label-top ns-form-item-label-top-padding',
 			labelSeparator: '',
-            width: (accBaseWidth / 2) - 1,
-			style: 'margin:4px 1px 7px 0; color: #333;',
-			format: 'Y-m-d',
-			value: new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))
-		});
+            columnWidth: 0.5,
+            height: 44,
+            value: function() {
+                var greg = $.calendars.instance('gregorian'),
+                    date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
-		endDate = Ext.create('Ext.form.field.Date', {
+                date = ns.core.init.calendar.fromJD(date.toJD());
+                return ns.core.init.calendar.formatDate(ns.core.init.dateFormat, date);
+            }(),
+            listeners: {
+                render: function(c) {
+                    onDateFieldRender(c);
+                }
+            }
+        });
+
+        endDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'End date',
 			labelAlign: 'top',
-			labelCls: 'ns-form-item-label-top',
+			labelCls: 'ns-form-item-label-top ns-form-item-label-top-padding',
 			labelSeparator: '',
-            width: (accBaseWidth / 2) - 1,
-			style: 'margin:4px 1px 7px 0; color: #333;',
-			format: 'Y-m-d',
-			value: new Date()
-		});
+            columnWidth: 0.5,
+            height: 44,
+            style: 'margin-left: 1px',
+            value: ns.core.init.calendar.today().toString(),
+            listeners: {
+                render: function(c) {
+                    onDateFieldRender(c);
+                }
+            }
+        });
 
         startEndDate = Ext.create('Ext.container.Container', {
             cls: 'ns-container-default',
@@ -6702,13 +6705,47 @@ Ext.onReady( function() {
                 Ext.Ajax.request({
                     url: init.contextPath + '/api/system/info.json',
                     success: function(r) {
-                        init.contextPath = Ext.decode(r.responseText).contextPath || init.contextPath;
+                        var info = Ext.decode(r.responseText);
+
+                        // context path
+                        init.contextPath = info.contextPath || init.contextPath;
+
+                        // calendars
+                        init.dateFormat = info.dateFormat || 'yyyy-mm-dd';
+
+                        (function() {
+                            var dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                defaultCalendarId = 'gregorian',
+                                calendarIdMap = {'iso8601': defaultCalendarId},
+                                calendarId = calendarIdMap[info.calendar] || info.calendar || defaultCalendarId,
+                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                calendarScriptUrl,
+                                createGenerator;
+
+                            // calendar
+                            createGenerator = function() {
+                                init.calendar = $.calendars.instance(calendarId);
+                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.dateFormat);
+                            };
+
+                            if (Ext.Array.contains(calendarIds, calendarId)) {
+                                calendarScriptUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                });
+                            }
+                            else {
+                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                            }
+                        }());
 
                         // user info, i18n
                         requests.push({
                             url: init.contextPath + '/api/me/user-account.json',
                             success: function(r) {
-                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || 'en';
+                                var defaultKeyUiLocale = 'en';                                
+                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
 
                                 // i18n
                                 Ext.Ajax.request({
@@ -6716,6 +6753,31 @@ Ext.onReady( function() {
                                     success: function(r) {
                                         NS.i18n = Ext.decode(r.responseText);
                                         fn();
+                                    },
+                                    failure: function() {
+                                        var failure = function() {
+                                            alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                        };
+
+                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                success: function(r) {
+                                                    console.log('No translations found for system locale (' + init.keyUiLocale + ').');
+                                                    NS.i18n = Ext.decode(r.responseText);
+                                                },
+                                                failure: function() {
+                                                    failure();
+                                                },
+                                                callback: function() {
+                                                    fn();
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            fn();
+                                            failure();
+                                        }
                                     }
                                 });
                             }
