@@ -2188,7 +2188,8 @@ Ext.onReady( function() {
 							params: Ext.encode(favorite),
 							failure: function(r) {
 								ns.core.web.mask.show();
-								alert(r.responseText);
+
+                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								var id = r.getAllResponseHeaders().location.split('/').pop();
@@ -2217,7 +2218,8 @@ Ext.onReady( function() {
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();
-								alert(r.responseText);
+
+                                alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 							},
 							success: function(r) {
 								eventReport = Ext.decode(r.responseText);
@@ -2230,7 +2232,8 @@ Ext.onReady( function() {
 									params: Ext.encode(eventReport),
 									failure: function(r) {
 										ns.core.web.mask.show();
-										alert(r.responseText);
+
+                                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 									},
 									success: function(r) {
 										if (ns.app.layout && ns.app.layout.id === id) {
@@ -2465,7 +2468,8 @@ Ext.onReady( function() {
 										method: 'GET',
 										failure: function(r) {
 											ns.app.viewport.mask.hide();
-											alert(r.responseText);
+
+                                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 										},
 										success: function(r) {
 											var sharing = Ext.decode(r.responseText),
@@ -6114,7 +6118,8 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-						alert(r.responseText);
+
+                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 					},
 					success: function(r) {
 						var config = Ext.decode(r.responseText);
@@ -6159,17 +6164,17 @@ Ext.onReady( function() {
 
                 // timing
                 ns.app.dateData = new Date();
-
+                
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + paramString,
 					disableCaching: false,
 					scope: this,
 					failure: function(r) {
 						//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
-
+                        
 						web.mask.hide(ns.app.centerRegion);
 
-                        alert(r.responseText);
+                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
 					},
 					success: function(r) {
                         ns.app.dateCreate = new Date();
@@ -7103,15 +7108,27 @@ Ext.onReady( function() {
                         requests.push({
                             url: init.contextPath + '/api/me/user-account.json',
                             success: function(r) {
-                                var defaultKeyUiLocale = 'en';                                
+                                var defaultKeyUiLocale = 'en';                                    
                                 init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
-
+                                
                                 // i18n
                                 Ext.Ajax.request({
                                     url: 'i18n/' + init.keyUiLocale + '.json',
                                     success: function(r) {
                                         NS.i18n = Ext.decode(r.responseText);
-                                        fn();
+
+                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                success: function(r) {
+                                                    Ext.applyIf(NS.i18n, Ext.decode(r.responseText));
+                                                },
+                                                callback: fn
+                                            })
+                                        }
+                                        else {
+                                            fn();
+                                        }
                                     },
                                     failure: function() {
                                         var failure = function() {
@@ -7128,9 +7145,7 @@ Ext.onReady( function() {
                                                 failure: function() {
                                                     failure();
                                                 },
-                                                callback: function() {
-                                                    fn();
-                                                }
+                                                callback: fn
                                             });
                                         }
                                         else {
