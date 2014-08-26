@@ -6166,8 +6166,7 @@ Ext.onReady( function() {
                 ns.app.dateData = new Date();
                 
 				Ext.Ajax.request({
-					//url: ns.core.init.contextPath + paramString,
-                    url: 'http://localhost:8080/api/analytics/events/aggregate/eBAyeGv0exc.json?stage=Zj7UnCAulEk&dimension=ou:ImspTQPwCqdr&dimension=pe:LAST_12_MONTHS&dimension=oZg33kd9taw',
+					url: ns.core.init.contextPath + paramString,
 					disableCaching: false,
 					scope: this,
 					failure: function(r) {
