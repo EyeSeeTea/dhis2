@@ -3,11 +3,12 @@ package org.hisp.dhis.security.migration;
 import org.hisp.dhis.security.PasswordManager;
 
 /**
- * TODO document the purpose of this class
+ * Drop-in replacement for PasswordManager which provides access to legacy password hashing methods as
+ * well as the currently used hashing methods. This is useful in implementing seamless migration to
+ * a new and more secure password hashing method. In such a migration phase the system will need to
+ * be able to accept login requests from users whose passwords are stored using legacy hash method
+ * in order to re-hash and store the user password hash using the new (current) method (handled elsewhere).
  *
- * Some useful debugging stuff:
- * Reset admin to md5(district) for debugging:
- * update users set password = '48e8f1207baef1ef7fe478a57d19f2e5' where username = 'admin'
  * @author Halvdan Hoem Grelland
  */
 public interface MigrationPasswordManager
