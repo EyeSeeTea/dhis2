@@ -49,7 +49,6 @@ import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.system.cache.PeriodCache;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,9 +67,6 @@ public class SpringDataValueSetStore
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    
-    @Autowired
-    private PeriodCache periodCache;
     
     //--------------------------------------------------------------------------
     // DataValueSetStore implementation
@@ -143,7 +139,7 @@ public class SpringDataValueSetStore
                 PeriodType pt = PeriodType.getPeriodTypeByName( rs.getString( "ptname" ) );
 
                 dataValue.setDataElement( rs.getString( "deuid" ) );
-                dataValue.setPeriod( periodCache.getIsoPeriod( pt, rs.getDate( "pestart" ), calendar ) );
+                dataValue.setPeriod( pt.createPeriod( rs.getDate( "pestart" ), calendar ).getIsoDate() );
                 dataValue.setOrgUnit( rs.getString( "ouuid" ) );
                 dataValue.setCategoryOptionCombo( rs.getString( "cocuid" ) );
                 dataValue.setAttributeOptionCombo( rs.getString( "aocuid" ) );

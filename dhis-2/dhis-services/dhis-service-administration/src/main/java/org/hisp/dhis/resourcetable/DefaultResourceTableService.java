@@ -72,7 +72,6 @@ import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableSt
 import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
-import org.hisp.dhis.system.cache.PeriodCache;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -142,14 +141,7 @@ public class DefaultResourceTableService
     {
         this.sqlViewService = sqlViewService;
     }
-    
-    private PeriodCache periodCache;
-
-    public void setPeriodCache( PeriodCache periodCache )
-    {
-        this.periodCache = periodCache;
-    }
-    
+        
     // -------------------------------------------------------------------------
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
@@ -461,8 +453,8 @@ public class DefaultResourceTableService
             values.add( day.getStartDate() );
 
             for ( PeriodType periodType : periodTypes )
-            {                
-                values.add( periodCache.getIsoPeriod( periodType, day.getStartDate(), calendar ) );
+            {
+                values.add( periodType.createPeriod( day.getStartDate(), calendar ).getIsoDate() );
             }
 
             batchArgs.add( values.toArray() );
@@ -506,8 +498,8 @@ public class DefaultResourceTableService
             for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
             {
                 if ( rowType.getFrequencyOrder() <= periodType.getFrequencyOrder() )
-                {
-                    values.add( periodCache.getIsoPeriod( periodType, startDate, calendar ) );
+                {                    
+                    values.add( periodType.createPeriod( startDate, calendar ).getIsoDate() );
                 }
                 else
                 {
