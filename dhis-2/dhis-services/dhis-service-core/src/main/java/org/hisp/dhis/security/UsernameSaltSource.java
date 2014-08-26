@@ -40,7 +40,6 @@ import  org.springframework.security.authentication.dao.SaltSource;
  * @author Torgeir Lorange Ostby
  * @version $Id: UsernameSaltSource.java 3109 2007-03-19 17:05:21Z torgeilo $
  */
-@Deprecated
 public interface UsernameSaltSource
     extends SaltSource
 {

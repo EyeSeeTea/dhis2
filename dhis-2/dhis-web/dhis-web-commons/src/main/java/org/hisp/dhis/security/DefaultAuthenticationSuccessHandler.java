@@ -61,6 +61,7 @@ public class DefaultAuthenticationSuccessHandler
         throws ServletException, IOException
     {
         HttpSession session = request.getSession();
+
         session.setAttribute( "userIs", ((User)authentication.getPrincipal()).getUsername());
         session.setAttribute( LoginInterceptor.JLI_SESSION_VARIABLE, Boolean.TRUE );
         session.setMaxInactiveInterval( DefaultAuthenticationSuccessHandler.DEFAULT_SESSION_TIMEOUT );

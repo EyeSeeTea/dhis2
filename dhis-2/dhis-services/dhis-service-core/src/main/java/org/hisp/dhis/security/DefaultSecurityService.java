@@ -275,31 +275,17 @@ public class DefaultSecurityService
             return false;
         }
 
-        String encodedToken = passwordManager.encodePassword( token );
-        String encodedCode = passwordManager.encodePassword( code );
+        String restoreCode = credentials.getRestoreCode();
 
+        Date restoreExpiry = credentials.getRestoreExpiry();
         Date currentTime = new Cal().now().time();
 
-        return canRestore( token, code, currentTime, credentials );
-    }
-
-    public boolean canRestore( String token, String code, Date currentTime, UserCredentials credentials )
-    {
-        String restoreToken = credentials.getRestoreToken(), restoreCode = credentials.getRestoreCode();
-        Date restoreExpiry = credentials.getRestoreExpiry();
-
-        if( restoreToken == null || restoreCode == null || restoreExpiry == null ||
-            token == null || code == null || currentTime == null )
+        if( restoreCode == null || restoreExpiry == null || code == null || currentTime.after( restoreExpiry ) )
         {
             return false;
         }
 
-        if( currentTime.after( restoreExpiry ))
-        {
-            return false;
-        }
-
-        return passwordManager.matches( token, restoreToken ) && passwordManager.matches( code, restoreCode );
+        return passwordManager.matches( code, restoreCode );
     }
 
     public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
