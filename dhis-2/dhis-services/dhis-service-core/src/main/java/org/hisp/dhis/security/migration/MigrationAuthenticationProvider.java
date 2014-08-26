@@ -10,6 +10,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Date;
+
 /**
  * TODO document the purpose of this class
  * @author Halvdan Hoem Grelland
@@ -46,34 +48,26 @@ public class MigrationAuthenticationProvider
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken )
         throws AuthenticationException
     {
-        String rawPassword = (String) usernamePasswordAuthenticationToken.getCredentials();
+        String password = (String) usernamePasswordAuthenticationToken.getCredentials();
         String username = userDetails.getUsername();
 
-        if( passwordManager.legacyMatches( userDetails.getPassword(), rawPassword, username ) )
+        // If legacyHash(password, username) matches stored hash, re-hash password with current method and switch with stored hash
+        if( passwordManager.legacyMatches( userDetails.getPassword(), password, username ) )
         {
             UserCredentials userCredentials = userService.getUserCredentialsByUsername( username );
 
             if ( userCredentials != null )
             {
-                migrateUserPasswordHash( userCredentials.getId(), passwordManager.encodePassword( rawPassword ) );
+                userCredentials.setPassword( passwordManager.encodePassword( password ) );
+                userCredentials.setPasswordLastUpdated( new Date() );
+                userService.updateUser( userCredentials.getUser() );
+
+                log.info( "User " + userCredentials.getUsername() + " was migrated from " + passwordManager.getLegacyPasswordEncoderClassName() +
+                    " to " + passwordManager.getPasswordEncoderClassName() + " based password hashing on login." );
+
                 userDetails = getUserDetailsService().loadUserByUsername( username ); // refresh userDetails to use new password on auth
             }
         }
-
         super.additionalAuthenticationChecks( userDetails, usernamePasswordAuthenticationToken );
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private void migrateUserPasswordHash( int userId, String newPasswordHash )
-    {
-        User user = userService.getUser( userId );
-        user.getUserCredentials().setPassword( newPasswordHash );
-        userService.updateUser( user );
-
-        log.info( "User " + user.getUsername() + " was migrated from " + passwordManager.getLegacyPasswordEncoderClassName() +
-            " to " + passwordManager.getPasswordEncoderClassName() + " based password hashing on login." );
     }
 }

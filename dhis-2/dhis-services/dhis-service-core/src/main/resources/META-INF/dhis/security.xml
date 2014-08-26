@@ -26,15 +26,17 @@
   -->
 
   <!--
+    Replaced by MigrationSpringSecurityPasswordManager as long as the system is not fully migrated to bCrypt password hashes.
+
   <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.spring.SpringSecurityPasswordManager">
     <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
   </bean>
   -->
 
   <bean id="org.hisp.dhis.security.PasswordManager" class="org.hisp.dhis.security.migration.MigrationSpringSecurityPasswordManager">
-    <property name="usernameSaltSource" ref="usernameSaltSource" />
     <property name="passwordEncoder" ref="bCryptPasswordEncoder" />
     <property name="legacyPasswordEncoder" ref="md5PasswordEncoder" />
+    <property name="usernameSaltSource" ref="usernameSaltSource" />
   </bean>
 
   <bean id="migrationAuthenticationProvider" class="org.hisp.dhis.security.migration.MigrationAuthenticationProvider">
