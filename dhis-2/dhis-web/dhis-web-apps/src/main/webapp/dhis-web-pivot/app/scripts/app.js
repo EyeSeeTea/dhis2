@@ -1701,7 +1701,6 @@ Ext.onReady( function() {
 
 	InterpretationWindow = function() {
 		var textArea,
-			linkPanel,
 			shareButton,
 			window;
 
@@ -2576,6 +2575,8 @@ Ext.onReady( function() {
             downloadButton,
             interpretationItem,
             pluginItem,
+            favoriteUrlItem,
+            apiUrlItem,
             shareButton,
             defaultButton,
             centerRegion,
