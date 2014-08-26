@@ -159,7 +159,7 @@
                     </table>
                 </div>
                 <!-- selection ends -->
-                <div id="hideTypeAheadPopUp"ng-hide="true"></div>
+                <div id="hideTypeAheadPopUp" ng-hide="true"></div>
                 <!-- event grid begins -->
                 <div ng-include="'views/eventList.html'"></div>
                 <!-- event grid ends -->
@@ -180,20 +180,6 @@
                             <div class="bordered-div container-default-form" ng-if="!displayCustomForm">
                                 <div ng-include="'views/defaultForm.html'"></div>                
                             </div>
-
-                            <!-- buttons for event registration / update begins -->
-                            <div style="clear: both;">                        
-                                <span ng-if="editingEventInFull">
-                                    <button ng-click="updateEvent()" class="button not-printable">{{'update'| translate}}</button>
-                                    <button ng-click="showEventList()" class="button not-printable">{{'go_back'| translate}}</button>
-                                </span>
-                                <span ng-if="eventRegistration">
-                                    <button ng-disabled="disableSaveAndAddNew" ng-click="addEvent(true)" class="button not-printable">{{'save_and_add_new'| translate}}</button>
-                                    <button ng-click="addEvent()" class="button not-printable">{{'save_and_back'| translate}}</button>
-                                    <button ng-click="showEventList(null)" class="button not-printable">{{'go_back'| translate}}</button>
-                                </span> 
-                            </div>
-                            <!-- buttons for event registration / update ends -->
 
                         </div>
                     </form>  
