@@ -6132,27 +6132,7 @@ Ext.onReady( function() {
 		var requests = [],
 			callbacks = 0,
 			init = {},
-            parseProperties,
-			fn;
-
-        parseProperties = function(responseText) {
-            var i18n = {}, rows;
-            
-            if (typeof responseText !== 'string') {
-                return i18n;
-            }
-            
-            rows = responseText.split(/\n/);
-
-            for (var i = 0, a; i < rows.length; i++) {
-                if (!!(typeof rows[i] === 'string' && rows[i].length && rows[i].indexOf('=') !== -1)) {
-                    a = rows[i].split('=');
-                    i18n[a[0].trim()] = eval('"' + a[1].trim().replace(/"/g, '\'') + '"');
-                }
-            }
-
-            return i18n;
-        };
+            fn;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
@@ -6218,48 +6198,55 @@ Ext.onReady( function() {
                             success: function(r) {
                                 var defaultKeyUiLocale = 'en';
                                 init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
-                                
-                                // i18n
+
                                 Ext.Ajax.request({
-                                    url: 'i18n/' + init.keyUiLocale + '.properties',
+                                    url: init.contextPath + '/dhis-web-commons/javascripts/javaProperties.js',
                                     success: function(r) {
-                                        NS.i18n = parseProperties(r.responseText);
+                                        var parseProperties = Ext.decode(r.responseText).parseProperties;
 
-                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
-                                            Ext.Ajax.request({
-                                                url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                success: function(r) {
-                                                    Ext.applyIf(NS.i18n, parseProperties(r.responseText));
-                                                },
-                                                callback: fn
-                                            })
-                                        }
-                                        else {
-                                            fn();
-                                        }
-                                    },
-                                    failure: function() {
-                                        var failure = function() {
-                                            alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                        };
+                                        // i18n
+                                        Ext.Ajax.request({
+                                            url: 'i18n/' + init.keyUiLocale + '.properties',
+                                            success: function(r) {
+                                                NS.i18n = parseProperties(r.responseText);
 
-                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
-                                            Ext.Ajax.request({
-                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                success: function(r) {
-                                                    console.log('No translations found for system locale (' + init.keyUiLocale + ').');
-                                                    NS.i18n = parseProperties(r.responseText);
-                                                },
-                                                failure: function() {
+                                                if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.applyIf(NS.i18n, parseProperties(r.responseText));
+                                                        },
+                                                        callback: fn
+                                                    })
+                                                }
+                                                else {
+                                                    fn();
+                                                }
+                                            },
+                                            failure: function() {
+                                                var failure = function() {
+                                                    alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                };
+
+                                                if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                        success: function(r) {
+                                                            console.log('No translations found for system locale (' + init.keyUiLocale + ').');
+                                                            NS.i18n = parseProperties(r.responseText);
+                                                        },
+                                                        failure: function() {
+                                                            failure();
+                                                        },
+                                                        callback: fn
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
                                                     failure();
-                                                },
-                                                callback: fn
-                                            });
-                                        }
-                                        else {
-                                            fn();
-                                            failure();
-                                        }
+                                                }
+                                            }
+                                        });
                                     }
                                 });
                             }
