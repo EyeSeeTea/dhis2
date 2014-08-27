@@ -253,8 +253,6 @@ public class DefaultSecurityService
             return false;
         }
 
-        String username = credentials.getUsername();
-
         newPassword = passwordManager.encodePassword( newPassword );
 
         credentials.setPassword( newPassword );
