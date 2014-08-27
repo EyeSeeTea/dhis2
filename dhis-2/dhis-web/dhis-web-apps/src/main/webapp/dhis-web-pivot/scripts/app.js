@@ -6135,12 +6135,17 @@ Ext.onReady( function() {
             parseProperties,
 			fn;
 
-        parseProperties = function(properties) {
-            var rows = Ext.Array.clean(properties.split(/\n/)),
-                i18n = {};
+        parseProperties = function(responseText) {
+            var i18n = {}, rows;
+            
+            if (typeof responseText !== 'string') {
+                return i18n;
+            }
+            
+            rows = responseText.split(/\n/);
 
             for (var i = 0, a; i < rows.length; i++) {
-                if (!!(typeof rows[i] === 'string' && rows[i].length)) {
+                if (!!(typeof rows[i] === 'string' && rows[i].length && rows[i].indexOf('=') !== -1)) {
                     a = rows[i].split('=');
                     i18n[a[0].trim()] = eval('"' + a[1].trim().replace(/"/g, '\'') + '"');
                 }
@@ -6213,7 +6218,7 @@ Ext.onReady( function() {
                             success: function(r) {
                                 var defaultKeyUiLocale = 'en';
                                 init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
-
+                                
                                 // i18n
                                 Ext.Ajax.request({
                                     url: 'i18n/' + init.keyUiLocale + '.properties',
