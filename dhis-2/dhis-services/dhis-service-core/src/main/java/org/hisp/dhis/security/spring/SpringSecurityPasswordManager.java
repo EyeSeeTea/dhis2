@@ -38,8 +38,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SpringSecurityPasswordManager
     implements PasswordManager
 {
-    private static String passwordEncoderClassName;
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -49,7 +47,6 @@ public class SpringSecurityPasswordManager
     public void setPasswordEncoder( PasswordEncoder passwordEncoder )
     {
         this.passwordEncoder = passwordEncoder;
-        passwordEncoderClassName = passwordEncoder.getClass().getName();
     }
 
     // -------------------------------------------------------------------------
@@ -71,6 +68,6 @@ public class SpringSecurityPasswordManager
     @Override
     public String getPasswordEncoderClassName()
     {
-        return passwordEncoderClassName;
+        return passwordEncoder.getClass().getName();
     }
 }

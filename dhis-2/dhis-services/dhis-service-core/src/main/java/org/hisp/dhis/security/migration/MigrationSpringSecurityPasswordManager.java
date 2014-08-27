@@ -51,6 +51,6 @@ public class MigrationSpringSecurityPasswordManager
     @Override
     public String getLegacyPasswordEncoderClassName()
     {
-        return legacyPasswordEncoderClassName;
+        return legacyPasswordEncoder.getClass().getName();
     }
 }
