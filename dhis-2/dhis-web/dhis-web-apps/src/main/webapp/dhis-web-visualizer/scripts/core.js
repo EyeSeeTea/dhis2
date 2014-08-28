@@ -2633,6 +2633,10 @@ Ext.onReady( function() {
                 };
 
                 generator.area = function() {
+
+                    // NB, always on for area charts as area extjs area charts cannot handle nulls
+                    xLayout.hideEmptyRows = true;
+                    
                     var store = getDefaultStore(),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
