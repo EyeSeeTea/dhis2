@@ -28,53 +28,31 @@ trackerCapture.controller('ProgramSummaryController',
     });
     
     //load programs associated with the selected org unit.
-    $scope.loadPrograms = function(orgUnit) {                
-        
-        $scope.selectedOrgUnit = orgUnit;
-        
-        if (angular.isObject($scope.selectedOrgUnit)) {   
-
+    $scope.loadPrograms = function(orgUnit) {
+        $scope.selectedOrgUnit = orgUnit;        
+        if (angular.isObject($scope.selectedOrgUnit)){
             ProgramFactory.getAll().then(function(programs){
-                $scope.programs = [];
-                angular.forEach(programs, function(program){                            
-                    if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
-                        $scope.programs.push(program);
-                    }
-                });
-
-                if($scope.programs.length === 0){
-                    $scope.selectedProgram = null;
-                }
-                else{
-                    if($scope.selectedProgram){
-                        angular.forEach($scope.programs, function(program){                            
-                            if(program.id === $scope.selectedProgram.id){                                
-                                $scope.selectedProgram = program;
-                            }
-                        });
-                    }
-                    else{                        
-                        if($scope.programs.length === 1){
-                            $scope.selectedProgram = $scope.programs[0];
-                        }                        
-                    }
+                $scope.programs = programs;                
+                if($scope.programs.length === 1){
+                    $scope.selectedProgram = $scope.programs[0];
                 } 
             });
         }        
     };
     
     //watch for selection of program
-    $scope.$watch('selectedProgram', function() {        
+    $scope.$watch('selectedProgram', function() {   
         if( angular.isObject($scope.selectedProgram)){            
             $scope.reportStarted = false;
             $scope.dataReady = false;
         }
     });
     
-    $scope.generateReport = function(){
+    $scope.generateReport = function(program, report, ouMode){
         
-        $scope.reportStarted = true;
-        $scope.dataReady = false;
+        $scope.selectedProgram = program;
+        $scope.report = report;
+        $scope.selectedOuMode = ouMode;
         
         //check for form validity
         $scope.outerForm.submitted = true;        
@@ -82,13 +60,16 @@ trackerCapture.controller('ProgramSummaryController',
             return false;
         }
         
+        $scope.reportStarted = true;
+        $scope.dataReady = false;
+        
         $scope.programStages = [];
         angular.forEach($scope.selectedProgram.programStages, function(stage){
             $scope.programStages[stage.id] = stage;
         });
             
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
-            $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode.name);      
+            $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode.name);   
         });  
         
         //fetch TEIs for the selected program and orgunit/mode
@@ -98,17 +79,14 @@ trackerCapture.controller('ProgramSummaryController',
                             'program=' + $scope.selectedProgram.id,
                             null,
                             $scope.pager,
-                            false).then(function(data){
-            if(data.rows){
-                $scope.teiCount = data.rows.length;                
-            }
-            
+                            false).then(function(data){                     
             
             //process tei grid
-            $scope.teiList = TEIGridService.format(data);          
-            
-            DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.selectedProgram.id).then(function(eventList){
-                $scope.dhis2Events = [];
+            var teis = TEIGridService.format(data,true);     
+            $scope.teiList = [];
+
+            DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.selectedProgram.id, report.startDate, report.endDate).then(function(eventList){
+                $scope.dhis2Events = [];                
                 angular.forEach(eventList, function(ev){
                     if(ev.trackedEntityInstance){
                         ev.name = $scope.programStages[ev.programStage].name;
@@ -117,9 +95,17 @@ trackerCapture.controller('ProgramSummaryController',
                         ev.eventDate = DateUtils.format(ev.eventDate);
                         
                         if($scope.dhis2Events[ev.trackedEntityInstance]){
+                            if(teis.rows[ev.trackedEntityInstance]){
+                                $scope.teiList.push(teis.rows[ev.trackedEntityInstance]);
+                                delete teis.rows[ev.trackedEntityInstance];
+                            }                     
                             $scope.dhis2Events[ev.trackedEntityInstance].push(ev);
                         }
                         else{
+                            if(teis.rows[ev.trackedEntityInstance]){
+                                $scope.teiList.push(teis.rows[ev.trackedEntityInstance]);
+                                delete teis.rows[ev.trackedEntityInstance];
+                            }  
                             $scope.dhis2Events[ev.trackedEntityInstance] = [ev];
                         }
                         ev = EventUtils.setEventOrgUnitName(ev);
@@ -157,8 +143,7 @@ trackerCapture.controller('ProgramSummaryController',
 
         modalInstance.result.then({
         });
-    };   
-    
+    };    
 })
 
 //Controller for event details

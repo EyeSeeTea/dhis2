@@ -1096,7 +1096,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'level'],
 			proxy: {
 				type: isPlugin ? 'jsonp' : 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitLevels.' + (isPlugin ? 'jsonp' : 'json') + '?fields=id,name,level&paging=false',
+				url: gis.init.contextPath + '/api/organisationUnitLevels.' + (isPlugin ? 'jsonp' : 'json') + '?fields=id,name,level&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitLevels'
@@ -2600,7 +2600,7 @@ Ext.onReady( function() {
 					legends = [];
 
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
+					url: gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
 					scope: this,
 					success: function(r) {
 						legends = Ext.decode(r.responseText).mapLegends;
@@ -4758,7 +4758,7 @@ Ext.onReady( function() {
 				var rule = new OpenLayers.Rule({
 					symbolizer: {
 						'pointRadius': 8,
-						'externalGraphic': '../../images/orgunitgroup/' + items[i].data.symbol
+						'externalGraphic': '../images/orgunitgroup/' + items[i].data.symbol
 					},
 					filter: new OpenLayers.Filter.Comparison({
 						type: OpenLayers.Filter.Comparison.EQUAL_TO,
@@ -4780,7 +4780,7 @@ Ext.onReady( function() {
 
 			for (var i = 0; i < items.length; i++) {
 				child = document.createElement("div");
-				child.style.backgroundImage = 'url(../../images/orgunitgroup/' + items[i].data.symbol + ')';
+				child.style.backgroundImage = 'url(../images/orgunitgroup/' + items[i].data.symbol + ')';
 				child.style.backgroundRepeat = 'no-repeat';
 				child.style.width = "21px";
 				child.style.height = "16px";
