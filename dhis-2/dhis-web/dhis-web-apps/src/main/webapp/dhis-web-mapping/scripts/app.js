@@ -2538,6 +2538,10 @@ Ext.onReady( function() {
 		gis.store.maps.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
 
+            if (!pager) {
+                return;
+            }
+
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
 
 			prevButton.enable();
