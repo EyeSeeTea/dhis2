@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.controller;
  */
 
 import com.google.common.collect.Lists;
+import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.message.Message;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
@@ -52,6 +53,7 @@ import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -101,6 +103,14 @@ public class MessageConversationController
             entity.markRead( currentUserService.getCurrentUser() );
             manager.update( entity );
         }
+    }
+
+    @Override
+    public RootNode getObject( @PathVariable String uid, Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response )
+        throws Exception
+    {
+        // TODO implement access control for this method (and possibly getEntityList)
+        return super.getObject( uid, parameters, request, response );
     }
 
     @Override
@@ -251,24 +261,9 @@ public class MessageConversationController
 
     @RequestMapping( value = "/read", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode markMessageConversationsRead(
-        @RequestParam( required = false, value = "user" ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
+        @RequestParam( value = "user", required = false ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
     {
         RootNode responseNode = new RootNode( "response" );
-
-        if( uids.length < 1 )
-        {
-            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return responseNode;
-        }
-
-        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uids );
-
-
-        if ( messageConversations.isEmpty() )
-        {
-            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            return responseNode;
-        }
 
         User currentUser = currentUserService.getCurrentUser();
         User user = userUid != null ? userService.getUser( userUid ) : currentUserService.getCurrentUser();
@@ -276,12 +271,22 @@ public class MessageConversationController
         if( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             return responseNode;
         }
 
-        if( !canUpdateAll( user, messageConversations ) || !aclService.canUpdate( currentUser, user ) )
+        if( !canModifyUserConversation( currentUser, user ) )
         {
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+
+        if ( messageConversations.isEmpty() )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given uids." ) );
+            return responseNode;
         }
 
         CollectionNode marked = responseNode.addChild( new CollectionNode( "markedRead" ) );
@@ -307,23 +312,9 @@ public class MessageConversationController
 
     @RequestMapping( value = "/unread", method = RequestMethod.PUT, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode markMessageConversationsUnread(
-        @RequestParam( required = false, value = "user" ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
+        @RequestParam( value = "user", required = false ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
     {
         RootNode responseNode = new RootNode( "response" );
-
-        if( uids.length < 1 )
-        {
-            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return responseNode;
-        }
-
-        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uids );
-
-        if ( messageConversations.isEmpty() )
-        {
-            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            return responseNode;
-        }
 
         User currentUser = currentUserService.getCurrentUser();
         User user = userUid != null ? userService.getUser( userUid ) : currentUser;
@@ -331,12 +322,22 @@ public class MessageConversationController
         if( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             return responseNode;
         }
 
-        if( !canUpdateAll( currentUser, messageConversations ) || !aclService.canUpdate( currentUser, user ) )
+        if( !canModifyUserConversation( currentUser, user ) )
         {
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+
+        if ( messageConversations.isEmpty() )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given uids." ) );
+            return responseNode;
         }
 
         CollectionNode marked = responseNode.addChild( new CollectionNode( "markedUnread" ) );
@@ -356,42 +357,75 @@ public class MessageConversationController
         return responseNode;
     }
 
+
+    //--------------------------------------------------------------------------
+    // Delete a MessageConversation (requires override auth)
+    //--------------------------------------------------------------------------
+
+    /**
+     * Deletes a MessageConversation.
+     * Note that this is a HARD delete and therefore requires override authority for the current user.
+     * @param uid the uid of the MessageConversation to delete.
+     * @throws Exception
+     */
+    @Override
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_METADATA_IMPORT')" )
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable String uid )
+        throws Exception
+    {
+        super.deleteObject( response, request, uid );
+    }
+
     //--------------------------------------------------------------------------
     // Remove a user from a MessageConversation
+    // In practice a DELETE on MessageConversation <-> User relationship
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{mc-uid}/{user-uid}", method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
     public @ResponseBody RootNode removeUserFromMessageConversation(
         @PathVariable( value = "mc-uid" ) String mcUid, @PathVariable( value = "user-uid" ) String userUid, HttpServletResponse response )
-        throws UpdateAccessDeniedException
+        throws DeleteAccessDeniedException
     {
         RootNode responseNode = new RootNode( "reply" );
 
-        MessageConversation messageConversation = messageService.getMessageConversation( mcUid );
         User user = userService.getUser( userUid );
-        User currentUser = currentUserService.getCurrentUser();
 
-        if( messageConversation == null || user == null )
+        if( user == null )
         {
+            responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             return responseNode;
         }
 
-        if( !aclService.canUpdate( currentUser, messageConversation ) || !aclService.canUpdate( currentUser, user ) )
+        if( !canModifyUserConversation( currentUserService.getCurrentUser(), user ) )
         {
-            throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
+            throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
         }
 
-        messageConversation.remove( user );
-        messageService.updateMessageConversation( messageConversation );
+        MessageConversation messageConversation = messageService.getMessageConversation( mcUid );
 
-        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+        if( messageConversation == null )
+        {
+            responseNode.addChild( new SimpleNode( "message", "No messageConversation with uid: " + mcUid ) );
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            return responseNode;
+        }
+
+        CollectionNode removed = responseNode.addChild( new CollectionNode( "removed" ) );
+
+        if( messageConversation.remove( user ) )
+        {
+            messageService.updateMessageConversation( messageConversation );
+            removed.addChild( new SimpleNode( "uid", messageConversation.getUid() ) );
+        }
+
+        response.setStatus( HttpServletResponse.SC_OK );
 
         return responseNode;
     }
 
     //--------------------------------------------------------------------------
-    // Remove a user from one or more MessageConversations
+    // Remove a user from one or more MessageConversations (batch operation)
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.DELETE, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
@@ -401,42 +435,39 @@ public class MessageConversationController
     {
         RootNode responseNode = new RootNode( "response" );
 
-        if( mcUids.length < 1 )
-        {
-            response.setStatus( HttpServletResponse.SC_BAD_REQUEST );
-            return responseNode;
-        }
-
-        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( mcUids );
-
-        if ( messageConversations.isEmpty() )
-        {
-            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            return responseNode;
-        }
-
         User currentUser = currentUserService.getCurrentUser();
-        User user = userUid != null ? userService.getUser( userUid ) : currentUser;
+
+        User user = userUid == null ? currentUser : userService.getUser( userUid ) ;
 
         if( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "User does not exist: " + userUid ) );
             return responseNode;
         }
 
-        if( !canUpdateAll( currentUser, messageConversations ) || !aclService.canUpdate( currentUser, user ) )
+        if( !canModifyUserConversation( currentUser, user ) )
         {
-            throw new DeleteAccessDeniedException( "Not authorized to modify this object." );
+            throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
+        }
+
+        Collection<MessageConversation> messageConversations = messageService.getMessageConversations( mcUids );
+
+        if( messageConversations.isEmpty() )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "Invalid conversation UIDs given" ) );
+            return responseNode;
         }
 
         CollectionNode removed = responseNode.addChild( new CollectionNode( "removed" ) );
 
-        for( MessageConversation conversation : messageConversations )
+        for( MessageConversation mc : messageConversations )
         {
-            if( conversation.remove( user ) )
+            if( mc.remove( user ) )
             {
-                removed.addChild( new SimpleNode( "uid", conversation.getUid() ) );
-                messageService.updateMessageConversation( conversation );
+                messageService.updateMessageConversation( mc );
+                removed.addChild( new SimpleNode( "uid", mc.getUid() ) );
             }
         }
 
@@ -445,21 +476,24 @@ public class MessageConversationController
         return responseNode;
     }
 
-
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
 
-    private boolean canUpdateAll( User user, Collection<MessageConversation> messageConversations )
+    /**
+     * Determines whether the current user has permission to modify the given user in a MessageConversation.
+     *
+     * The modification is either marking a conversation read/unread for the user or removing the user from the MessageConversation.
+     *
+     * Since there are no per-conversation authorities provided the permission is given if the current user equals the user
+     * or if the current user has update-permission to User objects.
+     *
+     * @param currentUser the current user to check authorization for.
+     * @param user the user to remove from a conversation.
+     * @return true if the current user is allowed to remove the user from a conversation, false otherwise.
+     */
+    private boolean canModifyUserConversation( User currentUser, User user )
     {
-        for( MessageConversation conversation : messageConversations )
-        {
-            if( !aclService.canUpdate( user, conversation ))
-            {
-                return false;
-            }
-        }
-        return true;
+        return currentUser.equals( user ) || currentUser.getUserCredentials().hasAnyAuthority( AclService.ACL_OVERRIDE_AUTHORITIES );
     }
-
 }

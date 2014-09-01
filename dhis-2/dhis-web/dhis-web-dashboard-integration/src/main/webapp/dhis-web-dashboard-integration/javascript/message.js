@@ -204,13 +204,11 @@ jQuery.fn.extend(
         {
             var $checkbox = $( this );
 
-            // Ensure we're applying this to a checkbox
             if( !$checkbox.is( "input" ) || $checkbox.attr( "type") !== "checkbox" )
             {
                 throw new Error( "Can only apply to a checkbox." );
             }
 
-            // Get checkboxes to control
             var $checkboxes = [];
 
             if( typeof $checkboxContainer !== "undefined" )
@@ -218,7 +216,6 @@ jQuery.fn.extend(
                 $checkboxes = $checkboxContainer.find( "input:checkbox" );
             }
 
-            // Apply master checkbox behaviour
             $checkbox.click( function( event )
             {
                 if( this.checked )
@@ -232,7 +229,6 @@ jQuery.fn.extend(
                 event.stopPropagation();
             });
 
-            // Apply reverse behaviour to slaves
             $checkboxes.click( function()
             {
                 var checked = $checkboxes.filter( ":checked" );
