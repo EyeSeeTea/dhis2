@@ -4203,15 +4203,7 @@ Ext.onReady( function() {
             var type = periodType.getValue(),
                 periodOffset = periodType.periodOffset,
                 generator = ns.core.init.periodGenerator,
-                periods;
-                
-            periods = function() {
-                if (type === 'Yearly') {
-                    periodOffset = periodOffset - 5;
-                }
-
-                return generator.generateReversedPeriods(type, periodOffset);
-            }();            
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);           
 
             for (var i = 0; i < periods.length; i++) {
                 periods[i].id = periods[i].iso;
