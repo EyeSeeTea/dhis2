@@ -2547,6 +2547,8 @@ Ext.onReady( function() {
             relativePeriod,
             fixedPeriodAvailable,
             fixedPeriodSelected,
+            onPeriodTypeSelect,
+            periodType,
             period,
             treePanel,
             userOrganisationUnit,
@@ -4204,16 +4206,10 @@ Ext.onReady( function() {
                 periods;
                 
             periods = function() {
-                if (periodOffset === 0) {
-                    var p = generator.generateReversedPeriods(type, 0);
-                    
-                    if (type === 'Yearly') {
-                        p = generator.filterFuturePeriodsExceptCurrent(p);
-                    }
-
-                    return p;
+                if (type === 'Yearly') {
+                    periodOffset = periodOffset - 5;
                 }
-                
+
                 return generator.generateReversedPeriods(type, periodOffset);
             }();            
 
@@ -4238,7 +4234,10 @@ Ext.onReady( function() {
             store: periodTypeStore,
             periodOffset: 0,
             listeners: {
-                select: onPeriodTypeSelect
+                select: function() {
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
+                }
             }
         });
 
