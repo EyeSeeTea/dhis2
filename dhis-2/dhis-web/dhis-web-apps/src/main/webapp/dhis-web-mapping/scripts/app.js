@@ -4536,7 +4536,7 @@ Ext.onReady( function() {
         onDateFieldRender = function(c) {
             $('#' + c.inputEl.id).calendarsPicker({
                 calendar: gis.init.calendar,
-                dateFormat: gis.init.dateFormat
+                dateFormat: gis.init.systemInfo.dateFormat
             });
 
             Ext.get(c.id).setStyle('z-index', 100000);
@@ -4554,7 +4554,7 @@ Ext.onReady( function() {
                     date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
                 date = gis.init.calendar.fromJD(date.toJD());
-                return gis.init.calendar.formatDate(gis.init.dateFormat, date);
+                return gis.init.calendar.formatDate(gis.init.systemInfo.dateFormat, date);
             }(),
             listeners: {
                 render: function(c) {
