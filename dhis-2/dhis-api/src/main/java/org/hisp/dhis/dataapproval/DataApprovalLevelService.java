@@ -158,6 +158,16 @@ public interface DataApprovalLevelService
     void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
 
     /**
+     * Gets the approval level at which this user may make approval actions
+     * (if the user is authorized for any) on this organisation unit.
+     *
+     * @param orgUnit org unit to test
+     * @param includeDataViewOrgUnits include data view org units in test?
+     * @return approval level
+     */
+    DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits );
+
+    /**
      * By organisation unit subhierarchy, returns the lowest data approval
      * level at which the user may see data within that subhierarchy, if
      * data viewing is being restricted to approved data from lower levels.

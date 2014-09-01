@@ -354,7 +354,7 @@ public class DataApprovalController
         DataApproval approval = new DataApproval( permissions.getDataApprovalStatus().getDataApprovalLevel(),
             dataSet, period, organisationUnit, categoryOptionGroup, false, new Date(), user );
 
-        dataApprovalService.addDataApproval( approval );
+        dataApprovalService.acceptData( approval, null, null );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
@@ -441,7 +441,7 @@ public class DataApprovalController
                     organisationUnit, categoryOptionGroup, false, approvalDate, user ) );
         }
 
-        dataApprovalService.addAllDataApprovals( dataApprovals );
+        dataApprovalService.acceptData( dataApprovals );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
@@ -519,7 +519,7 @@ public class DataApprovalController
             dataApprovalList.add( permissions.getDataApprovalStatus().getDataApproval() );
         }
 
-        dataApprovalService.deleteDataApprovals( dataApprovalList );
+        dataApprovalService.unapproveData( dataApprovalList );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_ACCEPT_DATA_LOWER_LEVELS')" )
@@ -589,7 +589,7 @@ public class DataApprovalController
             return;
         }
 
-        dataApprovalService.accept( permissions.getDataApprovalStatus().getDataApproval() );
+        dataApprovalService.acceptData( permissions.getDataApprovalStatus().getDataApproval(), null, null );
     }
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_ACCEPT_DATA_LOWER_LEVELS')" )
@@ -659,7 +659,7 @@ public class DataApprovalController
             return;
         }
 
-        dataApprovalService.unaccept( permissions.getDataApprovalStatus().getDataApproval() );
+        dataApprovalService.unacceptData( permissions.getDataApprovalStatus().getDataApproval(), null, null );
     }
 
     // -------------------------------------------------------------------------

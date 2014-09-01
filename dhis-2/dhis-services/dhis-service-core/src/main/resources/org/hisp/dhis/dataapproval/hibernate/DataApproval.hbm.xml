@@ -17,7 +17,7 @@
       <many-to-one name="dataSet" class="org.hisp.dhis.dataset.DataSet" column="datasetid" not-null="true" foreign-key="fk_dataapproval_datasetid" />
       <many-to-one name="period" class="org.hisp.dhis.period.Period" column="periodid" not-null="true" foreign-key="fk_dataapproval_periodid" />
       <many-to-one name="organisationUnit" class="org.hisp.dhis.organisationunit.OrganisationUnit" not-null="true" column="organisationunitid" foreign-key="fk_dataapproval_organisationunitid" />
-      <many-to-one name="categoryOptionGroup" class="org.hisp.dhis.dataelement.CategoryOptionGroup" column="categoryoptiongroupid" foreign-key="fk_dataapproval_categoryoptiongroupid" />
+      <many-to-one name="attributeOptionCombo" class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" column="attributeoptioncomboid" foreign-key="fk_dataapproval_attributeoptioncomboid" />
     </properties>
 
     <property name="accepted" type="boolean" />

@@ -29,10 +29,12 @@ package org.hisp.dhis.system.util;
  */
 
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,16 +88,28 @@ public class CollectionUtils
     {
         return collection != null ? collection : new HashSet<T>();
     }
-    
+
+    public static <T> List<T> asList( T... items )
+    {
+        List<T> list = new ArrayList<>();
+
+        for ( T item : items )
+        {
+            list.add( item );
+        }
+
+        return list;
+    }
+
     public static <T> Set<T> asSet( T... items )
     {
         Set<T> set = new HashSet<>();
-        
+
         for ( T item : items )
         {
             set.add( item );
         }
-        
+
         return set;
     }
 

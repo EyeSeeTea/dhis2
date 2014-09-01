@@ -154,6 +154,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE report DROP COLUMN usingorgunitgroupsets" );
         executeSql( "ALTER TABLE eventchart DROP COLUMN datatype" );
         executeSql( "ALTER TABLE validationrule DROP COLUMN type" );
+        executeSql( "ALTER TABLE dataapproval DROP COLUMN categoryoptiongroupid" );
 
         executeSql( "DROP INDEX datamart_crosstab" );
 

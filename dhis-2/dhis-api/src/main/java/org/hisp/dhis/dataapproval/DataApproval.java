@@ -31,7 +31,7 @@ package org.hisp.dhis.dataapproval;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -78,9 +78,9 @@ public class DataApproval
     private OrganisationUnit organisationUnit;
     
     /**
-     * The attribute CategoryOptionGroup being approved (optional).
+     * The attribute category option combo being approved (optional).
      */
-    private CategoryOptionGroup categoryOptionGroup;
+    private DataElementCategoryOptionCombo attributeOptionCombo;
 
     /**
      * Whether the approval has been accepted (optional, usually by another
@@ -109,14 +109,14 @@ public class DataApproval
 
     public DataApproval( DataApprovalLevel dataApprovalLevel, DataSet dataSet,
                          Period period, OrganisationUnit organisationUnit,
-                         CategoryOptionGroup categoryOptionGroup, boolean accepted,
-                         Date created, User creator )
+                         DataElementCategoryOptionCombo attributeOptionCombo,
+                         boolean accepted, Date created, User creator )
     {
         this.dataApprovalLevel = dataApprovalLevel;
         this.dataSet = dataSet;
         this.period = period;
         this.organisationUnit = organisationUnit;
-        this.categoryOptionGroup = categoryOptionGroup;
+        this.attributeOptionCombo = attributeOptionCombo;
         this.accepted = accepted;
         this.created = created;
         this.creator = creator;
@@ -128,7 +128,7 @@ public class DataApproval
         this.dataSet = da.dataSet;
         this.period = da.period;
         this.organisationUnit = da.organisationUnit;
-        this.categoryOptionGroup = da.categoryOptionGroup;
+        this.attributeOptionCombo = da.attributeOptionCombo;
         this.accepted = da.accepted;
         this.created = da.created;
         this.creator = da.creator;
@@ -188,14 +188,14 @@ public class DataApproval
         this.organisationUnit = organisationUnit;
     }
 
-    public CategoryOptionGroup getCategoryOptionGroup()
+    public DataElementCategoryOptionCombo getAttributeOptionCombo()
     {
-        return categoryOptionGroup;
+        return attributeOptionCombo;
     }
 
-    public void setCategoryOptionGroup( CategoryOptionGroup categoryOptionGroup )
+    public void setAttributeOptionCombo( DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        this.categoryOptionGroup = categoryOptionGroup;
+        this.attributeOptionCombo = attributeOptionCombo;
     }
 
     public boolean isAccepted()

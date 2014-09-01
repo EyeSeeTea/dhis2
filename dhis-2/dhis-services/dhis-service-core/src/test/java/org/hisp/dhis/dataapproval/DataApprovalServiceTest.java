@@ -420,7 +420,7 @@ public class DataApprovalServiceTest
         DataApproval dataApprovalC = new DataApproval( level1, dataSetA, periodB, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
         DataApproval dataApprovalD = new DataApproval( level1, dataSetB, periodA, organisationUnitA, NO_GROUP, NOT_ACCEPTED, date, userA );
 
-        dataApprovalService.addAllDataApprovals( newArrayList(dataApprovalA, dataApprovalB, dataApprovalC, dataApprovalD) );
+        dataApprovalService.addDataApprovals( newArrayList(dataApprovalA, dataApprovalB, dataApprovalC, dataApprovalD) );
 
         dataSetA.setApproveData( true );
         dataSetB.setApproveData( true );

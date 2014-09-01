@@ -29,6 +29,7 @@ package org.hisp.dhis.dataapproval;
  */
 
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
@@ -75,9 +76,9 @@ public interface DataApprovalStore
      * @param dataSet DataSet for approval
      * @param period Period for approval
      * @param organisationUnit OrganisationUnit for approval
-     * @param categoryOptionGroup CategoryOptionGroup (if any) for approval.
+     * @param categoryOptionCombo option combo (if any) for approval.
      * @return matching DataApproval object, if any
      */
     DataApproval getDataApproval( DataSet dataSet, Period period, 
-        OrganisationUnit organisationUnit, CategoryOptionGroup categoryOptionGroup );
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo );
 }
