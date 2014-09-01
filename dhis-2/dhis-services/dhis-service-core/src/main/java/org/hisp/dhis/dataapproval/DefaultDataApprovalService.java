@@ -507,22 +507,65 @@ public class DefaultDataApprovalService
     }
 
     private void doApprove( List<DataApproval> dataApprovalList )
+            throws ApprovalActionNotAllowedException
     {
         for ( DataApproval da : dataApprovalList )
         {
-            if
+            if ( !mayApprove( da, getStatus( da ) ) )
+            {
+                throw new ApprovalActionNotAllowedException();
+            }
+        }
+
+        for ( DataApproval da : dataApprovalList )
+        {
+            dataApprovalStore.addDataApproval( da );
         }
     }
 
     private void doUnapprove( List<DataApproval> dataApprovalList )
+            throws ApprovalActionNotAllowedException
     {
+        for ( DataApproval da : dataApprovalList )
+        {
+            if ( !mayUnapprove( da, getStatus( da ) ) )
+            {
+                throw new ApprovalActionNotAllowedException();
+            }
+        }
 
+        for ( DataApproval da : dataApprovalList )
+        {
+            dataApprovalStore.deleteDataApproval( da );
+        }
     }
 
     private void doAcceptOrUnaccept( List<DataApproval> dataApprovalList, boolean accepted )
+            throws ApprovalActionNotAllowedException
+    {
+        for ( DataApproval da : dataApprovalList )
+        {
+            if ( accepted ? !mayAccept( da, getStatus( da ) ) : !mayUnaccept( da, getStatus( da ) ) )
+            {
+                throw new ApprovalActionNotAllowedException();
+            }
+        }
+
+        for ( DataApproval da : dataApprovalList )
+        {
+            da.setAccepted( accepted );
+
+            dataApprovalStore.updateDataApproval( da );
+        }
+    }
+
+    private boolean mayApprove( DataApproval dataApproval, DataApprovalStatus dataApprovalStatus )
     {
 
     }
+
+
+
 
 
     private void addDataApproval( DataApproval dataApproval )
@@ -552,6 +595,12 @@ public class DefaultDataApprovalService
             warnNotPermitted( dataApproval, "approve",
                     mayApprove( dataApproval.getDataApprovalLevel(), dataApproval.getOrganisationUnit() ) );
         }
+    }
+
+
+    private DataApprovalStatus getStatus( DataApproval dataApproval )
+    {
+        return doGetDataApprovalStatus( org.hisp.dhis.system.util.CollectionUtils.asList( dataApproval ), dataApproval );
     }
 
     private DataApprovalStatus doGetDataApprovalStatus( List<DataApproval> dataApprovals, DataApproval originalDataApproval )

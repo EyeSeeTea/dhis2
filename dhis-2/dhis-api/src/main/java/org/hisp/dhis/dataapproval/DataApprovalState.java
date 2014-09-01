@@ -39,80 +39,96 @@ public enum DataApprovalState
     /**
      * Data approval does not apply to this selection. (Data is neither
      * "approved" nor "unapproved".)
+     * <p>
+     * approved=false unapproved=false approvable=false accepted=false ready=false
      */
-    UNAPPROVABLE ( DataApprovalBaseState.UNAPPROVABLE, false, false, false, false, false ),
+    UNAPPROVABLE ( false, false, false, false, false ),
 
     /**
      * Data is unapproved, and is waiting for some lower-level approval.
+     * <p>
+     * approved=false unapproved=true approvable=true accepted=false ready=false
      */
-    UNAPPROVED_WAITING ( DataApprovalBaseState.UNAPPROVED_NOT_READY, false, true, true, false, false ),
+    UNAPPROVED_WAITING ( false, true, true, false, false ),
 
     /**
-     * Data is unapproved, and is waiting for approval somewhere else
-     * (not approvable here.)
+     * Data is unapproved, and is waiting for approval at a higher organisation
+     * unit level (not approvable here.)
+     * <p>
+     * approved=false unapproved=true approvable=false accepted=false ready=false
      */
-    UNAPPROVED_ELSEWHERE ( DataApprovalBaseState.UNAPPROVED_NOT_READY, false, true, false, false, false ),
+    UNAPPROVED_ELSEWHERE ( false, true, false, false, false ),
 
     /**
      * Data is unapproved, and is ready to be approved for this selection.
+     * <p>
+     * approved=false unapproved=true approvable=true accepted=false ready=true
      */
-    UNAPPROVED_READY ( DataApprovalBaseState.UNAPPROVED_READY, false, true, true, false, true ),
+    UNAPPROVED_READY ( false, true, true, false, true ),
 
     /**
      * Some periods within this multi-period selection are approved here
      * and some are not approved (but ready for approval here.)
+     * <p>
+     * approved=false unapproved=false approvable=true accepted=false ready=true
      */
-    PARTIALLY_APPROVED_HERE( DataApprovalBaseState.PARTIALLY_APPROVED, false, false, true, false, true ),
+    PARTIALLY_APPROVED_HERE( false, false, true, false, true ),
 
     /**
      * Data is approved, and was approved here (so could be unapproved here.)
+     * <p>
+     * approved=true unapproved=false approvable=true accepted=false ready=false
      */
-    APPROVED_HERE ( DataApprovalBaseState.APPROVED, true, false, true, false, false ),
+    APPROVED_HERE ( true, false, true, false, false ),
 
     /**
      * Some periods within this multi-period selection are approved elsewhere
-     * and some are not approved elsewhere (not approvable here.)
+     * and some are not approved elsewhere (at a higher organisation unit level
+     * -- not approvable here.)
+     * <p>
+     * approved=false unapproved=false approvable=false accepted=false ready=false
      */
-    PARTIALLY_APPROVED_ELSEWHERE ( DataApprovalBaseState.PARTIALLY_APPROVED, false, false, false, false, false ),
+    PARTIALLY_APPROVED_ELSEWHERE ( false, false, false, false, false ),
 
     /**
-     * Data is approved, but was not approved here (so cannot be unapproved here.)
-     * This covers the following cases:
-     * <ul>
-     * <li>Data is approved at a higher level.</li>
-     * <li>Data is approved for wider scope of category options.</li>
-     * </ul>
-     * In the first two cases, there is a single data approval object
-     * that covers the selection. In the third case there is not.
+     * Data is approved, but at a higher organisation unit level
+     * (so cannot be unapproved here.)
+     * <p>
+     * approved=true unapproved=false approvable=false accepted=false ready=false
      */
-    APPROVED_ELSEWHERE( DataApprovalBaseState.APPROVED, true, false, false, false, false ),
+    APPROVED_ELSEWHERE( true, false, false, false, false ),
 
     /**
      * Some periods within this multi-period selection are accepted here
      * and some are not approved elsewhere (not approvable here.)
+     * <p>
+     * approved=true unapproved=false approvable=true accepted=false ready=false
      */
-    PARTIALLY_ACCEPTED_HERE( DataApprovalBaseState.PARTIALLY_ACCEPTED, true, false, true, false, false ),
+    PARTIALLY_ACCEPTED_HERE( true, false, true, false, false ),
 
     /**
      * Data is approved and accepted here (so could be unapproved here.)
+     * <p>
+     * approved=true unapproved=false approvable=true accepted=true ready=false
      */
-    ACCEPTED_HERE ( DataApprovalBaseState.ACCEPTED, true, false, true, true, false ),
+    ACCEPTED_HERE ( true, false, true, true, false ),
 
     /**
      * Some periods within this multi-period selection are accepted elsewhere
-     * and some are approved elsewhere (not approvable here.)
+     * and some are approved elsewhere (at a higher organisation unit level --
+     * not approvable here.)
+     * <p>
+     * approved=false unapproved=false approvable=false accepted=false ready=false
      */
-    PARTIALLY_ACCEPTED_ELSEWHERE ( DataApprovalBaseState.PARTIALLY_APPROVED, false, false, false, false, false ),
+    PARTIALLY_ACCEPTED_ELSEWHERE ( false, false, false, false, false ),
 
     /**
-     * Data is approved and accepted, but elsewhere.
+     * Data is approved and accepted, but at a higher organisation unit level --
+     * not approvable here.
+     * <p>
+     * approved=true unapproved=false approvable=false accepted=true ready=false
      */
-    ACCEPTED_ELSEWHERE ( DataApprovalBaseState.ACCEPTED, true, false, false, true, false );
-
-    /**
-     * "Base", or simplified, state of data approval.
-     */
-    private DataApprovalBaseState baseState;
+    ACCEPTED_ELSEWHERE ( true, false, false, true, false );
 
     /**
      * Is this data approved (and therefore locked)?
@@ -143,10 +159,9 @@ public enum DataApprovalState
     // Constructor
     // -------------------------------------------------------------------------
 
-    DataApprovalState( DataApprovalBaseState baseState, boolean approved, boolean unapproved,
+    DataApprovalState( boolean approved, boolean unapproved,
                        boolean approvable, boolean accepted, boolean ready )
     {
-        this.baseState = baseState;
         this.approved = approved;
         this.unapproved = unapproved;
         this.approvable = approvable;
@@ -157,11 +172,6 @@ public enum DataApprovalState
     // -------------------------------------------------------------------------
     // Getters
     // -------------------------------------------------------------------------
-
-    public DataApprovalBaseState getBaseState()
-    {
-        return baseState;
-    }
 
     public boolean isApproved()
     {
