@@ -3899,7 +3899,7 @@ Ext.onReady( function() {
         onDateFieldRender = function(c) {
             $('#' + c.inputEl.id).calendarsPicker({
                 calendar: ns.core.init.calendar,
-                dateFormat: ns.core.init.dateFormat
+                dateFormat: ns.core.init.systemInfo.dateFormat
             });
         };
         
@@ -3915,7 +3915,7 @@ Ext.onReady( function() {
                     date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
                 date = ns.core.init.calendar.fromJD(date.toJD());
-                return ns.core.init.calendar.formatDate(ns.core.init.dateFormat, date);
+                return ns.core.init.calendar.formatDate(ns.core.init.systemInfo.dateFormat, date);
             }(),
             listeners: {
                 render: function(c) {
