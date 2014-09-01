@@ -77,8 +77,12 @@ public interface OptionService
     Option getOption( int id );
     
     Option getOptionByCode( String code );
+        
+    void deleteOption( Option option  );
     
-    Option getOptionValueByName( OptionSet optionSet, String name );
+    Option getOptionByName( OptionSet optionSet, String name );
+
+    Option getOptionByCode( OptionSet optionSet, String code );
     
-    Collection<Option> getOptionValues( OptionSet optionSet, String option, Integer min, Integer max );
+    Collection<Option> getOptions( OptionSet optionSet, String option, Integer min, Integer max );
 }

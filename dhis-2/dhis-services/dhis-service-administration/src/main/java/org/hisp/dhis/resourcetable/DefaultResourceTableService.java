@@ -51,7 +51,6 @@ import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementGroupSet;
@@ -69,10 +68,8 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableStatement;
-import org.hisp.dhis.resourcetable.statement.CreateCategoryTableStatement;
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
-import org.hisp.dhis.system.cache.PeriodCache;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -142,14 +139,7 @@ public class DefaultResourceTableService
     {
         this.sqlViewService = sqlViewService;
     }
-    
-    private PeriodCache periodCache;
-
-    public void setPeriodCache( PeriodCache periodCache )
-    {
-        this.periodCache = periodCache;
-    }
-    
+        
     // -------------------------------------------------------------------------
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
@@ -348,36 +338,9 @@ public class DefaultResourceTableService
 
         Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
 
-        List<DataElementCategoryOptionCombo> categoryOptionCombos =
-            new ArrayList<>( categoryService.getAllDataElementCategoryOptionCombos() );
-
         resourceTableStore.createCategoryStructure( categories );
-
-        // ---------------------------------------------------------------------
-        // Populate table
-        // ---------------------------------------------------------------------
-
-        List<Object[]> batchArgs = new ArrayList<>();
-
-        for ( DataElementCategoryOptionCombo categoryOptionCombo : categoryOptionCombos )
-        {
-            List<Object> values = new ArrayList<>();
-
-            values.add( categoryOptionCombo.getId() );
-            values.add( categoryOptionCombo.getName() );
-
-            for ( DataElementCategory category : categories )
-            {
-                DataElementCategoryOption categoryOption = category.getCategoryOption( categoryOptionCombo );
-
-                values.add( categoryOption != null ? categoryOption.getName() : null );
-                values.add( categoryOption != null ? categoryOption.getUid() : null );
-            }
-
-            batchArgs.add( values.toArray() );
-        }
-
-        resourceTableStore.batchUpdate( (categories.size() * 2) + 2, CreateCategoryTableStatement.TABLE_NAME, batchArgs );
+        
+        resourceTableStore.populateCategoryStructure( categories );
 
         log.info( "Category table generated" );
     }
@@ -462,7 +425,7 @@ public class DefaultResourceTableService
 
             for ( PeriodType periodType : periodTypes )
             {
-                values.add( periodCache.getIsoPeriod( periodType, day.getStartDate(), calendar ) );
+                values.add( periodType.createPeriod( day.getStartDate(), calendar ).getIsoDate() );
             }
 
             batchArgs.add( values.toArray() );
@@ -506,8 +469,8 @@ public class DefaultResourceTableService
             for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
             {
                 if ( rowType.getFrequencyOrder() <= periodType.getFrequencyOrder() )
-                {
-                    values.add( periodCache.getIsoPeriod( periodType, startDate, calendar ) );
+                {                    
+                    values.add( periodType.createPeriod( startDate, calendar ).getIsoDate() );
                 }
                 else
                 {

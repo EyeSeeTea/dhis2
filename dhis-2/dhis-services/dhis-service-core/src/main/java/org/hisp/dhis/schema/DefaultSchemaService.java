@@ -64,6 +64,7 @@ public class DefaultSchemaService implements SchemaService
         for ( SchemaDescriptor descriptor : descriptors )
         {
             Schema schema = descriptor.getSchema();
+            schema.setDisplayName( beautify( schema.getName() ) );
 
             if ( schema.getProperties().isEmpty() )
             {
@@ -115,6 +116,7 @@ public class DefaultSchemaService implements SchemaService
         String name = getName( klass );
 
         schema = new Schema( klass, name, name + "s" );
+        schema.setDisplayName( beautify( schema.getName() ) );
         schema.setPropertyMap( Maps.newHashMap( propertyIntrospectorService.getPropertiesMap( schema.getKlass() ) ) );
 
         updateSelf( schema );
@@ -190,5 +192,11 @@ public class DefaultSchemaService implements SchemaService
 
             schema.getPropertyMap().remove( "__self__" );
         }
+    }
+
+    private String beautify( String name )
+    {
+        String[] camelCaseWords = org.apache.commons.lang.StringUtils.capitalize( name ).split( "(?=[A-Z])" );
+        return org.apache.commons.lang.StringUtils.join( camelCaseWords, " " ).trim();
     }
 }
