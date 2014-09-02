@@ -8525,7 +8525,7 @@ Ext.onReady( function() {
 				}
 			},
             handler: function() {
-                var url = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
+                var url = gis.init.contextPath + '/dhis-web-mapping/index.html?id=' + gis.map.id,
                     textField,
                     window;
 
@@ -8762,7 +8762,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html';
 										}
 									},
 									'-',
@@ -8772,7 +8772,7 @@ Ext.onReady( function() {
 										disabled: !(GIS.isSessionStorage && gis.util.layout.getAnalytical()),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/index.html?s=analytical');
 											}
 										}
 									},
@@ -8781,7 +8781,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html?s=table';
 										}
 									}
 								],
@@ -8818,7 +8818,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html';
 										}
 									},
 									'-',
@@ -8828,7 +8828,7 @@ Ext.onReady( function() {
 										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/index.html?s=analytical');
 											}
 										}
 									},
@@ -8837,7 +8837,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html?s=chart';
 										}
 									}
 								],
