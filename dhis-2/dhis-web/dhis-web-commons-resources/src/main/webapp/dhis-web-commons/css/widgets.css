@@ -779,11 +779,6 @@ ul.pageSizeSelection input
     border-color: #999999 transparent white;
 }
 
-.multiSelectButton.disabled
-{
-    pointer-events: none;
-}
-
 .multiSelectButton.disabled .downArrow
 {
     border-color: #e2e2e2 transparent white;
@@ -812,23 +807,19 @@ ul.pageSizeSelection input
 
 .multiSelectMenu li
 {
+    float: none !important;
     display: block;
-}
-
-.multiSelectMenu li a
-{
     text-decoration: none;
-    display: block;
     color: #606060;
     padding: 6px 9px;
 }
 
-.multiSelectMenu li a:hover
+.multiSelectMenu li:hover
 {
+    cursor: pointer;
     text-decoration: none;
     background-color: #f8f8f8;
 }
-
 
 /*----------------------------------------------------------------------------*/
 /* Placeholders                                                               */

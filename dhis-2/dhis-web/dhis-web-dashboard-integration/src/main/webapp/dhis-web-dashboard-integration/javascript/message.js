@@ -195,49 +195,135 @@ function formatItem( item )
     }
 }
 
-// Experimental jquery extension to provide multi select button and friends
-jQuery.fn.extend(
-{
-    _multiCheckbox: function( $checkboxContainer )
-    {
-        return this.each( function()
-        {
-            var $checkbox = $( this );
+/**
+ * Checkbox/dropdown combo menu for DHIS 2 Dashboard.
+ *
+ * @author Halvdan Hoem Grelland
+ */
+( function ( $ ) {
+    /*
+     Example markup:
+     <div>
+        <div></div> <!-- Empty, will be filled with button markup -->
+        <ul> <!-- Menu markup -->
+            <li data-action="actionA">Item A</li>
+            <li data-action="actionB">Item B</li>
+            <li data-action="actionC">Item C</li>
+        </ul>
+     </div>
+     ...
+     <div id="checkboxes">
+        ...
+        <input type="checkbox" value="someValue" .... />
+        ...
+     </div>
 
-            if( !$checkbox.is( "input" ) || $checkbox.attr( "type") !== "checkbox" )
-            {
-                throw new Error( "Can only apply to a checkbox." );
-            }
+     The string parameter given in data-action denotes the name of the
+     function which is called on click of the menu item.
 
-            var $checkboxes = [];
+     The selected checkboxes' values will be given as an array argument
+     to the function when called.
 
-            if( typeof $checkboxContainer !== "undefined" )
-            {
-                $checkboxes = $checkboxContainer.find( "input:checkbox" );
-            }
+     Usage:
+        $( "#myDiv" ).multiCheckboxMenu( $( "#myCheckboxContainer" ), {} );
 
-            $checkbox.click( function( event )
-            {
-                if( this.checked )
+     */
+
+    function getCheckedValues( $checkboxContainer ) {
+        var checked = [];
+        $checkboxContainer.find( "input:checkbox:checked" ).each( function() {
+            checked.push( this.value );
+        });
+        return checked;
+    }
+
+    var multiCheckboxMenu = $.fn.multiCheckboxMenu;
+
+    $.fn.multiCheckboxMenu = function( $checkboxContainer, options ) {
+        if( typeof options === "object" ) {
+            var $cb = $( "<input>", { type: "checkbox" } );
+            options = $.extend( true, options , {
+                checkbox: $cb,
+                buttonElements: [
+                    $( "<span>", { "class": "downArrow" } )
+                ],
+                menuClass: "multiSelectMenu",
+                buttonClass: "multiSelectButton"
+            });
+
+            var $checkbox = $( options.checkbox );
+            var $slaveCheckboxes = $checkboxContainer.find( "input:checkbox" );
+
+            var $button = $( "<a>", { href: "#" });
+            $button.addClass( options.buttonClass );
+
+            $button.append( $( options.checkbox ) );
+
+            $( options.buttonElements ).each( function() {
+                $button.append( $( this ) );
+            });
+
+            $( this ).find( "div:first" ).append($button);
+
+            var $menu = $( this ).find( "ul" );
+            $menu.addClass( options.menuClass );
+            $menu.css( "visibility", "hidden" );
+            $menu.position({
+                my: "left top",
+                at: "left bottom",
+                of: $button
+            });
+
+            $button.click( function ( event ) {
+                $( document ).one( "click", function() {
+                    $menu.css( "visibility", "hidden" );
+                });
+
+                if( $menu.css( "visibility" ) !== "visible" )
                 {
-                    $checkboxes.attr( "checked", "checked" );
+                    $menu.css( "visibility", "visible" );
                 }
                 else
                 {
-                    $checkboxes.removeAttr( "checked" );
+                    $menu.css( "visibility", "hidden" );
                 }
                 event.stopPropagation();
             });
 
-            $checkboxes.click( function()
-            {
-                var checked = $checkboxes.filter( ":checked" );
+            $menu.find( "li" ).each( function() {
+                var el = $( this );
+                el.action = this.getAttribute( "data-action" );
+
+                el.click( function() {
+                    var checked = getCheckedValues( $checkboxContainer );
+
+                    $checkbox.removeAttr( "checked" ); // TODO Use private function
+                    $slaveCheckboxes.removeAttr( "checked" );
+
+                    return window[ el.action ]( checked );
+                });
+            });
+
+            $checkbox.click( function( event ) {
+                if( this.checked )
+                {
+                    $slaveCheckboxes.attr( "checked", "checked" );
+                }
+                else
+                {
+                    $slaveCheckboxes.removeAttr( "checked" );
+                }
+                event.stopPropagation();
+            });
+
+            $slaveCheckboxes.click( function() {
+                var checked = $slaveCheckboxes.filter( ":checked" );
 
                 if( checked.length < 1 )
                 {
                     $checkbox.removeAttr( "checked" );
                 }
-                else if( checked.length > 0 && checked.length < $checkboxes.length )
+                else if( checked.length > 0 && checked.length < $slaveCheckboxes.length )
                 {
                     $checkbox.removeAttr( "checked" );
                 }
@@ -246,120 +332,6 @@ jQuery.fn.extend(
                     $checkbox.attr( "checked", "checked" );
                 }
             });
-        });
-    },
-    _dropdownMenu: function( menuItems, menuClass, buttonClass, buttonElements )
-    {
-        // Build menu
-        var $menu = $( "<ul>", { "class" : menuClass } );
-
-        $( menuItems ).each( function()
-        {
-            var el = $( "<li>" );
-            $( el ).append( $( "<a>", { href: "#", text: this.displayName } ) );
-
-            el.action = this.action;
-            el.onAction = this.onAction;
-
-            if( typeof this.actionArgFunc !== "undefined" )
-            {
-                el.actionArgFunc = this.actionArgFunc;
-
-                // Create and attach click handler to menu item
-                el.click( function()
-                {
-                    el.onAction();
-                    return el.action( el.actionArgFunc() );
-                });
-            }
-            else
-            {
-                el.click( function()
-                {
-                    el.onAction();
-                    el.action();
-                });
-            }
-
-            $menu.append( el );
-        });
-
-        $( document.body ).append( $menu );
-
-        // Build button
-        var $button = $( "<a>", { href: "#", "class" : buttonClass } );
-
-        $( buttonElements ).each( function()
-        {
-            $button.append( this );
-        });
-
-        // Click handler to show/hide menu
-        $button.click( function( event )
-        {
-            $( document ).one( "click", function()
-            {
-                $menu.css( "visibility", "hidden" );
-            });
-
-            if( $menu.css( "visibility") !== "visible" )
-            {
-                $menu.css( "visibility", "visible" );
-            }
-            else
-            {
-                $menu.css( "visibility", "hidden" );
-            }
-            event.stopPropagation();
-        });
-
-        this.append( $button );
-
-        $menu.css( "visibility", "hidden" );
-        $menu.position(
-            {
-                my: "left top",
-                at: "left bottom+1",
-                of: $button
-            }
-        );
-    },
-    multiCheckDropdownCombo: function( $checkboxContainer, menuItems, options )
-    {
-        var $cb = $( "<input>", { type: "checkbox" } )._multiCheckbox( $checkboxContainer );
-
-        var buttonElements = [
-            $cb,
-            $( "<span>", { "class" : "downArrow" } )
-        ];
-
-        var defaults = {
-            menuClass: "multiSelectMenu",
-            buttonClass: "multiSelectButton"
-        };
-
-        if ( typeof options === "undefined" )
-        {
-            options = defaults;
         }
-
-        $( menuItems ).each( function()
-        {
-            this.actionArgFunc = function()
-            {
-                var checked = [];
-                $checkboxContainer.find( "input:checkbox:checked" ).each( function()
-                {
-                    checked.push( this.value );
-                });
-                return checked;
-            };
-
-            this.onAction = function()
-            {
-                $cb.removeAttr( "checked" );
-            };
-        });
-        $( this )._dropdownMenu( menuItems, options.menuClass, options.buttonClass, buttonElements );
-    }
-});
+    };
+})( jQuery );
