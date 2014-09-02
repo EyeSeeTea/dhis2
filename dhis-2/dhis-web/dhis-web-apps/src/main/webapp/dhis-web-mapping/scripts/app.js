@@ -518,7 +518,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
+					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroupSets'
@@ -551,7 +551,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,name&paging=false',
+					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -2358,7 +2358,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'sharing/search',
+				url: gis.init.contextPath + '/api/sharing/search',
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -2463,7 +2463,7 @@ Ext.onReady( function() {
 					text: 'Save',
 					handler: function() {
 						Ext.Ajax.request({
-							url: gis.init.contextPath + gis.conf.finals.url.path_api + 'sharing?type=map&id=' + sharing.object.id,
+							url: gis.init.contextPath + '/api/sharing?type=map&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -2537,6 +2537,10 @@ Ext.onReady( function() {
 
 		gis.store.maps.on('load', function(store, records) {
 			var pager = store.proxy.reader.jsonData.pager;
+
+            if (!pager) {
+                return;
+            }
 
 			info.setText('Page ' + pager.page + ' of ' + pager.pageCount);
 
@@ -2872,7 +2876,7 @@ Ext.onReady( function() {
 											};
 
 											Ext.Ajax.request({
-												url: gis.init.contextPath + gis.conf.finals.url.path_api + 'maps/' + record.data.id,
+												url: gis.init.contextPath + '/api/maps/' + record.data.id,
 												method: 'PUT',
 												headers: {'Content-Type': 'application/json'},
 												params: Ext.encode(map),
@@ -3127,7 +3131,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets.json?fields=id,name&paging=false',
+				url: gis.init.contextPath + '/api/mapLegendSets.json?fields=id,name&paging=false',
 				reader: {
 					type: 'json',
 					root: 'mapLegendSets'
@@ -3594,7 +3598,7 @@ Ext.onReady( function() {
 		deleteLegendSet = function(id) {
 			if (id) {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + id,
+					url: gis.init.contextPath + '/api/mapLegendSets/' + id,
 					method: 'DELETE',
 					success: function() {
 						legendSetStore.load();
@@ -3693,7 +3697,7 @@ Ext.onReady( function() {
 					var body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/',
+						url: gis.init.contextPath + '/api/mapLegendSets/',
 						method: 'POST',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -3717,7 +3721,7 @@ Ext.onReady( function() {
 					body = Ext.encode(getRequestBody());
 
 					Ext.Ajax.request({
-						url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + id,
+						url: gis.init.contextPath + '/api/mapLegendSets/' + id,
 						method: 'PUT',
 						headers: {'Content-Type': 'application/json'},
 						params: body,
@@ -4298,7 +4302,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: gis.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    url: gis.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + gis.init.namePropertyUrl + ',type,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -4532,7 +4536,7 @@ Ext.onReady( function() {
         onDateFieldRender = function(c) {
             $('#' + c.inputEl.id).calendarsPicker({
                 calendar: gis.init.calendar,
-                dateFormat: gis.init.dateFormat
+                dateFormat: gis.init.systemInfo.dateFormat
             });
 
             Ext.get(c.id).setStyle('z-index', 100000);
@@ -4550,7 +4554,7 @@ Ext.onReady( function() {
                     date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
                 date = gis.init.calendar.fromJD(date.toJD());
-                return gis.init.calendar.formatDate(gis.init.dateFormat, date);
+                return gis.init.calendar.formatDate(gis.init.systemInfo.dateFormat, date);
             }(),
             listeners: {
                 render: function(c) {
@@ -4694,7 +4698,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -5406,7 +5410,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -6162,7 +6166,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -6745,6 +6749,7 @@ Ext.onReady( function() {
 			dataElementDetailLevel,
 			dataElementPanel,
 			dataSet,
+            onPeriodTypeSelect,
 			periodType,
 			period,
 			periodPrev,
@@ -6850,10 +6855,10 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
+                    path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false';
+					path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false';
 				}
 
 				if (!path) {
@@ -6887,7 +6892,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,name&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
+						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -6929,7 +6934,7 @@ Ext.onReady( function() {
             fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: gis.init.contextPath + '/api/dataSets.json?fields=id,name&paging=false',
+                url: gis.init.contextPath + '/api/dataSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
                 reader: {
                     type: 'json',
                     root: 'dataSets'
@@ -7079,7 +7084,7 @@ Ext.onReady( function() {
 				select: function() {
 					indicator.clearValue();
 
-					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,name&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
+					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
 					indicator.store.load();
 				}
 			}
@@ -7266,6 +7271,33 @@ Ext.onReady( function() {
 			store: dataSetStore
 		});
 
+        onPeriodTypeSelect = function() {
+            var type = periodType.getValue(),
+                periodOffset = periodType.periodOffset,
+                generator = gis.init.periodGenerator,
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);
+                
+            if (type === 'relativePeriods') {
+                periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
+
+                periodPrev.disable();
+                periodNext.disable();
+            }
+            else {
+                for (var i = 0; i < periods.length; i++) {
+                    periods[i].id = periods[i].iso;
+                }
+
+                periodsByTypeStore.setIndex(periods);
+                periodsByTypeStore.loadData(periods);
+                
+                periodPrev.enable();
+                periodNext.enable();
+            }
+
+            period.selectFirst();
+        };            
+
 		periodType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
 			editable: false,
@@ -7276,36 +7308,10 @@ Ext.onReady( function() {
 			width: 142,
 			store: gis.store.periodTypes,
 			periodOffset: 0,
-			selectHandler: function() {
-                var periodType = this.getValue(),
-                    generator = gis.init.periodGenerator,
-                    periods;
-
-				if (periodType === 'relativePeriods') {
-					periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
-
-					periodPrev.disable();
-					periodNext.disable();
-				}
-				else {
-                    periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
-
-                    for (var i = 0; i < periods.length; i++) {
-                        periods[i].id = periods[i].iso;
-                    }
-
-					periodsByTypeStore.setIndex(periods);
-					periodsByTypeStore.loadData(periods);
-
-					periodPrev.enable();
-					periodNext.enable();
-				}
-
-				period.selectFirst();
-			},
 			listeners: {
 				select: function() {
-					this.selectHandler();
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
 				}
 			}
 		});
@@ -7333,10 +7339,10 @@ Ext.onReady( function() {
             height: 24,
 			style: 'margin-left: 1px',
 			handler: function() {
-				if (periodType.getValue()) {
-					periodType.periodOffset--;
-					periodType.fireEvent('select');
-				}
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect();
+                }
 			}
 		});
 
@@ -7348,11 +7354,11 @@ Ext.onReady( function() {
 			style: 'margin-left: 1px',
 			scope: this,
 			handler: function() {
-				if (periodType.getValue() && periodType.periodOffset < 0) {
-					periodType.periodOffset++;
-					periodType.fireEvent('select');
-				}
-			}
+                if (periodType.getValue()) {
+                    periodType.periodOffset++;
+                    onPeriodTypeSelect();
+                }
+            }
 		});
 
 		periodTypePanel = Ext.create('Ext.panel.Panel', {
@@ -7497,7 +7503,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -8420,7 +8426,7 @@ Ext.onReady( function() {
 		});
 
 		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			text: 'Embed in web page' + '&nbsp;&nbsp;',
 			iconCls: 'gis-menu-item-datasource',
 			disabled: true,
 			xable: function() {
@@ -8521,7 +8527,7 @@ Ext.onReady( function() {
 				}
 			},
             handler: function() {
-                var url = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
+                var url = gis.init.contextPath + '/dhis-web-mapping/index.html?id=' + gis.map.id,
                     textField,
                     window;
 
@@ -8758,7 +8764,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html';
 										}
 									},
 									'-',
@@ -8768,7 +8774,7 @@ Ext.onReady( function() {
 										disabled: !(GIS.isSessionStorage && gis.util.layout.getAnalytical()),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/index.html?s=analytical');
 											}
 										}
 									},
@@ -8777,7 +8783,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html?s=table';
 										}
 									}
 								],
@@ -8814,7 +8820,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html';
 										}
 									},
 									'-',
@@ -8824,7 +8830,7 @@ Ext.onReady( function() {
 										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/index.html?s=analytical');
 											}
 										}
 									},
@@ -8833,7 +8839,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html?s=chart';
 										}
 									}
 								],
@@ -8867,7 +8873,7 @@ Ext.onReady( function() {
 						xtype: 'button',
 						text: GIS.i18n.home,
 						handler: function() {
-							window.location.href = '../../dhis-web-commons-about/redirect.action';
+							window.location.href = '../dhis-web-commons-about/redirect.action';
 						}
 					});
 
@@ -9132,59 +9138,74 @@ Ext.onReady( function() {
 			success: function(r) {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
-                // system info
+                // user-account
                 Ext.Ajax.request({
-                    url: init.contextPath + '/api/system/info.json',
+                    url: init.contextPath + '/api/me/user-account.json',
                     success: function(r) {
-                        var info = Ext.decode(r.responseText);
+                        init.userAccount = Ext.decode(r.responseText);
 
-                        // context path
-                        init.contextPath = info.contextPath || init.contextPath;
-
-                        // calendars
-                        init.dateFormat = info.dateFormat || 'yyyy-mm-dd';
-
-                        (function() {
-                            var dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
-                                defaultCalendarId = 'gregorian',
-                                calendarIdMap = {'iso8601': defaultCalendarId},
-                                calendarId = calendarIdMap[info.calendar] || info.calendar || defaultCalendarId,
-                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
-                                calendarScriptUrl,
-                                createGenerator;
-
-                            // calendar
-                            createGenerator = function() {
-                                init.calendar = $.calendars.instance(calendarId);
-                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.dateFormat);
-                            };
-
-                            if (Ext.Array.contains(calendarIds, calendarId)) {
-                                calendarScriptUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
-
-                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
-                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                                });
-                            }
-                            else {
-                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                            }
-                        }());
-
-                        // user info, i18n
-                        requests.push({
-                            url: init.contextPath + '/api/me/user-account.json',
+                        // system info
+                        Ext.Ajax.request({
+                            url: init.contextPath + '/api/system/info.json',
                             success: function(r) {
-                                var defaultKeyUiLocale = 'en';
-                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
+                                init.systemInfo = Ext.decode(r.responseText);
+
+                                // init
+                                var defaultKeyUiLocale = 'en',
+                                    defaultKeyAnalysisDisplayProperty = 'name',
+                                    namePropertyUrl,
+                                    contextPath,
+                                    keyUiLocale,
+                                    dateFormat;
+
+                                init.contextPath = init.systemInfo.contextPath || init.contextPath;
+                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+                                init.systemInfo.dateFormat = init.systemInfo.dateFormat || 'yyyy-mm-dd';
+
+                                contextPath = init.contextPath;
+                                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                dateFormat = init.systemInfo.dateFormat;
+
+                                init.namePropertyUrl = namePropertyUrl;
+
+                                // calendar
+                                (function() {
+                                    var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                        defaultCalendarId = 'gregorian',
+                                        calendarIdMap = {'iso8601': defaultCalendarId},
+                                        calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
+                                        calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                        calendarScriptUrl,
+                                        createGenerator;
+
+                                    // calendar
+                                    createGenerator = function() {
+                                        init.calendar = $.calendars.instance(calendarId);
+                                        init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
+                                    };
+
+                                    if (Ext.Array.contains(calendarIds, calendarId)) {
+                                        calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                        Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                            Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                        });
+                                    }
+                                    else {
+                                        Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                    }
+                                }());
 
                                 // i18n
-                                Ext.Ajax.request({
-                                    url: 'i18n/' + init.keyUiLocale + '.properties',
+                                requests.push({
+                                    url: 'i18n/' + keyUiLocale + '.properties',
                                     success: function(r) {
                                         GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
-                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                        if (keyUiLocale !== defaultKeyUiLocale) {
                                             Ext.Ajax.request({
                                                 url: 'i18n/' + defaultKeyUiLocale + '.properties',
                                                 success: function(r) {
@@ -9198,138 +9219,138 @@ Ext.onReady( function() {
                                         }
                                     },
                                     failure: function() {
-                                        var failure = function() {
-                                            alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                        var onFailure = function() {
+                                            alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
                                         };
 
-                                        if (init.keyUiLocale !== defaultKeyUiLocale) {
+                                        if (keyUiLocale !== defaultKeyUiLocale) {
                                             Ext.Ajax.request({
                                                 url: 'i18n/' + defaultKeyUiLocale + '.json',
                                                 success: function(r) {
-                                                    console.log('No translations found for system locale (' + init.keyUiLocale + ').');
+                                                    console.log('No translations found for system locale (' + keyUiLocale + ').');
                                                     GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
                                                 },
                                                 failure: function() {
-                                                    failure();
+                                                    onFailure();
                                                 },
                                                 callback: fn
                                             });
                                         }
                                         else {
                                             fn();
-                                            failure();
+                                            onFailure();
                                         }
                                     }
                                 });
-                            }
-                        });
 
-                        // root nodes
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,name,children[id,name]',
-                            success: function(r) {
-                                init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
-                                fn();
-                            }
-                        });
-
-                        // organisation unit levels
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
-                            success: function(r) {
-                                init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-
-                                if (!init.organisationUnitLevels.length) {
-                                    alert('No organisation unit levels');
-                                }
-
-                                fn();
-                            }
-                        });
-
-                        // user orgunits and children
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,name,children[id,name]&paging=false',
-                            success: function(r) {
-                                var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
-                                    ou = [],
-                                    ouc = [];
-
-                                if (organisationUnits.length) {
-                                    for (var i = 0, org; i < organisationUnits.length; i++) {
-                                        org = organisationUnits[i];
-
-                                        ou.push(org.id);
-
-                                        if (org.children) {
-                                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
-                                        }
+                                // root nodes
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']',
+                                    success: function(r) {
+                                        init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+                                        fn();
                                     }
+                                });
 
-                                    init.user = init.user || {};
-                                    init.user.ou = ou;
-                                    init.user.ouc = ouc;
+                                // organisation unit levels
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
+                                    success: function(r) {
+                                        init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+                                        if (!init.organisationUnitLevels.length) {
+                                            alert('No organisation unit levels');
+                                        }
+
+                                        fn();
+                                    }
+                                });
+
+                                // user orgunits and children
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']&paging=false',
+                                    success: function(r) {
+                                        var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
+                                            ou = [],
+                                            ouc = [];
+
+                                        if (organisationUnits.length) {
+                                            for (var i = 0, org; i < organisationUnits.length; i++) {
+                                                org = organisationUnits[i];
+
+                                                ou.push(org.id);
+
+                                                if (org.children) {
+                                                    ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                                }
+                                            }
+
+                                            init.user = init.user || {};
+                                            init.user.ou = ou;
+                                            init.user.ouc = ouc;
+                                        }
+                                        else {
+                                            alert('User is not assigned to any organisation units');
+                                        }
+
+                                        fn();
+                                    }
+                                });
+
+                                // admin
+                                requests.push({
+                                    url: init.contextPath + '/api/me/authorization/F_GIS_ADMIN',
+                                    success: function(r) {
+                                        init.user.isAdmin = (r.responseText === 'true');
+                                        fn();
+                                    }
+                                });
+
+                                // indicator groups
+                                requests.push({
+                                    url: init.contextPath + '/api/indicatorGroups.json?fields=id,name&paging=false',
+                                    success: function(r) {
+                                        init.indicatorGroups = Ext.decode(r.responseText).indicatorGroups || [];
+                                        fn();
+                                    }
+                                });
+
+                                // data element groups
+                                requests.push({
+                                    url: init.contextPath + '/api/dataElementGroups.json?fields=id,' + namePropertyUrl + '&paging=false',
+                                    success: function(r) {
+                                        init.dataElementGroups = Ext.decode(r.responseText).dataElementGroups || [];
+                                        fn();
+                                    }
+                                });
+
+                                // infrastructural data element group
+                                requests.push({
+                                    url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
+                                    success: function(r) {
+                                        var obj = Ext.decode(r.responseText);
+
+                                        init.systemSettings.infrastructuralDataElementGroup = Ext.isObject(obj) ? obj : null;
+                                        fn();
+                                    }
+                                });
+
+                                // infrastructural period type
+                                requests.push({
+                                    url: init.contextPath + '/api/configuration/infrastructuralPeriodType.json',
+                                    success: function(r) {
+                                        var obj = Ext.decode(r.responseText);
+
+                                        init.systemSettings.infrastructuralPeriodType = Ext.isObject(obj) ? obj : null;
+                                        fn();
+                                    }
+                                });
+
+                                for (var i = 0; i < requests.length; i++) {
+                                    Ext.Ajax.request(requests[i]);
                                 }
-                                else {
-                                    alert('User is not assigned to any organisation units');
-                                }
-
-                                fn();
                             }
                         });
-
-                        // admin
-                        requests.push({
-                            url: init.contextPath + '/api/me/authorization/F_GIS_ADMIN',
-                            success: function(r) {
-                                init.user.isAdmin = (r.responseText === 'true');
-                                fn();
-                            }
-                        });
-
-                        // indicator groups
-                        requests.push({
-                            url: init.contextPath + '/api/indicatorGroups.json?fields=id,name&paging=false',
-                            success: function(r) {
-                                init.indicatorGroups = Ext.decode(r.responseText).indicatorGroups || [];
-                                fn();
-                            }
-                        });
-
-                        // data element groups
-                        requests.push({
-                            url: init.contextPath + '/api/dataElementGroups.json?fields=id,name&paging=false',
-                            success: function(r) {
-                                init.dataElementGroups = Ext.decode(r.responseText).dataElementGroups || [];
-                                fn();
-                            }
-                        });
-
-                        // infrastructural data element group
-                        requests.push({
-                            url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
-                            success: function(r) {
-                                var obj = Ext.decode(r.responseText);
-
-                                init.systemSettings.infrastructuralDataElementGroup = Ext.isObject(obj) ? obj : null;
-                                fn();
-                            }
-                        });
-
-                        // infrastructural period type
-                        requests.push({
-                            url: init.contextPath + '/api/configuration/infrastructuralPeriodType.json',
-                            success: function(r) {
-                                var obj = Ext.decode(r.responseText);
-
-                                init.systemSettings.infrastructuralPeriodType = Ext.isObject(obj) ? obj : null;
-                                fn();
-                            }
-                        });
-
-                        for (var i = 0; i < requests.length; i++) {
-                            Ext.Ajax.request(requests[i]);
-                        }
                     }
                 });
             }

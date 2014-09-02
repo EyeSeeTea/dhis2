@@ -765,8 +765,12 @@ a:active {
     margin-top: 15px;
 }
 
-.report-type-container{
+.report-type-container{    
     padding: 10px;
+}
+
+.validation-error {
+    color: #b94a48 !important;
 }
 
 .report-type-container:hover, .report-type-container:focus{

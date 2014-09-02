@@ -36,6 +36,11 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hisp.dhis.acl.AccessStringHelper;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.AuditLogUtil;
@@ -49,10 +54,12 @@ import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
@@ -165,11 +172,63 @@ public class HibernateGenericStore<T>
     /**
      * Creates a Criteria for the implementation Class type.
      *
+     * Please note that sharing is not considered.
+     *
      * @return a Criteria instance.
      */
     protected final Criteria getCriteria()
     {
         return getClazzCriteria().setCacheable( cacheable );
+    }
+
+    protected final Disjunction getSharingDisjunction()
+    {
+        return getSharingDisjunction( currentUserService.getCurrentUser() );
+    }
+
+    protected final Disjunction getSharingDisjunction( User user )
+    {
+        Assert.notNull( user, "User argument can't be null." );
+
+        Disjunction disjunction = Restrictions.disjunction();
+
+        disjunction.add( Restrictions.like( "publicAccess", "r%" ) );
+        disjunction.add( Restrictions.isNull( "user" ) );
+        disjunction.add( Restrictions.eq( "user", user ) );
+
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass( UserGroupAccess.class, "uga" );
+        detachedCriteria.createAlias( "uga.userGroup", "ug" );
+        detachedCriteria.createAlias( "ug.members", "ugm" );
+
+        detachedCriteria.add( Restrictions.like( "uga.access", "r%" ) );
+        detachedCriteria.add( Restrictions.eq( "ugm.id", user.getId() ) );
+
+        detachedCriteria.setProjection( Projections.id() );
+
+        disjunction.add( Subqueries.exists( detachedCriteria ) );
+
+        return disjunction;
+    }
+
+    protected final Criteria getSharingCriteria()
+    {
+        return getSharingCriteria( currentUserService.getCurrentUser() );
+    }
+
+    protected final Criteria getSharingCriteria( User user )
+    {
+        Criteria criteria = getCriteria();
+
+        if ( !sharingEnabled() )
+        {
+            return criteria;
+        }
+
+        Assert.notNull( user, "User argument can't be null." );
+
+        criteria.add( getSharingDisjunction( user ) );
+
+        return criteria;
     }
 
     protected Criteria getClazzCriteria()
@@ -203,7 +262,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return an object of the implementation Class type.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected final T getObject( Criterion... expressions )
     {
         return (T) getCriteria( expressions ).uniqueResult();
@@ -215,7 +274,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return a List with objects of the implementation Class type.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected final List<T> getList( Criterion... expressions )
     {
         return getCriteria( expressions ).list();
@@ -291,7 +350,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final T get( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
@@ -306,7 +365,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final T load( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
@@ -338,7 +397,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final List<T> getAll()
     {
         Query query = sharingEnabled() ? getQueryAllAcl() : getQueryAll();
@@ -405,6 +464,8 @@ public class HibernateGenericStore<T>
     @Override
     public int getCount()
     {
+        // return getSharingCriteria().list().size();
+
         Query query = sharingEnabled() ? getQueryCountAcl() : getQueryCount();
 
         return ((Long) query.uniqueResult()).intValue();
@@ -439,10 +500,8 @@ public class HibernateGenericStore<T>
 
     protected boolean sharingEnabled()
     {
-        boolean enabled = forceAcl() || (aclService.isShareable( clazz ) && !(currentUserService.getCurrentUser() == null ||
+        return forceAcl() || (aclService.isShareable( clazz ) && !(currentUserService.getCurrentUser() == null ||
             CollectionUtils.containsAny( currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities(), AclService.ACL_OVERRIDE_AUTHORITIES )));
-
-        return enabled;
     }
 
     protected boolean isReadAllowed( T object )

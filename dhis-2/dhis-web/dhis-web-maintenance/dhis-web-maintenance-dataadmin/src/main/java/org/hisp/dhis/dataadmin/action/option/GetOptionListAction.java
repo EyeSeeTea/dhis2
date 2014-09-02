@@ -77,6 +77,11 @@ public class GetOptionListAction
         this.key = key;
     }
 
+    public String getKey()
+    {
+        return key;
+    }
+
     private OptionSet optionSet;
 
     public OptionSet getOptionSet()
@@ -103,7 +108,7 @@ public class GetOptionListAction
        
         this.paging = createPaging( optionSet.getOptions().size() );
 
-        options = optionService.getOptionValues( optionSet, key, paging.getStartPos(), paging.getPageSize() );
+        options = optionService.getOptions( optionSet, key, paging.getStartPos(), paging.getPageSize() );
 
         return SUCCESS;
     }

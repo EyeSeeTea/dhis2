@@ -1,4 +1,4 @@
-package org.hisp.dhis.calendar;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,29 +28,17 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import org.hisp.dhis.expression.MissingValueStrategy;
+import org.hisp.dhis.hibernate.EnumUserType;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class DateUnitTypeTest
+public class MissingValueStrategyUserType
+    extends EnumUserType<MissingValueStrategy>
 {
-    @Test
-    public void testDateUnitTypeFind()
+    public MissingValueStrategyUserType()
     {
-        assertEquals( DateUnitType.DAILY, DateUnitType.find( "20140101" ) );
-        assertEquals( DateUnitType.WEEKLY, DateUnitType.find( "2014W1" ) );
-        assertEquals( DateUnitType.MONTHLY, DateUnitType.find( "201401" ) );
-        assertEquals( DateUnitType.MONTHLY, DateUnitType.find( "2014-01" ) );
-        assertEquals( DateUnitType.BI_MONTHLY, DateUnitType.find( "201401B" ) );
-        assertEquals( DateUnitType.QUARTERLY, DateUnitType.find( "2014Q1" ) );
-        assertEquals( DateUnitType.SIX_MONTHLY, DateUnitType.find( "2014S1" ) );
-        assertEquals( DateUnitType.SIX_MONTHLY_APRIL, DateUnitType.find( "2014AprilS1" ) );
-        assertEquals( DateUnitType.YEARLY, DateUnitType.find( "2014" ) );
-        assertEquals( DateUnitType.FINANCIAL_APRIL, DateUnitType.find( "2014April" ) );
-        assertEquals( DateUnitType.FINANCIAL_JULY, DateUnitType.find( "2014July" ) );
-        assertEquals( DateUnitType.FINANCIAL_OCTOBER, DateUnitType.find( "2014Oct" ) );
+        super( MissingValueStrategy.class );
     }
 }

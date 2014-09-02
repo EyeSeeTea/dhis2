@@ -20,4 +20,58 @@
 
 <div id="mainPage" class="bordered-div">
     <h2>{{'upcoming_events' | translate}}</h2>
+    <form name="outerForm" novalidate>               
+        <div ng-include="'components/report/reportForm.html'"></div>
+    </form>    
+    <img src="../images/ajax-loader-bar.gif" ng-if="!dataReady && reportStarted"/>
+    <div ng-if="dataReady">
+        <div ng-switch="teiList.length">                    
+            <div ng-switch-when="undefined">
+                <div class="alert alert-warning vertical-spacing">
+                    {{'no_data_found'| translate}}
+                </div>
+            </div>
+            <div ng-switch-when="0">  
+                <div class="alert alert-warning vertical-spacing">
+                    {{'no_data_found'| translate}}
+                </div>
+            </div>    
+            <div ng-switch-default> 
+
+                <!-- report begins -->
+                <div class="vertical-spacing">                    
+                    <table class="table table-compact table-striped">
+                        <thead>
+                            <tr>
+                                <th>{{selectedProgram.trackedEntity.name}}</th>
+                                <th>{{selectedProgram.name}} {{'upcoming_event'| translate}}</th>
+                            </tr>
+                        </thead>
+                        <tr ng-repeat="tei in teiList">
+                            <td>
+                                <span ng-repeat="attribute in attributes">
+                                    <span class="bold">{{attribute.name}}:</span> {{tei[attribute.id]}}<br>
+                                </span>
+                            </td>
+                            <td>
+                                <span class='bold inline-block' ng-if='!dhis2Events[tei.id]'>{{'no_visit_made'| translate}}</span>
+                                <span class="inline-block" ng-repeat="ev in dhis2Events[tei.id] | orderBy: 'dueDate'">                                    
+                                    <span class="block align-center">{{ev.orgUnitName}}</span>                   
+                                    <span class="stage-container" 
+                                         title="{{'reschedule'| translate}}"
+                                         ng-class="{'{{ev.statusColor}}': true}"
+                                         ng-click="showReschedule(ev, tei)">
+                                        {{ev.name}}<br/>
+                                        {{ev.dueDate}}<br>  
+                                    </span>                                    
+                                    <i class="fa fa-arrow-right" ng-show="$index < dhis2Events[tei.id].length - 1"></i>
+                                </span>                                             
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <!-- report ends -->
+            </div>
+        </div> 
+    </div>
 </div>
