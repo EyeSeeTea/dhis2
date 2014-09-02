@@ -7084,7 +7084,7 @@ Ext.onReady( function() {
 				select: function() {
 					indicator.clearValue();
 
-					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,name&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
+					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
 					indicator.store.load();
 				}
 			}
