@@ -518,7 +518,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
+					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroupSets'
@@ -551,7 +551,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,name&paging=false',
+					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -6855,10 +6855,10 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
+                    path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false';
+					path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false';
 				}
 
 				if (!path) {
@@ -6892,7 +6892,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,name&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
+						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -6934,7 +6934,7 @@ Ext.onReady( function() {
             fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: gis.init.contextPath + '/api/dataSets.json?fields=id,name&paging=false',
+                url: gis.init.contextPath + '/api/dataSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
                 reader: {
                     type: 'json',
                     root: 'dataSets'
@@ -7503,7 +7503,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
