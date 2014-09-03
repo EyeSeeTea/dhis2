@@ -21,6 +21,8 @@ Ext.onReady( function() {
 		};
 	}());
 
+	// extensions
+
 	GIS.app = {};
 
 	GIS.app.extendInstance = function(gis) {
@@ -643,7 +645,7 @@ Ext.onReady( function() {
 			layer = gis.layer.facility;
 			layer.menu = GIS.app.LayerMenu(layer);
 			layer.widget = GIS.app.LayerWidgetFacility(layer);
-			layer.window = GIS.app.WidgetWindow(layer);
+			layer.window = GIS.app.WidgetWindow(layer, gis.conf.layout.widget.window_width + 150);
 			layer.window.widget = layer.widget;
 			GIS.core.createSelectHandlers(gis, layer);
 
@@ -1665,6 +1667,202 @@ Ext.onReady( function() {
             }
         });
 
+        // orgunit
+		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.organisationunitgroupsetpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
+            getRecord: function() {
+				var valueArray = this.valueCmp.getValue().split(';'),
+					record = {};
+
+				for (var i = 0; i < valueArray.length; i++) {
+					valueArray[i] = Ext.String.trim(valueArray[i]);
+				}
+
+				record.dimension = this.dataElement.id;
+				record.name = this.dataElement.name;
+
+				if (Ext.Array.clean(valueArray).length) {
+					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
+				}
+
+				return record;
+            },
+            setRecord: function(record) {
+				if (Ext.isString(record.filter) && record.filter) {
+					var a = record.filter.split(':');
+					this.valueCmp.setOptionValues(a[1].split(';'));
+				}
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.groupSet.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    style: 'margin-bottom:0',
+                    width: operatorCmpWidth,
+                    value: 'IN',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'IN', name: 'One of'}
+                        ]
+                    }
+                });
+
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+					data: [],
+					loadGroupSet: function(groupSetId, key, pageSize) {
+						var store = this,
+							params = {};
+
+                        groupSetId = groupSetId || container.groupSet.id;
+
+						if (key) {
+							params['key'] = key;
+						}
+                        
+						params['max'] = pageSize || 15;
+
+						Ext.Ajax.request({
+							url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + groupSetId + '.json?fields=organisationUnitGroups[id,name]',
+							params: params,
+							disableCaching: false,
+							success: function(r) {
+								var groups = Ext.decode(r.responseText).organisationUnitGroups;
+                                    
+								store.removeAll();
+                                store.loadData(groups);
+
+                                container.triggerCmp.storage = Ext.clone(groups);
+							}
+						});
+					},
+                    listeners: {
+						datachanged: function(s) {
+							if (container.searchCmp && s.getRange().length) {
+								container.searchCmp.expand();
+							}
+						}
+					}
+				});
+
+                this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    width: 62,
+                    style: 'margin-bottom:0',
+                    emptyText: 'Search..',
+                    valueField: 'id',
+                    displayField: 'name',
+                    hideTrigger: true,
+                    delimiter: '; ',
+                    enableKeyEvents: true,
+                    queryMode: 'local',
+                    listConfig: {
+                        minWidth: 304
+                    },
+                    store: this.valueStore,
+                    listeners: {
+						keyup: {
+							fn: function(cb) {
+								var value = cb.getValue(),
+									groupSetId = container.groupSet.id;
+
+								// search
+								container.valueStore.loadGroupSet(groupSetId, value);
+
+                                // trigger
+                                if (!value || (Ext.isString(value) && value.length === 1)) {
+									container.triggerCmp.setDisabled(!!value);
+								}
+							}
+						},
+						select: function(cb) {
+
+                            // value
+							container.valueCmp.addOptionValue(cb.getValue());
+
+                            // search
+							cb.clearValue();
+
+                            // trigger
+                            container.triggerCmp.enable();
+						}
+					}
+                });
+
+                this.triggerCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-button-combotrigger',
+                    disabledCls: 'ns-button-combotrigger-disabled',
+                    width: 18,
+                    height: 22,
+                    storage: [],
+                    handler: function(b) {
+                        if (b.storage.length) {
+							container.valueStore.removeAll();
+                            container.valueStore.add(Ext.clone(b.storage));
+                        }
+                        else {
+                            container.valueStore.loadGroupSet();
+                        }
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.Text', {
+					width: 226 + 20 + 20,
+                    style: 'margin-bottom:0',
+					addOptionValue: function(option) {
+						var value = this.getValue();
+
+						if (value) {
+							var a = value.split(';');
+
+							for (var i = 0; i < a.length; i++) {
+								a[i] = Ext.String.trim(a[i]);
+							};
+
+							a = Ext.Array.clean(a);
+
+							value = a.join('; ');
+							value += '; ';
+						}
+
+						this.setValue(value += option);
+					},
+                    setOptionValues: function(optionArray) {
+                        var value = '';
+
+                        for (var i = 0; i < optionArray.length; i++) {
+                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                        }
+
+                        this.setValue(value);
+                    }
+				});
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.searchCmp,
+                    this.triggerCmp,
+                    this.valueCmp
+                ];
+
+                this.callParent();
+            }
+        });
     };
 
     // Objects
@@ -5276,34 +5474,44 @@ Ext.onReady( function() {
 
 		// Components
 
-		groupSet = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'gis-combo',
-			fieldLabel: 'Group set',
-            editable: false,
-            valueField: 'id',
-            displayField: 'name',
-            emptyText: 'Organisation unit group set',
-            mode: 'remote',
-            forceSelection: true,
-            width: gis.conf.layout.widget.item_width,
-            labelWidth: gis.conf.layout.widget.itemlabel_width,
-            currentValue: false,
-            store: gis.store.groupSets
-        });
+		//groupSet = Ext.create('Ext.form.field.ComboBox', {
+			//cls: 'gis-combo',
+			//fieldLabel: 'Group set',
+            //editable: false,
+            //valueField: 'id',
+            //displayField: 'name',
+            //emptyText: 'Organisation unit group set',
+            //mode: 'remote',
+            //forceSelection: true,
+            //width: gis.conf.layout.widget.item_width,
+            //labelWidth: gis.conf.layout.widget.itemlabel_width,
+            //currentValue: false,
+            //store: gis.store.groupSets
+        //});
 
         icons = Ext.create('Ext.panel.Panel', {
 			title: '<div class="ns-panel-title-data">' + 'Organisation unit group icons' + '</div>',
 			hideCollapseTool: true,
-            items: [
-                groupSet
-            ],
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
-				}
+				},
+                render: function() {
+                    Ext.Ajax.request({
+                        url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
+                        success: function(r) {
+                            var groupSets = Ext.decode(r.responseText).organisationUnitGroupSets;
+
+                            for (var i = 0; i < groupSets.length; i++) {
+                                icons.add(Ext.create('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
+                                    groupSet: groupSets[i]
+                                }));
+                            }
+                        }
+                    });
+                }                                
 			}
         });
-
 
 		treePanel = Ext.create('Ext.tree.Panel', {
 			cls: 'gis-tree',
