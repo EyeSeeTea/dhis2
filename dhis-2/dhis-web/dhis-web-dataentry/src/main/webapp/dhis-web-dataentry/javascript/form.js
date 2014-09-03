@@ -112,7 +112,7 @@ dhis2.de.event.uncompleted = "dhis2.de.event.uncompleted";
  */
 dhis2.de.on = function( event, fn )
 {
-	$( document ).off( event ).on( event, fn );
+    $( document ).off( event ).on( event, fn );
 }
 
 var EVENT_FORM_LOADED = "dhis-web-dataentry-form-loaded"; // Deprecated
@@ -828,14 +828,14 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
                     multiDataSetValid = true;
                 }
 
-                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html(item.name).appendTo( '#selectedDataSetId' );
+                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html( item.name ).appendTo( '#selectedDataSetId' );
             } );
 
             $( '#selectDataSetId' ).append( '</optgroup>' );
         }
     }
 
-    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId != null ) {
+    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId ) {
         $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
 
         if ( dhis2.de.inputSelected() && dhis2.de.dataEntryFormIsLoaded ) {
@@ -844,12 +844,13 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
             loadDataValues();
         }
     } 
-    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId != null ) {
+    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId ) {
         $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
         dataSetSelected();
     }
     else {
     	dhis2.de.multiOrganisationUnit = false;
+        dhis2.de.currentDataSetId = null;
 
         clearSectionFilters();
         clearPeriod();
@@ -931,13 +932,11 @@ function getSortedDataSetListForOrgUnits( orgUnits )
  * Callback for changes in data set list.
  */
 function dataSetSelected()
-{
-    var x = dhis2.de.currentDataSetId;
-    
+{    
     var dataSetId = $( '#selectedDataSetId' ).val();
 
     var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
-    var previousPeriodType = previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
+    var previousPeriodType = !!previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
 
     dhis2.de.currentDataSetId = dataSetId;
     
@@ -979,8 +978,6 @@ function dataSetSelected()
         clearEntryForm();
         dhis2.de.clearAttributes();
     }
-
-    dhis2.de.updateOptionsStatus();
 }
 
 // -----------------------------------------------------------------------------
@@ -1164,35 +1161,6 @@ dhis2.de.getCurrentCategoryOptions = function()
 };
 
 /**
- * Updates the options status showing options selected if any.
- */
-dhis2.de.updateOptionsStatus = function()
-{
-    var html = '';
-
-    if ( dhis2.de.currentCategories && dhis2.de.currentCategories.length != 0 )
-    {
-        var prefix = '(';
-        $.safeEach( dhis2.de.currentCategories, function ( idx, category ) {
-            var option = $('#category-' + category.id).val();
-
-            if ( option && option != -1) {
-                var options = dhis2.de.categories[ category.id ].options;
-                var matching = $.grep(options, function (e) {
-                    return e.id == option;
-                });
-                
-                html += prefix + matching[0].name;
-                prefix = ', ';
-            }
-        });
-        html += html.length == 0 ? '' : ')';
-    }
-
-    $( '#currentOptionsSelection' ).html( html );
-};
-
-/**
  * Returns a query param value for the currently selected category options where
  * each option is separated by the ; character.
  */
@@ -1236,7 +1204,7 @@ dhis2.de.getAttributesMarkup = function()
 
     var options = dhis2.de.getCurrentCategoryOptions();
 
-	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 || period.iso == "" ) {
+	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 || !period ) {
 		return html;
 	}
 	
@@ -1248,7 +1216,7 @@ dhis2.de.getAttributesMarkup = function()
 
 		$.safeEach( category.options, function( idx, option ) {
 			if ( dhis2.de.optionValidWithinPeriod( option, period ) ) {
-				var selected = Ext.Array.contains( options, option.id ) ? " selected" : "";
+				var selected = ( $.inArray( option.id, options ) != -1 ) ? " selected" : "";
 				html += '<option value="' + option.id + '"' + selected + '>' + option.name + '</option>';
 			}
 		} );
@@ -1287,8 +1255,6 @@ dhis2.de.attributeSelected = function( categoryId )
     {
         clearEntryForm();
     }
-
-    dhis2.de.updateOptionsStatus();
 };
 
 // -----------------------------------------------------------------------------
