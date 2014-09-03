@@ -28,29 +28,29 @@ package org.hisp.dhis.importexport.action.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dxf2.csv.CsvImportService;
+import com.ibatis.common.logging.Log;
+import com.ibatis.common.logging.LogFactory;
+import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.scheduling.TaskId;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Halvdan Hoem Grelland
  */
-public class ImportMetaDataCsvTask
+public class ImportMetaDataGmlTask
     implements Runnable
 {
-    private static final Log log = LogFactory.getLog( ImportMetaDataTask.class );
+    private static final Log log = LogFactory.getLog( ImportMetaDataGmlTask.class );
 
     private ImportService importService;
-    
-    private CsvImportService csvImportService;
-    
+
+    private GmlImportService gmlImportService;
+
     private ImportOptions importOptions;
 
     private InputStream inputStream;
@@ -58,31 +58,33 @@ public class ImportMetaDataCsvTask
     private TaskId taskId;
 
     private String userUid;
-    
+
     private Class<?> clazz;
 
-    public ImportMetaDataCsvTask( String userUid, ImportService importService, 
-        CsvImportService csvImportService,
-        ImportOptions importOptions, InputStream inputStream,
-        TaskId taskId, Class<?> clazz )
+    public ImportMetaDataGmlTask( String userUid, ImportService importService, GmlImportService gmlImportService,
+        ImportOptions importOptions, InputStream inputStream, TaskId taskId, Class<?> clazz )
     {
         this.userUid = userUid;
         this.importService = importService;
-        this.csvImportService = csvImportService;
+        this.gmlImportService = gmlImportService;
         this.importOptions = importOptions;
         this.inputStream = inputStream;
         this.taskId = taskId;
         this.clazz = clazz;
     }
 
+    // -------------------------------------------------------------------------
+    // Runnable implementation
+    // -------------------------------------------------------------------------
+
     @Override
     public void run()
     {
-        MetaData metaData = null;
+        MetaData metaData;
 
         try
         {
-            metaData = csvImportService.fromCsv( inputStream, clazz );
+            metaData = gmlImportService.fromGml( inputStream, clazz );
         }
         catch ( IOException ex )
         {
