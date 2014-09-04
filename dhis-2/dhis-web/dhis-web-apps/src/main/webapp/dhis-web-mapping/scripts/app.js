@@ -1674,28 +1674,18 @@ Ext.onReady( function() {
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
-            getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';'),
-					record = {};
-
-				for (var i = 0; i < valueArray.length; i++) {
-					valueArray[i] = Ext.String.trim(valueArray[i]);
-				}
-
-				record.dimension = this.dataElement.id;
-				record.name = this.dataElement.name;
-
-				if (Ext.Array.clean(valueArray).length) {
-					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
-				}
-
-				return record;
+            getDimension: function() {
+                return this.valueCmp.getValue().length ? {
+                    dimension: this.groupSet.id,
+                    items: this.valueCmp.getValue()
+                } : null;
             },
-            setRecord: function(record) {
-				if (Ext.isString(record.filter) && record.filter) {
-					var a = record.filter.split(':');
-					this.valueCmp.setOptionValues(a[1].split(';'));
-				}
+            setDimension: function(dim) {
+                if (dim && dim.items && dim.items.length) {
+                    this.searchStore.removeAll();
+                    this.searchCmp.clearValue();
+                    this.valueStore.add(dim.items);
+                }
             },
             initComponent: function() {
                 var container = this;
@@ -1738,7 +1728,7 @@ Ext.onReady( function() {
 						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
-							url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + groupSetId + '.json?fields=organisationUnitGroups[id,name]',
+							url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + groupSetId + '.json?fields=organisationUnitGroups[id,' + gis.init.namePropertyUrl + ']',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
