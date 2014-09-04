@@ -5506,22 +5506,38 @@ Ext.onReady( function() {
         //});
 
         icons = Ext.create('Ext.panel.Panel', {
-			title: '<div class="ns-panel-title-data">' + 'Organisation unit group icons' + '</div>',
+			title: '<div class="ns-panel-title-data">' + 'Organisation unit group sets' + '</div>',
 			hideCollapseTool: true,
+            uxPanels: [],
+            getDimension: function() {
+                var a = [];
+                
+                for (var i = 0, ux; i < this.uxPanels.length; i++) {
+                    a.push(this.uxPanels[i]);
+                }
+
+                return Ext.Array.clean(a);
+            },
 			listeners: {
 				added: function() {
 					accordionPanels.push(this);
 				},
                 render: function() {
+                    var container = this;
+                    
                     Ext.Ajax.request({
                         url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
                         success: function(r) {
                             var groupSets = Ext.decode(r.responseText).organisationUnitGroupSets;
 
-                            for (var i = 0; i < groupSets.length; i++) {
-                                icons.add(Ext.create('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
+                            for (var i = 0, ux; i < groupSets.length; i++) {
+                                ux = Ext.create('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
                                     groupSet: groupSets[i]
-                                }));
+                                });
+
+                                container.uxPanels.push(ux);
+
+                                icons.add(ux);
                             }
                         }
                     });
