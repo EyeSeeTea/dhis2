@@ -1722,7 +1722,7 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.valueStore = Ext.create('Ext.data.Store', {
+                this.searchStore = Ext.create('Ext.data.Store', {
 					fields: ['id', 'name'],
 					data: [],
 					loadGroupSet: function(groupSetId, key, pageSize) {
@@ -1773,7 +1773,7 @@ Ext.onReady( function() {
                     listConfig: {
                         minWidth: 304
                     },
-                    store: this.valueStore,
+                    store: this.searchStore,
                     listeners: {
 						keyup: {
 							fn: function(cb) {
@@ -1790,9 +1790,12 @@ Ext.onReady( function() {
 							}
 						},
 						select: function(cb) {
-
+                            var id = cb.getValue();
+                            
                             // value
-							container.valueCmp.addOptionValue(cb.getValue());
+                            if (!container.valueStore.getById(id)) {
+                                container.valueStore.add(container.searchStore.getById(id));
+                            }
 
                             // search
 							cb.clearValue();
@@ -1804,53 +1807,56 @@ Ext.onReady( function() {
                 });
 
                 this.triggerCmp = Ext.create('Ext.button.Button', {
-                    cls: 'ns-button-combotrigger',
-                    disabledCls: 'ns-button-combotrigger-disabled',
+                    cls: 'gis-button-combotrigger',
+                    disabledCls: 'gis-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
                     storage: [],
                     handler: function(b) {
                         if (b.storage.length) {
-							container.valueStore.removeAll();
-                            container.valueStore.add(Ext.clone(b.storage));
+							container.searchStore.removeAll();
+                            container.searchStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            container.valueStore.loadGroupSet();
+                            container.searchStore.loadGroupSet();
                         }
                     }
                 });
 
-                this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 226 + 20 + 20,
-                    style: 'margin-bottom:0',
-					addOptionValue: function(option) {
-						var value = this.getValue();
-
-						if (value) {
-							var a = value.split(';');
-
-							for (var i = 0; i < a.length; i++) {
-								a[i] = Ext.String.trim(a[i]);
-							};
-
-							a = Ext.Array.clean(a);
-
-							value = a.join('; ');
-							value += '; ';
-						}
-
-						this.setValue(value += option);
-					},
-                    setOptionValues: function(optionArray) {
-                        var value = '';
-
-                        for (var i = 0; i < optionArray.length; i++) {
-                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+                    listeners: {
+                        add: function() {
+                            container.valueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.valueCmp.select(this.getRange());
                         }
-
-                        this.setValue(value);
                     }
-				});
+                });                        
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    style: 'margin-bottom:0',
+					width: 226 + 20 + 20,
+                    valueField: 'id',
+                    displayField: 'name',
+                    emptyText: 'Items',
+                    editable: false,
+                    store: container.valueStore,
+                    queryMode: 'local',
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+                            
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.valueStore.remove(container.valueStore.getById(id));
+                            }
+                        }
+                    }
+                });
 
                 this.items = [
                     this.nameCmp,
