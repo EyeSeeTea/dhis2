@@ -29,6 +29,8 @@ package org.hisp.dhis.settings.action.system;
  */
 
 import com.opensymphony.xwork2.Action;
+
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -110,6 +112,13 @@ public class SetGeneralSettingsAction
     public void setAnalyticsMaxLimit( Integer analyticsMaxLimit )
     {
         this.analyticsMaxLimit = analyticsMaxLimit;
+    }
+    
+    private Integer databaseServerCpus;
+    
+    public void setDatabaseServerCpus( Integer databaseServerCpus )
+    {
+        this.databaseServerCpus = databaseServerCpus;
     }
 
     private Integer infrastructuralDataElements;
@@ -196,6 +205,13 @@ public class SetGeneralSettingsAction
         this.dateFormat = dateFormat;
     }
 
+    private String helpPageLink;
+    
+    public void setHelpPageLink( String helpPageLink )
+    {
+        this.helpPageLink = helpPageLink;
+    }
+
     private String message;
 
     public String getMessage()
@@ -218,6 +234,7 @@ public class SetGeneralSettingsAction
     {
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAX_LIMIT, analyticsMaxLimit );
+        systemSettingManager.saveSystemSetting( KEY_DATABASE_SERVER_CPUS, databaseServerCpus );
         systemSettingManager.saveSystemSetting( KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART, omitIndicatorsZeroNumeratorDataMart );
         systemSettingManager.saveSystemSetting( KEY_FACTOR_OF_DEVIATION, factorDeviation );
         systemSettingManager.saveSystemSetting( KEY_PHONE_NUMBER_AREA_CODE, phoneNumberAreaCode );
@@ -226,6 +243,7 @@ public class SetGeneralSettingsAction
         systemSettingManager.saveSystemSetting( KEY_CALENDAR, calendar );
         systemSettingManager.saveSystemSetting( KEY_DATE_FORMAT, dateFormat );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAINTENANCE_MODE, analyticsMaintenanceMode );
+        systemSettingManager.saveSystemSetting( KEY_HELP_PAGE_LINK, StringUtils.trimToNull( helpPageLink ) );
 
         Configuration configuration = configurationService.getConfiguration();
 

@@ -252,7 +252,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             }
             
             //process tei grid
-            $scope.trackedEntityList = TEIGridService.format(data);
+            $scope.trackedEntityList = TEIGridService.format(data,false);
             $scope.showTrackedEntityDiv = true;
             $scope.teiFetched = true;  
             $scope.doSearch = true;
@@ -346,7 +346,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         }, function () {
         });
     };
-    
+
     $scope.showDashboard = function(currentEntity){   
         $location.path('/dashboard').search({tei: currentEntity.id,                                            
                                             program: $scope.selectedProgram ? $scope.selectedProgram.id: null});                                    
@@ -354,43 +354,5 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
        
     $scope.getHelpContent = function(){
         console.log('I will get help content');
-    };    
-})
-
-//Controller for column show/hide
-.controller('ColumnDisplayController', 
-    function($scope, 
-            $modalInstance, 
-            hiddenGridColumns,
-            gridColumns){
-    
-    $scope.gridColumns = gridColumns;
-    $scope.hiddenGridColumns = hiddenGridColumns;
-    
-    $scope.close = function () {
-      $modalInstance.close($scope.gridColumns);
-    };
-    
-    $scope.showHideColumns = function(gridColumn){
-       
-        if(gridColumn.show){                
-            $scope.hiddenGridColumns--;            
-        }
-        else{
-            $scope.hiddenGridColumns++;            
-        }      
-    };    
-})
-
-//Controller for the header section
-.controller('HeaderController',
-        function($scope,                
-                DHIS2URL,
-                TranslationService) {
-
-    TranslationService.translate();
-    
-    $scope.home = function(){        
-        window.location = DHIS2URL;
     };    
 });

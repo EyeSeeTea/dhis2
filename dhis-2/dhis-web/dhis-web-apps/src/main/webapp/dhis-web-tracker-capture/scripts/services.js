@@ -533,8 +533,15 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return promise;
         },
-        getByOrgUnitAndProgram: function(orgUnit, ouMode, program){   
-            var promise = $http.get( '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&paging=false').then(function(response){
+        getByOrgUnitAndProgram: function(orgUnit, ouMode, program, startDate, endDate){
+            var url;
+            if(startDate && endDate){
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&startDate=' + startDate + '&endDate=' + endDate + '&paging=false';
+            }
+            else{
+                url = '../api/events.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&paging=false';
+            }
+            var promise = $http.get( url ).then(function(response){
                 return response.data.events;
             });            
             return promise;
@@ -1052,7 +1059,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .service('TEIGridService', function(OrgUnitService, DateUtils){
     
     return {
-        format: function(grid){
+        format: function(grid, map){
             if(!grid || !grid.rows){
                 return;
             }
@@ -1093,12 +1100,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     }
 
                     if(!isEmpty){
-                        entityList.push(entity);
+                        if(map){
+                            entityList[entity.id] = entity;
+                        }
+                        else{
+                            entityList.push(entity);
+                        }
                     }        
                 });                
             });
             return {headers: attributes, rows: entityList, pager: grid.metaData.pager};                                    
-        },   
+        },
         generateGridColumns: function(attributes, ouMode){
             
             var columns = attributes ? angular.copy(attributes) : [];
@@ -1170,6 +1182,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     
             if(dhis2Event.status === 'COMPLETED'){
                 return 'alert alert-success';//'stage-completed';
+            }
+            else if(dhis2Event.status === 'SKIPPED'){
+                return 'alert alert-warning'; //'stage-skipped';
             }
             else{                
                 if(moment(eventDate).isAfter(dhis2Event.dueDate)){

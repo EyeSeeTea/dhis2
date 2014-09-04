@@ -36,6 +36,12 @@ import org.hibernate.SQLQuery;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Disjunction;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Subqueries;
 import org.hisp.dhis.acl.AccessStringHelper;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.AuditLogUtil;
@@ -49,10 +55,12 @@ import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.interpretation.Interpretation;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.HashSet;
@@ -164,12 +172,54 @@ public class HibernateGenericStore<T>
 
     /**
      * Creates a Criteria for the implementation Class type.
+     * <p/>
+     * Please note that sharing is not considered.
      *
      * @return a Criteria instance.
      */
     protected final Criteria getCriteria()
     {
         return getClazzCriteria().setCacheable( cacheable );
+    }
+
+    protected final Criteria getSharingCriteria()
+    {
+        return getSharingCriteria( currentUserService.getCurrentUser(), "r%" );
+    }
+
+    protected final Criteria getSharingCriteria( User user, String access )
+    {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( getClazz(), "c" ).setCacheable( false );
+
+        if ( !sharingEnabled() )
+        {
+            return criteria;
+        }
+
+        Assert.notNull( user, "User argument can't be null." );
+
+        Disjunction disjunction = Restrictions.disjunction();
+
+        disjunction.add( Restrictions.like( "c.publicAccess", access ) );
+        disjunction.add( Restrictions.isNull( "c.user.id" ) );
+        disjunction.add( Restrictions.eq( "c.user.id", user.getId() ) );
+
+        DetachedCriteria detachedCriteria = DetachedCriteria.forClass( getClazz(), "dc" );
+        detachedCriteria.createCriteria( "dc.userGroupAccesses", "uga" );
+        detachedCriteria.createCriteria( "uga.userGroup", "ug" );
+        detachedCriteria.createCriteria( "ug.members", "ugm" );
+
+        detachedCriteria.add( Restrictions.eqProperty( "dc.id", "c.id" ) );
+        detachedCriteria.add( Restrictions.eq( "ugm.id", user.getId() ) );
+        detachedCriteria.add( Restrictions.like( "uga.access", access ) );
+
+        detachedCriteria.setProjection( Property.forName( "uga.id" ) );
+
+        disjunction.add( Subqueries.exists( detachedCriteria ) );
+
+        criteria.add( disjunction );
+
+        return criteria;
     }
 
     protected Criteria getClazzCriteria()
@@ -203,7 +253,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return an object of the implementation Class type.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected final T getObject( Criterion... expressions )
     {
         return (T) getCriteria( expressions ).uniqueResult();
@@ -215,7 +265,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return a List with objects of the implementation Class type.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected final List<T> getList( Criterion... expressions )
     {
         return getCriteria( expressions ).list();
@@ -228,20 +278,22 @@ public class HibernateGenericStore<T>
     @Override
     public int save( T object )
     {
-        if ( !Interpretation.class.isAssignableFrom( clazz ) && currentUserService.getCurrentUser() != null && aclService.isShareable( clazz ) )
-        {
-            BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
+        BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
+        identifiableObject.setPublicAccess( AccessStringHelper.newInstance().build() );
+        identifiableObject.setUserGroupAccesses( new HashSet<UserGroupAccess>() );
 
+        User currentUser = currentUserService.getCurrentUser();
+
+        if ( !Interpretation.class.isAssignableFrom( clazz ) && currentUser != null && aclService.isShareable( clazz ) )
+        {
             // TODO we might want to allow setting sharing props on save, but for now we null them out
-            identifiableObject.setPublicAccess( null );
-            identifiableObject.setUserGroupAccesses( new HashSet<UserGroupAccess>() );
 
             if ( identifiableObject.getUser() == null )
             {
-                identifiableObject.setUser( currentUserService.getCurrentUser() );
+                identifiableObject.setUser( currentUser );
             }
 
-            if ( aclService.canCreatePublic( currentUserService.getCurrentUser(), identifiableObject.getClass() ) )
+            if ( aclService.canCreatePublic( currentUser, identifiableObject.getClass() ) )
             {
                 if ( aclService.defaultPublic( identifiableObject.getClass() ) )
                 {
@@ -252,13 +304,8 @@ public class HibernateGenericStore<T>
 
                     identifiableObject.setPublicAccess( build );
                 }
-                else
-                {
-                    String build = AccessStringHelper.newInstance().build();
-                    identifiableObject.setPublicAccess( build );
-                }
             }
-            else if ( aclService.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject.getClass() ) )
+            else if ( aclService.canCreatePrivate( currentUser, identifiableObject.getClass() ) )
             {
                 identifiableObject.setPublicAccess( AccessStringHelper.newInstance().build() );
             }
@@ -291,7 +338,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final T get( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
@@ -306,7 +353,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final T load( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
@@ -338,7 +385,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public final List<T> getAll()
     {
         Query query = sharingEnabled() ? getQueryAllAcl() : getQueryAll();
@@ -405,8 +452,11 @@ public class HibernateGenericStore<T>
     @Override
     public int getCount()
     {
-        Query query = sharingEnabled() ? getQueryCountAcl() : getQueryCount();
+        /*
+        return ((Number) getSharingCriteria().setProjection( Projections.countDistinct( "id" ) ).uniqueResult()).intValue();
+        */
 
+        Query query = sharingEnabled() ? getQueryCountAcl() : getQueryCount();
         return ((Long) query.uniqueResult()).intValue();
     }
 
@@ -439,10 +489,8 @@ public class HibernateGenericStore<T>
 
     protected boolean sharingEnabled()
     {
-        boolean enabled = forceAcl() || (aclService.isShareable( clazz ) && !(currentUserService.getCurrentUser() == null ||
+        return forceAcl() || (aclService.isShareable( clazz ) && !(currentUserService.getCurrentUser() == null ||
             CollectionUtils.containsAny( currentUserService.getCurrentUser().getUserCredentials().getAllAuthorities(), AclService.ACL_OVERRIDE_AUTHORITIES )));
-
-        return enabled;
     }
 
     protected boolean isReadAllowed( T object )

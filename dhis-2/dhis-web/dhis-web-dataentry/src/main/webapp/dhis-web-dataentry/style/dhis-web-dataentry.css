@@ -11,7 +11,7 @@
   filter: alpha(opacity=85);
   opacity: 0.85;
   border-radius: 3px;
-  z-index: 10;
+  z-index: 5;
 }
 
 #actions
@@ -100,6 +100,18 @@
   border: 1px solid #CBDDEB;
 }
 
+.sectionTable
+{
+  border-collapse: collapse;
+}
+
+.sectionDescription
+{
+  font-size: 13px;
+  color: #777;
+  padding-bottom: 10px;
+}
+
 .sectionFilter
 {
   padding: 5px;
@@ -118,12 +130,18 @@
 
 .entryfield,
 .entryoptionset,
+.entryselect,
 .dataelementtotal,
 .indicator
 {
   text-align: center;
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.06);
   border: 1px solid #aaa;
+}
+
+.entryselect
+{
+  padding: 4px 1px;
 }
 
 .entryarea

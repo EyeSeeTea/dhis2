@@ -299,6 +299,7 @@ public class TableAlteror
         
         updateProgramStageList();
         updateProgramAttributeList();
+        
     }
 
     // -------------------------------------------------------------------------

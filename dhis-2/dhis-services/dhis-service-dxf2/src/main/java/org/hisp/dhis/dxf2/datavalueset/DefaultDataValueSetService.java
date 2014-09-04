@@ -28,7 +28,27 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.csvreader.CsvReader;
+import static com.google.common.collect.Sets.newHashSet;
+import static org.apache.commons.lang.StringUtils.trimToNull;
+import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
+import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
+import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
+import static org.hisp.dhis.system.util.ConversionUtils.wrap;
+import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
+import static org.hisp.dhis.system.util.DateUtils.parseDate;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Writer;
+import java.nio.charset.Charset;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.amplecode.staxwax.factory.XMLFactory;
@@ -38,6 +58,7 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -72,26 +93,7 @@ import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static org.apache.commons.lang.StringUtils.trimToNull;
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
-import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
-import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
-import static org.hisp.dhis.system.util.ConversionUtils.wrap;
-import static org.hisp.dhis.system.util.DateUtils.getDefaultDate;
-import static org.hisp.dhis.system.util.DateUtils.parseDate;
+import com.csvreader.CsvReader;
 
 /**
  * @author Lars Helge Overland
@@ -106,8 +108,6 @@ public class DefaultDataValueSetService
     private static final String ERROR_INVALID_PERIOD = "Invalid period: ";
 
     private static final String ERROR_INVALID_ORG_UNIT = "Invalid org unit: ";
-
-    private static final String ERROR_INVALID_START_END_DATE = "Invalid start and/or end date: ";
 
     private static final String ERROR_OBJECT_NEEDED_TO_COMPLETE = "Must be provided to complete data set";
 
@@ -146,7 +146,7 @@ public class DefaultDataValueSetService
     //--------------------------------------------------------------------------
 
     @Override
-    public void writeDataValueSet( String dataSet, String period, String orgUnit, OutputStream out )
+    public void writeDataValueSetXml( String dataSet, String period, String orgUnit, OutputStream out )
     {
         DataSet dataSet_ = dataSetService.getDataSet( dataSet );
         Period period_ = PeriodType.getPeriodFromIsoString( period );
@@ -181,18 +181,34 @@ public class DefaultDataValueSetService
     }
 
     @Override
-    public void writeDataValueSet( Set<String> dataSetUids, Date startDate, Date endDate, Set<String> orgUnits,
-        OutputStream out )
+    public void writeDataValueSetXml( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, 
+        boolean includeChildren, OutputStream out )
     {
-        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
-        List<DataSet> dataSets = dataSetService.getDataSetsByUid( dataSetUids );
+        Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
+        Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        Set<OrganisationUnit> ou = new HashSet<>( organisationUnitService.getOrganisationUnitsByUid( orgUnits ) );
 
-        if ( periods.isEmpty() )
+        if ( ds.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one data set must be specified" );
+        }
+        
+        if ( pe.isEmpty() )
         {
             throw new IllegalArgumentException( "At least one period must be specified" );
         }
-
-        dataValueSetStore.writeDataValueSetXml( newHashSet( dataSets ), null, null, null, periods, getOrgUnits( orgUnits ), out );
+        
+        if ( ou.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one organisation unit must be specified" );
+        }
+        
+        if ( includeChildren )
+        {
+            ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
+        }
+        
+        dataValueSetStore.writeDataValueSetXml( ds, null, null, null, pe, ou, out );
     }
 
     @Override
@@ -237,33 +253,65 @@ public class DefaultDataValueSetService
     }
 
     @Override
-    public void writeDataValueSetJson( Set<String> dataSetUids, Date startDate, Date endDate, Set<String> orgUnits,
-        OutputStream outputStream )
+    public void writeDataValueSetJson( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits,
+        boolean includeChildren, OutputStream outputStream )
     {
-        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
-        List<DataSet> dataSets = dataSetService.getDataSetsByUid( dataSetUids );
+        Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
+        Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        Set<OrganisationUnit> ou = new HashSet<>( organisationUnitService.getOrganisationUnitsByUid( orgUnits ) );
 
-        if ( periods.isEmpty() )
+        if ( ds.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one data set must be specified" );
+        }
+        
+        if ( pe.isEmpty() )
         {
             throw new IllegalArgumentException( "At least one period must be specified" );
         }
+        
+        if ( ou.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one organisation unit must be specified" );
+        }
+        
+        if ( includeChildren )
+        {
+            ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
+        }
 
-        dataValueSetStore.writeDataValueSetJson( newHashSet( dataSets ), null, null, null, periods, getOrgUnits( orgUnits ),
-            outputStream );
+        dataValueSetStore.writeDataValueSetJson( ds, null, null, null, pe, ou, outputStream );
     }
 
     @Override
     public void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits,
-        Writer writer )
+        boolean includeChildren, Writer writer )
     {
-        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
+        Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
+        Set<OrganisationUnit> ou = new HashSet<>( organisationUnitService.getOrganisationUnitsByUid( orgUnits ) );
 
-        if ( periods.isEmpty() )
+        if ( ds.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one data set must be specified" );
+        }
+        
+        if ( pe.isEmpty() )
         {
             throw new IllegalArgumentException( "At least one period must be specified" );
         }
+        
+        if ( ou.isEmpty() )
+        {
+            throw new IllegalArgumentException( "At least one organisation unit must be specified" );
+        }
+        
+        if ( includeChildren )
+        {
+            ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
+        }
 
-        dataValueSetStore.writeDataValueSetCsv( periods, getOrgUnits( orgUnits ), writer );
+        dataValueSetStore.writeDataValueSetCsv( ds, pe, ou, writer );
     }
 
     @Override
@@ -720,61 +768,6 @@ public class DefaultDataValueSetService
         }
 
         summary.setDataSetComplete( DateUtils.getMediumDateString( completeDate ) );
-    }
-
-    private Set<DataElement> getDataElements( Set<String> dataSets )
-    {
-        Set<DataElement> dataElements = new HashSet<>();
-
-        for ( String ds : dataSets )
-        {
-            DataSet dataSet = dataSetService.getDataSet( ds );
-
-            if ( dataSet == null )
-            {
-                throw new IllegalArgumentException( ERROR_INVALID_DATA_SET + ds );
-            }
-
-            dataElements.addAll( dataSet.getDataElements() );
-        }
-
-        return dataElements;
-    }
-
-    private Set<Period> getPeriods( Date startDate, Date endDate )
-    {
-        if ( startDate == null || endDate == null || endDate.before( startDate ) )
-        {
-            throw new IllegalArgumentException( ERROR_INVALID_START_END_DATE + startDate + ", " + endDate );
-        }
-
-        Set<Period> periods = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
-
-        if ( periods.isEmpty() )
-        {
-            throw new IllegalArgumentException( "No periods exist for start/end date: " + startDate + ", " + endDate );
-        }
-
-        return periods;
-    }
-
-    private Set<OrganisationUnit> getOrgUnits( Set<String> orgUnits )
-    {
-        Set<OrganisationUnit> organisationUnits = new HashSet<>();
-
-        for ( String ou : orgUnits )
-        {
-            OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ou );
-
-            if ( orgUnit == null )
-            {
-                throw new IllegalArgumentException( ERROR_INVALID_ORG_UNIT + ou );
-            }
-
-            organisationUnits.add( orgUnit );
-        }
-
-        return organisationUnits;
     }
 
     private Map<String, OrganisationUnit> getUuidOrgUnitMap()

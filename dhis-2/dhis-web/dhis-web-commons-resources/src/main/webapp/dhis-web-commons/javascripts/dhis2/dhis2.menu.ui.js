@@ -115,7 +115,7 @@
 
     templates.search = '<div class="apps-search-wrap">' +
                            '<input class="apps-search" type="text" placeholder="{{search_apps}}">' +
-                           '<span class="apps-search-clear fa fa-times-circle"></span>' +
+                           '<i class="apps-search-clear fa fa-times-circle"></i>' +
                        '</div>';
 
     templates.extraLink = '<div class="apps-menu-bottom-button apps-menu-more"><a href="{{url}}">{{text}}</a></div>';
@@ -537,7 +537,12 @@
             }
 
             //Add the linkItem to the menu
-            jqLite(document.querySelector('#' + defaultMenu.container + ' ul')).append(linkItem);
+            //Make sure that the application button element is always positioned after the profile
+            if (document.querySelector('#applicationsButton') !== null) {
+                jqLite(document.querySelector('#applicationsButton')).before(linkItem);
+            } else {
+                jqLite(document.querySelector('#' + defaultMenu.container + ' ul')).append(linkItem);
+            }
         });
 
         defaultMenu.eventsHandlers.push(function (menuElement) {
@@ -942,6 +947,16 @@
 (function () {
     dhis2.menu.ui.initMenu = function () {
         try {
+		var helpPageLink = "";
+		$.ajax({
+			type : "GET",
+			url : "../dhis-web-commons/menu/getHelpPageLinkModule.action",
+			dataType : "json",
+			async : false,
+			success : function(json) {
+				helpPageLink = json;
+			}
+		});
             dhis2.menu.ui.createMenu("profile", [
                 {
                     name: "settings",
@@ -967,7 +982,7 @@
                 {
                     name: "help",
                     namespace: "/dhis-web-commons-about",
-                    defaultAction: "../dhis-web-commons-about/help.action",
+                    defaultAction: helpPageLink.defaultAction || "", //FIXME: This sets the help url to an empty string when the ajax call failed. We should find an alternative.
                     icon: "../icons/function-account.png",
                     description: ""
                 },

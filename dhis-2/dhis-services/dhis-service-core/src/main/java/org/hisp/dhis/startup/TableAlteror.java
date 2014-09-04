@@ -127,6 +127,7 @@ public class TableAlteror
         executeSql( "DROP TABLE dashboarditem_trackedentitytabularreports" );
         executeSql( "DROP TABLE categoryoptioncombousergroupaccesses" );
         executeSql( "DROP TABLE validationrulegroupuserrolestoalert" );
+        executeSql( "DROP TABLE expressionoptioncombo" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
@@ -721,6 +722,10 @@ public class TableAlteror
 
         // validation rule group, new column alertbyorgunits
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
+        
+        executeSql( "update expression set missingvaluestrategy = 'SKIP_IF_ANY_VALUE_MISSING' where nullifblank = true or nullifblank is null" );
+        executeSql( "update expression set missingvaluestrategy = 'NEVER_SKIP' where nullifblank = false" );
+        executeSql( "alter table expression alter column missingvaluestrategy set not null" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
@@ -1173,10 +1178,6 @@ public class TableAlteror
         if ( result != -1 )
         {
             executeSql( "drop table optionsetmembers" );
-        }
-        else
-        {
-            log.info( "Updated optionvalue table, SQL: " + sql );
         }
     }
 }

@@ -16,7 +16,7 @@
 
     <property name="expression" type="text" />
 
-	<property name="nullIfBlank" />
+    <property name="missingValueStrategy" column="missingvaluestrategy" type="org.hisp.dhis.common.MissingValueStrategyUserType" />
 
     <set name="dataElementsInExpression" table="expressiondataelement">
       <cache usage="read-write" />      
@@ -24,11 +24,5 @@
       <many-to-many class="org.hisp.dhis.dataelement.DataElement" column="dataelementid" foreign-key="fk_expression_dataelementid" />
     </set>
     
-    <set name="optionCombosInExpression" table="expressionoptioncombo">
-      <key column="expressionid" foreign-key="fk_expressionoptioncombo_expressionid"/>
-      <many-to-many class="org.hisp.dhis.dataelement.DataElementCategoryOptionCombo" 
-          column="categoryoptioncomboid" foreign-key="fk_expression_categoryoptioncomboid"/>
-   </set>
-
   </class>
 </hibernate-mapping>

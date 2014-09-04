@@ -3,7 +3,6 @@ trackerCapture.controller('EnrollmentController',
                 $scope,  
                 $timeout,
                 $location,
-                orderByFilter,
                 DateUtils,
                 EventUtils,
                 storage,
@@ -16,7 +15,8 @@ trackerCapture.controller('EnrollmentController',
                 ModalService,
                 DialogService) {
     TranslationService.translate();
-
+    
+    $scope.today = DateUtils.format(moment());
     
     //listen for the selected items
     $scope.$on('selectedItems', function(event, args) {   
@@ -39,7 +39,7 @@ trackerCapture.controller('EnrollmentController',
         
         if($scope.selectedProgram){             
             EnrollmentService.getByEntityAndProgram($scope.selectedTei.trackedEntityInstance, $scope.selectedProgram.id).then(function(data){
-                $scope.enrollments = data.enrollmentList;
+                $scope.enrollments = data.enrollments;
                 $scope.loadEnrollmentDetails();                
             });
         }

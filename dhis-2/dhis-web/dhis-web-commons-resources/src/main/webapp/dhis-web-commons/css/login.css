@@ -3,7 +3,6 @@
 {
   font-family: LiberationSans, sans-serif;
   line-height: 125%;
-  overflow: hidden;
 }
 
 html,body
@@ -71,7 +70,7 @@ a:hover
 #loginField
 {
   position: relative;
-  margin: 120px auto 0 auto;
+  margin: 128px auto 0 auto;
   width: 270px;
 }
 
@@ -130,11 +129,16 @@ a:hover
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 10px 0 9px 50px;
-  font-size: 12px;
+  padding: 10px 0 9px 0;
+  font-size: 13px;
   border-top: 1px solid #416f9d;
   color: #6b90b8;
   width: 100%;
+}
+
+#poweredByLabel
+{
+  margin-left: 50px;
 }
 
 #localeSelect

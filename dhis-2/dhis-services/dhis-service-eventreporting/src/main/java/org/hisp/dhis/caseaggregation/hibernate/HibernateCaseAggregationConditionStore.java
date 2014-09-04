@@ -231,14 +231,14 @@ public class HibernateCaseAggregationConditionStore
 
     @Override
     public Grid getAggregateValueDetails( CaseAggregationCondition aggregationCondition, OrganisationUnit orgunit,
-        Period period, I18nFormat format, I18n i18n )
+        Period period, boolean nonRegistrationProgram, I18nFormat format, I18n i18n )
     {
         Grid grid = new ListGrid();
         grid.setTitle( orgunit.getName() + " - " + aggregationCondition.getDisplayName() );
         grid.setSubtitle( format.formatPeriod( period ) );
 
         String sql = parseExpressionDetailsToSql( aggregationCondition.getAggregationExpression(),
-            aggregationCondition.getOperator(), orgunit.getId(), period );
+            aggregationCondition.getOperator(), orgunit.getId(), period, nonRegistrationProgram );
 
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
@@ -247,11 +247,43 @@ public class HibernateCaseAggregationConditionStore
             grid.addHeader( new GridHeader( i18n.getString( colName ), false, true ) );
         }
 
-        grid.addRows( rs );
+        addRows( rs, grid );
 
         return grid;
     }
 
+    public void addRows( SqlRowSet rs, Grid grid )
+    {
+        int cols = rs.getMetaData().getColumnCount();
+        String idValue = "";
+        int index = 1;
+        while ( rs.next() )
+        {
+        	grid.addRow();
+        	for ( int i = 1; i <= cols; i++ )
+            {
+            	Object value = rs.getObject( i );
+            	if( i==1 )
+            	{
+            		if( !value.toString().equals(idValue) )
+		        	{
+		        		grid.addValue( index );
+		        		idValue = value.toString();
+		        		index ++;
+		        	}
+            		else
+            		{
+            			grid.addValue( "" );
+            		}
+            	}
+            	else
+            	{
+            		grid.addValue( value );
+            	}
+            }
+        }
+    }
+    
     public void insertAggregateValue( String expression, String operator, Integer dataElementId, Integer optionComboId, int attributeOptioncomboId, 
         Integer deSumId, Collection<Integer> orgunitIds, Period period )
     {
@@ -371,8 +403,8 @@ public class HibernateCaseAggregationConditionStore
             }
         }
         else
-        {
-            sql += " " + operator + "( cast( pdv.value as DOUBLE PRECISION ) ) ";
+        { 
+            sql += " " + operator + "( cast( pdv.value as " + statementBuilder.getDoubleColumnType() + " ) ) ";
             sql += "FROM trackedentitydatavalue pdv ";
             sql += "    INNER JOIN programstageinstance psi  ";
             sql += "            ON psi.programstageinstanceid = pdv.programstageinstanceid ";
@@ -475,7 +507,7 @@ public class HibernateCaseAggregationConditionStore
 
         String sqlOrgunitCompleted = "";
 
-        // Get minus(date dataelement, date dataelement) out from the expression
+        // Get minus(DATE dataelement, DATE dataelement) out from the expression
         // and run them later
 
         Map<Integer, String> minus2SQLMap = new HashMap<>();
@@ -498,6 +530,29 @@ public class HibernateCaseAggregationConditionStore
             idx2++;
         }
 
+        // Get minus(DATE attribute, DATE attribute) out from the expression
+        // and run them later
+
+        Map<Integer, String> minus2AttributeSQLMap = new HashMap<>();
+        int idx1 = 0;
+        Pattern patternAttrMinus2 = Pattern.compile( CaseAggregationCondition.minusAttributeRegExp );
+        Matcher matcherAttrMinus2 = patternAttrMinus2.matcher( caseExpression );
+        while ( matcherAttrMinus2.find() )
+        { 
+           String attribute1 = matcherAttrMinus2.group( 2 );
+           String attribute2 = matcherAttrMinus2.group( 5 );
+           String compareSide = matcherAttrMinus2.group( 6 ) + matcherAttrMinus2.group( 7 );
+           minus2AttributeSQLMap.put(
+                idx1,
+                getConditionForMisus2Attribute(attribute1, attribute2, compareSide ));
+               
+            caseExpression = caseExpression.replace( matcherAttrMinus2.group( 0 ),
+                CaseAggregationCondition.MINUS_ATTRIBUTE_OPERATOR + "_" + idx1 );
+
+            idx1++;
+        }
+
+        
         // Get minus(date dataelement, date) out from the expression and run
         // them later
 
@@ -637,6 +692,13 @@ public class HibernateCaseAggregationConditionStore
             sql = sql
                 .replace( CaseAggregationCondition.MINUS_DATAELEMENT_OPERATOR + "_" + key, minus2SQLMap.get( key ) );
         }
+        
+        for ( int key = 0; key < idx1; key++ )
+        {
+            sql = sql
+                .replace( CaseAggregationCondition.MINUS_ATTRIBUTE_OPERATOR + "_" + key, minus2AttributeSQLMap.get( key ) );
+        }
+
 
         return sql + " ) ";
     }
@@ -917,6 +979,18 @@ public class HibernateCaseAggregationConditionStore
             + endDate
             + "' ) AS d2 WHERE DATE(d1.value ) - DATE(d2.value) " + compareSide;
     }
+    
+    private String getConditionForMisus2Attribute(String attribute1, String attribute2, String compareSide)
+    {
+         return " EXISTS ( SELECT * FROM (  SELECT _teav.value FROM trackedentityattributevalue _teav "
+            + " WHERE _teav.trackedentityinstanceid=p.trackedentityinstanceid "
+            + " and _teav.trackedentityattributeid = " + attribute1 + " ) as a1 , "
+            + " ( SELECT _teav.value FROM trackedentityattributevalue _teav "
+            + " WHERE _teav.trackedentityinstanceid=p.trackedentityinstanceid  "
+            + " and  _teav.trackedentityattributeid =  " + attribute2 + " ) as a2 "
+            + " WHERE DATE(a1.value ) - DATE(a2.value) " + compareSide;
+    }
+
 
     /**
      * Return the Ids of organisation units which entity instances registered or
@@ -942,12 +1016,11 @@ public class HibernateCaseAggregationConditionStore
     }
 
     @Override
-    public String parseExpressionDetailsToSql( String caseExpression, String operator, Integer orgunitId, Period period )
+    public String parseExpressionDetailsToSql( String caseExpression, String operator, Integer orgunitId,
+        Period period, boolean nonRegistrationProgram )
     {
         String sql = "SELECT ";
-
-        boolean hasDataelement = hasDataelementCriteria( caseExpression );
-
+        
         Collection<Integer> orgunitIds = new HashSet<>();
         orgunitIds.add( orgunitId );
 
@@ -958,37 +1031,49 @@ public class HibernateCaseAggregationConditionStore
                     DateUtils.getMediumDateString( period.getStartDate() ),
                     DateUtils.getMediumDateString( period.getEndDate() ) );
         }
-        else
+        else if ( nonRegistrationProgram )
         {
-            if ( hasDataelement )
-            {
-                sql += "pdv.value,pgs.name as program_stage, psi.executiondate as report_date,";
-            }
-        }
-
-        sql = sql.substring( 0, sql.length() - 1 );
-        sql += " FROM ";
-
-        if ( hasDataelement )
-        {
-            sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid";
-            sql += " INNER JOIN programstageinstance psi ON pi.programinstanceid=psi.programinstanceid ";
+            sql += " pdv.programstageinstanceid as event, pgs.name as program_stage, de.name as data_element, pdv.value, psi.executiondate as report_date ";
+            sql += " FROM programstageinstance psi inner join programinstance pi on pi.programinstanceid=psi.programinstanceid ";
             sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=psi.organisationunitid ";
             sql += " INNER JOIN trackedentitydatavalue pdv ON pdv.programstageinstanceid=psi.programstageinstanceid ";
-            sql += " INNER JOIN program pg ON pg.programid=pi.programid ";
+            sql += " INNER JOIN dataelement de ON de.dataelementid=pdv.dataelementid ";
+            sql += " INNER JOIN program pg on pg.programid=pi.programid ";
             sql += " INNER JOIN programstage pgs ON pgs.programid=pg.programid ";
         }
         else
         {
-            sql += " programinstance as pi INNER JOIN trackedentityinstance p on p.trackedentityinstanceid=pi.trackedentityinstanceid";
-            sql += " INNER JOIN organisationunit ou ON ou.organisationunitid=p.organisationunitid ";
-        }
+            sql += " p.trackedentityinstanceid as tracked_entity_instance, tea.name as attribute, ";
+            sql += "teav.value as value, pg.name as program ";
+            sql += "FROM trackedentityinstance p ";
+            sql += "INNER JOIN trackedentityattributevalue teav on p.trackedentityinstanceid=teav.trackedentityinstanceid  ";
+            sql += "INNER JOIN trackedentityattribute tea on tea.trackedentityattributeid=teav.trackedentityattributeid  ";
+            sql += "INNER JOIN programinstance as pi on p.trackedentityinstanceid=pi.trackedentityinstanceid  ";
+            sql += "INNER JOIN program pg on pg.programid=pi.programid  ";
+            sql += "INNER JOIN programstage pgs on pgs.programid=pg.programid  ";
+            
+            if( hasDataelementCriteria( caseExpression ) )
+            {
+                sql += " INNER JOIN programstageinstance psi on pi.programinstanceid=psi.programinstanceid ";
+                sql += " INNER JOIN organisationunit ou on ou.organisationunitid=psi.organisationunitid ";
+                sql += " INNER JOIN trackedentitydatavalue pdv on pdv.programstageinstanceid=psi.programstageinstanceid ";
+            }
+        }       
 
         sql += " WHERE "
             + createSQL( caseExpression, operator, orgunitIds, DateUtils.getMediumDateString( period.getStartDate() ),
                 DateUtils.getMediumDateString( period.getEndDate() ) );
 
         sql = sql.replaceAll( "COMBINE", "" );
+
+        if ( nonRegistrationProgram )
+        {
+            sql += " ORDER BY pdv.programstageinstanceid";
+        }
+        else
+        {
+            sql += " ORDER BY  p.trackedentityinstanceid ";
+        }
 
         return sql;
     }
@@ -1063,11 +1148,11 @@ public class HibernateCaseAggregationConditionStore
             {
                 periodid = rs.getInt( "periodid" );
             }
-
+            
             if ( periodid == null )
             {
-                String insertSql = "insert into period (periodtypeid,startdate,enddate) " + " VALUES " + "("
-                    + periodTypeId + ",'" + start + "','" + end + "' )";
+                String insertSql = "insert into period (periodid, periodtypeid,startdate,enddate) " + " VALUES " + "("
+                		+ statementBuilder.getAutoIncrementValue() +"," + periodTypeId + ",'" + start + "','" + end + "' )";
                 jdbcTemplate.execute( insertSql );
 
                 period.setId( jdbcTemplate.queryForObject( sql, Integer.class ) );
@@ -1123,10 +1208,10 @@ public class HibernateCaseAggregationConditionStore
         return false;
     }
 
-    private boolean hasDataelementCriteria( String expresstion )
+    private boolean hasDataelementCriteria( String expression )
     {
         Pattern pattern = Pattern.compile( CaseAggregationCondition.regExp );
-        Matcher matcher = pattern.matcher( expresstion );
+        Matcher matcher = pattern.matcher( expression );
         while ( matcher.find() )
         {
             String match = matcher.group();
@@ -1146,5 +1231,6 @@ public class HibernateCaseAggregationConditionStore
 
         return false;
     }
+    
 
 }
