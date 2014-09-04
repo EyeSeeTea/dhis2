@@ -1760,7 +1760,19 @@ Ext.onReady( function() {
 					}
 				});
 
+                // function
+                this.filterSearchStore = function() {
+                    var selected = container.valueCmp.getValue();
+                    
+                    container.searchStore.clearFilter();
+
+                    container.searchStore.filterBy(function(record, id) {
+                        return !Ext.Array.contains(selected, record.data.id);
+                    });
+                };                    
+
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
                     width: 62,
                     style: 'margin-bottom:0',
                     emptyText: 'Search..',
@@ -1776,12 +1788,12 @@ Ext.onReady( function() {
                     store: this.searchStore,
                     listeners: {
 						keyup: {
-							fn: function(cb) {
-								var value = cb.getValue(),
+							fn: function() {
+								var value = this.getValue(),
 									groupSetId = container.groupSet.id;
 
 								// search
-								container.valueStore.loadGroupSet(groupSetId, value);
+								container.searchStore.loadGroupSet(groupSetId, value);
 
                                 // trigger
                                 if (!value || (Ext.isString(value) && value.length === 1)) {
@@ -1789,8 +1801,8 @@ Ext.onReady( function() {
 								}
 							}
 						},
-						select: function(cb) {
-                            var id = cb.getValue();
+						select: function() {
+                            var id = Ext.Array.from(this.getValue())[0];
                             
                             // value
                             if (!container.valueStore.getById(id)) {
@@ -1798,11 +1810,18 @@ Ext.onReady( function() {
                             }
 
                             // search
-							cb.clearValue();
+							//this.clearValue();
+                            this.select([]);
+
+                            // filter
+                            container.filterSearchStore();
 
                             // trigger
                             container.triggerCmp.enable();
-						}
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
 					}
                 });
 
@@ -1841,8 +1860,9 @@ Ext.onReady( function() {
 					width: 226 + 20 + 20,
                     valueField: 'id',
                     displayField: 'name',
-                    emptyText: 'Items',
+                    emptyText: 'No selected items',
                     editable: false,
+                    hideTrigger: true,
                     store: container.valueStore,
                     queryMode: 'local',
 					listeners: {
