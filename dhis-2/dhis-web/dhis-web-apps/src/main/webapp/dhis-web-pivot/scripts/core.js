@@ -2050,7 +2050,7 @@ Ext.onReady( function() {
                     htmlArray;
 
 				xResponse.sortableIdObjects = [];
-xLayout.showDimensionName = xLayout.showSubTotals;
+xLayout.showDimensionName = xLayout.hideEmptyRows;
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
@@ -2158,7 +2158,7 @@ xLayout.showDimensionName = xLayout.showSubTotals;
                         config = config || {};
                         
                         return getTdHtml({
-                            cls: 'pivot-dim-empty cursor-default' + (config.cls ? ' ' + config.cls : ''),
+                            cls: config.cls ? ' ' + config.cls : 'pivot-empty',
                             colSpan: config.colSpan ? config.colSpan : 1,
                             rowSpan: config.rowSpan ? config.rowSpan : 1,
                             htmlValue: config.htmlValue ? config.htmlValue : '&nbsp;'
@@ -2171,12 +2171,14 @@ xLayout.showDimensionName = xLayout.showSubTotals;
                         if (i < xColAxis.dims - 1) {
                             if (xRowAxis && xRowAxis.dims) {
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
-                                    a.push(getEmptyNameTdConfig());
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'pivot-dim-label'
+                                    }));
                                 }
                             }
 
                             a.push(getEmptyNameTdConfig({
-                                cls: 'align-right',
+                                cls: 'pivot-dim-label align-right',
                                 htmlValue: '&nbsp;&nbsp;' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
                             }));
                         }
@@ -2184,13 +2186,14 @@ xLayout.showDimensionName = xLayout.showSubTotals;
                             if (xRowAxis && xRowAxis.dims) {
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
                                     a.push(getEmptyNameTdConfig({
-                                        cls: 'align-left',
+                                        cls: 'pivot-dim-label align-left',
                                         htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name
                                     }));
                                 }
                             }
 
                             a.push(getEmptyNameTdConfig({
+                                cls: 'pivot-label',
                                 htmlValue: '<span>' + dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + '</span>' +
                                            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
                                            '<span style="float:right">' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name + '</span>'
@@ -2215,13 +2218,13 @@ xLayout.showDimensionName = xLayout.showSubTotals;
                         if (xLayout.showDimensionName) {
                             dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
                         }
-                        else if (i === 0 && xColAxis && xRowAxis) {
-							dimHtml.push(getEmptyHtmlArray({
+                        else if (i === 0) {
+							dimHtml.push(xColAxis && xRowAxis ? getEmptyNameTdConfig({
                                 colSpan: xRowAxis.dims,
                                 rowSpan: xColAxis.dims
-                            }));
-						}                                        
-
+                            }) : '');
+						}
+                            
 						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
 							spanCount++;
 							condoId = null;

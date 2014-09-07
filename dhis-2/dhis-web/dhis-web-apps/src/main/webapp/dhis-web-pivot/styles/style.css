@@ -217,10 +217,11 @@ table.pivot {
 	background-color: #adb8c9;
 }
 
-.pivot-dim-empty {
-	background-color: #dae6f8;
+.pivot-dim-label {
 	background-color: #fff;
-	text-align: center;
+}
+.pivot-empty {
+	background-color: #dae6f8;
 }
 
 .pivot-value {
