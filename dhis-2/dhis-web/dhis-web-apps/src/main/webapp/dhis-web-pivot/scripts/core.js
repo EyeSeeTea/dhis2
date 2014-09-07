@@ -2050,7 +2050,7 @@ Ext.onReady( function() {
                     htmlArray;
 
 				xResponse.sortableIdObjects = [];
-
+xLayout.showDimensionName = xLayout.showSubTotals;
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
@@ -2154,14 +2154,51 @@ Ext.onReady( function() {
 					var a = [],
 						getEmptyHtmlArray;
 
-					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml({
-							cls: 'pivot-dim-empty cursor-default',
-							colSpan: xRowAxis.dims,
-							rowSpan: xColAxis.dims,
-							htmlValue: '&nbsp;'
-						}) : '';
-					};
+                    getEmptyNameTdConfig = function(config) {
+                        config = config || {};
+                        
+                        return getTdHtml({
+                            cls: 'pivot-dim-empty cursor-default' + (config.cls ? ' ' + config.cls : ''),
+                            colSpan: config.colSpan ? config.colSpan : 1,
+                            rowSpan: config.rowSpan ? config.rowSpan : 1,
+                            htmlValue: config.htmlValue ? config.htmlValue : '&nbsp;'
+                        });
+                    };
+
+                    getEmptyHtmlArray = function(i) {
+                        var a = [];
+                        
+                        if (i < xColAxis.dims - 1) {
+                            if (xRowAxis && xRowAxis.dims) {
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig());
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                cls: 'align-right',
+                                htmlValue: '&nbsp;&nbsp;' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                            }));
+                        }
+                        else {
+                            if (xRowAxis && xRowAxis.dims) {
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'align-left',
+                                        htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name
+                                    }));
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                htmlValue: '<span>' + dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + '</span>' +
+                                           '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+                                           '<span style="float:right">' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name + '</span>'
+                            }));
+                        }
+
+                        return a;
+                    };
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
@@ -2171,9 +2208,19 @@ Ext.onReady( function() {
 					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
 						dimHtml = [];
 
-						if (i === 0) {
-							dimHtml.push(getEmptyHtmlArray());
-						}
+						//if (i === 0) {
+							//dimHtml.push(getEmptyHtmlArray());
+						//}
+                        
+                        if (xLayout.showDimensionName) {
+                            dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
+                        }
+                        else if (i === 0 && xColAxis && xRowAxis) {
+							dimHtml.push(getEmptyHtmlArray({
+                                colSpan: xRowAxis.dims,
+                                rowSpan: xColAxis.dims
+                            }));
+						}                                        
 
 						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
 							spanCount++;
