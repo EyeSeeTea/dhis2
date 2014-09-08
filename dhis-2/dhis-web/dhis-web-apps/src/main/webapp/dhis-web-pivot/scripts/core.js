@@ -2156,7 +2156,7 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
 
                     getEmptyNameTdConfig = function(config) {
                         config = config || {};
-                        
+
                         return getTdHtml({
                             cls: config.cls ? ' ' + config.cls : 'pivot-empty',
                             colSpan: config.colSpan ? config.colSpan : 1,
@@ -2167,7 +2167,7 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
 
                     getEmptyHtmlArray = function(i) {
                         var a = [];
-                        
+
                         if (i < xColAxis.dims - 1) {
                             if (xRowAxis && xRowAxis.dims) {
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
@@ -2193,10 +2193,10 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
                             }
 
                             a.push(getEmptyNameTdConfig({
-                                cls: 'pivot-label',
-                                htmlValue: '<span>' + dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + '</span>' +
+                                cls: 'pivot-dim-label',
+                                htmlValue: '<span class="td-nobreak">' + dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + '</span>' +
                                            '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-                                           '<span style="float:right">' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name + '</span>'
+                                           '<span class="td-nobreak" style="float:right">' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name + '</span>'
                             }));
                         }
 
@@ -2214,7 +2214,7 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
 						//if (i === 0) {
 							//dimHtml.push(getEmptyHtmlArray());
 						//}
-                        
+
                         if (xLayout.showDimensionName) {
                             dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
                         }
@@ -2224,7 +2224,7 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
                                 rowSpan: xColAxis.dims
                             }) : '');
 						}
-                            
+
 						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
 							spanCount++;
 							condoId = null;

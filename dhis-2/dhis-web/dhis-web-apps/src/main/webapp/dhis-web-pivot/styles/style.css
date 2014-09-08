@@ -218,7 +218,8 @@ table.pivot {
 }
 
 .pivot-dim-label {
-	background-color: #fff;
+	background-color: #f7f9fD;
+	white-space: nowrap;
 }
 .pivot-empty {
 	background-color: #dae6f8;
