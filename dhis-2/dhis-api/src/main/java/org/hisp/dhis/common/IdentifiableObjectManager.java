@@ -68,7 +68,13 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> Collection<T> getAll( Class<T> clazz );
 
+    <T extends IdentifiableObject> Collection<T> getAllByName( Class<T> clazz, String name );
+
+    <T extends IdentifiableObject> Collection<T> getAllByNameIgnoreCase( Class<T> clazz, String name );
+
     <T extends IdentifiableObject> Collection<T> getAllSorted( Class<T> clazz );
+
+    <T extends IdentifiableObject> Collection<T> getAllSortedByLastUpdated( Class<T> clazz );
 
     <T extends IdentifiableObject> List<T> getByUid( Class<T> clazz, Collection<String> uids );
 

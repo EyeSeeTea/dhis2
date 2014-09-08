@@ -312,6 +312,8 @@ Ext.onReady( function() {
 
 				// showSubTotals: boolean (true)
 
+                // showDimensionLabels: boolean (false)
+
 				// hideEmptyRows: boolean (false)
 
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
@@ -478,6 +480,7 @@ Ext.onReady( function() {
 					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
 					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
+					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
 
@@ -2050,7 +2053,7 @@ Ext.onReady( function() {
                     htmlArray;
 
 				xResponse.sortableIdObjects = [];
-xLayout.showDimensionName = xLayout.hideEmptyRows;
+
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
@@ -2215,7 +2218,7 @@ xLayout.showDimensionName = xLayout.hideEmptyRows;
 							//dimHtml.push(getEmptyHtmlArray());
 						//}
 
-                        if (xLayout.showDimensionName) {
+                        if (xLayout.showDimensionLabels) {
                             dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
                         }
                         else if (i === 0) {

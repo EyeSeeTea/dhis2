@@ -35,6 +35,7 @@ import org.hisp.dhis.acl.AccessStringHelper;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupAccess;
@@ -73,6 +74,132 @@ public class SharingTest
         assertNotNull( dataElement.getPublicAccess() );
         assertFalse( AccessStringHelper.canRead( dataElement.getPublicAccess() ) );
         assertFalse( AccessStringHelper.canWrite( dataElement.getPublicAccess() ) );
+    }
+
+    @Test
+    public void getCount()
+    {
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+
+        assertEquals( 4, identifiableObjectManager.getCount( DataElement.class ) );
+    }
+
+    @Test
+    public void getCountByName()
+    {
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+
+        assertEquals( 1, identifiableObjectManager.getCountByName( DataElement.class, "DataElementA" ) );
+        assertEquals( 1, identifiableObjectManager.getCountByName( DataElement.class, "DataElementB" ) );
+        assertEquals( 1, identifiableObjectManager.getCountByName( DataElement.class, "DataElementC" ) );
+        assertEquals( 1, identifiableObjectManager.getCountByName( DataElement.class, "DataElementD" ) );
+    }
+
+    @Test
+    public void getEqualToName()
+    {
+        DataElement dataElement = createDataElement( 'A' );
+        identifiableObjectManager.save( dataElement );
+
+        assertNotNull( identifiableObjectManager.getByName( DataElement.class, "DataElementA" ) );
+        assertNull( identifiableObjectManager.getByName( DataElement.class, "DataElementB" ) );
+        assertEquals( dataElement, identifiableObjectManager.getByName( DataElement.class, "DataElementA" ) );
+    }
+
+    @Test
+    public void getAllEqualToName()
+    {
+        OrganisationUnit organisationUnitA1 = createOrganisationUnit( 'A' );
+        organisationUnitA1.setCode( null );
+        identifiableObjectManager.save( organisationUnitA1 );
+
+        OrganisationUnit organisationUnitA2 = createOrganisationUnit( 'B' );
+        organisationUnitA2.setName( "OrganisationUnitA" );
+        organisationUnitA2.setCode( null );
+        identifiableObjectManager.save( organisationUnitA2 );
+
+        assertEquals( 2, identifiableObjectManager.getAllByName( OrganisationUnit.class, "OrganisationUnitA" ).size() );
+        assertEquals( 0, identifiableObjectManager.getAllByName( OrganisationUnit.class, "organisationunita" ).size() );
+    }
+
+    @Test
+    public void getAllEqualToNameIgnoreCase()
+    {
+        OrganisationUnit organisationUnitA1 = createOrganisationUnit( 'A' );
+        organisationUnitA1.setCode( null );
+        identifiableObjectManager.save( organisationUnitA1 );
+
+        OrganisationUnit organisationUnitA2 = createOrganisationUnit( 'B' );
+        organisationUnitA2.setName( "OrganisationUnitA" );
+        organisationUnitA2.setCode( null );
+        identifiableObjectManager.save( organisationUnitA2 );
+
+        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "OrganisationUnitA" ).size() );
+        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "organisationunita" ).size() );
+    }
+
+    @Test
+    public void getAllLikeName()
+    {
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+
+        assertEquals( 4, identifiableObjectManager.getLikeName( DataElement.class, "DataElement" ).size() );
+        assertEquals( 4, identifiableObjectManager.getLikeName( DataElement.class, "dataElement" ).size() );
+    }
+
+    @Test
+    public void getAllLikeShortName()
+    {
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+
+        assertEquals( 4, identifiableObjectManager.getLikeShortName( DataElement.class, "DataElementShort" ).size() );
+        assertEquals( 4, identifiableObjectManager.getLikeShortName( DataElement.class, "dataElementSHORT" ).size() );
+    }
+
+    @Test
+    public void getAllOrderedName()
+    {
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+
+        List<DataElement> dataElements = new ArrayList<>( identifiableObjectManager.getAllSorted( DataElement.class ) );
+
+        assertEquals( 4, dataElements.size() );
+        assertEquals( "DataElementA", dataElements.get( 0 ).getName() );
+        assertEquals( "DataElementB", dataElements.get( 1 ).getName() );
+        assertEquals( "DataElementC", dataElements.get( 2 ).getName() );
+        assertEquals( "DataElementD", dataElements.get( 3 ).getName() );
+    }
+
+    @Test
+    public void getAllOrderedLastUpdated()
+    {
+        identifiableObjectManager.save( createDataElement( 'A' ) );
+        identifiableObjectManager.save( createDataElement( 'B' ) );
+        identifiableObjectManager.save( createDataElement( 'C' ) );
+        identifiableObjectManager.save( createDataElement( 'D' ) );
+
+        List<DataElement> dataElements = new ArrayList<>( identifiableObjectManager.getAllSortedByLastUpdated( DataElement.class ) );
+
+        assertEquals( 4, dataElements.size() );
+        assertEquals( "DataElementD", dataElements.get( 0 ).getName() );
+        assertEquals( "DataElementC", dataElements.get( 1 ).getName() );
+        assertEquals( "DataElementB", dataElements.get( 2 ).getName() );
+        assertEquals( "DataElementA", dataElements.get( 3 ).getName() );
     }
 
     @Test

@@ -256,6 +256,34 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Collection<T> getAllByName( Class<T> clazz, String name )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (Collection<T>) store.getAllEqName( name );
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Collection<T> getAllByNameIgnoreCase( Class<T> clazz, String name )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (Collection<T>) store.getAllEqNameIgnoreCase( name );
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public <T extends IdentifiableObject> Collection<T> getAllSorted( Class<T> clazz )
     {
@@ -267,6 +295,20 @@ public class DefaultIdentifiableObjectManager
         }
 
         return (Collection<T>) store.getAllOrderedName();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T extends IdentifiableObject> Collection<T> getAllSortedByLastUpdated( Class<T> clazz )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (Collection<T>) store.getAllOrderedLastUpdated();
     }
 
     @Override
