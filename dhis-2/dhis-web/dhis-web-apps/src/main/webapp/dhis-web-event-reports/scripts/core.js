@@ -2168,7 +2168,7 @@ Ext.onReady( function() {
 				};
 
 				doRowTotals = function() {
-					return !!xLayout.showTotals;
+					return !!xLayout.showRowTotals;
 				};
 
                 doColTotals = function() {

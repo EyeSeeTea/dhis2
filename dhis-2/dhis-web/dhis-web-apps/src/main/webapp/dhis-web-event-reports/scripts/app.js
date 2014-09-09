@@ -2147,8 +2147,11 @@ Ext.onReady( function() {
 				favorite = Ext.clone(ns.app.layout);
 
 				// sync
-				favorite.totals = favorite.showTotals;
-				delete favorite.showTotals;
+				favorite.rowTotals = favorite.showRowTotals;
+				delete favorite.showRowTotals;
+                
+				favorite.colTotals = favorite.showColTotals;
+				delete favorite.showColTotals;
 
 				favorite.subtotals = favorite.showSubTotals;
 				delete favorite.showSubTotals;
@@ -6139,10 +6142,10 @@ Ext.onReady( function() {
                         
 						// sync
 						config.showRowTotals = config.rowTotals;
-						delete config.showRowTotals;
+						delete config.rowTotals;
                         
 						config.showColTotals = config.colTotals;
-						delete config.showColTotals;
+						delete config.colTotals;
 
 						config.showSubTotals = config.subtotals;
 						delete config.subtotals;
