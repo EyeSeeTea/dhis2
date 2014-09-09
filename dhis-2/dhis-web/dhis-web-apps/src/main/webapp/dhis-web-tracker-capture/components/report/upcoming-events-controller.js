@@ -1,6 +1,7 @@
 trackerCapture.controller('UpcomingEventsController',
          function($scope,
                 $modal,
+                orderByFilter,
                 DateUtils,
                 EventUtils,
                 TEIService,
@@ -43,8 +44,8 @@ trackerCapture.controller('UpcomingEventsController',
     //watch for selection of program
     $scope.$watch('selectedProgram', function() {   
         if( angular.isObject($scope.selectedProgram)){            
+            $scope.reportFinished = false;
             $scope.reportStarted = false;
-            $scope.dataReady = false;
         }
     });
     
@@ -60,16 +61,25 @@ trackerCapture.controller('UpcomingEventsController',
             return false;
         }
         
+        $scope.reportFinished = false;
         $scope.reportStarted = true;
-        $scope.dataReady = false;
         
         $scope.programStages = [];
+        $scope.filterTypes = {};
+        $scope.filterText = {}; 
         angular.forEach($scope.selectedProgram.programStages, function(stage){
             $scope.programStages[stage.id] = stage;
         });
             
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
-            $scope.attributes = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode.name);   
+            $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode.name);
+
+            $scope.gridColumns.push({name: 'upcoming_event', id: 'upcoming_event', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
+            $scope.filterTypes['upcoming_event'] = 'string';                
+
+            $scope.gridColumns.push({name: 'due_date', id: 'due_date', type: 'date', displayInListNoProgram: false, showFilter: false, show: true});
+            $scope.filterTypes['due_date'] = 'date';
+            $scope.filterText['due_date']= {};                
         });  
         
         //fetch TEIs for the selected program and orgunit/mode
@@ -85,7 +95,7 @@ trackerCapture.controller('UpcomingEventsController',
             var teis = TEIGridService.format(data,true);     
             $scope.teiList = [];            
             DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.selectedProgram.id, null, null).then(function(eventList){
-                $scope.dhis2Events = [];   
+                $scope.dhis2Events = [];
                 angular.forEach(eventList, function(ev){
                     if(ev.dueDate){
                         ev.dueDate = DateUtils.format(ev.dueDate);
@@ -118,99 +128,84 @@ trackerCapture.controller('UpcomingEventsController',
                         }                        
                     }
                 });
-                $scope.reportStarted = false;
-                $scope.dataReady = true;                
+                
+                //incase a TEI happens to have more than one overdue, sort using duedate
+                for(var tei in $scope.dhis2Events){                    
+                    $scope.dhis2Events[tei] = orderByFilter($scope.dhis2Events[tei], '-dueDate');
+                    $scope.dhis2Events[tei].reverse();                    
+                }
+                
+                //make upcoming event name and its due date part of the grid column
+                for(var i=0; i<$scope.teiList.length; i++){
+                    $scope.teiList[i].upcoming_event = $scope.dhis2Events[$scope.teiList[i].id][0].name;
+                    $scope.teiList[i].due_date = $scope.dhis2Events[$scope.teiList[i].id][0].dueDate;
+                }
+               
+                $scope.reportFinished = true;
+                $scope.reportStarted = false;                
             });
         });
     };
     
-    $scope.showReschedule = function(dhis2Event, selectedTei){
+    $scope.showHideColumns = function(){
+        
+        $scope.hiddenGridColumns = 0;
+        
+        angular.forEach($scope.gridColumns, function(gridColumn){
+            if(!gridColumn.show){
+                $scope.hiddenGridColumns++;
+            }
+        });
         
         var modalInstance = $modal.open({
-            templateUrl: 'components/report/rescheduling.html',
-            controller: 'ReschedulingController',
+            templateUrl: 'views/column-modal.html',
+            controller: 'ColumnDisplayController',
             resolve: {
-                dhis2Event: function () {
-                    return dhis2Event;
+                gridColumns: function () {
+                    return $scope.gridColumns;
                 },
-                attributes: function(){
-                    return $scope.attributes;
-                },
-                selectedTei: function(){
-                    return selectedTei;
-                },
-                entityName: function(){
-                    return $scope.selectedProgram.trackedEntity.name;
+                hiddenGridColumns: function(){
+                    return $scope.hiddenGridColumns;
                 }
             }
         });
 
-        modalInstance.result.then({
+        modalInstance.result.then(function (gridColumns) {
+            $scope.gridColumns = gridColumns;
+        }, function () {
         });
-    };    
-})
-
-//Controller for event details
-.controller('ReschedulingController', 
-    function($scope, 
-            $modalInstance,            
-            DHIS2EventFactory,
-            dhis2Event,
-            selectedTei,
-            attributes,
-            entityName){
-    
-    $scope.selectedTei = selectedTei;
-    $scope.attributes = attributes;
-    $scope.entityName = entityName;    
-    $scope.currentEvent = dhis2Event;
-    
-    
-    $scope.save = function(){
-        
-        
-        if($scope.currentEvent.dueDate == ''){
-            $scope.invalidDate = true;
-            return false;
-        }
-        else{
-            var rawDate = $filter('date')($scope.currentEvent.dueDate, 'yyyy-MM-dd'); 
-            var convertedDate = moment($scope.currentEvent.dueDate, 'YYYY-MM-DD')._d;
-            convertedDate = $filter('date')(convertedDate, 'yyyy-MM-dd'); 
-
-            if(rawDate !== convertedDate){
-                $scope.invalidDate = true;
-                return false;
-            } 
-
-            var e = {event: $scope.currentEvent.event,
-                 enrollment: $scope.currentEvent.enrollment,
-                 dueDate: $scope.currentEvent.dueDate,
-                 status: $scope.currentEvent.status,
-                 program: $scope.currentEvent.program,
-                 programStage: $scope.currentEvent.programStage,
-                 orgUnit: $scope.currentEvent.orgUnit,
-                 trackedEntityInstance: $scope.currentEvent.trackedEntityInstance
-                };
-
-            DHIS2EventFactory.update(e).then(function(data){            
-                $scope.invalidDate = false;
-                $scope.dueDateSaved = true;
-                $scope.currentEvent.sortingDate = $scope.currentEvent.dueDate;                
-                var statusColor = EventUtils.getEventStatusColor($scope.currentEvent);  
-                var continueLoop = true;
-                for(var i=0; i< $scope.dhis2Events.length && continueLoop; i++){
-                    if($scope.dhis2Events[i].event === $scope.currentEvent.event ){
-                        $scope.dhis2Events[i].statusColor = statusColor;
-                        continueLoop = false;
-                    }
-                } 
-            });
-        }
-        
     };
     
-    $scope.close = function () {
-        $modalInstance.close();
+    $scope.sortTEIGrid = function(gridHeader){
+        if ($scope.sortHeader === gridHeader.id){
+            $scope.reverse = !$scope.reverse;
+            return;
+        }        
+        $scope.sortHeader = gridHeader.id;
+        $scope.reverse = false;    
+    };
+    
+    $scope.searchInGrid = function(gridColumn){
+        
+        $scope.currentFilter = gridColumn;
+       
+        for(var i=0; i<$scope.gridColumns.length; i++){
+            
+            //toggle the selected grid column's filter
+            if($scope.gridColumns[i].id === gridColumn.id){
+                $scope.gridColumns[i].showFilter = !$scope.gridColumns[i].showFilter;
+            }            
+            else{
+                $scope.gridColumns[i].showFilter = false;
+            }
+        }
+    };    
+    
+    $scope.removeStartFilterText = function(gridColumnId){
+        $scope.filterText[gridColumnId].start = undefined;
+    };
+    
+    $scope.removeEndFilterText = function(gridColumnId){
+        $scope.filterText[gridColumnId].end = undefined;
     };
 });

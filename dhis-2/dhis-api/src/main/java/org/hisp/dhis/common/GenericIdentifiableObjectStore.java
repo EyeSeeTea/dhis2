@@ -167,6 +167,22 @@ public interface GenericIdentifiableObjectStore<T>
     List<T> getAllOrderedLastUpdated( int first, int max );
 
     /**
+     * Gets the count of objects which name is equal the given name.
+     *
+     * @param name the name which result object names must be like.
+     * @return the count of objects.
+     */
+    int getCountEqName( String name );
+
+    /**
+     * Gets the count of objects which shortName is equal the given shortName.
+     *
+     * @param shortName the shortName which result object shortNames must be like.
+     * @return the count of objects.
+     */
+    int getCountEqShortName( String shortName );
+
+    /**
      * Gets the count of objects which name is like the given name.
      *
      * @param name the name which result object names must be like.
@@ -199,6 +215,8 @@ public interface GenericIdentifiableObjectStore<T>
      */
     List<T> getByUidNoAcl( Collection<String> uids );
 
+    int getCountGeCreated( Date created );
+
     /**
      * Returns all objects that are equal to or newer than given date.
      *
@@ -222,6 +240,15 @@ public interface GenericIdentifiableObjectStore<T>
      * @param lastUpdated Date to compare to.
      * @return All objects equal or newer than given date.
      */
+    List<T> getAllGeCreatedOrderedName( Date created );
+
+    /**
+     * Returns all objects that are equal to or newer than given date.
+     * (ordered by name)
+     *
+     * @param lastUpdated Date to compare to.
+     * @return All objects equal or newer than given date.
+     */
     List<T> getAllGeLastUpdatedOrderedName( Date lastUpdated );
 
     /**
@@ -230,7 +257,7 @@ public interface GenericIdentifiableObjectStore<T>
      * @param lastUpdated Date to compare to.
      * @return the number of objects equal or newer than given date.
      */
-    long getCountGeLastUpdated( Date lastUpdated );
+    int getCountGeLastUpdated( Date lastUpdated );
 
     /**
      * Retrieves objects associated with the given user.
