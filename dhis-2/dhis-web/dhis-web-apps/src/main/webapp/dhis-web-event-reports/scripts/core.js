@@ -308,6 +308,8 @@ Ext.onReady( function() {
 
 				// showHierarchy: boolean (false)
 
+                // showDimensionLabels: boolean (false)
+
 				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
 
 				// fontSize: string ('normal') - 'small', 'normal', 'large'
@@ -483,6 +485,7 @@ Ext.onReady( function() {
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
+					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
@@ -2058,7 +2061,7 @@ Ext.onReady( function() {
 					htmlArray;
 
 				xResponse.sortableIdObjects = [];
-xLayout.showDimensionLabels = true;
+                
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
@@ -2202,7 +2205,6 @@ xLayout.showDimensionLabels = true;
                         else {
                             if (xRowAxis && xRowAxis.dims) {                                
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
-console.log("name", dimConf.objectNameMap, xLayout.rowObjectNames[j]);
                                     a.push(getEmptyNameTdConfig({
                                         cls: 'pivot-dim-label',
                                         htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name
