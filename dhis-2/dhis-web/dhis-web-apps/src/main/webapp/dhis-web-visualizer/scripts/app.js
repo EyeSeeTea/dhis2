@@ -2319,6 +2319,7 @@ Ext.onReady( function() {
             area,
             pie,
             radar,
+            gauge,
             chartType,
             getDimensionStore,
             colStore,
@@ -2505,6 +2506,17 @@ Ext.onReady( function() {
             }
         });
 
+        gauge = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: ns.core.conf.finals.chart.gauge,
+            icon: 'images/gauge.png',
+            name: ns.core.conf.finals.chart.gauge,
+            tooltipText: NS.i18n.gauge_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
         chartType = Ext.create('Ext.toolbar.Toolbar', {
             height: 45,
             style: 'padding-top:1px; border:0 none; border-bottom:1px solid #ddd',
@@ -2555,7 +2567,8 @@ Ext.onReady( function() {
                 line,
                 area,
                 pie,
-                radar
+                radar,
+                gauge
             ]
         });
 

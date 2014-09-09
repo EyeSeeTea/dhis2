@@ -116,7 +116,8 @@ Ext.onReady( function() {
                     line: 'line',
                     area: 'area',
                     pie: 'pie',
-                    radar: 'radar'
+                    radar: 'radar',
+                    gauge: 'gauge'
                 },
                 data: {
                     domain: 'domain_',
@@ -2390,39 +2391,38 @@ Ext.onReady( function() {
                     };
                 };
 
-                getDefaultChart = function(store, axes, series, theme) {
+                getDefaultChart = function(config) {
                     var chart,
-                        config = {
-							//renderTo: init.el,
-                            store: store,
-                            axes: axes,
-                            series: series,
+                        store = config.store || {},
+                        defaultConfig = {
                             animate: true,
                             shadow: false,
                             insetPadding: 35,
                             width: ns.app.centerRegion.getWidth() - 15,
                             height: ns.app.centerRegion.getHeight() - 40,
-                            theme: theme || 'dv1'
+                            theme: 'dv1'
                         };
 
-                    // Legend
+                    // legend
                     if (!xLayout.hideLegend) {
-                        config.legend = getDefaultLegend(store);
+                        defaultConfig.legend = getDefaultLegend(store);
 
-                        if (config.legend.position === 'right') {
-                            config.insetPadding = 40;
+                        if (defaultConfig.legend.position === 'right') {
+                            defaultConfig.insetPadding = 40;
                         }
                     }
 
-                    // Title
+                    // title
                     if (!xLayout.hideTitle) {
-                        config.items = [getDefaultChartTitle(store)];
+                        defaultConfig.items = [getDefaultChartTitle(store)];
                     }
                     else {
-                        config.insetPadding = 10;
+                        defaultConfig.insetPadding = 10;
                     }
 
-                    chart = Ext.create('Ext.chart.Chart', config);
+                    Ext.apply(defaultConfig, config);
+
+                    chart = Ext.create('Ext.chart.Chart', defaultConfig);
 
                     chart.setChartSize = getDefaultChartSizeHandler();
                     chart.setTitlePosition = getDefaultChartTitlePositionHandler();
@@ -2463,7 +2463,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.stackedcolumn = function() {
@@ -2545,7 +2549,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.stackedbar = function() {
@@ -2629,7 +2637,11 @@ Ext.onReady( function() {
                         }
                     });
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.area = function() {
@@ -2666,7 +2678,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.pie = function() {
@@ -2727,7 +2743,11 @@ Ext.onReady( function() {
                     });
 
                     // Chart
-                    chart = getDefaultChart(store, null, series);
+                    chart = getDefaultChart({
+                        store: store,
+                        series: series
+                    });
+                    
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
@@ -2776,7 +2796,12 @@ Ext.onReady( function() {
                         series.push(obj);
                     }
 
-                    chart = getDefaultChart(store, axes, series, 'Category2');
+                    chart = getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series,
+                        theme: 'Category2'
+                    });
 
                     chart.insetPadding = 40;
                     chart.height = ns.app.centerRegion.getHeight() - 80;
@@ -2786,6 +2811,65 @@ Ext.onReady( function() {
                         this.setWidth(ns.app.centerRegion.getWidth());
                         this.setHeight(ns.app.centerRegion.getHeight() - 80);
                         this.animate = true;
+                    };
+
+                    return chart;
+                };
+
+                generator.gauge = function() {
+                    var store = getDefaultStore(),
+                        axis,
+                        series,
+                        legend,
+                        config,
+                        chart;
+
+                    axis = {
+                        type: 'gauge',
+                        position: 'gauge',
+                        minimum: 0,
+                        maximum: 100,
+                        steps: 10,
+                        margin: -7
+                    };
+
+                    series = {
+                        type: 'gauge',
+                        field: store.rangeFields[0],
+                        //donut: 5,
+                        colorSet: ['#82B525', '#ddd']
+                    };
+
+                    chart = getDefaultChart({
+                        axes: [axis],
+                        series: [series],
+                        width: ns.app.centerRegion.getWidth(),
+                        height: ns.app.centerRegion.getHeight() * 0.6,
+                        store: store,
+                        insetPadding: 100,
+                        theme: null,
+                        animate: {
+                            easing: 'elasticIn',
+                            duration: 1000
+                        }
+                    });
+
+                    chart.setChartSize = function() {
+						this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() * 0.6);
+                        this.animate = true;
+                    };
+
+                    chart.setTitlePosition = function() {
+                        if (this.items) {
+                            var title = this.items[0],
+                                titleX = (ns.app.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
+
+                            title.setAttributes({
+                                x: titleX
+                            }, true);
+                        }
                     };
 
                     return chart;
