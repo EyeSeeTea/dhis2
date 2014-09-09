@@ -3465,7 +3465,7 @@ Ext.onReady( function() {
 			load = function(dataElements) {
                 var attributes = attributeStorage[programId],
                     data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
-
+                    
 				dataElementsByStageStore.loadData(data);
 
                 if (layout) {
@@ -3617,11 +3617,10 @@ Ext.onReady( function() {
         });
 
         addUxFromDataElement = function(element, index) {
-			var getUxType,
+			var getUxType,            
 				ux;
 
             element.type = element.type || element.valueType;
-
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
@@ -3669,6 +3668,10 @@ Ext.onReady( function() {
 			};
 
 			dataElementsByStageStore.removeAt(dataElementsByStageStore.findExact('id', element.id));
+console.log("element", element);            
+
+            // add to dimConf, TODO bad practice
+            dimConf.objectNameMap[element.id] = element;
 
             return ux;
 		};
@@ -6125,7 +6128,7 @@ Ext.onReady( function() {
 					},
 					success: function(r) {
 						var config = Ext.decode(r.responseText);
-
+                        
 						// sync
 						config.showTotals = config.totals;
 						delete config.totals;
@@ -6188,6 +6191,16 @@ Ext.onReady( function() {
 							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
+
+                        // add to dimConf, TODO
+                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                            header = response.headers[i];
+                            map[header.name] = map[header.name] || {
+                                id: header.name,
+                                dimensionName: header.name,
+                                name: header.column
+                            };
+                        }
 
                         web.mask.show(ns.app.centerRegion, 'Creating table..');
 
