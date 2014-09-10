@@ -2326,7 +2326,6 @@ Ext.onReady( function() {
                 };
 
                 getDefaultChartTitle = function(store) {
-                    //var ids = filterIds,
                     var ids = [],
                         text = '',
                         fontSize,

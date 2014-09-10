@@ -2557,7 +2557,7 @@ Ext.onReady( function() {
             items: [
                 {
                     xtype: 'label',
-                    text: NS.i18n.chart_type,
+                    text: NS.i18n.type,
                     style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
                 },
                 column,
