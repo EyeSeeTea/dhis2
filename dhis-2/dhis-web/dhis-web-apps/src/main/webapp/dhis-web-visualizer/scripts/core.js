@@ -2326,14 +2326,21 @@ Ext.onReady( function() {
                 };
 
                 getDefaultChartTitle = function(store) {
-                    var ids = filterIds,
-                        a = [],
+                    //var ids = filterIds,
+                    var ids = [],
                         text = '',
-                        fontSize;
+                        fontSize,
+                        isPie = xLayout.type === conf.finals.chart.pie,
+                        isGauge = xLayout.type === conf.finals.chart.gauge;
 
-                    if (xLayout.type === conf.finals.chart.pie) {
-                        ids = ids.concat(columnIds);
+                    if (isPie) {
+                        ids = Ext.Array.clean(ids.concat(columnIds || []));
                     }
+                    else if (isGauge) {
+                        ids.push(columnIds[0], rowIds[0]);
+                    }
+
+                    ids = Ext.Array.clean(ids.concat(filterIds || []));
 
                     if (Ext.isArray(ids) && ids.length) {
                         for (var i = 0; i < ids.length; i++) {
