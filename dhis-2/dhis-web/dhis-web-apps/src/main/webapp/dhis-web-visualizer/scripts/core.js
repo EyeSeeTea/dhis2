@@ -2860,14 +2860,16 @@ Ext.onReady( function() {
                         }
                     });
 
-                    chart.items.push(Ext.create('Ext.draw.Sprite', {
-                        type: 'text',
-                        text: store.getRange()[0].data[columnIds[0]],
-                        font: 'normal 26px ' + conf.chart.style.fontFamily,
-                        fill: '#111',
-                        height: 40,
-                        y: 	60
-                    }));
+                    if (xLayout.showValues) {
+                        chart.items.push(Ext.create('Ext.draw.Sprite', {
+                            type: 'text',
+                            text: store.getRange()[0].data[columnIds[0]],
+                            font: 'normal 26px ' + conf.chart.style.fontFamily,
+                            fill: '#111',
+                            height: 40,
+                            y: 	60
+                        }));
+                    }
 
                     chart.setChartSize = function() {
 						this.animate = false;
@@ -2879,17 +2881,21 @@ Ext.onReady( function() {
                     chart.setTitlePosition = function() {
                         if (this.items) {
                             var title = this.items[0],
-                                titleX = (ns.app.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2),
-                                subTitle = this.items[1],
-                                subTitleX = (ns.app.centerRegion.getWidth() / 2) - (subTitle.el.getWidth() / 2);
+                                subTitle = this.items[1];
 
-                            title.setAttributes({
-                                x: titleX
-                            }, true);
-                            
-                            subTitle.setAttributes({
-                                x: subTitleX
-                            }, true);
+                            if (title) {
+                                var titleX = (ns.app.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
+                                title.setAttributes({
+                                    x: titleX
+                                }, true);
+                            }
+
+                            if (subTitle) {
+                                var subTitleX = (ns.app.centerRegion.getWidth() / 2) - (subTitle.el.getWidth() / 2);
+                                subTitle.setAttributes({
+                                    x: subTitleX
+                                }, true);
+                            }
                         }
                     };
 
