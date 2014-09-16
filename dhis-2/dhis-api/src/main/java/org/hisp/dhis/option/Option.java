@@ -35,8 +35,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * @author Chau Thu Tran
- *
- * @version $ Option.java Jul 28, 2014 4:28:53 PM $
  */
 @JacksonXmlRootElement( localName = "option", namespace = DxfNamespaces.DXF_2_0 )
 public class Option

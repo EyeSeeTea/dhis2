@@ -42,6 +42,7 @@ import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.Dashboard;
+import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
@@ -72,6 +73,7 @@ import org.hisp.dhis.mapping.MapLegend;
 import org.hisp.dhis.mapping.MapLegendSet;
 import org.hisp.dhis.mapping.MapView;
 import org.hisp.dhis.message.MessageConversation;
+import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
@@ -130,6 +132,8 @@ public class MetaData
 
     private List<Interpretation> interpretations = new ArrayList<>();
 
+    private List<Option> options = new ArrayList<>();
+
     private List<OptionSet> optionSets = new ArrayList<>();
 
     private List<DataElementCategory> categories = new ArrayList<>();
@@ -145,6 +149,8 @@ public class MetaData
     private List<CategoryOptionGroupSet> categoryOptionGroupSets = new ArrayList<>();
 
     private List<DataElementOperand> dataElementOperands = new ArrayList<>();
+
+    private List<DashboardItem> dashboardItems = new ArrayList<>();
 
     private List<Dashboard> dashboards = new ArrayList<>();
 
@@ -359,6 +365,19 @@ public class MetaData
     public void setDataElements( List<DataElement> dataElements )
     {
         this.dataElements = dataElements;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "options", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "option", namespace = DxfNamespaces.DXF_2_0 )
+    public List<Option> getOptions()
+    {
+        return options;
+    }
+
+    public void setOptions( List<Option> options )
+    {
+        this.options = options;
     }
 
     @JsonProperty
@@ -749,6 +768,19 @@ public class MetaData
     public void setConstants( List<Constant> constants )
     {
         this.constants = constants;
+    }
+
+    @JsonProperty
+    @JacksonXmlElementWrapper( localName = "dashboardItems", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "dashboardItem", namespace = DxfNamespaces.DXF_2_0 )
+    public List<DashboardItem> getDashboardItems()
+    {
+        return dashboardItems;
+    }
+
+    public void setDashboardItems( List<DashboardItem> dashboardItems )
+    {
+        this.dashboardItems = dashboardItems;
     }
 
     @JsonProperty
