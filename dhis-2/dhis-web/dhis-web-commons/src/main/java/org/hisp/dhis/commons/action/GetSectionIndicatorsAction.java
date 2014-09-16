@@ -1,5 +1,16 @@
 package org.hisp.dhis.commons.action;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.paging.ActionPagingSupport;
+
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -28,25 +39,8 @@ package org.hisp.dhis.commons.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.paging.ActionPagingSupport;
-
-/**
- * @author mortenoh
- */
-public class GetSectionDataElementsAction
-    extends ActionPagingSupport<DataElement>
+public class GetSectionIndicatorsAction
+    extends ActionPagingSupport<Indicator>
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -57,13 +51,6 @@ public class GetSectionDataElementsAction
     public void setDataSetService( DataSetService dataSetService )
     {
         this.dataSetService = dataSetService;
-    }
-
-    private DataElementCategoryService categoryService;
-
-    public void setCategoryService( DataElementCategoryService categoryService )
-    {
-        this.categoryService = categoryService;
     }
 
     // -------------------------------------------------------------------------
@@ -77,18 +64,11 @@ public class GetSectionDataElementsAction
         this.dataSetId = dataSetId;
     }
 
-    private Integer categoryComboId;
+    private List<Indicator> indicators = new ArrayList<>();
 
-    public void setCategoryComboId( Integer categoryComboId )
+    public List<Indicator> getIndicators()
     {
-        this.categoryComboId = categoryComboId;
-    }
-
-    private List<DataElement> dataElements = new ArrayList<>();
-
-    public List<DataElement> getDataElements()
-    {
-        return dataElements;
+        return indicators;
     }
 
     // -------------------------------------------------------------------------
@@ -99,38 +79,22 @@ public class GetSectionDataElementsAction
     public String execute()
         throws Exception
     {
-        if ( dataSetId == null || categoryComboId == null )
+        if ( dataSetId == null )
         {
             return SUCCESS;
         }
-
+        
         DataSet dataSet = dataSetService.getDataSet( dataSetId );
-
-        DataElementCategoryCombo categoryCombo = categoryService.getDataElementCategoryCombo( categoryComboId );
-
-        dataElements = new ArrayList<>( dataSet.getDataElements() );
-
+        
+        indicators = new ArrayList<>( dataSet.getIndicators() );
+        
         for ( Section section : dataSet.getSections() )
         {
-            dataElements.removeAll( section.getDataElements() );
+            indicators.removeAll( section.getIndicators() );
         }
-
-        categoryCombo = categoryService.getDataElementCategoryCombo( categoryComboId );
-
-        Iterator<DataElement> iterator = dataElements.iterator();
-
-        while ( iterator.hasNext() )
-        {
-            DataElement dataElement = iterator.next();
-
-            if ( !dataElement.getCategoryCombo().getName().equalsIgnoreCase( categoryCombo.getName() ) )
-            {
-                iterator.remove();
-            }
-        }
-
-        Collections.sort( dataElements, IdentifiableObjectNameComparator.INSTANCE );
-
+        
+        Collections.sort( indicators, IdentifiableObjectNameComparator.INSTANCE );
+        
         return SUCCESS;
     }
 }
