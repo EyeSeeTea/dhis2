@@ -11,7 +11,7 @@ function removeMessage( id )
 
 function removeMessages( messages )
 {
-    if( messages.length < 1 )
+    if( typeof messages === "undefined" || messages.length < 1 )
     {
         return;
     }
@@ -254,7 +254,7 @@ function formatItem( item )
             var $checkbox = $( options.checkbox );
             var $slaveCheckboxes = $checkboxContainer.find( "input:checkbox" );
 
-            var $button = $( "<a>", { href: "#" });
+            var $button = $( "<a>", { href: "#" } );
             $button.addClass( options.buttonClass );
 
             $button.append( $( options.checkbox ) );
@@ -297,7 +297,7 @@ function formatItem( item )
                 el.click( function() {
                     var checked = getCheckedValues( $checkboxContainer );
 
-                    $checkbox.removeAttr( "checked" ); // TODO Use private function
+                    $checkbox.removeAttr( "checked" );
                     $slaveCheckboxes.removeAttr( "checked" );
 
                     return window[ el.action ]( checked );
