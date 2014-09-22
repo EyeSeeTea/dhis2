@@ -53,6 +53,7 @@ import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -109,7 +110,21 @@ public class MessageConversationController
     public RootNode getObject( @PathVariable String uid, Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
-        // TODO implement access control for this method (and possibly getEntityList)
+        MessageConversation messageConversation = messageService.getMessageConversation( uid );
+
+        if( messageConversation == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            RootNode responseNode = new RootNode( "reply" );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversation found with UID: " + uid ) );
+            return responseNode;
+        }
+
+        if( !canReadMessageConversation( currentUserService.getCurrentUser(), messageConversation ) )
+        {
+            throw new AccessDeniedException( "Not authorized to access this conversation." );
+        }
+
         return super.getObject( uid, parameters, request, response );
     }
 
@@ -285,7 +300,7 @@ public class MessageConversationController
         if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given uids." ) );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
             return responseNode;
         }
 
@@ -336,7 +351,7 @@ public class MessageConversationController
         if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given uids." ) );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
             return responseNode;
         }
 
@@ -456,7 +471,7 @@ public class MessageConversationController
         if( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
-            responseNode.addChild( new SimpleNode( "message", "Invalid conversation UIDs given" ) );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
             return responseNode;
         }
 
@@ -495,5 +510,17 @@ public class MessageConversationController
     private boolean canModifyUserConversation( User currentUser, User user )
     {
         return currentUser.equals( user ) || currentUser.getUserCredentials().hasAnyAuthority( AclService.ACL_OVERRIDE_AUTHORITIES );
+    }
+
+    /**
+     * Determines whether the given user has permission to read the MessageConversation.
+     *
+     * @param user the user to check permission for.
+     * @param messageConversation the MessageConversation to access.
+     * @return true if the user can read the MessageConversation, false otherwise.
+     */
+    private boolean canReadMessageConversation( User user, MessageConversation messageConversation )
+    {
+        return messageConversation.getUsers().contains( user ) || user.getUserCredentials().hasAnyAuthority( AclService.ACL_OVERRIDE_AUTHORITIES );
     }
 }
