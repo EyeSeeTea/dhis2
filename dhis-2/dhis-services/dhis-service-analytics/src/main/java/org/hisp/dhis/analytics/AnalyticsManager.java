@@ -48,7 +48,7 @@ public interface AnalyticsManager
      * @param params the query to retrieve aggregated data for.
      * @return a map.
      */
-    Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params );
+    Future<Map<String, Object>> getAggregatedDataValues( DataQueryParams params );
     
     /**
      * Inserts entries for the aggregation periods mapped to each data period
@@ -59,5 +59,5 @@ public interface AnalyticsManager
      * @param dataPeriodAggregationPeriodMap the mapping between data periods and
      *        aggregation periods for this query.
      */
-    void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap );
+    void replaceDataPeriodsWithAggregationPeriods( Map<String, Object> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap );
 }

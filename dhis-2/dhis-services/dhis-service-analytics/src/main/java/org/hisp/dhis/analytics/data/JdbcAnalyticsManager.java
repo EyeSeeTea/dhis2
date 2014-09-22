@@ -111,7 +111,7 @@ public class JdbcAnalyticsManager
     // -------------------------------------------------------------------------
     
     @Async
-    public Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params )
+    public Future<Map<String, Object>> getAggregatedDataValues( DataQueryParams params )
     {
         try
         {
@@ -134,7 +134,7 @@ public class JdbcAnalyticsManager
         
             log.debug( sql );
     
-            Map<String, Double> map = null;
+            Map<String, Object> map = null;
             
             try
             {
@@ -144,7 +144,7 @@ public class JdbcAnalyticsManager
             {
                 log.info( "Query failed, likely because the requested analytics table does not exist", ex );
                 
-                return new AsyncResult<Map<String, Double>>( new HashMap<String, Double>() );
+                return new AsyncResult<Map<String, Object>>( new HashMap<String, Object>() );
             }
             
             replaceDataPeriodsWithAggregationPeriods( map, params, dataPeriodAggregationPeriodMap );
@@ -159,7 +159,7 @@ public class JdbcAnalyticsManager
         }
     }
     
-    public void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
+    public void replaceDataPeriodsWithAggregationPeriods( Map<String, Object> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
     {
         if ( params.isAggregationType( AVERAGE_INT_DISAGGREGATION ) )
         {
@@ -182,7 +182,7 @@ public class JdbcAnalyticsManager
                 
                 Assert.notNull( periods, dataPeriodAggregationPeriodMap.toString() );
                 
-                Double value = dataValueMap.get( key );
+                Object value = dataValueMap.get( key );
                 
                 for ( NameableObject period : periods )
                 {
@@ -378,10 +378,10 @@ public class JdbcAnalyticsManager
      * Retrieves data from the database based on the given query and SQL and puts
      * into a value key and value mapping.
      */
-    private Map<String, Double> getKeyValueMap( DataQueryParams params, String sql )
+    private Map<String, Object> getKeyValueMap( DataQueryParams params, String sql )
         throws BadSqlGrammarException
     {
-        Map<String, Double> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         
         Timer t = new Timer().start();
         
@@ -391,13 +391,16 @@ public class JdbcAnalyticsManager
         
         while ( rowSet.next() )
         {
-            Double value = rowSet.getDouble( VALUE_ID );
+            Object value = rowSet.getObject( VALUE_ID );
 
-            if ( !measureCriteriaSatisfied( params, value ) )
+            if ( value != null && Double.class.equals( value.getClass() ) )
             {
-                continue;
+                if ( !measureCriteriaSatisfied( params, (Double) value ) )
+                {
+                    continue;
+                }
             }
-            
+
             StringBuilder key = new StringBuilder();
             
             for ( DimensionalObject dim : params.getQueryDimensions() )
