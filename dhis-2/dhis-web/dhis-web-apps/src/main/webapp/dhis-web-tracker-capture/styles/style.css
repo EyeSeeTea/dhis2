@@ -189,6 +189,10 @@ div.paging a.active
     font-weight: bold;
 }
 
+.light-blue {
+    color: #67abcc;
+}
+
 .white {
     color: white;
 }
@@ -260,6 +264,10 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .table-borderless>tbody>tr>td, 
 .table-borderless>tfoot>tr>td {
     border-top: none; 
+}
+
+.listTable th {
+    height: 30px;
 }
 
 .dhis2-table>thead>tr>th, 
@@ -475,6 +483,9 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     margin: -15px !important;    
 }
 
+.add-default-padding {
+    margin: 15px !important;
+}
 .add-default-top-margin {
     margin-top: 15px !important;    
 }
@@ -777,9 +788,9 @@ a:active {
     background-color: #ebebeb;
     cursor: pointer;
 }
+
 @media print {
     #header, #leftBar, .not-printable {
         display: none;
     }
-
 }

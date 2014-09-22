@@ -28,8 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.user.User;
-
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -132,12 +130,29 @@ public interface GenericIdentifiableObjectStore<T>
     List<T> getAllLikeName( String name );
 
     /**
+     * Retrieves a List of objects where the name is like the given name.
+     *
+     * @param name  the name.
+     * @param first the first result object to return.
+     * @param max   the max number of result objects to return.
+     * @return a List of objects.
+     */
+    List<T> getAllLikeName( String name, int first, int max );
+
+    /**
      * Retrieves a List of objects where the shortName is like the given shortName.
      *
      * @param shortName the shortName.
      * @return a List of objects.
      */
     List<T> getAllLikeShortName( String shortName );
+
+    /**
+     * The returned list is ordered by the last updated property descending.
+     *
+     * @return List of objects.
+     */
+    List<T> getAllOrderedLastUpdated();
 
     /**
      * Retrieves the objects determined by the given first result and max result.
@@ -150,15 +165,20 @@ public interface GenericIdentifiableObjectStore<T>
     List<T> getAllOrderedLastUpdated( int first, int max );
 
     /**
-     * Retrieves the objects determined by the given first result and max result
-     * which name is like the given name.
+     * Gets the count of objects which name is equal the given name.
      *
-     * @param name  the name which result object names must be like.
-     * @param first the first result object to return.
-     * @param max   the max number of result objects to return.
-     * @return List of objects.
+     * @param name the name which result object names must be like.
+     * @return the count of objects.
      */
-    List<T> getAllLikeNameOrderedName( String name, int first, int max );
+    int getCountEqName( String name );
+
+    /**
+     * Gets the count of objects which shortName is equal the given shortName.
+     *
+     * @param shortName the shortName which result object shortNames must be like.
+     * @return the count of objects.
+     */
+    int getCountEqShortName( String shortName );
 
     /**
      * Gets the count of objects which name is like the given name.
@@ -169,6 +189,14 @@ public interface GenericIdentifiableObjectStore<T>
     int getCountLikeName( String name );
 
     /**
+     * Gets the count of objects which shortName is like the given shortName.
+     *
+     * @param shortName the shortName which result object shortNames must be like.
+     * @return the count of objects.
+     */
+    int getCountLikeShortName( String shortName );
+
+    /**
      * Retrieves a list of objects referenced by the given List of uids.
      *
      * @param uids a List of uids.
@@ -177,7 +205,7 @@ public interface GenericIdentifiableObjectStore<T>
     List<T> getByUid( Collection<String> uids );
 
     /**
-     * Retrieves a list of objects referenced by the given List of uids. 
+     * Retrieves a list of objects referenced by the given List of uids.
      * Bypasses the ACL system.
      *
      * @param uids a List of uids.
@@ -205,24 +233,33 @@ public interface GenericIdentifiableObjectStore<T>
      * Returns all objects that are equal to or newer than given date.
      * (ordered by name)
      *
+     * @param created Date to compare to.
+     * @return All objects equal or newer than given date.
+     */
+    List<T> getAllGeCreatedOrderedName( Date created );
+
+    /**
+     * Returns all objects that are equal to or newer than given date.
+     * (ordered by name)
+     *
      * @param lastUpdated Date to compare to.
      * @return All objects equal or newer than given date.
      */
     List<T> getAllGeLastUpdatedOrderedName( Date lastUpdated );
 
     /**
-     * Returns the number of objects that are equal to or newer than given date.
+     * Returns the number of objects that are equal to or newer than given last updated date.
      *
      * @param lastUpdated Date to compare to.
      * @return the number of objects equal or newer than given date.
      */
-    long getCountGeLastUpdated( Date lastUpdated );
+    int getCountGeLastUpdated( Date lastUpdated );
 
     /**
-     * Retrieves objects associated with the given user.
+     * Returns the number of objects that are equal to or newer than given created date.
      *
-     * @param user the user.
-     * @return list of objects.
+     * @param created Date to compare to.
+     * @return the number of objects equal or newer than given date.
      */
-    List<T> getByUser( User user );
+    int getCountGeCreated( Date created );
 }

@@ -1,6 +1,7 @@
 
 dhis2.util.namespace( 'dhis2.de' );
 dhis2.util.namespace( 'dhis2.de.event' );
+dhis2.util.namespace( 'dhis2.de.cst' );
 
 // whether current user has any organisation units
 dhis2.de.emptyOrganisationUnits = false;
@@ -75,26 +76,32 @@ dhis2.de.multiOrganisationUnit = false;
 
 // "organisationUnits" object inherited from ouwt.js
 
+// Constants
+
+dhis2.de.cst.defaultType = 'int';
+dhis2.de.cst.defaultName = '[unknown]';
+dhis2.de.cst.dropDownMaxItems = 30;
+dhis2.de.cst.formulaPattern = /#\{.+?\}/g;
+dhis2.de.cst.separator = '.';
+dhis2.de.cst.valueMaxLength = 50000;
+
 // Colors
 
-var COLOR_GREEN = '#b9ffb9';
-var COLOR_YELLOW = '#fffe8c';
-var COLOR_RED = '#ff8a8a';
-var COLOR_ORANGE = '#ff6600';
-var COLOR_WHITE = '#fff';
-var COLOR_GREY = '#ccc';
-var COLOR_BORDER_ACTIVE = '#73ad72';
-var COLOR_BORDER = '#aaa';
-
-var DEFAULT_TYPE = 'int';
-var DEFAULT_NAME = '[unknown]';
+dhis2.de.cst.colorGreen = '#b9ffb9';
+dhis2.de.cst.colorYellow = '#fffe8c';
+dhis2.de.cst.colorRed = '#ff8a8a';
+dhis2.de.cst.colorOrange = '#ff6600';
+dhis2.de.cst.colorWhite = '#fff';
+dhis2.de.cst.colorGrey = '#ccc';
+dhis2.de.cst.colorBorderActive = '#73ad72';
+dhis2.de.cst.colorBorder = '#aaa';
 
 // Form types
 
-var FORMTYPE_CUSTOM = 'custom';
-var FORMTYPE_SECTION = 'section';
-var FORMTYPE_MULTIORG_SECTION = 'multiorg_section';
-var FORMTYPE_DEFAULT = 'default';
+dhis2.de.cst.formTypeCustom = 'custom';
+dhis2.de.cst.formTypeSection = 'section';
+dhis2.de.cst.formTypeMultiOrgSection = 'multiorg_section';
+dhis2.de.cst.formTypeDefault = 'default';
 
 // Events
 
@@ -104,6 +111,8 @@ dhis2.de.event.formReady = "dhis2.de.event.formReady";
 dhis2.de.event.dataValueSaved = "dhis2.de.event.dataValueSaved";
 dhis2.de.event.completed = "dhis2.de.event.completed";
 dhis2.de.event.uncompleted = "dhis2.de.event.uncompleted";
+dhis2.de.event.validationSucces = "dhis2.de.event.validationSuccess";
+dhis2.de.event.validationError = "dhis2.de.event.validationError";
 
 /**
  * Convenience method to be used from inside custom forms. When a function is
@@ -112,12 +121,8 @@ dhis2.de.event.uncompleted = "dhis2.de.event.uncompleted";
  */
 dhis2.de.on = function( event, fn )
 {
-	$( document ).off( event ).on( event, fn );
-}
-
-var EVENT_FORM_LOADED = "dhis-web-dataentry-form-loaded"; // Deprecated
-
-var MAX_DROPDOWN_DISPLAYED = 30;
+    $( document ).off( event ).on( event, fn );
+};
 
 var DAO = DAO || {};
 
@@ -587,7 +592,7 @@ function loadForm()
 	                }
 	
 	                enableSectionFilter();	               
-	                $( document ).trigger( dhis2.de.event.formLoaded );
+	                $( document ).trigger( dhis2.de.event.formLoaded, dhis2.de.currentDataSetId );
 	
 	                loadDataValues();
 	                dhis2.de.insertOptionSets();
@@ -741,7 +746,7 @@ function getDataElementType( dataElementId )
 	}
 
 	console.log( 'Data element not present in data set, falling back to default type: ' + dataElementId );
-	return DEFAULT_TYPE;
+	return dhis2.de.cst.defaultType;
 }
 
 function getDataElementName( dataElementId )
@@ -754,7 +759,7 @@ function getDataElementName( dataElementId )
 	}
 
     console.log( 'Data element not present in form, falling back to default name: ' + dataElementId );
-	return DEFAULT_NAME;
+	return dhis2.de.cst.defaultName;
 }
 
 function getOptionComboName( optionComboId )
@@ -767,7 +772,7 @@ function getOptionComboName( optionComboId )
 	}
 
     console.log( 'Category option combo not present in form, falling back to default name: ' + optionComboId );
-	return DEFAULT_NAME;
+	return dhis2.de.cst.defaultName;
 }
 
 // ----------------------------------------------------------------------------
@@ -828,14 +833,14 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
                     multiDataSetValid = true;
                 }
 
-                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html(item.name).appendTo( '#selectedDataSetId' );
+                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html( item.name ).appendTo( '#selectedDataSetId' );
             } );
 
             $( '#selectDataSetId' ).append( '</optgroup>' );
         }
     }
 
-    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId != null ) {
+    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId ) {
         $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
 
         if ( dhis2.de.inputSelected() && dhis2.de.dataEntryFormIsLoaded ) {
@@ -844,12 +849,13 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
             loadDataValues();
         }
     } 
-    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId != null ) {
+    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId ) {
         $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
         dataSetSelected();
     }
     else {
     	dhis2.de.multiOrganisationUnit = false;
+        dhis2.de.currentDataSetId = null;
 
         clearSectionFilters();
         clearPeriod();
@@ -914,7 +920,7 @@ function getSortedDataSetListForOrgUnits( orgUnits )
             }
         } );
 
-        if ( !found && ( formType == FORMTYPE_SECTION || formType == FORMTYPE_DEFAULT ) )
+        if ( !found && ( formType == dhis2.de.cst.formTypeSection || formType == dhis2.de.cst.formTypeDefault ) )
         {
             filteredDataSetList.push(item);
         }
@@ -931,13 +937,11 @@ function getSortedDataSetListForOrgUnits( orgUnits )
  * Callback for changes in data set list.
  */
 function dataSetSelected()
-{
-    var x = dhis2.de.currentDataSetId;
-    
+{    
     var dataSetId = $( '#selectedDataSetId' ).val();
 
     var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
-    var previousPeriodType = previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
+    var previousPeriodType = !!previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
 
     dhis2.de.currentDataSetId = dataSetId;
     
@@ -949,17 +953,21 @@ function dataSetSelected()
 
         var periodType = dhis2.de.dataSets[dataSetId].periodType;
 
-        if ( periodType != previousPeriodType )
+        var previousPeriodTypeValid = !!( previousPeriodType && previousPeriodType == periodType );
+        
+        if ( !previousPeriodTypeValid )
         {
             displayPeriods();
             clearSectionFilters();
         }
-
-        dhis2.de.currentCategories = dhis2.de.getCategories( dataSetId );
         
+        dhis2.de.currentCategories = dhis2.de.getCategories( dataSetId );
+
+        dhis2.de.setAttributesMarkup();   
+
         dhis2.de.multiOrganisationUnit = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
 
-        if ( dhis2.de.inputSelected() && previousPeriodType && previousPeriodType == periodType )
+        if ( dhis2.de.inputSelected() && previousPeriodTypeValid )
         {
             showLoader();
             loadForm();
@@ -979,8 +987,6 @@ function dataSetSelected()
         clearEntryForm();
         dhis2.de.clearAttributes();
     }
-
-    dhis2.de.updateOptionsStatus();
 }
 
 // -----------------------------------------------------------------------------
@@ -995,10 +1001,9 @@ function periodSelected()
     var periodName = $( '#selectedPeriodId :selected' ).text();
 
     $( '#currentPeriod' ).html( periodName );
-
-    var attributeMarkup = dhis2.de.getAttributesMarkup();
-    $( '#attributeComboDiv' ).html( attributeMarkup );
-
+    
+    dhis2.de.setAttributesMarkup();
+    
     if ( dhis2.de.inputSelected() )
     {    	
         showLoader();
@@ -1164,35 +1169,6 @@ dhis2.de.getCurrentCategoryOptions = function()
 };
 
 /**
- * Updates the options status showing options selected if any.
- */
-dhis2.de.updateOptionsStatus = function()
-{
-    var html = '';
-
-    if ( dhis2.de.currentCategories && dhis2.de.currentCategories.length != 0 )
-    {
-        var prefix = '(';
-        $.safeEach( dhis2.de.currentCategories, function ( idx, category ) {
-            var option = $('#category-' + category.id).val();
-
-            if ( option && option != -1) {
-                var options = dhis2.de.categories[ category.id ].options;
-                var matching = $.grep(options, function (e) {
-                    return e.id == option;
-                });
-                
-                html += prefix + matching[0].name;
-                prefix = ', ';
-            }
-        });
-        html += html.length == 0 ? '' : ')';
-    }
-
-    $( '#currentOptionsSelection' ).html( html );
-};
-
-/**
  * Returns a query param value for the currently selected category options where
  * each option is separated by the ; character.
  */
@@ -1225,6 +1201,15 @@ dhis2.de.optionValidWithinPeriod = function( option, period )
 }
 
 /**
+ * Sets the markup for attribute selections.
+ */
+dhis2.de.setAttributesMarkup = function()
+{
+    var attributeMarkup = dhis2.de.getAttributesMarkup();
+    $( '#attributeComboDiv' ).html( attributeMarkup );
+}
+
+/**
 * Returns markup for drop down boxes to be put in the selection box for the
 * given categories. The empty string is returned if no categories are given. 
 */
@@ -1236,7 +1221,7 @@ dhis2.de.getAttributesMarkup = function()
 
     var options = dhis2.de.getCurrentCategoryOptions();
 
-	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 || period.iso == "" ) {
+	if ( !dhis2.de.currentCategories || dhis2.de.currentCategories.length == 0 || !period ) {
 		return html;
 	}
 	
@@ -1248,7 +1233,7 @@ dhis2.de.getAttributesMarkup = function()
 
 		$.safeEach( category.options, function( idx, option ) {
 			if ( dhis2.de.optionValidWithinPeriod( option, period ) ) {
-				var selected = Ext.Array.contains( options, option.id ) ? " selected" : "";
+				var selected = ( $.inArray( option.id, options ) != -1 ) ? " selected" : "";
 				html += '<option value="' + option.id + '"' + selected + '>' + option.name + '</option>';
 			}
 		} );
@@ -1287,8 +1272,6 @@ dhis2.de.attributeSelected = function( categoryId )
     {
         clearEntryForm();
     }
-
-    dhis2.de.updateOptionsStatus();
 };
 
 // -----------------------------------------------------------------------------
@@ -1338,16 +1321,16 @@ function getAndInsertDataValues()
     $( '.entrytrueonly' ).removeAttr( 'checked' );
     $( '.entryoptionset' ).val( '' );
 
-    $( '.entryfield' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
-    $( '.entryselect' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
-    $( '.indicator' ).css( 'background-color', COLOR_WHITE ).css( 'border', '1px solid ' + COLOR_BORDER );
-    $( '.entrytrueonly' ).css( 'background-color', COLOR_WHITE );
-    $( '.entryoptionset' ).css( 'background-color', COLOR_WHITE );
+    $( '.entryfield' ).css( 'background-color', dhis2.de.cst.colorWhite ).css( 'border', '1px solid ' + dhis2.de.cst.colorBorder );
+    $( '.entryselect' ).css( 'background-color', dhis2.de.cst.colorWhite ).css( 'border', '1px solid ' + dhis2.de.cst.colorBorder );
+    $( '.indicator' ).css( 'background-color', dhis2.de.cst.colorWhite ).css( 'border', '1px solid ' + dhis2.de.cst.colorBorder );
+    $( '.entrytrueonly' ).css( 'background-color', dhis2.de.cst.colorWhite );
+    $( '.entryoptionset' ).css( 'background-color', dhis2.de.cst.colorWhite );
 
     $( '[name="min"]' ).html( '' );
     $( '[name="max"]' ).html( '' );
 
-    $( '.entryfield' ).filter( ':disabled' ).css( 'background-color', COLOR_GREY );
+    $( '.entryfield' ).filter( ':disabled' ).css( 'background-color', dhis2.de.cst.colorGrey );
 
     var params = {
 		periodId : periodId,
@@ -1386,7 +1369,7 @@ function getAndInsertDataValues()
         {
             $( '.indicator' ).attr( 'readonly', 'readonly' );
             $( '.dataelementtotal' ).attr( 'readonly', 'readonly' );
-            $( document ).trigger( dhis2.de.event.dataValuesLoaded );
+            $( document ).trigger( dhis2.de.event.dataValuesLoaded, dhis2.de.currentDataSetId );
         }
 	} );
 }
@@ -1467,7 +1450,7 @@ function insertDataValues( json )
             }
             else if ( $( fieldId ).length > 0 )
             {
-                $( fieldId ).css( 'border-color', COLOR_BORDER_ACTIVE )
+                $( fieldId ).css( 'border-color', dhis2.de.cst.colorBorderActive )
             }	            		
         }
         
@@ -1490,7 +1473,7 @@ function insertDataValues( json )
             if ( dataValue && ( ( value.min && new Number( dataValue ) < new Number(
                 value.min ) ) || ( value.max && new Number( dataValue ) > new Number( value.max ) ) ) )
             {
-                $( valFieldId ).css( 'background-color', COLOR_ORANGE );
+                $( valFieldId ).css( 'background-color', dhis2.de.cst.colorOrange );
             }
 
             dhis2.de.currentMinMaxValueMap[minId] = value.min;
@@ -1543,9 +1526,7 @@ function displayEntryFormCompleted()
     dhis2.de.dataEntryFormIsLoaded = true;
     hideLoader();
     
-    $( document ).trigger( dhis2.de.event.formReady );
-    
-    $( 'body' ).trigger( EVENT_FORM_LOADED ); // Deprecated
+    $( document ).trigger( dhis2.de.event.formReady, dhis2.de.currentDataSetId );
 }
 
 function valueFocus( e )
@@ -1630,14 +1611,6 @@ function getPreviousEntryField( field )
     }
 }
 
-/**
- * Convenience method which can be used in custom form scripts. Do not change.
- */
-function onFormLoad( fn )
-{
-	$( 'body' ).off( EVENT_FORM_LOADED ).on( EVENT_FORM_LOADED, fn );
-}
-
 // -----------------------------------------------------------------------------
 // Data completeness
 // -----------------------------------------------------------------------------
@@ -1649,7 +1622,7 @@ function registerCompleteDataSet()
 		return false;
     }
 	
-	validate( true, function() 
+	dhis2.de.validate( true, function() 
     {
         var params = dhis2.de.storageManager.getCurrentCompleteDataSetParams();
 
@@ -1671,7 +1644,7 @@ function registerCompleteDataSet()
 	        type: 'post',
 	    	success: function( data, textStatus, xhr )
 	        {
-                $( document ).trigger( dhis2.de.event.completed, params );
+                $( document ).trigger( dhis2.de.event.completed, [ dhis2.de.currentDataSetId, params ] );
 	    		disableCompleteButton();
 	    		dhis2.de.storageManager.clearCompleteDataSet( params );
 	        },
@@ -1683,7 +1656,7 @@ function registerCompleteDataSet()
 	        	}
 	        	else // Offline, keep local value
 	        	{
-                    $( document ).trigger( dhis2.de.event.completed, params );
+                    $( document ).trigger( dhis2.de.event.completed, [ dhis2.de.currentDataSetId, params ] );
 	        		disableCompleteButton();
 	        		setHeaderMessage( i18n_offline_notification );
 	        	}
@@ -1722,7 +1695,7 @@ function undoCompleteDataSet()
     	type: 'delete',
     	success: function( data, textStatus, xhr )
         {
-          $( document ).trigger( dhis2.de.event.uncompleted );
+          $( document ).trigger( dhis2.de.event.uncompleted, dhis2.de.currentDataSetId );
           disableUndoButton();
           dhis2.de.storageManager.clearCompleteDataSet( params );
         },
@@ -1734,7 +1707,7 @@ function undoCompleteDataSet()
         	}
         	else // Offline, keep local value
         	{
-                $( document ).trigger( dhis2.de.event.uncompleted );
+                $( document ).trigger( dhis2.de.event.uncompleted, dhis2.de.currentDataSetId );
         		disableUndoButton();
         		setHeaderMessage( i18n_offline_notification );
         	}
@@ -1785,23 +1758,16 @@ function displayUserDetails()
 // Validation
 // -----------------------------------------------------------------------------
 
-function displayValidationDialog( data, height )
+/**
+ * Executes all validation checks.
+ * 
+ * @param ignoreValidationSuccess indicates whether no dialog should be display
+ *        if validation is successful.
+ * @param successCallback the function to execute if validation is successful.                                  
+ */
+dhis2.de.validate = function( ignoreValidationSuccess, successCallback )
 {
-	height = isDefined( height ) ? height : 500;
-	
-	$( '#validationDiv' ).html( data );
-	
-    $( '#validationDiv' ).dialog( {
-        modal: true,
-        title: 'Validation',
-        width: 920,
-        height: height
-    } );
-}
-
-function validate( ignoreSuccessfulValidation, successCallback )
-{
-	var compulsoryCombinationsValid = validateCompulsoryCombinations();
+	var compulsoryCombinationsValid = dhis2.de.validateCompulsoryCombinations();
 	
 	// Check for compulsory combinations and return false if violated
 	
@@ -1810,7 +1776,7 @@ function validate( ignoreSuccessfulValidation, successCallback )
     	var html = '<h3>' + i18n_validation_result + ' &nbsp;<img src="../images/warning_small.png"></h3>' +
         	'<p class="bold">' + i18n_all_values_for_data_element_must_be_filled + '</p>';
 		
-    	displayValidationDialog( html, 300 );
+    	dhis2.de.displayValidationDialog( html, 300 );
 	
 		return false;
 	}
@@ -1836,7 +1802,7 @@ function validate( ignoreSuccessfulValidation, successCallback )
     $( '#validationDiv' ).load( 'validate.action', params, function( response, status, xhr ) {
     	var success = null;
     	
-        if ( status == 'error' && !ignoreSuccessfulValidation )
+        if ( status == 'error' && !ignoreValidationSuccess )
         {
             window.alert( i18n_operation_not_available_offline );
             success = true;  // Accept if offline
@@ -1848,11 +1814,11 @@ function validate( ignoreSuccessfulValidation, successCallback )
         	
         	if ( hasViolations )
         	{
-        		displayValidationDialog( response, 500 );
+        		dhis2.de.displayValidationDialog( response, 500 );
         	}
-        	else if ( !ignoreSuccessfulValidation )
+        	else if ( !ignoreValidationSuccess )
         	{
-        		displayValidationDialog( successHtml, 200 );
+        		dhis2.de.displayValidationDialog( successHtml, 200 );
         	}        	
         }
         
@@ -1860,10 +1826,44 @@ function validate( ignoreSuccessfulValidation, successCallback )
         {
         	successCallback.call();
         }
+        
+        if ( success )
+        {
+        	$( document ).trigger( dhis2.de.event.validationSucces, dhis2.de.currentDataSetId );
+        }
+        else
+    	{
+        	$( document ).trigger( dhis2.de.event.validationError, dhis2.de.currentDataSetId );
+    	}
     } );
 }
 
-function validateCompulsoryCombinations()
+/**
+ * Displays the validation dialog.
+ * 
+ * @param html the html content to display in the dialog.
+ * @param height the height of the dialog.
+ */
+dhis2.de.displayValidationDialog = function( html, height )
+{
+	height = isDefined( height ) ? height : 500;
+	
+	$( '#validationDiv' ).html( html );
+	
+    $( '#validationDiv' ).dialog( {
+        modal: true,
+        title: 'Validation',
+        width: 920,
+        height: height
+    } );
+}
+
+/**
+ * Validates that all category option combinations have all values or no values
+ * per data element given that the fieldCombinationRequired is true for the 
+ * current data set.
+ */
+dhis2.de.validateCompulsoryCombinations = function()
 {
 	var fieldCombinationRequired = dhis2.de.dataSets[dhis2.de.currentDataSetId].fieldCombinationRequired;
 	
@@ -1889,7 +1889,7 @@ function validateCompulsoryCombinations()
                     if ( $.trim( $( this ).val() ).length == 0 )
                     {
                         violations = true;						
-                        $selector.css( 'background-color', COLOR_RED );						
+                        $selector.css( 'background-color', dhis2.de.cst.colorRed );						
                         return false;
                     }
                 } );
@@ -2081,7 +2081,11 @@ function StorageManager()
             if( typeof form !== 'undefined' ) {
                 def.resolve( form.data );
             } else {
-                def.resolve( "A form with that ID is not available. Please clear browser cache and try again." );
+                dhis2.de.storageManager.loadForm( dataSetId ).done(function( data ) {
+                    def.resolve( data );
+                }).fail(function() {
+                    def.resolve( "A form with that ID is not available. Please clear browser cache and try again." );
+                });
             }
         });
 
@@ -2119,6 +2123,24 @@ function StorageManager()
         });
 
         return def.promise();
+    };
+
+    /**
+     * Loads a form directly from the server, does not try to save it in the
+     * browser (so that it doesn't interfere with any current downloads).
+     *
+     * @param dataSetId
+     * @returns {*}
+     */
+    this.loadForm = function( dataSetId )
+    {
+        return $.ajax({
+            url: 'loadForm.action',
+            data: {
+                dataSetId: dataSetId
+            },
+            dataType: 'text'
+        });
     };
 
     /**
@@ -2584,7 +2606,7 @@ dhis2.de.searchOptionSet = function( uid, query, success )
                 var options = [];
 
                 if ( query == null || query == '' ) {
-                    options = obj.optionSet.options.slice( 0, MAX_DROPDOWN_DISPLAYED - 1 );
+                    options = obj.optionSet.options.slice( 0, dhis2.de.cst.dropDownMaxItems - 1 );
                 } 
                 else {
                     query = query.toLowerCase();
@@ -2592,7 +2614,7 @@ dhis2.de.searchOptionSet = function( uid, query, success )
                     for ( var idx=0, len = obj.optionSet.options.length; idx < len; idx++ ) {
                         var item = obj.optionSet.options[idx];
 
-                        if ( options.length >= MAX_DROPDOWN_DISPLAYED ) {
+                        if ( options.length >= dhis2.de.cst.dropDownMaxItems ) {
                             break;
                         }
 

@@ -162,9 +162,11 @@ public class TableAlteror
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name in ( 'Survey', 'OnChange', 'Relative' ))" );
         executeSql( "DELETE FROM periodtype WHERE name in ( 'Survey', 'OnChange', 'Relative' )" );
 
-        // upgrade report table totals
+        // upgrade reporttable and eventreport totals
         executeSql( "UPDATE reporttable SET rowtotals = totals, coltotals = totals" );
         executeSql( "ALTER TABLE reporttable DROP COLUMN totals" );
+        executeSql( "UPDATE eventreport SET rowtotals = totals, coltotals = totals" );
+        executeSql( "ALTER TABLE eventreport DROP COLUMN totals" );
 
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
@@ -430,6 +432,8 @@ public class TableAlteror
         executeSql( "update eventchart set regression = false where regression is null" );
         executeSql( "update eventchart set hidetitle = false where hidetitle is null" );
         executeSql( "update eventchart set hidesubtitle = false where hidesubtitle is null" );
+        executeSql( "update reporttable set showdimensionlabels = false where showdimensionlabels is null" );
+        executeSql( "update eventreport set showdimensionlabels = false where showdimensionlabels is null" );
 
         // move timelydays from system setting => dataset property
         executeSql( "update dataset set timelydays = 15 where timelydays is null" );
@@ -726,7 +730,16 @@ public class TableAlteror
         executeSql( "update expression set missingvaluestrategy = 'SKIP_IF_ANY_VALUE_MISSING' where nullifblank = true or nullifblank is null" );
         executeSql( "update expression set missingvaluestrategy = 'NEVER_SKIP' where nullifblank = false" );
         executeSql( "alter table expression alter column missingvaluestrategy set not null" );
+        executeSql( "alter table expression drop column nullifblank" );
 
+        executeSql( "alter table dataelement drop column sortorder" );
+        executeSql( "alter table indicator drop column sortorder" );
+        executeSql( "alter table dataset drop column sortorder" );
+
+        executeSql( "alter table datavalue alter column value type varchar(50000)" );
+        executeSql( "alter table datavalue alter column comment type varchar(50000)" );
+        executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
+        
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
@@ -1178,10 +1191,6 @@ public class TableAlteror
         if ( result != -1 )
         {
             executeSql( "drop table optionsetmembers" );
-        }
-        else
-        {
-            log.info( "Updated optionvalue table, SQL: " + sql );
         }
     }
 }

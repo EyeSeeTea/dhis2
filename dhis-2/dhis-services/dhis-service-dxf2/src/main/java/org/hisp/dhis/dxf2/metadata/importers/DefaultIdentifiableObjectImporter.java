@@ -41,6 +41,7 @@ import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataentryform.DataEntryForm;
@@ -53,6 +54,7 @@ import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandlerUtils;
+import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
@@ -70,6 +72,7 @@ import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.lang.reflect.Field;
@@ -140,6 +143,654 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     }
 
     private final Class<T> importerClass;
+
+    //-------------------------------------------------------------------------------------------------------
+    // Importer<T> Implementation
+    //-------------------------------------------------------------------------------------------------------
+
+    @Override
+    public ImportTypeSummary importObjects( User user, List<T> objects, ImportOptions options )
+    {
+        this.options = options;
+        this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
+        this.summaryType.setDataValueCount( null );
+
+        if ( objects.isEmpty() )
+        {
+            return summaryType;
+        }
+
+        if ( EventReport.class.isInstance( objects.get( 0 ) ) || EventChart.class.isInstance( objects.get( 0 ) ) )
+        {
+            return summaryType;
+        }
+
+        ObjectHandlerUtils.preObjectsHandlers( objects, objectHandlers );
+
+        for ( T object : objects )
+        {
+            ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
+            importObjectLocal( user, object );
+            ObjectHandlerUtils.postObjectHandlers( object, objectHandlers );
+        }
+
+        ObjectHandlerUtils.postObjectsHandlers( objects, objectHandlers );
+
+        return summaryType;
+    }
+
+    @Override
+    public ImportTypeSummary importObject( User user, T object, ImportOptions options )
+    {
+        this.options = options;
+        this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
+        this.summaryType.setDataValueCount( null );
+
+        if ( object == null )
+        {
+            summaryType.getImportCount().incrementIgnored();
+            return summaryType;
+        }
+
+        ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
+        importObjectLocal( user, object );
+        ObjectHandlerUtils.postObjectHandlers( object, objectHandlers );
+
+        return summaryType;
+    }
+
+    @Override
+    public boolean canHandle( Class<?> clazz )
+    {
+        return importerClass.equals( clazz );
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Generic implementations of deleteObject, newObject, updatedObject
+    //-------------------------------------------------------------------------------------------------------
+
+    /**
+     * Called every time a idObject is to be deleted.
+     *
+     * @param user            User to check
+     * @param persistedObject The current version of the idObject
+     * @return An ImportConflict instance if there was a conflict, otherwise null
+     */
+    protected boolean deleteObject( User user, T persistedObject )
+    {
+        if ( !aclService.canDelete( user, persistedObject ) )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), "Permission denied for deletion of object " + persistedObject.getUid() ) );
+
+            log.debug( "Permission denied for deletion of object " + persistedObject.getUid() );
+
+            return false;
+        }
+
+        log.debug( "Trying to delete object => " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass().getSimpleName() + ")" );
+
+        try
+        {
+            objectBridge.deleteObject( persistedObject );
+        }
+        catch ( Exception ex )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), ex.getMessage() ) );
+            return false;
+        }
+
+        log.debug( "Delete successful." );
+
+        return true;
+    }
+
+
+    /**
+     * Called every time a new idObject is to be imported.
+     *
+     * @param user   User to check
+     * @param object Object to import
+     * @return An ImportConflict instance if there was a conflict, otherwise null
+     */
+    protected boolean newObject( User user, T object )
+    {
+        if ( !aclService.canCreate( user, object.getClass() ) )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( object ), "Permission denied, you are not allowed to create objects of type " + object.getClass() ) );
+
+            log.debug( "Permission denied, you are not allowed to create objects of type " + object.getClass() );
+
+            return false;
+        }
+
+        // make sure that the internalId is 0, so that the system will generate a ID
+        object.setId( 0 );
+        // object.setUser( user );
+        object.setUser( null );
+
+        NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
+        nonIdentifiableObjects.extract( object );
+
+        UserCredentials userCredentials = null;
+
+        if ( object instanceof User )
+        {
+            userCredentials = ((User) object).getUserCredentials();
+
+            if ( userCredentials == null )
+            {
+                summaryType.getImportConflicts().add(
+                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
+
+                return false;
+            }
+        }
+
+        Map<Field, Object> fields = detachFields( object );
+        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
+
+        reattachFields( object, fields );
+
+        log.debug( "Trying to save new object => " + ImportUtils.getDisplayName( object ) + " (" + object.getClass().getSimpleName() + ")" );
+        objectBridge.saveObject( object );
+
+        updatePeriodTypes( object );
+        reattachCollectionFields( object, collectionFields );
+
+        objectBridge.updateObject( object );
+
+        if ( object instanceof User && !options.isDryRun() )
+        {
+            userCredentials.setUser( (User) object );
+            userCredentials.setId( object.getId() );
+
+            Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
+
+            sessionFactory.getCurrentSession().save( userCredentials );
+
+            reattachCollectionFields( userCredentials, collectionFieldsUserCredentials );
+
+            sessionFactory.getCurrentSession().saveOrUpdate( userCredentials );
+
+            ((User) object).setUserCredentials( userCredentials );
+
+            objectBridge.updateObject( object );
+        }
+
+        if ( !options.isDryRun() )
+        {
+            nonIdentifiableObjects.save( object );
+        }
+
+        summaryType.setLastImported( object.getUid() );
+
+        log.debug( "Save successful." );
+
+        return true;
+    }
+
+    /**
+     * Update idObject from old => new.
+     *
+     * @param user            User to check for access.
+     * @param object          Object to import
+     * @param persistedObject The current version of the idObject
+     * @return An ImportConflict instance if there was a conflict, otherwise null
+     */
+    protected boolean updateObject( User user, T object, T persistedObject )
+    {
+        if ( !aclService.canUpdate( user, persistedObject ) )
+        {
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), "Permission denied for update of object " + persistedObject.getUid() ) );
+
+            log.debug( "Permission denied for update of object " + persistedObject.getUid() );
+
+            return false;
+        }
+
+        // for now, don't support ProgramStage, ProgramValidation and EventReport for dryRun
+        if ( (ProgramStage.class.isAssignableFrom( persistedObject.getClass() )
+            || ProgramValidation.class.isAssignableFrom( persistedObject.getClass() )
+            || EventReport.class.isAssignableFrom( persistedObject.getClass() )) && options.isDryRun() )
+        {
+            return true;
+        }
+
+        NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
+        nonIdentifiableObjects.extract( object );
+        nonIdentifiableObjects.delete( persistedObject );
+
+        UserCredentials userCredentials = null;
+
+        if ( object instanceof User )
+        {
+            userCredentials = ((User) object).getUserCredentials();
+
+            if ( userCredentials == null )
+            {
+                summaryType.getImportConflicts().add(
+                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
+
+                return false;
+            }
+        }
+
+        Map<Field, Object> fields = detachFields( object );
+        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
+
+        reattachFields( object, fields );
+
+        persistedObject.mergeWith( object );
+
+        updatePeriodTypes( persistedObject );
+
+        reattachCollectionFields( persistedObject, collectionFields );
+
+        log.debug( "Starting update of object " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass()
+            .getSimpleName() + ")" );
+
+        objectBridge.updateObject( persistedObject );
+
+        if ( !options.isDryRun() )
+        {
+            if ( object instanceof User )
+            {
+                Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
+
+                ((User) persistedObject).getUserCredentials().mergeWith( userCredentials );
+                reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials );
+
+                sessionFactory.getCurrentSession().saveOrUpdate( ((User) persistedObject).getUserCredentials() );
+            }
+
+            nonIdentifiableObjects.save( persistedObject );
+        }
+
+        summaryType.setLastImported( object.getUid() );
+
+        log.debug( "Update successful." );
+
+        return true;
+    }
+
+    private void updatePeriodTypes( T object )
+    {
+        for ( Field field : object.getClass().getDeclaredFields() )
+        {
+            if ( PeriodType.class.isAssignableFrom( field.getType() ) )
+            {
+                PeriodType periodType = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+                periodType = objectBridge.getObject( periodType );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, periodType );
+            }
+        }
+    }
+
+    //-------------------------------------------------------------------------------------------------------
+    // Helpers
+    //-------------------------------------------------------------------------------------------------------
+
+    private void importObjectLocal( User user, T object )
+    {
+        if ( validateIdentifiableObject( object ) )
+        {
+            startImport( user, object );
+        }
+        else
+        {
+            summaryType.incrementIgnored();
+        }
+    }
+
+    private void startImport( User user, T object )
+    {
+        T persistedObject = objectBridge.getObject( object );
+
+        if ( options.getImportStrategy().isCreate() )
+        {
+            if ( newObject( user, object ) )
+            {
+                summaryType.incrementImported();
+            }
+        }
+        else if ( options.getImportStrategy().isUpdate() )
+        {
+            if ( updateObject( user, object, persistedObject ) )
+            {
+                summaryType.incrementUpdated();
+            }
+            else
+            {
+                summaryType.incrementIgnored();
+            }
+        }
+        else if ( options.getImportStrategy().isCreateAndUpdate() )
+        {
+            if ( persistedObject != null )
+            {
+                if ( updateObject( user, object, persistedObject ) )
+                {
+                    summaryType.incrementUpdated();
+                }
+                else
+                {
+                    summaryType.incrementIgnored();
+                }
+            }
+            else
+            {
+                if ( newObject( user, object ) )
+                {
+                    summaryType.incrementImported();
+                }
+                else
+                {
+                    summaryType.incrementIgnored();
+                }
+            }
+        }
+        else if ( options.getImportStrategy().isDelete() )
+        {
+            if ( deleteObject( user, persistedObject ) )
+            {
+                summaryType.incrementDeleted();
+            }
+            else
+            {
+                summaryType.incrementIgnored();
+            }
+        }
+    }
+
+    private boolean validateIdentifiableObject( T object )
+    {
+        ImportConflict conflict = null;
+        boolean success = true;
+
+        if ( options.getImportStrategy().isDelete() )
+        {
+            success = validateForDeleteStrategy( object );
+            return success;
+        }
+
+        if ( (object.getName() == null || object.getName().length() == 0)
+            && !DashboardItem.class.isInstance( object ) )
+        {
+            conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty name for object " + object );
+        }
+
+        if ( NameableObject.class.isInstance( object ) )
+        {
+            NameableObject nameableObject = (NameableObject) object;
+
+            if ( (nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0)
+                // this is nasty, but we have types in the system which have shortName, but which do -not- require not-null )
+                && !TrackedEntityAttribute.class.isAssignableFrom( object.getClass() )
+                && !TrackedEntity.class.isAssignableFrom( object.getClass() )
+                && !DashboardItem.class.isAssignableFrom( object.getClass() ) )
+            {
+                conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty shortName for object " + object );
+            }
+        }
+
+        if ( conflict != null )
+        {
+            summaryType.getImportConflicts().add( conflict );
+        }
+
+        if ( options.getImportStrategy().isCreate() )
+        {
+            success = validateForNewStrategy( object );
+        }
+        else if ( options.getImportStrategy().isUpdate() )
+        {
+            success = validateForUpdatesStrategy( object );
+        }
+        else if ( options.getImportStrategy().isCreateAndUpdate() )
+        {
+            // if we have a match on at least one of the objects, then assume update
+            if ( objectBridge.getObjects( object ).size() > 0 )
+            {
+                success = validateForUpdatesStrategy( object );
+            }
+            else
+            {
+                success = validateForNewStrategy( object );
+            }
+        }
+
+        return success;
+    }
+
+    private boolean validateForUpdatesStrategy( T object )
+    {
+        ImportConflict conflict = null;
+        Collection<T> objects = objectBridge.getObjects( object );
+
+        if ( objects.isEmpty() )
+        {
+            conflict = reportLookupConflict( object );
+        }
+        else if ( objects.size() > 1 )
+        {
+            conflict = reportMoreThanOneConflict( object );
+        }
+
+        if ( conflict != null )
+        {
+            summaryType.getImportConflicts().add( conflict );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateForNewStrategy( T object )
+    {
+        ImportConflict conflict;
+        Collection<T> objects = objectBridge.getObjects( object );
+
+        if ( objects.size() > 0 )
+        {
+            conflict = reportConflict( object );
+            summaryType.getImportConflicts().add( conflict );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean validateForDeleteStrategy( T object )
+    {
+        ImportConflict conflict = null;
+        Collection<T> objects = objectBridge.getObjects( object );
+
+        if ( objects.isEmpty() )
+        {
+            conflict = reportLookupConflict( object );
+        }
+        else if ( objects.size() > 1 )
+        {
+            conflict = reportMoreThanOneConflict( object );
+        }
+
+        if ( conflict != null )
+        {
+            summaryType.getImportConflicts().add( conflict );
+
+            return false;
+        }
+
+        return true;
+    }
+
+    private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject )
+    {
+        if ( identifiableObject == null )
+        {
+            return null;
+        }
+        else if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
+        {
+            Period period = (Period) identifiableObject;
+
+            if ( !options.isDryRun() )
+            {
+                period = periodService.reloadPeriod( period );
+                sessionFactory.getCurrentSession().flush();
+            }
+
+            return period;
+        }
+
+        return objectBridge.getObject( identifiableObject );
+    }
+
+    private Map<Field, Object> detachFields( final Object object )
+    {
+        final Map<Field, Object> fieldMap = Maps.newHashMap();
+        final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjects );
+
+        for ( Field field : fieldCollection )
+        {
+            Object ref = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+
+            if ( ref != null )
+            {
+                fieldMap.put( field, ref );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, new Object[]{ null } );
+            }
+        }
+
+        return fieldMap;
+    }
+
+    private void reattachFields( Object object, Map<Field, Object> fields )
+    {
+        for ( Field field : fields.keySet() )
+        {
+            IdentifiableObject idObject = (IdentifiableObject) fields.get( field );
+            IdentifiableObject reference = findObjectByReference( idObject );
+
+            if ( reference == null )
+            {
+                if ( schemaService.getSchema( idObject.getClass() ) != null )
+                {
+                    reportReferenceError( object, idObject );
+                }
+            }
+
+            if ( !options.isDryRun() )
+            {
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
+            }
+        }
+    }
+
+    private Map<Field, Collection<Object>> detachCollectionFields( final Object object )
+    {
+        final Map<Field, Collection<Object>> collectionFields = Maps.newHashMap();
+        final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjectCollectionsWithScanned );
+
+        for ( Field field : fieldCollection )
+        {
+            Collection<Object> objects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
+
+            if ( objects != null && !objects.isEmpty() )
+            {
+                collectionFields.put( field, objects );
+                Collection<Object> emptyCollection = ReflectionUtils.newCollectionInstance( field.getType() );
+                ReflectionUtils.invokeSetterMethod( field.getName(), object, emptyCollection );
+            }
+        }
+
+        return collectionFields;
+    }
+
+    private void reattachCollectionFields( final Object idObject, Map<Field, Collection<Object>> collectionFields )
+    {
+        for ( Field field : collectionFields.keySet() )
+        {
+            Collection<Object> collection = collectionFields.get( field );
+            final Collection<Object> objects = ReflectionUtils.newCollectionInstance( field.getType() );
+
+            for ( Object object : collection )
+            {
+                IdentifiableObject ref = findObjectByReference( (IdentifiableObject) object );
+
+                if ( ref != null )
+                {
+                    objects.add( ref );
+                }
+                else
+                {
+                    if ( schemaService.getSchema( idObject.getClass() ) != null || UserCredentials.class.isAssignableFrom( idObject.getClass() ) )
+                    {
+                        reportReferenceError( idObject, object );
+                    }
+                }
+            }
+
+            if ( !options.isDryRun() )
+            {
+                ReflectionUtils.invokeSetterMethod( field.getName(), idObject, objects );
+            }
+        }
+    }
+
+    private ImportConflict reportLookupConflict( IdentifiableObject object )
+    {
+        return new ImportConflict( ImportUtils.getDisplayName( object ), "Object does not exist." );
+    }
+
+    private ImportConflict reportMoreThanOneConflict( IdentifiableObject object )
+    {
+        return new ImportConflict( ImportUtils.getDisplayName( object ), "More than one object matches identifiers." );
+    }
+
+    private ImportConflict reportConflict( IdentifiableObject object )
+    {
+        return new ImportConflict( ImportUtils.getDisplayName( object ), "Object already exists." );
+    }
+
+    public String identifiableObjectToString( Object object )
+    {
+        if ( IdentifiableObject.class.isInstance( object ) )
+        {
+            IdentifiableObject identifiableObject = (IdentifiableObject) object;
+
+            return "IdentifiableObject{" +
+                "id=" + identifiableObject.getId() +
+                ", uid='" + identifiableObject.getUid() + '\'' +
+                ", code='" + identifiableObject.getCode() + '\'' +
+                ", name='" + identifiableObject.getName() + '\'' +
+                ", created=" + identifiableObject.getCreated() +
+                ", lastUpdated=" + identifiableObject.getLastUpdated() +
+                '}';
+        }
+
+        return object != null ? object.toString() : "object is null";
+    }
+
+    private void reportReferenceError( Object object, Object reference )
+    {
+        String objectName = object != null ? object.getClass().getSimpleName() : "null";
+        String referenceName = reference != null ? reference.getClass().getSimpleName() : "null";
+
+        String logMsg = "Unknown reference to " + identifiableObjectToString( reference ) + " (" + referenceName + ")" +
+            " on object " + identifiableObjectToString( object ) + " (" + objectName + ").";
+
+        log.debug( logMsg );
+
+        ImportConflict importConflict = new ImportConflict( ImportUtils.getDisplayName( object ), logMsg );
+        summaryType.getImportConflicts().add( importConflict );
+    }
 
     //-------------------------------------------------------------------------------------------------------
     // Internal state
@@ -253,6 +904,11 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         private Expression extractExpression( T object, String fieldName )
         {
+            if ( !ValidationRule.class.isInstance( object ) )
+            {
+                return null;
+            }
+
             Expression expression = null;
 
             if ( ReflectionUtils.findGetterMethod( fieldName, object ) != null )
@@ -527,639 +1183,5 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             // deletion will be done in extractProgramStageDataElements
             extractProgramStageDataElements( object );
         }
-    }
-
-    //-------------------------------------------------------------------------------------------------------
-    // Generic implementations of deleteObject, newObject, updatedObject
-    //-------------------------------------------------------------------------------------------------------
-
-    /**
-     * Called every time a idObject is to be deleted.
-     *
-     * @param user            User to check
-     * @param persistedObject The current version of the idObject
-     * @return An ImportConflict instance if there was a conflict, otherwise null
-     */
-    protected boolean deleteObject( User user, T persistedObject )
-    {
-        if ( !aclService.canDelete( user, persistedObject ) )
-        {
-            summaryType.getImportConflicts().add(
-                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), "You do not have delete access to class type." ) );
-
-            log.debug( "You do not have delete access to class type." );
-
-            return false;
-        }
-
-        log.debug( "Trying to delete object => " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass().getSimpleName() + ")" );
-
-        try
-        {
-            objectBridge.deleteObject( persistedObject );
-        }
-        catch ( Exception ex )
-        {
-            summaryType.getImportConflicts().add(
-                new ImportConflict( ImportUtils.getDisplayName( persistedObject ), ex.getMessage() ) );
-            return false;
-        }
-
-        log.debug( "Delete successful." );
-
-        return true;
-    }
-
-
-    /**
-     * Called every time a new idObject is to be imported.
-     *
-     * @param user   User to check
-     * @param object Object to import
-     * @return An ImportConflict instance if there was a conflict, otherwise null
-     */
-    protected boolean newObject( User user, T object )
-    {
-        if ( !aclService.canCreate( user, object.getClass() ) )
-        {
-            summaryType.getImportConflicts().add(
-                new ImportConflict( ImportUtils.getDisplayName( object ), "You do not have create access to class type." ) );
-
-            log.debug( "You do not have create access to class type." );
-
-            return false;
-        }
-
-        // make sure that the internalId is 0, so that the system will generate a ID
-        object.setId( 0 );
-        // object.setUser( user );
-        object.setUser( null );
-
-        NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
-        nonIdentifiableObjects.extract( object );
-
-        UserCredentials userCredentials = null;
-
-        if ( object instanceof User )
-        {
-            userCredentials = ((User) object).getUserCredentials();
-
-            if ( userCredentials == null )
-            {
-                summaryType.getImportConflicts().add(
-                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
-
-                return false;
-            }
-        }
-
-        Map<Field, Object> fields = detachFields( object );
-        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
-
-        reattachFields( object, fields );
-
-        log.debug( "Trying to save new object => " + ImportUtils.getDisplayName( object ) + " (" + object.getClass().getSimpleName() + ")" );
-        objectBridge.saveObject( object );
-
-        updatePeriodTypes( object );
-        reattachCollectionFields( object, collectionFields );
-
-        objectBridge.updateObject( object );
-
-        if ( object instanceof User && !options.isDryRun() )
-        {
-            userCredentials.setUser( (User) object );
-            userCredentials.setId( object.getId() );
-
-            Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
-
-            sessionFactory.getCurrentSession().save( userCredentials );
-
-            reattachCollectionFields( userCredentials, collectionFieldsUserCredentials );
-
-            sessionFactory.getCurrentSession().saveOrUpdate( userCredentials );
-
-            ((User) object).setUserCredentials( userCredentials );
-
-            objectBridge.updateObject( object );
-        }
-
-        if ( !options.isDryRun() )
-        {
-            nonIdentifiableObjects.save( object );
-        }
-
-        log.debug( "Save successful." );
-
-        return true;
-    }
-
-    /**
-     * Update idObject from old => new.
-     *
-     * @param user            User to check for access.
-     * @param object          Object to import
-     * @param persistedObject The current version of the idObject
-     * @return An ImportConflict instance if there was a conflict, otherwise null
-     */
-    protected boolean updateObject( User user, T object, T persistedObject )
-    {
-        if ( !aclService.canUpdate( user, persistedObject ) )
-        {
-            summaryType.getImportConflicts().add(
-                new ImportConflict( ImportUtils.getDisplayName( object ), "You do not have update access to object." ) );
-
-            return false;
-        }
-
-        // for now, don't support ProgramStage, ProgramValidation and EventReport for dryRun
-        if ( (ProgramStage.class.isAssignableFrom( persistedObject.getClass() )
-            || ProgramValidation.class.isAssignableFrom( persistedObject.getClass() )
-            || EventReport.class.isAssignableFrom( persistedObject.getClass() )) && options.isDryRun() )
-        {
-            return true;
-        }
-
-        NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects();
-        nonIdentifiableObjects.extract( object );
-        nonIdentifiableObjects.delete( persistedObject );
-
-        UserCredentials userCredentials = null;
-
-        if ( object instanceof User )
-        {
-            userCredentials = ((User) object).getUserCredentials();
-
-            if ( userCredentials == null )
-            {
-                summaryType.getImportConflicts().add(
-                    new ImportConflict( ImportUtils.getDisplayName( object ), "User is missing userCredentials part." ) );
-
-                return false;
-            }
-        }
-
-        Map<Field, Object> fields = detachFields( object );
-        Map<Field, Collection<Object>> collectionFields = detachCollectionFields( object );
-
-        reattachFields( object, fields );
-
-        persistedObject.mergeWith( object );
-
-        updatePeriodTypes( persistedObject );
-
-        reattachCollectionFields( persistedObject, collectionFields );
-
-        log.debug( "Starting update of object " + ImportUtils.getDisplayName( persistedObject ) + " (" + persistedObject.getClass()
-            .getSimpleName() + ")" );
-
-        objectBridge.updateObject( persistedObject );
-
-        if ( !options.isDryRun() )
-        {
-            if ( object instanceof User )
-            {
-                Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
-
-                ((User) persistedObject).getUserCredentials().mergeWith( userCredentials );
-                reattachCollectionFields( ((User) persistedObject).getUserCredentials(), collectionFieldsUserCredentials );
-
-                sessionFactory.getCurrentSession().saveOrUpdate( ((User) persistedObject).getUserCredentials() );
-            }
-
-            nonIdentifiableObjects.save( persistedObject );
-        }
-
-        log.debug( "Update successful." );
-
-        return true;
-    }
-
-    private void updatePeriodTypes( T object )
-    {
-        for ( Field field : object.getClass().getDeclaredFields() )
-        {
-            if ( PeriodType.class.isAssignableFrom( field.getType() ) )
-            {
-                PeriodType periodType = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-                periodType = objectBridge.getObject( periodType );
-                ReflectionUtils.invokeSetterMethod( field.getName(), object, periodType );
-            }
-        }
-    }
-
-    //-------------------------------------------------------------------------------------------------------
-    // Importer<T> Implementation
-    //-------------------------------------------------------------------------------------------------------
-
-    @Override
-    public ImportTypeSummary importObjects( User user, List<T> objects, ImportOptions options )
-    {
-        this.options = options;
-        this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
-
-        if ( objects.isEmpty() )
-        {
-            return summaryType;
-        }
-
-        ObjectHandlerUtils.preObjectsHandlers( objects, objectHandlers );
-
-        for ( T object : objects )
-        {
-            ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
-            importObjectLocal( user, object );
-            ObjectHandlerUtils.postObjectHandlers( object, objectHandlers );
-        }
-
-        ObjectHandlerUtils.postObjectsHandlers( objects, objectHandlers );
-
-        return summaryType;
-    }
-
-    @Override
-    public ImportTypeSummary importObject( User user, T object, ImportOptions options )
-    {
-        this.options = options;
-        this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
-
-        if ( object == null )
-        {
-            summaryType.getImportCount().incrementIgnored();
-            return summaryType;
-        }
-
-        ObjectHandlerUtils.preObjectHandlers( object, objectHandlers );
-        importObjectLocal( user, object );
-        ObjectHandlerUtils.postObjectHandlers( object, objectHandlers );
-
-        return summaryType;
-    }
-
-    @Override
-    public boolean canHandle( Class<?> clazz )
-    {
-        return importerClass.equals( clazz );
-    }
-
-    //-------------------------------------------------------------------------------------------------------
-    // Helpers
-    //-------------------------------------------------------------------------------------------------------
-    private void importObjectLocal( User user, T object )
-    {
-        if ( validateIdentifiableObject( object ) )
-        {
-            startImport( user, object );
-        }
-        else
-        {
-            summaryType.incrementIgnored();
-        }
-    }
-
-    private void startImport( User user, T object )
-    {
-        T persistedObject = objectBridge.getObject( object );
-
-        if ( options.getImportStrategy().isCreate() )
-        {
-            if ( newObject( user, object ) )
-            {
-                summaryType.incrementImported();
-            }
-        }
-        else if ( options.getImportStrategy().isUpdate() )
-        {
-            if ( updateObject( user, object, persistedObject ) )
-            {
-                summaryType.incrementUpdated();
-            }
-            else
-            {
-                summaryType.incrementIgnored();
-            }
-        }
-        else if ( options.getImportStrategy().isCreateAndUpdate() )
-        {
-            if ( persistedObject != null )
-            {
-                if ( updateObject( user, object, persistedObject ) )
-                {
-                    summaryType.incrementUpdated();
-                }
-                else
-                {
-                    summaryType.incrementIgnored();
-                }
-            }
-            else
-            {
-                if ( newObject( user, object ) )
-                {
-                    summaryType.incrementImported();
-                }
-                else
-                {
-                    summaryType.incrementIgnored();
-                }
-            }
-        }
-        else if ( options.getImportStrategy().isDelete() )
-        {
-            if ( deleteObject( user, persistedObject ) )
-            {
-                summaryType.incrementDeleted();
-            }
-            else
-            {
-                summaryType.incrementIgnored();
-            }
-        }
-    }
-
-    private boolean validateIdentifiableObject( T object )
-    {
-        ImportConflict conflict = null;
-        boolean success = true;
-
-        if ( options.getImportStrategy().isDelete() )
-        {
-            success = validateForDeleteStrategy( object );
-            return success;
-        }
-
-        if ( object.getName() == null || object.getName().length() == 0 )
-        {
-            conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty name for object " + object );
-        }
-
-        if ( NameableObject.class.isInstance( object ) )
-        {
-            NameableObject nameableObject = (NameableObject) object;
-
-            if ( (nameableObject.getShortName() == null || nameableObject.getShortName().length() == 0)
-                // this is nasty, but we have types in the system which have shortName, but which do -not- require not-null )
-                && !TrackedEntityAttribute.class.isAssignableFrom( object.getClass() )
-                && !TrackedEntity.class.isAssignableFrom( object.getClass() ) )
-            {
-                conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty shortName for object " + object );
-            }
-        }
-
-        if ( conflict != null )
-        {
-            summaryType.getImportConflicts().add( conflict );
-        }
-
-        if ( options.getImportStrategy().isCreate() )
-        {
-            success = validateForNewStrategy( object );
-        }
-        else if ( options.getImportStrategy().isUpdate() )
-        {
-            success = validateForUpdatesStrategy( object );
-        }
-        else if ( options.getImportStrategy().isCreateAndUpdate() )
-        {
-            // if we have a match on at least one of the objects, then assume update
-            if ( objectBridge.getObjects( object ).size() > 0 )
-            {
-                success = validateForUpdatesStrategy( object );
-            }
-            else
-            {
-                success = validateForNewStrategy( object );
-            }
-        }
-
-        return success;
-    }
-
-    private boolean validateForUpdatesStrategy( T object )
-    {
-        ImportConflict conflict = null;
-        Collection<T> objects = objectBridge.getObjects( object );
-
-        if ( objects.isEmpty() )
-        {
-            conflict = reportLookupConflict( object );
-        }
-        else if ( objects.size() > 1 )
-        {
-            conflict = reportMoreThanOneConflict( object );
-        }
-
-        if ( conflict != null )
-        {
-            summaryType.getImportConflicts().add( conflict );
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean validateForNewStrategy( T object )
-    {
-        ImportConflict conflict;
-        Collection<T> objects = objectBridge.getObjects( object );
-
-        if ( objects.size() > 0 )
-        {
-            conflict = reportConflict( object );
-            summaryType.getImportConflicts().add( conflict );
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private boolean validateForDeleteStrategy( T object )
-    {
-        ImportConflict conflict = null;
-        Collection<T> objects = objectBridge.getObjects( object );
-
-        if ( objects.isEmpty() )
-        {
-            conflict = reportLookupConflict( object );
-        }
-        else if ( objects.size() > 1 )
-        {
-            conflict = reportMoreThanOneConflict( object );
-        }
-
-        if ( conflict != null )
-        {
-            summaryType.getImportConflicts().add( conflict );
-
-            return false;
-        }
-
-        return true;
-    }
-
-    private IdentifiableObject findObjectByReference( IdentifiableObject identifiableObject )
-    {
-        if ( identifiableObject == null )
-        {
-            return null;
-        }
-        else if ( Period.class.isAssignableFrom( identifiableObject.getClass() ) )
-        {
-            Period period = (Period) identifiableObject;
-
-            if ( !options.isDryRun() )
-            {
-                period = periodService.reloadPeriod( period );
-                sessionFactory.getCurrentSession().flush();
-            }
-
-            return period;
-        }
-
-        return objectBridge.getObject( identifiableObject );
-    }
-
-    private Map<Field, Object> detachFields( final Object object )
-    {
-        final Map<Field, Object> fieldMap = Maps.newHashMap();
-        final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjects );
-
-        for ( Field field : fieldCollection )
-        {
-            Object ref = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-
-            if ( ref != null )
-            {
-                fieldMap.put( field, ref );
-                ReflectionUtils.invokeSetterMethod( field.getName(), object, new Object[]{ null } );
-            }
-        }
-
-        return fieldMap;
-    }
-
-    private void reattachFields( Object object, Map<Field, Object> fields )
-    {
-        for ( Field field : fields.keySet() )
-        {
-            IdentifiableObject idObject = (IdentifiableObject) fields.get( field );
-            IdentifiableObject reference = findObjectByReference( idObject );
-
-            if ( reference == null )
-            {
-                if ( schemaService.getSchema( idObject.getClass() ) != null )
-                {
-                    reportReferenceError( object, idObject );
-                }
-            }
-
-            if ( !options.isDryRun() )
-            {
-                ReflectionUtils.invokeSetterMethod( field.getName(), object, reference );
-            }
-        }
-    }
-
-    private Map<Field, Collection<Object>> detachCollectionFields( final Object object )
-    {
-        final Map<Field, Collection<Object>> collectionFields = Maps.newHashMap();
-        final Collection<Field> fieldCollection = ReflectionUtils.collectFields( object.getClass(), idObjectCollectionsWithScanned );
-
-        for ( Field field : fieldCollection )
-        {
-            Collection<Object> objects = ReflectionUtils.invokeGetterMethod( field.getName(), object );
-
-            if ( objects != null && !objects.isEmpty() )
-            {
-                collectionFields.put( field, objects );
-                Collection<Object> emptyCollection = ReflectionUtils.newCollectionInstance( field.getType() );
-                ReflectionUtils.invokeSetterMethod( field.getName(), object, emptyCollection );
-            }
-        }
-
-        return collectionFields;
-    }
-
-    private void reattachCollectionFields( final Object idObject, Map<Field, Collection<Object>> collectionFields )
-    {
-        for ( Field field : collectionFields.keySet() )
-        {
-            Collection<Object> collection = collectionFields.get( field );
-            final Collection<Object> objects = ReflectionUtils.newCollectionInstance( field.getType() );
-
-            for ( Object object : collection )
-            {
-                IdentifiableObject ref = findObjectByReference( (IdentifiableObject) object );
-
-                if ( ref != null )
-                {
-                    objects.add( ref );
-                }
-                else
-                {
-                    if ( schemaService.getSchema( idObject.getClass() ) != null || UserCredentials.class.isAssignableFrom( idObject.getClass() ) )
-                    {
-                        reportReferenceError( idObject, object );
-                    }
-                }
-            }
-
-            if ( !options.isDryRun() )
-            {
-                ReflectionUtils.invokeSetterMethod( field.getName(), idObject, objects );
-            }
-        }
-    }
-
-    private ImportConflict reportLookupConflict( IdentifiableObject object )
-    {
-        return new ImportConflict( ImportUtils.getDisplayName( object ), "Object does not exist." );
-    }
-
-    private ImportConflict reportMoreThanOneConflict( IdentifiableObject object )
-    {
-        return new ImportConflict( ImportUtils.getDisplayName( object ), "More than one object matches identifiers." );
-    }
-
-    private ImportConflict reportConflict( IdentifiableObject object )
-    {
-        return new ImportConflict( ImportUtils.getDisplayName( object ), "Object already exists." );
-    }
-
-    public String identifiableObjectToString( Object object )
-    {
-        if ( IdentifiableObject.class.isInstance( object ) )
-        {
-            IdentifiableObject identifiableObject = (IdentifiableObject) object;
-
-            return "IdentifiableObject{" +
-                "id=" + identifiableObject.getId() +
-                ", uid='" + identifiableObject.getUid() + '\'' +
-                ", code='" + identifiableObject.getCode() + '\'' +
-                ", name='" + identifiableObject.getName() + '\'' +
-                ", created=" + identifiableObject.getCreated() +
-                ", lastUpdated=" + identifiableObject.getLastUpdated() +
-                '}';
-        }
-
-        return object.toString();
-    }
-
-    private void reportReferenceError( Object object, Object reference )
-    {
-        String objectName = object != null ? object.getClass().getSimpleName() : "null";
-        String referenceName = reference != null ? reference.getClass().getSimpleName() : "null";
-
-        String logMsg = "Unknown reference to " + identifiableObjectToString( reference ) + " (" + referenceName + ")" +
-            " on object " + identifiableObjectToString( object ) + " (" + objectName + ").";
-
-        log.debug( logMsg );
-
-        ImportConflict importConflict = new ImportConflict( ImportUtils.getDisplayName( object ), logMsg );
-        summaryType.getImportConflicts().add( importConflict );
     }
 }

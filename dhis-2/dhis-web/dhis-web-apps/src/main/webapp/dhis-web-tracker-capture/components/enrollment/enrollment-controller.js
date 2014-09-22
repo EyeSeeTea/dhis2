@@ -28,7 +28,6 @@ trackerCapture.controller('EnrollmentController',
         $scope.hasEnrollmentHistory = false;
         $scope.selectedEnrollment = null;
         $scope.newEnrollment = {};
-        $scope.eventsForRescheduling = [];
         var selections = CurrentSelection.get();
         $scope.selectedTei = angular.copy(selections.tei); 
         $scope.selectedEntity = selections.te;
@@ -39,7 +38,7 @@ trackerCapture.controller('EnrollmentController',
         
         if($scope.selectedProgram){             
             EnrollmentService.getByEntityAndProgram($scope.selectedTei.trackedEntityInstance, $scope.selectedProgram.id).then(function(data){
-                $scope.enrollments = data.enrollments;
+                $scope.enrollments = data.enrollments;                
                 $scope.loadEnrollmentDetails();                
             });
         }
@@ -84,11 +83,11 @@ trackerCapture.controller('EnrollmentController',
                 
                 var incidentDate = $scope.selectedEnrollment ? $scope.selectedEnrollment.dateOfIncident : new Date();
 
-                angular.forEach($scope.selectedProgram.programStages, function(stage){                
-                    stage.dueDate = moment(moment(incidentDate).add('d', stage.minDaysFromStart), 'YYYY-MM-DD')._d;
-                    stage.dueDate = Date.parse(stage.dueDate);
-                    stage.dueDate = DateUtils.format(stage.dueDate);//$filter('date')(stage.dueDate, 'yyyy-MM-dd');
-                    $scope.programStages.push(stage);               
+                angular.forEach($scope.selectedProgram.programStages, function(stage){                    
+                    
+                    stage.dueDate = DateUtils.format(incidentDate);
+                    stage.dueDate = moment(moment(incidentDate).add('d', stage.minDaysFromStart))._d;
+                    stage.dueDate = DateUtils.format(stage.dueDate);
                 });
             }
             else{//prepare for possible enrollment
@@ -108,7 +107,6 @@ trackerCapture.controller('EnrollmentController',
                 });                
             }           
         }
-        
         $scope.broadCastSelections('dashboardWidgets');
     };
         
@@ -173,7 +171,7 @@ trackerCapture.controller('EnrollmentController',
                         //enrollment has failed
                         var dialogOptions = {
                                 headerText: 'enrollment_error',
-                                bodyText: data.description
+                                bodyText: enrollmentResponse.description
                             };
                         DialogService.showDialog({}, dialogOptions);
                         return;
@@ -240,7 +238,7 @@ trackerCapture.controller('EnrollmentController',
 
         ModalService.showModal({}, modalOptions).then(function(result){
             
-            EnrollmentService.cancelled($scope.selectedEnrollment).then(function(data){                
+            EnrollmentService.cancel($scope.selectedEnrollment).then(function(data){                
                 $scope.selectedEnrollment.status = 'CANCELLED';
                 $scope.loadEnrollmentDetails();                
             });
@@ -258,7 +256,7 @@ trackerCapture.controller('EnrollmentController',
 
         ModalService.showModal({}, modalOptions).then(function(result){
             
-            EnrollmentService.completed($scope.selectedEnrollment).then(function(data){                
+            EnrollmentService.complete($scope.selectedEnrollment).then(function(data){                
                 $scope.selectedEnrollment.status = 'COMPLETED';
                 $scope.loadEnrollmentDetails();                
             });
@@ -292,5 +290,10 @@ trackerCapture.controller('EnrollmentController',
                 });
             }
         }
+    };
+    
+    $scope.markForFollowup = function(){
+        EnrollmentService.update($scope.selectedEnrollment).then(function(data){         
+        });
     };
 });

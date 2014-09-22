@@ -1,5 +1,3 @@
-package org.hisp.dhis.indicator.comparator;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -27,30 +25,58 @@ package org.hisp.dhis.indicator.comparator;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.dd.action.category;
 
-import java.util.Comparator;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 
-import org.hisp.dhis.indicator.Indicator;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
- * @version $Id$
+ * @author Chau Thu Tran
+ *
+ * @version $ UpdateCategoryOptionComboAction.java Sep 12, 2014 6:56:40 PM $
  */
-public class IndicatorSortOrderComparator
-    implements Comparator<Indicator>
+public class GetCategoryOptionComboAction
+    implements Action
 {
-    public int compare( Indicator indicator0, Indicator indicator1 )
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
     {
-        if ( indicator0.getSortOrder() == null || indicator0.getSortOrder() == 0 )
-        {
-            return indicator0.getName().compareTo( indicator1.getName() );
-        }
-        
-        if ( indicator1.getSortOrder() == null || indicator1.getSortOrder() == 0 )
-        {
-            return indicator0.getName().compareTo( indicator1.getName() );
-        }
-        
-        return indicator0.getSortOrder() - indicator1.getSortOrder();
+        this.categoryService = categoryService;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input && Output
+    // -------------------------------------------------------------------------
+
+    private int id;
+
+    public void setId( int id )
+    {
+        this.id = id;
+    }
+
+    private DataElementCategoryOptionCombo optionCombo;
+
+    public DataElementCategoryOptionCombo getOptionCombo()
+    {
+        return optionCombo;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    public String execute()
+    {
+        optionCombo = categoryService.getDataElementCategoryOptionCombo( id );
+
+        return SUCCESS;
     }
 }
