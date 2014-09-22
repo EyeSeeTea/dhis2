@@ -105,6 +105,7 @@ public class DataElement
     public static final String AGGREGATION_OPERATOR_VARIANCE = "variance";
     public static final String AGGREGATION_OPERATOR_MIN = "min";
     public static final String AGGREGATION_OPERATOR_MAX = "max";
+    public static final String AGGREGATION_OPERATOR_NONE = "none";
     
     /**
      * The name to appear in forms.
@@ -123,8 +124,8 @@ public class DataElement
     private DataElementDomain domainType;
 
     /**
-     * The value type of this DataElement; e.g. DataElement.VALUE_TYPE_INT or
-     * DataElement.VALUE_TYPE_BOOL.
+     * The value type of this DataElement; e.g. DataElement.VALUE_TYPE_INT,
+     * DataElement.VALUE_TYPE_BOOL or DataElement.VALUE_TYPE_STRING.
      */
     private String type;
 

@@ -32,10 +32,11 @@ import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.COUNT;
+import static org.hisp.dhis.analytics.AggregationType.MAX;
+import static org.hisp.dhis.analytics.AggregationType.MIN;
 import static org.hisp.dhis.analytics.AggregationType.STDDEV;
 import static org.hisp.dhis.analytics.AggregationType.VARIANCE;
-import static org.hisp.dhis.analytics.AggregationType.MIN;
-import static org.hisp.dhis.analytics.AggregationType.MAX;
+import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
 import static org.hisp.dhis.analytics.MeasureFilter.EQ;
 import static org.hisp.dhis.analytics.MeasureFilter.GE;
@@ -47,7 +48,6 @@ import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
-import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,6 +61,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsManager;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.DataType;
 import org.hisp.dhis.analytics.MeasureFilter;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
@@ -205,6 +206,24 @@ public class JdbcAnalyticsManager
     private String getSelectClause( DataQueryParams params )
     {
         String sql = "select " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() ) + ", ";
+
+        if ( params.isDataType( DataType.TEXT ) )
+        {
+            sql += "textvalue";
+        }
+        else
+        {
+            sql += getNumericValueColumn( params );
+        }
+        
+        sql += " as value ";
+        
+        return sql;        
+    }
+    
+    private String getNumericValueColumn( DataQueryParams params )
+    {
+        String sql = "";
         
         if ( params.isAggregationType( AVERAGE_INT ) )
         {
@@ -241,9 +260,7 @@ public class JdbcAnalyticsManager
             sql += "sum(value)";
         }
         
-        sql += " as value ";
-        
-        return sql;        
+        return sql;
     }
     
     /**
@@ -347,7 +364,12 @@ public class JdbcAnalyticsManager
      */
     private String getGroupByClause( DataQueryParams params )
     {
-        String sql = "group by " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() );
+        String sql = "";
+        
+        if ( params.isAggregation() )
+        {
+            sql = "group by " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() );
+        }
         
         return sql;
     }
