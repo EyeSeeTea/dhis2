@@ -71,103 +71,106 @@
     var multiCheckboxMenu = $.fn.multiCheckboxMenu;
 
     $.fn.multiCheckboxMenu = function( $checkboxContainer, options ) {
-        if( typeof options === "object" ) {
-            var $cb = $( "<input>", { type: "checkbox" } );
-            options = $.extend( true, options , {
-                checkbox: $cb,
-                buttonElements: [
-                    $( "<span>", { "class": "downArrow" } )
-                ],
-                menuClass: "multiSelectMenu",
-                buttonClass: "multiSelectButton"
-            });
 
-            var $checkbox = $( options.checkbox );
-            var $slaveCheckboxes = $checkboxContainer.find( "input:checkbox" );
-
-            var $button = $( "<a>", { href: "#" } );
-            $button.addClass( options.buttonClass );
-
-            $button.append( $( options.checkbox ) );
-
-            $( options.buttonElements ).each( function() {
-                $button.append( $( this ) );
-            });
-
-            $( this ).find( "div:first" ).append($button);
-
-            var $menu = $( this ).find( "ul" );
-            $menu.addClass( options.menuClass );
-            $menu.css( "visibility", "hidden" );
-            $menu.position({
-                my: "left top",
-                at: "left bottom",
-                of: $button
-            });
-
-            $button.click( function ( event ) {
-                $( document ).one( "click", function() {
-                    $menu.css( "visibility", "hidden" );
-                });
-
-                if( $menu.css( "visibility" ) !== "visible" )
-                {
-                    $menu.css( "visibility", "visible" );
-                }
-                else
-                {
-                    $menu.css( "visibility", "hidden" );
-                }
-                event.stopPropagation();
-            });
-
-            $menu.find( "li" ).each( function() {
-                var el = $( this );
-                el.action = this.getAttribute( "data-action" );
-
-                if( typeof el.action === "undefined" )
-                {
-                    el.action = function(){};
-                }
-
-                el.click( function() {
-                    var checked = getCheckedValues( $checkboxContainer );
-
-                    $checkbox.removeAttr( "checked" );
-                    $slaveCheckboxes.removeAttr( "checked" );
-
-                    return window[ el.action ]( checked );
-                });
-            });
-
-            $checkbox.click( function( event ) {
-                if( this.checked )
-                {
-                    $slaveCheckboxes.attr( "checked", "checked" );
-                }
-                else
-                {
-                    $slaveCheckboxes.removeAttr( "checked" );
-                }
-                event.stopPropagation();
-            });
-
-            $slaveCheckboxes.click( function() {
-                var checked = $slaveCheckboxes.filter( ":checked" );
-
-                if( checked.length < 1 )
-                {
-                    $checkbox.removeAttr( "checked" );
-                }
-                else if( checked.length > 0 && checked.length < $slaveCheckboxes.length )
-                {
-                    $checkbox.removeAttr( "checked" );
-                }
-                else
-                {
-                    $checkbox.attr( "checked", "checked" );
-                }
-            });
+        if( typeof options !== "object" ) {
+            options = {};
         }
+
+        var $cb = $( "<input>", { type: "checkbox" } );
+        options = $.extend( true, options , {
+            checkbox: $cb,
+            buttonElements: [
+                $( "<span>", { "class": "downArrow" } )
+            ],
+            menuClass: "multiSelectMenu",
+            buttonClass: "multiSelectButton"
+        });
+
+        var $checkbox = $( options.checkbox );
+        var $slaveCheckboxes = $checkboxContainer.find( "input:checkbox" );
+
+        var $button = $( "<a>", { href: "#" } );
+        $button.addClass( options.buttonClass );
+
+        $button.append( $( options.checkbox ) );
+
+        $( options.buttonElements ).each( function() {
+            $button.append( $( this ) );
+        });
+
+        $( this ).find( "div:first" ).append($button);
+
+        var $menu = $( this ).find( "ul" );
+        $menu.addClass( options.menuClass );
+        $menu.css( "visibility", "hidden" );
+        $menu.position({
+            my: "left top",
+            at: "left bottom",
+            of: $button
+        });
+
+        $button.click( function ( event ) {
+            $( document ).one( "click", function() {
+                $menu.css( "visibility", "hidden" );
+            });
+
+            if( $menu.css( "visibility" ) !== "visible" )
+            {
+                $menu.css( "visibility", "visible" );
+            }
+            else
+            {
+                $menu.css( "visibility", "hidden" );
+            }
+            event.stopPropagation();
+        });
+
+        $menu.find( "li" ).each( function() {
+            var el = $( this );
+            el.action = this.getAttribute( "data-action" );
+
+            if( typeof el.action === "undefined" )
+            {
+                el.action = function(){};
+            }
+
+            el.click( function() {
+                var checked = getCheckedValues( $checkboxContainer );
+
+                $checkbox.removeAttr( "checked" );
+                $slaveCheckboxes.removeAttr( "checked" );
+
+                return window[ el.action ]( checked );
+            });
+        });
+
+        $checkbox.click( function( event ) {
+            if( this.checked )
+            {
+                $slaveCheckboxes.attr( "checked", "checked" );
+            }
+            else
+            {
+                $slaveCheckboxes.removeAttr( "checked" );
+            }
+            event.stopPropagation();
+        });
+
+        $slaveCheckboxes.click( function() {
+            var checked = $slaveCheckboxes.filter( ":checked" );
+
+            if( checked.length < 1 )
+            {
+                $checkbox.removeAttr( "checked" );
+            }
+            else if( checked.length > 0 && checked.length < $slaveCheckboxes.length )
+            {
+                $checkbox.removeAttr( "checked" );
+            }
+            else
+            {
+                $checkbox.attr( "checked", "checked" );
+            }
+        });
     };
 })( jQuery );
