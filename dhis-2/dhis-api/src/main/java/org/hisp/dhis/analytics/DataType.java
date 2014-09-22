@@ -1,4 +1,4 @@
-package org.hisp.dhis.calendar.impl;
+package org.hisp.dhis.analytics;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,38 +28,10 @@ package org.hisp.dhis.calendar.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.calendar.Calendar;
-import org.hisp.dhis.calendar.ChronologyBasedCalendar;
-import org.joda.time.chrono.GregorianChronology;
-import org.springframework.stereotype.Component;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Component
-public class GregorianCalendar extends ChronologyBasedCalendar
+public enum DataType
 {
-    private static final Calendar self = new GregorianCalendar();
-
-    public static Calendar getInstance()
-    {
-        return self;
-    }
-
-    protected GregorianCalendar()
-    {
-        super( GregorianChronology.getInstance() );
-    }
-
-    @Override
-    public String name()
-    {
-        return "gregorian";
-    }
-
-    @Override
-    public boolean isIso8601()
-    {
-        return true;
-    }
+    NUMERIC, TEXT;
 }

@@ -83,6 +83,7 @@ dhis2.de.cst.defaultName = '[unknown]';
 dhis2.de.cst.dropDownMaxItems = 30;
 dhis2.de.cst.formulaPattern = /#\{.+?\}/g;
 dhis2.de.cst.separator = '.';
+dhis2.de.cst.valueMaxLength = 50000;
 
 // Colors
 
@@ -121,10 +122,7 @@ dhis2.de.event.validationError = "dhis2.de.event.validationError";
 dhis2.de.on = function( event, fn )
 {
     $( document ).off( event ).on( event, fn );
-}
-
-var EVENT_FORM_LOADED = "dhis-web-dataentry-form-loaded"; // Deprecated
-var EVENT_VALUE_SAVED = 'dhis-web-dataentry-value-saved'; // Deprecated
+};
 
 var DAO = DAO || {};
 
@@ -594,7 +592,7 @@ function loadForm()
 	                }
 	
 	                enableSectionFilter();	               
-	                $( document ).trigger( dhis2.de.event.formLoaded );
+	                $( document ).trigger( dhis2.de.event.formLoaded, dhis2.de.currentDataSetId );
 	
 	                loadDataValues();
 	                dhis2.de.insertOptionSets();
@@ -1371,7 +1369,7 @@ function getAndInsertDataValues()
         {
             $( '.indicator' ).attr( 'readonly', 'readonly' );
             $( '.dataelementtotal' ).attr( 'readonly', 'readonly' );
-            $( document ).trigger( dhis2.de.event.dataValuesLoaded );
+            $( document ).trigger( dhis2.de.event.dataValuesLoaded, dhis2.de.currentDataSetId );
         }
 	} );
 }
@@ -1528,9 +1526,7 @@ function displayEntryFormCompleted()
     dhis2.de.dataEntryFormIsLoaded = true;
     hideLoader();
     
-    $( document ).trigger( dhis2.de.event.formReady );
-    
-    $( 'body' ).trigger( EVENT_FORM_LOADED ); // Deprecated
+    $( document ).trigger( dhis2.de.event.formReady, dhis2.de.currentDataSetId );
 }
 
 function valueFocus( e )
@@ -1615,14 +1611,6 @@ function getPreviousEntryField( field )
     }
 }
 
-/**
- * Convenience method which can be used in custom form scripts. Do not change.
- */
-function onFormLoad( fn )
-{
-	$( 'body' ).off( EVENT_FORM_LOADED ).on( EVENT_FORM_LOADED, fn );
-}
-
 // -----------------------------------------------------------------------------
 // Data completeness
 // -----------------------------------------------------------------------------
@@ -1656,7 +1644,7 @@ function registerCompleteDataSet()
 	        type: 'post',
 	    	success: function( data, textStatus, xhr )
 	        {
-                $( document ).trigger( dhis2.de.event.completed, params );
+                $( document ).trigger( dhis2.de.event.completed, [ dhis2.de.currentDataSetId, params ] );
 	    		disableCompleteButton();
 	    		dhis2.de.storageManager.clearCompleteDataSet( params );
 	        },
@@ -1668,7 +1656,7 @@ function registerCompleteDataSet()
 	        	}
 	        	else // Offline, keep local value
 	        	{
-                    $( document ).trigger( dhis2.de.event.completed, params );
+                    $( document ).trigger( dhis2.de.event.completed, [ dhis2.de.currentDataSetId, params ] );
 	        		disableCompleteButton();
 	        		setHeaderMessage( i18n_offline_notification );
 	        	}
@@ -1707,7 +1695,7 @@ function undoCompleteDataSet()
     	type: 'delete',
     	success: function( data, textStatus, xhr )
         {
-          $( document ).trigger( dhis2.de.event.uncompleted );
+          $( document ).trigger( dhis2.de.event.uncompleted, dhis2.de.currentDataSetId );
           disableUndoButton();
           dhis2.de.storageManager.clearCompleteDataSet( params );
         },
@@ -1719,7 +1707,7 @@ function undoCompleteDataSet()
         	}
         	else // Offline, keep local value
         	{
-                $( document ).trigger( dhis2.de.event.uncompleted );
+                $( document ).trigger( dhis2.de.event.uncompleted, dhis2.de.currentDataSetId );
         		disableUndoButton();
         		setHeaderMessage( i18n_offline_notification );
         	}
@@ -1841,11 +1829,11 @@ dhis2.de.validate = function( ignoreValidationSuccess, successCallback )
         
         if ( success )
         {
-        	$( document ).trigger( dhis2.de.event.validationSucces );
+        	$( document ).trigger( dhis2.de.event.validationSucces, dhis2.de.currentDataSetId );
         }
         else
     	{
-        	$( document ).trigger( dhis2.de.event.validationError );
+        	$( document ).trigger( dhis2.de.event.validationError, dhis2.de.currentDataSetId );
     	}
     } );
 }
@@ -2093,7 +2081,11 @@ function StorageManager()
             if( typeof form !== 'undefined' ) {
                 def.resolve( form.data );
             } else {
-                def.resolve( "A form with that ID is not available. Please clear browser cache and try again." );
+                dhis2.de.storageManager.loadForm( dataSetId ).done(function( data ) {
+                    def.resolve( data );
+                }).fail(function() {
+                    def.resolve( "A form with that ID is not available. Please clear browser cache and try again." );
+                });
             }
         });
 
@@ -2131,6 +2123,24 @@ function StorageManager()
         });
 
         return def.promise();
+    };
+
+    /**
+     * Loads a form directly from the server, does not try to save it in the
+     * browser (so that it doesn't interfere with any current downloads).
+     *
+     * @param dataSetId
+     * @returns {*}
+     */
+    this.loadForm = function( dataSetId )
+    {
+        return $.ajax({
+            url: 'loadForm.action',
+            data: {
+                dataSetId: dataSetId
+            },
+            dataType: 'text'
+        });
     };
 
     /**

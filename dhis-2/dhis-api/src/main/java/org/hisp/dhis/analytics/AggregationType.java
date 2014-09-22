@@ -41,7 +41,8 @@ public enum AggregationType
     STDDEV( "stddev" ), 
     VARIANCE( "variance" ),
     MIN( "min" ),
-    MAX( "max" );
+    MAX( "max" ),
+    NONE( "none" );
 
     private final String value;
 

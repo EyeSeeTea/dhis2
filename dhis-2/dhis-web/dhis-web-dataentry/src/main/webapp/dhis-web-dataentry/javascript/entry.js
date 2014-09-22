@@ -181,7 +181,7 @@ function saveVal( dataElementId, optionComboId, fieldId )
     {
         if ( type == 'string' || type == 'int' || type == 'number' || type == 'posInt' || type == 'negInt' || type == 'zeroPositiveInt' || type == 'unitInterval' || type == 'percentage' )
         {
-            if ( value.length > 255 )
+            if ( value.length > dhis2.de.cst.valueMaxLength )
             {
                 return dhis2.de.alertField( fieldId, i18n_value_too_long + '\n\n' + dataElementName );
             }
@@ -309,14 +309,6 @@ dhis2.de.alertField = function( fieldId, alertMessage )
     return false;
 }
 
-/**
- * Convenience method which can be used in custom form scripts. Do not change.
- */
-function onValueSave( fn )
-{
-	$( 'body' ).off( EVENT_VALUE_SAVED ).on( EVENT_VALUE_SAVED, fn );
-}
-
 // -----------------------------------------------------------------------------
 // Saver objects
 // -----------------------------------------------------------------------------
@@ -368,9 +360,7 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
     {
     	dhis2.de.storageManager.clearDataValueJSON( dataValue );
         markValue( fieldId, resultColor );
-        $( document ).trigger( dhis2.de.event.dataValueSaved, dataValue );
-        
-        $( 'body' ).trigger( EVENT_VALUE_SAVED, dataValue ); // Deprecated
+        $( document ).trigger( dhis2.de.event.dataValueSaved, [ dhis2.de.currentDataSetId, dataValue ] );
     }
 
     function handleError( xhr, textStatus, errorThrown )

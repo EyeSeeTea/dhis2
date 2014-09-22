@@ -591,6 +591,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
+/* factory for handling event reports */
+.factory('EventReportService', function($http, $q) {   
+    
+    return {        
+        getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){ 
+            var pgSize = pager ? pager.pageSize : 50;
+        	var pg = pager ? pager.page : 1;
+            var url = '../api/events/overdue.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&programStatus=' + programStatus + '&eventStatus='+ eventStatus + '&pageSize=' + pgSize + '&page=' + pg;
+            if(startDate && endDate){
+                url = url + '&startDate=' + startDate + '&endDate=' + endDate ;
+            }
+            var promise = $http.get( url ).then(function(response){
+                return response.data;
+            });            
+            return promise;
+        }
+    };    
+})
+
 .factory('OperatorFactory', function(){
     
     var defaultOperators = ['IS', 'RANGE' ];
@@ -1180,17 +1199,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             dateValue = Date.parse(dateValue);
             dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
             return dateValue;
+        },
+        formatToHrsMins: function(dateValue) {            
+            return moment(dateValue).format('YYYY-MM-DD @ hh:mm A');
         }
     };            
 })
 
-.service('EventUtils', function($filter, OrgUnitService){
+.service('EventUtils', function($filter, DateUtils, OrgUnitService){
     return {
         createDummyEvent: function(programStage, orgUnit, enrollment){
             
-            var today = moment();
-            today = Date.parse(today);
-            today = $filter('date')(today, 'yyyy-MM-dd');
+            var today = DateUtils.format(moment());
     
             var dueDate = this.getEventDueDate(programStage, enrollment);
             var dummyEvent = {programStage: programStage.id, 
@@ -1208,9 +1228,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return dummyEvent;        
         },
         getEventStatusColor: function(dhis2Event){    
-            var today = moment();
-            today = Date.parse(today);
-            today = $filter('date')(today, 'yyyy-MM-dd');
+            var today = DateUtils.format(moment());
             var eventDate = today;
             
             if(dhis2Event.eventDate){
@@ -1231,9 +1249,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             }            
         },
         getEventDueDate: function(programStage, enrollment){
-            var dueDate = moment(moment(enrollment.dateOfIncident).add('d', programStage.minDaysFromStart), 'YYYY-MM-DD')._d;
-            dueDate = Date.parse(dueDate);
-            dueDate = $filter('date')(dueDate, 'yyyy-MM-dd');
+            var dueDate = DateUtils.format(enrollment.dateOfIncident);
+            dueDate = moment(dueDate).add('d', programStage.minDaysFromStart)._d;
+            dueDate = DateUtils.format(dueDate);
             return dueDate;
         },
         getEventOrgUnitName: function(orgUnitId){            

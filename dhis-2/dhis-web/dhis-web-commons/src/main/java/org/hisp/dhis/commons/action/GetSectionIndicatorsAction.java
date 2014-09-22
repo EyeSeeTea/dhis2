@@ -1,4 +1,15 @@
-package org.hisp.dhis.period;
+package org.hisp.dhis.commons.action;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.paging.ActionPagingSupport;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,81 +39,62 @@ package org.hisp.dhis.period;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.calendar.DateTimeUnit;
-
-import java.util.Calendar;
-
-/**
- * PeriodType for six-monthly Periods aligned to a financial year starting in
- * April or October. A valid April six-monthly Period has startDate set to
- * either April 1st or October 1st, and endDate set to the last day of the
- * fifth month after the startDate.
- *
- * @author Torgeir Lorange Ostby
- * @author Jim Grace
- */
-
-public class SixMonthlyAprilPeriodType
-    extends SixMonthlyAbstractPeriodType
+public class GetSectionIndicatorsAction
+    extends ActionPagingSupport<Indicator>
 {
-    private static final long serialVersionUID = -2770872821413382644L;
-
-    private static final String ISO_FORMAT = "yyyyAprilSn";
-
-    private static final int BASE_MONTH = Calendar.APRIL;
-
-    /**
-     * The name of the SixMonthlyPeriodType, which is "SixMonthly".
-     */
-    public static final String NAME = "SixMonthlyApril";
-
     // -------------------------------------------------------------------------
-    // PeriodType functionality
+    // Dependencies
     // -------------------------------------------------------------------------
 
-    @Override
-    public String getName()
-    {
-        return NAME;
-    }
+    private DataSetService dataSetService;
 
-    @Override
-    public int getBaseMonth()
+    public void setDataSetService( DataSetService dataSetService )
     {
-        return BASE_MONTH;
+        this.dataSetService = dataSetService;
     }
 
     // -------------------------------------------------------------------------
-    // CalendarPeriodType functionality
+    // Input & Output
+    // -------------------------------------------------------------------------
+
+    private Integer dataSetId;
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    private List<Indicator> indicators = new ArrayList<>();
+
+    public List<Indicator> getIndicators()
+    {
+        return indicators;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action Implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public String getIsoDate( DateTimeUnit dateTimeUnit )
+    public String execute()
+        throws Exception
     {
-        int month = dateTimeUnit.getMonth();
-
-        if ( dateTimeUnit.isIso8601() )
+        if ( dataSetId == null )
         {
-            month = getCalendar().fromIso( dateTimeUnit ).getMonth();
+            return SUCCESS;
         }
-
-        switch ( month )
+        
+        DataSet dataSet = dataSetService.getDataSet( dataSetId );
+        
+        indicators = new ArrayList<>( dataSet.getIndicators() );
+        
+        for ( Section section : dataSet.getSections() )
         {
-            case 4:
-                return dateTimeUnit.getYear() + "AprilS1";
-            case 10:
-                return dateTimeUnit.getYear() + "AprilS2";
-            default:
-                throw new IllegalArgumentException( "Month not valid [4,10]" );
+            indicators.removeAll( section.getIndicators() );
         }
-    }
-
-    /**
-     * n refers to the semester, can be [1-2].
-     */
-    @Override
-    public String getIsoFormat()
-    {
-        return ISO_FORMAT;
+        
+        Collections.sort( indicators, IdentifiableObjectNameComparator.INSTANCE );
+        
+        return SUCCESS;
     }
 }

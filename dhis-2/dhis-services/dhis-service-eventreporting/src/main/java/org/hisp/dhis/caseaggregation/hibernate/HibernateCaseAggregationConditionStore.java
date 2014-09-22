@@ -327,17 +327,20 @@ public class HibernateCaseAggregationConditionStore
         try
         {
             int periodId = 0;
-            periodId = jdbcTemplate.queryForInt(  "select periodid from period where periodtypeid = ( select periodtypeid from periodtype where name='"
-                    + period.getPeriodType().getName()
-                    + "' )"
-                    + " and startdate='"
-                    + DateUtils.getMediumDateString( period.getStartDate() )
-                    + "' and enddate='"
-                    + DateUtils.getMediumDateString( period.getEndDate() ) + "'" );
+            
+            final String selectSql = "select periodid from period where periodtypeid = ( select periodtypeid from periodtype where name='"
+                + period.getPeriodType().getName()
+                + "' )"
+                + " and startdate='"
+                + DateUtils.getMediumDateString( period.getStartDate() )
+                + "' and enddate='"
+                + DateUtils.getMediumDateString( period.getEndDate() ) + "'";
+            
+            periodId = jdbcTemplate.queryForObject( selectSql, Integer.class );
             
             if ( periodId == 0 )
             {
-                String insertSql = "insert into period (periodid, periodtypeid,startdate,enddate) " + " VALUES " + "("
+                final String insertSql = "insert into period (periodid, periodtypeid,startdate,enddate) " + " VALUES " + "("
                     + statementBuilder.getAutoIncrementValue() + ","+ period.getPeriodType().getId() + ",'" + DateUtils.getMediumDateString( period.getStartDate() )
                     + "','" + DateUtils.getMediumDateString( period.getEndDate() ) + "' )";
                 
@@ -345,7 +348,7 @@ public class HibernateCaseAggregationConditionStore
             }
             else
             {
-                String deleteDataValueSql = "delete from datavalue where dataelementid=" + dataElementId
+                final String deleteDataValueSql = "delete from datavalue where dataelementid=" + dataElementId
                     + " and categoryoptioncomboid=" + optionComboId + " and sourceid in ("
                     + TextUtils.getCommaDelimitedString( orgunitIds ) + ") "
                         + "and periodid = " + periodId;
@@ -482,15 +485,15 @@ public class HibernateCaseAggregationConditionStore
             orgunitIds.retainAll( _orgunitIds );
         }
         
-        if(orgunitIds.size() > 0 )
+        if ( orgunitIds.size() > 0 )
         {
             String sql = "select caseaggregationconditionid, aggregationdataelementid, optioncomboid, "
-                + " cagg.aggregationexpression as caseexpression, cagg.operator as caseoperator, cagg.desum as desumid "
-                + "     from caseaggregationcondition cagg inner join datasetmembers dm "
-                + "             on cagg.aggregationdataelementid=dm.dataelementid inner join dataset ds "
-                + "             on ds.datasetid = dm.datasetid inner join periodtype pt "
-                + "             on pt.periodtypeid=ds.periodtypeid inner join dataelement de "
-                + "             on de.dataelementid=dm.dataelementid where ds.datasetid = " + dataSet.getDataSetId();
+                + "cagg.aggregationexpression as caseexpression, cagg.operator as caseoperator, cagg.desum as desumid "
+                + "from caseaggregationcondition cagg inner join datasetmembers dm "
+                + "on cagg.aggregationdataelementid=dm.dataelementid inner join dataset ds "
+                + "on ds.datasetid = dm.datasetid inner join periodtype pt "
+                + "on pt.periodtypeid=ds.periodtypeid inner join dataelement de "
+                + "on de.dataelementid=dm.dataelementid where ds.datasetid = " + dataSet.getDataSetId();
     
             SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
     
@@ -591,9 +594,21 @@ public class HibernateCaseAggregationConditionStore
         {
             String[] ids = matcherMinus.group( 2 ).split( SEPARATOR_ID );
 
+            Integer programId = null;
+            Integer programStageId = null;
+            if( !ids[1].equals(IN_CONDITION_GET_ALL))
+            {
+                programId =  Integer.parseInt( ids[0] );
+            }
+            
+            if( !ids[1].equals(IN_CONDITION_GET_ALL))
+            {
+                programStageId =  Integer.parseInt( ids[1] );
+            }
+            
             minusSQLMap.put(
                 idx,
-                getConditionForMinusDataElement( orgunitIds, Integer.parseInt( ids[1] ), Integer.parseInt( ids[2] ),
+                getConditionForMinusDataElement( orgunitIds, programId, programStageId, Integer.parseInt( ids[2] ),
                     matcherMinus.group( 4 ) ) );
 
             caseExpression = caseExpression.replace( matcherMinus.group( 0 ), CaseAggregationCondition.MINUS_OPERATOR
@@ -953,18 +968,32 @@ public class HibernateCaseAggregationConditionStore
         return sql;
     }
 
-    private String getConditionForMinusDataElement( Collection<Integer> orgunitIds, Integer programStageId,
+    private String getConditionForMinusDataElement( Collection<Integer> orgunitIds, Integer programId, Integer programStageId,
         Integer dataElementId, String compareSide )
     {
-        return " EXISTS ( SELECT _pdv.value FROM trackedentitydatavalue _pdv inner join programstageinstance _psi "
+        String sql = " EXISTS ( SELECT _pdv.value FROM trackedentitydatavalue _pdv inner join programstageinstance _psi "
             + "                         ON _pdv.programstageinstanceid=_psi.programstageinstanceid "
             + "                 JOIN programinstance _pi ON _pi.programinstanceid=_psi.programinstanceid "
             + "           WHERE psi.programstageinstanceid=_pdv.programstageinstanceid "
             + "                  AND _pdv.dataelementid=" + dataElementId
             + "                 AND _psi.organisationunitid in (" + TextUtils.getCommaDelimitedString( orgunitIds )
-            + ") " + "                 AND _psi.programstageid = " + programStageId
-            + " AND ( _psi.executionDate BETWEEN '" + PARAM_PERIOD_START_DATE + "' AND '" + PARAM_PERIOD_END_DATE
+            + ") ";
+        
+        
+        if (programId != null) 
+        {
+            sql += " AND_pi.programid ";
+        }
+ 
+        if (programId != null)
+        {
+            sql += " AND _psi.programstageid = " + programStageId;
+        }
+        
+       sql += " AND ( _psi.executionDate BETWEEN '" + PARAM_PERIOD_START_DATE + "' AND '" + PARAM_PERIOD_END_DATE
             + "') " + "                 AND ( DATE(_pdv.value) - DATE(" + compareSide + ") ) ";
+       
+       return sql;
     }
 
     private String getConditionForMisus2DataElement( Collection<Integer> orgunitIds, String programStageId1,
@@ -1175,6 +1204,7 @@ public class HibernateCaseAggregationConditionStore
                 String insertSql = "insert into period (periodid, periodtypeid,startdate,enddate) " + " VALUES " + "("
                     + statementBuilder.getAutoIncrementValue() + "," + periodTypeId + ",'" + start + "','" + end
                     + "' )";
+                
                 jdbcTemplate.execute( insertSql );
 
                 period.setId( jdbcTemplate.queryForObject( sql, Integer.class ) );
@@ -1253,7 +1283,6 @@ public class HibernateCaseAggregationConditionStore
 
         return false;
     }
-
    
     private String replacePeriodSql( String sql, Period period )
     {
@@ -1264,6 +1293,5 @@ public class HibernateCaseAggregationConditionStore
         sql = sql.replaceAll( PARAM_PERIOD_ISO_DATE, period.getIsoDate() );
 
         return sql;
-    }
-    
+    }    
 }
