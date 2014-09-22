@@ -125,6 +125,11 @@
                 var el = $( this );
                 el.action = this.getAttribute( "data-action" );
 
+                if( typeof el.action === "undefined" )
+                {
+                    el.action = function(){};
+                }
+
                 el.click( function() {
                     var checked = getCheckedValues( $checkboxContainer );
 
