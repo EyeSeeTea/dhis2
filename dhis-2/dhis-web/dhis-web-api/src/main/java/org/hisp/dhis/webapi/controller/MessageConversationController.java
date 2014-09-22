@@ -414,6 +414,7 @@ public class MessageConversationController
 
         if( !canModifyUserConversation( currentUserService.getCurrentUser(), user ) )
         {
+
             throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
         }
 

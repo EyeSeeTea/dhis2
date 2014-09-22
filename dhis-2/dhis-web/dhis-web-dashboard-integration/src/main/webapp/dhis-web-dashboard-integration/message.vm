@@ -4,7 +4,7 @@
     <ul>
 
         #if( $auth.hasAccess( "dhis-web-dashboard-integration", "sendMessage" ) )
-            <li><a class="blueButtonLink" href="showSendMessage.action">$i18n.getString( 'write_message' )</a></li>
+        <li><a class="blueButtonLink" href="showSendMessage.action">$i18n.getString( 'write_message' )</a></li>
         #end
         <li><a class="blueButtonLink" href="showSendFeedback.action">$i18n.getString( "write_feedback" )</a></li>
         <li><span style="padding-left:12px"></span></li>
