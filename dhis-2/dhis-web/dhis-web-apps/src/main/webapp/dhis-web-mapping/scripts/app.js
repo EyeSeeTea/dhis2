@@ -1575,27 +1575,7 @@ Ext.onReady( function() {
                             container.valueStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
-                                params: {
-                                    'max': 14
-                                },
-                                success: function(r) {
-                                    var options = Ext.decode(r.responseText).options,
-                                        data = [];
-
-                                    Ext.each(options, function(option) {
-                                        data.push({
-                                            id: option,
-                                            name: option
-                                        });
-                                    });
-
-                                    b.storage = Ext.clone(data);
-									container.valueStore.removeAll();
-                                    container.valueStore.add(data);
-                                }
-                            });
+                            container.valueStore.loadOptionSet();
                         }
                     }
                 });
