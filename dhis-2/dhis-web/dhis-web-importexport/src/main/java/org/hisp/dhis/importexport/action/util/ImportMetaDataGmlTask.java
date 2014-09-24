@@ -36,7 +36,6 @@ import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.scheduling.TaskId;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -70,8 +69,6 @@ public class ImportMetaDataGmlTask
         this.taskId = taskId;
         this.clazz = clazz;
     }
-
-    private Class<?> clazz;
 
     // -------------------------------------------------------------------------
     // Runnable implementation
