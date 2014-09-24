@@ -59,7 +59,7 @@ public class ImportMetaDataGmlTask
     private String userUid;
 
     public ImportMetaDataGmlTask( String userUid, ImportService importService, GmlImportService gmlImportService,
-        ImportOptions importOptions, InputStream inputStream, TaskId taskId, Class<?> clazz )
+        ImportOptions importOptions, InputStream inputStream, TaskId taskId )
     {
         this.userUid = userUid;
         this.importService = importService;
@@ -67,7 +67,6 @@ public class ImportMetaDataGmlTask
         this.importOptions = importOptions;
         this.inputStream = inputStream;
         this.taskId = taskId;
-        this.clazz = clazz;
     }
 
     // -------------------------------------------------------------------------
