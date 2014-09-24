@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_SUM_INT_DISAGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 import static org.hisp.dhis.common.DimensionType.DATASET;
 import static org.hisp.dhis.common.DimensionType.ORGANISATIONUNIT;
@@ -106,7 +107,7 @@ public class DataQueryParams
     protected List<DimensionalObject> filters = new ArrayList<>();
 
     protected AggregationType aggregationType;
-    
+        
     private Map<MeasureFilter, Double> measureCriteria = new HashMap<>();
     
     /**
@@ -155,6 +156,11 @@ public class DataQueryParams
     protected transient Partitions partitions;
 
     /**
+     * The data type for this query.
+     */
+    protected transient DataType dataType;
+        
+    /**
      * The aggregation period type for this query.
      */
     protected transient String periodType;
@@ -201,6 +207,7 @@ public class DataQueryParams
         params.hideEmptyRows = this.hideEmptyRows;
         
         params.partitions = new Partitions( this.partitions );
+        params.dataType = this.dataType;
         params.periodType = this.periodType;
         params.dataPeriodType = this.dataPeriodType;
         params.skipPartitioning = this.skipPartitioning;
@@ -604,6 +611,14 @@ public class DataQueryParams
         
         return index == -1 ? null : index;
     }
+
+    /**
+     * Indicates whether this object is of the given data type.
+     */
+    public boolean isDataType( DataType dataType )
+    {
+        return this.dataType != null && this.dataType.equals( dataType );
+    }
     
     /**
      * Indicates whether this object is of the given aggregation type.
@@ -635,14 +650,23 @@ public class DataQueryParams
     }
     
     /**
+     * Indicates whether the aggregation type is of type disaggregation.
+     */
+    public boolean isDisaggregation()
+    {
+        return isAggregationType( AVERAGE_SUM_INT_DISAGGREGATION ) || isAggregationType( AVERAGE_INT_DISAGGREGATION );
+    }
+    
+    /**
      * Replaces the periods of this query with the corresponding data periods.
      * Sets the period type to the data period type. This method is relevant only 
      * when then the data period type has lower frequency than the aggregation 
-     * period type.
+     * period type. This is valid because disaggregation is allowed for data
+     * with average aggregation operator.
      */
     public void replaceAggregationPeriodsWithDataPeriods( ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
     {
-        if ( isAggregationType( AVERAGE_INT_DISAGGREGATION ) &&  dataPeriodType != null )
+        if ( isDisaggregation() && dataPeriodType != null )
         {
             this.periodType = this.dataPeriodType.getName();
             
@@ -916,6 +940,15 @@ public class DataQueryParams
         this.dataApprovalLevels = new HashMap<>();
     }
     
+    /**
+     * Indicates whether this params requires aggregation of data. No aggregation
+     * takes place if aggregation type is none or if data type is text.
+     */
+    public boolean isAggregation()
+    {
+        return !( AggregationType.NONE.equals( aggregationType ) || DataType.TEXT.equals( dataType ) );
+    }
+    
     // -------------------------------------------------------------------------
     // Static methods
     // -------------------------------------------------------------------------
@@ -1150,6 +1183,16 @@ public class DataQueryParams
     public void setPartitions( Partitions partitions )
     {
         this.partitions = partitions;
+    }
+
+    public DataType getDataType()
+    {
+        return dataType;
+    }
+
+    public void setDataType( DataType dataType )
+    {
+        this.dataType = dataType;
     }
 
     public String getPeriodType()

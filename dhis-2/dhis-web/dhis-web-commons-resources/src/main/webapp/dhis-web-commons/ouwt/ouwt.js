@@ -151,14 +151,14 @@ function Selection()
     };
 
     this.isSelected = function() {
-    	var ou = selection.getSelected();    	
+    	var ou = selection.getSelected();
     	return ou && ou.length > 0;
     };
-    
+
     this.setSelected = function( selected ) {
         sessionStorage[ OU_SELECTED_KEY ] = JSON.stringify( selected );
     };
-    
+
     this.selectedExists = function() {
         return sessionStorage[ OU_SELECTED_KEY ] != null;
     };
@@ -283,6 +283,20 @@ function Selection()
             type: 'POST',
             dataType: format
         } );
+    };
+
+    this.busy = function( busy ) {
+        if( busy ) {
+            $("#orgUnitTree").css("cursor", "wait")
+                .find("a").css("cursor", "wait");
+        } else {
+            $("#orgUnitTree").css("cursor", "auto")
+                .find("a").css("cursor", "auto");
+        }
+    };
+
+    this.isBusy = function() {
+        return $("#orgUnitTree").css("cursor") == "wait";
     };
 
     this.load = function ()
@@ -411,23 +425,45 @@ function Selection()
                 subtree.reloadTree();
             } );
         } else {
-            $.post( organisationUnitTreePath + "clearselected.action", function() {
+            selection.busy( true );
+
+            $.ajax( {
+                url: organisationUnitTreePath + "clearselected.action",
+                type: 'POST'
+            }).done(function() {
                 var selected = selection.getSelected();
 
                 if( multipleSelectionAllowed ) {
+                    var q = '';
+
                     $.each( selected, function( i, item ) {
-                        $.post( organisationUnitTreePath + "addorgunit.action", {
-                            id: item
-                        } ).complete( fn );
-                    } );
+                        q += "id=" + item;
+
+                        if( i < (selected.length - 1) ) {
+                            q += '&';
+                        }
+                    });
+
+                    $.ajax({
+                        url: organisationUnitTreePath + "addorgunit.action",
+                        data: q,
+                        type: 'POST'
+                    } ).complete( function() {
+                        selection.busy( false );
+                    });
                 } else {
                     selected = $.isArray( selected ) ? selected[0] : selected;
 
                     $.post( organisationUnitTreePath + "setorgunit.action", {
                         id: selected
-                    } ).complete( fn );
+                    } ).complete( function() {
+                        selection.busy( false );
+                        fn();
+                    } );
                 }
-            } );
+            }).always(function() {
+                selection.busy( false );
+            });
         }
     };
 
@@ -443,6 +479,10 @@ function Selection()
     };
 
     this.select = function( unitId ) {
+        if( selection.isBusy() ) {
+            return;
+        }
+
         var $linkTag = $( "#" + getTagId( unitId ) ).find( "a" ).eq( 0 );
 
         if( $linkTag.hasClass( "selected" ) && ( unselectAllowed || rootUnselectAllowed ) ) {
@@ -478,9 +518,14 @@ function Selection()
                 selection.clearSelected();
             }
 
+            selection.busy( true );
+
             $.post( organisationUnitTreePath + "removeorgunit.action", {
                 id: unitId
-            } ).complete( this.responseReceived );
+            } ).complete( function() {
+                selection.busy( false );
+                selection.responseReceived();
+            });
 
             $linkTag.removeClass( "selected" );
         } else {
@@ -494,15 +539,22 @@ function Selection()
                 selected.push( unitId );
                 selection.setSelected( selected );
 
+                selection.busy( true );
+
                 $.post( organisationUnitTreePath + "addorgunit.action", {
                     id: unitId
-                } ).complete( this.responseReceived );
+                } ).complete( function() {
+                    selection.busy( false );
+                    selection.responseReceived();
+                });
 
                 $linkTag.addClass( "selected" );
             }
             else
             {
                 selection.setSelected( unitId );
+
+                selection.busy( true );
 
                 $.ajax( {
                     url:organisationUnitTreePath + "setorgunit.action",
@@ -511,7 +563,10 @@ function Selection()
                     },
                     type:'POST',
                     timeout:10000,
-                    complete:this.responseReceived
+                    complete: function() {
+                        selection.busy( false );
+                        selection.responseReceived();
+                    }
                 } );
 
                 $( "#orgUnitTree" ).find( "a" ).removeClass( "selected" );
@@ -563,7 +618,7 @@ function Selection()
 
     this.scrollToSelected = function() {
     	var ou = selection.getSelected();
-    	
+
     	if ( ou && ou.length ) {
     		$( "#orgUnitTree" ).scrollTop( 0 );
     		var tagId = "#" + getTagId( ou[0] );
@@ -573,7 +628,7 @@ function Selection()
     		$( "#orgUnitTree" ).animate( { scrollTop: offset }, 300 );
     	}
     };
-    
+
     this.findByName = function() {
         var name = $( '#searchField' ).val();
         var match;
@@ -617,7 +672,7 @@ function Selection()
             } );
         }
     };
-    
+
     this.enable = function() {
         $( "#orgUnitTree" ).show();
     };

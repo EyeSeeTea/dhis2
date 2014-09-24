@@ -71,6 +71,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportCount;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.dxf2.metadata.ExportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.pdfform.PdfDataEntryFormUtil;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
@@ -146,7 +147,7 @@ public class DefaultDataValueSetService
     //--------------------------------------------------------------------------
 
     @Override
-    public void writeDataValueSetXml( String dataSet, String period, String orgUnit, OutputStream out )
+    public void writeDataValueSetXml( String dataSet, String period, String orgUnit, OutputStream out, ExportOptions exportOptions )
     {
         DataSet dataSet_ = dataSetService.getDataSet( dataSet );
         Period period_ = PeriodType.getPeriodFromIsoString( period );
@@ -177,12 +178,12 @@ public class DefaultDataValueSetService
         period_ = periodService.reloadPeriod( period_ );
 
         dataValueSetStore.writeDataValueSetXml( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, wrap( period_ ),
-            wrap( orgUnit_ ), out );
+            wrap( orgUnit_ ), out, exportOptions );
     }
 
     @Override
     public void writeDataValueSetXml( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, 
-        boolean includeChildren, OutputStream out )
+        boolean includeChildren, OutputStream out, ExportOptions exportOptions )
     {
         Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
         Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
@@ -208,11 +209,11 @@ public class DefaultDataValueSetService
             ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
         }
         
-        dataValueSetStore.writeDataValueSetXml( ds, null, null, null, pe, ou, out );
+        dataValueSetStore.writeDataValueSetXml( ds, null, null, null, pe, ou, out, exportOptions );
     }
 
     @Override
-    public void writeDataValueSetJson( String dataSet, String period, String orgUnit, OutputStream outputStream )
+    public void writeDataValueSetJson( String dataSet, String period, String orgUnit, OutputStream outputStream, ExportOptions exportOptions )
     {
         DataSet dataSet_ = dataSetService.getDataSet( dataSet );
         Period period_ = PeriodType.getPeriodFromIsoString( period );
@@ -243,18 +244,18 @@ public class DefaultDataValueSetService
         period_ = periodService.reloadPeriod( period_ );
 
         dataValueSetStore.writeDataValueSetJson( newHashSet( dataSet_ ), completeDate, period_, orgUnit_, wrap( period_ ),
-            wrap( orgUnit_ ), outputStream );
+            wrap( orgUnit_ ), outputStream, exportOptions );
     }
 
     @Override
-    public void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream )
+    public void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream, ExportOptions exportOptions )
     {
-        dataValueSetStore.writeDataValueSetJson( lastUpdated, outputStream );
+        dataValueSetStore.writeDataValueSetJson( lastUpdated, outputStream, exportOptions );
     }
 
     @Override
     public void writeDataValueSetJson( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits,
-        boolean includeChildren, OutputStream outputStream )
+        boolean includeChildren, OutputStream outputStream, ExportOptions exportOptions )
     {
         Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
         Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
@@ -280,12 +281,12 @@ public class DefaultDataValueSetService
             ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
         }
 
-        dataValueSetStore.writeDataValueSetJson( ds, null, null, null, pe, ou, outputStream );
+        dataValueSetStore.writeDataValueSetJson( ds, null, null, null, pe, ou, outputStream, exportOptions );
     }
 
     @Override
     public void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits,
-        boolean includeChildren, Writer writer )
+        boolean includeChildren, Writer writer, ExportOptions exportOptions )
     {
         Set<DataSet> ds = new HashSet<>( dataSetService.getDataSetsByUid( dataSets ) );
         Set<Period> pe = new HashSet<>( periodService.getPeriodsBetweenDates( startDate, endDate ) );
@@ -311,7 +312,7 @@ public class DefaultDataValueSetService
             ou = new HashSet<>( organisationUnitService.getOrganisationUnitsWithChildren( IdentifiableObjectUtils.getUids( ou ) ) );
         }
 
-        dataValueSetStore.writeDataValueSetCsv( ds, pe, ou, writer );
+        dataValueSetStore.writeDataValueSetCsv( ds, pe, ou, writer, exportOptions );
     }
 
     @Override
@@ -401,14 +402,12 @@ public class DefaultDataValueSetService
             {
                 if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase().equals( ouScheme.toLowerCase() ) )
                 {
-                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit",
-                        organisationUnit.getCode() == null ? "" : organisationUnit.getCode() ) );
+                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit", organisationUnit.getCode() == null ? "" : organisationUnit.getCode() ) );
                     simpleNode.setAttribute( true );
                 }
                 else
                 {
-                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit",
-                        organisationUnit.getUid() == null ? "" : organisationUnit.getUid() ) );
+                    simpleNode = complexNode.addChild( new SimpleNode( "orgUnit", organisationUnit.getUid() == null ? "" : organisationUnit.getUid() ) );
                     simpleNode.setAttribute( true );
                 }
             }
@@ -512,50 +511,44 @@ public class DefaultDataValueSetService
         IdentifiableProperty dataElementIdScheme = dataValueSet.getDataElementIdScheme() != null ?
             IdentifiableProperty.valueOf( dataValueSet.getDataElementIdScheme().toUpperCase() ) :
             importOptions.getDataElementIdScheme();
+            
         IdentifiableProperty orgUnitIdScheme = dataValueSet.getOrgUnitIdScheme() != null ?
             IdentifiableProperty.valueOf( dataValueSet.getOrgUnitIdScheme().toUpperCase() ) :
             importOptions.getOrgUnitIdScheme();
+            
         boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
+        
         ImportStrategy strategy = dataValueSet.getStrategy() != null ?
             ImportStrategy.valueOf( dataValueSet.getStrategy() ) :
             importOptions.getImportStrategy();
+            
         boolean skipExistingCheck = importOptions.isSkipExistingCheck();
 
         Map<String, DataElement> dataElementMap = identifiableObjectManager.getIdMap( DataElement.class, dataElementIdScheme );
-        Map<String, OrganisationUnit> orgUnitMap = orgUnitIdScheme == UUID ?
-            getUuidOrgUnitMap() :
-            identifiableObjectManager.getIdMap( OrganisationUnit.class, orgUnitIdScheme );
-        Map<String, DataElementCategoryOptionCombo> categoryOptionComboMap = identifiableObjectManager
-            .getIdMap( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID );
+        Map<String, OrganisationUnit> orgUnitMap = orgUnitIdScheme == UUID ? getUuidOrgUnitMap() : identifiableObjectManager.getIdMap( OrganisationUnit.class, orgUnitIdScheme );
+        Map<String, DataElementCategoryOptionCombo> categoryOptionComboMap = identifiableObjectManager.getIdMap( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID );
         Map<String, Period> periodMap = new HashMap<>();
 
-        DataSet dataSet = dataValueSet.getDataSet() != null ?
-            identifiableObjectManager.getObject( DataSet.class, IdentifiableProperty.UID, dataValueSet.getDataSet() ) :
-            null;
+        DataSet dataSet = dataValueSet.getDataSet() != null ? identifiableObjectManager.getObject( DataSet.class, IdentifiableProperty.UID, dataValueSet.getDataSet() ) : null;
         Date completeDate = getDefaultDate( dataValueSet.getCompleteDate() );
 
         Period outerPeriod = PeriodType.getPeriodFromIsoString( trimToNull( dataValueSet.getPeriod() ) );
 
         OrganisationUnit outerOrgUnit;
 
-        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService
-            .getDefaultDataElementCategoryOptionCombo();
+        DataElementCategoryOptionCombo fallbackCategoryOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         if ( orgUnitIdScheme.equals( IdentifiableProperty.UUID ) )
         {
-            outerOrgUnit = dataValueSet.getOrgUnit() == null ?
-                null :
-                organisationUnitService.getOrganisationUnitByUuid( dataValueSet.getOrgUnit() );
+            outerOrgUnit = dataValueSet.getOrgUnit() == null ? null : organisationUnitService.getOrganisationUnitByUuid( dataValueSet.getOrgUnit() );
         }
         else
         {
-            outerOrgUnit = dataValueSet.getOrgUnit() != null ?
-                identifiableObjectManager.getObject( OrganisationUnit.class, orgUnitIdScheme, dataValueSet.getOrgUnit() ) : null;
+            outerOrgUnit = dataValueSet.getOrgUnit() != null ? identifiableObjectManager.getObject( OrganisationUnit.class, orgUnitIdScheme, dataValueSet.getOrgUnit() ) : null;
         }
 
         DataElementCategoryOptionCombo outerAttrOptionCombo = dataValueSet.getAttributeOptionCombo() != null ?
-            identifiableObjectManager.getObject( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID,
-                trimToNull( dataValueSet.getAttributeOptionCombo() ) ) : null;
+            identifiableObjectManager.getObject( DataElementCategoryOptionCombo.class, IdentifiableProperty.UID, trimToNull( dataValueSet.getAttributeOptionCombo() ) ) : null;
 
         if ( dataSet != null && completeDate != null )
         {
@@ -569,8 +562,7 @@ public class DefaultDataValueSetService
 
         String currentUser = currentUserService.getCurrentUsername();
 
-        BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class )
-            .init();
+        BatchHandler<DataValue> batchHandler = batchHandlerFactory.createBatchHandler( DataValueBatchHandler.class ).init();
 
         int importCount = 0;
         int updateCount = 0;
@@ -592,21 +584,15 @@ public class DefaultDataValueSetService
             totalCount++;
 
             DataElement dataElement = dataElementMap.get( trimToNull( dataValue.getDataElement() ) );
-            DataElementCategoryOptionCombo categoryOptionCombo = categoryOptionComboMap
-                .get( trimToNull( dataValue.getCategoryOptionCombo() ) );
-            Period period = outerPeriod != null ?
-                outerPeriod :
-                PeriodType.getPeriodFromIsoString( trimToNull( dataValue.getPeriod() ) );
-            OrganisationUnit orgUnit =
-                outerOrgUnit != null ? outerOrgUnit : orgUnitMap.get( trimToNull( dataValue.getOrgUnit() ) );
-            DataElementCategoryOptionCombo attrOptionCombo = outerAttrOptionCombo != null ?
-                outerAttrOptionCombo :
+            DataElementCategoryOptionCombo categoryOptionCombo = categoryOptionComboMap.get( trimToNull( dataValue.getCategoryOptionCombo() ) );
+            Period period = outerPeriod != null ? outerPeriod : PeriodType.getPeriodFromIsoString( trimToNull( dataValue.getPeriod() ) );
+            OrganisationUnit orgUnit = outerOrgUnit != null ? outerOrgUnit : orgUnitMap.get( trimToNull( dataValue.getOrgUnit() ) );
+            DataElementCategoryOptionCombo attrOptionCombo = outerAttrOptionCombo != null ? outerAttrOptionCombo : 
                 categoryOptionComboMap.get( trimToNull( dataValue.getAttributeOptionCombo() ) );
 
             if ( dataElement == null )
             {
-                summary.getConflicts()
-                    .add( new ImportConflict( DataElement.class.getSimpleName(), dataValue.getDataElement() ) );
+                summary.getConflicts().add( new ImportConflict( DataElement.class.getSimpleName(), dataValue.getDataElement() ) );
                 continue;
             }
 
@@ -618,8 +604,7 @@ public class DefaultDataValueSetService
 
             if ( orgUnit == null )
             {
-                summary.getConflicts()
-                    .add( new ImportConflict( OrganisationUnit.class.getSimpleName(), dataValue.getOrgUnit() ) );
+                summary.getConflicts().add( new ImportConflict( OrganisationUnit.class.getSimpleName(), dataValue.getOrgUnit() ) );
                 continue;
             }
 
@@ -685,6 +670,16 @@ public class DefaultDataValueSetService
             internalValue.setComment( trimToNull( dataValue.getComment() ) );
             internalValue.setFollowup( dataValue.getFollowup() );
 
+            String valid = ValidationUtils.dataValueIsValid( internalValue.getValue(), dataElement );
+
+            boolean zeroInsignificant = ValidationUtils.dataValueIsZeroAndInsignificant( internalValue.getValue(), dataElement );
+            
+            if ( valid != null || zeroInsignificant )
+            {
+                summary.getConflicts().add( new ImportConflict( DataValue.class.getSimpleName(), internalValue.getValue() ) );
+                continue;
+            }
+            
             if ( !skipExistingCheck && batchHandler.objectExists( internalValue ) )
             {
                 if ( strategy.isCreateAndUpdate() || strategy.isUpdate() )
@@ -701,7 +696,7 @@ public class DefaultDataValueSetService
             {
                 if ( strategy.isCreateAndUpdate() || strategy.isCreate() )
                 {
-                    if ( !dryRun )
+                    if ( !dryRun && !internalValue.isNullValue() )
                     {
                         batchHandler.addObject( internalValue );
                     }

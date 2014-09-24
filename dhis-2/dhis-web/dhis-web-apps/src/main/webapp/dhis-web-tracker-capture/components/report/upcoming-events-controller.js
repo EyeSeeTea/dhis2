@@ -1,23 +1,29 @@
 trackerCapture.controller('UpcomingEventsController',
          function($scope,
                 $modal,
-                DateUtils,
-                EventUtils,
-                TEIService,
+                $location,
+                $translate,
+                orderByFilter,
+                DateUtils,                
+                Paginator,
+                EventReportService,
                 TEIGridService,
                 TranslationService,
                 AttributesFactory,
                 ProgramFactory,
-                DHIS2EventFactory,
                 storage) {
 
     TranslationService.translate();
     
     $scope.today = DateUtils.format(moment());
     
-    $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
-    $scope.selectedOuMode = $scope.ouModes[0];
+    $scope.selectedOuMode = 'SELECTED';
     $scope.report = {};
+    $scope.displayMode = {};
+    $scope.printMode = false;
+    
+    //Paging
+    $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};
     
     //watch for selection of org unit from tree
     $scope.$watch('selectedOrgUnit', function() {        
@@ -28,31 +34,46 @@ trackerCapture.controller('UpcomingEventsController',
     });
     
     //load programs associated with the selected org unit.
-    $scope.loadPrograms = function(orgUnit) {
+    $scope.loadPrograms = function(orgUnit) {        
         $scope.selectedOrgUnit = orgUnit;        
         if (angular.isObject($scope.selectedOrgUnit)){
             ProgramFactory.getAll().then(function(programs){
                 $scope.programs = programs;                
                 if($scope.programs.length === 1){
                     $scope.selectedProgram = $scope.programs[0];
-                } 
+                }
+                else{
+                    if(angular.isObject($scope.selectedProgram)){
+                        var continueLoop = true;
+                        for(var i=0; i<programs.length && continueLoop; i++){
+                            if(programs[i].id === $scope.selectedProgram.id){
+                                $scope.selectedProgram = programs[i];
+                                continueLoop = false;
+                            }
+                        }
+                        if(continueLoop){
+                            $scope.selectedProgram = null;
+                        }
+                    }
+                    else{
+                        $scope.selectedProgram = null;
+                    }
+                }
             });
         }        
     };
     
     //watch for selection of program
     $scope.$watch('selectedProgram', function() {   
-        if( angular.isObject($scope.selectedProgram)){            
-            $scope.reportStarted = false;
-            $scope.dataReady = false;
+        $scope.reportFinished = false;
+        $scope.reportStarted = false;
+        
+        if (angular.isObject($scope.selectedProgram)){
+            $scope.generateGridHeader();
         }
     });
     
-    $scope.generateReport = function(program, report, ouMode){
-
-        $scope.selectedProgram = program;
-        $scope.report = report;
-        $scope.selectedOuMode = ouMode;
+    $scope.generateReport = function(){
         
         //check for form validity
         $scope.outerForm.submitted = true;        
@@ -60,157 +81,167 @@ trackerCapture.controller('UpcomingEventsController',
             return false;
         }
         
-        $scope.reportStarted = true;
-        $scope.dataReady = false;
+        $scope.reportFinished = false;
+        $scope.reportStarted = true;        
         
-        $scope.programStages = [];
-        angular.forEach($scope.selectedProgram.programStages, function(stage){
-            $scope.programStages[stage.id] = stage;
-        });
-            
-        AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
-            $scope.attributes = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode.name);   
-        });  
-        
-        //fetch TEIs for the selected program and orgunit/mode
-        TEIService.search($scope.selectedOrgUnit.id, 
-                            $scope.selectedOuMode.name,
-                            null,
-                            'program=' + $scope.selectedProgram.id,
-                            null,
-                            $scope.pager,
-                            false).then(function(data){                     
-            
-            //process tei grid
-            var teis = TEIGridService.format(data,true);     
-            $scope.teiList = [];            
-            DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.selectedProgram.id, null, null).then(function(eventList){
-                $scope.dhis2Events = [];   
-                angular.forEach(eventList, function(ev){
-                    if(ev.dueDate){
-                        ev.dueDate = DateUtils.format(ev.dueDate);
-                        
-                        if( ev.trackedEntityInstance && 
-                            !ev.eventDate && 
-                            ev.dueDate >= report.startDate && 
-                            ev.dueDate <= report.endDate){
-                        
-                            ev.name = $scope.programStages[ev.programStage].name;
-                            ev.programName = $scope.selectedProgram.name;
-                            ev.statusColor = EventUtils.getEventStatusColor(ev); 
-                            ev.dueDate = DateUtils.format(ev.dueDate);
+        $scope.upcomingEvents = [];
+        EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.selectedProgram.id, $scope.report.startDate, $scope.report.endDate, 'ACTIVE','SCHEDULE', $scope.pager).then(function(data){                     
+                
+            if( data.pager ){
+                $scope.pager = data.pager;
+                $scope.pager.toolBarDisplay = 5;
 
-                            if($scope.dhis2Events[ev.trackedEntityInstance]){
-                                if(teis.rows[ev.trackedEntityInstance]){
-                                    $scope.teiList.push(teis.rows[ev.trackedEntityInstance]);
-                                    delete teis.rows[ev.trackedEntityInstance];
-                                }                     
-                                $scope.dhis2Events[ev.trackedEntityInstance].push(ev);
-                            }
-                            else{
-                                if(teis.rows[ev.trackedEntityInstance]){
-                                    $scope.teiList.push(teis.rows[ev.trackedEntityInstance]);
-                                    delete teis.rows[ev.trackedEntityInstance];
-                                }  
-                                $scope.dhis2Events[ev.trackedEntityInstance] = [ev];
-                            }
-                            ev = EventUtils.setEventOrgUnitName(ev);
-                        }                        
-                    }
+                Paginator.setPage($scope.pager.page);
+                Paginator.setPageCount($scope.pager.pageCount);
+                Paginator.setPageSize($scope.pager.pageSize);
+                Paginator.setItemCount($scope.pager.total);                    
+            }
+
+            angular.forEach(data.eventRows, function(row){
+                var upcomingEvent = {};
+                angular.forEach(row.attributes, function(att){
+                    upcomingEvent[att.attribute] = att.value;
                 });
-                $scope.reportStarted = false;
-                $scope.dataReady = true;                
+
+                upcomingEvent.dueDate = DateUtils.format(row.dueDate);
+                upcomingEvent.event = row.event;
+                upcomingEvent.eventName = row.eventName;
+                upcomingEvent.followup = row.followup;
+                upcomingEvent.program = row.program;
+                upcomingEvent.programStage = row.programStage;
+                upcomingEvent.trackedEntityInstance = row.trackedEntityInstance;
+                upcomingEvent.orgUnitName = row.registrationOrgUnit;
+                upcomingEvent.created = DateUtils.format(row.registrationDate);;
+                $scope.upcomingEvents.push(upcomingEvent);
+
             });
+
+            //sort overdue events by their due dates - this is default
+            $scope.upcomingEvents = orderByFilter($scope.upcomingEvents, '-dueDate');
+            $scope.upcomingEvents.reverse();
+
+            $scope.reportFinished = true;
+            $scope.reportStarted = false;
         });
     };
     
-    $scope.showReschedule = function(dhis2Event, selectedTei){
+    $scope.generateGridHeader = function(){
+        
+        if (angular.isObject($scope.selectedProgram)){
+            
+            $scope.programStages = [];
+            $scope.filterTypes = {};
+            $scope.filterText = {};
+
+            angular.forEach($scope.selectedProgram.programStages, function(stage){
+                $scope.programStages[stage.id] = stage;
+            });
+
+            AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
+                $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
+
+                $scope.gridColumns.push({name: $translate('event_name'), id: 'eventName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
+                $scope.filterTypes['eventName'] = 'string';
+                $scope.gridColumns.push({name: $translate('due_date'), id: 'dueDate', type: 'date', displayInListNoProgram: false, showFilter: false, show: true});
+                $scope.filterTypes['dueDate'] = 'date';
+                $scope.filterText['dueDate']= {};                
+            });
+            
+        }      
+    };
+    
+    $scope.showHideColumns = function(){
+        
+        $scope.hiddenGridColumns = 0;
+        
+        angular.forEach($scope.gridColumns, function(gridColumn){
+            if(!gridColumn.show){
+                $scope.hiddenGridColumns++;
+            }
+        });
         
         var modalInstance = $modal.open({
-            templateUrl: 'components/report/rescheduling.html',
-            controller: 'ReschedulingController',
+            templateUrl: 'views/column-modal.html',
+            controller: 'ColumnDisplayController',
             resolve: {
-                dhis2Event: function () {
-                    return dhis2Event;
+                gridColumns: function () {
+                    return $scope.gridColumns;
                 },
-                attributes: function(){
-                    return $scope.attributes;
-                },
-                selectedTei: function(){
-                    return selectedTei;
-                },
-                entityName: function(){
-                    return $scope.selectedProgram.trackedEntity.name;
+                hiddenGridColumns: function(){
+                    return $scope.hiddenGridColumns;
                 }
             }
         });
 
-        modalInstance.result.then({
+        modalInstance.result.then(function (gridColumns) {
+            $scope.gridColumns = gridColumns;
+        }, function () {
         });
-    };    
-})
-
-//Controller for event details
-.controller('ReschedulingController', 
-    function($scope, 
-            $modalInstance,            
-            DHIS2EventFactory,
-            dhis2Event,
-            selectedTei,
-            attributes,
-            entityName){
-    
-    $scope.selectedTei = selectedTei;
-    $scope.attributes = attributes;
-    $scope.entityName = entityName;    
-    $scope.currentEvent = dhis2Event;
-    
-    
-    $scope.save = function(){
-        
-        
-        if($scope.currentEvent.dueDate == ''){
-            $scope.invalidDate = true;
-            return false;
-        }
-        else{
-            var rawDate = $filter('date')($scope.currentEvent.dueDate, 'yyyy-MM-dd'); 
-            var convertedDate = moment($scope.currentEvent.dueDate, 'YYYY-MM-DD')._d;
-            convertedDate = $filter('date')(convertedDate, 'yyyy-MM-dd'); 
-
-            if(rawDate !== convertedDate){
-                $scope.invalidDate = true;
-                return false;
-            } 
-
-            var e = {event: $scope.currentEvent.event,
-                 enrollment: $scope.currentEvent.enrollment,
-                 dueDate: $scope.currentEvent.dueDate,
-                 status: $scope.currentEvent.status,
-                 program: $scope.currentEvent.program,
-                 programStage: $scope.currentEvent.programStage,
-                 orgUnit: $scope.currentEvent.orgUnit,
-                 trackedEntityInstance: $scope.currentEvent.trackedEntityInstance
-                };
-
-            DHIS2EventFactory.update(e).then(function(data){            
-                $scope.invalidDate = false;
-                $scope.dueDateSaved = true;
-                $scope.currentEvent.sortingDate = $scope.currentEvent.dueDate;                
-                var statusColor = EventUtils.getEventStatusColor($scope.currentEvent);  
-                var continueLoop = true;
-                for(var i=0; i< $scope.dhis2Events.length && continueLoop; i++){
-                    if($scope.dhis2Events[i].event === $scope.currentEvent.event ){
-                        $scope.dhis2Events[i].statusColor = statusColor;
-                        continueLoop = false;
-                    }
-                } 
-            });
-        }
-        
     };
     
-    $scope.close = function () {
-        $modalInstance.close();
+    $scope.sortGrid = function(gridHeader){
+        if ($scope.sortHeader === gridHeader.id){
+            $scope.reverse = !$scope.reverse;
+            return;
+        }        
+        $scope.sortHeader = gridHeader.id;
+        $scope.reverse = false;
+        
+        $scope.upcomingEvents = orderByFilter($scope.upcomingEvents, $scope.sortHeader);
+        
+        if($scope.reverse){
+            $scope.upcomingEvents.reverse();
+        }
+    };
+    
+    $scope.searchInGrid = function(gridColumn){
+        
+        $scope.currentFilter = gridColumn;
+       
+        for(var i=0; i<$scope.gridColumns.length; i++){
+            
+            //toggle the selected grid column's filter
+            if($scope.gridColumns[i].id === gridColumn.id){
+                $scope.gridColumns[i].showFilter = !$scope.gridColumns[i].showFilter;
+            }            
+            else{
+                $scope.gridColumns[i].showFilter = false;
+            }
+        }
+    };    
+    
+    $scope.removeStartFilterText = function(gridColumnId){
+        $scope.filterText[gridColumnId].start = undefined;
+    };
+    
+    $scope.removeEndFilterText = function(gridColumnId){
+        $scope.filterText[gridColumnId].end = undefined;
+    };
+    
+    $scope.showDashboard = function(tei){
+        $location.path('/dashboard').search({tei: tei,                                            
+                                            program: $scope.selectedProgram ? $scope.selectedProgram.id: null});
+    };
+    
+    $scope.generateReportData = function(){
+        return TEIGridService.getData($scope.upcomingEvents, $scope.gridColumns);
+    };
+    
+    $scope.generateReportHeader = function(){
+        return TEIGridService.getHeader($scope.gridColumns);
+    };
+    
+    $scope.jumpToPage = function(){
+        $scope.generateReport();
+    };
+    
+    $scope.resetPageSize = function(){
+        $scope.pager.page = 1;        
+        $scope.generateReport();
+    };
+    
+    $scope.getPage = function(page){    
+        $scope.pager.page = page;
+        $scope.generateReport();
     };
 });

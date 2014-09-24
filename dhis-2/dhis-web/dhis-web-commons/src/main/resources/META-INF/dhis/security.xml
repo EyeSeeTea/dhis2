@@ -23,7 +23,7 @@
   <sec:http pattern="/dhis-web-commons/css/**" security="none" />
   <sec:http pattern="/dhis-web-commons/flags/**" security="none" />
   <sec:http pattern="/dhis-web-commons/fonts/**" security="none" />
-  <sec:http pattern="/api/files/style/external" security="none" />
+  <sec:http pattern="/api/files/style/external.js" security="none" />
   <sec:http pattern="/external-static/**" security="none" />
   <sec:http pattern="/favicon.ico" security="none" />
 
@@ -52,6 +52,7 @@
     <sec:intercept-url pattern="/api/account/username" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/recovery" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/restore" access="permitAll()" />
+    <sec:intercept-url pattern="/api/account/password" access="permitAll()" />
     <sec:intercept-url pattern="/api/account" access="permitAll()" />
     <sec:intercept-url pattern="/**" access="isAuthenticated()" />
     <sec:custom-filter ref="automaticAccessFilter" before="LOGOUT_FILTER" />

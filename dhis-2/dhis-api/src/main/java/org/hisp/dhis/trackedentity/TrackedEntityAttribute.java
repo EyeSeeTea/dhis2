@@ -75,6 +75,8 @@ public class TrackedEntityAttribute
     public static final String TYPE_TRACKER_ASSOCIATE = "trackerAssociate";
 
     public static final String TYPE_USERS = "users";
+    
+    public static final String TYPE_EMAIL = "email";
 
     private String description;
 
@@ -315,7 +317,6 @@ public class TrackedEntityAttribute
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Boolean getConfidential()
@@ -354,6 +355,7 @@ public class TrackedEntityAttribute
             unique = trackedEntityAttribute.isUnique();
             orgunitScope = trackedEntityAttribute.getOrgunitScope();
             programScope = trackedEntityAttribute.getProgramScope();
+            confidential = trackedEntityAttribute.getConfidential();
         }
     }
 

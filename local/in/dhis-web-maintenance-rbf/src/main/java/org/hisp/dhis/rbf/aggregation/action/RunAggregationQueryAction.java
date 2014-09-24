@@ -213,7 +213,12 @@ public class RunAggregationQueryAction
                 
                 Set<OrganisationUnit> orgUnits = new HashSet<OrganisationUnit>( dataSet.getSources() );
                 
+                System.out.println( " Size of DataSet Source -- " + orgUnits.size() );
+                
+                
                 orgUnits.retainAll( orgUnitList );
+                
+                System.out.println( " Size of OrgList Source -- " + orgUnits.size() );
                 
                 List<Period> periods = new ArrayList<Period>();
                 

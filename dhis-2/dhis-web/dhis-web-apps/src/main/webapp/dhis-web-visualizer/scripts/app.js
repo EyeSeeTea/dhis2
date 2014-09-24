@@ -2190,7 +2190,13 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/charts/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
@@ -2319,6 +2325,7 @@ Ext.onReady( function() {
             area,
             pie,
             radar,
+            gauge,
             chartType,
             getDimensionStore,
             colStore,
@@ -2505,6 +2512,17 @@ Ext.onReady( function() {
             }
         });
 
+        gauge = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: ns.core.conf.finals.chart.gauge,
+            icon: 'images/gauge.png',
+            name: ns.core.conf.finals.chart.gauge,
+            tooltipText: NS.i18n.gauge_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
         chartType = Ext.create('Ext.toolbar.Toolbar', {
             height: 45,
             style: 'padding-top:1px; border:0 none; border-bottom:1px solid #ddd',
@@ -2545,7 +2563,7 @@ Ext.onReady( function() {
             items: [
                 {
                     xtype: 'label',
-                    text: NS.i18n.chart_type,
+                    text: NS.i18n.type,
                     style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
                 },
                 column,
@@ -2555,7 +2573,8 @@ Ext.onReady( function() {
                 line,
                 area,
                 pie,
-                radar
+                radar,
+                gauge
             ]
         });
 
@@ -4273,6 +4292,7 @@ Ext.onReady( function() {
 							text: NS.i18n.prev_year,
 							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
+                            width: 62,
 							handler: function() {
 								if (periodType.getValue()) {
 									periodType.periodOffset--;
@@ -4285,6 +4305,7 @@ Ext.onReady( function() {
 							text: NS.i18n.next_year,
 							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
+                            width: 62,
 							handler: function() {
 								if (periodType.getValue()) {
 									periodType.periodOffset++;
@@ -4491,7 +4512,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5870,6 +5891,16 @@ Ext.onReady( function() {
 				}
 			}
 
+            // add assigned categories as dimension
+            if (!ns.app.layoutWindow.hasDimension(dimConf.category.dimensionName)) {
+                ns.app.stores.dimension.add({id: dimConf.category.dimensionName, name: dimConf.category.name});
+            }
+
+            // add data as dimension
+            if (!ns.app.layoutWindow.hasDimension(dimConf.data.dimensionName)) {
+                ns.app.stores.dimension.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
+            }
+            
             // add orgunit as dimension
             if (!ns.app.layoutWindow.hasDimension(dimConf.organisationUnit.dimensionName)) {
                 ns.app.stores.dimension.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
@@ -6232,4 +6263,3 @@ Ext.onReady( function() {
 		});
 	}());
 });
-

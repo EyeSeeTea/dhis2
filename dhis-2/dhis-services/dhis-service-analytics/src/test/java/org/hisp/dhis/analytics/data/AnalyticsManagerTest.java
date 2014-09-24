@@ -65,9 +65,9 @@ public class AnalyticsManagerTest
         params.setPeriods( getList( y2012 ) );
         params.setOrganisationUnits( getList( createOrganisationUnit( 'A' ) ) );
         params.setDataPeriodType( new YearlyPeriodType() );
-        params.setAggregationType( AggregationType.AVERAGE_INT_DISAGGREGATION );
+        params.setAggregationType( AggregationType.AVERAGE_SUM_INT_DISAGGREGATION );
         
-        Map<String, Double> dataValueMap = new HashMap<>();
+        Map<String, Object> dataValueMap = new HashMap<>();
         dataValueMap.put( BASE_UID + "A-2012-" + BASE_UID + "A", 1d );
         dataValueMap.put( BASE_UID + "B-2012-" + BASE_UID + "A", 1d );
         

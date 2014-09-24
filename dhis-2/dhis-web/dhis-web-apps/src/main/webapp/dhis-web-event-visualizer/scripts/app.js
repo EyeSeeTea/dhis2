@@ -3981,7 +3981,7 @@ Ext.onReady( function() {
             store: periodTypeStore,
             periodOffset: 0,
             listeners: {
-                select: function(cmp) {
+                select: function() {
                     periodType.periodOffset = 0;
                     onPeriodTypeSelect();
                 }
@@ -3992,6 +3992,7 @@ Ext.onReady( function() {
             text: NS.i18n.prev_year,
             style: 'border-radius:1px; margin-right:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset--;
@@ -4004,6 +4005,7 @@ Ext.onReady( function() {
             text: NS.i18n.next_year,
             style: 'border-radius:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset++;
@@ -4412,7 +4414,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5765,7 +5767,13 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/eventCharts/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
