@@ -28,29 +28,17 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.geotools.GML;
-import org.geotools.data.simple.SimpleFeatureCollection;
-import org.geotools.data.simple.SimpleFeatureIterator;
-import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureCollectionIteration;
-import org.geotools.gml.GMLFilterFeature;
-import org.geotools.gml3.GMLConfiguration;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.xml.PullParser;
-import org.geotools.xml.StreamingParser;
 import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.organisationunit.CoordinatesTuple;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.PropertyDescriptor;
-import org.xml.sax.SAXException;
+import org.hisp.dhis.dxf2.render.RenderService;
 
-import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -58,46 +46,45 @@ import java.util.List;
 public class DefaultGmlImportService
     implements GmlImportService
 {
+    private static final String GML_TO_DXF_TRANSFORM = "gml/gml2metadata.xsl";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    private RenderService renderService;
+
+    public void setRenderService( RenderService renderService )
+    {
+        this.renderService = renderService;
+    }
 
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public MetaData fromGml( InputStream input, Class<?> clazz ) throws Exception
+    public MetaData fromGml( InputStream input )
+        throws Exception
     {
-        MetaData metaData = new MetaData();
-
-        GMLConfiguration gmlCfg = new GMLConfiguration();
-        PullParser parser = new PullParser( gmlCfg, input, SimpleFeature.class );
-
-        int nfeatures = 0;
-        SimpleFeature f = null;
-
-        while( ( f = (SimpleFeature) parser.parse() ) != null )
-        {
-            nfeatures++;
-            String name = f.getAttribute( "Name" ).toString();
-
-            System.out.println( f.getID() + " name: " + name );
-        }
-
-        System.out.println( "features: " + nfeatures );
-
-        return metaData;
+        return renderService.fromXml( transformGml( input ), MetaData.class );
     }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
 
-    private List<OrganisationUnit> organisationUnitsFromGml( SimpleFeature feature )
+    private InputStream transformGml( InputStream input )
+        throws IOException, TransformerException
     {
-        List<OrganisationUnit> organisationUnits = new ArrayList<>();
+        InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
 
-        return organisationUnits;
+        StreamSource gml = new StreamSource( input ), xsl = new StreamSource( s );
+
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+        TransformerFactory.newInstance().newTransformer( xsl ).transform( gml, new StreamResult( output ) );
+
+        return new ByteArrayInputStream( output.toByteArray() );
     }
 }

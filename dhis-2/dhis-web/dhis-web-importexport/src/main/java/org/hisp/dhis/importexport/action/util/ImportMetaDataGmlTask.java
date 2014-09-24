@@ -59,8 +59,6 @@ public class ImportMetaDataGmlTask
 
     private String userUid;
 
-    private Class<?> clazz;
-
     public ImportMetaDataGmlTask( String userUid, ImportService importService, GmlImportService gmlImportService,
         ImportOptions importOptions, InputStream inputStream, TaskId taskId, Class<?> clazz )
     {
@@ -73,6 +71,8 @@ public class ImportMetaDataGmlTask
         this.clazz = clazz;
     }
 
+    private Class<?> clazz;
+
     // -------------------------------------------------------------------------
     // Runnable implementation
     // -------------------------------------------------------------------------
@@ -84,9 +84,9 @@ public class ImportMetaDataGmlTask
 
         try
         {
-            metaData = gmlImportService.fromGml( inputStream, clazz );
+            metaData = gmlImportService.fromGml( inputStream );
         }
-        catch ( IOException ex )
+        catch ( Exception ex )
         {
             log.error( "Unable to read meta-data while reading input stream", ex );
             return;

@@ -30,7 +30,6 @@ package org.hisp.dhis.dxf2.gml;
 
 import org.hisp.dhis.dxf2.metadata.MetaData;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -38,6 +37,6 @@ import java.io.InputStream;
  */
 public interface GmlImportService
 {
-    MetaData fromGml( InputStream input, Class<?> clazz )
-        throws IOException;
+    MetaData fromGml( InputStream input )
+        throws Exception;
 }
