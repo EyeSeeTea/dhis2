@@ -8,6 +8,7 @@ import java.util.Locale;
 
 /**
  * Methods to parse various GML coordinate formats and output the DHIS 2 internal representation.
+ * TODO Consider using guava splitter (probably more performant)
  * @author Halvdan Hoem Grelland
  */
 public class GmlConversionUtils
