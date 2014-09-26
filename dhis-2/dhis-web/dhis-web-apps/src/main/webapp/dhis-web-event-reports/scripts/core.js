@@ -1186,6 +1186,11 @@ Ext.onReady( function() {
                     for (var i = 0, orgDim; i < originalDimensions.length; i++) {
                         orgDim = originalDimensions[i];
 
+                        // if sorting and row dim, dont restore order
+                        if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
+                            continue;
+                        }
+
                         if (Ext.isString(orgDim.filter)) {
                             var a = orgDim.filter.split(':');
 

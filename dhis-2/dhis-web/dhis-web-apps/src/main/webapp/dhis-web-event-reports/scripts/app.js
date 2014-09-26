@@ -6275,7 +6275,7 @@ Ext.onReady( function() {
 
 					if (layout.sorting) {
 						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-						xLayout = getSXLayout(xLayout, xResponse);
+						xLayout = getSXLayout(layout, xLayout, xResponse);
 						table = getHtml(xLayout, xResponse);
 					}
 
