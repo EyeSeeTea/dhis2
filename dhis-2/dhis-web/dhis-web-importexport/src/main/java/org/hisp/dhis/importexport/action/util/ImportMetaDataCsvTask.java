@@ -75,6 +75,10 @@ public class ImportMetaDataCsvTask
         this.clazz = clazz;
     }
 
+    // -------------------------------------------------------------------------
+    // Runnable implementation
+    // -------------------------------------------------------------------------
+
     @Override
     public void run()
     {

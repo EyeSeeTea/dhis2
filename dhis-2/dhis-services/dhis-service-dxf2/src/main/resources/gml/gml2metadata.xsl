@@ -1,24 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:gml="http://www.opengis.net/gml"
->
+  xmlns:gml="http://www.opengis.net/gml">
 
 <xsl:param name="precision">4</xsl:param>
 
-<!-- Transform gml coordinates to coordinate strings -->
 <xsl:template match="gml:coordinates">
   <xsl:value-of select="java:gmlCoordinatesToString(normalize-space(.),$precision)"
     disable-output-escaping="yes"
-    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConvertUtils"/>
+    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
 </xsl:template>
 
-<!--  Transform gml features -->
+<xsl:template match="gml:pos">
+  <xsl:value-of select="java:gmlPosToString(normalize-space(.),$precision)"
+    disable-output-escaping="yes"
+    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
+</xsl:template>
+
+<xsl:template match="gml:posList">
+  <xsl:value-of select="java:gmlPosListToString(normalize-space(.),$precision)"
+    disable-output-escaping="yes"
+    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
+</xsl:template>
+
 <xsl:template match="gml:Polygon">
   <featureType>Polygon</featureType>
   <coordinates>
     <xsl:text>[[[</xsl:text>
     <xsl:apply-templates select=".//gml:coordinates"/>
+    <xsl:apply-templates select=".//gml:posList"/>
     <xsl:text>]]]</xsl:text>
     <xsl:if test="position() != last()">
       <xsl:text>,</xsl:text>
@@ -38,22 +48,21 @@
 <xsl:template match="gml:Point">
   <featureType>Point</featureType>
   <coordinates>
-    <!-- <xsl:text>[</xsl:text> -->
     <xsl:apply-templates select=".//gml:coordinates"/>
-    <!-- <xsl:text>]</xsl:text> -->
+    <xsl:apply-templates select=".//gml:pos"/>
   </coordinates>
 </xsl:template>
 
 <xsl:template match="gml:polygonMember">
   <xsl:text>[[</xsl:text>
   <xsl:apply-templates select=".//gml:coordinates"/>
+  <xsl:apply-templates select=".//gml:posList"/>
   <xsl:text>]]</xsl:text>
   <xsl:if test="position() != last()">
     <xsl:text>,</xsl:text>
   </xsl:if>
 </xsl:template>
 
-<!-- Transform featureMember to OrganisationUnit -->
 <xsl:template match="gml:featureMember">
   <xsl:variable name="name" select=".//*[local-name()='Name' or local-name()='NAME' or local-name()='name']"/>
   <xsl:variable name="code" select=".//*[local-name()='code']" />
@@ -67,15 +76,10 @@
     <xsl:attribute name="code">
       <xsl:value-of select="$code" />
     </xsl:attribute>
-    <xsl:attribute name="id">
-      <xsl:value-of select="0" />
-    </xsl:attribute>
-    <active>true</active>
     <xsl:apply-templates select="./child::node()/child::node()/gml:Polygon|./child::node()/child::node()/gml:MultiPolygon|./child::node()/child::node()/gml:Point"/>
   </organisationUnit>
 </xsl:template>
 
-<!-- Transform entry point -->
 <xsl:template match="/">
   <dxf xmlns="http://dhis2.org/schema/dxf/2.0" minorVersion="2.0">
     <organisationUnits>

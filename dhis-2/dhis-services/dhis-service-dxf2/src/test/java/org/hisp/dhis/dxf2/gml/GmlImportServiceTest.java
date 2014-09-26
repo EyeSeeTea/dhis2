@@ -70,7 +70,7 @@ public class GmlImportServiceTest
 
         List<OrganisationUnit> orgUnits = metaData.getOrganisationUnits();
 
-        assertEquals( 14, orgUnits.size() );
+        assertEquals( 16, orgUnits.size() );
 
         HashMap<String, OrganisationUnit> units = new HashMap<>();
 
@@ -93,6 +93,8 @@ public class GmlImportServiceTest
         assertEquals( 1, units.get( "Tonkolili" ).getCoordinatesAsList().size() );
         assertEquals( 2, units.get( "Western Area" ).getCoordinatesAsList().size() );
         assertEquals( 1, units.get( "Ole Johan Dahls Hus" ).getCoordinatesAsList().size() );
+        assertEquals( 1, units.get( "Blindern" ).getCoordinatesAsList().size() );
+        assertEquals( 1, units.get( "Forskningsparken").getCoordinatesAsList().size() );
 
         assertEquals( 76, units.get( "Bo" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 7, units.get( "Pujehun" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
@@ -100,5 +102,7 @@ public class GmlImportServiceTest
         assertEquals( 159, units.get( "Pujehun" ).getCoordinatesAsList().get( 2 ).getNumberOfCoordinates() );
         assertEquals( 189, units.get( "Bonthe" ).getCoordinatesAsList().get( 1 ).getNumberOfCoordinates() );
         assertEquals( 1, units.get( "Ole Johan Dahls Hus" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
+        assertEquals( 1, units.get( "Blindern").getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
+        assertEquals( 76, units.get( "Forskningsparken" ).getCoordinatesAsList().get(0).getNumberOfCoordinates() );
     }
 }
