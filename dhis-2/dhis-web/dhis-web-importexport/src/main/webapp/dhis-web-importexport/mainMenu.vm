@@ -4,6 +4,7 @@
 <ul>
   <li><a href="dxf2MetaDataImport.action?importFormat=xml">$i18n.getString( "xml_metadata_import" )&nbsp;</a></li>
   <li><a href="dxf2MetaDataImport.action?importFormat=csv">$i18n.getString( "csv_metadata_import" )&nbsp;</a></li>
+  <li><a href="dxf2MetaDataImport.action?importFormat=gml">$i18n.getString( "gml_metadata_import" )&nbsp;</a></li>
   <li><a href="displayImportDataValueForm.action?importFormat=xml">$i18n.getString( "xml_data_import" )&nbsp;</a></li>
   <li><a href="displayImportDataValueForm.action?importFormat=csv">$i18n.getString( "csv_data_import" )&nbsp;</a></li>
   <li><a href="displayImportDataValueForm.action?importFormat=pdf">$i18n.getString( "pdf_data_import" )&nbsp;</a></li>
