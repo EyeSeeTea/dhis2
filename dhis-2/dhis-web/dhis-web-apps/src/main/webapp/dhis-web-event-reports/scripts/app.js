@@ -6263,7 +6263,7 @@ Ext.onReady( function() {
 
 					xLayout = getXLayout(layout);
 					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-					xLayout = getSXLayout(xLayout, xResponse);
+					xLayout = getSXLayout(layout, xLayout, xResponse);
 
 					table = getHtml(xLayout, xResponse);
 
