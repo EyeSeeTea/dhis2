@@ -31,6 +31,7 @@ package org.hisp.dhis.appmanager.action;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -105,6 +106,8 @@ public class AddAppAction
     public String execute()
         throws Exception
     {
+        HttpServletRequest request = ServletActionContext.getRequest();
+        
         if ( file == null )
         {
             message = i18n.getString( "appmanager_no_file_specified" );
@@ -133,7 +136,9 @@ public class AddAppAction
             
             try
             {
-                appManager.installApp( file, fileName, getRootPath() );
+                String contextPath = ContextUtils.getContextPath( request );
+                
+                appManager.installApp( file, fileName, contextPath );
                 
                 message = i18n.getString( "appmanager_install_success" );
                 
@@ -145,16 +150,12 @@ public class AddAppAction
                 log.error( "Error parsing JSON in manifest", ex );
                 return FAILURE;
             }
+            catch ( IOException ex )
+            {
+                message = i18n.getString( "appmanager_could_not_read_file_check_server_permissions" );
+                log.error( "App could not not be read, check server permissions" );
+                return FAILURE;
+            }
         }
-    }
-    
-    private String getRootPath()
-    {
-        HttpServletRequest req = ServletActionContext.getRequest();
-        StringBuffer fullUrl = req.getRequestURL();
-        String baseUrl = ContextUtils.getBaseUrl( req );
-        String rootPath = fullUrl.substring( 0, fullUrl.indexOf( "/", baseUrl.length() ) );
-        
-        return rootPath;
     }
 }
