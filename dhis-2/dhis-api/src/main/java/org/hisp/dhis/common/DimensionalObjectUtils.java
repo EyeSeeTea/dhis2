@@ -37,9 +37,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections.ListUtils;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -284,9 +284,11 @@ public class DimensionalObjectUtils
      * analytics type must be equal to EVENT.
      * 
      * @param dimension the dimension.
+     * @param naForNull indicates whether a [n/a] string should be used as
+     *        replacement for null values.
      * @param grid the grid with data values.
      */
-    public static void setDimensionItemsForFilters( DimensionalObject dimension, Grid grid )
+    public static void setDimensionItemsForFilters( DimensionalObject dimension, Grid grid, boolean naForNull )
     {
         if ( dimension == null || grid == null || !AnalyticsType.EVENT.equals( dimension.getAnalyticsType() ) )
         {
@@ -294,11 +296,20 @@ public class DimensionalObjectUtils
         }
             
         BaseDimensionalObject dim = (BaseDimensionalObject) dimension;
-        Set<Object> values = grid.getUniqueValues( dim.getDimension() );
-        List<NameableObject> items = NameableObjectUtils.getNameableObjects( values );
+        
+        List<String> filterItems = dim.getFilterItemsAsList();
+        
+        List<Object> values = new ArrayList<>( grid.getUniqueValues( dim.getDimension() ) );
+        
+        // Use order of items in filter if specified
+        
+        List<?> itemList = filterItems != null ? ListUtils.retainAll( filterItems, values ) : values;
+                
+        List<NameableObject> items = NameableObjectUtils.getNameableObjects( itemList, naForNull );
+        
         dim.setItems( items );
     }
-    
+        
     /**
      * Accepts filter strings on the format:
      * </p>

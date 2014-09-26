@@ -1,5 +1,7 @@
+package org.hisp.dhis.common;
+
 /*
- * Copyright (c) 2004-2013, University of Oslo
+ * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,28 +28,27 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dhis2.util.namespace("dhis2.coc");
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-dhis2.coc = {
-    clearAndSetAjaxSelect: function( type, clearSelected ) {
-        var source = "../api/categories.json";
+import org.junit.Test;
 
-        if( type !== undefined ) {
-            source += "?filter=dataDimensionType:eq:" + type;
-        }
+import static org.junit.Assert.*;
 
-        if( clearSelected ) {
-            $('#selectedList').children().empty();
-        }
-
-        $('#caAvailable').selected({
-          url: source,
-          target: $('#caSelected'),
-          search: $('#caAvailableSearch'),
-          iterator: 'categories'
-        });
-    },
-    getType: function () {
-        return $('#dimensionType').val().toLowerCase();
+/**
+ * @author Lars Helge Overland
+ */
+public class DimensionalObjectTest
+{
+    @Test
+    public void testGetFilterItemsAsList()
+    {
+        BaseDimensionalObject objectA = new BaseDimensionalObject( "dimA", DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, "IN:uidA;uidB;uidC" );
+        List<String> expectedA = new ArrayList<>( Arrays.asList( "uidA", "uidB", "uidC" ) );
+        assertEquals( expectedA, objectA.getFilterItemsAsList() );
+        
+        BaseDimensionalObject objectB = new BaseDimensionalObject( "dimA", DimensionType.TRACKED_ENTITY_DATAELEMENT, null, null, "EQ:uidA" );
+        assertEquals( null, objectB.getFilterItemsAsList() );
     }
-};
+}
