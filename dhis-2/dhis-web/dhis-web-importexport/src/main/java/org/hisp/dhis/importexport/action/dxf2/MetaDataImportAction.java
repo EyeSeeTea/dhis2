@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -179,7 +180,7 @@ public class MetaDataImportAction
                 break;
             case "gml":
                 scheduler.executeTask( new ImportMetaDataGmlTask( userId, importService, gmlImportService,
-                    importOptions, in, taskId) );
+                    importOptions, in, taskId ) );
                 break;
             default:
                 scheduler.executeTask( new ImportMetaDataTask( userId, importService, importOptions, in, taskId ) );

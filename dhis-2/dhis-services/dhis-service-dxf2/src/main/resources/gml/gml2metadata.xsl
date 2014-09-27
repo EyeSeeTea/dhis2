@@ -77,6 +77,7 @@
       <xsl:value-of select="$code" />
     </xsl:attribute>
     <xsl:apply-templates select="./child::node()/child::node()/gml:Polygon|./child::node()/child::node()/gml:MultiPolygon|./child::node()/child::node()/gml:Point"/>
+    <active>true</active>
   </organisationUnit>
 </xsl:template>
 
