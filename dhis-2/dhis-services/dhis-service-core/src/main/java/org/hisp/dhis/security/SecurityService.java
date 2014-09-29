@@ -120,11 +120,11 @@ public interface SecurityService
      *
      * @param credentials the user credentials.
      * @param token the token.
-     * @return error message if any of the arguments are null or if the user
-     *         credentials identified by the user name does not exist, null if
-     *         the arguments are valid.
+     * @return false if any of the arguments are null or if the user credentials
+     *         identified by the user name does not exist, true if the arguments
+     *         are valid.
      */
-    String verifyToken( UserCredentials credentials, String token, RestoreType restoreType );
+    boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType );
 
     /**
      * Checks whether current user has read access to object.

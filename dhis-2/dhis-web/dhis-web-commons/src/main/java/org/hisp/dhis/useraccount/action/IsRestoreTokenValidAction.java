@@ -88,9 +88,9 @@ public class IsRestoreTokenValidAction
         {
             return ERROR;
         }
-
-        String errorMessage = securityService.verifyToken( credentials, token, RestoreType.RECOVER_PASSWORD );
-
-        return errorMessage == null ? SUCCESS : ERROR;
+        
+        boolean verified = securityService.verifyToken( credentials, token, RestoreType.RECOVER_PASSWORD );
+        
+        return verified ? SUCCESS : ERROR;
     }
 }

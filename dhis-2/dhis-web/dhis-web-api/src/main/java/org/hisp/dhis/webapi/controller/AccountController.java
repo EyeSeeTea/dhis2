@@ -465,7 +465,9 @@ public class AccountController
             return;
         }
 
-        if( !passwordManager.matches( oldPassword, credentials.getPassword() ) )
+        String oldPasswordEncoded = passwordManager.encodePassword( oldPassword );
+
+        if ( !credentials.getPassword().equals( oldPasswordEncoded ) )
         {
             result.put( "status", "NON_MATCHING_PASSWORD" );
             result.put( "message", "Old password is wrong, please correct and try again." );

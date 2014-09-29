@@ -268,149 +268,54 @@ public class DefaultSecurityService
 
     public boolean canRestoreNow( UserCredentials credentials, String token, String code, RestoreType restoreType )
     {
-        String logInfoPrefix = "Restore User " + credentials.getUid() + " " + credentials.getUsername();
-
-        String errorMessage = verifyToken( credentials, token, restoreType );
-
-        if ( errorMessage != null )
+        if ( !verifyToken( credentials, token, restoreType ) )
         {
-            log.info( logInfoPrefix + " verifyToken() failed: " + errorMessage );
             return false;
         }
 
-        errorMessage = canRestore( credentials,  token, code, new Cal().now().time() );
+        String restoreCode = credentials.getRestoreCode();
 
-        return errorMessage == null && passwordManager.matches( code, credentials.getRestoreCode() );
+        Date restoreExpiry = credentials.getRestoreExpiry();
+        Date currentTime = new Cal().now().time();
+
+        if( restoreCode == null || restoreExpiry == null || code == null || currentTime.after( restoreExpiry ) )
+        {
+            return false;
+        }
+
+        return passwordManager.matches( code, restoreCode );
     }
 
-    /**
-     * Verify the token given for a user invite or password restore operation.
-     * <p>
-     * If error, returns one of the following strings:
-     *
-     * <ul>
-     *     <li>credentials_parameter_is_null</li>
-     *     <li>token_parameter_is_null</li>
-     *     <li>restoreType_parameter_is_null</li>
-     *     <li>cannot_parse_restore_options ...</li>
-     *     <li>wrong_prefix_for_restore_type ...</li>
-     *     <li>could_not_verify_token ...</li>
-     *     <li>restoreToken_does_not_match_supplied_token</li>
-     * </ul>
-     *
-     * @param credentials the user credentials.
-     * @param token the token.
-     * @param restoreType type of restore operation.
-     * @return null if success, otherwise error string.
-     */
-    public String verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
+    public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
     {
-        if ( credentials == null )
+        if ( credentials == null || token == null || restoreType == null )
         {
-            return "credentials_parameter_is_null";
-        }
-
-        if ( token == null )
-        {
-            return "token_parameter_is_null";
-        }
-
-        if ( restoreType == null )
-        {
-            return "restoreType_parameter_is_null";
+            return false;
         }
 
         RestoreOptions restoreOptions = RestoreOptions.getRestoreOptions( token );
 
         if ( restoreOptions == null )
         {
-            return "cannot_parse_restore_options for " + restoreType.name() + " from token " + token;
+            log.info( "Can't parse restore options for " + restoreType.name() + " from token " + token + " for user " + credentials );
+            return false;
         }
 
         if ( restoreType != restoreOptions.getRestoreType() )
         {
-            return "wrong_prefix_for_restore_type " + restoreType.name() + " on token " + token;
+            log.info( "Wrong prefix for restore type " + restoreType.name() + " on token " + token + " for user " + credentials );
+            return false;
         }
 
         if ( credentials.getRestoreToken() == null )
         {
-            return "could_not_verify_token for " + restoreType.name() + " because user has no token";
+            log.info( "Could not verify token for " + restoreType.name() + " as user has no token: " + credentials );
+            return false;
         }
 
-        boolean validToken = passwordManager.matches( token, credentials.getRestoreToken() );
+        String restoreToken = credentials.getRestoreToken();
 
-        return validToken ? null : "restoreToken_does_not_match_supplied_token " + token;
-    }
-
-    /**
-     * Tests whether the given input arguments can perform a valid restore of
-     * the user account for these credentials.
-     * <p>
-     * If fail, returns one of the following error strings:
-     * <ul>
-     *     <li>account_restoreToken_is_null</li>
-     *     <li>account_restoreCode_is_null</li>
-     *     <li>account_restoreExpiry_is_null</li>
-     *     <li>token_parameter_is_null</li>
-     *     <li>code_parameter_is_null</li>
-     *     <li>date_parameter_is_null</li>
-     *     <li>token_does_not_match_restoreToken ...</li>
-     *     <li>code_does_not_match_restoreCode ...</li>
-     *     <li>date_is_after_expiry ...</li>
-     * </ul>
-     * @param token the restore token.
-     * @param code  the restore code.
-     * @param date  the expiry date.
-     * @return null if success, or error message if fail.
-     */
-    public String canRestore( UserCredentials credentials, String token, String code, Date date )
-    {
-        if ( credentials.getRestoreToken() == null )
-        {
-            return "account_restoreToken_is_null";
-        }
-
-        if ( credentials.getRestoreCode() == null )
-        {
-            return "account_restoreCode_is_null";
-        }
-
-        if ( credentials.getRestoreExpiry() == null )
-        {
-            return "account_restoreExpiry_is_null";
-        }
-
-        if ( token == null )
-        {
-            return "token_parameter_is_null";
-        }
-
-        if ( code == null )
-        {
-            return "code_parameter_is_null";
-        }
-
-        if ( date == null )
-        {
-            return "date_parameter_is_null";
-        }
-
-        if ( date.after( credentials.getRestoreExpiry() ) )
-        {
-            return "date_is_after_expiry - date: " + date.toString() + " expiry: " + credentials.getRestoreExpiry().toString();
-        }
-
-        if( !passwordManager.matches( token, credentials.getRestoreToken() ) )
-        {
-            return ( "token_does_not_match_restoreToken - token: '" + token + "' restoreToken: '" + credentials.getRestoreToken() + "'" );
-        }
-
-        if( !passwordManager.matches( code, credentials.getRestoreCode() ) )
-        {
-            return ( "code_does_not_match_restoreCode - code: '" + code + "' restoreCode: '" + credentials.getRestoreCode() + "'" );
-        }
-
-        return null; // Success.
+        return passwordManager.matches( token, restoreToken );
     }
 
     @Override

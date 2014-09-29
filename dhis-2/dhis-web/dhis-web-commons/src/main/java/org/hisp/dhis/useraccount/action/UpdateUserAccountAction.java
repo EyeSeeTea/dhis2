@@ -179,6 +179,7 @@ public class UpdateUserAccountAction
         if ( rawPassword != null )
         {
             userCredentials.setPassword( passwordManager.encodePassword( rawPassword ) );
+
             userService.updateUserCredentials( userCredentials );
         }
 
