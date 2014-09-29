@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.collection;
+package org.hisp.dhis.common.comparator;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,50 +28,24 @@ package org.hisp.dhis.system.collection;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Comparator;
+
+import org.apache.commons.lang.ObjectUtils;
 
 /**
+ * Converts the given objects based on their string value. Null objects are
+ * interpreted as empty strings.
+ * 
  * @author Lars Helge Overland
  */
-public class SetBuilder<E>
+public class ObjectStringValueComparator
+    implements Comparator<Object>
 {
-    private Set<E> set;
+    public static final ObjectStringValueComparator INSTANCE = new ObjectStringValueComparator();
     
-    public SetBuilder()
+    @Override
+    public int compare( Object o1, Object o2 )
     {
-        set = new HashSet<>();
-    }
-    
-    public SetBuilder<E> add( E element )
-    {
-        set.add( element );
-        return this;
-    }
-    
-    @SafeVarargs
-    public final SetBuilder<E> add( final E... elements )
-    {
-        for ( E element : elements )
-        {
-            set.add( element );
-        }
-        
-        return this;
-    }
-    
-    public SetBuilder<E> addAll( Collection<? extends E> collection )
-    {
-        set.addAll( collection );
-        return this;
-    }
-    
-    /**
-     * Returns an immutable Set based on the content of the builder.
-     */
-    public Set<E> build()
-    {
-        return new HashSet<>( set );
+        return ObjectUtils.toString( o1 ).compareTo( ObjectUtils.toString( o2 ) );
     }
 }

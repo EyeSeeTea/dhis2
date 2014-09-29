@@ -259,19 +259,6 @@ public class DefaultOrganisationUnitService
         return getOrganisationUnit( id ).getOrganisationUnitLevel();
     }
 
-    public Collection<OrganisationUnit> getLeafOrganisationUnits( int id )
-    {
-        Collection<OrganisationUnit> units = getOrganisationUnitWithChildren( id );
-
-        return FilterUtils.filter( units, new Filter<OrganisationUnit>()
-        {
-            public boolean retain( OrganisationUnit object )
-            {
-                return object != null && object.getChildren().isEmpty();
-            }
-        } );
-    }
-
     public Collection<OrganisationUnit> getOrganisationUnits( Collection<OrganisationUnitGroup> groups, Collection<OrganisationUnit> parents )
     {
         Set<OrganisationUnit> members = new HashSet<>();
@@ -314,9 +301,19 @@ public class DefaultOrganisationUnitService
 
     public Collection<OrganisationUnit> getOrganisationUnitWithChildren( int id )
     {
+        return getOrganisationUnitWithChildren( id, null );
+    }
+    
+    public Collection<OrganisationUnit> getOrganisationUnitWithChildren( int id, Integer maxLevels )
+    {
         OrganisationUnit organisationUnit = getOrganisationUnit( id );
 
         if ( organisationUnit == null )
+        {
+            return Collections.emptySet();
+        }
+        
+        if ( maxLevels != null && maxLevels <= 0 )
         {
             return Collections.emptySet();
         }
@@ -328,7 +325,9 @@ public class DefaultOrganisationUnitService
         organisationUnit.setLevel( rootLevel );
         result.add( organisationUnit );
 
-        addOrganisationUnitChildren( organisationUnit, result, rootLevel );
+        final Integer maxLevel = maxLevels != null ? ( rootLevel + maxLevels - 1 ) : null;
+        
+        addOrganisationUnitChildren( organisationUnit, result, rootLevel, maxLevel );
 
         return result;
     }
@@ -337,11 +336,16 @@ public class DefaultOrganisationUnitService
      * Support method for getOrganisationUnitWithChildren(). Adds all
      * OrganisationUnit children to a result collection.
      */
-    private void addOrganisationUnitChildren( OrganisationUnit parent, List<OrganisationUnit> result, int level )
+    private void addOrganisationUnitChildren( OrganisationUnit parent, List<OrganisationUnit> result, int level, final Integer maxLevel )
     {
         if ( parent.getChildren() != null && parent.getChildren().size() > 0 )
         {
             level++;
+        }
+        
+        if ( maxLevel != null && level > maxLevel )
+        {
+            return;
         }
 
         List<OrganisationUnit> childList = parent.getSortedChildren();
@@ -351,7 +355,7 @@ public class DefaultOrganisationUnitService
             child.setLevel( level );
             result.add( child );
 
-            addOrganisationUnitChildren( child, result, level );
+            addOrganisationUnitChildren( child, result, level, maxLevel );
         }
     }
 
