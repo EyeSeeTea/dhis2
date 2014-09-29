@@ -342,39 +342,6 @@ public class UserCredentials
     }
 
     /**
-     * Tests whether the given input arguments can perform a valid restore of the
-     * user account for these credentials. Returns false if any of the input arguments
-     * are null, or any of the properties on the credentials are null. Returns false
-     * if the expiry date arguement is after the expiry date of the credentials.
-     * Returns false if any of the given token or code arguments are not equal to
-     * the respective properties the the credentials. Returns true otherwise.
-     *
-     * @param token the restore token.
-     * @param code  the restore code.
-     * @param date  the expiry date.
-     * @return true or false.
-     */
-    public boolean canRestore( String token, String code, Date date )
-    {
-        if ( this.restoreToken == null || this.restoreCode == null || this.restoreExpiry == null )
-        {
-            return false;
-        }
-
-        if ( token == null || code == null || date == null )
-        {
-            return false;
-        }
-
-        if ( date.after( this.restoreExpiry ) )
-        {
-            return false;
-        }
-
-        return token.equals( this.restoreToken ) && code.equals( this.restoreCode );
-    }
-
-    /**
      * Returns the dimensions to use as constrains (filters) in data analytics
      * aggregation.
      */
