@@ -236,8 +236,7 @@ public class DefaultSecurityService
 
         userService.updateUserCredentials( credentials );
 
-        String[] result = { token, code };
-        return result;
+        return new String[] { token, code };
     }
 
     public RestoreOptions getRestoreOptions( String token )
@@ -282,6 +281,16 @@ public class DefaultSecurityService
         return true;
     }
 
+    /**
+     * Verifies all parameters needed for account restore and checks validity of the
+     * user supplied token and code. If the restore cannot be verified a descriptive
+     * error string is returned.
+     * @param credentials the user credentials.
+     * @param token the user supplied token.
+     * @param code the user supplied code.
+     * @param restoreType the restore type.
+     * @return null if restore is valid, a descriptive error string otherwise.
+     */
     private String verifyRestore( UserCredentials credentials, String token, String code, RestoreType restoreType )
     {
         String errorMessage = credentials.isRestorable();
