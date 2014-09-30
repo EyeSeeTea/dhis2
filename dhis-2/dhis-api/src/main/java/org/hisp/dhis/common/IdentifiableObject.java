@@ -35,6 +35,9 @@ import org.hisp.dhis.user.UserGroupAccess;
 import java.util.Date;
 import java.util.Set;
 
+/**
+ * @author Lars Helge Overland
+ */
 public interface IdentifiableObject
     extends ImportableObject, LinkableObject, Comparable<IdentifiableObject>, Mergeable<IdentifiableObject>
 {

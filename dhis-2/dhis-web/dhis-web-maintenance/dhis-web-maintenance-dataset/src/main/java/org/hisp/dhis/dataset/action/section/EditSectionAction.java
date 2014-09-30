@@ -28,17 +28,11 @@ package org.hisp.dhis.dataset.action.section;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.SectionService;
@@ -57,13 +51,6 @@ public class EditSectionAction
     public void setSectionService( SectionService sectionService )
     {
         this.sectionService = sectionService;
-    }
-
-    private DataElementService dataElementService;
-
-    public void setDataElementService( DataElementService dataElementService )
-    {
-        this.dataElementService = dataElementService;
     }
 
     // -------------------------------------------------------------------------
@@ -124,7 +111,7 @@ public class EditSectionAction
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
+    
     public String execute()
         throws Exception
     {
@@ -132,38 +119,8 @@ public class EditSectionAction
 
         dataSet = section.getDataSet();
 
-        dataElementOfDataSet = new ArrayList<>( dataSet.getDataElements() );
-
-        Collection<Section> sections = dataSet.getSections();
-
-        for ( Section s : sections )
-        {
-            dataElementOfDataSet.removeAll( s.getDataElements() );
-        }
-
         categoryCombo = section.getCategoryCombo();
         
-        if ( categoryCombo != null )
-        {        
-            Iterator<DataElement> dataElementIterator = dataElementOfDataSet.iterator();
-            
-            while ( dataElementIterator.hasNext() )
-            {
-                DataElement de = dataElementIterator.next();
-                
-                if ( !de.getCategoryCombo().equals( categoryCombo ) )
-                {
-                    dataElementIterator.remove();
-                }
-            }
-        }
-
-        dataElementGroups = new ArrayList<>( dataElementService.getAllDataElementGroups() );
-
-        Collections.sort( dataElementOfDataSet, new IdentifiableObjectNameComparator() );
-
-        Collections.sort( dataElementGroups, IdentifiableObjectNameComparator.INSTANCE );
-
         return SUCCESS;
     }
 }

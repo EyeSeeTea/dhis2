@@ -97,7 +97,9 @@ public class DefaultAnalyticsTableService
     
     public void update( Integer lastYears, TaskId taskId )
     {
-        Clock clock = new Clock().startClock().logTime( "Starting update, no of processes: " + getProcessNo() );
+        int processNo = getProcessNo();
+        
+        Clock clock = new Clock().startClock().logTime( "Starting update, no of processes: " + processNo );
         
         String validState = tableManager.validState();
         
@@ -109,9 +111,8 @@ public class DefaultAnalyticsTableService
         
         final List<AnalyticsTable> tables = tableManager.getTables( lastYears );
         
-        clock.logTime( "Partition tables: " + tables + ", last years: " + lastYears );
-        
-        notifier.notify( taskId, "Creating analytics tables" );
+        clock.logTime( "Partition tables: " + tables + ", last years: " + lastYears );        
+        notifier.notify( taskId, "Creating analytics tables, processes: " + processNo );
         
         createTables( tables );
         
@@ -145,8 +146,11 @@ public class DefaultAnalyticsTableService
         
         swapTables( tables );
         
+        clock.logTime( "Partition tables: " + tables + ", last years: " + lastYears );
+        notifier.notify( taskId, "Clearing caches" );
+
         partitionManager.clearCaches();
-        
+
         clock.logTime( "Table update done" );
         notifier.notify( taskId, "Table update done" );
     }
@@ -167,6 +171,7 @@ public class DefaultAnalyticsTableService
         resourceTableService.dropAllSqlViews();
         resourceTableService.generateOrganisationUnitStructures();        
         resourceTableService.generateCategoryOptionComboNames();
+        resourceTableService.generateCategoryOptionGroupSetTable();
         resourceTableService.generateDataElementGroupSetTable();
         resourceTableService.generateIndicatorGroupSetTable();
         resourceTableService.generateOrganisationUnitGroupSetTable();

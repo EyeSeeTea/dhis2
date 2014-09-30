@@ -41,7 +41,7 @@ import org.hisp.dhis.option.OptionStore;
  * @author Chau Thu Tran
  */
 public class HibernateOptionStore
-    extends HibernateIdentifiableObjectStore<OptionSet>
+    extends HibernateIdentifiableObjectStore<Option>
     implements OptionStore
 {
     // -------------------------------------------------------------------------
@@ -74,11 +74,11 @@ public class HibernateOptionStore
         return query.list();
     }
 
-    public Option getOptionValueByName( OptionSet optionSet, String name )
+    public Option getOptionByName( OptionSet optionSet, String name )
     {
         String hql = 
             "select option from OptionSet as optionset " +
-            "join optionset.options as option where optionset = :optionSet and lower(option.name) = :name";
+            "join optionset.options as option where optionset = :optionSet and option.name = :name";
 
         Query query = getQuery( hql );
         query.setEntity( "optionSet", optionSet );
@@ -87,8 +87,21 @@ public class HibernateOptionStore
         return (Option) query.uniqueResult();
     }
 
+    public Option getOptionByCode( OptionSet optionSet, String code )
+    {
+        String hql = 
+            "select option from OptionSet as optionset " +
+            "join optionset.options as option where optionset = :optionSet and option.code = :code";
+
+        Query query = getQuery( hql );
+        query.setEntity( "optionSet", optionSet );
+        query.setString( "code", code );
+
+        return (Option) query.uniqueResult();
+    }
+
     @SuppressWarnings( "unchecked" )
-    public Collection<Option> getOptionValues( OptionSet optionSet, String option, Integer min, Integer max )
+    public Collection<Option> getOptions( OptionSet optionSet, String option, Integer min, Integer max )
     {
         String hql = 
             "select option from OptionSet as optionset " +
@@ -96,7 +109,7 @@ public class HibernateOptionStore
 
         if ( option != null )
         {
-            hql += "and lower(option.name) like ('%" + option + "%') ";
+            hql += "and lower(option.name) like ('%" + option.toLowerCase() + "%') ";
         }
 
         hql += " order by index(option)";

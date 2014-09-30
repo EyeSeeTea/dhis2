@@ -183,9 +183,9 @@ Ext.onReady( function() {
                     '*',
                     'program[id,name]',
                     'programStage[id,name]',
-                    'columns[dimension,filter,items[id,name]]',
-                    'rows[dimension,filter,items[id,name]]',
-                    'filters[dimension,filter,items[id,name]]',
+                    'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
                     '!lastUpdated',
                     '!href',
                     '!created',
@@ -296,7 +296,9 @@ Ext.onReady( function() {
 
 				// filters: [Dimension]
 
-				// showTotals: boolean (true)
+				// showRowTotals: boolean (true)
+
+				// showColTotals: boolean (true)
 
 				// showSubTotals: boolean (true)
 
@@ -307,6 +309,8 @@ Ext.onReady( function() {
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
 				// showHierarchy: boolean (false)
+
+                // showDimensionLabels: boolean (false)
 
 				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
 
@@ -475,7 +479,8 @@ Ext.onReady( function() {
                     }
 
 					// properties
-					layout.showTotals = Ext.isBoolean(config.totals) ? config.totals : (Ext.isBoolean(config.showTotals) ? config.showTotals : true);
+					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
+					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
 					layout.countType = Ext.isString(config.countType) && !Ext.isEmpty(config.countType) ? config.countType : 'events';
@@ -483,6 +488,7 @@ Ext.onReady( function() {
 
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
 
+					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
@@ -1109,10 +1115,11 @@ Ext.onReady( function() {
 				return xLayout;
 			};
 
-			service.layout.getSyncronizedXLayout = function(xLayout, xResponse) {
+			service.layout.getSyncronizedXLayout = function(layout, xLayout, xResponse) {
 				var removeDimensionFromXLayout,
 					getHeaderNames,
-					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
+                    originalDimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
 
 				removeDimensionFromXLayout = function(objectName) {
 					var getUpdatedAxis;
@@ -1156,7 +1163,7 @@ Ext.onReady( function() {
 				};
 
 				return function() {
-
+                    
 					// items
 					for (var i = 0, dim, header; i < dimensions.length; i++) {
 						dim = dimensions[i];
@@ -1174,6 +1181,47 @@ Ext.onReady( function() {
 							}
 						}
 					}
+
+                    // restore order for options
+                    for (var i = 0, orgDim; i < originalDimensions.length; i++) {
+                        orgDim = originalDimensions[i];
+
+                        // if sorting and row dim, dont restore order
+                        if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
+                            continue;
+                        }
+
+                        if (Ext.isString(orgDim.filter)) {
+                            var a = orgDim.filter.split(':');
+
+                            if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
+                                var options = a[1].split(';'),
+                                    items = [];
+
+                                for (var j = 0, dim; j < dimensions.length; j++) {
+                                    dim = dimensions[j];
+
+                                    if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
+                                        var items = [];
+                                        
+                                        for (var k = 0, option; k < options.length; k++) {
+                                            option = options[k];
+
+                                            for (var l = 0, item; l < dim.items.length; l++) {
+                                                item = dim.items[l];
+
+                                                if (item.name === option) {
+                                                    items.push(item);
+                                                }
+                                            }
+                                        }
+
+                                        dim.items = items;
+                                    }
+                                }
+                            }
+                        }
+                    }
 
 					// Re-layout
 					layout = api.layout.Layout(xLayout);
@@ -1619,7 +1667,7 @@ Ext.onReady( function() {
 			service.response.aggregate = {};
 
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
-				var emptyId = 'N/A',
+				var emptyId = '[N/A]',
                     meta = ['ou', 'pe'],
                     ouHierarchy,
                     names,
@@ -2026,7 +2074,9 @@ Ext.onReady( function() {
 				var getRoundedHtmlValue,
 					getTdHtml,
 					doSubTotals,
-					doTotals,
+					doRowTotals,
+                    doColTotals,
+                    doSortableColumnHeaders,
 					getColAxisHtmlArray,
 					getRowHtmlArray,
 					rowAxisHtmlArray,
@@ -2058,7 +2108,7 @@ Ext.onReady( function() {
 					htmlArray;
 
 				xResponse.sortableIdObjects = [];
-
+                
 				getRoundedHtmlValue = function(value, dec) {
 					dec = dec || 2;
 					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
@@ -2159,8 +2209,12 @@ Ext.onReady( function() {
 					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
 				};
 
-				doTotals = function() {
-					return !!xLayout.showTotals;
+				doRowTotals = function() {
+					return !!xLayout.showRowTotals;
+				};
+
+                doColTotals = function() {
+					return !!xLayout.showColTotals;
 				};
 
 				doSortableColumnHeaders = function() {
@@ -2171,14 +2225,52 @@ Ext.onReady( function() {
 					var a = [],
 						getEmptyHtmlArray;
 
-					getEmptyHtmlArray = function() {
-						return (xColAxis && xRowAxis) ? getTdHtml({
-							cls: 'pivot-dim-empty cursor-default',
-							colSpan: xRowAxis.dims,
-							rowSpan: xColAxis.dims,
-							htmlValue: '&nbsp;'
-						}) : '';
-					};
+                    getEmptyNameTdConfig = function(config) {
+                        config = config || {};
+
+                        return getTdHtml({
+                            cls: config.cls ? ' ' + config.cls : 'pivot-empty',
+                            colSpan: config.colSpan ? config.colSpan : 1,
+                            rowSpan: config.rowSpan ? config.rowSpan : 1,
+                            htmlValue: config.htmlValue ? config.htmlValue : '&nbsp;'
+                        });
+                    };
+
+                    getEmptyHtmlArray = function(i) {
+                        var a = [];
+
+                        if (i < xColAxis.dims - 1) {
+                            if (xRowAxis && xRowAxis.dims) {
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'pivot-dim-label'
+                                    }));
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                cls: 'pivot-dim-label',
+                                htmlValue: dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                            }));
+                        }
+                        else {
+                            if (xRowAxis && xRowAxis.dims) {                                
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'pivot-dim-label',
+                                        htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name
+                                    }));
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                cls: 'pivot-dim-label',
+                                htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + ', ' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                            }));
+                        }
+
+                        return a;
+                    };
 
 					if (!(xColAxis && Ext.isObject(xColAxis))) {
 						return a;
@@ -2188,8 +2280,14 @@ Ext.onReady( function() {
 					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
 						dimHtml = [];
 
-						if (i === 0) {
-							dimHtml.push(getEmptyHtmlArray());
+                        if (xLayout.showDimensionLabels) {
+                            dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
+                        }
+                        else if (i === 0) {
+							dimHtml.push(xColAxis && xRowAxis ? getEmptyNameTdConfig({
+                                colSpan: xRowAxis.dims,
+                                rowSpan: xColAxis.dims
+                            }) : '');
 						}
 
 						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
@@ -2223,7 +2321,7 @@ Ext.onReady( function() {
 								spanCount = 0;
 							}
 
-							if (i === 0 && (j === xColAxis.size - 1) && doTotals()) {
+							if (i === 0 && (j === xColAxis.size - 1) && doRowTotals()) {
 								totalId = doSortableColumnHeaders() ? 'total_' : null;
 
 								dimHtml.push(getTdHtml({
@@ -2366,7 +2464,7 @@ Ext.onReady( function() {
 					}
 
 					// totals
-					if (xColAxis && doTotals()) {
+					if (xColAxis && doRowTotals()) {
 						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
 							for (j = 0, obj; j < valueObjects[i].length; j++) {
 								obj = valueObjects[i][j];
@@ -2407,17 +2505,17 @@ Ext.onReady( function() {
 								// if value row is empty
 								if (isValueRowEmpty) {
 
-									// Hide values by adding collapsed = true to all items
+									// hide values by adding collapsed = true to all items
 									for (var j = 0; j < valueRow.length; j++) {
 										valueRow[j].collapsed = true;
 									}
 
-									// Hide totals by adding collapsed = true to all items
-									if (doTotals()) {
+									// hide totals by adding collapsed = true to all items
+									if (doRowTotals()) {
 										totalValueObjects[i].collapsed = true;
 									}
 
-									// Hide/reduce parent dim span
+									// hide/reduce parent dim span
 									dimLeaf = axisAllObjects[i][xRowAxis.dims-1];
 									recursiveReduce(dimLeaf);
 								}
@@ -2614,7 +2712,7 @@ Ext.onReady( function() {
 				getColTotalHtmlArray = function() {
 					var a = [];
 
-					if (xRowAxis && doTotals()) {
+					if (xRowAxis && doColTotals()) {
 						var xTotalColObjects;
 
 						// Total col items
@@ -2682,7 +2780,7 @@ Ext.onReady( function() {
 						empty = [],
 						a = [];
 
-					if (doTotals()) {
+					if (doRowTotals() && doColTotals()) {
 						for (var i = 0, obj; i < totalColObjects.length; i++) {
 							obj = totalColObjects[i];
 
@@ -2711,7 +2809,7 @@ Ext.onReady( function() {
 						row,
 						a = [];
 
-					if (doTotals()) {
+					if (doColTotals()) {
 						if (xRowAxis) {
 							dimTotalArray = [getTdHtml({
 								type: 'dimensionSubtotal',
@@ -2769,16 +2867,16 @@ Ext.onReady( function() {
 
 			web.report.query.format = function(str) {
 				var n = parseFloat(str);
-
-				if (!Ext.isNumber(n)) {
+                
+                // return string if
+                // - parsefloat(string) is not a number
+                // - string is just starting with a number
+                // - string is a valid date
+				if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
 					return str;
 				}
 
-				if (new Date(str).toString() === 'Invalid Date') {
-					return n;
-				}
-
-				return str;
+                return n;
 			};
 
 			web.report.query.getHtml = function(layout, xResponse) {

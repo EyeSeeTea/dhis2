@@ -2578,7 +2578,7 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var url = ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?id=' + ns.app.layout.id,
+					var url = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html?id=' + ns.app.layout.id,
 						apiUrl = ns.core.init.contextPath + '/api/eventCharts/' + ns.app.layout.id + '/data.html',
 						html = '';
 
@@ -2804,7 +2804,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?paging=false&links=false',
+				url: ns.core.init.contextPath + '/api/organisationUnitGroups.json?fields=id,' + ns.core.init.namePropertyUrl + '&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitGroups'
@@ -3024,7 +3024,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,optionSet[id,name]]]&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,' + ns.core.init.namePropertyUrl + ',valueType,optionSet[id,name]]]&paging=false',
                     success: function(r) {
                         var program = Ext.decode(r.responseText).programs[0],
                             stages,
@@ -3127,7 +3127,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',type,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -3534,7 +3534,7 @@ Ext.onReady( function() {
         onDateFieldRender = function(c) {
             $('#' + c.inputEl.id).calendarsPicker({
                 calendar: ns.core.init.calendar,
-                dateFormat: ns.core.init.dateFormat
+                dateFormat: ns.core.init.systemInfo.dateFormat
             });
         };
         
@@ -3550,7 +3550,7 @@ Ext.onReady( function() {
                     date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
                 date = ns.core.init.calendar.fromJD(date.toJD());
-                return ns.core.init.calendar.formatDate(ns.core.init.dateFormat, date);
+                return ns.core.init.calendar.formatDate(ns.core.init.systemInfo.dateFormat, date);
             }(),
             listeners: {
                 render: function(c) {
@@ -3954,14 +3954,15 @@ Ext.onReady( function() {
 			}
 		});
 
-        onPeriodTypeSelect = function(value) {
-            var ptype = new PeriodType(),
+        onPeriodTypeSelect = function() {
+            var type = periodType.getValue(),
+                periodOffset = periodType.periodOffset,
+                generator = ns.core.init.periodGenerator,
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);
 
-                periods = ptype.get(value).generatePeriods({
-                    offset: periodType.periodOffset,
-                    filterFuturePeriods: true,
-                    reversePeriods: true
-                });
+            for (var i = 0; i < periods.length; i++) {
+                periods[i].id = periods[i].iso;
+            }
 
             fixedPeriodAvailableStore.setIndex(periods);
             fixedPeriodAvailableStore.loadData(periods);
@@ -3980,8 +3981,9 @@ Ext.onReady( function() {
             store: periodTypeStore,
             periodOffset: 0,
             listeners: {
-                select: function(cmp) {
-                    onPeriodTypeSelect(cmp.getValue());
+                select: function() {
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -3990,10 +3992,11 @@ Ext.onReady( function() {
             text: NS.i18n.prev_year,
             style: 'border-radius:1px; margin-right:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset--;
-                    onPeriodTypeSelect(periodType.getValue());
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -4002,10 +4005,11 @@ Ext.onReady( function() {
             text: NS.i18n.next_year,
             style: 'border-radius:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset++;
-                    onPeriodTypeSelect(periodType.getValue());
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -4267,7 +4271,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + ns.core.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -4395,6 +4399,10 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
+                    
+                    Ext.defer(function() {
+                        data.expand();
+                    }, 20);
 				},
 				itemcontextmenu: function(v, r, h, i, e) {
 					v.getSelectionModel().select(r, false);
@@ -4410,7 +4418,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -4685,7 +4693,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/organisationUnitGroups.json?fields=id,name&filter=organisationUnitGroupSet.id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
+					path = '/organisationUnitGroups.json?fields=id,' + ns.core.init.namePropertyUrl + '&filter=organisationUnitGroupSet.id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
 
 					store.isPending = true;
 
@@ -5186,7 +5194,7 @@ Ext.onReady( function() {
             expandInitPanels: function() {
                 organisationUnit.expand();
                 //period.expand();
-                data.expand();
+                //data.expand();
             },
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
@@ -5599,7 +5607,7 @@ Ext.onReady( function() {
 							iconCls: 'ns-button-icon-chart',
 							param: 'chart',
 							handler: function() {
-								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-visualizer/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -5619,7 +5627,7 @@ Ext.onReady( function() {
 							param: 'map',
 							disabled: true,
 							handler: function() {
-								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-mapping/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -5763,7 +5771,13 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/eventCharts/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
@@ -5825,7 +5839,7 @@ Ext.onReady( function() {
 
                 xLayout = getXLayout(layout);
                 xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-                xLayout = getSXLayout(xLayout, xResponse);
+                xLayout = getSXLayout(layout, xLayout, xResponse);
 
                 if (!xLayout) {
                     web.mask.hide(ns.app.centerRegion);
@@ -5845,6 +5859,7 @@ Ext.onReady( function() {
                 // timing
                 ns.app.dateRender = new Date();
 
+                ns.app.centerRegion.update();
                 ns.app.centerRegion.removeAll(true);
 				ns.app.centerRegion.add(chart);
 
@@ -6321,9 +6336,9 @@ Ext.onReady( function() {
 			}
 		});
 
-		interpretationItem = Ext.create('Ext.menu.Item', {
-			text: 'Write interpretation' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-tablelayout',
+        favoriteUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'Favorite link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
 			disabled: true,
 			xable: function() {
 				if (ns.app.layout.id) {
@@ -6333,69 +6348,23 @@ Ext.onReady( function() {
 					this.disable();
 				}
 			},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
-				}
+            handler: function() {
+                var url = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html?id=' + ns.app.layout.id,
+                    textField,
+                    window;
 
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
-			}
-		});
-
-		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-datasource',
-			disabled: true,
-			xable: function() {
-				if (ns.app.layout) {
-					this.enable();
-				}
-				else {
-					this.disable();
-				}
-			},
-			handler: function() {
-				var textArea,
-					window,
-					text = '';
-
-				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
-				text += '</head>\n\n<body>\n';
-				text += '<div id="table1"></div>\n\n';
-				text += '<script>\n\n';
-				text += 'DHIS.getTable(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'table1'), null, 2) + ');\n\n';
-				text += '</script>\n\n';
-				text += '</body>\n</html>';
-
-				textArea = Ext.create('Ext.form.field.TextArea', {
-					width: 700,
-					height: 400,
-					readOnly: true,
-					cls: 'ns-textarea monospaced',
-					value: text
-				});
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Plugin configuration',
+					title: 'Favorite link',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
-					items: textArea,
 					destroyOnBlur: true,
-					bbar: [
-						'->',
-						{
-							text: 'Select',
-							handler: function() {
-								textArea.selectText();
-							}
-						}
-					],
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
 					listeners: {
 						show: function(w) {
 							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
@@ -6413,42 +6382,85 @@ Ext.onReady( function() {
 				});
 
 				window.show();
-			}
-		});
+            }
+        });
+
+        apiUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'API link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout.id) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+            handler: function() {
+                var url = ns.core.init.contextPath + '/api/eventCharts/' + ns.app.layout.id + '/data',
+                    textField,
+                    window;
+
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'API link',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					destroyOnBlur: true,
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
+					listeners: {
+						show: function(w) {
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
+            }
+        });
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
-			disabled: true,
+            disabled: true,
 			xableItems: function() {
-				interpretationItem.xable();
+				//interpretationItem.xable();
 				//pluginItem.xable();
+				favoriteUrlItem.xable();
+				apiUrlItem.xable();
 			},
-			//menu: {
-				//cls: 'ns-menu',
-				//shadow: false,
-				//showSeparator: false,
-				//items: [
+			menu: {
+				cls: 'ns-menu',
+				shadow: false,
+				showSeparator: false,
+				items: [
 					//interpretationItem,
-					//pluginItem
-				//],
-				//listeners: {
-					//afterrender: function() {
-						//this.getEl().addCls('ns-toolbar-btn-menu');
-					//},
-					//show: function() {
-						//shareButton.xableItems();
-					//}
-				//}
-			//},
-			menu: {},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
+					//pluginItem,
+                    favoriteUrlItem,
+                    apiUrlItem
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('ns-toolbar-btn-menu');
+					},
+					show: function() {
+						shareButton.xableItems();
+					}
 				}
-
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
 			},
 			listeners: {
 				added: function() {
@@ -6456,7 +6468,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-
+        
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.chart,
 			iconCls: 'ns-button-icon-chart',
@@ -6520,7 +6532,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_event_reports + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/index.html';
 										}
 									},
 									'-',
@@ -6531,7 +6543,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = ns.app.accordion.treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?s=eventanalytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-reports/index.html?s=eventanalytical');
 											}
 										}
 									},
@@ -6540,7 +6552,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['eventtable']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?s=eventtable';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports/index.html?s=eventtable';
 										}
 									}
 								],
@@ -6585,7 +6597,24 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
-                }
+                },
+				afterrender: function(p) {
+					var liStyle = 'padding:3px 10px; color:#333',
+						html = '';
+
+					html += '<div style="padding:20px">';
+					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
+					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
+					html += '</div>';
+
+					p.update(html);
+				}
 			}
 		});
 
@@ -6702,166 +6731,179 @@ Ext.onReady( function() {
 			success: function(r) {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
+                // user-account
                 Ext.Ajax.request({
-                    url: init.contextPath + '/api/system/info.json',
+                    url: init.contextPath + '/api/me/user-account.json',
                     success: function(r) {
-                        var info = Ext.decode(r.responseText);
+                        init.userAccount = Ext.decode(r.responseText);
 
-                        // context path
-                        init.contextPath = info.contextPath || init.contextPath;
-
-                        // calendars
-                        init.dateFormat = info.dateFormat || 'yyyy-mm-dd';
-
-                        (function() {
-                            var dhis2PeriodUrl = '../../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
-                                defaultCalendarId = 'gregorian',
-                                calendarIdMap = {'iso8601': defaultCalendarId},
-                                calendarId = calendarIdMap[info.calendar] || info.calendar || defaultCalendarId,
-                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
-                                calendarScriptUrl,
-                                createGenerator;
-
-                            // calendar
-                            createGenerator = function() {
-                                init.calendar = $.calendars.instance(calendarId);
-                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.dateFormat);
-                            };
-
-                            if (Ext.Array.contains(calendarIds, calendarId)) {
-                                calendarScriptUrl = '../../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
-
-                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
-                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                                });
-                            }
-                            else {
-                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                            }
-                        }());
-
-                        // user info, i18n
-                        requests.push({
-                            url: init.contextPath + '/api/me/user-account.json',
+                        // system info
+                        Ext.Ajax.request({
+                            url: init.contextPath + '/api/system/info.json',
                             success: function(r) {
-                                var defaultKeyUiLocale = 'en';
-                                init.keyUiLocale = Ext.decode(r.responseText).settings.keyUiLocale || defaultKeyUiLocale;
+                                init.systemInfo = Ext.decode(r.responseText);
 
-                                Ext.Ajax.request({
-                                    url: init.contextPath + '/dhis-web-commons/javascripts/javaProperties.js',
-                                    success: function(r) {
-                                        var parseProperties = Ext.decode(r.responseText).parseProperties;
+                                // init
+                                var defaultKeyUiLocale = 'en',
+                                    defaultKeyAnalysisDisplayProperty = 'name',
+                                    namePropertyUrl,
+                                    contextPath,
+                                    keyUiLocale,
+                                    dateFormat;
 
-                                        // i18n
-                                        Ext.Ajax.request({
-                                            url: 'i18n/' + init.keyUiLocale + '.properties',
-                                            success: function(r) {
-                                                NS.i18n = parseProperties(r.responseText);
+                                init.contextPath = init.systemInfo.contextPath || init.contextPath;
+                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+                                init.systemInfo.dateFormat = init.systemInfo.dateFormat || 'yyyy-mm-dd';
 
-                                                if (init.keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                        success: function(r) {
-                                                            Ext.applyIf(NS.i18n, parseProperties(r.responseText));
-                                                        },
-                                                        callback: fn
-                                                    })
-                                                }
-                                                else {
-                                                    fn();
-                                                }
-                                            },
-                                            failure: function() {
-                                                var failure = function() {
-                                                    alert('No translations found for system locale (' + init.keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                                };
+                                contextPath = init.contextPath;
+                                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                dateFormat = init.systemInfo.dateFormat;
 
-                                                if (init.keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                        success: function(r) {
-                                                            console.log('No translations found for system locale (' + init.keyUiLocale + ').');
-                                                            NS.i18n = parseProperties(r.responseText);
-                                                        },
-                                                        failure: function() {
-                                                            failure();
-                                                        },
-                                                        callback: fn
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                    failure();
-                                                }
-                                            }
+                                init.namePropertyUrl = namePropertyUrl;
+
+                                // calendar
+                                (function() {
+                                    var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                        defaultCalendarId = 'gregorian',
+                                        calendarIdMap = {'iso8601': defaultCalendarId},
+                                        calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
+                                        calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                        calendarScriptUrl,
+                                        createGenerator;
+
+                                    // calendar
+                                    createGenerator = function() {
+                                        init.calendar = $.calendars.instance(calendarId);
+                                        init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
+                                    };
+
+                                    if (Ext.Array.contains(calendarIds, calendarId)) {
+                                        calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                        Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                            Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
                                         });
                                     }
-                                });
-                            }
-                        });
+                                    else {
+                                        Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                    }
+                                }());
 
-                        // root nodes
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnits.json?userDataViewFallback=true&fields=id,name,children[id,name]',
-                            success: function(r) {
-                                init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
-                                fn();
-                            }
-                        });
+                                // i18n
+                                requests.push({
+                                    url: 'i18n/' + keyUiLocale + '.properties',
+                                    success: function(r) {
+                                        NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
-                        // organisation unit levels
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
-                            success: function(r) {
-                                init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-                                fn();
-                            }
-                        });
+                                        if (keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.properties',
+                                                success: function(r) {
+                                                    Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                },
+                                                callback: fn
+                                            })
+                                        }
+                                        else {
+                                            fn();
+                                        }
+                                    },
+                                    failure: function() {
+                                        var onFailure = function() {
+                                            alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                        };
 
-                        // user orgunits and children
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,name,children[id,name]&paging=false',
-                            success: function(r) {
-                                var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
-                                    ou = [],
-                                    ouc = [];
-
-                                if (organisationUnits.length) {
-                                    for (var i = 0, org; i < organisationUnits.length; i++) {
-                                        org = organisationUnits[i];
-
-                                        ou.push(org.id);
-
-                                        if (org.children) {
-                                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                        if (keyUiLocale !== defaultKeyUiLocale) {
+                                            Ext.Ajax.request({
+                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                success: function(r) {
+                                                    console.log('No translations found for system locale (' + keyUiLocale + ').');
+                                                    NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                },
+                                                failure: function() {
+                                                    onFailure();
+                                                },
+                                                callback: fn
+                                            });
+                                        }
+                                        else {
+                                            fn();
+                                            onFailure();
                                         }
                                     }
+                                });
 
-                                    init.user = {
-                                        ou: ou,
-                                        ouc: ouc
+                                // root nodes
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']',
+                                    success: function(r) {
+                                        init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+                                        fn();
                                     }
-                                }
-                                else {
-                                    alert('User is not assigned to any organisation units');
-                                }
+                                });
 
-                                fn();
+                                // organisation unit levels
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
+                                    success: function(r) {
+                                        init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+                                        if (!init.organisationUnitLevels.length) {
+                                            alert('No organisation unit levels');
+                                        }
+
+                                        fn();
+                                    }
+                                });
+
+                                // user orgunits and children
+                                requests.push({
+                                    url: contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']&paging=false',
+                                    success: function(r) {
+                                        var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
+                                            ou = [],
+                                            ouc = [];
+
+                                        if (organisationUnits.length) {
+                                            for (var i = 0, org; i < organisationUnits.length; i++) {
+                                                org = organisationUnits[i];
+
+                                                ou.push(org.id);
+
+                                                if (org.children) {
+                                                    ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                                }
+                                            }
+
+                                            init.user = init.user || {};
+                                            init.user.ou = ou;
+                                            init.user.ouc = ouc;
+                                        }
+                                        else {
+                                            alert('User is not assigned to any organisation units');
+                                        }
+
+                                        fn();
+                                    }
+                                });
+
+                                // dimensions
+								requests.push({
+									url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + namePropertyUrl + '&paging=false',
+									success: function(r) {
+										init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
+										fn();
+									}
+								});
+
+                                for (var i = 0; i < requests.length; i++) {
+                                    Ext.Ajax.request(requests[i]);
+                                }
                             }
                         });
-
-                        // dimensions
-                        requests.push({
-                            url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
-                            success: function(r) {
-                                init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
-                                fn();
-                            }
-                        });
-
-                        for (var i = 0; i < requests.length; i++) {
-                            Ext.Ajax.request(requests[i]);
-                        }
                     }
                 });
 			}

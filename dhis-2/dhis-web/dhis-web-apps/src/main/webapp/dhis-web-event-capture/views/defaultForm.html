@@ -80,9 +80,8 @@
                                        style="width:99%;"/>
                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
                             </div>
-                            <div ng-switch-when="string">                                        
-
-                                <div class="container-fluid">                                
+                            <div ng-switch-when="string">                                
+                                <div class="container-fluid" ng-if="programStageDataElements[eventGridColumn.id].dataElement.optionSet">
                                     <span ng-if="!selectedProgram.dataEntryMethod || programStageDataElements[eventGridColumn.id].dataElement.optionSet.options.length > 7">
                                         <input type="text"
                                                ng-model="currentEvent[eventGridColumn.id]"                                                                    
@@ -110,16 +109,24 @@
                                         </label>                                    
                                         <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>                                    
                                     </span>
-                                </div>                            
+                                </div>
+                                <div ng-if="!programStageDataElements[eventGridColumn.id].dataElement.optionSet">
+                                    <input type="text"
+                                        ng-model="currentEvent[eventGridColumn.id]"                                        
+                                        ng-required={{eventGridColumn.compulsory}}
+                                        name="foo" 
+                                        style="width:99%;"/>
+                                    <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
+                                </div>                                
                             </div>
                             <div ng-switch-when="bool">
                                 <select ng-model="currentEvent[eventGridColumn.id]"                                                                
                                         ng-required={{eventGridColumn.compulsory}}
                                         name="foo" 
-                                        style="width:99%;"/>
+                                        style="width:99%;">
                                 <option value="">{{'please_select'| translate}}</option>                        
-                                <option value="0">{{'no'| translate}}</option>
-                                <option value="1">{{'yes'| translate}}</option>
+                                <option value="false">{{'no'| translate}}</option>
+                                <option value="true">{{'yes'| translate}}</option>
                                 </select>
                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
                             </div>
@@ -246,9 +253,8 @@
                                                style="width:99%;"/>
                                         <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
                                     </div>
-                                    <div ng-switch-when="string">                                        
-
-                                        <div class="container-fluid">                                
+                                    <div ng-switch-when="string">
+                                        <div class="container-fluid" ng-if="programStageDataElements[de.dataElement.id].dataElement.optionSet">                                
                                             <span ng-if="!selectedProgram.dataEntryMethod || programStageDataElements[de.dataElement.id].dataElement.optionSet.options.length > 8">
                                                 <input type="text"
                                                        ng-model="currentEvent[de.dataElement.id]"                                                                    
@@ -276,16 +282,24 @@
                                                 </label>                                    
                                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>                                    
                                             </span>
-                                        </div>                            
+                                        </div>
+                                        <div ng-if="!programStageDataElements[de.dataElement.id].dataElement.optionSet">
+                                            <input type="text"
+                                                ng-model="currentEvent[de.dataElement.id]"
+                                                ng-required={{programStageDataElements[de.dataElement.id].compulsory}}
+                                                name="foo" 
+                                                style="width:99%;"/>
+                                            <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
+                                        </div>
                                     </div>
                                     <div ng-switch-when="bool">
                                         <select ng-model="currentEvent[de.dataElement.id]"                                                                
                                                 ng-required={{programStageDataElements[de.dataElement.id].compulsory}}
                                                 name="foo" 
-                                                style="width:99%;"/>
+                                                style="width:99%;">
                                         <option value="">{{'please_select'| translate}}</option>                        
-                                        <option value="0">{{'no'| translate}}</option>
-                                        <option value="1">{{'yes'| translate}}</option>
+                                        <option value="false">{{'no'| translate}}</option>
+                                        <option value="true">{{'yes'| translate}}</option>
                                         </select>
                                         <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="required">{{'required'| translate}}</span>
                                     </div>

@@ -75,6 +75,7 @@ public abstract class BaseChart
     public static final String TYPE_AREA = "area";
     public static final String TYPE_PIE = "pie";
     public static final String TYPE_RADAR = "radar";
+    public static final String TYPE_METER = "gauge";
     
     protected String domainAxisLabel;
 
@@ -195,6 +196,11 @@ public abstract class BaseChart
     public boolean isAnalyticsType( AnalyticsType type )
     {
         return getAnalyticsType().equals( type );
+    }
+    
+    public boolean hasTitle()
+    {
+        return title != null && !title.isEmpty();
     }
 
     // -------------------------------------------------------------------------

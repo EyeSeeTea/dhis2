@@ -85,7 +85,8 @@ function referrerBack( defaultUrl )
  *
  * @param context Context vars from context menu
  */
-function translateWithContext( context ) {
+function translateWithContext( context ) 
+{
   translate( context.type, context.uid );
 }
 
@@ -609,10 +610,9 @@ function setRadioValue( radioName, value )
  */
 function setMessage( message )
 {
-	if ( message && message != '' )
+	if ( message )
 	{
-		$( '#message' ).html( message );
-		$( '#message' ).show();
+		$( '#message' ).html( message ).show();
 	}
 }
 

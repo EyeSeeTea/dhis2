@@ -91,8 +91,15 @@ public class CaseAggregationCondition
     public static String MINUS_OPERATOR = "DATEDIFF";
 
     public static String MINUS_DATAELEMENT_OPERATOR = "DEDATEDIFF";
+    
+    public static String MINUS_ATTRIBUTE_OPERATOR = "ATTRDATEDIFF";
 
     public static String AUTO_STORED_BY = "aggregated_from_tracker";
+    
+    public static final String PARAM_PERIOD_START_DATE = "PERIOD_START_DATE";
+    public static final String PARAM_PERIOD_END_DATE = "PARAM_PERIOD_END_DATE";
+    public static final String PARAM_PERIOD_ID = "PERIOD_ID";
+    public static final String PARAM_PERIOD_ISO_DATE = "PERIOD_ISO_DATE";
 
     public static final String regExp = "\\[(" + OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE + "|" + OBJECT_PROGRAM + "|"
         + OBJECT_PROGRAM_STAGE_PROPERTY + "|" + OBJECT_PROGRAM_STAGE + "|" + OBJECT_TRACKED_ENTITY_PROGRAM_STAGE_PROPERTY
@@ -100,7 +107,7 @@ public class CaseAggregationCondition
         + SEPARATOR_OBJECT + "([a-zA-Z0-9@#\\- ]+[" + SEPARATOR_ID + "[a-zA-Z0-9]*]*)" + "\\]";
 
     public static final String dataelementRegExp = MINUS_OPERATOR + "{1}\\s*\\(\\s*(\\["
-        + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+" + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID
+        + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9\\*]+" + SEPARATOR_ID + "[0-9\\*]+" + SEPARATOR_ID
         + "[0-9]+)+\\])\\s*(,)+\\s*(" + OBJECT_PROGRAM_PROPERTY_INCIDENT_DATE + "|"
         + OBJECT_PROGRAM_PROPERTY_REPORT_DATE_DATE + "|" + OBJECT_PROGRAM_PROPERTY_ENROLLEMENT_DATE + ")+\\s*\\)\\s*";
 
@@ -108,6 +115,10 @@ public class CaseAggregationCondition
         + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+" + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID
         + "[0-9]+)+\\])\\s*(,)\\s*(\\[" + OBJECT_PROGRAM_STAGE_DATAELEMENT + SEPARATOR_OBJECT + "([0-9]+"
         + SEPARATOR_ID + "[0-9]+" + SEPARATOR_ID + "[0-9]+)+\\])\\s*\\)\\s*(>=|<=|!=|>|<|=){1}\\s*([0-9]+)";
+    public static final String minusAttributeRegExp = MINUS_ATTRIBUTE_OPERATOR + "{1}\\s*\\(\\s*(\\["
+        + OBJECT_TRACKED_ENTITY_ATTRIBUTE + SEPARATOR_OBJECT + "([0-9]+)+\\])\\s*(,)\\s*(\\[" 
+        + OBJECT_TRACKED_ENTITY_ATTRIBUTE + SEPARATOR_OBJECT + "([0-9]+)+\\])\\s*\\)\\s*(>=|<=|!=|>|<|=){1}\\s*([0-9]+)";
+
 
     // -------------------------------------------------------------------------
     // Fields

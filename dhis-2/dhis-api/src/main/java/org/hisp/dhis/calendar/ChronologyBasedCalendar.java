@@ -30,7 +30,10 @@ package org.hisp.dhis.calendar;
 
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.joda.time.chrono.ISOChronology;
+
+import java.util.Date;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -45,53 +48,60 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
     }
 
     @Override
-    public DateUnit toIso( DateUnit dateUnit )
+    public DateTimeUnit toIso( DateTimeUnit dateTimeUnit )
     {
-        if ( dateUnit.isIso8601() )
+        if ( dateTimeUnit.isIso8601() )
         {
-            return dateUnit;
+            return dateTimeUnit;
         }
 
-        DateTime dateTime = dateUnit.toDateTime( chronology );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
         dateTime = dateTime.withChronology( ISOChronology.getInstance() );
 
-        return new DateUnit( DateUnit.fromDateTime( dateTime ), true );
+        return new DateTimeUnit( DateTimeUnit.fromJodaDateTime( dateTime ), true );
     }
 
     @Override
-    public DateUnit fromIso( DateUnit dateUnit )
+    public DateTimeUnit fromIso( Date date )
     {
-        if ( !dateUnit.isIso8601() )
+        return fromIso( DateTimeUnit.fromJdkDate( date ) );
+    }
+
+    @Override
+    public DateTimeUnit fromIso( DateTimeUnit dateTimeUnit )
+    {
+        if ( !dateTimeUnit.isIso8601() )
         {
-            return dateUnit;
+            return dateTimeUnit;
         }
 
-        DateTime dateTime = dateUnit.toDateTime( ISOChronology.getInstance() );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( ISOChronology.getInstance() );
         dateTime = dateTime.withChronology( chronology );
-        return DateUnit.fromDateTime( dateTime );
+
+        return DateTimeUnit.fromJodaDateTime( dateTime );
     }
 
     @Override
-    public DateInterval toInterval( DateUnit dateUnit, DateIntervalType type, int offset, int length )
+    public DateInterval toInterval( DateTimeUnit dateTimeUnit, DateIntervalType type, int offset, int length )
     {
         switch ( type )
         {
             case ISO8601_YEAR:
-                return toYearIsoInterval( dateUnit, offset, length );
+                return toYearIsoInterval( dateTimeUnit, offset, length );
             case ISO8601_MONTH:
-                return toMonthIsoInterval( dateUnit, offset, length );
+                return toMonthIsoInterval( dateTimeUnit, offset, length );
             case ISO8601_WEEK:
-                return toWeekIsoInterval( dateUnit, offset, length );
+                return toWeekIsoInterval( dateTimeUnit, offset, length );
             case ISO8601_DAY:
-                return toDayIsoInterval( dateUnit, offset, length );
+                return toDayIsoInterval( dateTimeUnit, offset, length );
         }
 
         return null;
     }
 
-    private DateInterval toYearIsoInterval( DateUnit dateUnit, int offset, int length )
+    private DateInterval toYearIsoInterval( DateTimeUnit dateTimeUnit, int offset, int length )
     {
-        DateTime from = dateUnit.toDateTime( chronology );
+        DateTime from = dateTimeUnit.toJodaDateTime( chronology );
 
         if ( offset > 0 )
         {
@@ -104,19 +114,18 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
 
         DateTime to = new DateTime( from ).plusYears( length ).minusDays( 1 );
 
-        DateUnit fromDateUnit = DateUnit.fromDateTime( from );
-        DateUnit toDateUnit = DateUnit.fromDateTime( to );
+        DateTimeUnit fromDateTimeUnit = DateTimeUnit.fromJodaDateTime( from );
+        DateTimeUnit toDateTimeUnit = DateTimeUnit.fromJodaDateTime( to );
 
-        fromDateUnit.setDayOfWeek( isoWeekday( fromDateUnit ) );
-        toDateUnit.setDayOfWeek( isoWeekday( toDateUnit ) );
+        fromDateTimeUnit.setDayOfWeek( isoWeekday( fromDateTimeUnit ) );
+        toDateTimeUnit.setDayOfWeek( isoWeekday( toDateTimeUnit ) );
 
-        return new DateInterval( toIso( fromDateUnit ), toIso( toDateUnit ),
-            DateIntervalType.ISO8601_YEAR );
+        return new DateInterval( toIso( fromDateTimeUnit ), toIso( toDateTimeUnit ), DateIntervalType.ISO8601_YEAR );
     }
 
-    private DateInterval toMonthIsoInterval( DateUnit dateUnit, int offset, int length )
+    private DateInterval toMonthIsoInterval( DateTimeUnit dateTimeUnit, int offset, int length )
     {
-        DateTime from = dateUnit.toDateTime( chronology );
+        DateTime from = dateTimeUnit.toJodaDateTime( chronology );
 
         if ( offset > 0 )
         {
@@ -129,19 +138,18 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
 
         DateTime to = new DateTime( from ).plusMonths( length ).minusDays( 1 );
 
-        DateUnit fromDateUnit = DateUnit.fromDateTime( from );
-        DateUnit toDateUnit = DateUnit.fromDateTime( to );
+        DateTimeUnit fromDateTimeUnit = DateTimeUnit.fromJodaDateTime( from );
+        DateTimeUnit toDateTimeUnit = DateTimeUnit.fromJodaDateTime( to );
 
-        fromDateUnit.setDayOfWeek( isoWeekday( fromDateUnit ) );
-        toDateUnit.setDayOfWeek( isoWeekday( toDateUnit ) );
+        fromDateTimeUnit.setDayOfWeek( isoWeekday( fromDateTimeUnit ) );
+        toDateTimeUnit.setDayOfWeek( isoWeekday( toDateTimeUnit ) );
 
-        return new DateInterval( toIso( fromDateUnit ), toIso( toDateUnit ),
-            DateIntervalType.ISO8601_MONTH );
+        return new DateInterval( toIso( fromDateTimeUnit ), toIso( toDateTimeUnit ), DateIntervalType.ISO8601_MONTH );
     }
 
-    private DateInterval toWeekIsoInterval( DateUnit dateUnit, int offset, int length )
+    private DateInterval toWeekIsoInterval( DateTimeUnit dateTimeUnit, int offset, int length )
     {
-        DateTime from = dateUnit.toDateTime( chronology );
+        DateTime from = dateTimeUnit.toJodaDateTime( chronology );
 
         if ( offset > 0 )
         {
@@ -154,19 +162,18 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
 
         DateTime to = new DateTime( from ).plusWeeks( length ).minusDays( 1 );
 
-        DateUnit fromDateUnit = DateUnit.fromDateTime( from );
-        DateUnit toDateUnit = DateUnit.fromDateTime( to );
+        DateTimeUnit fromDateTimeUnit = DateTimeUnit.fromJodaDateTime( from );
+        DateTimeUnit toDateTimeUnit = DateTimeUnit.fromJodaDateTime( to );
 
-        fromDateUnit.setDayOfWeek( isoWeekday( fromDateUnit ) );
-        toDateUnit.setDayOfWeek( isoWeekday( toDateUnit ) );
+        fromDateTimeUnit.setDayOfWeek( isoWeekday( fromDateTimeUnit ) );
+        toDateTimeUnit.setDayOfWeek( isoWeekday( toDateTimeUnit ) );
 
-        return new DateInterval( toIso( fromDateUnit ), toIso( toDateUnit ),
-            DateIntervalType.ISO8601_WEEK );
+        return new DateInterval( toIso( fromDateTimeUnit ), toIso( toDateTimeUnit ), DateIntervalType.ISO8601_WEEK );
     }
 
-    private DateInterval toDayIsoInterval( DateUnit dateUnit, int offset, int length )
+    private DateInterval toDayIsoInterval( DateTimeUnit dateTimeUnit, int offset, int length )
     {
-        DateTime from = dateUnit.toDateTime( chronology );
+        DateTime from = dateTimeUnit.toJodaDateTime( chronology );
 
         if ( offset > 0 )
         {
@@ -179,132 +186,130 @@ public abstract class ChronologyBasedCalendar extends AbstractCalendar
 
         DateTime to = new DateTime( from ).plusDays( length );
 
-        DateUnit fromDateUnit = DateUnit.fromDateTime( from );
-        DateUnit toDateUnit = DateUnit.fromDateTime( to );
+        DateTimeUnit fromDateTimeUnit = DateTimeUnit.fromJodaDateTime( from );
+        DateTimeUnit toDateTimeUnit = DateTimeUnit.fromJodaDateTime( to );
 
-        fromDateUnit.setDayOfWeek( isoWeekday( fromDateUnit ) );
-        toDateUnit.setDayOfWeek( isoWeekday( toDateUnit ) );
+        fromDateTimeUnit.setDayOfWeek( isoWeekday( fromDateTimeUnit ) );
+        toDateTimeUnit.setDayOfWeek( isoWeekday( toDateTimeUnit ) );
 
-        return new DateInterval( toIso( fromDateUnit ), toIso( toDateUnit ),
-            DateIntervalType.ISO8601_DAY );
+        return new DateInterval( toIso( fromDateTimeUnit ), toIso( toDateTimeUnit ), DateIntervalType.ISO8601_DAY );
     }
 
     @Override
     public int monthsInYear()
     {
-        DateTime dateTime = new DateTime( 1, 1, 1, 0, 0, chronology );
-        return dateTime.monthOfYear().getMaximumValue();
+        LocalDate localDate = new LocalDate( 1, 1, 1, chronology );
+        return localDate.toDateTimeAtStartOfDay().monthOfYear().getMaximumValue();
     }
 
     @Override
     public int daysInWeek()
     {
-        DateTime dateTime = new DateTime( 1, 1, 1, 0, 0, chronology );
-        return dateTime.dayOfWeek().getMaximumValue();
+        LocalDate localDate = new LocalDate( 1, 1, 1, chronology );
+        return localDate.toDateTimeAtStartOfDay().dayOfWeek().getMaximumValue();
     }
 
     @Override
     public int daysInYear( int year )
     {
-        DateTime dateTime = new DateTime( year, 1, 1, 0, 0, chronology );
-        return (int) dateTime.year().toInterval().toDuration().getStandardDays();
+        LocalDate localDate = new LocalDate( year, 1, 1, chronology );
+        return (int) localDate.toDateTimeAtStartOfDay().year().toInterval().toDuration().getStandardDays();
     }
 
     @Override
     public int daysInMonth( int year, int month )
     {
-        DateTime dateTime = new DateTime( year, month, 1, 0, 0, chronology );
-        return dateTime.dayOfMonth().getMaximumValue();
+        LocalDate localDate = new LocalDate( year, month, 1, chronology );
+        return localDate.toDateTimeAtStartOfDay().dayOfMonth().getMaximumValue();
     }
 
     @Override
     public int weeksInYear( int year )
     {
-        DateTime dateTime = new DateTime( year, 1, 1, 0, 0, chronology );
-        return dateTime.weekOfWeekyear().getMaximumValue();
+        LocalDate localDate = new LocalDate( year, 1, 1, chronology );
+        return localDate.toDateTimeAtStartOfDay().weekOfWeekyear().getMaximumValue();
     }
 
     @Override
-    public int isoWeek( DateUnit dateUnit )
+    public int isoWeek( DateTimeUnit dateTimeUnit )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
         return dateTime.getWeekOfWeekyear();
     }
 
     @Override
-    public int week( DateUnit dateUnit )
+    public int week( DateTimeUnit dateTimeUnit )
     {
-        return isoWeek( dateUnit );
+        return isoWeek( dateTimeUnit );
     }
 
     @Override
-    public int isoWeekday( DateUnit dateUnit )
+    public int isoWeekday( DateTimeUnit dateTimeUnit )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
         dateTime = dateTime.withChronology( ISOChronology.getInstance() );
         return dateTime.getDayOfWeek();
     }
 
     @Override
-    public int weekday( DateUnit dateUnit )
+    public int weekday( DateTimeUnit dateTimeUnit )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return dateTime.getDayOfWeek();
+        return dateTimeUnit.toJodaDateTime( chronology ).getDayOfWeek();
     }
 
     @Override
-    public DateUnit plusDays( DateUnit dateUnit, int days )
+    public DateTimeUnit plusDays( DateTimeUnit dateTimeUnit, int days )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.plusDays( days ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.plusDays( days ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit minusDays( DateUnit dateUnit, int days )
+    public DateTimeUnit minusDays( DateTimeUnit dateTimeUnit, int days )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.minusDays( days ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.minusDays( days ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit plusWeeks( DateUnit dateUnit, int weeks )
+    public DateTimeUnit plusWeeks( DateTimeUnit dateTimeUnit, int weeks )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.plusWeeks( weeks ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.plusWeeks( weeks ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit minusWeeks( DateUnit dateUnit, int weeks )
+    public DateTimeUnit minusWeeks( DateTimeUnit dateTimeUnit, int weeks )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.minusWeeks( weeks ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.minusWeeks( weeks ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit plusMonths( DateUnit dateUnit, int months )
+    public DateTimeUnit plusMonths( DateTimeUnit dateTimeUnit, int months )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.plusMonths( months ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.plusMonths( months ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit minusMonths( DateUnit dateUnit, int months )
+    public DateTimeUnit minusMonths( DateTimeUnit dateTimeUnit, int months )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.minusMonths( months ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.minusMonths( months ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit plusYears( DateUnit dateUnit, int years )
+    public DateTimeUnit plusYears( DateTimeUnit dateTimeUnit, int years )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.plusYears( years ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.plusYears( years ), dateTimeUnit.isIso8601() );
     }
 
     @Override
-    public DateUnit minusYears( DateUnit dateUnit, int years )
+    public DateTimeUnit minusYears( DateTimeUnit dateTimeUnit, int years )
     {
-        DateTime dateTime = dateUnit.toDateTime( chronology );
-        return DateUnit.fromDateTime( dateTime.minusYears( years ) );
+        DateTime dateTime = dateTimeUnit.toJodaDateTime( chronology );
+        return DateTimeUnit.fromJodaDateTime( dateTime.minusYears( years ), dateTimeUnit.isIso8601() );
     }
 }

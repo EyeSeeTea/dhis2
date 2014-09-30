@@ -704,7 +704,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'level'],
 			proxy: {
 				type: isPlugin ? 'jsonp' : 'ajax',
-				url: gis.init.contextPath + gis.conf.finals.url.path_api + 'organisationUnitLevels.' + (isPlugin ? 'jsonp' : 'json') + '?fields=id,name,level&paging=false',
+				url: gis.init.contextPath + '/api/organisationUnitLevels.' + (isPlugin ? 'jsonp' : 'json') + '?fields=id,name,level&paging=false',
 				reader: {
 					type: 'json',
 					root: 'organisationUnitLevels'
@@ -907,10 +907,15 @@ Ext.onReady( function() {
                 setMap();
             };
 
-            failure = function() {
+            failure = function(r) {
                 gis.olmap.mask.hide();
-                alert('Map id not recognized' + (gis.el ? ' (' + gis.el + ')' : ''));
-                return;
+
+                if (Ext.Array.contains([403], r.status)) {
+                    alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                }
+                else {
+                    alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                }
             };
 
             if (isPlugin) {
@@ -2208,7 +2213,7 @@ Ext.onReady( function() {
 					legends = [];
 
 				Ext.Ajax.request({
-					url: gis.init.contextPath + gis.conf.finals.url.path_api + 'mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
+					url: gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
 					scope: this,
 					success: function(r) {
 						legends = Ext.decode(r.responseText).mapLegends;
@@ -2499,9 +2504,9 @@ Ext.onReady( function() {
 
             conf.url.analysisFields = [
                 '*',
-                'columns[dimension,filter,items[id,name]]',
-                'rows[dimension,filter,items[id,name]]',
-                'filters[dimension,filter,items[id,name]]',
+                'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
                 '!lastUpdated',
                 '!href',
                 '!created',

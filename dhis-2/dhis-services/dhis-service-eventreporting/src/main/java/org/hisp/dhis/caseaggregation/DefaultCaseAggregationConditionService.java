@@ -29,10 +29,14 @@ package org.hisp.dhis.caseaggregation;
  */
 
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE;
-import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_PROGRAM_STAGE_DATAELEMENT;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.OBJECT_TRACKED_ENTITY_ATTRIBUTE;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.PARAM_PERIOD_END_DATE;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.PARAM_PERIOD_START_DATE;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.PARAM_PERIOD_ID;
+import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.PARAM_PERIOD_ISO_DATE;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_ID;
 import static org.hisp.dhis.caseaggregation.CaseAggregationCondition.SEPARATOR_OBJECT;
 import static org.hisp.dhis.i18n.I18nUtils.i18n;
@@ -62,6 +66,7 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.system.util.ConcurrentUtils;
+import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.SystemUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
@@ -425,38 +430,71 @@ public class DefaultCaseAggregationConditionService
         ConcurrentUtils.waitForCompletion( futures );
     }
 
-    public Grid getAggregateValue( CaseAggregationCondition caseAggregationCondition, Collection<Integer> orgunitIds,
-        Period period, I18nFormat format, I18n i18n )
+    @Override
+    public List<Grid> getAggregateValue( Collection<CaseAggregationCondition> caseAggregationConditions, Collection<Integer> orgunitIds,
+        Collection<Period> periods, I18nFormat format, I18n i18n )
     {
-        periodService.reloadPeriod( period );
+        Collection<Integer> _orgunitIds = aggregationConditionStore.getServiceOrgunit();
+        _orgunitIds.retainAll( orgunitIds );
+        if ( _orgunitIds.size() > 0 )
+        {
+            int attributeOptioncomboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
+            List<Grid> grids = new ArrayList<>();
+            for ( CaseAggregationCondition condition : caseAggregationConditions )
+            {  
+                String sql = aggregationConditionStore.parseExpressionToSql( false, condition, attributeOptioncomboId, _orgunitIds );
+                for ( Period period : periods )
+                {
+                    period =  periodService.reloadPeriod( period );
+                    String periodSQL = sql;
+                    periodSQL = replacePeriodSql( periodSQL, period );
+                   
+                    Grid grid = aggregationConditionStore.getAggregateValue( periodSQL, format, i18n );
+                    grid.setTitle( condition.getDisplayName() );
+                    grid.setSubtitle( format.formatPeriod( period ) );
 
-        int attributeOptioncomboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
+                    grids.add( grid );
+                }
+            }
+            
+            return grids;
+        }
         
-        return aggregationConditionStore.getAggregateValue( caseAggregationCondition, orgunitIds, period, attributeOptioncomboId, format, i18n );
+        return null;
     }
-
+    
     @Override
     public Grid getAggregateValueDetails( CaseAggregationCondition aggregationCondition, OrganisationUnit orgunit,
         Period period, I18nFormat format, I18n i18n )
     {
         periodService.reloadPeriod( period );
 
-        return aggregationConditionStore.getAggregateValueDetails( aggregationCondition, orgunit, period, format, i18n );
+        boolean nonRegistrationProgram = singleEventWithoutRegistrationProgram( aggregationCondition.getAggregationExpression() );
+        return aggregationConditionStore.getAggregateValueDetails( aggregationCondition, orgunit, period, nonRegistrationProgram, format, i18n  );
     }
 
-    public void insertAggregateValue( CaseAggregationCondition caseAggregationCondition,
-        Collection<Integer> orgunitIds, Period period )
+    @Override
+    public void insertAggregateValue( Collection<CaseAggregationCondition> caseAggregationConditions,
+        Collection<Integer> orgunitIds, Collection<Period> periods )
     {
-        periodService.reloadPeriod( period );
-
-        Integer deSumId = (caseAggregationCondition.getDeSum() == null) ? null : caseAggregationCondition.getDeSum()
-            .getId();
-
-        int attributeOptioncomboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
-        
-        aggregationConditionStore.insertAggregateValue( caseAggregationCondition.getAggregationExpression(),
-            caseAggregationCondition.getOperator(), caseAggregationCondition.getAggregationDataElement().getId(),
-            caseAggregationCondition.getOptionCombo().getId(), attributeOptioncomboId, deSumId, orgunitIds, period );
+        Collection<Integer> _orgunitIds = aggregationConditionStore.getServiceOrgunit();
+        _orgunitIds.retainAll( orgunitIds );
+        if ( _orgunitIds.size() > 0 )
+        {
+            DataElementCategoryOptionCombo attributeOptioncombo = categoryService.getDefaultDataElementCategoryOptionCombo();
+            for( CaseAggregationCondition caseAggregationCondition : caseAggregationConditions )
+            {
+                String sql = aggregationConditionStore.parseExpressionToSql(false, caseAggregationCondition, attributeOptioncombo.getId(), _orgunitIds );
+    
+                for ( Period period : periods )
+                {
+                    period = periodService.reloadPeriod( period );
+                    sql = replacePeriodSql( sql, period );
+                    aggregationConditionStore.insertAggregateValue( sql, caseAggregationCondition.getAggregationDataElement(), 
+                        caseAggregationCondition.getOptionCombo(), attributeOptioncombo, _orgunitIds, period );
+                }
+            }
+        }
     }
 
     @Override
@@ -464,7 +502,8 @@ public class DefaultCaseAggregationConditionService
     {
         periodService.reloadPeriod( period );
 
-        return aggregationConditionStore.parseExpressionDetailsToSql( caseExpression, operator, orgunitId, period );
+        boolean nonRegistrationProgram = singleEventWithoutRegistrationProgram( caseExpression );
+        return aggregationConditionStore.parseExpressionDetailsToSql( caseExpression, operator, orgunitId, period, nonRegistrationProgram );
     }
 
     @Override
@@ -476,8 +515,10 @@ public class DefaultCaseAggregationConditionService
 
         int attributeOptioncomboId = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
         
-        return aggregationConditionStore.parseExpressionToSql( isInsert, caseExpression, operator, aggregateDeId,
-            aggregateDeName, optionComboId, optionComboName, attributeOptioncomboId, deSumId, orgunitIds, period );
+        String sql = aggregationConditionStore.parseExpressionToSql( isInsert, caseExpression, operator, aggregateDeId,
+            aggregateDeName, optionComboId, optionComboName, attributeOptioncomboId, deSumId, orgunitIds );
+        
+        return replacePeriodSql( sql, period );
     }
 
     @Override
@@ -490,6 +531,17 @@ public class DefaultCaseAggregationConditionService
     // Support Methods
     // -------------------------------------------------------------------------
 
+    private String replacePeriodSql( String sql, Period period )
+    {
+        sql = sql.replaceAll( "COMBINE", "" );
+        sql = sql.replaceAll( PARAM_PERIOD_START_DATE,  DateUtils.getMediumDateString( period.getStartDate() ));
+        sql = sql.replaceAll( PARAM_PERIOD_END_DATE,  DateUtils.getMediumDateString( period.getEndDate() ));
+        sql = sql.replaceAll( PARAM_PERIOD_ID,  period.getId() + "" );
+        sql = sql.replaceAll( PARAM_PERIOD_ISO_DATE, period.getIsoDate() );
+
+        return sql;
+    }
+    
     @Async
     private Future<?> aggregateValueManager( ConcurrentLinkedQueue<CaseAggregateSchedule> caseAggregateSchedule,
         String taskStrategy )
@@ -522,4 +574,64 @@ public class DefaultCaseAggregationConditionService
         return entityInstanceIds.size();
     }
 
+    private boolean singleEventWithoutRegistrationProgram( String expression )
+    {
+        Pattern patternCondition = Pattern.compile( CaseAggregationCondition.regExp );
+
+        Matcher matcher = patternCondition.matcher( expression );
+
+        while ( matcher.find() )
+        {
+            String match = matcher.group();
+            match = match.replaceAll( "[\\[\\]]", "" );
+
+            String[] info = match.split( SEPARATOR_OBJECT );
+
+            if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE_DATAELEMENT ) )
+            {
+                String[] ids = info[1].split( SEPARATOR_ID );
+                
+                int programId = Integer.parseInt( ids[0] );
+                Program program = programService.getProgram( programId );
+
+                if ( program != null && !program.isRegistration() )
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                String[] ids = info[1].split( SEPARATOR_ID );
+
+                if ( info[0].equalsIgnoreCase( OBJECT_TRACKED_ENTITY_ATTRIBUTE ) )
+                {
+                    return false;
+                }
+                else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM ) )
+                {
+                    int objectId = Integer.parseInt( ids[0] );
+
+                    Program program = programService.getProgram( objectId );
+
+                    if ( program != null && !program.isRegistration() )
+                    {
+                        return true;
+                    }
+                }
+                else if ( info[0].equalsIgnoreCase( OBJECT_PROGRAM_STAGE )
+                    || info[0].equalsIgnoreCase( OBJECT_ORGUNIT_COMPLETE_PROGRAM_STAGE ) )
+                {
+                    int objectId = Integer.parseInt( ids[0] );
+                    ProgramStage programStage = programStageService.getProgramStage( objectId );
+                    if (programStage!=null && !programStage.getProgram().isRegistration() )
+                    {
+                        return true;
+                    }
+                }
+            }
+
+        }
+
+        return false;
+    }
 }

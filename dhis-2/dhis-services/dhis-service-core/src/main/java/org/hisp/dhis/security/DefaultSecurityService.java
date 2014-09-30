@@ -248,7 +248,7 @@ public class DefaultSecurityService
     public boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType )
     {
         if ( credentials == null || token == null || code == null || newPassword == null
-            || !canRestoreNow( credentials, token, code, restoreType ) )
+            || !canRestore( credentials, token, code, restoreType ) )
         {
             return false;
         }
@@ -266,56 +266,134 @@ public class DefaultSecurityService
         return true;
     }
 
-    public boolean canRestoreNow( UserCredentials credentials, String token, String code, RestoreType restoreType )
+    public boolean canRestore( UserCredentials credentials, String token, String code, RestoreType restoreType )
     {
-        if ( !verifyToken( credentials, token, restoreType ) )
+        String logPrefix = "Restore user: " + credentials.getUid() + ", username: " + credentials.getUsername() + " ";
+
+        String errorMessage = verifyRestore( credentials, token, code, restoreType );
+
+        if ( errorMessage != null )
         {
+            log.info( logPrefix + "Failed to verify restore: " + errorMessage );
             return false;
         }
 
-        String restoreCode = credentials.getRestoreCode();
-
-        Date restoreExpiry = credentials.getRestoreExpiry();
-        Date currentTime = new Cal().now().time();
-
-        if( restoreCode == null || restoreExpiry == null || code == null || currentTime.after( restoreExpiry ) )
-        {
-            return false;
-        }
-
-        return passwordManager.matches( code, restoreCode );
+        log.info( logPrefix + " success" );
+        return true;
     }
 
-    public boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
+    private String verifyRestore( UserCredentials credentials, String token, String code, RestoreType restoreType )
     {
-        if ( credentials == null || token == null || restoreType == null )
+        String errorMessage = credentials.isRestorable();
+
+        if ( errorMessage != null )
         {
-            return false;
+            return errorMessage;
+        }
+
+        errorMessage = verifyToken( credentials, token, restoreType );
+
+        if ( errorMessage != null )
+        {
+            return errorMessage;
+        }
+
+        errorMessage = verifyRestoreCode( credentials, code );
+
+        if ( errorMessage != null )
+        {
+            return errorMessage;
+        }
+
+        Date currentTime = new Cal().now().time();
+        Date restoreExpiry = credentials.getRestoreExpiry();
+
+        if ( currentTime.after( restoreExpiry ) )
+        {
+            return "date_is_after_expiry - date: " + currentTime.toString() + " expiry: " + restoreExpiry.toString();
+        }
+
+        return null; // Success;
+    }
+
+    private String verifyRestoreCode( UserCredentials credentials, String code )
+    {
+        String restoreCode = credentials.getRestoreCode();
+
+        if( code == null )
+        {
+            return "code_parameter_is_null";
+        }
+
+        if ( restoreCode == null )
+        {
+            return "account_restoreCode_is_null";
+        }
+
+        boolean validCode = passwordManager.matches( code, restoreCode );
+
+        return validCode ? null : "code_does_not_match_restoreCode - code: '"+ code + "' restoreCode: '" + restoreCode + "'" ;
+    }
+
+    /**
+     * Verify the token given for a user invite or password restore operation.
+     * <p>
+     * If error, returns one of the following strings:
+     *
+     * <ul>
+     *     <li>credentials_parameter_is_null</li>
+     *     <li>token_parameter_is_null</li>
+     *     <li>restore_type_parameter_is_null</li>
+     *     <li>cannot_parse_restore_options ...</li>
+     *     <li>wrong_prefix_for_restore_type ...</li>
+     *     <li>could_not_verify_token ...</li>
+     *     <li>restore_token_does_not_match_supplied_token ...</li>
+     * </ul>
+     *
+     * @param credentials the user credentials.
+     * @param token the token.
+     * @param restoreType type of restore operation.
+     * @return null if success, otherwise error string.
+     */
+    public String verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
+    {
+        if ( credentials == null )
+        {
+            return "credentials_parameter_is_null";
+        }
+
+        if ( token == null )
+        {
+            return "token_parameter_is_null";
+        }
+
+        if ( restoreType == null )
+        {
+            return "restore_type_parameter_is_null";
         }
 
         RestoreOptions restoreOptions = RestoreOptions.getRestoreOptions( token );
 
         if ( restoreOptions == null )
         {
-            log.info( "Can't parse restore options for " + restoreType.name() + " from token " + token + " for user " + credentials );
-            return false;
+            return "cannot_parse_restore_options for " + restoreType.name() + " from token " + token;
         }
 
         if ( restoreType != restoreOptions.getRestoreType() )
         {
-            log.info( "Wrong prefix for restore type " + restoreType.name() + " on token " + token + " for user " + credentials );
-            return false;
-        }
-
-        if ( credentials.getRestoreToken() == null )
-        {
-            log.info( "Could not verify token for " + restoreType.name() + " as user has no token: " + credentials );
-            return false;
+            return "wrong_prefix_for_restore_type " + restoreType.name() + " on token " + token;
         }
 
         String restoreToken = credentials.getRestoreToken();
 
-        return passwordManager.matches( token, restoreToken );
+        if ( restoreToken == null )
+        {
+            return "could_not_verify_token for " + restoreType.name() + " because user has no token";
+        }
+
+        boolean validToken = passwordManager.matches( token, restoreToken );
+
+        return validToken ? null : "restore_token_does_not_match_supplied_token " + token;
     }
 
     @Override

@@ -39,6 +39,7 @@ import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.option.Option;
 import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -51,7 +52,6 @@ import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageSection;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.program.comparator.ProgramStageDataElementSortOrderComparator;
 import org.hisp.dhis.program.comparator.ProgramStageSectionSortOrderComparator;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
@@ -295,7 +295,6 @@ public class LoadDataEntryAction
         // ---------------------------------------------------------------------
 
         programStageDataElements = new ArrayList<>( programStage.getProgramStageDataElements() );
-        Collections.sort( programStageDataElements, new ProgramStageDataElementSortOrderComparator() );
 
         DataEntryForm dataEntryForm = programStage.getDataEntryForm();
 
@@ -370,10 +369,11 @@ public class LoadDataEntryAction
         for ( TrackedEntityDataValue entityInstanceDataValue : entityInstanceDataValues )
         {
             int key = entityInstanceDataValue.getDataElement().getId();
-            if ( entityInstanceDataValue.getDataElement().getOptionSet() != null )
+            OptionSet optionSet = entityInstanceDataValue.getDataElement().getOptionSet();
+            if ( optionSet != null )
             {
                 String value = entityInstanceDataValue.getValue();
-                Option option = optionService.getOptionByCode( value );
+                Option option = optionService.getOptionByCode( optionSet, value );
                 
                 TrackedEntityDataValue instanceDataValue = new TrackedEntityDataValue(entityInstanceDataValue.getProgramStageInstance(), entityInstanceDataValue.getDataElement());
                 instanceDataValue.setValue( option.getName() );

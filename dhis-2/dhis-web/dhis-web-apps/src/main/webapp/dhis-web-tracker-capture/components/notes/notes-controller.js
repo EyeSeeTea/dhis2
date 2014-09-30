@@ -1,7 +1,8 @@
 trackerCapture.controller('NotesController',
         function($scope,
-                $filter,
                 storage,
+                DateUtils,
+                TEIService,
                 EnrollmentService,
                 CurrentSelection,
                 orderByFilter,
@@ -15,12 +16,17 @@ trackerCapture.controller('NotesController',
         storedBy = loginDetails.userCredentials.username;
     }
     
-    var today = moment();
-    today = Date.parse(today);
-    today = $filter('date')(today, 'yyyy-MM-dd');
+    var today = DateUtils.format(moment());
+    
+    $scope.showMessagingDiv = false;
+    $scope.showNotesDiv = true;
     
     $scope.$on('dashboardWidgets', function(event, args) {
         $scope.selectedEnrollment = null;
+        var selections = CurrentSelection.get();                    
+        $scope.selectedTei = angular.copy(selections.tei);
+        $scope.selectedProgram = selections.pr;
+        
         var selections = CurrentSelection.get();
         if(selections.enrollment){
             EnrollmentService.get(selections.enrollment.enrollment).then(function(data){    
@@ -28,19 +34,30 @@ trackerCapture.controller('NotesController',
                 if(!angular.isUndefined( $scope.selectedEnrollment.notes)){
                     $scope.selectedEnrollment.notes = orderByFilter($scope.selectedEnrollment.notes, '-storedDate');            
                     angular.forEach($scope.selectedEnrollment.notes, function(note){
-                        note.storedDate = moment(note.storedDate).format('YYYY-MM-DD @ hh:mm A');
+                        note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
                     });
                 }
             });
-        }        
+        }
+        
+        if($scope.selectedProgram && $scope.selectedTei){
+            //check if the selected TEI has any of the contact attributes
+            //that can be used for communication
+            TEIService.processAttributes($scope.selectedTei, $scope.selectedProgram, $scope.selectedEnrollment).then(function(tei){
+                $scope.selectedTei = tei; 
+                var continueLoop = true;
+                for(var i=0; i<$scope.selectedTei.attributes.length && continueLoop; i++){
+                    if( ($scope.selectedTei.attributes[i].type === 'phoneNumber' && $scope.selectedTei.attributes[i].show) || 
+                        ($scope.selectedTei.attributes[i].type === 'email' && $scope.selectedTei.attributes[i].show) ){
+                        $scope.messagingPossible = true;
+                        continueLoop = false;
+                    }
+                }
+            });
+        }
     });
    
     $scope.searchNoteField = false;
-    $scope.addNoteField = false;    
-    
-    $scope.showAddNote = function() {
-        $scope.addNoteField = !$scope.addNoteField;
-    };
     
     $scope.addNote = function(){
         
@@ -66,13 +83,22 @@ trackerCapture.controller('NotesController',
         }        
     };
     
-    $scope.closeAddNote = function(){
-         $scope.addNoteField = false;
+    $scope.clearNote = function(){
          $scope.note = '';           
     };
     
     $scope.searchNote = function(){        
         $scope.searchNoteField = $scope.searchNoteField === false ? true : false;
         $scope.noteSearchText = '';
+    };
+    
+    $scope.showNotes = function(){
+        $scope.showNotesDiv = !$scope.showNotesDiv;
+        $scope.showMessagingDiv = !$scope.showMessagingDiv;
+    };
+    
+    $scope.showMessaging = function(){
+        $scope.showNotesDiv = !$scope.showNotesDiv;
+        $scope.showMessagingDiv = !$scope.showMessagingDiv;
     };
 });

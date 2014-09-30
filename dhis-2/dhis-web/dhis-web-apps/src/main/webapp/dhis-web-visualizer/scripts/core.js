@@ -3,6 +3,13 @@ Ext.onReady( function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
+    // override
+    Ext.override(Ext.chart.series.Line, {
+        drawSeries: function() {
+            var ak=this,au=ak.chart,S=au.axes,ao=au.getChartStore(),V=ao.getCount(),u=ak.chart.surface,am={},R=ak.group,K=ak.showMarkers,aA=ak.markerGroup,D=au.shadow,C=ak.shadowGroups,X=ak.shadowAttributes,O=ak.smooth,q=C.length,ar=["M"],T=["M"],d=["M"],b=["M"],J=au.markerIndex,ai=[].concat(ak.axis),ah,av=[],ag={},aa=[],v={},I=false,Q=[],az=ak.markerStyle,Z=ak.style,t=ak.colorArrayStyle,P=t&&t.length||0,L=Ext.isNumber,aw=ak.seriesIdx,g=ak.getAxesForXAndYFields(),l=g.xAxis,ay=g.yAxis,ac,h,ab,ad,A,c,ae,H,G,f,e,s,r,W,N,M,at,m,F,E,aB,n,p,B,a,Y,af,z,aq,w,ap,o,ax,an,al,U,k,aj;if(ak.fireEvent("beforedraw",ak)===false){return}if(!V||ak.seriesIsHidden){aj=this.items;if(aj){for(N=0,at=aj.length;N<at;++N){if(aj[N].sprite){aj[N].sprite.hide(true)}}}return}an=Ext.apply(az||{},ak.markerConfig);U=an.type;delete an.type;al=Z;if(!al["stroke-width"]){al["stroke-width"]=0.5}if(J&&aA&&aA.getCount()){for(N=0;N<J;N++){E=aA.getAt(N);aA.remove(E);aA.add(E);aB=aA.getAt(aA.getCount()-2);E.setAttributes({x:0,y:0,translate:{x:aB.attr.translation.x,y:aB.attr.translation.y}},true)}}ak.unHighlightItem();ak.cleanHighlights();ak.setBBox();am=ak.bbox;ak.clipRect=[am.x,am.y,am.width,am.height];for(N=0,at=ai.length;N<at;N++){m=S.get(ai[N]);if(m){F=m.calcEnds();if(m.position=="top"||m.position=="bottom"){z=F.from;aq=F.to}else{w=F.from;ap=F.to}}}if(ak.xField&&!L(z)&&(l=="bottom"||l=="top")&&!S.get(l)){m=Ext.create("Ext.chart.axis.Axis",{chart:au,fields:[].concat(ak.xField)}).calcEnds();z=m.from;aq=m.to}if(ak.yField&&!L(w)&&(ay=="right"||ay=="left")&&!S.get(ay)){m=Ext.create("Ext.chart.axis.Axis",{chart:au,fields:[].concat(ak.yField)}).calcEnds();w=m.from;ap=m.to}if(isNaN(z)){z=0;Y=am.width/((V-1)||1)}else{Y=am.width/((aq-z)||(V-1)||1)}if(isNaN(w)){w=0;af=am.height/((V-1)||1)}else{af=am.height/((ap-w)||(V-1)||1)}ak.eachRecord(function(j,x){p=j.get(ak.xField);if(typeof p=="string"||typeof p=="object"&&!Ext.isDate(p)||l&&S.get(l)&&S.get(l).type=="Category"){if(p in ag){p=ag[p]}else{p=ag[p]=x}}B=j.get(ak.yField);if(typeof B=="undefined"||(typeof B=="string"&&!B)){if(Ext.isDefined(Ext.global.console)){Ext.global.console.warn("[Ext.chart.series.Line]  Skipping a store element with an undefined value at ",j,p,B)}return}if(typeof B=="object"&&!Ext.isDate(B)||ay&&S.get(ay)&&S.get(ay).type=="Category"){B=x}Q.push(x);av.push(p);aa.push(B)});at=av.length;if(at>am.width){a=ak.shrink(av,aa,am.width);av=a.x;aa=a.y}ak.items=[];k=0;at=av.length;for(N=0;N<at;N++){p=av[N];B=aa[N];if(B===false){if(T.length==1){T=[]}I=true;ak.items.push(false);continue}else{H=(am.x+(p-z)*Y).toFixed(2);G=((am.y+am.height)-(B-w)*af).toFixed(2);if(I){I=false;T.push("M")}T=T.concat([H,G])}if((typeof r=="undefined")&&(typeof G!="undefined")){r=G;s=H}if(!ak.line||au.resizing){ar=ar.concat([H,am.y+am.height/2])}if(au.animate&&au.resizing&&ak.line){ak.line.setAttributes({path:ar},true);if(ak.fillPath){ak.fillPath.setAttributes({path:ar,opacity:0.2},true)}if(ak.line.shadows){ac=ak.line.shadows;for(M=0,q=ac.length;M<q;M++){h=ac[M];h.setAttributes({path:ar},true)}}}if(K){E=aA.getAt(k++);if(!E){E=Ext.chart.Shape[U](u,Ext.apply({group:[R,aA],x:0,y:0,translate:{x:+(f||H),y:e||(am.y+am.height/2)},value:'"'+p+", "+B+'"',zIndex:4000},an));E._to={translate:{x:+H,y:+G}}}else{E.setAttributes({value:'"'+p+", "+B+'"',x:0,y:0,hidden:false},true);E._to={translate:{x:+H,y:+G}}}}ak.items.push({series:ak,value:[p,B],point:[H,G],sprite:E,storeItem:ao.getAt(Q[N])});f=H;e=G}if(T.length<=1){return}if(ak.smooth){b=Ext.draw.Draw.smooth(T,L(O)?O:ak.defaultSmoothness)}d=O?b:T;if(au.markerIndex&&ak.previousPath){ad=ak.previousPath;if(!O){Ext.Array.erase(ad,1,2)}}else{ad=T}if(!ak.line){ak.line=u.add(Ext.apply({type:"path",group:R,path:ar,stroke:al.stroke||al.fill},al||{}));if(D){ak.line.setAttributes(Ext.apply({},ak.shadowOptions),true)}ak.line.setAttributes({fill:"none",zIndex:3000});if(!al.stroke&&P){ak.line.setAttributes({stroke:t[aw%P]},true)}if(D){ac=ak.line.shadows=[];for(ab=0;ab<q;ab++){ah=X[ab];ah=Ext.apply({},ah,{path:ar});h=u.add(Ext.apply({},{type:"path",group:C[ab]},ah));ac.push(h)}}}if(ak.fill){c=d.concat([["L",H,am.y+am.height],["L",s,am.y+am.height],["L",s,r]]);if(!ak.fillPath){ak.fillPath=u.add({group:R,type:"path",opacity:al.opacity||0.3,fill:al.fill||t[aw%P],path:ar})}}W=K&&aA.getCount();if(au.animate){A=ak.fill;o=ak.line;ae=ak.renderer(o,false,{path:d},N,ao);Ext.apply(ae,al||{},{stroke:al.stroke||al.fill});delete ae.fill;o.show(true);if(au.markerIndex&&ak.previousPath){ak.animation=ax=ak.onAnimate(o,{to:ae,from:{path:ad}})}else{ak.animation=ax=ak.onAnimate(o,{to:ae})}if(D){ac=o.shadows;for(M=0;M<q;M++){ac[M].show(true);if(au.markerIndex&&ak.previousPath){ak.onAnimate(ac[M],{to:{path:d},from:{path:ad}})}else{ak.onAnimate(ac[M],{to:{path:d}})}}}if(A){ak.fillPath.show(true);ak.onAnimate(ak.fillPath,{to:Ext.apply({},{path:c,fill:al.fill||t[aw%P],"stroke-width":0},al||{})})}if(K){k=0;for(N=0;N<at;N++){if(ak.items[N]){n=aA.getAt(k++);if(n){ae=ak.renderer(n,ao.getAt(N),n._to,N,ao);ak.onAnimate(n,{to:Ext.apply(ae,an||{})});n.show(true)}}}for(;k<W;k++){n=aA.getAt(k);n.hide(true)}}}else{ae=ak.renderer(ak.line,false,{path:d,hidden:false},N,ao);Ext.apply(ae,al||{},{stroke:al.stroke||al.fill});delete ae.fill;ak.line.setAttributes(ae,true);if(D){ac=ak.line.shadows;for(M=0;M<q;M++){ac[M].setAttributes({path:d,hidden:false},true)}}if(ak.fill){ak.fillPath.setAttributes({path:c,hidden:false},true)}if(K){k=0;for(N=0;N<at;N++){if(ak.items[N]){n=aA.getAt(k++);if(n){ae=ak.renderer(n,ao.getAt(N),n._to,N,ao);n.setAttributes(Ext.apply(an||{},ae||{}),true);n.show(true)}}}for(;k<W;k++){n=aA.getAt(k);n.hide(true)}}}if(au.markerIndex){if(ak.smooth){Ext.Array.erase(T,1,2)}else{Ext.Array.splice(T,1,0,T[1],T[2])}ak.previousPath=T}ak.renderLabels();ak.renderCallouts();ak.fireEvent("draw",ak);
+        }
+    });
+
 	// namespace
 	DV = {};
 	var NS = DV;
@@ -109,7 +116,8 @@ Ext.onReady( function() {
                     line: 'line',
                     area: 'area',
                     pie: 'pie',
-                    radar: 'radar'
+                    radar: 'radar',
+                    gauge: 'gauge'
                 },
                 data: {
                     domain: 'domain_',
@@ -224,9 +232,9 @@ Ext.onReady( function() {
                     '*',
                     'program[id,name]',
                     'programStage[id,name]',
-                    'columns[dimension,filter,items[id,name]]',
-                    'rows[dimension,filter,items[id,name]]',
-                    'filters[dimension,filter,items[id,name]]',
+                    'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
                     '!lastUpdated',
                     '!href',
                     '!created',
@@ -2318,14 +2326,20 @@ Ext.onReady( function() {
                 };
 
                 getDefaultChartTitle = function(store) {
-                    var ids = filterIds,
-                        a = [],
+                    var ids = [],
                         text = '',
-                        fontSize;
+                        fontSize,
+                        isPie = xLayout.type === conf.finals.chart.pie,
+                        isGauge = xLayout.type === conf.finals.chart.gauge;
 
-                    if (xLayout.type === conf.finals.chart.pie) {
-                        ids = ids.concat(columnIds);
+                    if (isPie) {
+                        ids = Ext.Array.clean(ids.concat(columnIds || []));
                     }
+                    else if (isGauge) {
+                        ids.push(columnIds[0], rowIds[0]);
+                    }
+
+                    ids = Ext.Array.clean(ids.concat(filterIds || []));
 
                     if (Ext.isArray(ids) && ids.length) {
                         for (var i = 0; i < ids.length; i++) {
@@ -2383,39 +2397,38 @@ Ext.onReady( function() {
                     };
                 };
 
-                getDefaultChart = function(store, axes, series, theme) {
+                getDefaultChart = function(config) {
                     var chart,
-                        config = {
-							//renderTo: init.el,
-                            store: store,
-                            axes: axes,
-                            series: series,
+                        store = config.store || {},
+                        defaultConfig = {
                             animate: true,
                             shadow: false,
                             insetPadding: 35,
                             width: ns.app.centerRegion.getWidth() - 15,
                             height: ns.app.centerRegion.getHeight() - 40,
-                            theme: theme || 'dv1'
+                            theme: 'dv1'
                         };
 
-                    // Legend
+                    // legend
                     if (!xLayout.hideLegend) {
-                        config.legend = getDefaultLegend(store);
+                        defaultConfig.legend = getDefaultLegend(store);
 
-                        if (config.legend.position === 'right') {
-                            config.insetPadding = 40;
+                        if (defaultConfig.legend.position === 'right') {
+                            defaultConfig.insetPadding = 40;
                         }
                     }
 
-                    // Title
+                    // title
                     if (!xLayout.hideTitle) {
-                        config.items = [getDefaultChartTitle(store)];
+                        defaultConfig.items = [getDefaultChartTitle(store)];
                     }
                     else {
-                        config.insetPadding = 10;
+                        defaultConfig.insetPadding = 10;
                     }
 
-                    chart = Ext.create('Ext.chart.Chart', config);
+                    Ext.apply(defaultConfig, config);
+
+                    chart = Ext.create('Ext.chart.Chart', defaultConfig);
 
                     chart.setChartSize = getDefaultChartSizeHandler();
                     chart.setTitlePosition = getDefaultChartTitlePositionHandler();
@@ -2456,7 +2469,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.stackedcolumn = function() {
@@ -2538,7 +2555,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.stackedbar = function() {
@@ -2622,10 +2643,18 @@ Ext.onReady( function() {
                         }
                     });
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.area = function() {
+
+                    // NB, always on for area charts as area extjs area charts cannot handle nulls
+                    xLayout.hideEmptyRows = true;
+                    
                     var store = getDefaultStore(),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
@@ -2655,7 +2684,11 @@ Ext.onReady( function() {
                     // Theme
                     setDefaultTheme(store);
 
-                    return getDefaultChart(store, axes, series);
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
                 };
 
                 generator.pie = function() {
@@ -2716,7 +2749,11 @@ Ext.onReady( function() {
                     });
 
                     // Chart
-                    chart = getDefaultChart(store, null, series);
+                    chart = getDefaultChart({
+                        store: store,
+                        series: series
+                    });
+                    
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
@@ -2765,7 +2802,12 @@ Ext.onReady( function() {
                         series.push(obj);
                     }
 
-                    chart = getDefaultChart(store, axes, series, 'Category2');
+                    chart = getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series,
+                        theme: 'Category2'
+                    });
 
                     chart.insetPadding = 40;
                     chart.height = ns.app.centerRegion.getHeight() - 80;
@@ -2775,6 +2817,86 @@ Ext.onReady( function() {
                         this.setWidth(ns.app.centerRegion.getWidth());
                         this.setHeight(ns.app.centerRegion.getHeight() - 80);
                         this.animate = true;
+                    };
+
+                    return chart;
+                };
+
+                generator.gauge = function() {
+                    var store = getDefaultStore(),
+                        axis,
+                        series,
+                        legend,
+                        config,
+                        chart;
+                        
+                    axis = {
+                        type: 'gauge',
+                        position: 'gauge',
+                        minimum: 0,
+                        maximum: 100,
+                        steps: 10,
+                        margin: -7
+                    };
+
+                    series = {
+                        type: 'gauge',
+                        field: store.rangeFields[0],
+                        //donut: 5,
+                        colorSet: ['#82B525', '#ddd']
+                    };
+                    
+                    chart = getDefaultChart({
+                        axes: [axis],
+                        series: [series],
+                        width: ns.app.centerRegion.getWidth(),
+                        height: ns.app.centerRegion.getHeight() * 0.6,
+                        store: store,
+                        insetPadding: 100,
+                        theme: null,
+                        animate: {
+                            easing: 'elasticIn',
+                            duration: 1000
+                        }
+                    });
+
+                    if (xLayout.showValues) {
+                        chart.items.push(Ext.create('Ext.draw.Sprite', {
+                            type: 'text',
+                            text: store.getRange()[0].data[columnIds[0]],
+                            font: 'normal 26px ' + conf.chart.style.fontFamily,
+                            fill: '#111',
+                            height: 40,
+                            y: 	60
+                        }));
+                    }
+
+                    chart.setChartSize = function() {
+						this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() * 0.6);
+                        this.animate = true;
+                    };
+
+                    chart.setTitlePosition = function() {
+                        if (this.items) {
+                            var title = this.items[0],
+                                subTitle = this.items[1];
+
+                            if (title) {
+                                var titleX = (ns.app.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
+                                title.setAttributes({
+                                    x: titleX
+                                }, true);
+                            }
+
+                            if (subTitle) {
+                                var subTitleX = (ns.app.centerRegion.getWidth() / 2) - (subTitle.el.getWidth() / 2);
+                                subTitle.setAttributes({
+                                    x: subTitleX
+                                }, true);
+                            }
+                        }
                     };
 
                     return chart;

@@ -4,13 +4,13 @@
   "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
 
 <hibernate-mapping>
-  <class name="org.hisp.dhis.sms.outbound.OutboundSms" table="outbound_sms">
+  <class name="org.hisp.dhis.sms.outbound.OutboundSms" table="outbound_sms" lazy="false">
 
     <id name="id">
       <generator class="native" />
     </id>
 
-    <set name="recipients" table="outbound_sms_recipients">
+    <set name="recipients" table="outbound_sms_recipients" fetch="join">
       <key column="outbound_sms_id" />
       <element type="text"/>
     </set>

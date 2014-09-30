@@ -35,16 +35,20 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.hibernate.SessionFactory;
+import org.hibernate.metadata.ClassMetadata;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.annotation.Description;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.system.util.ReflectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -57,9 +61,21 @@ import java.util.Map;
  */
 public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrospectorService
 {
+    @Autowired
+    private SessionFactory sessionFactory;
+
     protected Map<String, Property> scanClass( Class<?> clazz )
     {
         Map<String, Property> propertyMap = Maps.newHashMap();
+        ClassMetadata classMetadata = sessionFactory.getClassMetadata( clazz );
+        List<String> classPropertyNames = new ArrayList<>();
+
+        if ( classMetadata != null )
+        {
+            classPropertyNames = Lists.newArrayList( classMetadata.getPropertyNames() );
+        }
+
+        List<String> classFieldNames = ReflectionUtils.getAllFieldNames( clazz );
 
         // TODO this is quite nasty, should find a better way of exposing properties at class-level
         if ( clazz.isAnnotationPresent( JacksonXmlRootElement.class ) )
@@ -88,28 +104,16 @@ public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrosp
             Method method = property.getGetterMethod();
             JsonProperty jsonProperty = method.getAnnotation( JsonProperty.class );
 
-            String name = jsonProperty.value();
+            String fieldName = getFieldName( method );
+            property.setName( !StringUtils.isEmpty( jsonProperty.value() ) ? jsonProperty.value() : fieldName );
+            property.setReadable( true );
 
-            if ( StringUtils.isEmpty( name ) )
+            if ( classFieldNames.contains( fieldName ) )
             {
-                String[] getters = new String[]{
-                    "is", "has", "get"
-                };
-
-                name = method.getName();
-
-                for ( String getter : getters )
-                {
-                    if ( name.startsWith( getter ) )
-                    {
-                        name = name.substring( getter.length() );
-                    }
-                }
-
-                name = StringUtils.uncapitalize( name );
+                property.setFieldName( fieldName );
+                property.setPersisted( classPropertyNames.contains( property.getFieldName() ) );
+                property.setWritable( property.isPersisted() );
             }
-
-            property.setName( name );
 
             if ( method.isAnnotationPresent( Description.class ) )
             {
@@ -141,7 +145,7 @@ public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrosp
 
                 if ( StringUtils.isEmpty( jacksonXmlProperty.localName() ) )
                 {
-                    property.setName( name );
+                    property.setName( property.getName() );
                 }
                 else
                 {
@@ -167,7 +171,7 @@ public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrosp
                 }
             }
 
-            propertyMap.put( name, property );
+            propertyMap.put( property.getName(), property );
 
             Class<?> returnType = method.getReturnType();
             property.setKlass( returnType );
@@ -210,6 +214,27 @@ public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrosp
         }
 
         return propertyMap;
+    }
+
+    private String getFieldName( Method method )
+    {
+        String name;
+
+        String[] getters = new String[]{
+            "is", "has", "get"
+        };
+
+        name = method.getName();
+
+        for ( String getter : getters )
+        {
+            if ( name.startsWith( getter ) )
+            {
+                name = name.substring( getter.length() );
+            }
+        }
+
+        return StringUtils.uncapitalize( name );
     }
 
     private static List<Property> collectProperties( Class<?> klass )

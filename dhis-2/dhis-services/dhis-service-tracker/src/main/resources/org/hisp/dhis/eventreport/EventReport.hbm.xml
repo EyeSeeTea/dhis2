@@ -112,7 +112,9 @@
       <element type="string" column="dimension" />
     </list>
 
-    <property name="totals" />
+    <property name="rowTotals" />
+	  
+	<property name="colTotals" />
 
     <property name="subtotals" />
 
@@ -121,6 +123,8 @@
     <property name="showHierarchy" />
 
     <property name="countType" />
+
+    <property name="showDimensionLabels" />
 
     <property name="digitGroupSeparator" />
 

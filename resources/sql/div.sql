@@ -1,12 +1,4 @@
 ﻿
--- Delete all data values for category combo
-
-delete from datavalue where categoryoptioncomboid in (
-select cc.categoryoptioncomboid from categoryoptioncombo cc
-join categorycombos_optioncombos co
-on (cc.categoryoptioncomboid=co.categoryoptioncomboid)
-where categorycomboid=12414 );
-
 -- Data elements and frequency with average agg operator (higher than yearly negative for data mart performance)
 
 select d.dataelementid, d.name as dataelement, pt.name as periodtype from dataelement d 
@@ -92,17 +84,24 @@ from users u
 join userinfo ui on u.userid=ui.userinfoid
 order by u.username;
 
--- Explore report tables
+-- Users in user role
 
-select rt.name, rt.paramleafparentorganisationunit as leaf, 
-rt.paramgrandparentorganisationunit as grand, rt.paramparentorganisationunit as parent,
-(select count(*) from reporttable_dataelements where reporttableid=rt.reporttableid) as de,
-(select count(*) from reporttable_datasets where reporttableid=rt.reporttableid) as ds,
-(select count(*) from reporttable_indicators where reporttableid=rt.reporttableid) as in,
-(select count(*) from reporttable_organisationunits where reporttableid=rt.reporttableid) as ou, 
-(select count(*) from reporttable_orgunitgroups where reporttableid=rt.reporttableid) as oug,
-(select count(*) from reporttable_periods where reporttableid=rt.reporttableid) as pe
-from reporttable rt;
+select u.userid, u.username, ui.firstname, ui.surname from users u 
+inner join userinfo ui on u.userid=ui.userinfoid 
+inner join userrolemembers urm on u.userid=urm.userid 
+inner join userrole ur on urm.userroleid=ur.userroleid 
+where ur.name='UserRoleName';
+
+-- Users with ALL authority
+
+select u.userid, u.username, ui.firstname, ui.surname from users u 
+inner join userinfo ui on u.userid=ui.userinfoid
+where u.userid in (
+  select urm.userid from userrolemembers urm 
+  inner join userrole ur on urm.userroleid=ur.userroleid
+  inner join userroleauthorities ura on ur.userroleid=ura.userroleid 
+  where ura.authority = 'ALL'
+);
 
 -- Turn longitude/latitude around for organisationunit coordinates (adjust the like clause)
 
@@ -173,20 +172,27 @@ where dv.periodid in (
   where pe.startdate < '1950-01-01'
   or pe.enddate > '2050-01-01');
 
--- (Write) Populate dashboards for all users (7666 is userinfoid for target dashboard, replace with preferred id)
+-- Data value exploded view
 
-insert into usersetting (userinfoid, name, value)
-select userinfoid, 'dashboardConfig', (
-  select value
-  from usersetting
-  where userinfoid=7666
-  and name='dashboardConfig') as value
-from userinfo
-where userinfoid not in (
-  select userinfoid
-  from usersetting
-  where name='dashboardConfig')
+select de.name as dename, de.uid as deuid, pe.startdate as pestart, pe.enddate as peend, pt.name as ptname, 
+ou.name as ouname, ou.uid as ouuid, coc.uid as cocuid, coc.categoryoptioncomboid as cocid, aoc.uid as aocuid, aoc.categoryoptioncomboid as aocid, dv.value as dvval
+from datavalue dv
+inner join dataelement de on (dv.dataelementid=de.dataelementid)
+inner join period pe on (dv.periodid=pe.periodid)
+inner join periodtype pt on (pe.periodtypeid=pt.periodtypeid)
+inner join organisationunit ou on (dv.sourceid=ou.organisationunitid)
+inner join categoryoptioncombo coc on (dv.categoryoptioncomboid=coc.categoryoptioncomboid)
+inner join categoryoptioncombo aoc on (dv.attributeoptioncomboid=aoc.categoryoptioncomboid)
+limit 10000;
   
+-- (Write) Delete all data values for category combo
+
+delete from datavalue where categoryoptioncomboid in (
+select cc.categoryoptioncomboid from categoryoptioncombo cc
+join categorycombos_optioncombos co
+on (cc.categoryoptioncomboid=co.categoryoptioncomboid)
+where categorycomboid=12414 );
+
 -- (Write) Reset password to "district" for account with given username
 
 update users set password='48e8f1207baef1ef7fe478a57d19f2e5' where username='admin';
@@ -218,9 +224,23 @@ executiondate = (executiondate + interval '1 year'),
 created = (created + interval '1 year'),
 lastupdated = (lastupdated + interval '1 year');
 
--- Replace first digit in invalid uid with letter a
+-- (Write) Replace first digit in invalid uid with letter a
 
 update organisationunit set uid = regexp_replace(uid,'\d','a') where uid SIMILAR TO '[0-9]%';
+
+-- (Write) Delete validation rules and clean up expressions
+
+delete from validationrule where name = 'abc';
+delete from expressiondataelement where expressionid not in (
+  select leftexpressionid from validationrule
+  union all
+  select rightexpressionid from validationrule
+);
+delete from expression where expressionid not in (
+  select leftexpressionid from validationrule
+  union all
+  select rightexpressionid from validationrule
+);
 
 -- (Write) Insert random org unit codes
 

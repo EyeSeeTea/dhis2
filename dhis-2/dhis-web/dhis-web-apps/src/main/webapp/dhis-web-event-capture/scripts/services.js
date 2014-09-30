@@ -249,22 +249,32 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                                             ' ng-required="programStageDataElements.' + deId + '.compulsory">';
                         }
                         if(programStageDataElements[deId].dataElement.type == "string"){
-                            newInputField = '<input type="text" ' +
+                            if(programStageDataElements[deId].dataElement.optionSet){
+                        		newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
                                             ' ng-required="programStageDataElements.' + deId + '.compulsory"' +
                                             ' typeahead="option.code as option.name for option in programStageDataElements.'+deId+'.dataElement.optionSet.options | filter:$viewValue | limitTo:20"' +
                                             ' typeahead-open-on-focus ng-required="programStageDataElements.'+deId+'.compulsory">';
+                        	}
+                        	else{
+                        		newInputField = '<input type="text" ' +
+                                            this.getAttributesAsString(attributes) +
+                                            ' ng-model="currentEvent.' + deId + '" ' +
+                                            ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
+                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">';
+                        	}
                         }
                         if(programStageDataElements[deId].dataElement.type == "bool"){
                             newInputField = '<select ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-required="programStageDataElements.' + deId + '.compulsory">' + 
-                                            'option value="">{{\'please_select\'| translate}}</option>' +
-                                            '<option value="0">{{\'no\'| translate}}</option>' + 
-                                            '<option value="1">{{\'yes\'| translate}}</option>';
+                                            '<option value="">{{\'please_select\'| translate}}</option>' +
+                                            '<option value="false">{{\'no\'| translate}}</option>' + 
+                                            '<option value="true">{{\'yes\'| translate}}</option>' +
+                                            '</select>';
                         }
                         if(programStageDataElements[deId].dataElement.type == "date"){
                             newInputField = '<input type="text" ' +

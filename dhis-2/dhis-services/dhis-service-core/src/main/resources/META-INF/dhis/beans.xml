@@ -351,16 +351,18 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.option.OptionStore" class="org.hisp.dhis.option.hibernate.HibernateOptionStore">
+  <bean id="org.hisp.dhis.option.OptionSetStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
     <property name="clazz" value="org.hisp.dhis.option.OptionSet" />
     <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
-  
-   <bean id="org.hisp.dhis.option.OptionValueStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
-    <property name="clazz" value="org.hisp.dhis.option.Option" />
-    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
   </bean>
 
+  <bean id="org.hisp.dhis.option.OptionStore" class="org.hisp.dhis.option.hibernate.HibernateOptionStore">
+    <property name="clazz" value="org.hisp.dhis.option.Option" />
+    <property name="sessionFactory" ref="sessionFactory" />
+    <property name="cacheable" value="true" />
+  </bean>
+  
   <bean id="org.hisp.dhis.mapping.MapStore" class="org.hisp.dhis.mapping.hibernate.HibernateMapStore">
     <property name="clazz" value="org.hisp.dhis.mapping.Map" />
     <property name="sessionFactory" ref="sessionFactory" />
@@ -513,7 +515,6 @@
     <property name="validationRuleStore" ref="org.hisp.dhis.validation.ValidationRuleStore" />
     <property name="validationRuleGroupStore" ref="org.hisp.dhis.validation.ValidationRuleGroupStore" />
     <property name="expressionService" ref="org.hisp.dhis.expression.ExpressionService" />
-    <property name="dataEntryFormService" ref="org.hisp.dhis.dataentryform.DataEntryFormService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataValueService" ref="org.hisp.dhis.datavalue.DataValueService" />
@@ -681,8 +682,8 @@
   </bean>
 
   <bean id="org.hisp.dhis.option.OptionService" class="org.hisp.dhis.option.DefaultOptionService">
+    <property name="optionSetStore" ref="org.hisp.dhis.option.OptionSetStore" />
     <property name="optionStore" ref="org.hisp.dhis.option.OptionStore" />
-    <property name="optionValueStore" ref="org.hisp.dhis.option.OptionValueStore" />
     <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
   </bean>
 
@@ -764,6 +765,7 @@
         <value>south_africa</value>
         <value>south_africa_department_of_health</value>
         <value>sri_lanka</value>
+		<value>sudan</value>
         <value>swaziland</value>
         <value>tajikistan</value>
         <value>tanzania</value>
@@ -905,6 +907,7 @@
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="smsMessageSender" ref="org.hisp.dhis.sms.SmsMessageSender" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
   </bean>
 
   <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender">

@@ -40,6 +40,8 @@ import java.util.Map;
  */
 public class NameableObjectUtils
 {
+    public static final String NULL_REPLACEMENT = "[n/a]";
+    
     /**
      * Returns a list of NameableObjects.
      *
@@ -115,14 +117,21 @@ public class NameableObjectUtils
      * the value of each list item.
      * 
      * @param values the list of object values.
+     * @param naForNull indicates whether a [n/a] string should be used as
+     *        replacement for null values.
      * @return a list of BaseNameableObejcts.
      */
-    public static List<NameableObject> getNameableObjects( Collection<Object> values )
+    public static List<NameableObject> getNameableObjects( Collection<?> values, boolean naForNull )
     {
         List<NameableObject> objects = new ArrayList<>();
         
         for ( Object value : values )
         {
+            if ( value == null && naForNull )
+            {
+                value = NULL_REPLACEMENT;
+            }
+            
             if ( value != null )
             {
                 String val = String.valueOf( value );
@@ -172,6 +181,28 @@ public class NameableObjectUtils
             for ( NameableObject object : objects )
             {
                 map.put( object.getUid(), object );
+            }
+        }
+
+        return map;
+    }
+
+    /**
+     * Returns a mapping between the uid and the short name of the given nameable
+     * objects.
+     *
+     * @param objects the v objects.
+     * @return mapping between the uid and the short name of the given objects.
+     */
+    public static Map<String, String> getUidShortNameMap( Collection<? extends NameableObject> objects )
+    {
+        Map<String, String> map = new HashMap<>();
+
+        if ( objects != null )
+        {
+            for ( NameableObject object : objects )
+            {
+                map.put( object.getUid(), object.getDisplayShortName() );
             }
         }
 

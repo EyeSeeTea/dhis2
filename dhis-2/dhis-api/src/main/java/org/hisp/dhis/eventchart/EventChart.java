@@ -134,7 +134,7 @@ public class EventChart
         DimensionalObject object = getDimensionalObject( series, relativePeriodDate, user, true,
             organisationUnitsAtLevel, organisationUnitsInGroups, format );
 
-        DimensionalObjectUtils.setDimensionItemsForFilters( object, dataItemGrid );
+        DimensionalObjectUtils.setDimensionItemsForFilters( object, dataItemGrid, true );
         
         return object != null ? object.getItems() : null;
     }
@@ -146,7 +146,7 @@ public class EventChart
         DimensionalObject object = getDimensionalObject( category, relativePeriodDate, user, true,
             organisationUnitsAtLevel, organisationUnitsInGroups, format );
 
-        DimensionalObjectUtils.setDimensionItemsForFilters( object, dataItemGrid );
+        DimensionalObjectUtils.setDimensionItemsForFilters( object, dataItemGrid, true );
         
         return object != null ? object.getItems() : null;
     }
@@ -217,7 +217,7 @@ public class EventChart
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "columnDimensions", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "column", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "columnDimension", namespace = DxfNamespaces.DXF_2_0 )
     public List<String> getColumnDimensions()
     {
         return columnDimensions;
@@ -231,7 +231,7 @@ public class EventChart
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "rowDimensions", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "row", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "rowDimension", namespace = DxfNamespaces.DXF_2_0 )
     public List<String> getRowDimensions()
     {
         return rowDimensions;

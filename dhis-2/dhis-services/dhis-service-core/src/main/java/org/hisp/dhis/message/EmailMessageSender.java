@@ -28,6 +28,7 @@ package org.hisp.dhis.message;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 import static org.hisp.dhis.user.UserSettingService.KEY_MESSAGE_EMAIL_NOTIFICATION;
 
 import java.util.Set;
@@ -45,8 +46,6 @@ import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.scheduling.annotation.Async;
-
-import static org.apache.commons.lang.StringUtils.defaultIfEmpty;
 
 /**
  * @author Lars Helge Overland
@@ -163,7 +162,7 @@ public class EmailMessageSender
         email.setHostName( hostName );
         email.setFrom( defaultIfEmpty( sender, FROM_ADDRESS ), FROM_NAME );
         email.setSmtpPort( port );
-        email.setTLS( tls );
+        email.setStartTLSEnabled( tls );
         
         if ( username != null && password != null )
         {

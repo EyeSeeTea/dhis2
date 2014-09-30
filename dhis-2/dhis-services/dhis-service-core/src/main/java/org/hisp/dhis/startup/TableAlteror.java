@@ -128,6 +128,7 @@ public class TableAlteror
         executeSql( "DROP TABLE categoryoptioncombousergroupaccesses" );
         executeSql( "DROP TABLE validationrulegroupuserrolestoalert" );
         executeSql( "DROP TABLE expressionoptioncombo" );
+        executeSql( "DROP TABLE orgunitgroupdatasets" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
@@ -161,10 +162,6 @@ public class TableAlteror
         // remove relative period type
         executeSql( "DELETE FROM period WHERE periodtypeid=(select periodtypeid from periodtype where name in ( 'Survey', 'OnChange', 'Relative' ))" );
         executeSql( "DELETE FROM periodtype WHERE name in ( 'Survey', 'OnChange', 'Relative' )" );
-
-        // upgrade report table totals
-        executeSql( "UPDATE reporttable SET rowtotals = totals, coltotals = totals" );
-        executeSql( "ALTER TABLE reporttable DROP COLUMN totals" );
 
         // mapping
         executeSql( "DROP TABLE maporganisationunitrelation" );
@@ -430,6 +427,8 @@ public class TableAlteror
         executeSql( "update eventchart set regression = false where regression is null" );
         executeSql( "update eventchart set hidetitle = false where hidetitle is null" );
         executeSql( "update eventchart set hidesubtitle = false where hidesubtitle is null" );
+        executeSql( "update reporttable set showdimensionlabels = false where showdimensionlabels is null" );
+        executeSql( "update eventreport set showdimensionlabels = false where showdimensionlabels is null" );
 
         // move timelydays from system setting => dataset property
         executeSql( "update dataset set timelydays = 15 where timelydays is null" );
@@ -459,7 +458,6 @@ public class TableAlteror
         executeSql( "update reporttable set userorganisationunit = false where userorganisationunit is null" );
         executeSql( "update reporttable set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update reporttable set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
-        executeSql( "update reporttable set totals = true where totals is null" );
         executeSql( "update reporttable set subtotals = true where subtotals is null" );
         executeSql( "update reporttable set hideemptyrows = false where hideemptyrows is null" );
         executeSql( "update reporttable set displaydensity = 'normal' where displaydensity is null" );
@@ -469,6 +467,14 @@ public class TableAlteror
         executeSql( "update reporttable set toplimit = 0 where toplimit is null" );
         executeSql( "update reporttable set showhierarchy = false where showhierarchy is null" );
         executeSql( "update reporttable set aggregationtype = 'default' where aggregationtype is null" );
+
+        // reporttable col/rowtotals = keep existing || copy from totals || true
+        executeSql( "update reporttable set totals = true where totals is null" );
+        executeSql( "update reporttable set coltotals = totals where coltotals is null" );
+        executeSql( "update reporttable set coltotals = true where coltotals is null" );
+        executeSql( "update reporttable set rowtotals = totals where rowtotals is null" );
+        executeSql( "update reporttable set rowtotals = true where rowtotals is null" );        
+        executeSql( "alter table reporttable drop column totals" );
 
         executeSql( "update chart set reportingmonth = false where reportingmonth is null" );
         executeSql( "update chart set reportingbimonth = false where reportingbimonth is null" );
@@ -492,9 +498,17 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
-
+        
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
+
+        // eventreport col/rowtotals = keep existing || copy from totals || true
+        executeSql( "update eventreport set totals = true where totals is null" );
+        executeSql( "update eventreport set coltotals = totals where coltotals is null" );
+        executeSql( "update eventreport set coltotals = true where coltotals is null" );
+        executeSql( "update eventreport set rowtotals = totals where rowtotals is null" );
+        executeSql( "update eventreport set rowtotals = true where rowtotals is null" );        
+        executeSql( "alter table eventreport drop column totals" );
 
         // Move chart filters to chart_filters table
 
@@ -722,7 +736,23 @@ public class TableAlteror
 
         // validation rule group, new column alertbyorgunits
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
+        
+        executeSql( "update expression set missingvaluestrategy = 'SKIP_IF_ANY_VALUE_MISSING' where nullifblank = true or nullifblank is null" );
+        executeSql( "update expression set missingvaluestrategy = 'NEVER_SKIP' where nullifblank = false" );
+        executeSql( "alter table expression alter column missingvaluestrategy set not null" );
+        executeSql( "alter table expression drop column nullifblank" );
 
+        executeSql( "alter table dataelementcategoryoption alter column startdate type date" );
+        executeSql( "alter table dataelementcategoryoption alter column enddate type date" );
+        
+        executeSql( "alter table dataelement drop column sortorder" );
+        executeSql( "alter table indicator drop column sortorder" );
+        executeSql( "alter table dataset drop column sortorder" );
+
+        executeSql( "alter table datavalue alter column value type varchar(50000)" );
+        executeSql( "alter table datavalue alter column comment type varchar(50000)" );
+        executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
+        
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
@@ -1174,10 +1204,6 @@ public class TableAlteror
         if ( result != -1 )
         {
             executeSql( "drop table optionsetmembers" );
-        }
-        else
-        {
-            log.info( "Updated optionvalue table, SQL: " + sql );
         }
     }
 }

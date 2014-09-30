@@ -80,7 +80,6 @@ function Selection()
     var autoSelectRoot = true;
     var realRoot = true;
     var includeChildren = false;
-    var blockedLevels = [];
 
     this.setListenerFunction = function( listenerFunction_, skipInitialCall ) {
         listenerFunction = listenerFunction_;
@@ -90,32 +89,6 @@ function Selection()
                 selection.responseReceived();
             } );
         }
-    };
-
-    this.addBlockedLevel = function(level) {
-        if( $.isArray(level) ) {
-            $.each(level, function(idx, item) {
-                blockedLevels.push(item);
-            });
-        } else {
-            blockedLevels.push(level);
-        }
-
-        this.updateBlockedLevels();
-    };
-
-    this.getBlockedLevels = function() {
-        return blockedLevels;
-    };
-
-    this.updateBlockedLevels = function() {
-        $('#orgUnitTree').find('a').css('color', 'black');
-
-        $.each(blockedLevels, function( idx, item ) {
-            $('#orgUnitTree li[level=' + item + '] > a').css({
-                cursor: 'not-allowed'
-            }).removeAttr('href');
-        })
     };
 
     this.setMultipleSelectionAllowed = function( allowed ) {
@@ -151,14 +124,14 @@ function Selection()
     };
 
     this.isSelected = function() {
-    	var ou = selection.getSelected();    	
+    	var ou = selection.getSelected();
     	return ou && ou.length > 0;
     };
-    
+
     this.setSelected = function( selected ) {
         sessionStorage[ OU_SELECTED_KEY ] = JSON.stringify( selected );
     };
-    
+
     this.selectedExists = function() {
         return sessionStorage[ OU_SELECTED_KEY ] != null;
     };
@@ -283,6 +256,20 @@ function Selection()
             type: 'POST',
             dataType: format
         } );
+    };
+
+    this.busy = function( busy ) {
+        if( busy ) {
+            $("#orgUnitTree").css("cursor", "wait")
+                .find("a").css("cursor", "wait");
+        } else {
+            $("#orgUnitTree").css("cursor", "auto")
+                .find("a").css("cursor", "auto");
+        }
+    };
+
+    this.isBusy = function() {
+        return $("#orgUnitTree").css("cursor") == "wait";
     };
 
     this.load = function ()
@@ -411,23 +398,45 @@ function Selection()
                 subtree.reloadTree();
             } );
         } else {
-            $.post( organisationUnitTreePath + "clearselected.action", function() {
+            selection.busy( true );
+
+            $.ajax( {
+                url: organisationUnitTreePath + "clearselected.action",
+                type: 'POST'
+            }).done(function() {
                 var selected = selection.getSelected();
 
                 if( multipleSelectionAllowed ) {
+                    var q = '';
+
                     $.each( selected, function( i, item ) {
-                        $.post( organisationUnitTreePath + "addorgunit.action", {
-                            id: item
-                        } ).complete( fn );
-                    } );
+                        q += "id=" + item;
+
+                        if( i < (selected.length - 1) ) {
+                            q += '&';
+                        }
+                    });
+
+                    $.ajax({
+                        url: organisationUnitTreePath + "addorgunit.action",
+                        data: q,
+                        type: 'POST'
+                    } ).complete( function() {
+                        selection.busy( false );
+                    });
                 } else {
                     selected = $.isArray( selected ) ? selected[0] : selected;
 
                     $.post( organisationUnitTreePath + "setorgunit.action", {
                         id: selected
-                    } ).complete( fn );
+                    } ).complete( function() {
+                        selection.busy( false );
+                        fn();
+                    } );
                 }
-            } );
+            }).always(function() {
+                selection.busy( false );
+            });
         }
     };
 
@@ -443,6 +452,10 @@ function Selection()
     };
 
     this.select = function( unitId ) {
+        if( selection.isBusy() ) {
+            return;
+        }
+
         var $linkTag = $( "#" + getTagId( unitId ) ).find( "a" ).eq( 0 );
 
         if( $linkTag.hasClass( "selected" ) && ( unselectAllowed || rootUnselectAllowed ) ) {
@@ -478,9 +491,14 @@ function Selection()
                 selection.clearSelected();
             }
 
+            selection.busy( true );
+
             $.post( organisationUnitTreePath + "removeorgunit.action", {
                 id: unitId
-            } ).complete( this.responseReceived );
+            } ).complete( function() {
+                selection.busy( false );
+                selection.responseReceived();
+            });
 
             $linkTag.removeClass( "selected" );
         } else {
@@ -494,15 +512,22 @@ function Selection()
                 selected.push( unitId );
                 selection.setSelected( selected );
 
+                selection.busy( true );
+
                 $.post( organisationUnitTreePath + "addorgunit.action", {
                     id: unitId
-                } ).complete( this.responseReceived );
+                } ).complete( function() {
+                    selection.busy( false );
+                    selection.responseReceived();
+                });
 
                 $linkTag.addClass( "selected" );
             }
             else
             {
                 selection.setSelected( unitId );
+
+                selection.busy( true );
 
                 $.ajax( {
                     url:organisationUnitTreePath + "setorgunit.action",
@@ -511,7 +536,10 @@ function Selection()
                     },
                     type:'POST',
                     timeout:10000,
-                    complete:this.responseReceived
+                    complete: function() {
+                        selection.busy( false );
+                        selection.responseReceived();
+                    }
                 } );
 
                 $( "#orgUnitTree" ).find( "a" ).removeClass( "selected" );
@@ -563,7 +591,7 @@ function Selection()
 
     this.scrollToSelected = function() {
     	var ou = selection.getSelected();
-    	
+
     	if ( ou && ou.length ) {
     		$( "#orgUnitTree" ).scrollTop( 0 );
     		var tagId = "#" + getTagId( ou[0] );
@@ -573,7 +601,7 @@ function Selection()
     		$( "#orgUnitTree" ).animate( { scrollTop: offset }, 300 );
     	}
     };
-    
+
     this.findByName = function() {
         var name = $( '#searchField' ).val();
         var match;
@@ -617,32 +645,13 @@ function Selection()
             } );
         }
     };
-    
+
     this.enable = function() {
         $( "#orgUnitTree" ).show();
     };
 
-    this.unblock = function() {
-        $( "#orgUnitTree" ).unblock();
-    };
-
     this.disable = function() {
         $( "#orgUnitTree" ).hide();
-    };
-
-    this.block = function( message ) {
-        if( message === undefined ) {
-            $( "#orgUnitTree" ).block( {message: null} );
-        }
-        else {
-            $( "#orgUnitTree" ).block( {
-                message: message,
-                css: {
-                    border: '1px solid black',
-                    margin: '4px 10px'
-                }
-            } );
-        }
     };
 }
 
@@ -735,8 +744,6 @@ function Subtree() {
         expandTreeAtOrgUnits( selected );
 
         selectOrgUnits( selected );
-
-        selection.updateBlockedLevels();
     };
 
     // force reload
@@ -817,7 +824,6 @@ function Subtree() {
         if( 'undefined' !== typeof organisationUnits[parent.c[0]] ) {
             createChildren( parentTag, parent );
             def.resolve();
-            selection.updateBlockedLevels();
         }
         else {
             selection.getOrganisationUnit( parent.c[0] ).done(function(item) {
@@ -825,13 +831,11 @@ function Subtree() {
                     $.extend( organisationUnits, item );
                     createChildren( parentTag, parent );
                     def.resolve();
-                    selection.updateBlockedLevels();
                 } else {
                     subtree.getChildren( parent.id ).done( function() {
                         createChildren( parentTag, parent );
                         def.resolve();
                     }).always(function() {
-                        selection.updateBlockedLevels();
                     });
                 }
             });
