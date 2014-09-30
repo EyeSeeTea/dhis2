@@ -5,7 +5,6 @@
 
   <bean id="org.hisp.dhis.dxf2.gml.GmlImportService" class="org.hisp.dhis.dxf2.gml.DefaultGmlImportService">
     <property name="renderService" ref="org.hisp.dhis.dxf2.render.RenderService" />
-    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
   </bean>
 
   <bean id="org.hisp.dhis.dxf2.csv.CsvImportService" class="org.hisp.dhis.dxf2.csv.DefaultCsvImportService" />

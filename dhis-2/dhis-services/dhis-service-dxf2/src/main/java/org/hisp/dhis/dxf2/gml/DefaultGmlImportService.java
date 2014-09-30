@@ -30,8 +30,6 @@ package org.hisp.dhis.dxf2.gml;
 
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.render.RenderService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -41,9 +39,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -64,48 +59,15 @@ public class DefaultGmlImportService
         this.renderService = renderService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
     @Override
     public MetaData fromGml( InputStream input )
-        throws Exception
+        throws IOException, TransformerException
     {
-        MetaData rawMetaData = renderService.fromXml( transformGml( input ), MetaData.class );
-        MetaData resultMetaData = new MetaData();
-
-        Map<String, OrganisationUnit> orgUnitMap = new HashMap<>();
-
-        for ( OrganisationUnit orgUnit : rawMetaData.getOrganisationUnits() )
-        {
-            orgUnitMap.put( orgUnit.getName(), orgUnit );
-        }
-
-        Collection<OrganisationUnit> fetchedUnits = organisationUnitService.getOrganisationUnitsByNames( orgUnitMap.keySet() );
-
-        for( OrganisationUnit o : fetchedUnits )
-        {
-            // TODO Fix this.
-            System.out.println( o.getName() + " " + o.getUid() );
-        }
-
-        for ( OrganisationUnit unit : fetchedUnits )
-        {
-            OrganisationUnit importedUnit = orgUnitMap.get( unit.getName() );
-            importedUnit.mergeWith( unit );
-
-            resultMetaData.getOrganisationUnits().add( importedUnit );
-        }
-
-        return resultMetaData;
+        return renderService.fromXml( transformGml( input ), MetaData.class );
     }
 
     // -------------------------------------------------------------------------

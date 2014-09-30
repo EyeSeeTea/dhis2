@@ -30,10 +30,13 @@ package org.hisp.dhis.importexport.action.util;
 
 import com.ibatis.common.logging.Log;
 import com.ibatis.common.logging.LogFactory;
+import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.InputStream;
@@ -78,6 +81,7 @@ public class ImportMetaDataGmlTask
     {
         MetaData metaData;
 
+        //importOptions.setImportStrategy( "UPDATE" );
         try
         {
             metaData = gmlImportService.fromGml( inputStream );
