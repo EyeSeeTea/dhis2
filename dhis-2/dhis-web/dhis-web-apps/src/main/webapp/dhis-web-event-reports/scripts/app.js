@@ -599,7 +599,220 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
-	}());
+
+		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
+			extend: 'Ext.container.Container',
+			alias: 'widget.organisationunitgroupsetpanel',
+			layout: 'column',
+            bodyStyle: 'border:0 none',
+            style: 'margin: ' + margin,
+            getDimension: function() {
+                return this.valueCmp.getValue().length ? {
+                    dimension: this.groupSet.id,
+                    items: this.valueCmp.getValue()
+                } : null;
+            },
+            setDimension: function(dim) {
+                if (dim && dim.items && dim.items.length) {
+                    this.searchStore.removeAll();
+                    this.searchCmp.clearValue();
+                    this.valueStore.add(dim.items);
+                }
+            },
+            initComponent: function() {
+                var container = this;
+
+                this.nameCmp = Ext.create('Ext.form.Label', {
+                    text: this.dataElement.name,
+                    width: nameCmpWidth,
+                    style: 'padding:' + namePadding
+                });
+
+                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
+                    valueField: 'id',
+                    displayField: 'name',
+                    queryMode: 'local',
+                    editable: false,
+                    style: 'margin-bottom:0',
+                    width: operatorCmpWidth,
+                    value: 'IN',
+                    store: {
+                        fields: ['id', 'name'],
+                        data: [
+                            {id: 'IN', name: 'One of'}
+                        ]
+                    }
+                });
+
+                this.searchStore = Ext.create('Ext.data.Store', {
+					fields: ['code', 'name'],
+					data: [],
+					loadOptionSet: function(optionSetId, key, pageSize) {
+						var store = this,
+							params = {};
+
+                        optionSetId = optionSetId || container.dataElement.optionSet.id;
+
+						if (key) {
+							params['key'] = key;
+						}
+                        
+						params['max'] = pageSize || 15;
+
+						Ext.Ajax.request({
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[code,name]',                            
+							//url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + groupSetId + '.json?fields=organisationUnitGroups[id,' + gis.init.namePropertyUrl + ']',
+							params: params,
+							disableCaching: false,
+							success: function(r) {
+								var options = Ext.decode(r.responseText).options;
+                                    
+								store.removeAll();
+                                store.loadData(options);
+
+                                container.triggerCmp.storage = Ext.clone(options);
+							}
+						});
+					},
+                    listeners: {
+						datachanged: function(s) {
+							if (container.searchCmp && s.getRange().length) {
+								container.searchCmp.expand();
+							}
+						}
+					}
+				});
+
+                // function
+                this.filterSearchStore = function() {
+                    var selected = container.valueCmp.getValue();
+                    
+                    container.searchStore.clearFilter();
+
+                    container.searchStore.filterBy(function(record, id) {
+                        return !Ext.Array.contains(selected, record.data.id);
+                    });
+                };                    
+
+                this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    width: 62,
+                    style: 'margin-bottom:0',
+                    emptyText: 'Search..',
+                    valueField: 'code',
+                    displayField: 'name',
+                    hideTrigger: true,
+                    delimiter: '; ',
+                    enableKeyEvents: true,
+                    queryMode: 'local',
+                    listConfig: {
+                        minWidth: 304
+                    },
+                    store: this.searchStore,
+                    listeners: {
+						keyup: {
+							fn: function() {
+								var value = this.getValue(),
+									optionSetId = container.dataElement.optionSet.id;
+
+								// search
+								container.searchStore.loadOptionSet(optionSetId, value);
+
+                                // trigger
+                                if (!value || (Ext.isString(value) && value.length === 1)) {
+									container.triggerCmp.setDisabled(!!value);
+								}
+							}
+						},
+						select: function() {
+                            var id = Ext.Array.from(this.getValue())[0];
+                            
+                            // value
+                            if (container.valueStore.findExact('code', id) === -1) {
+                                container.valueStore.add(container.searchStore.getAt(container.searchStore.findExact('code', id)).data);
+                            }
+
+                            // search
+							//this.clearValue();
+                            this.select([]);
+
+                            // filter
+                            container.filterSearchStore();
+
+                            // trigger
+                            container.triggerCmp.enable();
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
+					}
+                });
+
+                this.triggerCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-button-combotrigger',
+                    disabledCls: 'ns-button-combotrigger-disabled',
+                    width: 18,
+                    height: 22,
+                    storage: [],
+                    handler: function(b) {
+                        if (b.storage.length) {
+							container.searchStore.removeAll();
+                            container.searchStore.add(Ext.clone(b.storage));
+                        }
+                        else {
+                            container.searchStore.loadOptionSet();
+                        }
+                    }
+                });
+
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+                    listeners: {
+                        add: function() {
+                            container.valueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.valueCmp.select(this.getRange());
+                        }
+                    }
+                });                        
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    style: 'margin-bottom:0',
+					width: 226 + 20 + 20,
+                    valueField: 'code',
+                    displayField: 'name',
+                    emptyText: 'No selected items',
+                    editable: false,
+                    hideTrigger: true,
+                    store: container.valueStore,
+                    queryMode: 'local',
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+                            
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.valueStore.removeAt(container.valueStore.findExact('code', id));
+                            }
+                        }
+                    }
+                });
+
+                this.items = [
+                    this.nameCmp,
+                    this.operatorCmp,
+                    this.searchCmp,
+                    this.triggerCmp,
+                    this.valueCmp
+                ];
+
+                this.callParent();
+            }
+        });
+    }());
 
 		// toolbar
     (function() {
@@ -3642,7 +3855,7 @@ Ext.onReady( function() {
 
 			getUxType = function(element) {
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
-					return 'Ext.ux.panel.DataElementOptionContainer';
+					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
 
 				if (element.type === 'int' || element.type === 'number') {
