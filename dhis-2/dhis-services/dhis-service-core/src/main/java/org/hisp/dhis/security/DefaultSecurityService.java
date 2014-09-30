@@ -325,6 +325,13 @@ public class DefaultSecurityService
         return null; // Success;
     }
 
+    /**
+     * Verifies a user supplied restore code against the stored restore code.
+     * If the code cannot be verified a descriptive error string is returned.
+     * @param credentials the user credentials.
+     * @param code the user supplied code.
+     * @return null on success, a descriptive error string otherwise.
+     */
     private String verifyRestoreCode( UserCredentials credentials, String code )
     {
         String restoreCode = credentials.getRestoreCode();
