@@ -148,7 +148,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( filters.isEmpty() || DataElementOperand.class.isAssignableFrom( getEntityClass() ) )
         {
-            entityList = getEntityList( metaData, options );
+            entityList = getEntityList( metaData, options, filters );
         }
         else
         {
@@ -169,12 +169,19 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
             if ( name != null )
             {
-                int count = manager.getCountLikeName( getEntityClass(), name );
+                if ( options.hasPaging() )
+                {
+                    int count = manager.getCountLikeName( getEntityClass(), name );
 
-                Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-                metaData.setPager( pager );
+                    Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
+                    metaData.setPager( pager );
 
-                entityList = Lists.newArrayList( manager.getBetweenLikeName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
+                    entityList = Lists.newArrayList( manager.getBetweenLikeName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
+                }
+                else
+                {
+                    entityList = Lists.newArrayList( manager.getLikeName( getEntityClass(), name ) );
+                }
             }
             else
             {
@@ -190,7 +197,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                     }
                 }
 
-                entityList = getEntityList( metaData, options );
+                entityList = getEntityList( metaData, options, filters );
             }
         }
 
@@ -516,7 +523,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // Helpers
     //--------------------------------------------------------------------------
 
-    protected List<T> getEntityList( WebMetaData metaData, WebOptions options )
+    protected List<T> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
     {
         List<T> entityList;
 

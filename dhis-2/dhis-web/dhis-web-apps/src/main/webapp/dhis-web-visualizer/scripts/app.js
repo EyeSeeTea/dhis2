@@ -473,8 +473,8 @@ Ext.onReady( function() {
 			baseLineValue,
 			baseLineTitle,
 
-            rangeAxisMaxValue,
             rangeAxisMinValue,
+            rangeAxisMaxValue,
             rangeAxisSteps,
             rangeAxisDecimals,
 			rangeAxisTitle,
@@ -551,13 +551,13 @@ Ext.onReady( function() {
 			style: 'margin-bottom:4px'
 		});
 
-		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
+		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
 			labelWidth: 125
 		});
 
-		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
+		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
 			labelWidth: 125,
@@ -568,6 +568,7 @@ Ext.onReady( function() {
 			width: labelWidth + 5 + numberWidth,
 			height: 18,
 			fieldLabel: 'Range axis tick steps',
+			labelStyle: 'color:#333',
 			labelWidth: 125,
 			minValue: 1
 		});
@@ -576,6 +577,7 @@ Ext.onReady( function() {
 			width: labelWidth + 5 + numberWidth,
 			height: 18,
 			fieldLabel: 'Range axis decimals',
+			labelStyle: 'color:#333',
 			labelWidth: 125,
 			minValue: 0
 		});
@@ -709,7 +711,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.chart_options,
-			bodyStyle: 'background-color:#fff; padding:5px 5px 3px',
+			bodyStyle: 'background-color:#fff; padding:3px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -2289,6 +2291,7 @@ Ext.onReady( function() {
 				ns.app.chart = ns.core.web.chart.createChart(ns);
 
 				// update viewport
+                ns.app.centerRegion.update();
 				ns.app.centerRegion.removeAll();
 				ns.app.centerRegion.add(ns.app.chart);
 
@@ -2517,7 +2520,7 @@ Ext.onReady( function() {
             chartType: ns.core.conf.finals.chart.gauge,
             icon: 'images/gauge.png',
             name: ns.core.conf.finals.chart.gauge,
-            tooltipText: NS.i18n.gauge_chart,
+            tooltipText: NS.i18n.meter_chart,
             listeners: {
                 added: buttonAddedListener
             }
@@ -5729,7 +5732,24 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
-                }
+                },
+				afterrender: function(p) {
+					var liStyle = 'padding:3px 10px; color:#333',
+						html = '';
+
+					html += '<div style="padding:20px">';
+					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
+					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
+					html += '</div>';
+
+					p.update(html);
+				}
 			}
 		});
 
