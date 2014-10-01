@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
@@ -166,6 +165,8 @@ public class MetaDataImportAction
         ImportOptions importOptions = new ImportOptions();
         importOptions.setStrategy( strategy.toString() );
         importOptions.setDryRun( dryRun );
+
+        System.out.println( "dry run: " + dryRun );
 
         String userId = user != null ? user.getUid() : null;
 

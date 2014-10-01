@@ -82,7 +82,7 @@
 </xsl:template>
 
 <xsl:template match="/">
-  <dxf xmlns="http://dhis2.org/schema/dxf/2.0" minorVersion="2.0">
+  <dxf xmlns="http://dhis2.org/schema/dxf/2.0">
     <organisationUnits>
       <xsl:apply-templates select=".//gml:featureMember"/>
     </organisationUnits>

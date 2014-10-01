@@ -3,7 +3,7 @@
 <ul class="introList">
     #introListImgItem( "dxf2MetaDataImport.action?importFormat=xml" "xml_metadata_import" "import" )
     #introListImgItem( "dxf2MetaDataImport.action?importFormat=csv" "csv_metadata_import" "import" )
-    #introListImgItem( "dxf2MetaDataImport.action?importFormat=gml" "gml_metadata_import" "import" )
+    #introListImgItem( "gmlMetaDataImport.action" "gml_metadata_import" "import" )
     #introListImgItem( "displayImportDataValueForm.action?importFormat=xml" "xml_data_import" "import" )
     #introListImgItem( "displayImportDataValueForm.action?importFormat=csv" "csv_data_import" "import" )
     #introListImgItem( "displayImportDataValueForm.action?importFormat=pdf" "pdf_data_import" "import" )

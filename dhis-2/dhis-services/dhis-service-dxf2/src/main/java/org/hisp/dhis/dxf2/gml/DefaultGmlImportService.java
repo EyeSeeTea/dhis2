@@ -30,6 +30,9 @@ package org.hisp.dhis.dxf2.gml;
 
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.springframework.core.io.DefaultResourceLoader;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -67,7 +70,13 @@ public class DefaultGmlImportService
     public MetaData fromGml( InputStream input )
         throws IOException, TransformerException
     {
-        return renderService.fromXml( transformGml( input ), MetaData.class );
+        InputStream dxfStream = transformGml( input );
+
+        MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
+
+        dxfStream.close();
+
+        return metaData;
     }
 
     // -------------------------------------------------------------------------
@@ -77,13 +86,17 @@ public class DefaultGmlImportService
     private InputStream transformGml( InputStream input )
         throws IOException, TransformerException
     {
-        InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
+        //InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
+        ResourceLoader resourceLoader = new DefaultResourceLoader( );
+        InputStream s = resourceLoader.getClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
 
         StreamSource gml = new StreamSource( input ), xsl = new StreamSource( s );
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         TransformerFactory.newInstance().newTransformer( xsl ).transform( gml, new StreamResult( output ) );
+
+        s.close();
 
         return new ByteArrayInputStream( output.toByteArray() );
     }
