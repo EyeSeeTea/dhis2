@@ -381,12 +381,18 @@ Ext.onReady( function() {
             }
         });
 
-		Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
 			extend: 'Ext.container.Container',
-			alias: 'widget.dataelementoptionpanel',
+			alias: 'widget.organisationunitgroupsetpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
+            addCss: function() {
+                var css = '.optionselector .x-boundlist-selected { background-color: #fff; border-color: #fff } \n';
+                css += '.optionselector .x-boundlist-selected.x-boundlist-item-over { background-color: #ddd; border-color: #ddd } \n';
+
+                Ext.util.CSS.createStyleSheet(css);
+            },
             getRecord: function() {
 				var valueArray = this.valueCmp.getValue().split(';'),
 					record = {};
@@ -410,205 +416,10 @@ Ext.onReady( function() {
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
-            initComponent: function() {
-                var container = this;
-
-                this.nameCmp = Ext.create('Ext.form.Label', {
-                    text: this.dataElement.name,
-                    width: nameCmpWidth,
-                    style: 'padding:' + namePadding
-                });
-
-                this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
-                    valueField: 'id',
-                    displayField: 'name',
-                    queryMode: 'local',
-                    editable: false,
-                    style: 'margin-bottom:0',
-                    width: operatorCmpWidth,
-                    value: 'IN',
-                    store: {
-                        fields: ['id', 'name'],
-                        data: [
-                            {id: 'IN', name: 'One of'}
-                        ]
-                    }
-                });
-
-                this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
-					data: [],
-					loadOptionSet: function(optionSetId, key, pageSize) {
-						var store = this,
-							params = {};
-
-                        optionSetId = optionSetId || container.dataElement.optionSet.id;
-
-						if (key) {
-							params['key'] = key;
-						}
-                        
-						params['max'] = pageSize || 15;
-
-						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
-							params: params,
-							disableCaching: false,
-							success: function(r) {
-								var options = Ext.decode(r.responseText).options;
-
-                                for (var i = 0; i < options.length; i++) {
-                                    options[i].id = options[i].name;
-                                }
-                                    
-								store.removeAll();
-                                store.loadData(options);
-
-                                container.triggerCmp.storage = Ext.clone(options);
-							}
-						});
-					},
-                    listeners: {
-						datachanged: function(s) {
-							if (container.searchCmp && s.getRange().length) {
-								container.searchCmp.expand();
-							}
-						}
-					}
-				});
-
-                this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
-                    width: 62,
-                    style: 'margin-bottom:0',
-                    emptyText: 'Search..',
-                    valueField: 'id',
-                    displayField: 'name',
-                    hideTrigger: true,
-                    delimiter: '; ',
-                    enableKeyEvents: true,
-                    queryMode: 'local',
-                    listConfig: {
-                        minWidth: 304
-                    },
-                    store: this.valueStore,
-                    listeners: {
-						keyup: {
-							fn: function(cb) {
-								var value = cb.getValue(),
-									optionSetId = container.dataElement.optionSet.id;
-
-								// search
-								container.valueStore.loadOptionSet(optionSetId, value);
-
-                                // trigger
-                                if (!value || (Ext.isString(value) && value.length === 1)) {
-									container.triggerCmp.setDisabled(!!value);
-								}
-							}
-						},
-						select: function(cb) {
-
-                            // value
-							container.valueCmp.addOptionValue(cb.getValue());
-
-                            // search
-							cb.clearValue();
-
-                            // trigger
-                            container.triggerCmp.enable();
-						}
-					}
-                });
-
-                this.triggerCmp = Ext.create('Ext.button.Button', {
-                    cls: 'ns-button-combotrigger',
-                    disabledCls: 'ns-button-combotrigger-disabled',
-                    width: 18,
-                    height: 22,
-                    storage: [],
-                    handler: function(b) {
-                        if (b.storage.length) {
-							container.valueStore.removeAll();
-                            container.valueStore.add(Ext.clone(b.storage));
-                        }
-                        else {
-                            container.valueStore.loadOptionSet();
-                        }
-                    }
-                });
-
-                this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 226,
-                    style: 'margin-bottom:0',
-					addOptionValue: function(option) {
-						var value = this.getValue();
-
-						if (value) {
-							var a = value.split(';');
-
-							for (var i = 0; i < a.length; i++) {
-								a[i] = Ext.String.trim(a[i]);
-							};
-
-							a = Ext.Array.clean(a);
-
-							value = a.join('; ');
-							value += '; ';
-						}
-
-						this.setValue(value += option);
-					},
-                    setOptionValues: function(optionArray) {
-                        var value = '';
-
-                        for (var i = 0; i < optionArray.length; i++) {
-                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
-                        }
-
-                        this.setValue(value);
-                    }
-				});
-
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    style: 'font-weight:bold',
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
-                    }
-                });
-
-                this.items = [
-                    this.nameCmp,
-                    this.operatorCmp,
-                    this.searchCmp,
-                    this.triggerCmp,
-                    this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
-                ];
-
-                this.callParent();
-            }
-        });
-
-		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
-			extend: 'Ext.container.Container',
-			alias: 'widget.organisationunitgroupsetpanel',
-			layout: 'column',
-            bodyStyle: 'border:0 none',
-            style: 'margin: ' + margin,
             getDimension: function() {
+console.log(this.valueCmp.getValue());
                 return this.valueCmp.getValue().length ? {
-                    dimension: this.groupSet.id,
+                    dimension: this.dataElement.optionSet.id,
                     items: this.valueCmp.getValue()
                 } : null;
             },
@@ -620,7 +431,11 @@ Ext.onReady( function() {
                 }
             },
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    idProperty = 'code',
+                    nameProperty = 'name';
+
+                this.addCss();
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
@@ -645,7 +460,7 @@ Ext.onReady( function() {
                 });
 
                 this.searchStore = Ext.create('Ext.data.Store', {
-					fields: ['code', 'name'],
+					fields: [idProperty, 'name'],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
 						var store = this,
@@ -653,22 +468,28 @@ Ext.onReady( function() {
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
 
-						if (key) {
-							params['key'] = key;
-						}
-                        
+						//if (key) {
+							//params['key'] = key;
+						//}
+
 						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[code,name]',                            
-							//url: gis.init.contextPath + '/api/organisationUnitGroupSets/' + groupSetId + '.json?fields=organisationUnitGroups[id,' + gis.init.namePropertyUrl + ']',
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText).options;
-                                    
+								var options = Ext.decode(r.responseText).options,
+                                    data = [];
+
+                                for (var i = 0; i < options.length; i++) {
+                                    if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
+                                        data.push(options[i]);
+                                    }
+                                }
+
 								store.removeAll();
-                                store.loadData(options);
+                                store.loadData(data);
 
                                 container.triggerCmp.storage = Ext.clone(options);
 							}
@@ -686,21 +507,21 @@ Ext.onReady( function() {
                 // function
                 this.filterSearchStore = function() {
                     var selected = container.valueCmp.getValue();
-                    
+
                     container.searchStore.clearFilter();
 
-                    container.searchStore.filterBy(function(record, id) {
-                        return !Ext.Array.contains(selected, record.data.id);
+                    container.searchStore.filterBy(function(record) {
+                        return !Ext.Array.contains(selected, record.data[idProperty]);
                     });
-                };                    
+                };
 
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     width: 62,
                     style: 'margin-bottom:0',
                     emptyText: 'Search..',
-                    valueField: 'code',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     hideTrigger: true,
                     delimiter: '; ',
                     enableKeyEvents: true,
@@ -726,14 +547,13 @@ Ext.onReady( function() {
 						},
 						select: function() {
                             var id = Ext.Array.from(this.getValue())[0];
-                            
+
                             // value
-                            if (container.valueStore.findExact('code', id) === -1) {
-                                container.valueStore.add(container.searchStore.getAt(container.searchStore.findExact('code', id)).data);
+                            if (container.valueStore.findExact(idProperty, id) === -1) {
+                                container.valueStore.add(container.searchStore.getAt(container.searchStore.findExact(idProperty, id)).data);
                             }
 
                             // search
-							//this.clearValue();
                             this.select([]);
 
                             // filter
@@ -775,29 +595,49 @@ Ext.onReady( function() {
                             container.valueCmp.select(this.getRange());
                         }
                     }
-                });                        
+                });
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     style: 'margin-bottom:0',
-					width: 226 + 20 + 20,
-                    valueField: 'code',
-                    displayField: 'name',
+					width: 226,
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     emptyText: 'No selected items',
                     editable: false,
                     hideTrigger: true,
                     store: container.valueStore,
                     queryMode: 'local',
+                    listConfig: {
+                        cls: 'optionselector'
+                    },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
                             newVal = Ext.Array.from(newVal);
                             oldVal = Ext.Array.from(oldVal);
-                            
+
                             if (newVal.length < oldVal.length) {
                                 var id = Ext.Array.difference(oldVal, newVal)[0];
-                                container.valueStore.removeAt(container.valueStore.findExact('code', id));
+                                container.valueStore.removeAt(container.valueStore.findExact(idProperty, id));
                             }
                         }
+                    }
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    text: '+',
+                    width: buttonCmpWidth,
+                    style: 'font-weight:bold',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    text: 'x',
+                    width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
                     }
                 });
 
@@ -806,7 +646,9 @@ Ext.onReady( function() {
                     this.operatorCmp,
                     this.searchCmp,
                     this.triggerCmp,
-                    this.valueCmp
+                    this.valueCmp,
+                    this.addCmp,
+                    this.removeCmp
                 ];
 
                 this.callParent();
@@ -2364,7 +2206,7 @@ Ext.onReady( function() {
 				// sync
 				favorite.rowTotals = favorite.showRowTotals;
 				delete favorite.showRowTotals;
-                
+
 				favorite.colTotals = favorite.showColTotals;
 				delete favorite.showColTotals;
 
@@ -3695,7 +3537,7 @@ Ext.onReady( function() {
 			load = function(dataElements) {
                 var attributes = attributeStorage[programId],
                     data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
-                    
+
 				dataElementsByStageStore.loadData(data);
 
                 if (layout) {
@@ -3847,7 +3689,7 @@ Ext.onReady( function() {
         });
 
         addUxFromDataElement = function(element, index) {
-			var getUxType,            
+			var getUxType,
 				ux;
 
             element.type = element.type || element.valueType;
@@ -4131,7 +3973,7 @@ Ext.onReady( function() {
                 dateFormat: ns.core.init.systemInfo.dateFormat
             });
         };
-        
+
         startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
@@ -4993,7 +4835,7 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
-                    
+
                     Ext.defer(function() {
                         data.expand();
                     }, 20);
@@ -5631,7 +5473,7 @@ Ext.onReady( function() {
 
             // data items
             for (var i = 0, record; i < dataElementSelected.items.items.length; i++) {
-                record = dataElementSelected.items.items[i].getRecord();
+                record = dataElementSelected.items.items[i].getDimension();
 
                 map[record.dimension] = map[record.dimension] || [];
 
@@ -6365,11 +6207,11 @@ Ext.onReady( function() {
 					},
 					success: function(r) {
 						var config = Ext.decode(r.responseText);
-                        
+
 						// sync
 						config.showRowTotals = config.rowTotals;
 						delete config.rowTotals;
-                        
+
 						config.showColTotals = config.colTotals;
 						delete config.colTotals;
 
@@ -6409,14 +6251,14 @@ Ext.onReady( function() {
 
                 // timing
                 ns.app.dateData = new Date();
-                
+
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + paramString,
 					disableCaching: false,
 					scope: this,
 					failure: function(r) {
 						//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
-                        
+
 						web.mask.hide(ns.app.centerRegion);
 
                         alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
@@ -7027,7 +6869,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-        
+
         statusBar = Ext.create('Ext.ux.toolbar.StatusBar', {
             height: 27,
             listeners: {
