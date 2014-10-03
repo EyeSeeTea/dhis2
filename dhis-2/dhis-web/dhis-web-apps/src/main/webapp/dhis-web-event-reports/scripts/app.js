@@ -394,24 +394,20 @@ Ext.onReady( function() {
                 Ext.util.CSS.createStyleSheet(css);
             },
             getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';'),
-					record = {};
+				var valueString = this.valueCmp.getValue().join(';'),
+					record = {
+                        dimension: this.dataElement.id,
+                        name: this.dataElement.name
+                    };
 
-				for (var i = 0; i < valueArray.length; i++) {
-					valueArray[i] = Ext.String.trim(valueArray[i]);
-				}
+                if (valueString.length) {
+                    record.filter = 'IN:' + valueString;
+                }
 
-				record.dimension = this.dataElement.id;
-				record.name = this.dataElement.name;
-
-				if (Ext.Array.clean(valueArray).length) {
-					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
-				}
-
-				return record;
+                return record;
             },
             setRecord: function(record) {
-				if (Ext.isString(record.filter) && record.filter) {
+				if (Ext.isString(record.filter) && record.filter.length) {
 					var a = record.filter.split(':');
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
@@ -611,6 +607,21 @@ console.log(this.valueCmp.getValue());
                     listConfig: {
                         cls: 'optionselector'
                     },
+                    setOptionValues: function(optionArray) {
+                        var options = [];
+                        
+                        for (var i = 0; i < optionArray.length; i++) {
+                            options.push({
+                                code: optionArray[i],
+                                name: optionArray[i]
+                            });
+                        }
+
+                        container.valueStore.removeAll();
+                        container.valueStore.loadData(options);
+
+                        this.setValue(options);
+                    },                            
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
                             newVal = Ext.Array.from(newVal);
@@ -5473,7 +5484,7 @@ console.log(this.valueCmp.getValue());
 
             // data items
             for (var i = 0, record; i < dataElementSelected.items.items.length; i++) {
-                record = dataElementSelected.items.items[i].getDimension();
+                record = dataElementSelected.items.items[i].getRecord();
 
                 map[record.dimension] = map[record.dimension] || [];
 

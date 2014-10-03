@@ -1834,7 +1834,8 @@ Ext.onReady( function() {
                 // - parsefloat(string) is not a number
                 // - string is just starting with a number
                 // - string is a valid date
-				if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+				//if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+				if (!Ext.isNumber(n) || n != str) {
 					return 0;
 				}
 
@@ -2106,7 +2107,8 @@ Ext.onReady( function() {
                                 return str;
                             }
 
-                            if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+                            //if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+                            if (!Ext.isNumber(n) || n != str) {
                                 return str;
                             }
 
@@ -2115,17 +2117,6 @@ Ext.onReady( function() {
 
                         return str || '';
                     }
-
-                        //if (config.htmlValue && isValue) {
-                            //return Ext.isNumber(parseFloat(config.htmlValue)) ? parseFloat(config.htmlValue).toString() : config.htmlValue;
-                        //}
-
-                        //if (config.value && isValue) {
-                            //return Ext.isNumber(parseFloat(config.value)) ? parseFloat(config.value).toString() : config.value;
-                        //}
-
-                        //return config.htmlValue || '';
-                    //};
 
 					if (!Ext.isObject(config)) {
 						return '';
