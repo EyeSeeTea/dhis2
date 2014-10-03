@@ -31,6 +31,7 @@ package org.hisp.dhis.dataapproval.hibernate;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataapproval.DataApproval;
+import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalStore;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -99,24 +100,17 @@ public class HibernateDataApprovalStore
         delete( dataApproval );
     }
 
-    public DataApproval getDataApproval( DataSet dataSet, Period period, 
-        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo categoryOptionCombo )
+    public DataApproval getDataApproval( DataApprovalLevel dataApprovalLevel, DataSet dataSet, Period period,
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         Period storedPeriod = periodService.reloadPeriod( period );
 
         Criteria criteria = getCriteria();
+        criteria.add( Restrictions.eq( "dataApprovalLevel", dataApprovalLevel ) );
         criteria.add( Restrictions.eq( "dataSet", dataSet ) );
         criteria.add( Restrictions.eq( "period", storedPeriod ) );
         criteria.add( Restrictions.eq( "organisationUnit", organisationUnit ) );
-        
-        if ( categoryOptionCombo != null )
-        {
-            criteria.add( Restrictions.eq( "categoryOptionCombo", categoryOptionCombo ) );
-        }
-        else
-        {
-            criteria.add( Restrictions.isNull( "categoryOptionCombo" ) );
-        }
+        criteria.add( Restrictions.eq( "attributeOptionCombo", attributeOptionCombo ) );
 
         return (DataApproval) criteria.uniqueResult();
     }

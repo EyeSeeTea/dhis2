@@ -254,6 +254,11 @@ public class DefaultOrganisationUnitService
         return i18n( i18nService, organisationUnitStore.getRootOrganisationUnits());
     }
 
+    public int getLevelOfOrganisationUnit( OrganisationUnit unit )
+    {
+        return unit.getLevel() != 0 ? unit.getLevel() : getLevelOfOrganisationUnit( unit.getId() );
+    }
+
     public int getLevelOfOrganisationUnit( int id )
     {
         return getOrganisationUnit( id ).getOrganisationUnitLevel();

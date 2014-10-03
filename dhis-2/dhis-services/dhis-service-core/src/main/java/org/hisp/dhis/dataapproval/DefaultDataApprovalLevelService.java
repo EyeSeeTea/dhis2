@@ -329,21 +329,24 @@ public class DefaultDataApprovalLevelService
     {
         User user = currentUserService.getCurrentUser();
 
-        for ( OrganisationUnit ou : user.getOrganisationUnits() )
-        {
-            if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
-            {
-                return userApprovalLevel( ou );
-            }
-        }
-
-        if ( includeDataViewOrgUnits && user.getDataViewOrganisationUnits() != null )
+        if ( user != null )
         {
             for ( OrganisationUnit ou : user.getOrganisationUnits() )
             {
                 if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
                 {
                     return userApprovalLevel( ou );
+                }
+            }
+
+            if ( includeDataViewOrgUnits && user.getDataViewOrganisationUnits() != null )
+            {
+                for ( OrganisationUnit ou : user.getOrganisationUnits() )
+                {
+                    if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
+                    {
+                        return userApprovalLevel( ou );
+                    }
                 }
             }
         }

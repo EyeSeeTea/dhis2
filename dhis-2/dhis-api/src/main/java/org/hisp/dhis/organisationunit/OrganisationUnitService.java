@@ -217,6 +217,13 @@ public interface OrganisationUnitService
     int getLevelOfOrganisationUnit( int id );
 
     /**
+     * Returns the level of the organisation unit (whether loaded or not.)
+     *
+     * @return the level of the organisation unit with the given identifier.
+     */
+    int getLevelOfOrganisationUnit( OrganisationUnit unit );
+
+    /**
      * Returns all OrganisationUnits which are part of the subtree of the
      * OrganisationUnit with the given identifier and have no children.
      *

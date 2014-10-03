@@ -69,6 +69,10 @@ public class DataApprovalAggregator
      */
     static private final MapMap<DataApprovalState, DataApprovalState, DataApprovalState> transitionMap = asMapMap(
 
+            // -----------------------------------------------------------------
+            // State where data cannot be approved
+            // -----------------------------------------------------------------
+
             //
             // Data cannot be approved
             //
