@@ -394,16 +394,23 @@ Ext.onReady( function() {
                 Ext.util.CSS.createStyleSheet(css);
             },
             getRecord: function() {
-				var valueString = this.valueCmp.getValue().join(';'),
+                var items = this.valueCmp.getValue(),
 					record = {
                         dimension: this.dataElement.id,
                         name: this.dataElement.name
                     };
 
-                if (valueString.length) {
-                    record.filter = 'IN:' + valueString;
+                // array or object
+                for (var i = 0; i < items.length; i++) {
+                    if (Ext.isObject(items[i])) {
+                        items[i] = items[i].code;
+                    }
                 }
 
+                if (items.length) {
+                    record.filter = 'IN:' + items.join(';');
+                }
+                
                 return record;
             },
             setRecord: function(record) {
