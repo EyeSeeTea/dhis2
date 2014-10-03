@@ -419,20 +419,6 @@ Ext.onReady( function() {
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
-            getDimension: function() {
-console.log(this.valueCmp.getValue());
-                return this.valueCmp.getValue().length ? {
-                    dimension: this.dataElement.optionSet.id,
-                    items: this.valueCmp.getValue()
-                } : null;
-            },
-            setDimension: function(dim) {
-                if (dim && dim.items && dim.items.length) {
-                    this.searchStore.removeAll();
-                    this.searchCmp.clearValue();
-                    this.valueStore.add(dim.items);
-                }
-            },
             initComponent: function() {
                 var container = this,
                     idProperty = 'code',
@@ -672,6 +658,7 @@ console.log(this.valueCmp.getValue());
                 this.callParent();
             }
         });
+
     }());
 
 		// toolbar
