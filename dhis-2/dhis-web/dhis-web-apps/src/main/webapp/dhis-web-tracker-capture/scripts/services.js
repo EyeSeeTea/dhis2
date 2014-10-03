@@ -9,7 +9,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities','attributes','optionSets']
+        objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes','optionSets']
     });
     return{
         currentStore: store
@@ -251,7 +251,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };   
 })
 
-/* Service for getting tracked entity instances */
+/* Service for getting tracked entity */
 .factory('TEService', function(StorageService, $q, $rootScope) {
 
     return {
@@ -273,6 +273,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             StorageService.currentStore.open().done(function(){
                 StorageService.currentStore.get('trackedEntities', uid).done(function(te){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(te);
+                    });
+                });
+            });                        
+            return def.promise;            
+        }
+    };
+})
+
+/* Service for getting tracked entity Form */
+.factory('TEFormService', function(StorageService, $q, $rootScope) {
+
+    return {
+        getByProgram: function(programUid){            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('trackedEntityForms', programUid).done(function(te){                    
                     $rootScope.$apply(function(){
                         def.resolve(te);
                     });
@@ -1221,7 +1240,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                               name: programStage.name,
                               reportDateDescription: programStage.reportDateDescription,
                               status: 'SCHEDULED'};
-            dummyEvent.statusColor = 'alert alert-info';//'stage-on-time';
+            dummyEvent.statusColor = 'alert alert-warning';//'stage-on-time';
             if(moment(today).isAfter(dummyEvent.dueDate)){
                 dummyEvent.statusColor = 'alert alert-danger';//'stage-overdue';
             }
@@ -1239,13 +1258,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return 'alert alert-success';//'stage-completed';
             }
             else if(dhis2Event.status === 'SKIPPED'){
-                return 'alert alert-warning'; //'stage-skipped';
+                return 'alert alert-default'; //'stage-skipped';
             }
             else{                
-                if(moment(eventDate).isAfter(dhis2Event.dueDate)){
-                    return 'alert alert-danger';//'stage-overdue';
-                }                
-                return 'alert alert-info';//'stage-on-time';
+                if(dhis2Event.eventDate){
+                    return 'alert alert-info'; //'stage-executed';
+                }
+                else{
+                    if(moment(eventDate).isAfter(dhis2Event.dueDate)){
+                        return 'alert alert-danger';//'stage-overdue';
+                    }                
+                    return 'alert alert-warning';//'stage-on-time';
+                }               
             }            
         },
         getEventDueDate: function(programStage, enrollment){

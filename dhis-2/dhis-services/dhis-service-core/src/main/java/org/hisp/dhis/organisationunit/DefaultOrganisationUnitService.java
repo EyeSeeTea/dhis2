@@ -28,24 +28,8 @@ package org.hisp.dhis.organisationunit;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Maps;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.common.IdentifiableObjectUtils;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.hierarchy.HierarchyViolationException;
-import org.hisp.dhis.i18n.I18nService;
-import org.hisp.dhis.organisationunit.comparator.OrganisationUnitLevelComparator;
-import org.hisp.dhis.system.filter.OrganisationUnitPolygonCoveringCoordinateFilter;
-import org.hisp.dhis.system.util.ConversionUtils;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.system.util.GeoUtils;
-import org.hisp.dhis.system.util.ValidationUtils;
-import org.hisp.dhis.user.CurrentUserService;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.version.VersionService;
-import org.springframework.transaction.annotation.Transactional;
+import static org.hisp.dhis.i18n.I18nUtils.i18n;
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -59,7 +43,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hisp.dhis.i18n.I18nUtils.i18n;
+import org.apache.commons.collections.CollectionUtils;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
+import org.hisp.dhis.hierarchy.HierarchyViolationException;
+import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.organisationunit.comparator.OrganisationUnitLevelComparator;
+import org.hisp.dhis.system.filter.OrganisationUnitPolygonCoveringCoordinateFilter;
+import org.hisp.dhis.system.util.Filter;
+import org.hisp.dhis.system.util.FilterUtils;
+import org.hisp.dhis.system.util.GeoUtils;
+import org.hisp.dhis.system.util.ValidationUtils;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.version.VersionService;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -280,23 +279,33 @@ public class DefaultOrganisationUnitService
 
     public Collection<OrganisationUnit> getOrganisationUnitsWithChildren( Collection<String> parentUids )
     {
+        return getOrganisationUnitsWithChildren( parentUids, null );
+    }
+
+    public Collection<OrganisationUnit> getOrganisationUnitsWithChildren( Collection<String> parentUids, Integer maxLevels )
+    {
         Set<OrganisationUnit> units = new HashSet<>();
 
         for ( String uid : parentUids )
         {
-            units.addAll( getOrganisationUnitsWithChildren( uid ) );
+            units.addAll( getOrganisationUnitWithChildren( uid, maxLevels ) );
         }
 
         return units;
     }
 
-    public Collection<OrganisationUnit> getOrganisationUnitsWithChildren( String uid )
+    public Collection<OrganisationUnit> getOrganisationUnitWithChildren( String uid )
+    {
+        return getOrganisationUnitWithChildren( uid, null );
+    }
+
+    public Collection<OrganisationUnit> getOrganisationUnitWithChildren( String uid, Integer maxLevels )
     {
         OrganisationUnit unit = getOrganisationUnit( uid );
         
         int id = unit != null ? unit.getId() : -1;
         
-        return getOrganisationUnitWithChildren( id );
+        return getOrganisationUnitWithChildren( id, maxLevels );
     }
 
     public Collection<OrganisationUnit> getOrganisationUnitWithChildren( int id )
@@ -556,26 +565,12 @@ public class DefaultOrganisationUnitService
             : intersection;
     }
 
-    public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet()
+    public OrganisationUnitDataSetAssociationSet getOrganisationUnitDataSetAssociationSet( Integer maxLevels )
     {
         Map<String, Set<String>> associationSet = Maps.newHashMap( organisationUnitStore.getOrganisationUnitDataSetAssocationMap() );
-        Map<String, Set<String>> groupAssociationSet = organisationUnitStore.getOrganisationUnitGroupDataSetAssocationMap();
-
-        // merge maps
-        for ( String key : groupAssociationSet.keySet() )
-        {
-            if ( associationSet.containsKey( key ) )
-            {
-                associationSet.get( key ).addAll( groupAssociationSet.get( key ) );
-            }
-            else
-            {
-                associationSet.put( key, groupAssociationSet.get( key ) );
-            }
-        }
 
         filterUserDataSets( associationSet );
-        filterChildOrganisationUnits( associationSet );
+        filterChildOrganisationUnits( associationSet, maxLevels );
 
         OrganisationUnitDataSetAssociationSet set = new OrganisationUnitDataSetAssociationSet();
 
@@ -596,13 +591,18 @@ public class DefaultOrganisationUnitService
         return set;
     }
 
+    /**
+     * Retains only the data sets from the map which the current user has access to.
+     * 
+     * @param associationMap the associations between organisation unit and data sets.
+     */
     private void filterUserDataSets( Map<String, Set<String>> associationMap )
     {
         User currentUser = currentUserService.getCurrentUser();
 
         if ( currentUser != null && !currentUser.getUserCredentials().isSuper() )
         {
-            Collection<String> userDataSets = ConversionUtils.getUids( DataSet.class, currentUser.getUserCredentials().getAllDataSets() );
+            Collection<String> userDataSets = IdentifiableObjectUtils.getUids( currentUser.getUserCredentials().getAllDataSets() );
 
             for ( Set<String> dataSets : associationMap.values() )
             {
@@ -611,17 +611,24 @@ public class DefaultOrganisationUnitService
         }
     }
 
-    private void filterChildOrganisationUnits( Map<String, Set<String>> associationMap )
+    /**
+     * Retains only the organisation units in the sub-tree of the current user.
+     * 
+     * @param associationMap the associations between organisation unit and data sets.
+     * @param maxLevels the maximum number of levels to include relative to 
+     *        current user, inclusive.
+     */
+    private void filterChildOrganisationUnits( Map<String, Set<String>> associationMap, Integer maxLevels )
     {
         User currentUser = currentUserService.getCurrentUser();
 
-        if ( currentUser != null )
+        if ( currentUser != null && currentUser.getOrganisationUnits() != null )
         {
-            Collection<String> parentIds = ConversionUtils.getUids( OrganisationUnit.class,
-                currentUser.getOrganisationUnits() );
+            Collection<String> parentIds = getUids( currentUser.getOrganisationUnits() );
 
-            Collection<OrganisationUnit> organisationUnitsWithChildren = getOrganisationUnitsWithChildren( parentIds );
-            Collection<String> children = ConversionUtils.getUids( OrganisationUnit.class, organisationUnitsWithChildren );
+            Collection<OrganisationUnit> organisationUnitsWithChildren = getOrganisationUnitsWithChildren( parentIds, maxLevels );
+            
+            Collection<String> children = getUids( organisationUnitsWithChildren );
 
             associationMap.keySet().retainAll( children );
         }

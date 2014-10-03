@@ -28,7 +28,16 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Sets;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+import java.util.List;
+
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.acl.AccessStringHelper;
@@ -45,11 +54,7 @@ import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.GregorianCalendar;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import com.google.common.collect.Sets;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -172,17 +177,17 @@ public class IdentifiableObjectManagerTest
     @Test
     public void getAllEqualToNameIgnoreCase()
     {
-        OrganisationUnit organisationUnitA1 = createOrganisationUnit( 'A' );
-        organisationUnitA1.setCode( null );
-        identifiableObjectManager.save( organisationUnitA1 );
+        OrganisationUnit organisationUnitC1 = createOrganisationUnit( 'C' );
+        organisationUnitC1.setCode( null );
+        identifiableObjectManager.save( organisationUnitC1 );
 
-        OrganisationUnit organisationUnitA2 = createOrganisationUnit( 'B' );
-        organisationUnitA2.setName( "OrganisationUnitA" );
-        organisationUnitA2.setCode( null );
-        identifiableObjectManager.save( organisationUnitA2 );
+        OrganisationUnit organisationUnitC2 = createOrganisationUnit( 'D' );
+        organisationUnitC2.setName( "OrganisationUnitC" );
+        organisationUnitC2.setCode( null );
+        identifiableObjectManager.save( organisationUnitC2 );
 
-        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "OrganisationUnitA" ).size() );
-        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "organisationunita" ).size() );
+        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "OrganisationUnitC" ).size() );
+        assertEquals( 2, identifiableObjectManager.getAllByNameIgnoreCase( OrganisationUnit.class, "organisationunitc" ).size() );
     }
 
     @Test

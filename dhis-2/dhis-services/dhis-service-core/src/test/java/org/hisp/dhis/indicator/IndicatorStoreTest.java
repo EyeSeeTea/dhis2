@@ -31,6 +31,7 @@ package org.hisp.dhis.indicator;
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 
@@ -44,6 +45,7 @@ import static org.junit.Assert.*;
 public class IndicatorStoreTest
     extends DhisSpringTest
 {
+    @Autowired
     private IndicatorStore indicatorStore;
 
     private GenericIdentifiableObjectStore<IndicatorType> indicatorTypeStore;
@@ -56,11 +58,7 @@ public class IndicatorStoreTest
     public void setUpTest()
         throws Exception
     {
-        indicatorStore = (IndicatorStore) getBean( IndicatorStore.ID );
-
         indicatorTypeStore = (GenericIdentifiableObjectStore<IndicatorType>) getBean( "org.hisp.dhis.indicator.IndicatorTypeStore" );
-
-        indicatorService = (IndicatorService) getBean( IndicatorService.ID );
     }
 
     // -------------------------------------------------------------------------
@@ -234,22 +232,22 @@ public class IndicatorStoreTest
 
         Indicator indicatorA = createIndicator( 'A', type );
         Indicator indicatorB = createIndicator( 'B', type );
+        Indicator indicatorC = createIndicator( 'C', type );
 
         int idA = indicatorStore.save( indicatorA );
         int idB = indicatorStore.save( indicatorB );
+        int idC = indicatorStore.save( indicatorC );
 
         assertNotNull( indicatorStore.get( idA ) );
         assertNotNull( indicatorStore.get( idB ) );
+        assertNotNull( indicatorStore.get( idC ) );
 
         indicatorStore.delete( indicatorA );
+        indicatorStore.delete( indicatorC );
 
         assertNull( indicatorStore.get( idA ) );
         assertNotNull( indicatorStore.get( idB ) );
-
-        indicatorStore.delete( indicatorB );
-
-        assertNull( indicatorStore.get( idA ) );
-        assertNull( indicatorStore.get( idB ) );
+        assertNull( indicatorStore.get( idC ) );
     }
 
     @Test

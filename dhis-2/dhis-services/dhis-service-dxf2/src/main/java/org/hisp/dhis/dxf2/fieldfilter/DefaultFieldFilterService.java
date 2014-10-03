@@ -327,6 +327,20 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                 cleanupFields.add( fieldKey );
             }
+            else if ( ":persisted".equals( fieldKey ) )
+            {
+                List<Property> properties = schema.getProperties();
+
+                for ( Property property : properties )
+                {
+                    if ( property.isPersisted() )
+                    {
+                        fieldMap.put( property.key(), new FieldMap() );
+                    }
+                }
+
+                cleanupFields.add( fieldKey );
+            }
             else if ( fieldKey.startsWith( ":" ) )
             {
                 PresetProvider presetProvider = presets.get( fieldKey.substring( 1 ) );

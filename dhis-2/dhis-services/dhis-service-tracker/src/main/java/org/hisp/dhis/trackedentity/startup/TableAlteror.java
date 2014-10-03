@@ -257,8 +257,6 @@ public class TableAlteror
             + "where trackedentityattribute.mandatory is not null" );
         executeSql( "ALTER TABLE trackedentityattribute DROP COLUMN mandatory" );
 
-        executeSql( "update datavalue set storedby='aggregated_from_tracker' where storedby='DHIS-System'" );
-
         executeSql( "ALTER TABLE trackedentityattribute DROP COLUMN groupBy" );
 
         executeSql( "update trackedentityattribute set valuetype='string' where valuetype='combo' and optionsetid is null" );
@@ -278,10 +276,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE programstageinstance DROP COLUMN completed" );
 
         executeSql( "update program_attributes set mandatory = false where mandatory is null;" );
-
-        int attributeoptioncomboid = categoryService.getDefaultDataElementCategoryOptionCombo().getId();
-        executeSql( "update datavalue set attributeoptioncomboid=" + attributeoptioncomboid
-            + " where storedby='aggregated_from_tracker' or comment='aggregated_from_tracker'" );
 
         executeSql( "update trackedentityattribute set confidential = false where confidential is null;" );
 

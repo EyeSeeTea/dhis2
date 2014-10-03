@@ -49,11 +49,13 @@ import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
+import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.config.InclusionStrategy;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.ComplexNode;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.node.types.SimpleNode;
+import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -79,6 +81,7 @@ import java.io.InputStream;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -127,7 +130,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // GET
     //--------------------------------------------------------------------------
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping( method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectList(
         @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
     {
@@ -148,7 +151,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         if ( filters.isEmpty() || DataElementOperand.class.isAssignableFrom( getEntityClass() ) )
         {
-            entityList = getEntityList( metaData, options );
+            entityList = getEntityList( metaData, options, filters );
         }
         else
         {
@@ -197,7 +200,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                     }
                 }
 
-                entityList = getEntityList( metaData, options );
+                entityList = getEntityList( metaData, options, filters );
             }
         }
 
@@ -248,15 +251,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return rootNode;
     }
 
-    @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
-    public @ResponseBody RootNode getObjectProperty( @PathVariable( "uid" ) String uid, @PathVariable( "property" ) String property,
-        @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
-    {
-        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( property ) );
-    }
-
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public @ResponseBody RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
+    public @ResponseBody RootNode getObject(
+        @PathVariable( "uid" ) String pvUid,
+        @RequestParam Map<String, String> parameters,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
@@ -267,7 +265,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             fields.add( ":all" );
         }
 
-        return getObjectInternal( uid, parameters, filters, fields );
+        return getObjectInternal( pvUid, parameters, filters, fields );
+    }
+
+    @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
+    public @ResponseBody RootNode getObjectProperty(
+        @PathVariable( "uid" ) String uid,
+        @PathVariable( "property" ) String pvProperty,
+        @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
     }
 
     private RootNode getObjectInternal( String uid, Map<String, String> parameters,
@@ -328,7 +335,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // POST
     //--------------------------------------------------------------------------
 
-    @RequestMapping(method = RequestMethod.POST, consumes = { "application/xml", "text/xml" })
+    @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
     public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
@@ -353,7 +360,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         renderService.toXml( response.getOutputStream(), summary );
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
     public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
@@ -382,16 +389,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // PUT
     //--------------------------------------------------------------------------
 
-    @RequestMapping(value = "/{uid}", method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE })
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid, InputStream
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE } )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
         List<T> objects = getEntity( uid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
@@ -413,16 +420,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         renderService.toXml( response.getOutputStream(), summary );
     }
 
-    @RequestMapping(value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid, InputStream
+    @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
         List<T> objects = getEntity( uid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
@@ -448,16 +455,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // DELETE
     //--------------------------------------------------------------------------
 
-    @RequestMapping(value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseStatus(value = HttpStatus.NO_CONTENT)
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable("uid") String uid )
+    @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid )
         throws Exception
     {
         List<T> objects = getEntity( uid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
@@ -467,6 +474,165 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         manager.delete( objects.get( 0 ) );
+    }
+
+    //--------------------------------------------------------------------------
+    // Identifiable object collections add, delete
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "/{uid}/{property}/{itemId}", method = RequestMethod.GET )
+    public @ResponseBody RootNode getCollectionItem(
+        @PathVariable( "uid" ) String pvUid,
+        @PathVariable( "property" ) String pvProperty,
+        @PathVariable( "itemId" ) String pvItemId,
+        @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws Exception
+    {
+        RootNode rootNode = getObjectInternal( pvUid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
+
+        // TODO optimize this using field filter (collection filtering)
+        if ( !rootNode.getChildren().isEmpty() && rootNode.getChildren().get( 0 ).isCollection() )
+        {
+            for ( Node node : rootNode.getChildren().get( 0 ).getChildren() )
+            {
+                if ( node.isComplex() )
+                {
+                    for ( Node child : node.getChildren() )
+                    {
+                        if ( child.isSimple() && child.getName().equals( "id" ) )
+                        {
+                            if ( !((SimpleNode) child).getValue().equals( pvItemId ) )
+                            {
+                                rootNode.getChildren().get( 0 ).removeChild( node );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return rootNode;
+    }
+
+    @RequestMapping( value = "/{uid}/{property}/{itemId}", method = { RequestMethod.POST, RequestMethod.PUT } )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @SuppressWarnings( "unchecked" )
+    public void addCollectionItem(
+        @PathVariable( "uid" ) String pvUid,
+        @PathVariable( "property" ) String pvProperty,
+        @PathVariable( "itemId" ) String pvItemId, HttpServletResponse response ) throws Exception
+    {
+        List<T> objects = getEntity( pvUid );
+
+        if ( objects.isEmpty() )
+        {
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+        }
+
+        if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
+        {
+            ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+        }
+
+        Property property = getSchema().getPropertyMap().get( pvProperty );
+
+        if ( !property.isCollection() || !property.isIdentifiableObject() )
+        {
+            ContextUtils.conflictResponse( response, "Only adds within identifiable collection are allowed." );
+        }
+
+        if ( !property.isOwner() )
+        {
+            ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+        }
+
+        Collection<IdentifiableObject> identifiableObjects =
+            (Collection<IdentifiableObject>) property.getGetterMethod().invoke( objects.get( 0 ) );
+
+        IdentifiableObject candidate = manager.getNoAcl( (Class<? extends IdentifiableObject>) property.getItemKlass(), pvItemId );
+
+        if ( candidate == null )
+        {
+            ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+        }
+
+        // if it already contains this object, don't add it. It might be a list and not set, and we don't want duplicates.
+        if ( identifiableObjects.contains( candidate ) )
+        {
+            return; // nothing to do, just return with OK
+        }
+
+        identifiableObjects.add( candidate );
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
+        {
+            throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
+        }
+
+        manager.update( objects.get( 0 ) );
+    }
+
+    @RequestMapping( value = "/{uid}/{property}/{itemId}", method = RequestMethod.DELETE )
+    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @SuppressWarnings( "unchecked" )
+    public void deleteCollectionItem(
+        @PathVariable( "uid" ) String pvUid,
+        @PathVariable( "property" ) String pvProperty,
+        @PathVariable( "itemId" ) String pvItemId, HttpServletResponse response ) throws Exception
+    {
+        List<T> objects = getEntity( pvUid );
+
+        if ( objects.isEmpty() )
+        {
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+        }
+
+        if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
+        {
+            ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+        }
+
+        Property property = getSchema().getPropertyMap().get( pvProperty );
+
+        if ( !property.isCollection() || !property.isIdentifiableObject() )
+        {
+            ContextUtils.conflictResponse( response, "Only deletes within identifiable collection are allowed." );
+        }
+
+        if ( !property.isOwner() )
+        {
+            ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+        }
+
+        Collection<IdentifiableObject> identifiableObjects =
+            (Collection<IdentifiableObject>) property.getGetterMethod().invoke( objects.get( 0 ) );
+
+        Iterator<IdentifiableObject> iterator = identifiableObjects.iterator();
+        IdentifiableObject candidate = null;
+
+        while ( iterator.hasNext() )
+        {
+            candidate = iterator.next();
+
+            if ( candidate.getUid() != null && candidate.getUid().equals( pvItemId ) )
+            {
+                iterator.remove();
+                break;
+            }
+
+            candidate = null;
+        }
+
+        if ( candidate == null )
+        {
+            ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+        }
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
+        {
+            throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
+        }
+
+        manager.update( objects.get( 0 ) );
     }
 
     //--------------------------------------------------------------------------
@@ -523,7 +689,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     // Helpers
     //--------------------------------------------------------------------------
 
-    protected List<T> getEntityList( WebMetaData metaData, WebOptions options )
+    protected List<T> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
     {
         List<T> entityList;
 
@@ -592,6 +758,21 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
     }
 
+    private InclusionStrategy.Include getInclusionStrategy( String inclusionStrategy )
+    {
+        if ( inclusionStrategy != null )
+        {
+            Optional<InclusionStrategy.Include> optional = Enums.getIfPresent( InclusionStrategy.Include.class, inclusionStrategy );
+
+            if ( optional.isPresent() )
+            {
+                return optional.get();
+            }
+        }
+
+        return InclusionStrategy.Include.NON_NULL;
+    }
+
     //--------------------------------------------------------------------------
     // Reflection helpers
     //--------------------------------------------------------------------------
@@ -602,7 +783,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     private String entitySimpleName;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected Class<T> getEntityClass()
     {
         if ( entityClass == null )
@@ -634,7 +815,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         return entitySimpleName;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     protected T getEntityInstance()
     {
         try
@@ -645,20 +826,5 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             throw new RuntimeException( ex );
         }
-    }
-
-    private InclusionStrategy.Include getInclusionStrategy( String inclusionStrategy )
-    {
-        if ( inclusionStrategy != null )
-        {
-            Optional<InclusionStrategy.Include> optional = Enums.getIfPresent( InclusionStrategy.Include.class, inclusionStrategy );
-
-            if ( optional.isPresent() )
-            {
-                return optional.get();
-            }
-        }
-
-        return InclusionStrategy.Include.NON_NULL;
     }
 }
