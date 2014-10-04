@@ -33,7 +33,7 @@ package org.hisp.dhis.dataapproval;
  * @version $Id$
  */
 public class UserCannotAccessApprovalLevelException
-        extends ApprovalException
+        extends DataApprovalException
 {
     private static final long serialVersionUID = -571500237431167490L;
 

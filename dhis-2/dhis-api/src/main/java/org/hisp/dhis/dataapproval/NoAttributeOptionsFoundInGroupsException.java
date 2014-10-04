@@ -33,7 +33,7 @@ package org.hisp.dhis.dataapproval;
  * @version $Id$
  */
 public class NoAttributeOptionsFoundInGroupsException
-        extends ApprovalException
+        extends DataApprovalException
 {
     private static final long serialVersionUID = -781185389702703948L;
 

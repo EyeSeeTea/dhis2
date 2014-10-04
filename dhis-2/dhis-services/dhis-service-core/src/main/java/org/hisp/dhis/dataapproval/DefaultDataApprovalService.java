@@ -123,13 +123,11 @@ public class DefaultDataApprovalService
                              Set<DataSet> dataSets,
                              Set<CategoryOptionGroup> attributeOptionGroups,
                              Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException
     {
         doApprove( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ) );
     }
 
     public void approveData( List<DataApproval> dataApprovalList )
-            throws ApprovalException
     {
         doApprove( checkApprovalsList( dataApprovalList, false ) );
     }
@@ -138,13 +136,11 @@ public class DefaultDataApprovalService
                                Set<DataSet> dataSets,
                                Set<CategoryOptionGroup> attributeOptionGroups,
                                Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException
     {
         doUnapprove( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ) );
     }
 
     public void unapproveData( List<DataApproval> dataApprovalList )
-            throws ApprovalException
     {
         doUnapprove( checkApprovalsList( dataApprovalList, false ) );
     }
@@ -153,13 +149,11 @@ public class DefaultDataApprovalService
                             Set<DataSet> dataSets,
                             Set<CategoryOptionGroup> attributeOptionGroups,
                             Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException
     {
         doAcceptOrUnaccept( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ), true );
     }
 
     public void acceptData( List<DataApproval> dataApprovalList )
-            throws ApprovalException
     {
         doAcceptOrUnaccept( checkApprovalsList( dataApprovalList, false ), true );
     }
@@ -168,13 +162,11 @@ public class DefaultDataApprovalService
                               Set<DataSet> dataSets,
                               Set<CategoryOptionGroup> attributeOptionGroups,
                               Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException
     {
         doAcceptOrUnaccept( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ), false );
     }
 
     public void unacceptData( List<DataApproval> dataApprovalList )
-            throws ApprovalException
     {
         doAcceptOrUnaccept( checkApprovalsList( dataApprovalList, false ), false );
     }
@@ -223,7 +215,6 @@ public class DefaultDataApprovalService
     } */
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
-            throws ApprovalException
     {
         DataApproval da = new DataApproval( null, dataSet, period, organisationUnit, attributeOptionCombo, false, null, null );
 
@@ -237,8 +228,7 @@ public class DefaultDataApprovalService
 
     public DataApprovalStatusAndPermissions getDataApprovalPermissions( Set<DataSet> dataSets, Period period,
         OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups,
-        Set<DataElementCategoryOption> attributeCategoryOptions, DataApprovalLevel dataApprovalLevel )
-            throws ApprovalException
+        Set<DataElementCategoryOption> attributeCategoryOptions )
     {
         DataApproval da = new DataApproval( null, null, period, organisationUnit, null, false, null, null );
 
@@ -293,14 +283,12 @@ public class DefaultDataApprovalService
      * @param attributeOptions attribute options, if any
      * @param isGetStatus true if get, false if action
      * @return list of DataApprovals
-     * @throws ApprovalException
      */
     private List<DataApproval> makeApprovalsList( DataApproval dataApproval,
                                                   Set<DataSet> dataSets,
                                                   Set<CategoryOptionGroup> attributeOptionGroups,
                                                   Set<DataElementCategoryOption> attributeOptions,
                                                   boolean isGetStatus )
-            throws ApprovalException
     {
         if ( ( attributeOptionGroups == null || attributeOptionGroups.isEmpty() )
             && attributeOptions == null || attributeOptions.isEmpty() )
@@ -382,7 +370,6 @@ public class DefaultDataApprovalService
     }
 
     private List<DataApproval> checkApprovalsList( List<DataApproval> dataApprovalList, boolean isGetStatus )
-            throws ApprovalException
     {
         List<DataApproval> daList = new ArrayList<>();
 
@@ -415,7 +402,6 @@ public class DefaultDataApprovalService
     }
 
     private DataApproval checkDataApproval( DataApproval dataApproval, boolean includeDataViewOrgUnits )
-            throws ApprovalException
     {
         DataApproval da = new DataApproval ( dataApproval ); // Defensive copy so we can change it.
 
@@ -460,7 +446,6 @@ public class DefaultDataApprovalService
     }
 
     private List<DataApproval> expandApprovalsList ( List<DataApproval> approvalsList, Set<DataSet> dataSets )
-            throws PeriodShorterThanDataSetPeriodException
     {
         return expandPeriods( expandDataSets( approvalsList, dataSets ) );
     }
@@ -488,7 +473,6 @@ public class DefaultDataApprovalService
     }
 
     private List<DataApproval> expandPeriods ( List<DataApproval> approvalsList )
-            throws PeriodShorterThanDataSetPeriodException
     {
         List<DataApproval> expandedApprovals = new ArrayList<>();
 
@@ -525,7 +509,6 @@ public class DefaultDataApprovalService
     }
 
     private void doApprove( List<DataApproval> dataApprovalList )
-            throws ApprovalActionNotAllowedException
     {
         for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
         {
@@ -550,7 +533,6 @@ public class DefaultDataApprovalService
     }
 
     private void doUnapprove( List<DataApproval> dataApprovalList )
-            throws ApprovalActionNotAllowedException
     {
         for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
         {
@@ -575,7 +557,6 @@ public class DefaultDataApprovalService
     }
 
     private void doAcceptOrUnaccept( List<DataApproval> dataApprovalList, boolean accepted )
-            throws ApprovalActionNotAllowedException
     {
         for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
         {
@@ -659,8 +640,7 @@ public class DefaultDataApprovalService
     private DataApprovalStatus doGetDataApprovalStatus( List<DataApproval> dataApprovals, DataApproval originalDataApproval )
     {
         DataApprovalSelection dataApprovalSelection = new DataApprovalSelection( dataApprovals, originalDataApproval,
-                dataApprovalStore, dataApprovalLevelService,
-                organisationUnitService, categoryService, periodService );
+                dataApprovalStore, dataApprovalLevelService, organisationUnitService, categoryService );
 
         return dataApprovalSelection.getDataApprovalStatus();
     }

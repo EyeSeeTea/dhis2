@@ -32,12 +32,12 @@ package org.hisp.dhis.dataapproval;
  * @author Jim Grace
  * @version $Id$
  */
-public abstract class ApprovalException
-        extends Exception
+public abstract class DataApprovalException
+        extends RuntimeException
 {
     private static final long serialVersionUID = -5506344977983711195L;
 
-    public ApprovalException()
+    public DataApprovalException()
     {
         super();
     }

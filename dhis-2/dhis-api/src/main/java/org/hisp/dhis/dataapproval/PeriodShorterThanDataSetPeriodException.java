@@ -33,7 +33,7 @@ package org.hisp.dhis.dataapproval;
  * @version $Id$
  */
 public class PeriodShorterThanDataSetPeriodException
-        extends ApprovalException
+        extends DataApprovalException
 {
     private static final long serialVersionUID = -6211422929151909772L;
 

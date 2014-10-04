@@ -68,23 +68,6 @@ public class HibernateDataApprovalStore
     {
         dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
 
-        // ---------------------------------------------------------------------
-        // In general null values do not violate a unique constraint,
-        // so we check by hand if categoryOptionCombo has a null value,
-        // that no identical record exists with a null value.
-        // ---------------------------------------------------------------------
-
-        if ( dataApproval.getCategoryOptionCombo() == null )
-        {
-            DataApproval duplicate = getDataApproval( dataApproval.getDataSet(),
-                    dataApproval.getPeriod(), dataApproval.getOrganisationUnit(), null );
-
-            if ( duplicate != null )
-            {
-                throw new DataIntegrityViolationException( dataApproval.toString() );
-            }
-        }
-
         save( dataApproval );
     }
 
@@ -97,6 +80,8 @@ public class HibernateDataApprovalStore
     
     public void deleteDataApproval( DataApproval dataApproval )
     {
+        dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
+
         delete( dataApproval );
     }
 

@@ -60,16 +60,14 @@ public interface DataApprovalService
     void approveData( DataApproval dataApproval,
                       Set<DataSet> dataSets,
                       Set<CategoryOptionGroup> attributeOptionGroups,
-                      Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException;
+                      Set<DataElementCategoryOption> attributeOptions );
 
     /**
      * Approves data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be approved.
      */
-    void approveData(List<DataApproval> dataApprovalList)
-            throws ApprovalException;
+    void approveData(List<DataApproval> dataApprovalList);
 
     /**
      * Unapproves data.
@@ -85,16 +83,14 @@ public interface DataApprovalService
     void unapproveData( DataApproval dataApproval,
                         Set<DataSet> dataSets,
                         Set<CategoryOptionGroup> attributeOptionGroups,
-                        Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException;
+                        Set<DataElementCategoryOption> attributeOptions );
 
     /**
      * Unapproves data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be unapproved.
      */
-    void unapproveData(List<DataApproval> dataApprovalList)
-            throws ApprovalException;
+    void unapproveData(List<DataApproval> dataApprovalList);
 
     /**
      * Accepts data.
@@ -110,16 +106,14 @@ public interface DataApprovalService
     void acceptData( DataApproval dataApproval,
                      Set<DataSet> dataSets,
                      Set<CategoryOptionGroup> attributeOptionGroups,
-                     Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException;
+                     Set<DataElementCategoryOption> attributeOptions );
 
     /**
      * Accepts data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be accepted.
      */
-    void acceptData(List<DataApproval> dataApprovalList)
-            throws ApprovalException;
+    void acceptData(List<DataApproval> dataApprovalList);
 
     /**
      * Unaccepts data.
@@ -136,16 +130,14 @@ public interface DataApprovalService
     void unacceptData( DataApproval dataApproval,
                        Set<DataSet> dataSets,
                        Set<CategoryOptionGroup> attributeOptionGroups,
-                       Set<DataElementCategoryOption> attributeOptions )
-            throws ApprovalException;
+                       Set<DataElementCategoryOption> attributeOptions );
 
     /**
      * Unaccepts data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be unaccepted.
      */
-    void unacceptData(List<DataApproval> dataApprovalList)
-            throws ApprovalException;
+    void unacceptData(List<DataApproval> dataApprovalList);
 
     /**
      * Returns the data approval status for a given data set, period,
@@ -161,8 +153,7 @@ public interface DataApprovalService
      */
     DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
                                               OrganisationUnit organisationUnit,
-                                              DataElementCategoryOptionCombo attributeOptionCombo )
-            throws ApprovalException;
+                                              DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
      * Returns the data approval permissions and status for a given data set,
@@ -175,13 +166,10 @@ public interface DataApprovalService
      * @param organisationUnit OrganisationUnit to check for approval.
      * @param categoryOptionGroups CategoryOptionGroups (if any) for approval.
      * @param dataElementCategoryOptions Selected category options (if any).
-     * @param dataApprovalLevel Approval level to test (if specified).
      * @return the data approval permissions (including status.)
      */
     DataApprovalStatusAndPermissions getDataApprovalPermissions( Set<DataSet> dataSets, Period period,
                                                         OrganisationUnit organisationUnit,
                                                         Set<CategoryOptionGroup> categoryOptionGroups,
-                                                        Set<DataElementCategoryOption> dataElementCategoryOptions,
-                                                        DataApprovalLevel dataApprovalLevel )
-            throws ApprovalException;
+                                                        Set<DataElementCategoryOption> dataElementCategoryOptions );
 }

@@ -33,7 +33,7 @@ package org.hisp.dhis.dataapproval;
  * @version $Id$
  */
 public class ApprovalActionNotAllowedException
-        extends ApprovalException
+        extends DataApprovalException
 {
     private static final long serialVersionUID = 2765006990627122000L;
 

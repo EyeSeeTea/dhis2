@@ -33,7 +33,7 @@ package org.hisp.dhis.dataapproval;
  * @version $Id$
  */
 public class DataSetNotMarkedForApprovalException
-        extends ApprovalException
+        extends DataApprovalException
 {
     private static final long serialVersionUID = 6661288395024958390L;
 

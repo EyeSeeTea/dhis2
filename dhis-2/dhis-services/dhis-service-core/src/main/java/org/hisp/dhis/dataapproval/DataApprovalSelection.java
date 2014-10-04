@@ -28,15 +28,10 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -80,8 +75,6 @@ class DataApprovalSelection
 
     private DataElementCategoryService categoryService;
 
-    private PeriodService periodService;
-
     // -------------------------------------------------------------------------
     // Internal instance variables
     // -------------------------------------------------------------------------
@@ -117,15 +110,13 @@ class DataApprovalSelection
      * @param dataApprovalLevelService service object reference
      * @param organisationUnitService service object reference
      * @param categoryService service object reference
-     * @param periodService service object reference
      */
     DataApprovalSelection( List<DataApproval> dataApprovals,
                            DataApproval originalDataApproval,
                            DataApprovalStore dataApprovalStore,
                            DataApprovalLevelService dataApprovalLevelService,
                            OrganisationUnitService organisationUnitService,
-                           DataElementCategoryService categoryService,
-                           PeriodService periodService )
+                           DataElementCategoryService categoryService )
     {
         this.dataApprovals = dataApprovals;
         this.originalDataApproval = originalDataApproval;
@@ -133,7 +124,6 @@ class DataApprovalSelection
         this.dataApprovalLevelService = dataApprovalLevelService;
         this.categoryService = categoryService;
         this.organisationUnitService = organisationUnitService;
-        this.periodService = periodService;
     }
 
     // -------------------------------------------------------------------------
