@@ -473,8 +473,8 @@ Ext.onReady( function() {
 			baseLineValue,
 			baseLineTitle,
 
-            rangeAxisMaxValue,
             rangeAxisMinValue,
+            rangeAxisMaxValue,
             rangeAxisSteps,
             rangeAxisDecimals,
 			rangeAxisTitle,
@@ -551,13 +551,13 @@ Ext.onReady( function() {
 			style: 'margin-bottom:4px'
 		});
 
-		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
+		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
 			labelWidth: 125
 		});
 
-		rangeAxisMinValue = Ext.create('Ext.form.field.Number', {
+		rangeAxisMaxValue = Ext.create('Ext.form.field.Number', {
 			width: numberWidth,
 			height: 18,
 			labelWidth: 125,
@@ -568,6 +568,7 @@ Ext.onReady( function() {
 			width: labelWidth + 5 + numberWidth,
 			height: 18,
 			fieldLabel: 'Range axis tick steps',
+			labelStyle: 'color:#333',
 			labelWidth: 125,
 			minValue: 1
 		});
@@ -576,6 +577,7 @@ Ext.onReady( function() {
 			width: labelWidth + 5 + numberWidth,
 			height: 18,
 			fieldLabel: 'Range axis decimals',
+			labelStyle: 'color:#333',
 			labelWidth: 125,
 			minValue: 0
 		});
@@ -709,7 +711,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.chart_options,
-			bodyStyle: 'background-color:#fff; padding:5px 5px 3px',
+			bodyStyle: 'background-color:#fff; padding:3px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -2190,7 +2192,13 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/charts/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
@@ -2283,6 +2291,7 @@ Ext.onReady( function() {
 				ns.app.chart = ns.core.web.chart.createChart(ns);
 
 				// update viewport
+                ns.app.centerRegion.update();
 				ns.app.centerRegion.removeAll();
 				ns.app.centerRegion.add(ns.app.chart);
 
@@ -2319,6 +2328,7 @@ Ext.onReady( function() {
             area,
             pie,
             radar,
+            gauge,
             chartType,
             getDimensionStore,
             colStore,
@@ -2370,6 +2380,8 @@ Ext.onReady( function() {
             relativePeriod,
             fixedPeriodAvailable,
             fixedPeriodSelected,
+            onPeriodTypeSelect,
+            periodType,
             period,
             treePanel,
             userOrganisationUnit,
@@ -2503,6 +2515,17 @@ Ext.onReady( function() {
             }
         });
 
+        gauge = Ext.create('Ext.button.Button', {
+            xtype: 'button',
+            chartType: ns.core.conf.finals.chart.gauge,
+            icon: 'images/gauge.png',
+            name: ns.core.conf.finals.chart.gauge,
+            tooltipText: NS.i18n.meter_chart,
+            listeners: {
+                added: buttonAddedListener
+            }
+        });
+
         chartType = Ext.create('Ext.toolbar.Toolbar', {
             height: 45,
             style: 'padding-top:1px; border:0 none; border-bottom:1px solid #ddd',
@@ -2543,7 +2566,7 @@ Ext.onReady( function() {
             items: [
                 {
                     xtype: 'label',
-                    text: NS.i18n.chart_type,
+                    text: NS.i18n.type,
                     style: 'font-size:11px; font-weight:bold; padding:13px 8px 0 6px'
                 },
                 column,
@@ -2553,7 +2576,8 @@ Ext.onReady( function() {
                 line,
                 area,
                 pie,
-                radar
+                radar,
+                gauge
             ]
         });
 
@@ -2839,7 +2863,7 @@ Ext.onReady( function() {
 			fields: ['id', 'name', 'index'],
 			proxy: {
 				type: 'ajax',
-				url: ns.core.init.contextPath + '/api/dataElementGroups.json?fields=id,name&paging=false',
+				url: ns.core.init.contextPath + '/api/dataElementGroups.json?fields=id,' + ns.core.init.namePropertyUrl + '&paging=false',
 				reader: {
 					type: 'json',
 					root: 'dataElementGroups'
@@ -4170,6 +4194,40 @@ Ext.onReady( function() {
 			}
 		});
 
+        onPeriodTypeSelect = function() {
+            var type = periodType.getValue(),
+                periodOffset = periodType.periodOffset,
+                generator = ns.core.init.periodGenerator,
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);           
+
+            for (var i = 0; i < periods.length; i++) {
+                periods[i].id = periods[i].iso;
+            }
+
+            fixedPeriodAvailableStore.setIndex(periods);
+            fixedPeriodAvailableStore.loadData(periods);
+            ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
+        };            
+
+        periodType = Ext.create('Ext.form.field.ComboBox', {
+            cls: 'ns-combo',
+            style: 'margin-bottom:1px',
+            width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 2,
+            valueField: 'id',
+            displayField: 'name',
+            emptyText: NS.i18n.select_period_type,
+            editable: false,
+            queryMode: 'remote',
+            store: periodTypeStore,
+            periodOffset: 0,
+            listeners: {
+                select: function() {
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
+                }
+            }
+        });
+
 		period = {
 			xtype: 'panel',
 			title: '<div class="ns-panel-title-period">Periods</div>',
@@ -4231,44 +4289,17 @@ Ext.onReady( function() {
 					bodyStyle: 'border-style:none',
 					style: 'margin-top:0px',
 					items: [
-						{
-							xtype: 'combobox',
-							cls: 'ns-combo',
-							style: 'margin-bottom:1px',
-							width: ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding - 62 - 62 - 2,
-							valueField: 'id',
-							displayField: 'name',
-							emptyText: NS.i18n.select_period_type,
-							editable: false,
-							queryMode: 'remote',
-							store: periodTypeStore,
-							periodOffset: 0,
-							listeners: {
-								select: function() {
-                                    var periodType = this.getValue(),
-                                        generator = ns.core.init.periodGenerator,
-                                        periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
-
-                                    for (var i = 0; i < periods.length; i++) {
-                                        periods[i].id = periods[i].iso;
-                                    }
-
-									fixedPeriodAvailableStore.setIndex(periods);
-									fixedPeriodAvailableStore.loadData(periods);
-									ns.core.web.multiSelect.filterAvailable(fixedPeriodAvailable, fixedPeriodSelected);
-								}
-							}
-						},
+                        periodType,
 						{
 							xtype: 'button',
 							text: NS.i18n.prev_year,
 							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
+                            width: 62,
 							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue()) {
-									cb.periodOffset--;
-									cb.fireEvent('select');
+								if (periodType.getValue()) {
+									periodType.periodOffset--;
+                                    onPeriodTypeSelect();
 								}
 							}
 						},
@@ -4277,11 +4308,11 @@ Ext.onReady( function() {
 							text: NS.i18n.next_year,
 							style: 'margin-left:1px; border-radius:2px',
 							height: 24,
+                            width: 62,
 							handler: function() {
-								var cb = this.up('panel').down('combobox');
-								if (cb.getValue() && cb.periodOffset < 0) {
-									cb.periodOffset++;
-									cb.fireEvent('select');
+								if (periodType.getValue()) {
+									periodType.periodOffset++;
+                                    onPeriodTypeSelect();
 								}
 							}
 						}
@@ -4290,7 +4321,7 @@ Ext.onReady( function() {
 				{
 					xtype: 'panel',
 					layout: 'column',
-					bodyStyle: 'border-style:none; padding-bottom:1px',
+					bodyStyle: 'border-style:none; padding-bottom:2px',
 					items: [
 						fixedPeriodAvailable,
 						fixedPeriodSelected
@@ -4484,7 +4515,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5312,7 +5343,7 @@ Ext.onReady( function() {
 		});
 
 		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			text: 'Embed in web page' + '&nbsp;&nbsp;',
 			iconCls: 'ns-menu-item-datasource',
 			disabled: true,
 			xable: function() {
@@ -5398,7 +5429,7 @@ Ext.onReady( function() {
 				}
 			},
             handler: function() {
-                var url = ns.core.init.contextPath + '/dhis-web-visualizer/app/index.html?id=' + ns.app.layout.id,
+                var url = ns.core.init.contextPath + '/dhis-web-visualizer/index.html?id=' + ns.app.layout.id,
                     textField,
                     window;
 
@@ -5581,7 +5612,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/index.html';
 										}
 									},
 									'-',
@@ -5592,7 +5623,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-pivot/index.html?s=analytical');
 											}
 										}
 									},
@@ -5601,7 +5632,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/index.html?s=table';
 										}
 									}
 								],
@@ -5638,7 +5669,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_maps + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/index.html';
 										}
 									},
 									'-',
@@ -5649,7 +5680,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'analytical', ns.core.init.contextPath + '/dhis-web-mapping/index.html?s=analytical');
 											}
 										}
 									},
@@ -5658,7 +5689,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['map']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/app/index.html?s=map';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/index.html?s=map';
 										}
 									}
 								],
@@ -5701,7 +5732,24 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
-                }
+                },
+				afterrender: function(p) {
+					var liStyle = 'padding:3px 10px; color:#333',
+						html = '';
+
+					html += '<div style="padding:20px">';
+					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
+					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
+					html += '</div>';
+
+					p.update(html);
+				}
 			}
 		});
 
@@ -5863,6 +5911,16 @@ Ext.onReady( function() {
 				}
 			}
 
+            // add assigned categories as dimension
+            if (!ns.app.layoutWindow.hasDimension(dimConf.category.dimensionName)) {
+                ns.app.stores.dimension.add({id: dimConf.category.dimensionName, name: dimConf.category.name});
+            }
+
+            // add data as dimension
+            if (!ns.app.layoutWindow.hasDimension(dimConf.data.dimensionName)) {
+                ns.app.stores.dimension.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
+            }
+            
             // add orgunit as dimension
             if (!ns.app.layoutWindow.hasDimension(dimConf.organisationUnit.dimensionName)) {
                 ns.app.stores.dimension.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
@@ -6225,4 +6283,3 @@ Ext.onReady( function() {
 		});
 	}());
 });
-

@@ -518,7 +518,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,name&paging=false',
+					url: gis.init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroupSets'
@@ -551,7 +551,7 @@ Ext.onReady( function() {
 				fields: ['id', 'name'],
 				proxy: {
 					type: 'ajax',
-					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,name&paging=false',
+					url: init.contextPath + '/api/organisationUnitGroups.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
 					reader: {
 						type: 'json',
 						root: 'organisationUnitGroups'
@@ -1487,29 +1487,27 @@ Ext.onReady( function() {
 						var store = this,
 							params = {};
 
-						params['max'] = pageSize || 15;
+                        optionSetId = optionSetId || container.dataElement.optionSet.id;
 
 						if (key) {
 							params['key'] = key;
 						}
+
+						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
 							url: gis.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText).options,
-									data = [];
+								var options = Ext.decode(r.responseText).options;
 
-								Ext.each(options, function(option) {
-									data.push({
-										id: option,
-										name: option
-									});
-								});
-
+                                for (var i = 0; i < options.length; i++) {
+                                    options[i].id = options[i].name;
+                                }
+                                    
 								store.removeAll();
-								store.add(data);
+                                store.loadData(options);
 							}
 						});
 					},
@@ -1577,27 +1575,7 @@ Ext.onReady( function() {
                             container.valueStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            Ext.Ajax.request({
-                                url: gis.init.contextPath + '/api/optionSets/' + container.dataElement.optionSet.id + '/options.json',
-                                params: {
-                                    'max': 14
-                                },
-                                success: function(r) {
-                                    var options = Ext.decode(r.responseText).options,
-                                        data = [];
-
-                                    Ext.each(options, function(option) {
-                                        data.push({
-                                            id: option,
-                                            name: option
-                                        });
-                                    });
-
-                                    b.storage = Ext.clone(data);
-									container.valueStore.removeAll();
-                                    container.valueStore.add(data);
-                                }
-                            });
+                            container.valueStore.loadOptionSet();
                         }
                     }
                 });
@@ -4198,7 +4176,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: gis.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[attribute[id,name,valueType,optionSet[id,name]]]&paging=false',
+                    url: gis.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,optionSet[id,name]]]&paging=false',
                     success: function(r) {
                         var program = Ext.decode(r.responseText).programs[0],
                             stages,
@@ -4210,7 +4188,7 @@ Ext.onReady( function() {
                         }
 
                         stages = program.programStages;
-                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'attribute');
+                        attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute');
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -4302,7 +4280,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: gis.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    url: gis.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + gis.init.namePropertyUrl + ',type,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -4698,7 +4676,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -4834,14 +4812,12 @@ Ext.onReady( function() {
 						v.menu.destroy();
 					}
 					v.menu = Ext.create('Ext.menu.Menu', {
-						id: 'treepanel-contextmenu',
 						showSeparator: false,
 						shadow: false
 					});
 					if (!r.data.leaf) {
 						v.menu.add({
-							id: 'treepanel-contextmenu-item',
-							text: gis.i18n.select_all_children,
+							text: GIS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5410,7 +5386,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -5546,14 +5522,12 @@ Ext.onReady( function() {
 						v.menu.destroy();
 					}
 					v.menu = Ext.create('Ext.menu.Menu', {
-						id: 'treepanel-contextmenu',
 						showSeparator: false,
 						shadow: false
 					});
 					if (!r.data.leaf) {
 						v.menu.add({
-							id: 'treepanel-contextmenu-item',
-							text: gis.i18n.select_all_children,
+							text: GIS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -6166,7 +6140,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -6302,14 +6276,12 @@ Ext.onReady( function() {
 						v.menu.destroy();
 					}
 					v.menu = Ext.create('Ext.menu.Menu', {
-						id: 'treepanel-contextmenu',
 						showSeparator: false,
 						shadow: false
 					});
 					if (!r.data.leaf) {
 						v.menu.add({
-							id: 'treepanel-contextmenu-item',
-							text: gis.i18n.select_all_children,
+							text: GIS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -6749,6 +6721,7 @@ Ext.onReady( function() {
 			dataElementDetailLevel,
 			dataElementPanel,
 			dataSet,
+            onPeriodTypeSelect,
 			periodType,
 			period,
 			periodPrev,
@@ -6854,10 +6827,10 @@ Ext.onReady( function() {
 				var path;
 
 				if (Ext.isString(uid)) {
-                    path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
+                    path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false&filter=dataElementGroups.id:eq:' + uid;
 				}
 				else if (uid === 0) {
-					path = '/dataElements.json?fields=id,name&domainType=aggregate&paging=false';
+					path = '/dataElements.json?fields=id,' + gis.init.namePropertyUrl + '&domainType=aggregate&paging=false';
 				}
 
 				if (!path) {
@@ -6891,7 +6864,7 @@ Ext.onReady( function() {
 				if (Ext.isString(uid)) {
 					this.setProxy({
 						type: 'ajax',
-						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,name&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
+						url: gis.init.contextPath + '/api/dataElementOperands.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=dataElement.dataElementGroups.id:eq:' + uid,
 						reader: {
 							type: 'json',
 							root: 'dataElementOperands'
@@ -6933,7 +6906,7 @@ Ext.onReady( function() {
             fields: ['id', 'name'],
             proxy: {
                 type: 'ajax',
-                url: gis.init.contextPath + '/api/dataSets.json?fields=id,name&paging=false',
+                url: gis.init.contextPath + '/api/dataSets.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false',
                 reader: {
                     type: 'json',
                     root: 'dataSets'
@@ -7083,7 +7056,7 @@ Ext.onReady( function() {
 				select: function() {
 					indicator.clearValue();
 
-					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,name&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
+					indicator.store.proxy.url = gis.init.contextPath + '/api/indicators.json?fields=id,' + gis.init.namePropertyUrl + '&paging=false&filter=indicatorGroups.id:eq:' + this.getValue();
 					indicator.store.load();
 				}
 			}
@@ -7270,6 +7243,33 @@ Ext.onReady( function() {
 			store: dataSetStore
 		});
 
+        onPeriodTypeSelect = function() {
+            var type = periodType.getValue(),
+                periodOffset = periodType.periodOffset,
+                generator = gis.init.periodGenerator,
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);
+                
+            if (type === 'relativePeriods') {
+                periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
+
+                periodPrev.disable();
+                periodNext.disable();
+            }
+            else {
+                for (var i = 0; i < periods.length; i++) {
+                    periods[i].id = periods[i].iso;
+                }
+
+                periodsByTypeStore.setIndex(periods);
+                periodsByTypeStore.loadData(periods);
+                
+                periodPrev.enable();
+                periodNext.enable();
+            }
+
+            period.selectFirst();
+        };            
+
 		periodType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
 			editable: false,
@@ -7280,36 +7280,10 @@ Ext.onReady( function() {
 			width: 142,
 			store: gis.store.periodTypes,
 			periodOffset: 0,
-			selectHandler: function() {
-                var periodType = this.getValue(),
-                    generator = gis.init.periodGenerator,
-                    periods;
-
-				if (periodType === 'relativePeriods') {
-					periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
-
-					periodPrev.disable();
-					periodNext.disable();
-				}
-				else {
-                    periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
-
-                    for (var i = 0; i < periods.length; i++) {
-                        periods[i].id = periods[i].iso;
-                    }
-
-					periodsByTypeStore.setIndex(periods);
-					periodsByTypeStore.loadData(periods);
-
-					periodPrev.enable();
-					periodNext.enable();
-				}
-
-				period.selectFirst();
-			},
 			listeners: {
 				select: function() {
-					this.selectHandler();
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
 				}
 			}
 		});
@@ -7337,10 +7311,10 @@ Ext.onReady( function() {
             height: 24,
 			style: 'margin-left: 1px',
 			handler: function() {
-				if (periodType.getValue()) {
-					periodType.periodOffset--;
-					periodType.fireEvent('select');
-				}
+                if (periodType.getValue()) {
+                    periodType.periodOffset--;
+                    onPeriodTypeSelect();
+                }
 			}
 		});
 
@@ -7352,11 +7326,11 @@ Ext.onReady( function() {
 			style: 'margin-left: 1px',
 			scope: this,
 			handler: function() {
-				if (periodType.getValue() && periodType.periodOffset < 0) {
-					periodType.periodOffset++;
-					periodType.fireEvent('select');
-				}
-			}
+                if (periodType.getValue()) {
+                    periodType.periodOffset++;
+                    onPeriodTypeSelect();
+                }
+            }
 		});
 
 		periodTypePanel = Ext.create('Ext.panel.Panel', {
@@ -7501,7 +7475,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + gis.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: gis.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -7637,14 +7611,12 @@ Ext.onReady( function() {
 						v.menu.destroy();
 					}
 					v.menu = Ext.create('Ext.menu.Menu', {
-						id: 'treepanel-contextmenu',
 						showSeparator: false,
 						shadow: false
 					});
 					if (!r.data.leaf) {
 						v.menu.add({
-							id: 'treepanel-contextmenu-item',
-							text: gis.i18n.select_all_children,
+							text: GIS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -8424,7 +8396,7 @@ Ext.onReady( function() {
 		});
 
 		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
+			text: 'Embed in web page' + '&nbsp;&nbsp;',
 			iconCls: 'gis-menu-item-datasource',
 			disabled: true,
 			xable: function() {
@@ -8525,7 +8497,7 @@ Ext.onReady( function() {
 				}
 			},
             handler: function() {
-                var url = gis.init.contextPath + '/dhis-web-mapping/app/index.html?id=' + gis.map.id,
+                var url = gis.init.contextPath + '/dhis-web-mapping/index.html?id=' + gis.map.id,
                     textField,
                     window;
 
@@ -8754,7 +8726,6 @@ Ext.onReady( function() {
 						menu: {},
 						handler: function(b) {
 							b.menu = Ext.create('Ext.menu.Menu', {
-                                title: 'sddd',
 								closeAction: 'destroy',
 								shadow: false,
 								showSeparator: false,
@@ -8763,7 +8734,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html';
 										}
 									},
 									'-',
@@ -8773,7 +8744,7 @@ Ext.onReady( function() {
 										disabled: !(GIS.isSessionStorage && gis.util.layout.getAnalytical()),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-pivot/index.html?s=analytical');
 											}
 										}
 									},
@@ -8782,7 +8753,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['table']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-pivot/app/index.html?s=table';
+											window.location.href = gis.init.contextPath + '/dhis-web-pivot/index.html?s=table';
 										}
 									}
 								],
@@ -8819,7 +8790,7 @@ Ext.onReady( function() {
 										text: GIS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'gis-menu-item-noicon',
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html';
 										}
 									},
 									'-',
@@ -8829,7 +8800,7 @@ Ext.onReady( function() {
 										disabled: !GIS.isSessionStorage || !gis.util.layout.getAnalytical(),
 										handler: function() {
 											if (GIS.isSessionStorage) {
-												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+												gis.util.layout.setSessionStorage('analytical', gis.util.layout.getAnalytical(), gis.init.contextPath + '/dhis-web-visualizer/index.html?s=analytical');
 											}
 										}
 									},
@@ -8838,7 +8809,7 @@ Ext.onReady( function() {
 										cls: 'gis-menu-item-noicon',
 										disabled: !(GIS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['chart']),
 										handler: function() {
-											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/app/index.html?s=chart';
+											window.location.href = gis.init.contextPath + '/dhis-web-visualizer/index.html?s=chart';
 										}
 									}
 								],

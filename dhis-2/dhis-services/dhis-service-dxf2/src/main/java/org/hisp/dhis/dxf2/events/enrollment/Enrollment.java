@@ -64,6 +64,8 @@ public class Enrollment
     private List<Attribute> attributes = new ArrayList<>();
     
     private List<Note> notes = new ArrayList<>();
+    
+    private Boolean followup;
 
     public Enrollment()
     {
@@ -165,6 +167,18 @@ public class Enrollment
     public void setNotes( List<Note> notes )
     {
         this.notes = notes;
+    }
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0)
+    public Boolean getFollowup()
+    {
+        return followup;
+    }
+
+    public void setFollowup( Boolean followup )
+    {
+        this.followup = followup;
     }
 
     @Override

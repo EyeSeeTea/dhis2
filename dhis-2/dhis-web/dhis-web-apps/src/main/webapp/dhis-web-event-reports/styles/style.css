@@ -55,7 +55,6 @@ body,
 .x-grid-cell-inner,
 .x-form-item-label,
 .x-window-header-text-default {
-	font-size: 11px;
     font-family: arial,sans-serif,ubuntu,consolas;
 }
 
@@ -167,6 +166,13 @@ body.x-windows {
 .align-left {
 	text-align: left !important;
 }
+.align-right {
+	text-align: right !important;
+}
+
+.font-size-0 {
+    font-size: 0 !important;
+}
 
 .ns-form-item-label-top {
 	padding-left: 2px;
@@ -240,9 +246,14 @@ table.small td {
 	background-color: #adb8c9;
 }
 
-.pivot-dim-empty {
+.pivot-dim-label {
+	background-color: #f2f6fc;
+	white-space: nowrap;
+    text-align: center;
+}
+
+.pivot-empty {
 	background-color: #dae6f8;
-	text-align: center;
 }
 
 .pivot-value {

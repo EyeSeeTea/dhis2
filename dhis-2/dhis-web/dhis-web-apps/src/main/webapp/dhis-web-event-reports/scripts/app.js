@@ -381,37 +381,50 @@ Ext.onReady( function() {
             }
         });
 
-		Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
 			extend: 'Ext.container.Container',
-			alias: 'widget.dataelementoptionpanel',
+			alias: 'widget.organisationunitgroupsetpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
+            addCss: function() {
+                var css = '.optionselector .x-boundlist-selected { background-color: #fff; border-color: #fff } \n';
+                css += '.optionselector .x-boundlist-selected.x-boundlist-item-over { background-color: #ddd; border-color: #ddd } \n';
+
+                Ext.util.CSS.createStyleSheet(css);
+            },
             getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';'),
-					record = {};
+                var items = this.valueCmp.getValue(),
+					record = {
+                        dimension: this.dataElement.id,
+                        name: this.dataElement.name
+                    };
 
-				for (var i = 0; i < valueArray.length; i++) {
-					valueArray[i] = Ext.String.trim(valueArray[i]);
-				}
+                // array or object
+                for (var i = 0; i < items.length; i++) {
+                    if (Ext.isObject(items[i])) {
+                        items[i] = items[i].code;
+                    }
+                }
 
-				record.dimension = this.dataElement.id;
-				record.name = this.dataElement.name;
-
-				if (Ext.Array.clean(valueArray).length) {
-					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
-				}
-
-				return record;
+                if (items.length) {
+                    record.filter = 'IN:' + items.join(';');
+                }
+                
+                return record;
             },
             setRecord: function(record) {
-				if (Ext.isString(record.filter) && record.filter) {
+				if (Ext.isString(record.filter) && record.filter.length) {
 					var a = record.filter.split(':');
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    idProperty = 'code',
+                    nameProperty = 'name';
+
+                this.addCss();
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
@@ -435,8 +448,8 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
+                this.searchStore = Ext.create('Ext.data.Store', {
+					fields: [idProperty, 'name'],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
 						var store = this,
@@ -444,25 +457,28 @@ Ext.onReady( function() {
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
 
-						if (key) {
-							params['key'] = key;
-						}
-                        
+						//if (key) {
+							//params['key'] = key;
+						//}
+
 						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText).options;
+								var options = Ext.decode(r.responseText).options,
+                                    data = [];
 
-                                for (var i = 0; i < options.length; i++) {
-                                    options[i].id = options[i].name;
+                                for (var i = 0; i < options.length; i++) {
+                                    if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
+                                        data.push(options[i]);
+                                    }
                                 }
-                                    
+
 								store.removeAll();
-                                store.loadData(options);
+                                store.loadData(data);
 
                                 container.triggerCmp.storage = Ext.clone(options);
 							}
@@ -477,12 +493,24 @@ Ext.onReady( function() {
 					}
 				});
 
+                // function
+                this.filterSearchStore = function() {
+                    var selected = container.valueCmp.getValue();
+
+                    container.searchStore.clearFilter();
+
+                    container.searchStore.filterBy(function(record) {
+                        return !Ext.Array.contains(selected, record.data[idProperty]);
+                    });
+                };
+
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
                     width: 62,
                     style: 'margin-bottom:0',
                     emptyText: 'Search..',
-                    valueField: 'id',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     hideTrigger: true,
                     delimiter: '; ',
                     enableKeyEvents: true,
@@ -490,15 +518,15 @@ Ext.onReady( function() {
                     listConfig: {
                         minWidth: 304
                     },
-                    store: this.valueStore,
+                    store: this.searchStore,
                     listeners: {
 						keyup: {
-							fn: function(cb) {
-								var value = cb.getValue(),
+							fn: function() {
+								var value = this.getValue(),
 									optionSetId = container.dataElement.optionSet.id;
 
 								// search
-								container.valueStore.loadOptionSet(optionSetId, value);
+								container.searchStore.loadOptionSet(optionSetId, value);
 
                                 // trigger
                                 if (!value || (Ext.isString(value) && value.length === 1)) {
@@ -506,17 +534,26 @@ Ext.onReady( function() {
 								}
 							}
 						},
-						select: function(cb) {
+						select: function() {
+                            var id = Ext.Array.from(this.getValue())[0];
 
                             // value
-							container.valueCmp.addOptionValue(cb.getValue());
+                            if (container.valueStore.findExact(idProperty, id) === -1) {
+                                container.valueStore.add(container.searchStore.getAt(container.searchStore.findExact(idProperty, id)).data);
+                            }
 
                             // search
-							cb.clearValue();
+                            this.select([]);
+
+                            // filter
+                            container.filterSearchStore();
 
                             // trigger
                             container.triggerCmp.enable();
-						}
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
 					}
                 });
 
@@ -528,46 +565,68 @@ Ext.onReady( function() {
                     storage: [],
                     handler: function(b) {
                         if (b.storage.length) {
-							container.valueStore.removeAll();
-                            container.valueStore.add(Ext.clone(b.storage));
+							container.searchStore.removeAll();
+                            container.searchStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            container.valueStore.loadOptionSet();
+                            container.searchStore.loadOptionSet();
                         }
                     }
                 });
 
-                this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 226,
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+                    listeners: {
+                        add: function() {
+                            container.valueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.valueCmp.select(this.getRange());
+                        }
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
                     style: 'margin-bottom:0',
-					addOptionValue: function(option) {
-						var value = this.getValue();
-
-						if (value) {
-							var a = value.split(';');
-
-							for (var i = 0; i < a.length; i++) {
-								a[i] = Ext.String.trim(a[i]);
-							};
-
-							a = Ext.Array.clean(a);
-
-							value = a.join('; ');
-							value += '; ';
-						}
-
-						this.setValue(value += option);
-					},
+					width: 226,
+                    valueField: idProperty,
+                    displayField: nameProperty,
+                    emptyText: 'No selected items',
+                    editable: false,
+                    hideTrigger: true,
+                    store: container.valueStore,
+                    queryMode: 'local',
+                    listConfig: {
+                        cls: 'optionselector'
+                    },
                     setOptionValues: function(optionArray) {
-                        var value = '';
-
+                        var options = [];
+                        
                         for (var i = 0; i < optionArray.length; i++) {
-                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                            options.push({
+                                code: optionArray[i],
+                                name: optionArray[i]
+                            });
                         }
 
-                        this.setValue(value);
+                        container.valueStore.removeAll();
+                        container.valueStore.loadData(options);
+
+                        this.setValue(options);
+                    },                            
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.valueStore.removeAt(container.valueStore.findExact(idProperty, id));
+                            }
+                        }
                     }
-				});
+                });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
@@ -599,7 +658,8 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
-	}());
+
+    }());
 
 		// toolbar
     (function() {
@@ -817,7 +877,7 @@ Ext.onReady( function() {
 
                 this.sortOrderCmp = Ext.create('Ext.form.field.ComboBox', {
                     cls: 'ns-combo',
-                    style: 'margin-bottom:2px',
+                    style: 'margin-bottom:' + container.comboBottomMargin + 'px',
                     width: sortWidth,
                     queryMode: 'local',
                     valueField: 'id',
@@ -834,7 +894,7 @@ Ext.onReady( function() {
 
                 this.topLimitCmp = Ext.create('Ext.form.field.Number', {
                     width: sortWidth - 1,
-                    style: 'margin-bottom:2px; margin-left:1px',
+                    style: 'margin-bottom:' + container.comboBottomMargin + 'px; margin-left:1px',
                     minValue: 1,
                     maxValue: 10000,
                     value: container.topLimit,
@@ -1556,9 +1616,11 @@ Ext.onReady( function() {
 	};
 
     AggregateOptionsWindow = function() {
-		var showTotals,
+		var showColTotals,
+            showRowTotals,
 			showSubTotals,
 			hideEmptyRows,
+			showDimensionLabels,
             limit,
             countType,
             aggregationType,
@@ -1575,36 +1637,50 @@ Ext.onReady( function() {
 			parameters,
 
 			comboboxWidth = 280,
+            comboBottomMargin = 1,
+            checkboxBottomMargin = 2,
 			window;
 
-		showTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_totals,
-			style: 'margin-bottom:4px',
+        showColTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_col_totals,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showRowTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_row_totals,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 			checked: true
 		});
 
 		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_subtotals,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 			checked: true
 		});
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
             checked: true
+		});
+
+		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_dimension_labels,
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
         limit = Ext.create('Ext.ux.container.LimitContainer', {
             boxLabel: NS.i18n.limit,
             sortOrder: 1,
             topLimit: 10,
-            comboboxWidth: comboboxWidth
+            comboboxWidth: comboboxWidth,
+            comboBottomMargin: comboBottomMargin
         });
 
         countType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.count_type,
@@ -1624,12 +1700,12 @@ Ext.onReady( function() {
 
 		showHierarchy = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.show_hierarchy,
-			style: 'margin-bottom:4px'
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.display_density,
@@ -1650,7 +1726,7 @@ Ext.onReady( function() {
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.font_size,
@@ -1672,7 +1748,7 @@ Ext.onReady( function() {
 		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
 			labelStyle: 'color:#333',
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:0',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.digit_group_separator,
@@ -1690,26 +1766,15 @@ Ext.onReady( function() {
 			})
 		});
 
-		//legendSet = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//style: 'margin-bottom:3px',
-			//width: comboboxWidth,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.legend_set,
-			//valueField: 'id',
-			//displayField: 'name',
-			//editable: false,
-			//value: 0,
-			//store: ns.app.stores.legendSet
-		//});
-
 		data = {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showTotals,
+				showColTotals,
+                showRowTotals,
 				showSubTotals,
 				hideEmptyRows,
+                showDimensionLabels,
                 limit,
                 countType
                 //aggregationType
@@ -1737,7 +1802,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:5px 5px 3px',
+			bodyStyle: 'background-color:#fff; padding:3px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -1745,13 +1810,15 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
-					showTotals: showTotals.getValue(),
+					showColTotals: showColTotals.getValue(),
+					showRowTotals: showRowTotals.getValue(),
 					showSubTotals: showSubTotals.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     sortOrder: limit.getSortOrder(),
                     topLimit: limit.getTopLimit(),
 					countType: countType.getValue(),
 					showHierarchy: showHierarchy.getValue(),
+                    showDimensionLabels: showDimensionLabels.getValue(),
 					displayDensity: displayDensity.getValue(),
 					fontSize: fontSize.getValue(),
 					digitGroupSeparator: digitGroupSeparator.getValue()
@@ -1759,13 +1826,15 @@ Ext.onReady( function() {
 				};
 			},
 			setOptions: function(layout) {
-				showTotals.setValue(Ext.isBoolean(layout.showTotals) ? layout.showTotals : true);
+				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
+				showRowTotals.setValue(Ext.isBoolean(layout.showRowTotals) ? layout.showRowTotals : true);
 				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				limit.setValues(layout.sortOrder, layout.topLimit);
 				countType.setValue(Ext.isString(layout.countType) ? layout.countType : 'events');
                 //aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
+				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
@@ -1781,25 +1850,25 @@ Ext.onReady( function() {
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:2px',
+					style: 'margin-top:2px; margin-bottom:6px; margin-left:3px',
 					html: NS.i18n.data
 				},
 				data,
 				{
-					bodyStyle: 'border:0 none; padding:5px'
+					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:2px',
+					style: 'margin-bottom:6px; margin-left:3px',
 					html: NS.i18n.organisation_units
 				},
 				organisationUnits,
 				{
-					bodyStyle: 'border:0 none; padding:5px'
+					bodyStyle: 'border:0 none; padding:7px'
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:2px',
+					style: 'margin-bottom:6px; margin-left:3px',
 					html: NS.i18n.style
 				},
 				style
@@ -1843,12 +1912,14 @@ Ext.onReady( function() {
 					//}
 
 					// cmp
-					w.showTotals = showTotals;
+					w.showColTotals = showColTotals;
+					w.showRowTotals = showRowTotals;
 					w.showSubTotals = showSubTotals;
 					w.hideEmptyRows = hideEmptyRows;
                     w.limit = limit;
 					w.countType = countType;
 					w.showHierarchy = showHierarchy;
+                    w.showDimensionLabels = showDimensionLabels;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
@@ -1873,6 +1944,8 @@ Ext.onReady( function() {
 			parameters,
 
 			comboboxWidth = 280,
+            comboBottomMargin = 1,
+            checkboxBottomMargin = 2,
 			window;
 
 		//showHierarchy = Ext.create('Ext.form.field.Checkbox', {
@@ -1882,7 +1955,7 @@ Ext.onReady( function() {
 
 		displayDensity = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.display_density,
@@ -1903,7 +1976,7 @@ Ext.onReady( function() {
 
 		fontSize = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.font_size,
@@ -1925,7 +1998,7 @@ Ext.onReady( function() {
 		digitGroupSeparator = Ext.create('Ext.form.field.ComboBox', {
 			labelStyle: 'color:#333',
 			cls: 'ns-combo',
-			style: 'margin-bottom:2px',
+			style: 'margin-bottom:0',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.digit_group_separator,
@@ -1977,7 +2050,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:5px 5px 3px',
+			bodyStyle: 'background-color:#fff; padding:3px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -1985,7 +2058,8 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
-					showTotals: false,
+					showColTotals: false,
+					showRowTotals: false,
 					showSubTotals: false,
 					hideEmptyRows: false,
                     sortOrder: 0,
@@ -2016,7 +2090,7 @@ Ext.onReady( function() {
 				//},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:2px',
+					style: 'margin-top:2px; margin-bottom:6px; margin-left:3px',
 					html: NS.i18n.style
 				},
 				style
@@ -2135,8 +2209,11 @@ Ext.onReady( function() {
 				favorite = Ext.clone(ns.app.layout);
 
 				// sync
-				favorite.totals = favorite.showTotals;
-				delete favorite.showTotals;
+				favorite.rowTotals = favorite.showRowTotals;
+				delete favorite.showRowTotals;
+
+				favorite.colTotals = favorite.showColTotals;
+				delete favorite.showColTotals;
 
 				favorite.subtotals = favorite.showSubTotals;
 				delete favorite.showSubTotals;
@@ -2939,7 +3016,7 @@ Ext.onReady( function() {
 
 			linkPanel = Ext.create('Ext.panel.Panel', {
 				html: function() {
-					var url = ns.core.init.contextPath + '/dhis-web-event-reports/app/index.html?id=' + ns.app.layout.id,
+					var url = ns.core.init.contextPath + '/dhis-web-event-reports/index.html?id=' + ns.app.layout.id,
 						apiUrl = ns.core.init.contextPath + '/api/eventReports/' + ns.app.layout.id + '/data.html',
 						html = '';
 
@@ -3388,7 +3465,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,name,valueType,optionSet[id,name]]]&paging=false',
+                    url: ns.core.init.contextPath + '/api/programs.json?filter=id:eq:' + programId + '&fields=programStages[id,name],programTrackedEntityAttributes[trackedEntityAttribute[id,' + ns.core.init.namePropertyUrl + ',valueType,optionSet[id,name]]]&paging=false',
                     success: function(r) {
                         var program = Ext.decode(r.responseText).programs[0],
                             stages,
@@ -3491,7 +3568,7 @@ Ext.onReady( function() {
             }
             else {
                 Ext.Ajax.request({
-                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,name,type,optionSet[id,name]]]',
+                    url: ns.core.init.contextPath + '/api/programStages.json?filter=id:eq:' + stageId + '&fields=programStageDataElements[dataElement[id,' + ns.core.init.namePropertyUrl + ',type,optionSet[id,name]]]',
                     success: function(r) {
                         var objects = Ext.decode(r.responseText).programStages,
                             dataElements;
@@ -3621,12 +3698,11 @@ Ext.onReady( function() {
 				ux;
 
             element.type = element.type || element.valueType;
-
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
-					return 'Ext.ux.panel.DataElementOptionContainer';
+					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
 
 				if (element.type === 'int' || element.type === 'number') {
@@ -3902,7 +3978,7 @@ Ext.onReady( function() {
                 dateFormat: ns.core.init.systemInfo.dateFormat
             });
         };
-        
+
         startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
@@ -4319,10 +4395,11 @@ Ext.onReady( function() {
 			}
 		});
 
-        onPeriodTypeSelect = function(value) {
-            var periodType = value,
+        onPeriodTypeSelect = function() {
+            var type = periodType.getValue(),
+                periodOffset = periodType.periodOffset,
                 generator = ns.core.init.periodGenerator,
-                periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset));
+                periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);
 
             for (var i = 0; i < periods.length; i++) {
                 periods[i].id = periods[i].iso;
@@ -4346,7 +4423,8 @@ Ext.onReady( function() {
             periodOffset: 0,
             listeners: {
                 select: function(cmp) {
-                    onPeriodTypeSelect(cmp.getValue());
+                    periodType.periodOffset = 0;
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -4355,10 +4433,11 @@ Ext.onReady( function() {
             text: NS.i18n.prev_year,
             style: 'border-radius:1px; margin-right:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset--;
-                    onPeriodTypeSelect(periodType.getValue());
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -4367,10 +4446,11 @@ Ext.onReady( function() {
             text: NS.i18n.next_year,
             style: 'border-radius:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset++;
-                    onPeriodTypeSelect(periodType.getValue());
+                    onPeriodTypeSelect();
                 }
             }
         });
@@ -4632,7 +4712,7 @@ Ext.onReady( function() {
 					format: 'json',
 					noCache: false,
 					extraParams: {
-						fields: 'children[id,name,children::isNotEmpty|rename(hasChildren)&paging=false'
+						fields: 'children[id,' + ns.core.init.namePropertyUrl + ',children::isNotEmpty|rename(hasChildren)&paging=false'
 					},
 					url: ns.core.init.contextPath + '/api/organisationUnits',
 					reader: {
@@ -4760,6 +4840,10 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
+
+                    Ext.defer(function() {
+                        data.expand();
+                    }, 20);
 				},
 				itemcontextmenu: function(v, r, h, i, e) {
 					v.getSelectionModel().select(r, false);
@@ -4775,7 +4859,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5055,7 +5139,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/organisationUnitGroups.json?fields=id,name&filter=organisationUnitGroupSet.id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
+					path = '/organisationUnitGroups.json?fields=id,' + ns.core.init.namePropertyUrl + '&filter=organisationUnitGroupSet.id:eq:' + dimension.id + (filter ? '&filter=name:like:' + filter : '');
 
 					store.isPending = true;
 
@@ -5556,7 +5640,7 @@ Ext.onReady( function() {
             expandInitPanels: function() {
                 organisationUnit.expand();
                 //period.expand();
-                data.expand();
+                //data.expand();
             },
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
@@ -5943,7 +6027,7 @@ Ext.onReady( function() {
 							iconCls: 'ns-button-icon-chart',
 							param: 'chart',
 							handler: function() {
-								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-visualizer/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-visualizer/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -5963,7 +6047,7 @@ Ext.onReady( function() {
 							param: 'map',
 							disabled: true,
 							handler: function() {
-								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-mapping/app/index.html?s=analytical');
+								web.storage.session.set(layoutConfig, 'analytical', init.contextPath + '/dhis-web-mapping/index.html?s=analytical');
 							},
 							listeners: {
 								render: function() {
@@ -6119,14 +6203,22 @@ Ext.onReady( function() {
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
 
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var config = Ext.decode(r.responseText);
 
 						// sync
-						config.showTotals = config.totals;
-						delete config.totals;
+						config.showRowTotals = config.rowTotals;
+						delete config.rowTotals;
+
+						config.showColTotals = config.colTotals;
+						delete config.colTotals;
 
 						config.showSubTotals = config.subtotals;
 						delete config.subtotals;
@@ -6164,14 +6256,14 @@ Ext.onReady( function() {
 
                 // timing
                 ns.app.dateData = new Date();
-                
+
 				Ext.Ajax.request({
 					url: ns.core.init.contextPath + paramString,
 					disableCaching: false,
 					scope: this,
 					failure: function(r) {
 						//ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
-                        
+
 						web.mask.hide(ns.app.centerRegion);
 
                         alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
@@ -6186,6 +6278,16 @@ Ext.onReady( function() {
 							web.mask.hide(ns.app.centerRegion);
 							return;
 						}
+
+                        // add to dimConf, TODO
+                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                            header = response.headers[i];
+                            map[header.name] = map[header.name] || {
+                                id: header.name,
+                                dimensionName: header.name,
+                                name: header.column
+                            };
+                        }
 
                         web.mask.show(ns.app.centerRegion, 'Creating table..');
 
@@ -6221,7 +6323,7 @@ Ext.onReady( function() {
 
 					xLayout = getXLayout(layout);
 					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-					xLayout = getSXLayout(xLayout, xResponse);
+					xLayout = getSXLayout(layout, xLayout, xResponse);
 
 					table = getHtml(xLayout, xResponse);
 
@@ -6233,7 +6335,7 @@ Ext.onReady( function() {
 
 					if (layout.sorting) {
 						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-						xLayout = getSXLayout(xLayout, xResponse);
+						xLayout = getSXLayout(layout, xLayout, xResponse);
 						table = getHtml(xLayout, xResponse);
 					}
 
@@ -6287,10 +6389,10 @@ Ext.onReady( function() {
 					var xResponse = service.response.query.getExtendedResponse(layout, response),
                         table = web.report.query.getHtml(layout, xResponse);
 
-					if (layout.sorting) {
-						xResponse = web.report.query.sort(layout, xResponse);
-						table = web.report.query.getHtml(layout, xResponse);
-					}
+					//if (layout.sorting) {
+						//xResponse = web.report.query.sort(layout, xResponse);
+						//table = web.report.query.getHtml(layout, xResponse);
+					//}
 
 					ns.app.centerRegion.removeAll(true);
 					ns.app.centerRegion.update(table.html);
@@ -6640,9 +6742,9 @@ Ext.onReady( function() {
 			}
 		});
 
-		interpretationItem = Ext.create('Ext.menu.Item', {
-			text: 'Write interpretation' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-tablelayout',
+        favoriteUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'Favorite link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
 			disabled: true,
 			xable: function() {
 				if (ns.app.layout.id) {
@@ -6652,69 +6754,23 @@ Ext.onReady( function() {
 					this.disable();
 				}
 			},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
-				}
+            handler: function() {
+                var url = ns.core.init.contextPath + '/dhis-web-event-reports/index.html?id=' + ns.app.layout.id,
+                    textField,
+                    window;
 
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
-			}
-		});
-
-		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed as plugin' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-datasource',
-			disabled: true,
-			xable: function() {
-				if (ns.app.layout) {
-					this.enable();
-				}
-				else {
-					this.disable();
-				}
-			},
-			handler: function() {
-				var textArea,
-					window,
-					text = '';
-
-				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
-				text += '</head>\n\n<body>\n';
-				text += '<div id="table1"></div>\n\n';
-				text += '<script>\n\n';
-				text += 'DHIS.getTable(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'table1'), null, 2) + ');\n\n';
-				text += '</script>\n\n';
-				text += '</body>\n</html>';
-
-				textArea = Ext.create('Ext.form.field.TextArea', {
-					width: 700,
-					height: 400,
-					readOnly: true,
-					cls: 'ns-textarea monospaced',
-					value: text
-				});
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Plugin configuration',
+					title: 'Favorite link',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
-					items: textArea,
 					destroyOnBlur: true,
-					bbar: [
-						'->',
-						{
-							text: 'Select',
-							handler: function() {
-								textArea.selectText();
-							}
-						}
-					],
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
 					listeners: {
 						show: function(w) {
 							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
@@ -6732,42 +6788,85 @@ Ext.onReady( function() {
 				});
 
 				window.show();
-			}
-		});
+            }
+        });
+
+        apiUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'API link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout.id) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+            handler: function() {
+                var url = ns.core.init.contextPath + '/api/eventReports/' + ns.app.layout.id + '/data',
+                    textField,
+                    window;
+
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'API link',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					destroyOnBlur: true,
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
+					listeners: {
+						show: function(w) {
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
+            }
+        });
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
-			disabled: true,
+            disabled: true,
 			xableItems: function() {
-				interpretationItem.xable();
+				//interpretationItem.xable();
 				//pluginItem.xable();
+				favoriteUrlItem.xable();
+				//apiUrlItem.xable();
 			},
-			//menu: {
-				//cls: 'ns-menu',
-				//shadow: false,
-				//showSeparator: false,
-				//items: [
+			menu: {
+				cls: 'ns-menu',
+				shadow: false,
+				showSeparator: false,
+				items: [
 					//interpretationItem,
-					//pluginItem
-				//],
-				//listeners: {
-					//afterrender: function() {
-						//this.getEl().addCls('ns-toolbar-btn-menu');
-					//},
-					//show: function() {
-						//shareButton.xableItems();
-					//}
-				//}
-			//},
-			menu: {},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
+					//pluginItem,
+                    favoriteUrlItem
+                    //apiUrlItem
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('ns-toolbar-btn-menu');
+					},
+					show: function() {
+						shareButton.xableItems();
+					}
 				}
-
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
 			},
 			listeners: {
 				added: function() {
@@ -6851,7 +6950,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_event_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html';
 										}
 									},
 									'-',
@@ -6862,7 +6961,7 @@ Ext.onReady( function() {
 										handler: function() {
 											if (NS.isSessionStorage) {
 												ns.app.layout.parentGraphMap = ns.app.accordion.treePanel.getParentGraphMap();
-												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?s=eventanalytical');
+												ns.core.web.storage.session.set(ns.app.layout, 'eventanalytical', ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html?s=eventanalytical');
 											}
 										}
 									},
@@ -6871,7 +6970,7 @@ Ext.onReady( function() {
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && JSON.parse(sessionStorage.getItem('dhis2')) && JSON.parse(sessionStorage.getItem('dhis2'))['eventchart']),
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/app/index.html?s=eventchart';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html?s=eventchart';
 										}
 									}
 								],

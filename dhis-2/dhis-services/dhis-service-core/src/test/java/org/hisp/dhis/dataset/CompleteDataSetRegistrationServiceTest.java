@@ -54,48 +54,26 @@ public class CompleteDataSetRegistrationServiceTest
     extends DhisSpringTest
 {
     private CompleteDataSetRegistration registrationA;
-
     private CompleteDataSetRegistration registrationB;
-
     private CompleteDataSetRegistration registrationC;
-
     private CompleteDataSetRegistration registrationD;
-
     private CompleteDataSetRegistration registrationE;
-
     private CompleteDataSetRegistration registrationF;
-
     private CompleteDataSetRegistration registrationG;
-
     private CompleteDataSetRegistration registrationH;
 
     private DataSet dataSetA;
-
     private DataSet dataSetB;
-
     private DataSet dataSetC;
 
     private Period periodA;
-
     private Period periodB;
 
     private OrganisationUnit sourceA;
-
     private OrganisationUnit sourceB;
-
     private OrganisationUnit sourceC;
 
     private Date onTimeA;
-
-    private Date onTimeB;
-
-    private Date deadlineA;
-
-    private Date deadlineB;
-
-    private Date tooLateA;
-
-    private Date tooLateB;
 
     private DataElementCategoryOptionCombo optionCombo;
 
@@ -148,11 +126,6 @@ public class CompleteDataSetRegistrationServiceTest
         optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
 
         onTimeA = getDate( 2000, 1, 10 );
-        onTimeB = getDate( 2000, 2, 10 );
-        deadlineA = getDate( 2000, 1, 15 );
-        deadlineB = getDate( 2000, 2, 15 );
-        tooLateA = getDate( 2000, 1, 25 );
-        tooLateB = getDate( 2000, 2, 25 );
     }
 
     // -------------------------------------------------------------------------
@@ -190,11 +163,6 @@ public class CompleteDataSetRegistrationServiceTest
 
         assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetA, periodA, sourceA, optionCombo ) );
         assertNotNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetB, periodB, sourceA, optionCombo ) );
-
-        completeDataSetRegistrationService.deleteCompleteDataSetRegistration( registrationB );
-
-        assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetA, periodA, sourceA, optionCombo ) );
-        assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetB, periodB, sourceA, optionCombo ) );
     }
 
     @Test

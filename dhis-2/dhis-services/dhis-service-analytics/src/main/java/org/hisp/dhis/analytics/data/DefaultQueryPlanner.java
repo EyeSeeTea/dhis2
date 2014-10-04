@@ -28,9 +28,6 @@ package org.hisp.dhis.analytics.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
-import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
 import static org.hisp.dhis.analytics.AggregationType.SUM;
 import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 import static org.hisp.dhis.common.DimensionalObject.CATEGORYOPTIONCOMBO_DIM_ID;
@@ -40,9 +37,12 @@ import static org.hisp.dhis.common.DimensionalObject.INDICATOR_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE;
+import static org.hisp.dhis.dataelement.DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM;
 import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_BOOL;
+import static org.hisp.dhis.dataelement.DataElement.VALUE_TYPE_INT;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -52,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.DataQueryGroups;
 import org.hisp.dhis.analytics.DataQueryParams;
+import org.hisp.dhis.analytics.DataType;
 import org.hisp.dhis.analytics.Partitions;
 import org.hisp.dhis.analytics.QueryPlanner;
 import org.hisp.dhis.analytics.partition.PartitionManager;
@@ -80,6 +81,8 @@ public class DefaultQueryPlanner
     implements QueryPlanner
 {
     private static final Log log = LogFactory.getLog( DefaultQueryPlanner.class );
+
+    private static final List<String> AVERAGE_AGG_OPERATORS = Arrays.asList( AGGREGATION_OPERATOR_AVERAGE_SUM, AGGREGATION_OPERATOR_AVERAGE );
     
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -233,29 +236,34 @@ public class DefaultQueryPlanner
 
                 for ( DataQueryParams byPeriodType : groupedByPeriodType )
                 {
-                    List<DataQueryParams> groupedByAggregationType = groupByAggregationType( byPeriodType );
-
-                    for ( DataQueryParams byAggregationType : groupedByAggregationType )
+                    List<DataQueryParams> groupedByDataType = groupByDataType( byPeriodType );
+                    
+                    for ( DataQueryParams byDataType : groupedByDataType )
                     {
-                        if ( AVERAGE_INT_DISAGGREGATION.equals( byAggregationType.getAggregationType() ) )
+                        List<DataQueryParams> groupedByAggregationType = groupByAggregationType( byDataType );
+    
+                        for ( DataQueryParams byAggregationType : groupedByAggregationType )
                         {
-                            List<DataQueryParams> groupedByDataPeriodType = groupByDataPeriodType( byAggregationType );
-                            
-                            for ( DataQueryParams byDataPeriodType : groupedByDataPeriodType )
+                            if ( byAggregationType.isDisaggregation() )
                             {
-                                byDataPeriodType.setPartitions( byPartition.getPartitions() );
-                                byDataPeriodType.setPeriodType( byPeriodType.getPeriodType() );
-                                byDataPeriodType.setAggregationType( byAggregationType.getAggregationType() );
+                                List<DataQueryParams> groupedByDataPeriodType = groupByDataPeriodType( byAggregationType );
                                 
-                                queries.add( byDataPeriodType );
+                                for ( DataQueryParams byDataPeriodType : groupedByDataPeriodType )
+                                {
+                                    byDataPeriodType.setPartitions( byPartition.getPartitions() );
+                                    byDataPeriodType.setPeriodType( byPeriodType.getPeriodType() );
+                                    byDataPeriodType.setAggregationType( byAggregationType.getAggregationType() );
+                                    
+                                    queries.add( byDataPeriodType );
+                                }
                             }
-                        }
-                        else
-                        {
-                            byAggregationType.setPartitions( byPartition.getPartitions() );
-                            byAggregationType.setPeriodType( byPeriodType.getPeriodType() );
-                            
-                            queries.add( byAggregationType );
+                            else
+                            {
+                                byAggregationType.setPartitions( byPartition.getPartitions() );
+                                byAggregationType.setPeriodType( byPeriodType.getPeriodType() );
+                                
+                                queries.add( byAggregationType );
+                            }
                         }
                     }
                 }
@@ -500,7 +508,38 @@ public class DefaultQueryPlanner
         
         return queries;    
     }
-    
+
+    private List<DataQueryParams> groupByDataType( DataQueryParams params )
+    {
+        List<DataQueryParams> queries = new ArrayList<>();
+        
+        if ( params.getDataElements() != null && !params.getDataElements().isEmpty() )
+        {
+            ListMap<DataType, NameableObject> dataTypeDataElementMap = getDataTypeDataElementMap( params.getDataElements() );
+            
+            for ( DataType dataType : dataTypeDataElementMap.keySet() )
+            {
+                DataQueryParams query = params.instance();
+                query.setDataElements( dataTypeDataElementMap.get( dataType ) );
+                query.setDataType( dataType );
+                queries.add( query );
+            }
+        }
+        else
+        {
+            DataQueryParams query = params.instance();
+            query.setDataType( DataType.NUMERIC );
+            queries.add( query );
+        }
+
+        if ( queries.size() > 1 )
+        {
+            log.debug( "Split on data type: " + queries.size() );
+        }
+        
+        return queries;
+    }
+
     /**
      * Groups the given query in sub queries based on the aggregation type of its
      * data elements. The aggregation type can be sum, average aggregation or
@@ -578,7 +617,7 @@ public class DefaultQueryPlanner
         
         return queries;
     }
-    
+
     /**
      * Groups the given query in sub queries based on the period type of its
      * data elements. Sets the data period type on each query.
@@ -634,7 +673,26 @@ public class DefaultQueryPlanner
         
         return map;
     }
+    
+    /**
+     * Creates a mapping between data type and data element for the given data elements.
+     */
+    private ListMap<DataType, NameableObject> getDataTypeDataElementMap(  Collection<NameableObject> dataElements )
+    {
+        ListMap<DataType, NameableObject> map = new ListMap<>();
         
+        for ( NameableObject element : dataElements )
+        {
+            DataElement de = (DataElement) element;
+            
+            DataType dataType = DataElement.VALUE_TYPE_STRING.equals( de.getType() ) ? DataType.TEXT : DataType.NUMERIC;
+            
+            map.putValue( dataType, de );
+        }
+        
+        return map;
+    }
+    
     /**
      * Creates a mapping between the aggregation type and data element for the
      * given data elements and period type.
@@ -663,24 +721,29 @@ public class DefaultQueryPlanner
         PeriodType aggregationPeriodType, PeriodType dataPeriodType )
     {
         AggregationType aggregationType = null;
+
+        boolean disaggregation = isDisaggregation( aggregationOperator, aggregationPeriodType, dataPeriodType );
+        boolean number = VALUE_TYPE_INT.equals( valueType );
         
-        if ( AGGREGATION_OPERATOR_AVERAGE.equals( aggregationOperator ) )
+        if ( AVERAGE_AGG_OPERATORS.contains( aggregationOperator ) && VALUE_TYPE_BOOL.equals( valueType ) )
         {
-            if ( VALUE_TYPE_BOOL.equals( valueType ) )
-            {
-                aggregationType = AVERAGE_BOOL;
-            }
-            else
-            {
-                if ( dataPeriodType == null || aggregationPeriodType == null || aggregationPeriodType.getFrequencyOrder() >= dataPeriodType.getFrequencyOrder() )
-                {
-                    aggregationType = AVERAGE_INT;
-                }
-                else
-                {
-                    aggregationType = AVERAGE_INT_DISAGGREGATION;
-                }
-            }
+            aggregationType = AggregationType.AVERAGE_BOOL;
+        }
+        else if ( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM.equals( aggregationOperator ) && number && disaggregation )
+        {
+            aggregationType = AggregationType.AVERAGE_SUM_INT_DISAGGREGATION;
+        }
+        else if ( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM.equals( aggregationOperator ) && number )
+        {
+            aggregationType = AggregationType.AVERAGE_SUM_INT;
+        }
+        else if ( DataElement.AGGREGATION_OPERATOR_AVERAGE.equals( aggregationOperator ) && number && disaggregation )
+        {
+            aggregationType = AggregationType.AVERAGE_INT_DISAGGREGATION;
+        }
+        else if ( DataElement.AGGREGATION_OPERATOR_AVERAGE.equals( aggregationOperator ) && number )
+        {
+            aggregationType = AggregationType.AVERAGE_INT;
         }
         else
         {
@@ -690,6 +753,15 @@ public class DefaultQueryPlanner
         return aggregationType;
     }
 
+    /**
+     * Indicates whether disaggregation is allowed for the given input.
+     */
+    private boolean isDisaggregation( String aggregationOperator, 
+        PeriodType aggregationPeriodType, PeriodType dataPeriodType )
+    {
+        return dataPeriodType != null && aggregationPeriodType != null && aggregationPeriodType.getFrequencyOrder() < dataPeriodType.getFrequencyOrder();
+    }
+    
     /**
      * Creates a mapping between the period type and the data element for the
      * given data elements.

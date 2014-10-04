@@ -80,6 +80,24 @@ public class ListUtils
     }
     
     /**
+     * Retains only elements in the give list that are part of the given retain
+     * list.
+     * 
+     * @param list the target list.
+     * @param retain the elements to retain in the target list.
+     */
+    public static <T> List<T> retainAll( List<T> list, List<T> retain )
+    {
+        if ( list == null || retain == null )
+        {
+            return list;
+        }
+        
+        list.retainAll( retain );
+        return list;
+    }
+    
+    /**
      * Returns a sublist of the given list with the elements at the given indexes.
      * 
      * @param list the list to select from.
@@ -159,7 +177,8 @@ public class ListUtils
      * @param items the items which should be included in the Collection.
      * @return a Collection.
      */
-    public static <T> Collection<T> getCollection( T... items )
+    @SafeVarargs
+    public static final <T> Collection<T> getCollection( final T... items )
     {
         List<T> list = new ArrayList<>();
         
@@ -177,7 +196,8 @@ public class ListUtils
      * @param items the items which should be included in the List.
      * @return a List.
      */
-    public static <T> List<T> getList( T... items )
+    @SafeVarargs
+    public static final <T> List<T> getList( final T... items )
     {
         List<T> list = new ArrayList<>();
         
@@ -237,7 +257,7 @@ public class ListUtils
      * @return a union of the given lists.
      */
     @SafeVarargs
-    public static <T> List<T> union( final List<T>... lists )
+    public static final <T> List<T> union( final List<T>... lists )
     {
         final List<T> union = new ArrayList<>();
         

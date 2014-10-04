@@ -93,6 +93,13 @@ public class DefaultUserService
     {
         this.userAuthorityGroupStore = userAuthorityGroupStore;
     }
+    
+    private UserSettingStore userSettingStore;
+
+    public void setUserSettingStore( UserSettingStore userSettingStore )
+    {
+        this.userSettingStore = userSettingStore;
+    }
 
     private CurrentUserService currentUserService;
 
@@ -223,7 +230,7 @@ public class DefaultUserService
     @Override
     public List<User> getAllUsersBetweenByName( String name, int first, int max )
     {
-        return userStore.getAllLikeNameOrderedName( name, first, max );
+        return userStore.getAllLikeName( name, first, max );
     }
 
     @Override
@@ -317,7 +324,7 @@ public class DefaultUserService
             users.add( uidUser );
         }
 
-        users.addAll( userStore.getAllLikeNameOrderedName( query, 0, 1000 ) ); //TODO
+        users.addAll( userStore.getAllLikeName( query, 0, 1000 ) ); //TODO
 
         return users;
     }
@@ -418,7 +425,7 @@ public class DefaultUserService
 
     public Collection<UserAuthorityGroup> getUserRolesBetweenByName( String name, int first, int max )
     {
-        return userAuthorityGroupStore.getAllLikeNameOrderedName( name, first, max );
+        return userAuthorityGroupStore.getAllLikeName( name, first, max );
     }
 
     public int getUserRoleCount()
@@ -461,7 +468,7 @@ public class DefaultUserService
     // UserCredentials
     // -------------------------------------------------------------------------
 
-    public User addUserCredentials( UserCredentials userCredentials )
+    public int addUserCredentials( UserCredentials userCredentials )
     {
         return userCredentialsStore.addUserCredentials( userCredentials );
     }
@@ -622,7 +629,7 @@ public class DefaultUserService
 
     public void addUserSetting( UserSetting userSetting )
     {
-        userCredentialsStore.addUserSetting( userSetting );
+        userSettingStore.addUserSetting( userSetting );
     }
 
     public void addOrUpdateUserSetting( UserSetting userSetting )
@@ -642,27 +649,27 @@ public class DefaultUserService
 
     public void updateUserSetting( UserSetting userSetting )
     {
-        userCredentialsStore.updateUserSetting( userSetting );
+        userSettingStore.updateUserSetting( userSetting );
     }
 
     public void deleteUserSetting( UserSetting userSetting )
     {
-        userCredentialsStore.deleteUserSetting( userSetting );
+        userSettingStore.deleteUserSetting( userSetting );
     }
 
     public Collection<UserSetting> getAllUserSettings( User user )
     {
-        return userCredentialsStore.getAllUserSettings( user );
+        return userSettingStore.getAllUserSettings( user );
     }
 
     public Collection<UserSetting> getUserSettings( String name )
     {
-        return userCredentialsStore.getUserSettings( name );
+        return userSettingStore.getUserSettings( name );
     }
 
     public UserSetting getUserSetting( User user, String name )
     {
-        return userCredentialsStore.getUserSetting( user, name );
+        return userSettingStore.getUserSetting( user, name );
     }
 
     public Serializable getUserSettingValue( User user, String name, Serializable defaultValue )
@@ -676,7 +683,7 @@ public class DefaultUserService
     {
         Map<User, Serializable> map = new HashMap<>();
 
-        for ( UserSetting setting : userCredentialsStore.getUserSettings( name ) )
+        for ( UserSetting setting : userSettingStore.getUserSettings( name ) )
         {
             map.put( setting.getUser(), setting.getValue() != null ? setting.getValue() : defaultValue );
         }

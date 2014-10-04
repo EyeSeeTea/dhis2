@@ -213,6 +213,11 @@ public class DefaultAclService implements AclService
     {
         Schema schema = schemaService.getSchema( klass );
 
+        if ( schema == null )
+        {
+            return false;
+        }
+
         if ( !schema.isShareable() )
         {
             return canAccess( user, schema.getAuthorityByType( AuthorityType.CREATE ) );
@@ -254,7 +259,7 @@ public class DefaultAclService implements AclService
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public Class<? extends IdentifiableObject> classForType( String type )
     {
         Schema schema = schemaService.getSchemaBySingularName( type );

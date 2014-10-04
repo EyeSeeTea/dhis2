@@ -43,6 +43,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -51,25 +52,12 @@ import org.junit.Test;
 public class DataElementStoreTest
     extends DhisSpringTest
 {
+    @Autowired
     private DataElementStore dataElementStore;
     
+    @Autowired
     private DataSetService dataSetService;
-    
-    // -------------------------------------------------------------------------
-    // Fixture
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void setUpTest()
-        throws Exception
-    {
-        dataElementStore = (DataElementStore) getBean( DataElementStore.ID );
         
-        dataElementService = (DataElementService) getBean( DataElementService.ID );
-        
-        dataSetService = (DataSetService) getBean( DataSetService.ID );
-    }
-    
     // -------------------------------------------------------------------------
     // Tests
     // -------------------------------------------------------------------------
@@ -271,12 +259,12 @@ public class DataElementStoreTest
     public void testGetDataElementsByAggregationOperator()
     {
         assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE ).size() );
+            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
         assertEquals( 0, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
             .size() );
 
         DataElement dataElementA = createDataElement( 'A' );
-        dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE );
+        dataElementA.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM );
         DataElement dataElementB = createDataElement( 'B' );
         dataElementB.setAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM );
         DataElement dataElementC = createDataElement( 'C' );
@@ -290,7 +278,7 @@ public class DataElementStoreTest
         dataElementStore.save( dataElementD );
 
         assertEquals( 1, dataElementStore.getDataElementsByAggregationOperator(
-            DataElement.AGGREGATION_OPERATOR_AVERAGE ).size() );
+            DataElement.AGGREGATION_OPERATOR_AVERAGE_SUM ).size() );
         assertEquals( 3, dataElementStore.getDataElementsByAggregationOperator( DataElement.AGGREGATION_OPERATOR_SUM )
             .size() );
     }

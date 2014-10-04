@@ -31,12 +31,15 @@ package org.hisp.dhis.analytics.data;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_BOOL;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT;
 import static org.hisp.dhis.analytics.AggregationType.AVERAGE_INT_DISAGGREGATION;
+import static org.hisp.dhis.analytics.AggregationType.AVERAGE_SUM_INT;
 import static org.hisp.dhis.analytics.AggregationType.COUNT;
+import static org.hisp.dhis.analytics.AggregationType.MAX;
+import static org.hisp.dhis.analytics.AggregationType.MIN;
 import static org.hisp.dhis.analytics.AggregationType.STDDEV;
 import static org.hisp.dhis.analytics.AggregationType.VARIANCE;
-import static org.hisp.dhis.analytics.AggregationType.MIN;
-import static org.hisp.dhis.analytics.AggregationType.MAX;
+import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 import static org.hisp.dhis.analytics.DataQueryParams.VALUE_ID;
+import static org.hisp.dhis.analytics.DataType.TEXT;
 import static org.hisp.dhis.analytics.MeasureFilter.EQ;
 import static org.hisp.dhis.analytics.MeasureFilter.GE;
 import static org.hisp.dhis.analytics.MeasureFilter.GT;
@@ -47,7 +50,6 @@ import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 import static org.hisp.dhis.system.util.TextUtils.removeLastOr;
 import static org.hisp.dhis.system.util.TextUtils.trimEnd;
-import static org.hisp.dhis.analytics.DataQueryParams.LEVEL_PREFIX;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -110,7 +112,7 @@ public class JdbcAnalyticsManager
     // -------------------------------------------------------------------------
     
     @Async
-    public Future<Map<String, Double>> getAggregatedDataValues( DataQueryParams params )
+    public Future<Map<String, Object>> getAggregatedDataValues( DataQueryParams params )
     {
         try
         {
@@ -133,7 +135,7 @@ public class JdbcAnalyticsManager
         
             log.debug( sql );
     
-            Map<String, Double> map = null;
+            Map<String, Object> map = null;
             
             try
             {
@@ -143,7 +145,7 @@ public class JdbcAnalyticsManager
             {
                 log.info( "Query failed, likely because the requested analytics table does not exist", ex );
                 
-                return new AsyncResult<Map<String, Double>>( new HashMap<String, Double>() );
+                return new AsyncResult<Map<String, Object>>( new HashMap<String, Object>() );
             }
             
             replaceDataPeriodsWithAggregationPeriods( map, params, dataPeriodAggregationPeriodMap );
@@ -158,9 +160,9 @@ public class JdbcAnalyticsManager
         }
     }
     
-    public void replaceDataPeriodsWithAggregationPeriods( Map<String, Double> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
+    public void replaceDataPeriodsWithAggregationPeriods( Map<String, Object> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
     {
-        if ( params.isAggregationType( AVERAGE_INT_DISAGGREGATION ) )
+        if ( params.isDisaggregation() )
         {
             int periodIndex = params.getPeriodDimensionIndex();
             
@@ -181,7 +183,7 @@ public class JdbcAnalyticsManager
                 
                 Assert.notNull( periods, dataPeriodAggregationPeriodMap.toString() );
                 
-                Double value = dataValueMap.get( key );
+                Object value = dataValueMap.get( key );
                 
                 for ( NameableObject period : periods )
                 {
@@ -205,12 +207,34 @@ public class JdbcAnalyticsManager
     private String getSelectClause( DataQueryParams params )
     {
         String sql = "select " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() ) + ", ";
+
+        if ( params.isDataType( TEXT ) )
+        {
+            sql += "textvalue";
+        }
+        else // NUMERIC
+        {
+            sql += getNumericValueColumn( params );
+        }
         
-        if ( params.isAggregationType( AVERAGE_INT ) )
+        sql += " as value ";
+        
+        return sql;        
+    }
+    
+    private String getNumericValueColumn( DataQueryParams params )
+    {
+        String sql = "";
+        
+        if ( params.isAggregationType( AVERAGE_SUM_INT ) )
         {
             int days = PeriodType.getPeriodTypeByName( params.getPeriodType() ).getFrequencyOrder();
             
             sql += "sum(daysxvalue) / " + days;
+        }
+        else if ( params.isAggregationType( AVERAGE_INT ) || params.isAggregationType( AVERAGE_INT_DISAGGREGATION ) )
+        {
+            sql += "avg(value)";
         }
         else if ( params.isAggregationType( AVERAGE_BOOL ) )
         {
@@ -236,14 +260,12 @@ public class JdbcAnalyticsManager
         {
             sql += "max(value)";
         }
-        else // SUM, AVERAGE_DISAGGREGATION and undefined //TODO
+        else // SUM, AVERAGE_SUM_INT_DISAGGREGATION and undefined //TODO
         {
             sql += "sum(value)";
         }
         
-        sql += " as value ";
-        
-        return sql;        
+        return sql;
     }
     
     /**
@@ -258,7 +280,7 @@ public class JdbcAnalyticsManager
         {
             sql += "select " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() ) + ", ";
             
-            if ( params.isAggregationType( AVERAGE_INT ) )
+            if ( params.isAggregationType( AVERAGE_SUM_INT ) )
             {
                 sql += "daysxvalue";
             }
@@ -347,7 +369,12 @@ public class JdbcAnalyticsManager
      */
     private String getGroupByClause( DataQueryParams params )
     {
-        String sql = "group by " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() );
+        String sql = "";
+        
+        if ( params.isAggregation() )
+        {
+            sql = "group by " + getCommaDelimitedQuotedColumns( params.getQueryDimensions() );
+        }
         
         return sql;
     }
@@ -356,10 +383,10 @@ public class JdbcAnalyticsManager
      * Retrieves data from the database based on the given query and SQL and puts
      * into a value key and value mapping.
      */
-    private Map<String, Double> getKeyValueMap( DataQueryParams params, String sql )
+    private Map<String, Object> getKeyValueMap( DataQueryParams params, String sql )
         throws BadSqlGrammarException
     {
-        Map<String, Double> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         
         Timer t = new Timer().start();
         
@@ -369,13 +396,6 @@ public class JdbcAnalyticsManager
         
         while ( rowSet.next() )
         {
-            Double value = rowSet.getDouble( VALUE_ID );
-
-            if ( !measureCriteriaSatisfied( params, value ) )
-            {
-                continue;
-            }
-            
             StringBuilder key = new StringBuilder();
             
             for ( DimensionalObject dim : params.getQueryDimensions() )
@@ -385,7 +405,26 @@ public class JdbcAnalyticsManager
             
             key.deleteCharAt( key.length() - 1 );
             
-            map.put( key.toString(), value );
+            if ( params.isDataType( TEXT ) )
+            {
+                String value = rowSet.getString( VALUE_ID );
+                
+                map.put( key.toString(), value );
+            }
+            else // NUMERIC
+            {
+                Double value = rowSet.getDouble( VALUE_ID );
+    
+                if ( value != null && Double.class.equals( value.getClass() ) )
+                {
+                    if ( !measureCriteriaSatisfied( params, (Double) value ) )
+                    {
+                        continue;
+                    }
+                }
+                
+                map.put( key.toString(), value );
+            }            
         }
         
         return map;

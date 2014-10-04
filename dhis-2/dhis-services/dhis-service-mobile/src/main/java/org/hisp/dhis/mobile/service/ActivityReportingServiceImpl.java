@@ -63,13 +63,17 @@ import org.hisp.dhis.api.mobile.model.comparator.ActivityComparator;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.GridHeader;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
+import org.hisp.dhis.common.QueryFilter;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.event.EventStatus;
-import org.hisp.dhis.interpretation.InterpretationService;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.i18n.I18nManager;
+import org.hisp.dhis.interpretation.InterpretationService;
 import org.hisp.dhis.message.Message;
 import org.hisp.dhis.message.MessageConversation;
 import org.hisp.dhis.message.MessageService;
@@ -824,8 +828,7 @@ public class ActivityReportingServiceImpl
         patientModel.setCompletedPrograms( mobileCompletedProgramInstanceList );
 
         // Set Relationship
-        List<Relationship> relationships = new ArrayList<>(
-            relationshipService.getRelationshipsForTrackedEntityInstance( patient ) );
+        Collection<Relationship> relationships = relationshipService.getRelationshipsForTrackedEntityInstance( patient );
         List<org.hisp.dhis.api.mobile.model.LWUITmodel.Relationship> relationshipList = new ArrayList<>();
 
         for ( Relationship eachRelationship : relationships )
@@ -835,15 +838,34 @@ public class ActivityReportingServiceImpl
             if ( eachRelationship.getEntityInstanceA().getId() == patient.getId() )
             {
                 relationshipMobile.setName( eachRelationship.getRelationshipType().getaIsToB() );
-                relationshipMobile.setPersonBName( eachRelationship.getEntityInstanceB().getName() );
+                relationshipMobile.setaIsToB( eachRelationship.getRelationshipType().getaIsToB() );
+                relationshipMobile.setbIsToA( eachRelationship.getRelationshipType().getbIsToA() );
                 relationshipMobile.setPersonBId( eachRelationship.getEntityInstanceB().getId() );
             }
             else
             {
                 relationshipMobile.setName( eachRelationship.getRelationshipType().getbIsToA() );
-                relationshipMobile.setPersonBName( eachRelationship.getEntityInstanceA().getName() );
+                relationshipMobile.setaIsToB( eachRelationship.getRelationshipType().getbIsToA() );
+                relationshipMobile.setbIsToA( eachRelationship.getRelationshipType().getaIsToB() );
                 relationshipMobile.setPersonBId( eachRelationship.getEntityInstanceA().getId() );
             }
+            
+            // get relative's name
+            TrackedEntityInstance relative = entityInstanceService.getTrackedEntityInstance( relationshipMobile
+                .getPersonBId() );
+            List<TrackedEntityAttributeValue> attributes = new ArrayList<TrackedEntityAttributeValue>(
+                relative.getAttributeValues() );
+
+            String relativeName = "";
+            for ( TrackedEntityAttributeValue value : attributes )
+            {
+                if ( value != null && value.getAttribute().getDisplayInListNoProgram() )
+                {
+                    relativeName += value.getValue() + " ";
+                }
+            }
+            relationshipMobile.setPersonBName( relativeName );
+            
             relationshipList.add( relationshipMobile );
         }
         patientModel.setRelationships( relationshipList );
@@ -1074,29 +1096,15 @@ public class ActivityReportingServiceImpl
         }
         else
         {
-            List<TrackedEntityInstance> patients = new ArrayList<>();
-
-            // remove the own searcher
-            patients = removeIfDuplicated( patients, enrollmentRelationship.getPersonAId() );
-
-            if ( patients.size() > 1 )
-            {
-                String patientsInfo = "";
-
-                for ( TrackedEntityInstance each : patients )
-                {
-                    patientsInfo += each.getId() + "/" + each.getName() + "$";
-                }
-
-                throw new NotAllowedException( patientsInfo );
-            }
-            else if ( patients.size() == 0 )
+            String instanceInfo = findPatientInAdvanced( enrollmentRelationship.getPersonBName(), orgUnitId,
+                0 );
+            if ( instanceInfo == null || instanceInfo.trim().length() == 0 )
             {
                 throw NotAllowedException.NO_BENEFICIARY_FOUND;
             }
             else
             {
-                patientB = patients.get( 0 );
+                throw new NotAllowedException( instanceInfo );
             }
         }
         TrackedEntityInstance patientA = entityInstanceService.getTrackedEntityInstance( enrollmentRelationship
@@ -1303,19 +1311,6 @@ public class ActivityReportingServiceImpl
         return anonymousProgramMobile;
     }
 
-    private List<TrackedEntityInstance> removeIfDuplicated( List<TrackedEntityInstance> patients, int patientId )
-    {
-        List<TrackedEntityInstance> result = new ArrayList<>( patients );
-        for ( int i = 0; i < patients.size(); i++ )
-        {
-            if ( patients.get( i ).getId() == patientId )
-            {
-                result.remove( i );
-            }
-        }
-        return result;
-    }
-
     private void saveDataValues( ActivityValue activityValue, ProgramStageInstance programStageInstance,
         Map<Integer, DataElement> dataElementMap )
     {
@@ -1490,10 +1485,17 @@ public class ActivityReportingServiceImpl
     }
 
     @Override
-    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findPatient( int patientId )
+    public org.hisp.dhis.api.mobile.model.LWUITmodel.Patient findPatient( String patientId )
         throws NotAllowedException
     {
         TrackedEntityInstance patient = entityInstanceService.getTrackedEntityInstance( patientId );
+
+        // Temporary fix
+        if ( patient == null )
+        {
+            patient = entityInstanceService.getTrackedEntityInstance( Integer.parseInt( patientId ) );
+        }
+
         org.hisp.dhis.api.mobile.model.LWUITmodel.Patient patientMobile = getPatientModel( patient );
         return patientMobile;
     }
@@ -1514,100 +1516,137 @@ public class ActivityReportingServiceImpl
         return patientlist;
     }
 
+    /**
+     * keyword is on format of
+     * {attribute-id1}:{operator1}:{filter-value1};{attribute
+     * -id2}:{operator2}:{filter-value2}
+     */
     @Override
     public String findPatientInAdvanced( String keyword, int orgUnitId, int programId )
         throws NotAllowedException
     {
-        Set<TrackedEntityInstance> patients = new HashSet<>();
+        TrackedEntityInstanceQueryParams param = new TrackedEntityInstanceQueryParams();
+        List<TrackedEntityAttribute> displayAttributes = new ArrayList<TrackedEntityAttribute>(
+            attributeService.getTrackedEntityAttributesDisplayInList() );
 
-        Collection<TrackedEntityAttribute> attributes = attributeService.getAllTrackedEntityAttributes();
-
-        for ( TrackedEntityAttribute displayAttribute : attributes )
+        for ( TrackedEntityAttribute trackedEntityAttribute : displayAttributes )
         {
-            Collection<TrackedEntityInstance> resultPatients = attValueService.getTrackedEntityInstance(
-                displayAttribute, keyword );
-            // Search in specific OrgUnit
-            if ( orgUnitId != 0 )
+            QueryItem queryItem = new QueryItem( trackedEntityAttribute );
+            param.addAttribute( queryItem );
+        }
+
+        if ( programId != 0 )
+        {
+            param.setProgram( programService.getProgram( programId ) );
+        }
+
+        if ( orgUnitId != 0 )
+        {
+            param.addOrganisationUnit( organisationUnitService.getOrganisationUnit( orgUnitId ) );
+            param.setOrganisationUnitMode( OrganisationUnitSelectionMode.SELECTED );
+        }
+        else
+        {
+            param.setOrganisationUnitMode( OrganisationUnitSelectionMode.ALL );
+        }
+
+        String[] items = keyword.split( ";" );
+
+        if ( items == null )
+        {
+            items = new String[1];
+            items[0] = keyword;
+        }
+
+        for ( int i = 0; i < items.length; i++ )
+        {
+            String[] split = keyword.split( ":" );
+            if ( split == null || (split.length != 3 && split.length != 2) )
             {
-                for ( TrackedEntityInstance patient : resultPatients )
-                {
-                    if ( patient.getOrganisationUnit().getId() == orgUnitId )
-                    {
-                        patients.add( patient );
-                    }
-                }
+                throw NotAllowedException.INVALID_FILTER;
             }
-            // Search in all OrgUnit
+
+            if ( split.length == 2 )
+            {
+                QueryOperator operator = QueryOperator.fromString( split[0] );
+                param.setQuery( new QueryFilter( operator, split[1] ) );
+            }
             else
             {
-                patients.addAll( resultPatients );
+                TrackedEntityAttribute at = attributeService.getTrackedEntityAttributeByName( split[0] );
+                QueryItem queryItem = new QueryItem( at, at.isNumericType() );
+                QueryOperator operator = QueryOperator.fromString( split[1] );
+                queryItem.getFilters().add( new QueryFilter( operator, split[2] ) );
+                param.getFilters().add( queryItem );
             }
         }
 
-        if ( patients.size() == 0 )
+        Grid trackedEntityInstanceGrid = entityInstanceService.getTrackedEntityInstances( param );
+        List<List<Object>> listOfTrackedEntityInstance = trackedEntityInstanceGrid.getRows();
+
+        if ( listOfTrackedEntityInstance.size() == 0 )
         {
             throw NotAllowedException.NO_BENEFICIARY_FOUND;
         }
 
-        Set<TrackedEntity> trackedentities = new HashSet<>();
-        for ( TrackedEntityInstance patient : patients )
+        /**
+         * Grid columns: 0 = instance 1 = created 2 = lastupdated 3 = ou 4 = te
+         * 5 onwards = attributes
+         */
+        int instanceIndex = 0;
+        int teIndex = 4;
+        List<Integer> attributesIndex = new ArrayList<Integer>();
+        List<GridHeader> headers = trackedEntityInstanceGrid.getHeaders();
+        int index = 0;
+        for ( GridHeader header : headers )
         {
-            if ( patient.getTrackedEntity() != null )
+            if ( header.getName().equals( "instance" ) )
             {
-                trackedentities.add( patient.getTrackedEntity() );
+                instanceIndex = index;
             }
+            else if ( header.getName().equals( "te" ) )
+            {
+                teIndex = index;
+            }
+            else if ( !header.getName().equals( "created" ) && !header.getName().equals( "lastupdated" )
+                && !header.getName().equals( "ou" ) )
+            {
+                attributesIndex.add( new Integer( index ) );
+            }
+            index++;
         }
 
-        String resultSet = "";
-
-        Collection<TrackedEntityAttribute> displayAttributes = attributeService
-            .getTrackedEntityAttributesDisplayInList();
-        for ( TrackedEntity trackedentity : trackedentities )
+        String instanceInfo = "";
+        String trackedEntityName = "";
+        for ( List<Object> row : listOfTrackedEntityInstance )
         {
-            resultSet += trackedentity.getDisplayName() + "$";
-            for ( TrackedEntityInstance patient : patients )
+            TrackedEntity te = trackedEntityService.getTrackedEntity( (String) row.get( teIndex ) );
+            if ( !trackedEntityName.equals( te.getDisplayName() ) )
             {
-                if ( patient.getTrackedEntity() != null && patient.getTrackedEntity().getId() == trackedentity.getId() )
+                trackedEntityName = te.getDisplayName();
+                instanceInfo += te.getDisplayName() + "$";
+            }
+
+            // NOTE: this line should be here but because the mobile client uses
+            // the int TEI id, we will temprarily get the int id for now.
+            // instanceInfo += (String) row.get( instanceIndex ) + "/";
+                        
+            TrackedEntityInstance tei = entityInstanceService.getTrackedEntityInstance( (String) row.get( instanceIndex ) );
+            instanceInfo += tei.getId() + "/";
+            //end of temproary fix
+
+            String attText = "";
+            for ( Integer attIndex : attributesIndex )
+            {
+                if ( row.get( attIndex.intValue() ) != null )
                 {
-                    resultSet += patient.getId() + "/";
-                    String attText = "";
-                    for ( TrackedEntityAttribute displayAttribute : displayAttributes )
-                    {
-                        TrackedEntityAttributeValue value = attValueService.getTrackedEntityAttributeValue( patient,
-                            displayAttribute );
-                        if ( value != null )
-                        {
-                            attText += value.getValue() + " ";
-                        }
-                    }
-                    attText = attText.trim();
-                    resultSet += attText + "$";
+                    attText += (String) row.get( attIndex.intValue() ) + " ";
                 }
             }
+            instanceInfo += attText.trim() + "$";
         }
 
-        // get tracked entity with no tracked entity name
-        resultSet += "Others$";
-        for ( TrackedEntityInstance patient : patients )
-        {
-            if ( patient.getTrackedEntity() == null )
-            {
-                resultSet += patient.getId() + "/";
-                String attText = "";
-                for ( TrackedEntityAttribute displayAttribute : displayAttributes )
-                {
-                    TrackedEntityAttributeValue value = attValueService.getTrackedEntityAttributeValue( patient,
-                        displayAttribute );
-                    if ( value != null )
-                    {
-                        attText += value.getValue() + " ";
-                    }
-                }
-                attText = attText.trim();
-                resultSet += attText + "$";
-            }
-        }
-        return resultSet;
+        return instanceInfo;
     }
 
     @Override

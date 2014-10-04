@@ -62,6 +62,7 @@ a:hover
 #accountArea
 {
   position: absolute;
+  top: 22px;
   right: 17px;
   padding: 18px 30px 18px 0;
   font-size: 17px;
@@ -129,11 +130,16 @@ a:hover
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 10px 0 9px 50px;
+  padding: 10px 0 9px 0;
   font-size: 13px;
   border-top: 1px solid #416f9d;
   color: #6b90b8;
   width: 100%;
+}
+
+#poweredByLabel
+{
+  margin-left: 50px;
 }
 
 #localeSelect

@@ -339,7 +339,7 @@ class DataApprovalSelection
             }
         }
 
-        if ( orgUnitLevel >= dal.getOrgUnitLevel() && orgUnit.getAllDataSets().contains( daIn.getDataSet() ) )
+        if ( orgUnitLevel >= dal.getOrgUnitLevel() && daIn.getDataSet().getSources().contains( orgUnit ) )
         {
             return true; // Not OK because we see a data set assignment but no approval.
         }

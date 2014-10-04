@@ -151,6 +151,7 @@ trackerCapture.controller('ProgramSummaryController',
     function($scope, 
             $modalInstance,
             orderByFilter,
+            DateUtils,
             ProgramStageFactory,
             dhis2Event,
             selectedTei,
@@ -168,7 +169,7 @@ trackerCapture.controller('ProgramSummaryController',
     if(!angular.isUndefined( $scope.currentEvent.notes)){
         $scope.currentEvent.notes = orderByFilter($scope.currentEvent.notes, '-storedDate');            
         angular.forEach($scope.currentEvent.notes, function(note){
-            note.storedDate = moment(note.storedDate).format('YYYY-MM-DD @ hh:mm A');
+            note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
         });
     }
     
@@ -184,15 +185,9 @@ trackerCapture.controller('ProgramSummaryController',
             }                
         });
         angular.forEach($scope.currentEvent.dataValues, function(dataValue){
-            var val = dataValue.value;
-            if(val){
-                var de = $scope.currentStage.programStageDataElements[dataValue.dataElement];
-                if( de && de.type === 'int' && val){
-                    val = parseInt(val);
-                    dataValue.value = val;
-                }
-                $scope.currentEvent[dataValue.dataElement] = val;
-            }                    
+            if(dataValue.dataElement){
+                $scope.currentEvent[dataValue.dataElement] = dataValue;
+            }            
         });
     });
     

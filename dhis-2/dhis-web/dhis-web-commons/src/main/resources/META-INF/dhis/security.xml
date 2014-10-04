@@ -23,7 +23,7 @@
   <sec:http pattern="/dhis-web-commons/css/**" security="none" />
   <sec:http pattern="/dhis-web-commons/flags/**" security="none" />
   <sec:http pattern="/dhis-web-commons/fonts/**" security="none" />
-  <sec:http pattern="/api/files/style/external" security="none" />
+  <sec:http pattern="/api/files/style/external.js" security="none" />
   <sec:http pattern="/external-static/**" security="none" />
   <sec:http pattern="/favicon.ico" security="none" />
 
@@ -52,6 +52,7 @@
     <sec:intercept-url pattern="/api/account/username" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/recovery" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/restore" access="permitAll()" />
+    <sec:intercept-url pattern="/api/account/password" access="permitAll()" />
     <sec:intercept-url pattern="/api/account" access="permitAll()" />
     <sec:intercept-url pattern="/**" access="isAuthenticated()" />
     <sec:custom-filter ref="automaticAccessFilter" before="LOGOUT_FILTER" />
@@ -96,12 +97,22 @@
   <!-- Security : Authentication providers -->
 
   <sec:authentication-manager alias="authenticationManager">
+    <sec:authentication-provider ref="migrationAuthenticationProvider" />
+  </sec:authentication-manager>
+
+  <!--
+  As of 2.17 user password hashes are being migrated from MD5(password, username) to bCrypt(password).
+  The migration is implemented in the migrationAuthenticationProvider configured above.
+  Once migration is complete, the authentication-manager configuration above can be
+  replaced by the one given below (commented). At that point the system will no longer accept
+  authentication request from users which are still stored with an MD5 hash in the database.
+
+  <sec:authentication-manager alias="authenticationManager">
     <sec:authentication-provider user-service-ref="userDetailsService">
-      <sec:password-encoder hash="md5">
-        <sec:salt-source ref="usernameSaltSource" />
-      </sec:password-encoder>
+      <sec:password-encoder ref="bCryptPasswordEncoder" />
     </sec:authentication-provider>
   </sec:authentication-manager>
+  -->
 
   <!-- Security : AccessProvider -->
 

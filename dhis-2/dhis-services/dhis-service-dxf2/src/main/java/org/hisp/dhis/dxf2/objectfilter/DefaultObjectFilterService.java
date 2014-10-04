@@ -29,8 +29,10 @@ package org.hisp.dhis.dxf2.objectfilter;
  */
 
 import com.google.common.collect.Lists;
+
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dxf2.objectfilter.ops.Op;
+import org.hisp.dhis.dxf2.objectfilter.ops.OpStatus;
 import org.hisp.dhis.dxf2.parser.ParserService;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
@@ -164,9 +166,11 @@ public class DefaultObjectFilterService implements ObjectFilterService
         return true;
     }
 
+    /**
+     * Filters through every operator treating multiple of same operator as OR.
+     */
     private boolean evaluateFilterOps( Object value, FilterOps filterOps )
     {
-        // filter through every operator treating multiple of same operator as OR
         for ( String operator : filterOps.getFilters().keySet() )
         {
             boolean include = false;
@@ -175,12 +179,11 @@ public class DefaultObjectFilterService implements ObjectFilterService
 
             for ( Op op : ops )
             {
-                switch ( op.evaluate( value ) )
+                OpStatus status = op.evaluate( value );
+                
+                if ( OpStatus.INCLUDE.equals( status ) )
                 {
-                    case INCLUDE:
-                    {
-                        include = true;
-                    }
+                    include = true;
                 }
             }
 

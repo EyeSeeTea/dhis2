@@ -28,13 +28,14 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.system.deletion.DeletionHandler;
 
 /**
@@ -125,6 +126,21 @@ public class DataSetDeletionHandler
             dataSetService.updateDataSet( dataSet );
         }
     }
+    
+    @Override
+    public void deleteDataElementCategoryCombo( DataElementCategoryCombo categoryCombo )
+    {
+        Collection<DataSet> dataSets = dataSetService.getAllDataSets();
+
+        for ( DataSet dataSet : dataSets )
+        {            
+            if ( dataSet != null && categoryCombo.equals( dataSet.getCategoryCombo() ) )
+            {
+                dataSet.setCategoryCombo( null );
+                dataSetService.updateDataSet( dataSet );
+            }
+        }        
+    }
 
     @Override
     public void deleteOrganisationUnit( OrganisationUnit unit )
@@ -135,19 +151,6 @@ public class DataSetDeletionHandler
         {
             DataSet dataSet = iterator.next();
             dataSet.getSources().remove( unit );
-            dataSetService.updateDataSet( dataSet );
-        }
-    }
-    
-    @Override
-    public void deleteOrganisationUnitGroup( OrganisationUnitGroup group )
-    {
-        Iterator<DataSet> iterator = group.getDataSets().iterator();
-        
-        while ( iterator.hasNext() )
-        {
-            DataSet dataSet = iterator.next();
-            dataSet.getOrganisationUnitGroups().remove( group );
             dataSetService.updateDataSet( dataSet );
         }
     }

@@ -9,7 +9,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities','attributes','optionSets']
+        objectStores: ['trackerCapturePrograms', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes','optionSets']
     });
     return{
         currentStore: store
@@ -203,7 +203,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service to deal with enrollment */
-.service('EnrollmentService', function($http, EventUtils, DHIS2EventFactory) {
+.service('EnrollmentService', function($http) {
     
     return {        
         get: function( enrollmentUid ){
@@ -236,13 +236,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;
         },
-        cancelled: function(enrollment){
+        cancel: function(enrollment){
             var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/cancelled').then(function(response){
                 return response.data;               
             });
             return promise;           
         },
-        completed: function(enrollment){
+        complete: function(enrollment){
             var promise = $http.put('../api/enrollments/' + enrollment.enrollment + '/completed').then(function(response){
                 return response.data;               
             });
@@ -251,7 +251,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };   
 })
 
-/* Service for getting tracked entity instances */
+/* Service for getting tracked entity */
 .factory('TEService', function(StorageService, $q, $rootScope) {
 
     return {
@@ -273,6 +273,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             StorageService.currentStore.open().done(function(){
                 StorageService.currentStore.get('trackedEntities', uid).done(function(te){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(te);
+                    });
+                });
+            });                        
+            return def.promise;            
+        }
+    };
+})
+
+/* Service for getting tracked entity Form */
+.factory('TEFormService', function(StorageService, $q, $rootScope) {
+
+    return {
+        getByProgram: function(programUid){            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('trackedEntityForms', programUid).done(function(te){                    
                     $rootScope.$apply(function(){
                         def.resolve(te);
                     });
@@ -591,6 +610,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
+/* factory for handling event reports */
+.factory('EventReportService', function($http, $q) {   
+    
+    return {        
+        getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){ 
+            var pgSize = pager ? pager.pageSize : 50;
+        	var pg = pager ? pager.page : 1;
+            var url = '../api/events/overdue.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&programStatus=' + programStatus + '&eventStatus='+ eventStatus + '&pageSize=' + pgSize + '&page=' + pg;
+            if(startDate && endDate){
+                url = url + '&startDate=' + startDate + '&endDate=' + endDate ;
+            }
+            var promise = $http.get( url ).then(function(response){
+                return response.data;
+            });            
+            return promise;
+        }
+    };    
+})
+
 .factory('OperatorFactory', function(){
     
     var defaultOperators = ['IS', 'RANGE' ];
@@ -797,8 +835,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                             ' ng-change="saveDatavalue(programStageDataElements.'+ deId + ')"' + 
                                             ' ng-required="programStageDataElements.' + deId + '.compulsory">' + 
                                             '<option value="">{{\'please_select\'| translate}}</option>' +
-                                            '<option value="0">{{\'no\'| translate}}</option>' + 
-                                            '<option value="1">{{\'yes\'| translate}}</option>';
+                                            '<option value="false">{{\'no\'| translate}}</option>' + 
+                                            '<option value="true">{{\'yes\'| translate}}</option>' +
+                                            '</select>';
                         }
                         if(programStageDataElements[deId].dataElement.type == "date"){
                             newInputField = '<input type="text" ' +
@@ -966,6 +1005,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
+/* Context menu for grid*/
+.service('ContextMenuSelectedItem', function(){
+    this.selectedItem = '';
+    
+    this.setSelectedItem = function(selectedItem){  
+        this.selectedItem = selectedItem;        
+    };
+    
+    this.getSelectedItem = function(){
+        return this.selectedItem;
+    };
+})
+
 /* Translation service - gets logged in user profile for the server, 
  * and apply user's locale to translation
  */
@@ -1056,7 +1108,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
 })
 
-.service('TEIGridService', function(OrgUnitService, DateUtils){
+.service('TEIGridService', function(OrgUnitService, DateUtils, $translate){
     
     return {
         format: function(grid, map){
@@ -1116,8 +1168,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var columns = attributes ? angular.copy(attributes) : [];
        
             //also add extra columns which are not part of attributes (orgunit for example)
-            columns.push({id: 'orgUnitName', name: 'Registering unit', type: 'string', displayInListNoProgram: false});
-            columns.push({id: 'created', name: 'Registration date', type: 'string', displayInListNoProgram: false});
+            columns.push({id: 'orgUnitName', name: $translate('registering_unit'), type: 'string', displayInListNoProgram: false});
+            columns.push({id: 'created', name: $translate('registration_date'), type: 'date', displayInListNoProgram: false});
 
             //generate grid column for the selected program/attributes
             angular.forEach(columns, function(column){
@@ -1127,10 +1179,33 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
                 if(column.displayInListNoProgram || column.displayInList){
                     column.show = true;
-                }           
+                }  
+                column.showFilter = false;
             });     
             
             return columns;  
+        },
+        getData: function(rows, columns){
+            var data = [];
+            angular.forEach(rows, function(row){
+                var d = {};
+                angular.forEach(columns, function(col){
+                    if(col.show){
+                        d[col.name] = row[col.id];
+                    }                
+                });
+                data.push(d);            
+            });
+            return data;
+        },
+        getHeader: function(columns){
+            var header = []; 
+            angular.forEach(columns, function(col){
+                if(col.show){
+                    header.push($translate(col.name));
+                }
+            });        
+            return header;
         }
     };
 })
@@ -1143,17 +1218,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             dateValue = Date.parse(dateValue);
             dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
             return dateValue;
+        },
+        formatToHrsMins: function(dateValue) {            
+            return moment(dateValue).format('YYYY-MM-DD @ hh:mm A');
         }
     };            
 })
 
-.service('EventUtils', function($filter, OrgUnitService){
+.service('EventUtils', function($filter, DateUtils, OrgUnitService){
     return {
         createDummyEvent: function(programStage, orgUnit, enrollment){
             
-            var today = moment();
-            today = Date.parse(today);
-            today = $filter('date')(today, 'yyyy-MM-dd');
+            var today = DateUtils.format(moment());
     
             var dueDate = this.getEventDueDate(programStage, enrollment);
             var dummyEvent = {programStage: programStage.id, 
@@ -1163,17 +1239,15 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                               sortingDate: dueDate,
                               name: programStage.name,
                               reportDateDescription: programStage.reportDateDescription,
-                              status: 'ACTIVE'};
-            dummyEvent.statusColor = 'alert alert-info';//'stage-on-time';
+                              status: 'SCHEDULED'};
+            dummyEvent.statusColor = 'alert alert-warning';//'stage-on-time';
             if(moment(today).isAfter(dummyEvent.dueDate)){
                 dummyEvent.statusColor = 'alert alert-danger';//'stage-overdue';
             }
             return dummyEvent;        
         },
         getEventStatusColor: function(dhis2Event){    
-            var today = moment();
-            today = Date.parse(today);
-            today = $filter('date')(today, 'yyyy-MM-dd');
+            var today = DateUtils.format(moment());
             var eventDate = today;
             
             if(dhis2Event.eventDate){
@@ -1184,19 +1258,24 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return 'alert alert-success';//'stage-completed';
             }
             else if(dhis2Event.status === 'SKIPPED'){
-                return 'alert alert-warning'; //'stage-skipped';
+                return 'alert alert-default'; //'stage-skipped';
             }
             else{                
-                if(moment(eventDate).isAfter(dhis2Event.dueDate)){
-                    return 'alert alert-danger';//'stage-overdue';
-                }                
-                return 'alert alert-info';//'stage-on-time';
+                if(dhis2Event.eventDate){
+                    return 'alert alert-info'; //'stage-executed';
+                }
+                else{
+                    if(moment(eventDate).isAfter(dhis2Event.dueDate)){
+                        return 'alert alert-danger';//'stage-overdue';
+                    }                
+                    return 'alert alert-warning';//'stage-on-time';
+                }               
             }            
         },
         getEventDueDate: function(programStage, enrollment){
-            var dueDate = moment(moment(enrollment.dateOfIncident).add('d', programStage.minDaysFromStart), 'YYYY-MM-DD')._d;
-            dueDate = Date.parse(dueDate);
-            dueDate = $filter('date')(dueDate, 'yyyy-MM-dd');
+            var dueDate = DateUtils.format(enrollment.dateOfIncident);
+            dueDate = moment(dueDate).add('d', programStage.minDaysFromStart)._d;
+            dueDate = DateUtils.format(dueDate);
             return dueDate;
         },
         getEventOrgUnitName: function(orgUnitId){            
@@ -1215,7 +1294,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 OrgUnitService.open().then(function(){
                     OrgUnitService.get(dhis2Event.orgUnit).then(function(ou){
                         if(ou){
-                            dhis2Event.orgUnitName = ou.n;
+                            dhis2Event.eventOrgUnitName = ou.n;
                             return dhis2Event;                            
                         }                                                       
                     });                            

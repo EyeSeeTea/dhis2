@@ -165,7 +165,24 @@ public class DefaultDimensionService
         
         return null;
     }
-
+    
+    public DimensionalObject getDimension( String uid, DimensionType dimensionType )
+    {
+        if ( uid == null || dimensionType == null )
+        {
+            return null;
+        }
+        
+        Class<? extends DimensionalObject> clazz = DimensionalObject.DYNAMIC_DIMENSION_TYPE_CLASS_MAP.get( dimensionType );
+        
+        if ( clazz == null )
+        {
+            return null;
+        }
+        
+        return identifiableObjectManager.get( clazz, uid );
+    }
+    
     public List<NameableObject> getCanReadDimensionItems( String uid )
     {
         DimensionalObject dimension = getDimension( uid );
@@ -294,8 +311,10 @@ public class DefaultDimensionService
         dimensions.addAll( cogs );
         dimensions.addAll( cs );
         
-        return dimensions;        
+        return dimensions;
     }
+    
+    
 
     @Override
     public void mergeAnalyticalObject( BaseAnalyticalObject object )
