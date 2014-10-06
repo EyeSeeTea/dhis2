@@ -1,4 +1,4 @@
-package org.hisp.dhis.about.action;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,65 +28,38 @@ package org.hisp.dhis.about.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManager;
-import org.hisp.dhis.setting.SystemSettingManager;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_START_MODULE;
+import com.google.common.collect.Lists;
+import org.hisp.dhis.schema.Authority;
+import org.hisp.dhis.schema.AuthorityType;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.hisp.dhis.trackedentity.TrackedEntityForm;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class RedirectAction
-    implements Action
+@Component
+public class TrackedEntityFormSchemaDescriptor implements SchemaDescriptor
 {
-    @Autowired
-    private SystemSettingManager systemSettingManager;
+    public static final String SINGULAR = "trackedEntityForm";
 
-    @Autowired
-    private AppManager appManager;
+    public static final String PLURAL = "trackedEntityForms";
 
-    private String redirectUrl;
-
-    public String getRedirectUrl()
-    {
-        return redirectUrl;
-    }
+    public static final String API_ENDPOINT = "/" + PLURAL;
 
     @Override
-    public String execute()
-        throws Exception
+    public Schema getSchema()
     {
-        String startModule = (String) systemSettingManager.getSystemSetting( KEY_START_MODULE );
+        Schema schema = new Schema( TrackedEntityForm.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setOrder( 1490 );
+        schema.setMetadata( false );
 
-        if ( startModule != null )
-        {
-            if ( startModule.startsWith( "app:" ) )
-            {
-                List<App> apps = appManager.getApps();
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE, Lists.newArrayList( "F_ADD_TRACKED_ENTITY_FORM" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.UPDATE, Lists.newArrayList( "F_ADD_TRACKED_ENTITY_FORM" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_ADD_TRACKED_ENTITY_FORM" ) ) );
 
-                for ( App app : apps )
-                {
-                    if ( app.getName().equals( startModule.substring( "app:".length() ) ) )
-                    {
-                        redirectUrl = app.getLaunchUrl();
-                        return SUCCESS;
-                    }
-                }
-            }
-            else
-            {
-                redirectUrl = "../" + startModule + "/index.action";
-                return SUCCESS;
-            }
-        }
-
-        redirectUrl = "../dhis-web-dashboard-integration/index.action";
-
-        return SUCCESS;
+        return schema;
     }
 }

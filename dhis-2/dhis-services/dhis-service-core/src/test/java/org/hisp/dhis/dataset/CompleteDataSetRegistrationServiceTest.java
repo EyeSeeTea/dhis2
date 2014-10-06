@@ -54,35 +54,23 @@ public class CompleteDataSetRegistrationServiceTest
     extends DhisSpringTest
 {
     private CompleteDataSetRegistration registrationA;
-
     private CompleteDataSetRegistration registrationB;
-
     private CompleteDataSetRegistration registrationC;
-
     private CompleteDataSetRegistration registrationD;
-
     private CompleteDataSetRegistration registrationE;
-
     private CompleteDataSetRegistration registrationF;
-
     private CompleteDataSetRegistration registrationG;
-
     private CompleteDataSetRegistration registrationH;
 
     private DataSet dataSetA;
-
     private DataSet dataSetB;
-
     private DataSet dataSetC;
 
     private Period periodA;
-
     private Period periodB;
 
     private OrganisationUnit sourceA;
-
     private OrganisationUnit sourceB;
-
     private OrganisationUnit sourceC;
 
     private Date onTimeA;
@@ -175,11 +163,6 @@ public class CompleteDataSetRegistrationServiceTest
 
         assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetA, periodA, sourceA, optionCombo ) );
         assertNotNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetB, periodB, sourceA, optionCombo ) );
-
-        completeDataSetRegistrationService.deleteCompleteDataSetRegistration( registrationB );
-
-        assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetA, periodA, sourceA, optionCombo ) );
-        assertNull( completeDataSetRegistrationService.getCompleteDataSetRegistration( dataSetB, periodB, sourceA, optionCombo ) );
     }
 
     @Test

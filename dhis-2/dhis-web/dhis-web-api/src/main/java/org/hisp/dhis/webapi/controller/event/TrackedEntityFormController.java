@@ -1,4 +1,4 @@
-package org.hisp.dhis.node.types;
+package org.hisp.dhis.webapi.controller.event;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -25,64 +25,21 @@ package org.hisp.dhis.node.types;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.node.AbstractNode;
-import org.hisp.dhis.node.NodeType;
-
-import java.util.Objects;
+import org.hisp.dhis.schema.descriptors.TrackedEntityFormSchemaDescriptor;
+import org.hisp.dhis.trackedentity.TrackedEntityForm;
+import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CollectionNode extends AbstractNode
+@Controller
+@RequestMapping( value = TrackedEntityFormSchemaDescriptor.API_ENDPOINT )
+public class TrackedEntityFormController
+    extends AbstractCrudController<TrackedEntityForm>
 {
-    /**
-     * Should this collection act as a wrapper around its children.
-     */
-    boolean wrapping = true;
-
-    public CollectionNode( String name )
-    {
-        super( name, NodeType.COLLECTION );
-    }
-
-    public boolean isWrapping()
-    {
-        return wrapping;
-    }
-
-    public void setWrapping( boolean wrapping )
-    {
-        this.wrapping = wrapping;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 31 * super.hashCode() + Objects.hash( wrapping );
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-
-        if ( obj == null || getClass() != obj.getClass() )
-        {
-            return false;
-        }
-
-        if ( !super.equals( obj ) )
-        {
-            return false;
-        }
-
-        final CollectionNode other = (CollectionNode) obj;
-        return Objects.equals( this.wrapping, other.wrapping );
-    }
 }
