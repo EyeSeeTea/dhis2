@@ -1,5 +1,3 @@
-package org.hisp.dhis.settings.action.system;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -27,117 +25,72 @@ package org.hisp.dhis.settings.action.system;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.trackedentity.action.programstage;
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManager;
-import org.hisp.dhis.i18n.locale.LocaleManager;
-import org.hisp.dhis.setting.StyleManager;
-import org.hisp.dhis.setting.SystemSettingManager;
-import org.hisp.dhis.system.util.Filter;
-import org.hisp.dhis.system.util.FilterUtils;
-import org.hisp.dhis.webportal.module.Module;
-import org.hisp.dhis.webportal.module.ModuleManager;
-import org.hisp.dhis.webportal.module.StartableModuleFilter;
+import java.util.List;
+
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.SortedMap;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author Lars Helge Overland
+ * @author Chau Thu Tran
+ *
+ * @version $ SortProgramStagesAction.java Oct 6, 2014 2:16:00 PM $
  */
-public class GetAppearanceSettingsAction
+public class SortProgramStagesAction
     implements Action
 {
-    private static final Filter<Module> startableFilter = new StartableModuleFilter();
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     @Autowired
-    private SystemSettingManager systemSettingManager;
-
-    @Autowired
-    private ModuleManager moduleManager;
-
-    @Autowired
-    private StyleManager styleManager;
-
-    @Autowired
-    private LocaleManager localeManager;
-
-    @Autowired
-    private AppManager appManager;
+    private ProgramStageService programStageService;
 
     // -------------------------------------------------------------------------
-    // Output
+    // Getters & setters
     // -------------------------------------------------------------------------
 
-    private List<String> flags = new ArrayList<>();
+    private Integer id;
 
-    public List<String> getFlags()
+    public void setId( Integer id )
     {
-        return flags;
+        this.id = id;
     }
 
-    private List<Module> modules = new ArrayList<>();
-
-    public List<Module> getModules()
+    public Integer getId()
     {
-        return modules;
+        return id;
     }
 
-    private List<App> apps = new ArrayList<>();
+    private List<Integer> programStageIds;
 
-    public List<App> getApps()
+    public void setProgramStageIds( List<Integer> programStageIds )
     {
-        return apps;
-    }
-
-    private SortedMap<String, String> styles;
-
-    public SortedMap<String, String> getStyles()
-    {
-        return styles;
-    }
-
-    private String currentStyle;
-
-    public String getCurrentStyle()
-    {
-        return currentStyle;
-    }
-
-    private List<Locale> availableLocales = new ArrayList<>();
-
-    public List<Locale> getAvailableLocales()
-    {
-        return availableLocales;
+        this.programStageIds = programStageIds;
     }
 
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
+        throws Exception
     {
-        availableLocales = localeManager.getAvailableLocales();
+        int index = 1;
+        
+        for ( Integer id : programStageIds )
+        {
+            ProgramStage programStage = programStageService.getProgramStage( id );
+            programStage.setSortOrder( index );
+            programStageService.updateProgramStage( programStage );
 
-        styles = styleManager.getStyles();
-
-        currentStyle = styleManager.getSystemStyle();
-
-        flags = systemSettingManager.getFlags();
-
-        modules = moduleManager.getMenuModules();
-
-        apps = appManager.getApps();
-
-        FilterUtils.filter( modules, startableFilter );
+            index++;
+        }
 
         return SUCCESS;
     }

@@ -41,6 +41,7 @@ import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.common.IllegalQueryException;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.system.grid.GridUtils;
 import org.hisp.dhis.webapi.utils.ContextUtils;
@@ -48,6 +49,7 @@ import org.hisp.dhis.webapi.utils.ContextUtils.CacheStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -156,6 +158,33 @@ public class AnalyticsController
         GridUtils.toHtml( substituteMetaData( grid ), response.getWriter() );
     }
 
+    @RequestMapping( value = RESOURCE_PATH + ".html+css", method = RequestMethod.GET )
+    public void getHtmlCss(
+        @RequestParam Set<String> dimension,
+        @RequestParam( required = false ) Set<String> filter,
+        @RequestParam( required = false ) AggregationType aggregationType,
+        @RequestParam( required = false ) String measureCriteria,
+        @RequestParam( required = false ) boolean skipMeta,
+        @RequestParam( required = false ) boolean skipRounding,
+        @RequestParam( required = false ) boolean hierarchyMeta,
+        @RequestParam( required = false ) boolean ignoreLimit,
+        @RequestParam( required = false ) boolean tableLayout,
+        @RequestParam( required = false ) boolean hideEmptyRows,
+        @RequestParam( required = false ) boolean showHierarchy,
+        @RequestParam( required = false ) DisplayProperty displayProperty,
+        @RequestParam( required = false ) String columns,
+        @RequestParam( required = false ) String rows,
+        Model model,
+        HttpServletResponse response ) throws Exception
+    {
+        DataQueryParams params = analyticsService.getFromUrl( dimension, filter, aggregationType, measureCriteria,
+            skipMeta, skipRounding, hierarchyMeta, ignoreLimit, hideEmptyRows, showHierarchy, displayProperty, i18nManager.getI18nFormat() );
+
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_HTML, CacheStrategy.RESPECT_SYSTEM_SETTING );
+        Grid grid = analyticsService.getAggregatedDataValues( params, tableLayout, getDimensionsFromParam( columns ), getDimensionsFromParam( rows ) );
+        GridUtils.toHtmlCss( substituteMetaData( grid ), response.getWriter() );
+    }
+
     @RequestMapping( value = RESOURCE_PATH + ".csv", method = RequestMethod.GET )
     public void getCsv(
         @RequestParam Set<String> dimension,
@@ -251,5 +280,15 @@ public class AnalyticsController
         }
 
         return grid;
+    }
+
+    // -------------------------------------------------------------------------
+    // Exception handlers
+    // -------------------------------------------------------------------------
+
+    @ExceptionHandler( IllegalQueryException.class )
+    public void illegalQueryExceptionHandler( IllegalQueryException ex, HttpServletResponse response )
+    {
+        ContextUtils.conflictResponse( response, ex.getMessage() );
     }
 }
