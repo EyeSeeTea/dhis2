@@ -36,9 +36,8 @@ trackerCapture.controller('DashboardController',
             $scope.selectedEnrollment = null;
             
             EnrollmentService.getByEntityAndProgram($scope.selectedEntity.trackedEntityInstance, $scope.selectedProgram.id, 'ACTIVE').then(function(data){
-            
-                if(data.enrollmentList.length === 1){        
-                    $scope.selectedEnrollment = data.enrollmentList[0].enrollment;                    
+                if(data.enrollments.length === 1){        
+                    $scope.selectedEnrollment = data.enrollments[0].enrollment;                    
                     if(!angular.isUndefined($scope.selectedEntity.relationships)){
                         TEIService.get($scope.selectedEntity.relationships[0].trackedEntityInstanceB).then(function(contact){
                             CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
