@@ -100,4 +100,13 @@ public interface DataAnalysisStore
      * @return a collection of DeflatedDataValues.
      */
     Collection<DeflatedDataValue> getDataValuesMarkedForFollowup();
+
+    /**
+     * Returns a collection of DeflatedDataValues which are marked for followup and
+     * whose source OrganisationUnit is lower or equal to the given sourceId hierarchically.
+     *
+     * @param sourceId the id of the OrganisationUnit for which to get the DeflatedDataValues.
+     * @return a collection of DeflatedDataValues.
+     */
+    Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( String sourceId, int level );
 }

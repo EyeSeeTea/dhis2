@@ -44,7 +44,7 @@
 	#foreach( $value in $dataValues )	
 	#set( $count = $count + 1 )	
 	<tr>	
-		<td><span id="value-${count}-name">$encoder.htmlEncode( $value.dataElementName ) $encoder.htmlEncode( $value.categoryOptionComboNameParsed )</span></td>
+		<td><span id="value-${count}-name">$encoder.htmlEncode( $value.dataElementName ) $encoder.htmlEncode( $value.categoryOptionComboNamezxParsed )</span></td>
 		
 		<td>$encoder.htmlEncode( $value.sourceName )</td>
 		

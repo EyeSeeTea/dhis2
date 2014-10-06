@@ -62,4 +62,13 @@ public class FollowupAnalysisService
     {
         return dataAnalysisStore.getDataValuesMarkedForFollowup();
     }
+
+    // -------------------------------------------------------------------------
+    // DataAnalysisService implementation
+    // -------------------------------------------------------------------------
+
+    private Collection<DeflatedDataValue> getDataValuesMarkedForFollowupLimitLevel( String sourceId, int level )
+    {
+        return dataAnalysisStore.getDataValuesMarkedForFollowup( sourceId, level );
+    }
 }

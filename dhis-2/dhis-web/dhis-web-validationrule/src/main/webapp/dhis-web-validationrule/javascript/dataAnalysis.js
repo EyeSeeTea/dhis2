@@ -93,6 +93,20 @@ function getFollowUpAnalysis()
     } );
 }
 
+function getFollowUpAnalysisByOrgUnit( orgUnitUid )
+{
+    setHeaderWaitMessage( i18n_analysing_please_wait );
+
+    var url = "getAnalysis.action?key=followup?orgUnit=" + orgUnitUid;
+
+    $.get( url, function( data)
+    {
+        hideHeaderMessage();
+        $( "div#analysisResult" ).show();
+        $( "div#analysisResult" ).html( data );
+    } );
+}
+
 function displayAnalysisInput()
 {
 	$( 'div#analysisInput' ).show();
