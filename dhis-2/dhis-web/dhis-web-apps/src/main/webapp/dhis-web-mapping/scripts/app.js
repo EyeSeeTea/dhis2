@@ -8680,7 +8680,7 @@ Ext.onReady( function() {
 
 					if (gis.init.user.isAdmin) {
 						a.push({
-							text: GIS.i18n.legend,
+							text: GIS.i18n.legends,
 							menu: {},
 							handler: function() {
 								if (viewport.legendSetWindow && viewport.legendSetWindow.destroy) {
