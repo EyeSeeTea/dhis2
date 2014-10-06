@@ -438,7 +438,7 @@ nav a#pull {
 
 .container-link-empty {
     margin-right: -4px;
-    width: 16.7%;
+    width: 16%;
     min-height: 85px !important;
     border-right: 1px solid #18324c;
     display: inline-block;
@@ -448,7 +448,7 @@ nav a#pull {
 
 .container-link {
     margin-right: -4px;
-    width: 16.7%;
+    width: 16%;
     min-height: 85px !important;
     border-right: 1px solid #18324c;
     display: inline-block;
