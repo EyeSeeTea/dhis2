@@ -28,10 +28,12 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Jim Grace
@@ -69,6 +71,19 @@ public interface DataApprovalLevelService
      * @return a data approval level.
      */
     DataApprovalLevel getDataApprovalLevelByLevelNumber( int levelNumber );
+
+    /**
+     * Gets the highest approval level for a given organisation unit and
+     * (optionally) a set of attribute option groups. Returns the first
+     * approval level matching both the orgUnit's level and (optionally)
+     * having a category option group set containing one of the category
+     * option groups.
+     *
+     * @param orgUnit
+     * @param cogs
+     * @return
+     */
+    DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit, Set<CategoryOptionGroup> cogs );
 
     /**
      * Gets a list of all data approval levels.

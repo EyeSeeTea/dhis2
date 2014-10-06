@@ -48,96 +48,31 @@ public interface DataApprovalService
 
     /**
      * Approves data.
-     * <p>
-     * If present, dataSets, attributeOptionGroups and/or attributeOptions
-     * override the properties specified in the dataApproval object.
-     *
-     * @param dataApproval the data approval properties to approve.
-     * @param dataSets data sets to check for approval (if any).
-     * @param attributeOptionGroups attribute option groups to approve.
-     * @param attributeOptions attribute options to approve.
-     */
-    void approveData( DataApproval dataApproval,
-                      Set<DataSet> dataSets,
-                      Set<CategoryOptionGroup> attributeOptionGroups,
-                      Set<DataElementCategoryOption> attributeOptions );
-
-    /**
-     * Approves data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be approved.
      */
-    void approveData(List<DataApproval> dataApprovalList);
+    void approveData( List<DataApproval> dataApprovalList );
 
     /**
      * Unapproves data.
-     * <p>
-     * If present, dataSets, attributeOptionGroups and/or attributeOptions
-     * override the properties specified in the dataApproval object.
-     *
-     * @param dataApproval the data approval properties to unapprove.
-     * @param dataSets data sets to check for approval (if any).
-     * @param attributeOptionGroups attribute option groups to unapprove.
-     * @param attributeOptions attribute options to unapprove.
-     */
-    void unapproveData( DataApproval dataApproval,
-                        Set<DataSet> dataSets,
-                        Set<CategoryOptionGroup> attributeOptionGroups,
-                        Set<DataElementCategoryOption> attributeOptions );
-
-    /**
-     * Unapproves data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be unapproved.
      */
-    void unapproveData(List<DataApproval> dataApprovalList);
+    void unapproveData( List<DataApproval> dataApprovalList );
 
     /**
      * Accepts data.
-     * <p>
-     * If present, dataSets, attributeOptionGroups and/or attributeOptions
-     * override the properties specified in the dataApproval object.
-     *
-     * @param dataApproval the data approval properties to accept.
-     * @param dataSets data sets to check for approval (if any).
-     * @param attributeOptionGroups attribute option groups to accept.
-     * @param attributeOptions attribute options to accept.
-     */
-    void acceptData( DataApproval dataApproval,
-                     Set<DataSet> dataSets,
-                     Set<CategoryOptionGroup> attributeOptionGroups,
-                     Set<DataElementCategoryOption> attributeOptions );
-
-    /**
-     * Accepts data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be accepted.
      */
-    void acceptData(List<DataApproval> dataApprovalList);
+    void acceptData( List<DataApproval> dataApprovalList );
 
     /**
      * Unaccepts data.
-     * <p>
-     * If present, attributeOptionGroups and/or attributeOptions
-     * override the attribute option group combination specified
-     * in the dataApproval object.
-     *
-     * @param dataApproval the data approval properties to unaccept.
-     * @param dataSets data sets to check for approval (if any).
-     * @param attributeOptionGroups attribute option groups to unaccept.
-     * @param attributeOptions attribute options to unaccept.
-     */
-    void unacceptData( DataApproval dataApproval,
-                       Set<DataSet> dataSets,
-                       Set<CategoryOptionGroup> attributeOptionGroups,
-                       Set<DataElementCategoryOption> attributeOptions );
-
-    /**
-     * Unaccepts data from a list of data approval objects.
      *
      * @param dataApprovalList describes the data to be unaccepted.
      */
-    void unacceptData(List<DataApproval> dataApprovalList);
+    void unacceptData( List<DataApproval> dataApprovalList );
 
     /**
      * Returns the data approval status for a given data set, period,
@@ -161,15 +96,15 @@ public interface DataApprovalService
      * category combination. If attributeOptionCombo is null, the default
      * option combo will be used.
      *
-     * @param dataSets Data set(s) to check for approval.
+     * @param dataSet DataSet to check for approval.
      * @param period Period to check for approval.
      * @param organisationUnit OrganisationUnit to check for approval.
      * @param categoryOptionGroups CategoryOptionGroups (if any) for approval.
      * @param dataElementCategoryOptions Selected category options (if any).
      * @return the data approval permissions (including status.)
      */
-    DataApprovalStatusAndPermissions getDataApprovalPermissions( Set<DataSet> dataSets, Period period,
-                                                        OrganisationUnit organisationUnit,
-                                                        Set<CategoryOptionGroup> categoryOptionGroups,
-                                                        Set<DataElementCategoryOption> dataElementCategoryOptions );
+    DataApprovalStatusAndPermissions getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
+                                                                          OrganisationUnit organisationUnit,
+                                                                          Set<CategoryOptionGroup> categoryOptionGroups,
+                                                                          Set<DataElementCategoryOption> dataElementCategoryOptions );
 }

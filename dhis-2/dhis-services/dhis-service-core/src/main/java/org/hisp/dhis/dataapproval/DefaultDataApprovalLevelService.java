@@ -115,6 +115,43 @@ public class DefaultDataApprovalLevelService
         }
     }
 
+    public DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit, Set<CategoryOptionGroup> cogs )
+    {
+        Set<CategoryOptionGroupSet> cogSets = null;
+
+        if ( cogs != null )
+        {
+            cogSets = new HashSet<>();
+
+            for ( CategoryOptionGroup cog : cogs )
+            {
+                if ( cog.getGroupSet() != null )
+                {
+                    cogSets.add( cog.getGroupSet() );
+                }
+            }
+        }
+
+        int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
+
+        for ( DataApprovalLevel level : getDataApprovalLevelsByOrgUnitLevel( orgUnitLevel ) )
+        {
+            if ( level.getCategoryOptionGroupSet() == null )
+            {
+                if ( cogs == null )
+                {
+                    return level;
+                }
+            }
+            else if ( cogs != null && cogSets.contains( level.getCategoryOptionGroupSet() ) )
+            {
+                return level;
+            }
+        }
+
+        return null;
+    }
+
     public List<DataApprovalLevel> getAllDataApprovalLevels()
     {
         List<DataApprovalLevel> dataApprovalLevels = dataApprovalLevelStore.getAllDataApprovalLevels();

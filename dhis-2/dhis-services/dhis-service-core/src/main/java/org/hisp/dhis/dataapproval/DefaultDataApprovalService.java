@@ -46,6 +46,8 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.transaction.annotation.Transactional;
 
+import static org.hisp.dhis.system.util.CollectionUtils.asSet;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -119,100 +121,112 @@ public class DefaultDataApprovalService
     // DataApproval
     // -------------------------------------------------------------------------
 
-    public void approveData( DataApproval dataApproval,
-                             Set<DataSet> dataSets,
-                             Set<CategoryOptionGroup> attributeOptionGroups,
-                             Set<DataElementCategoryOption> attributeOptions )
-    {
-        doApprove( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ) );
-    }
-
     public void approveData( List<DataApproval> dataApprovalList )
     {
-        doApprove( checkApprovalsList( dataApprovalList, false ) );
-    }
+        List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
 
-    public void unapproveData( DataApproval dataApproval,
-                               Set<DataSet> dataSets,
-                               Set<CategoryOptionGroup> attributeOptionGroups,
-                               Set<DataElementCategoryOption> attributeOptions )
-    {
-        doUnapprove( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ) );
+        for ( Iterator<DataApproval> it = checkedList.iterator(); it.hasNext(); )
+        {
+            DataApproval da = it.next();
+
+            DataApprovalStatus status = getStatus( da );
+
+            if ( status.getDataApprovalState().isApproved() && status.getDataApprovalLevel().getLevel() >= da.getDataApprovalLevel().getLevel() )
+            {
+                it.remove(); // Already approved at this level -- no action needed.
+            }
+            else if ( !status.getDataApprovalState().isApprovable() || !mayApprove( da, status ) )
+            {
+                throw new ApprovalActionNotAllowedException();
+            }
+        }
+
+        for ( DataApproval da : checkedList )
+        {
+            dataApprovalStore.addDataApproval( da );
+        }
     }
 
     public void unapproveData( List<DataApproval> dataApprovalList )
     {
-        doUnapprove( checkApprovalsList( dataApprovalList, false ) );
-    }
+        List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
+        List<DataApproval> storedDataApprovals = new ArrayList<>();
 
-    public void acceptData( DataApproval dataApproval,
-                            Set<DataSet> dataSets,
-                            Set<CategoryOptionGroup> attributeOptionGroups,
-                            Set<DataElementCategoryOption> attributeOptions )
-    {
-        doAcceptOrUnaccept( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ), true );
+        for ( DataApproval da : checkedList )
+        {
+            DataApprovalStatus status = getStatus( da );
+
+            if ( status.getDataApprovalState().isApproved() )
+            {
+                if ( !status.getDataApprovalState().isUnapprovable() || !mayUnapprove( da, status ) )
+                {
+                    throw new ApprovalActionNotAllowedException();
+                }
+                storedDataApprovals.add ( status.getDataApproval() );
+            }
+        }
+
+        for ( DataApproval da : storedDataApprovals )
+        {
+            dataApprovalStore.deleteDataApproval( da );
+        }
     }
 
     public void acceptData( List<DataApproval> dataApprovalList )
     {
-        doAcceptOrUnaccept( checkApprovalsList( dataApprovalList, false ), true );
-    }
+        List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
+        List<DataApproval> storedDataApprovals = new ArrayList<>();
 
-    public void unacceptData( DataApproval dataApproval,
-                              Set<DataSet> dataSets,
-                              Set<CategoryOptionGroup> attributeOptionGroups,
-                              Set<DataElementCategoryOption> attributeOptions )
-    {
-        doAcceptOrUnaccept( makeApprovalsList( dataApproval, dataSets, attributeOptionGroups, attributeOptions, false ), false );
+        for ( DataApproval da : checkedList )
+        {
+            DataApprovalStatus status = getStatus( da );
+
+            if ( !status.getDataApprovalState().isAccepted() )
+            {
+                if ( !mayAcceptOrUnaccept( da, status )
+                        || !status.getDataApprovalState().isAcceptable() )
+                {
+                    throw new ApprovalActionNotAllowedException();
+                }
+                storedDataApprovals.add( status.getDataApproval() );
+            }
+        }
+
+        for ( DataApproval da : storedDataApprovals )
+        {
+            da.setAccepted( true );
+
+            dataApprovalStore.updateDataApproval( da );
+        }
     }
 
     public void unacceptData( List<DataApproval> dataApprovalList )
     {
-        doAcceptOrUnaccept( checkApprovalsList( dataApprovalList, false ), false );
-    }
+        List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
+        List<DataApproval> storedDataApprovals = new ArrayList<>();
 
-    /*
-    public void deleteDataApproval( DataApproval dataApproval )
-    {
-        boolean mayUnapprove = mayUnapprove( dataApproval.getDataApprovalLevel(), dataApproval.getOrganisationUnit(), dataApproval.isAccepted() )
-            || mayAcceptOrUnaccept( dataApproval.getDataApprovalLevel(), dataApproval.getOrganisationUnit() );
-
-        if ( ( dataApproval.getCategoryOptionGroup() == null || securityService.canRead( dataApproval.getCategoryOptionGroup() ) )
-            && mayUnapprove )
+        for ( DataApproval da : checkedList )
         {
-            PeriodType selectionPeriodType = dataApproval.getPeriod().getPeriodType();
-            PeriodType dataSetPeriodType = dataApproval.getDataSet().getPeriodType();
+            DataApprovalStatus status = getStatus( da );
 
-            if ( selectionPeriodType.equals( dataSetPeriodType ) )
+            if ( status.getDataApprovalState().isAccepted() )
             {
-                dataApprovalStore.deleteDataApproval( dataApproval );
-
-                for ( OrganisationUnit ancestor : dataApproval.getOrganisationUnit().getAncestors() )
+                if ( !mayAcceptOrUnaccept( da, status )
+                        || !status.getDataApprovalState().isUnacceptable() )
                 {
-                    DataApproval ancestorApproval = dataApprovalStore.getDataApproval(
-                        dataApproval.getDataSet(), dataApproval.getPeriod(), ancestor, dataApproval.getCategoryOptionGroup() );
-
-                    if ( ancestorApproval != null )
-                    {
-                        dataApprovalStore.deleteDataApproval( ancestorApproval );
-                    }
+                    throw new ApprovalActionNotAllowedException();
                 }
-            }
-            else if ( selectionPeriodType.getFrequencyOrder() <= dataSetPeriodType.getFrequencyOrder() )
-            {
-                log.warn( "Attempted data unapproval for period " + dataApproval.getPeriod().getIsoDate()
-                    + " is incompatible with data set period type " + dataSetPeriodType.getName() + "." );
-            }
-            else
-            {
-                unapproveCompositePeriod( dataApproval );
+                storedDataApprovals.add( status.getDataApproval() );
             }
         }
-        else
+
+        for ( DataApproval da : storedDataApprovals )
         {
-            warnNotPermitted( dataApproval, "unapprove", mayUnapprove );
+            da.setAccepted( false );
+
+            dataApprovalStore.updateDataApproval( da );
         }
-    } */
+    }
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
@@ -226,13 +240,13 @@ public class DefaultDataApprovalService
         return ( doGetDataApprovalStatus( dataApprovalList, da ) );
     }
 
-    public DataApprovalStatusAndPermissions getDataApprovalPermissions( Set<DataSet> dataSets, Period period,
-        OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups,
-        Set<DataElementCategoryOption> attributeCategoryOptions )
+    public DataApprovalStatusAndPermissions getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
+                                    OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups,
+                                    Set<DataElementCategoryOption> attributeCategoryOptions )
     {
         DataApproval da = new DataApproval( null, null, period, organisationUnit, null, false, null, null );
 
-        DataApprovalStatus status = doGetDataApprovalStatus( makeApprovalsList( da, dataSets, categoryOptionGroups, attributeCategoryOptions, true ), da );
+        DataApprovalStatus status = doGetDataApprovalStatus( makeApprovalsList( da, asSet( dataSet) , categoryOptionGroups, attributeCategoryOptions, true ), da );
 
         DataApprovalStatusAndPermissions permissions = new DataApprovalStatusAndPermissions();
 
@@ -506,83 +520,6 @@ public class DefaultDataApprovalService
         }
 
         return expandedApprovals;
-    }
-
-    private void doApprove( List<DataApproval> dataApprovalList )
-    {
-        for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
-        {
-            DataApproval da = it.next();
-
-            DataApprovalStatus status = getStatus( da );
-
-            if ( status.getDataApprovalState().isApproved() )
-            {
-                it.remove();
-            }
-            else if ( !status.getDataApprovalState().isApprovable() || !mayApprove( da, status ) )
-            {
-                throw new ApprovalActionNotAllowedException();
-            }
-        }
-
-        for ( DataApproval da : dataApprovalList )
-        {
-            dataApprovalStore.addDataApproval( da );
-        }
-    }
-
-    private void doUnapprove( List<DataApproval> dataApprovalList )
-    {
-        for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
-        {
-            DataApproval da = it.next();
-
-            DataApprovalStatus status = getStatus( da );
-
-            if ( !status.getDataApprovalState().isApproved() )
-            {
-                it.remove();
-            }
-            else if ( !status.getDataApprovalState().isUnapprovable() || !mayUnapprove( da, status ) )
-            {
-                throw new ApprovalActionNotAllowedException();
-            }
-        }
-
-        for ( DataApproval da : dataApprovalList )
-        {
-            dataApprovalStore.deleteDataApproval( da );
-        }
-    }
-
-    private void doAcceptOrUnaccept( List<DataApproval> dataApprovalList, boolean accepted )
-    {
-        for ( Iterator<DataApproval> it = dataApprovalList.iterator(); it.hasNext(); )
-        {
-            DataApproval da = it.next();
-
-            DataApprovalStatus status = getStatus( da );
-
-            if ( accepted == status.getDataApprovalState().isAccepted() )
-            {
-                it.remove();
-            }
-            else if ( !mayAcceptOrUnaccept( da, status )
-                    || accepted ?
-                    !status.getDataApprovalState().isAcceptable() :
-                    !status.getDataApprovalState().isUnacceptable() )
-            {
-                throw new ApprovalActionNotAllowedException();
-            }
-        }
-
-        for ( DataApproval da : dataApprovalList )
-        {
-            da.setAccepted( accepted );
-
-            dataApprovalStore.updateDataApproval( da );
-        }
     }
 
     private boolean mayApprove( DataApproval dataApproval, DataApprovalStatus dataApprovalStatus )
