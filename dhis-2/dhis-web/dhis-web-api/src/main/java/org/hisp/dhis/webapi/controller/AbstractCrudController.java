@@ -344,6 +344,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
+
+        preCreateEntity( parsed );
+
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
 
         if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
@@ -369,6 +372,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
+
+        preCreateEntity( parsed );
+
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.CREATE );
 
         if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
@@ -390,7 +396,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
@@ -410,6 +415,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         ((BaseIdentifiableObject) parsed).setUid( uid );
 
+        preUpdateEntity( parsed );
+
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
 
         if ( ImportStatus.SUCCESS.equals( summary.getStatus() ) )
@@ -421,7 +428,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
@@ -440,6 +446,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         ((BaseIdentifiableObject) parsed).setUid( uid );
+
+        preUpdateEntity( parsed );
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
 
@@ -675,12 +683,18 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     {
     }
 
-    // TODO replace with hooks directly in idManager
+    protected void preCreateEntity( T entity )
+    {
+    }
+
     protected void postCreateEntity( T entity )
     {
     }
 
-    // TODO replace with hooks directly in idManager
+    protected void preUpdateEntity( T entity )
+    {
+    }
+
     protected void postUpdateEntity( T entity )
     {
     }
