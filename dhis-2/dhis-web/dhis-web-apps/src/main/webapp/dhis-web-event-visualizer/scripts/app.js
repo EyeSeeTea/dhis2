@@ -380,37 +380,50 @@ Ext.onReady( function() {
             }
         });
 
-		Ext.define('Ext.ux.panel.DataElementOptionContainer', {
+		Ext.define('Ext.ux.panel.OrganisationUnitGroupSetContainer', {
 			extend: 'Ext.container.Container',
-			alias: 'widget.dataelementoptionpanel',
+			alias: 'widget.organisationunitgroupsetpanel',
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
+            addCss: function() {
+                var css = '.optionselector .x-boundlist-selected { background-color: #fff; border-color: #fff } \n';
+                css += '.optionselector .x-boundlist-selected.x-boundlist-item-over { background-color: #ddd; border-color: #ddd } \n';
+
+                Ext.util.CSS.createStyleSheet(css);
+            },
             getRecord: function() {
-				var valueArray = this.valueCmp.getValue().split(';'),
-					record = {};
+                var items = this.valueCmp.getValue(),
+					record = {
+                        dimension: this.dataElement.id,
+                        name: this.dataElement.name
+                    };
 
-				for (var i = 0; i < valueArray.length; i++) {
-					valueArray[i] = Ext.String.trim(valueArray[i]);
-				}
+                // array or object
+                for (var i = 0; i < items.length; i++) {
+                    if (Ext.isObject(items[i])) {
+                        items[i] = items[i].code;
+                    }
+                }
 
-				record.dimension = this.dataElement.id;
-				record.name = this.dataElement.name;
-
-				if (Ext.Array.clean(valueArray).length) {
-					record.filter = this.operatorCmp.getValue() + ':' + valueArray.join(';');
-				}
-
-				return record;
+                if (items.length) {
+                    record.filter = 'IN:' + items.join(';');
+                }
+                
+                return record;
             },
             setRecord: function(record) {
-				if (Ext.isString(record.filter) && record.filter) {
+				if (Ext.isString(record.filter) && record.filter.length) {
 					var a = record.filter.split(':');
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    idProperty = 'code',
+                    nameProperty = 'name';
+
+                this.addCss();
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
@@ -434,8 +447,8 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
+                this.searchStore = Ext.create('Ext.data.Store', {
+					fields: [idProperty, 'name'],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
 						var store = this,
@@ -443,25 +456,28 @@ Ext.onReady( function() {
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
 
-						if (key) {
-							params['key'] = key;
-						}
-                        
+						//if (key) {
+							//params['key'] = key;
+						//}
+
 						params['max'] = pageSize || 15;
 
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '/options.json',
+							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
 							params: params,
 							disableCaching: false,
 							success: function(r) {
-								var options = Ext.decode(r.responseText).options;
+								var options = Ext.decode(r.responseText).options,
+                                    data = [];
 
-                                for (var i = 0; i < options.length; i++) {
-                                    options[i].id = options[i].name;
+                                for (var i = 0; i < options.length; i++) {
+                                    if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
+                                        data.push(options[i]);
+                                    }
                                 }
-                                    
+
 								store.removeAll();
-                                store.loadData(options);
+                                store.loadData(data);
 
                                 container.triggerCmp.storage = Ext.clone(options);
 							}
@@ -476,12 +492,24 @@ Ext.onReady( function() {
 					}
 				});
 
+                // function
+                this.filterSearchStore = function() {
+                    var selected = container.valueCmp.getValue();
+
+                    container.searchStore.clearFilter();
+
+                    container.searchStore.filterBy(function(record) {
+                        return !Ext.Array.contains(selected, record.data[idProperty]);
+                    });
+                };
+
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
                     width: 62,
                     style: 'margin-bottom:0',
                     emptyText: 'Search..',
-                    valueField: 'id',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     hideTrigger: true,
                     delimiter: '; ',
                     enableKeyEvents: true,
@@ -489,15 +517,15 @@ Ext.onReady( function() {
                     listConfig: {
                         minWidth: 304
                     },
-                    store: this.valueStore,
+                    store: this.searchStore,
                     listeners: {
 						keyup: {
-							fn: function(cb) {
-								var value = cb.getValue(),
+							fn: function() {
+								var value = this.getValue(),
 									optionSetId = container.dataElement.optionSet.id;
 
 								// search
-								container.valueStore.loadOptionSet(optionSetId, value);
+								container.searchStore.loadOptionSet(optionSetId, value);
 
                                 // trigger
                                 if (!value || (Ext.isString(value) && value.length === 1)) {
@@ -505,17 +533,26 @@ Ext.onReady( function() {
 								}
 							}
 						},
-						select: function(cb) {
+						select: function() {
+                            var id = Ext.Array.from(this.getValue())[0];
 
                             // value
-							container.valueCmp.addOptionValue(cb.getValue());
+                            if (container.valueStore.findExact(idProperty, id) === -1) {
+                                container.valueStore.add(container.searchStore.getAt(container.searchStore.findExact(idProperty, id)).data);
+                            }
 
                             // search
-							cb.clearValue();
+                            this.select([]);
+
+                            // filter
+                            container.filterSearchStore();
 
                             // trigger
                             container.triggerCmp.enable();
-						}
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
 					}
                 });
 
@@ -527,46 +564,68 @@ Ext.onReady( function() {
                     storage: [],
                     handler: function(b) {
                         if (b.storage.length) {
-							container.valueStore.removeAll();
-                            container.valueStore.add(Ext.clone(b.storage));
+							container.searchStore.removeAll();
+                            container.searchStore.add(Ext.clone(b.storage));
                         }
                         else {
-                            container.valueStore.loadOptionSet();
+                            container.searchStore.loadOptionSet();
                         }
-                    }                    
+                    }
                 });
 
-                this.valueCmp = Ext.create('Ext.form.field.Text', {
-					width: 226,
+                this.valueStore = Ext.create('Ext.data.Store', {
+					fields: ['id', 'name'],
+                    listeners: {
+                        add: function() {
+                            container.valueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.valueCmp.select(this.getRange());
+                        }
+                    }
+                });
+
+                this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
                     style: 'margin-bottom:0',
-					addOptionValue: function(option) {
-						var value = this.getValue();
-
-						if (value) {
-							var a = value.split(';');
-
-							for (var i = 0; i < a.length; i++) {
-								a[i] = Ext.String.trim(a[i]);
-							};
-
-							a = Ext.Array.clean(a);
-
-							value = a.join('; ');
-							value += '; ';
-						}
-
-						this.setValue(value += option);
-					},
+					width: 226,
+                    valueField: idProperty,
+                    displayField: nameProperty,
+                    emptyText: 'No selected items',
+                    editable: false,
+                    hideTrigger: true,
+                    store: container.valueStore,
+                    queryMode: 'local',
+                    listConfig: {
+                        cls: 'optionselector'
+                    },
                     setOptionValues: function(optionArray) {
-                        var value = '';
-
+                        var options = [];
+                        
                         for (var i = 0; i < optionArray.length; i++) {
-                            value += optionArray[i] + (i < (optionArray.length - 1) ? '; ' : '');
+                            options.push({
+                                code: optionArray[i],
+                                name: optionArray[i]
+                            });
                         }
 
-                        this.setValue(value);
+                        container.valueStore.removeAll();
+                        container.valueStore.loadData(options);
+
+                        this.setValue(options);
+                    },                            
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.valueStore.removeAt(container.valueStore.findExact(idProperty, id));
+                            }
+                        }
                     }
-				});
+                });
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     text: '+',
@@ -598,7 +657,7 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
-	}());
+    }());
 
 		// toolbar
     (function() {
@@ -3257,12 +3316,11 @@ Ext.onReady( function() {
 				ux;
 
             element.type = element.type || element.valueType;
-
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
-					return 'Ext.ux.panel.DataElementOptionContainer';
+					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
 
 				if (element.type === 'int' || element.type === 'number') {
@@ -3981,7 +4039,7 @@ Ext.onReady( function() {
             store: periodTypeStore,
             periodOffset: 0,
             listeners: {
-                select: function(cmp) {
+                select: function() {
                     periodType.periodOffset = 0;
                     onPeriodTypeSelect();
                 }
@@ -3992,6 +4050,7 @@ Ext.onReady( function() {
             text: NS.i18n.prev_year,
             style: 'border-radius:1px; margin-right:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset--;
@@ -4004,6 +4063,7 @@ Ext.onReady( function() {
             text: NS.i18n.next_year,
             style: 'border-radius:1px',
             height: 24,
+            width: 62,
             handler: function() {
                 if (periodType.getValue()) {
                     periodType.periodOffset++;
@@ -4397,6 +4457,10 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
+                    
+                    Ext.defer(function() {
+                        data.expand();
+                    }, 20);
 				},
 				itemcontextmenu: function(v, r, h, i, e) {
 					v.getSelectionModel().select(r, false);
@@ -4412,7 +4476,7 @@ Ext.onReady( function() {
 					if (!r.data.leaf) {
 						v.menu.add({
 							id: 'treepanel-contextmenu-item',
-							text: NS.i18n.select_all_children,
+							text: NS.i18n.select_sub_units,
 							icon: 'images/node-select-child.png',
 							handler: function() {
 								r.expand(false, function() {
@@ -5188,7 +5252,7 @@ Ext.onReady( function() {
             expandInitPanels: function() {
                 organisationUnit.expand();
                 //period.expand();
-                data.expand();
+                //data.expand();
             },
 			map: layer ? layer.map : null,
 			layer: layer ? layer : null,
@@ -5765,7 +5829,13 @@ Ext.onReady( function() {
 					url: init.contextPath + '/api/eventCharts/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
 						web.mask.hide(ns.app.centerRegion);
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+
+                        if (Ext.Array.contains([403], r.status)) {
+                            alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                        }
+                        else {
+                            alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
 					},
 					success: function(r) {
 						var layoutConfig = Ext.decode(r.responseText),
@@ -5827,7 +5897,7 @@ Ext.onReady( function() {
 
                 xLayout = getXLayout(layout);
                 xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-                xLayout = getSXLayout(xLayout, xResponse);
+                xLayout = getSXLayout(layout, xLayout, xResponse);
 
                 if (!xLayout) {
                     web.mask.hide(ns.app.centerRegion);
@@ -5847,6 +5917,7 @@ Ext.onReady( function() {
                 // timing
                 ns.app.dateRender = new Date();
 
+                ns.app.centerRegion.update();
                 ns.app.centerRegion.removeAll(true);
 				ns.app.centerRegion.add(chart);
 
@@ -6323,9 +6394,9 @@ Ext.onReady( function() {
 			}
 		});
 
-		interpretationItem = Ext.create('Ext.menu.Item', {
-			text: 'Write interpretation' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-tablelayout',
+        favoriteUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'Favorite link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
 			disabled: true,
 			xable: function() {
 				if (ns.app.layout.id) {
@@ -6335,69 +6406,23 @@ Ext.onReady( function() {
 					this.disable();
 				}
 			},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
-				}
+            handler: function() {
+                var url = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html?id=' + ns.app.layout.id,
+                    textField,
+                    window;
 
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
-			}
-		});
-
-		pluginItem = Ext.create('Ext.menu.Item', {
-			text: 'Embed in web page' + '&nbsp;&nbsp;',
-			iconCls: 'ns-menu-item-datasource',
-			disabled: true,
-			xable: function() {
-				if (ns.app.layout) {
-					this.enable();
-				}
-				else {
-					this.disable();
-				}
-			},
-			handler: function() {
-				var textArea,
-					window,
-					text = '';
-
-				text += '<html>\n<head>\n';
-				text += '<link rel="stylesheet" href="http://dhis2-cdn.org/v214/ext/resources/css/ext-plugin-gray.css" />\n';
-				text += '<script src="http://dhis2-cdn.org/v214/ext/ext-all.js"></script>\n';
-				text += '<script src="http://dhis2-cdn.org/v214/plugin/table.js"></script>\n';
-				text += '</head>\n\n<body>\n';
-				text += '<div id="table1"></div>\n\n';
-				text += '<script>\n\n';
-				text += 'DHIS.getTable(' + JSON.stringify(ns.core.service.layout.layout2plugin(ns.app.layout, 'table1'), null, 2) + ');\n\n';
-				text += '</script>\n\n';
-				text += '</body>\n</html>';
-
-				textArea = Ext.create('Ext.form.field.TextArea', {
-					width: 700,
-					height: 400,
-					readOnly: true,
-					cls: 'ns-textarea monospaced',
-					value: text
-				});
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Plugin configuration',
+					title: 'Favorite link',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
-					items: textArea,
 					destroyOnBlur: true,
-					bbar: [
-						'->',
-						{
-							text: 'Select',
-							handler: function() {
-								textArea.selectText();
-							}
-						}
-					],
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
 					listeners: {
 						show: function(w) {
 							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
@@ -6415,42 +6440,85 @@ Ext.onReady( function() {
 				});
 
 				window.show();
-			}
-		});
+            }
+        });
+
+        apiUrlItem = Ext.create('Ext.menu.Item', {
+			text: 'API link' + '&nbsp;&nbsp;',
+			iconCls: 'ns-menu-item-datasource',
+			disabled: true,
+			xable: function() {
+				if (ns.app.layout.id) {
+					this.enable();
+				}
+				else {
+					this.disable();
+				}
+			},
+            handler: function() {
+                var url = ns.core.init.contextPath + '/api/eventCharts/' + ns.app.layout.id + '/data',
+                    textField,
+                    window;
+
+                textField = Ext.create('Ext.form.field.Text', {
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>'
+                });
+
+				window = Ext.create('Ext.window.Window', {
+					title: 'API link',
+					layout: 'fit',
+					modal: true,
+					resizable: false,
+					destroyOnBlur: true,
+                    bodyStyle: 'padding: 12px 18px; background-color: #fff; font-size: 11px',
+                    html: '<a class="user-select td-nobreak" target="_blank" href="' + url + '">' + url + '</a>',
+					listeners: {
+						show: function(w) {
+							ns.core.web.window.setAnchorPosition(w, ns.app.shareButton);
+
+							document.body.oncontextmenu = true;
+
+							if (!w.hasDestroyOnBlurHandler) {
+								ns.core.web.window.addDestroyOnBlurHandler(w);
+							}
+						},
+						hide: function() {
+							document.body.oncontextmenu = function(){return false;};
+						}
+					}
+				});
+
+				window.show();
+            }
+        });
 
 		shareButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.share,
-			disabled: true,
+            disabled: true,
 			xableItems: function() {
-				interpretationItem.xable();
+				//interpretationItem.xable();
 				//pluginItem.xable();
+				favoriteUrlItem.xable();
+				apiUrlItem.xable();
 			},
-			//menu: {
-				//cls: 'ns-menu',
-				//shadow: false,
-				//showSeparator: false,
-				//items: [
+			menu: {
+				cls: 'ns-menu',
+				shadow: false,
+				showSeparator: false,
+				items: [
 					//interpretationItem,
-					//pluginItem
-				//],
-				//listeners: {
-					//afterrender: function() {
-						//this.getEl().addCls('ns-toolbar-btn-menu');
-					//},
-					//show: function() {
-						//shareButton.xableItems();
-					//}
-				//}
-			//},
-			menu: {},
-			handler: function() {
-				if (ns.app.interpretationWindow) {
-					ns.app.interpretationWindow.destroy();
-					ns.app.interpretationWindow = null;
+					//pluginItem,
+                    favoriteUrlItem,
+                    apiUrlItem
+				],
+				listeners: {
+					afterrender: function() {
+						this.getEl().addCls('ns-toolbar-btn-menu');
+					},
+					show: function() {
+						shareButton.xableItems();
+					}
 				}
-
-				ns.app.interpretationWindow = InterpretationWindow();
-				ns.app.interpretationWindow.show();
 			},
 			listeners: {
 				added: function() {
@@ -6458,7 +6526,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-
+        
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.chart,
 			iconCls: 'ns-button-icon-chart',
@@ -6587,7 +6655,24 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
-                }
+                },
+				afterrender: function(p) {
+					var liStyle = 'padding:3px 10px; color:#333',
+						html = '';
+
+					html += '<div style="padding:20px">';
+					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
+					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
+					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
+					html += '</div>';
+
+					p.update(html);
+				}
 			}
 		});
 

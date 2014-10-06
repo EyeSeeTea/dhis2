@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -169,15 +170,21 @@ public class DataValue
         return getCategoryOptionCombo();
     }
     
+    /**
+     * Indicates whether the value is a zero.
+     */
     public boolean isZero()
     {
         return dataElement != null && dataElement.getType().equals( DataElement.VALUE_TYPE_INT )
             && value != null && ZERO_PATTERN.matcher( value ).find();
     }
 
+    /**
+     * Indicates whether the value is null.
+     */
     public boolean isNullValue()
     {
-        return value == null && comment == null;
+        return StringUtils.trimToNull( value ) == null && StringUtils.trimToNull( comment ) == null;
     }
 
     public boolean isFollowup()

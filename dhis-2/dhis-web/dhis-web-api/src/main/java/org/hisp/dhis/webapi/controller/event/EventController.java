@@ -28,19 +28,6 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.Pager;
@@ -51,6 +38,8 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.event.ImportEventTask;
+import org.hisp.dhis.dxf2.events.report.EventRowService;
+import org.hisp.dhis.dxf2.events.report.EventRows;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
@@ -69,6 +58,8 @@ import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.system.util.StreamUtils;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -80,6 +71,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -109,6 +110,9 @@ public class EventController
     private EventService eventService;
 
     @Autowired
+    private EventRowService eventRowService;
+
+    @Autowired
     private TrackedEntityInstanceService trackedEntityInstanceService;
 
     @Autowired
@@ -135,7 +139,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
         @RequestParam( required = false ) boolean skipMeta,
-        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request )
+        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
     {
         WebOptions options = new WebOptions( parameters );
 
@@ -148,18 +152,30 @@ public class EventController
         if ( trackedEntityInstance != null )
         {
             tei = trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
+
+            if ( tei == null )
+            {
+                ContextUtils.conflictResponse( response, "Invalid trackedEntityInstance ID." );
+                return null;
+            }
         }
 
         if ( orgUnit != null )
         {
             rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+
+            if ( rootOrganisationUnit == null )
+            {
+                ContextUtils.conflictResponse( response, "Invalid orgUnit ID." );
+                return null;
+            }
         }
 
         if ( rootOrganisationUnit != null )
         {
             if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
             {
-                organisationUnits.addAll( organisationUnitService.getOrganisationUnitsWithChildren( rootOrganisationUnit.getUid() ) );
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
             }
             else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
             {
@@ -198,6 +214,61 @@ public class EventController
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
 
         return "events";
+    }
+
+    @RequestMapping( value = "/overdue", method = RequestMethod.GET )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
+    public String getOverdueEvents(
+        @RequestParam( required = false ) String program,
+        @RequestParam( required = false ) String orgUnit,
+        @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
+        @RequestParam( required = false ) ProgramStatus programStatus,
+        @RequestParam( required = false ) EventStatus eventStatus,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletRequest request )
+    {
+        WebOptions options = new WebOptions( parameters );
+
+        Program pr = manager.get( Program.class, program );
+        List<OrganisationUnit> organisationUnits = new ArrayList<>();
+        OrganisationUnit rootOrganisationUnit = null;
+
+        if ( orgUnit != null )
+        {
+            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+        }
+
+        if ( rootOrganisationUnit != null )
+        {
+            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
+            {
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
+            }
+            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
+            {
+                organisationUnits.add( rootOrganisationUnit );
+                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
+            }
+            else // SELECTED
+            {
+                organisationUnits.add( rootOrganisationUnit );
+            }
+        }
+
+        EventRows eventRows = eventRowService.getEventRows( pr, organisationUnits, programStatus, eventStatus, startDate, endDate );
+
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), eventRows.getEventRows().size(), options.getPageSize() );
+            eventRows.setPager( pager );
+            eventRows.setEventRows( PagerUtils.pageCollection( eventRows.getEventRows(), pager ) );
+        }
+
+        model.addAttribute( "model", eventRows );
+        model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
+
+        return "eventRows";
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
@@ -394,7 +465,7 @@ public class EventController
 
         DataElement dataElement = dataElementService.getDataElement( dataElementUid );
 
-        if( dataElement == null )
+        if ( dataElement == null )
         {
             ContextUtils.notFoundResponse( response, "DataElement not found for uid: " + dataElementUid );
             return;
@@ -407,7 +478,7 @@ public class EventController
         ContextUtils.okResponse( response, "Event updated: " + uid );
 
     }
-    
+
     @RequestMapping( value = "/{uid}/addNote", method = RequestMethod.PUT, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventForNote( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException
@@ -426,7 +497,7 @@ public class EventController
         eventService.updateEventForNote( updatedEvent );
         ContextUtils.okResponse( response, "Event updated: " + uid );
     }
-    
+
     @RequestMapping( value = "/{uid}/updateEventDate", method = RequestMethod.PUT, consumes = "application/json" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void putJsonEventForEventDate( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, ImportOptions importOptions ) throws IOException

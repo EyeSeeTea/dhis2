@@ -31,6 +31,8 @@ package org.hisp.dhis.common.hibernate;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.AuditLogUtil;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -38,7 +40,6 @@ import org.hisp.dhis.common.GenericNameableObjectStore;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.hibernate.exception.ReadAccessDeniedException;
-import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -126,12 +127,16 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
         sessionFactory.getCurrentSession().update( object );
     }
 
+    /**
+     * Uses query since name property might not be unique.
+     */
     @Override
-    @Deprecated
     public final T getByName( String name )
     {
-        T object = getObject( Restrictions.eq( "name", name ) );
-
+        List<T> list = getList( Restrictions.eq( "name", name ) );
+        
+        T object = list != null && !list.isEmpty() ? list.get( 0 ) : null;
+        
         if ( !isReadAllowed( object ) )
         {
             AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
@@ -141,12 +146,16 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
         return object;
     }
 
+    /**
+     * Uses query since name property might not be unique.
+     */
     @Override
-    @Deprecated
     public final T getByShortName( String shortName )
     {
-        T object = getObject( Restrictions.eq( "shortName", shortName ) );
+        List<T> list = getList( Restrictions.eq( "shortName", shortName ) );
 
+        T object = list != null && !list.isEmpty() ? list.get( 0 ) : null;
+        
         if ( !isReadAllowed( object ) )
         {
             AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), object, AuditLogUtil.ACTION_READ_DENIED );
@@ -176,487 +185,220 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllEqName( String name )
     {
-        Query query = sharingEnabled() ? getQueryAllEqNameAcl( name ) : getQueryAllEqName( name );
-
-        return query.list();
-    }
-
-    private Query getQueryAllEqNameAcl( String name )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where name = :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "name", name );
-
-        return query;
-    }
-
-    private Query getQueryAllEqName( String name )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where name = :name order by c.name" );
-        query.setString( "name", name );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.eq( "name", name ) )
+            .addOrder( Order.asc( "name" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllEqNameIgnoreCase( String name )
     {
-        Query query = sharingEnabled() ? getQueryAllEqNameAclIgnoreCase( name ) : getQueryAllEqNameIgnoreCase( name );
-
-        return query.list();
-    }
-
-    private Query getQueryAllEqNameAclIgnoreCase( String name )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(name) = :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "name", name.toLowerCase() );
-
-        return query;
-    }
-
-    private Query getQueryAllEqNameIgnoreCase( String name )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where lower(name) = :name order by c.name" );
-        query.setString( "name", name.toLowerCase() );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.eq( "name", name ).ignoreCase() )
+            .addOrder( Order.asc( "name" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllEqShortName( String shortName )
     {
-        Query query = sharingEnabled() ? getQueryAllEqShortNameAcl( shortName ) : getQueryAllEqShortName( shortName );
-
-        return query.list();
-    }
-
-    private Query getQueryAllEqShortNameAcl( String shortName )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where shortName = :shortName and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.shortName";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "shortName", shortName );
-
-        return query;
-    }
-
-    private Query getQueryAllEqShortName( String shortName )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where shortName = :shortName order by c.shortName" );
-        query.setString( "shortName", shortName );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.eq( "shortName", shortName ) )
+            .addOrder( Order.asc( "shortName" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllEqShortNameIgnoreCase( String shortName )
     {
-        Query query = sharingEnabled() ? getQueryAllEqShortNameAclIgnoreCase( shortName ) : getQueryAllEqShortNameIgnoreCase( shortName );
-
-        return query.list();
-    }
-
-    private Query getQueryAllEqShortNameAclIgnoreCase( String shortName )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(shortName) = :shortName and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.shortName";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "shortName", shortName.toLowerCase() );
-
-        return query;
-    }
-
-    private Query getQueryAllEqShortNameIgnoreCase( String shortName )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where lower(shortName) = :shortName order by c.shortName" );
-        query.setString( "shortName", shortName.toLowerCase() );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.eq( "shortName", shortName ).ignoreCase() )
+            .addOrder( Order.asc( "shortName" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllLikeName( String name )
     {
-        Query query = sharingEnabled() ? getQueryAllLikeNameAcl( name ) : getQueryAllLikeName( name );
-
-        return query.list();
-    }
-
-    private Query getQueryAllLikeNameAcl( String name )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(name) like :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-
-        return query;
-    }
-
-    private Query getQueryAllLikeName( String name )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where lower(name) like :name order by c.name" );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.like( "name", "%" + name + "%" ).ignoreCase() )
+            .addOrder( Order.asc( "name" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
+    public List<T> getAllLikeName( String name, int first, int max )
+    {
+        return getSharingCriteria()
+            .add( Restrictions.like( "name", "%" + name + "%" ).ignoreCase() )
+            .addOrder( Order.asc( "name" ) )
+            .setFirstResult( first )
+            .setMaxResults( max )
+            .list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<T> getAllLikeShortName( String shortName )
     {
         if ( NameableObject.class.isAssignableFrom( clazz ) )
         {
-            Query query = sharingEnabled() ? getQueryAllLikeShortNameAcl( shortName ) : getQueryAllLikeShortName( shortName );
-            return query.list();
+            return getSharingCriteria()
+                .add( Restrictions.like( "shortName", "%" + shortName + "%" ).ignoreCase() )
+                .addOrder( Order.asc( "shortName" ) )
+                .list();
         }
 
         return getAllLikeName( shortName ); // Fallback to name
     }
 
-    private Query getQueryAllLikeShortNameAcl( String shortName )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(shortName) like :shortName and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.shortName";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "shortName", "%" + shortName.toLowerCase() + "%" );
-
-        return query;
-    }
-
-    private Query getQueryAllLikeShortName( String shortName )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where lower(shortName) like :shortName order by c.shortName" );
-        query.setString( "shortName", "%" + shortName.toLowerCase() + "%" );
-
-        return query;
-    }
-
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllOrderedName()
     {
-        Query query = sharingEnabled() ? getQueryAllOrderedNameAcl() : getQueryAllOrderedName();
-
-        return query.list();
-    }
-
-    private Query getQueryAllOrderedNameAcl()
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-
-        return query;
-    }
-
-    private Query getQueryAllOrderedName()
-    {
-        return getQuery( "from " + clazz.getName() + " c order by c.name" );
+        return getSharingCriteria()
+            .addOrder( Order.asc( "name" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getAllOrderedName( int first, int max )
     {
-        /*
-        return getSharingCriteria().setFirstResult( first ).setMaxResults( max ).list();
-        */
-
-        Query query = sharingEnabled() ? getQueryAllOrderedNameAcl() : getQueryAllOrderedName();
-
-        query.setFirstResult( first );
-        query.setMaxResults( max );
-
-        return query.list();
+        return getSharingCriteria()
+            .addOrder( Order.asc( "name" ) )
+            .setFirstResult( first ).setMaxResults( max )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
+    public List<T> getAllOrderedLastUpdated()
+    {
+        return getSharingCriteria()
+            .addOrder( Order.desc( "lastUpdated" ) )
+            .list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<T> getAllOrderedLastUpdated( int first, int max )
     {
-        Query query = sharingEnabled() ? getQueryAllOrderedLastUpdatedAcl() : getQueryAllOrderedLastUpdated();
-
-        query.setFirstResult( first );
-        query.setMaxResults( max );
-
-        return query.list();
-    }
-
-    private Query getQueryAllOrderedLastUpdatedAcl()
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " order by c.lastUpdated desc";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-
-        return query;
-    }
-
-    private Query getQueryAllOrderedLastUpdated()
-    {
-        return getQuery( "from " + clazz.getName() + " c order by lastUpdated desc" );
+        return getSharingCriteria()
+            .addOrder( Order.desc( "lastUpdated" ) )
+            .setFirstResult( first ).setMaxResults( max )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public List<T> getAllLikeNameOrderedName( String name, int first, int max )
+    public int getCountEqName( String name )
     {
-        Query query = sharingEnabled() ? getQueryAllLikeNameOrderedNameAcl( name ) : getQueryAllLikeNameOrderedName( name );
-
-        query.setFirstResult( first );
-        query.setMaxResults( max );
-
-        return query.list();
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.eq( "name", name ).ignoreCase() )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
-    private Query getQueryAllLikeNameOrderedNameAcl( String name )
+    @Override
+    public int getCountEqShortName( String shortName )
     {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where lower(c.name) like :name and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-
-        return query;
-    }
-
-    private Query getQueryAllLikeNameOrderedName( String name )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where lower(name) like :name order by name" );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-
-        return query;
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.eq( "shortName", shortName ).ignoreCase() )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
     @Override
     public int getCountLikeName( String name )
     {
-        Query query = sharingEnabled() ? getQueryCountLikeNameAcl( name ) : getQueryCountLikeName( name );
-
-        return ((Long) query.uniqueResult()).intValue();
-    }
-
-    private Query getQueryCountLikeNameAcl( String name )
-    {
-        String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where lower(name) like :name and (c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " )";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-
-        return query;
-    }
-
-    private Query getQueryCountLikeName( String name )
-    {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where lower(name) like :name" );
-        query.setString( "name", "%" + name.toLowerCase() + "%" );
-
-        return query;
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.like( "name", "%" + name + "%" ).ignoreCase() )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
     @Override
-    public long getCountGeLastUpdated( Date lastUpdated )
+    public int getCountLikeShortName( String shortName )
     {
-        Query query = sharingEnabled() ? getQueryCountGeLastUpdatedAcl( lastUpdated ) : getQueryCountGeLastUpdated( lastUpdated );
-
-        return ((Long) query.uniqueResult()).intValue();
-    }
-
-    private Query getQueryCountGeLastUpdatedAcl( Date lastUpdated )
-    {
-        String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and (c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " )";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
-    }
-
-    private Query getQueryCountGeLastUpdated( Date lastUpdated )
-    {
-        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where lastUpdated >= :lastUpdated" );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.like( "shortName", "%" + shortName + "%" ).ignoreCase() )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    public int getCountGeLastUpdated( Date lastUpdated )
+    {
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.ge( "lastUpdated", lastUpdated ) )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<T> getAllGeLastUpdated( Date lastUpdated )
     {
-        Query query = sharingEnabled() ? getQueryAllGeLastUpdatedAcl( lastUpdated ) : getQueryAllGeLastUpdated( lastUpdated );
-
-        return query.list();
-    }
-
-    private Query getQueryAllGeLastUpdatedAcl( Date lastUpdated )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " )";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
-    }
-
-    private Query getQueryAllGeLastUpdated( Date lastUpdated )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where c.lastUpdated >= :lastUpdated" );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.ge( "lastUpdated", lastUpdated ) )
+            .addOrder( Order.desc( "lastUpdated" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    public int getCountGeCreated( Date created )
+    {
+        return ((Number) getSharingCriteria()
+            .add( Restrictions.ge( "created", created ) )
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<T> getAllGeCreated( Date created )
     {
-        Query query = sharingEnabled() ? getQueryAllGeCreatedAcl( created ) : getQueryAllGeCreated( created );
-
-        return query.list();
-    }
-
-    private Query getQueryAllGeCreatedAcl( Date created )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.created >= :created and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setTimestamp( "created", created );
-
-        return query;
-    }
-
-    private Query getQueryAllGeCreated( Date created )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where c.created >= :created" );
-        query.setTimestamp( "created", created );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.ge( "created", created ) )
+            .addOrder( Order.desc( "created" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
+    public List<T> getAllGeCreatedOrderedName( Date created )
+    {
+        return getSharingCriteria()
+            .add( Restrictions.ge( "created", created ) )
+            .addOrder( Order.asc( "name" ) )
+            .list();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
     public List<T> getAllGeLastUpdatedOrderedName( Date lastUpdated )
     {
-        Query query = sharingEnabled() ? getQueryAllGeLastUpdatedOrderedNameAcl( lastUpdated ) : getQueryAllGeLastUpdatedOrderedName( lastUpdated );
-
-        return query.list();
-    }
-
-    private Query getQueryAllGeLastUpdatedOrderedNameAcl( Date lastUpdated )
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.lastUpdated >= :lastUpdated and ( c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')"
-            + " ) order by c.name";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
-    }
-
-    private Query getQueryAllGeLastUpdatedOrderedName( Date lastUpdated )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where c.lastUpdated >= :lastUpdated order by c.name" );
-        query.setTimestamp( "lastUpdated", lastUpdated );
-
-        return query;
+        return getSharingCriteria()
+            .add( Restrictions.ge( "lastUpdated", lastUpdated ) )
+            .addOrder( Order.asc( "name" ) )
+            .list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
-    public List<T> getByUser( User user )
-    {
-        Query query = getQuery( "from " + clazz.getName() + " c where user = :user" );
-        query.setEntity( "user", user );
-
-        return query.list();
-    }
-
-    @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public List<T> getByDataDimension( boolean dataDimension )
     {
-        Query query = getQuery( "from " + clazz.getName() + " c where c.dataDimension = :dataDimension" );
-        query.setBoolean( "dataDimension", dataDimension );
-
-        return query.list();
+        return getSharingCriteria()
+            .add( Restrictions.eq( "dataDimension", dataDimension ) ).list();
     }
 
     @Override

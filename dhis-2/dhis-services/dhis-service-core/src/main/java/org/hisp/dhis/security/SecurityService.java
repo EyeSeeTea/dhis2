@@ -111,7 +111,7 @@ public interface SecurityService
      * @param restoreType type of restore operation (e.g. pw recovery, invite).
      * @return true or false.
      */
-    boolean canRestoreNow( UserCredentials credentials, String token, String code, RestoreType restoreType );
+    boolean canRestore( UserCredentials credentials, String token, String code, RestoreType restoreType );
 
     /**
      * Tests whether the given token in combination with the given user name is
@@ -120,11 +120,11 @@ public interface SecurityService
      *
      * @param credentials the user credentials.
      * @param token the token.
-     * @return false if any of the arguments are null or if the user credentials
-     *         identified by the user name does not exist, true if the arguments
-     *         are valid.
+     * @return error message if any of the arguments are null or if the user
+     *         credentials identified by the user name does not exist, null if
+     *         the arguments are valid.
      */
-    boolean verifyToken( UserCredentials credentials, String token, RestoreType restoreType );
+    String verifyToken( UserCredentials credentials, String token, RestoreType restoreType );
 
     /**
      * Checks whether current user has read access to object.

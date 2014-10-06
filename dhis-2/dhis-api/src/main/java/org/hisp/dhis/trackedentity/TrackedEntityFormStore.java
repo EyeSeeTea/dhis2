@@ -28,31 +28,28 @@ package org.hisp.dhis.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericStore;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.program.Program;
 
 /**
  * @author Chau Thu Tran
- * 
- * @version TrackedEntityFormStore.java 9:41:14 AM Jan 31, 2013 $
  */
 public interface TrackedEntityFormStore
-    extends GenericStore<TrackedEntityForm>
+    extends GenericIdentifiableObjectStore<TrackedEntityForm>
 {
     String ID = TrackedEntityFormStore.class.getName();
 
     /**
      * Get tracked entity form of a program
-     * 
+     *
      * @param program Program
-     * 
      * @return TrackedEntityForm
      */
     TrackedEntityForm get( Program program );
 
     /**
      * Get tracked entity form which doesn't belong to any program
-     * 
+     *
      * @return TrackedEntityForm
      */
     TrackedEntityForm getFormsWithoutProgram();

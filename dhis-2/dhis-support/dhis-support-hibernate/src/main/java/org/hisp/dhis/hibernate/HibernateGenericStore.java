@@ -189,9 +189,9 @@ public class HibernateGenericStore<T>
 
     protected final Criteria getSharingCriteria( User user, String access )
     {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( getClazz(), "c" ).setCacheable( false );
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( getClazz(), "c" ).setCacheable( cacheable );
 
-        if ( !sharingEnabled() )
+        if ( !sharingEnabled() || user == null )
         {
             return criteria;
         }
@@ -253,7 +253,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return an object of the implementation Class type.
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected final T getObject( Criterion... expressions )
     {
         return (T) getCriteria( expressions ).uniqueResult();
@@ -265,7 +265,7 @@ public class HibernateGenericStore<T>
      * @param expressions the Criterions for the Criteria.
      * @return a List with objects of the implementation Class type.
      */
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     protected final List<T> getList( Criterion... expressions )
     {
         return getCriteria( expressions ).list();
@@ -278,31 +278,29 @@ public class HibernateGenericStore<T>
     @Override
     public int save( T object )
     {
-        BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
-        identifiableObject.setPublicAccess( AccessStringHelper.newInstance().build() );
-        identifiableObject.setUserGroupAccesses( new HashSet<UserGroupAccess>() );
-
         User currentUser = currentUserService.getCurrentUser();
 
-        if ( !Interpretation.class.isAssignableFrom( clazz ) && currentUser != null && aclService.isShareable( clazz ) )
+        if ( IdentifiableObject.class.isAssignableFrom( object.getClass() ) )
         {
-            // TODO we might want to allow setting sharing props on save, but for now we null them out
+            BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
+            identifiableObject.setPublicAccess( AccessStringHelper.newInstance().build() );
+            identifiableObject.setUserGroupAccesses( new HashSet<UserGroupAccess>() );
 
             if ( identifiableObject.getUser() == null )
             {
                 identifiableObject.setUser( currentUser );
             }
+        }
+
+        if ( !Interpretation.class.isAssignableFrom( clazz ) && currentUser != null && aclService.isShareable( clazz ) )
+        {
+            BaseIdentifiableObject identifiableObject = (BaseIdentifiableObject) object;
 
             if ( aclService.canCreatePublic( currentUser, identifiableObject.getClass() ) )
             {
                 if ( aclService.defaultPublic( identifiableObject.getClass() ) )
                 {
-                    String build = AccessStringHelper.newInstance()
-                        .enable( AccessStringHelper.Permission.READ )
-                        .enable( AccessStringHelper.Permission.WRITE )
-                        .build();
-
-                    identifiableObject.setPublicAccess( build );
+                    identifiableObject.setPublicAccess( AccessStringHelper.READ_WRITE );
                 }
             }
             else if ( aclService.canCreatePrivate( currentUser, identifiableObject.getClass() ) )
@@ -338,7 +336,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final T get( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().get( getClazz(), id );
@@ -353,7 +351,7 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final T load( int id )
     {
         T object = (T) sessionFactory.getCurrentSession().load( getClazz(), id );
@@ -385,25 +383,10 @@ public class HibernateGenericStore<T>
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public final List<T> getAll()
     {
-        Query query = sharingEnabled() ? getQueryAllAcl() : getQueryAll();
-
-        return query.list();
-    }
-
-    private Query getQueryAllAcl()
-    {
-        String hql = "select distinct c from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-
-        return query;
+        return getSharingCriteria().list();
     }
 
     /**
@@ -444,38 +427,12 @@ public class HibernateGenericStore<T>
         return query;
     }
 
-    private Query getQueryAll()
-    {
-        return getQuery( "from " + clazz.getName() + " c" );
-    }
-
     @Override
     public int getCount()
     {
-        /*
-        return ((Number) getSharingCriteria().setProjection( Projections.countDistinct( "id" ) ).uniqueResult()).intValue();
-        */
-
-        Query query = sharingEnabled() ? getQueryCountAcl() : getQueryCount();
-        return ((Long) query.uniqueResult()).intValue();
-    }
-
-    private Query getQueryCountAcl()
-    {
-        String hql = "select count(distinct c) from " + clazz.getName() + " c"
-            + " where c.publicAccess like 'r%' or c.user IS NULL or c.user=:user"
-            + " or exists "
-            + "     (from c.userGroupAccesses uga join uga.userGroup ug join ug.members ugm where ugm = :user and uga.access like 'r%')";
-
-        Query query = getQuery( hql );
-        query.setEntity( "user", currentUserService.getCurrentUser() );
-
-        return query;
-    }
-
-    private Query getQueryCount()
-    {
-        return getQuery( "select count(distinct c) from " + clazz.getName() + " c" );
+        return ((Number) getSharingCriteria()
+            .setProjection( Projections.countDistinct( "id" ) )
+            .uniqueResult()).intValue();
     }
 
     //----------------------------------------------------------------------------------------------------------------

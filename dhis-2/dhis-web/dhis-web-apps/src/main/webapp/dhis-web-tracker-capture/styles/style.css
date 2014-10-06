@@ -92,7 +92,8 @@ textarea {
 }
 
 .vertical-center {
-    vertical-align: middle;
+    //vertical-align: middle;
+    line-height: inherit;
 }
 
 .empty-stage-container {
@@ -173,6 +174,12 @@ div.paging a.active
     background-color: #b9ffb9;
 }
 
+.alert-default {
+	color: #55514d;
+	background-color: #D5CBC1;
+	border-color: #aaa29a;
+}
+
 .red {
     color: red;
 }
@@ -187,6 +194,10 @@ div.paging a.active
 
 .bold {
     font-weight: bold;
+}
+
+.light-blue {
+    color: #67abcc;
 }
 
 .white {
@@ -260,6 +271,10 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
 .table-borderless>tbody>tr>td, 
 .table-borderless>tfoot>tr>td {
     border-top: none; 
+}
+
+.listTable th {
+    height: 30px;
 }
 
 .dhis2-table>thead>tr>th, 
@@ -475,6 +490,9 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     margin: -15px !important;    
 }
 
+.add-default-padding {
+    margin: 15px !important;
+}
 .add-default-top-margin {
     margin-top: 15px !important;    
 }
@@ -766,7 +784,7 @@ a:active {
 }
 
 .report-type-container{    
-    padding: 10px;
+    padding: 20px;
 }
 
 .validation-error {
@@ -777,9 +795,9 @@ a:active {
     background-color: #ebebeb;
     cursor: pointer;
 }
+
 @media print {
     #header, #leftBar, .not-printable {
         display: none;
     }
-
 }

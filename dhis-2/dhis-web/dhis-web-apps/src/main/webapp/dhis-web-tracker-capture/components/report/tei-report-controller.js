@@ -1,7 +1,6 @@
 //conroller for tei report
 trackerCapture.controller('TeiReportController',
         function($scope,
-                $filter,
                 CurrentSelection,
                 storage,
                 DateUtils,
@@ -105,9 +104,7 @@ trackerCapture.controller('TeiReportController',
         $scope.selectedReport = $scope.report[pr.id];
         
         //today as report date
-        $scope.today = moment();
-        $scope.today = Date.parse($scope.today);
-        $scope.today = $filter('date')($scope.today, 'yyyy-MM-dd');
+        $scope.today = DateUtils.format(moment());
 
         //process tei attributes, this is to have consistent display so that the tei 
         //contains program attributes whether it has value or not
@@ -116,7 +113,7 @@ trackerCapture.controller('TeiReportController',
         });
         
         //get program stage for the selected program
-        //they are needed assign data element names for event data values
+        //they are needed to assign data element names for event data values
         $scope.programStages = [];  
         $scope.allowProvidedElsewhereExists = [];
         angular.forEach($scope.selectedProgram.programStages, function(st){
@@ -137,8 +134,9 @@ trackerCapture.controller('TeiReportController',
         angular.forEach(Object.keys($scope.selectedReport.enrollments), function(enr){        
             //format report data values
             angular.forEach($scope.selectedReport.enrollments[enr], function(ev){
+
                 angular.forEach(ev.notes, function(note){
-                    note.storedDate = moment(note.storedDate).format('DD.MM.YYYY @ hh:mm A');
+                    note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
                 }); 
 
                 if(ev.dataValues){
@@ -155,7 +153,7 @@ trackerCapture.controller('TeiReportController',
                 enrollment.dateOfEnrollment = DateUtils.format(enrollment.dateOfEnrollment);
                 enrollment.dateOfIncident = DateUtils.format(enrollment.dateOfIncident);            
                 angular.forEach(enrollment.notes, function(note){
-                    note.storedDate = moment(note.storedDate).format('DD.MM.YYYY @ hh:mm A');
+                    note.storedDate = DateUtils.formatToHrsMins(note.storedDate);
                 });            
                 $scope.enrollments.push(enrollment);               
             });

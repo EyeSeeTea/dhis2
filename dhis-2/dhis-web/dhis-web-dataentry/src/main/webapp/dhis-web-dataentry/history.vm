@@ -34,7 +34,7 @@ $( document ).ready( function() {
     <tr>
 		<td valign="top">
 			<div id="commentOptionDiv" style="display:none;"><input type="text" id="commentOptionSet" style="width:240px"></div>
-			<textarea id="commentTextArea" maxlength="360" style="height:130px; width:240px;">$!encoder.htmlEncode( $dataValue.comment )</textarea><br>
+			<textarea id="commentTextArea" style="height:130px; width:240px;">$!encoder.htmlEncode( $dataValue.comment )</textarea><br>
 			<input type="button" value="$i18n.getString( 'save_comment' )" style="width:130px" onclick="saveComment()">
 		</td>		
         <td valign="top">
@@ -87,7 +87,7 @@ $( document ).ready( function() {
                 </ul>
                 <div id="historyTabs-chart">
                     #if( $historyInvalid )
-                        $encoder.htmlEncode( $i18n.getString( "history_not_valid" ) )
+                        <div class="tipText">$encoder.htmlEncode( $i18n.getString( "history_not_valid" ) )</div>
                     #else
                         <img id="historyChart"
                              src="../api/charts/history/data.png?de=${dataElementHistory.dataElement.uid}&co=${dataElementHistory.optionCombo.uid}&ou=${dataElementHistory.organisationUnit.uid}&pe=${periodId}"/>
@@ -132,7 +132,7 @@ $( document ).ready( function() {
                             </tbody>
                         </table>
                     #else
-                        $encoder.htmlEncode( $i18n.getString( "there_is_no_audit_trail_for_this_value" ) )
+                        <div class="tipText">$encoder.htmlEncode( $i18n.getString( "there_is_no_audit_trail_for_this_value" ) )</div>
                     #end
                 </div>
             </div>

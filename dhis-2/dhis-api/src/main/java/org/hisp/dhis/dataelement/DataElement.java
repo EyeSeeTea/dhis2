@@ -99,12 +99,14 @@ public class DataElement
     public static final String VALUE_TYPE_LONG_TEXT = "longText";
 
     public static final String AGGREGATION_OPERATOR_SUM = "sum";
-    public static final String AGGREGATION_OPERATOR_AVERAGE = "average";
+    public static final String AGGREGATION_OPERATOR_AVERAGE_SUM = "average"; // Sum in organisation unit
+    public static final String AGGREGATION_OPERATOR_AVERAGE = "avg";
     public static final String AGGREGATION_OPERATOR_COUNT = "count";
     public static final String AGGREGATION_OPERATOR_STDDEV = "stddev";
     public static final String AGGREGATION_OPERATOR_VARIANCE = "variance";
     public static final String AGGREGATION_OPERATOR_MIN = "min";
     public static final String AGGREGATION_OPERATOR_MAX = "max";
+    public static final String AGGREGATION_OPERATOR_NONE = "none";
     
     /**
      * The name to appear in forms.
@@ -148,11 +150,6 @@ public class DataElement
      * A combination of categories to capture data.
      */
     private DataElementCategoryCombo categoryCombo;
-
-    /**
-     * Defines a custom sort order.
-     */
-    private Integer sortOrder;
 
     /**
      * URL for lookup of additional information on the web.
@@ -552,16 +549,6 @@ public class DataElement
         this.categoryCombo = categoryCombo;
     }
 
-    public Integer getSortOrder()
-    {
-        return sortOrder;
-    }
-
-    public void setSortOrder( Integer sortOrder )
-    {
-        this.sortOrder = sortOrder;
-    }
-
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -716,7 +703,6 @@ public class DataElement
             aggregationOperator = dataElement.getAggregationOperator() == null ? aggregationOperator : dataElement
                 .getAggregationOperator();
             categoryCombo = dataElement.getCategoryCombo() == null ? categoryCombo : dataElement.getCategoryCombo();
-            sortOrder = dataElement.getSortOrder() == null ? sortOrder : dataElement.getSortOrder();
             url = dataElement.getUrl() == null ? url : dataElement.getUrl();
             optionSet = dataElement.getOptionSet() == null ? optionSet : dataElement.getOptionSet();
 
