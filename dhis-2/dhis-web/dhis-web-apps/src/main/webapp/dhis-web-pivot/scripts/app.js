@@ -622,7 +622,7 @@ Ext.onReady( function() {
 		sortOrder = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			style: 'margin-bottom:1px',
-			width: 250,
+			width: 254,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.sort_order,
 			labelStyle: 'color:#333',
@@ -643,7 +643,7 @@ Ext.onReady( function() {
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			style: 'margin-bottom:3px',
-			width: 250,
+			width: 254,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.top_limit,
 			labelStyle: 'color:#333',
@@ -798,7 +798,8 @@ Ext.onReady( function() {
                             items: [
                                 {
                                     bodyStyle: 'border:0 none; padding:2px 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
-                                    html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>'
+                                    html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>',
+                                    columnWidth: 1
                                 },
                                 {
                                     xtype: 'button',
