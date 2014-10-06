@@ -35,7 +35,7 @@ trackerCapture.controller('DependencyController',
         if(angular.isObject($scope.currentDataElement)){
             
             //Fetch available events for the selected person
-            DHIS2EventFactory.getByEntity(selections.tei, selectedOrgUnit.id, selectedProgram.id).then(function(data) {
+            DHIS2EventFactory.getByEntity(selections.tei, selectedOrgUnit, selectedProgram).then(function(data) {
 
                 $scope.dhis2Events = data;   
 
