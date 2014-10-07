@@ -33,10 +33,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
-import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.InputStream;
+import java.util.Collection;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -76,19 +77,20 @@ public class ImportMetaDataGmlTask
     @Override
     public void run()
     {
-        MetaData metaData;
+        Collection<OrganisationUnit> orgUnits;
 
-        //importOptions.setImportStrategy( "UPDATE" );
         try
         {
-            metaData = gmlImportService.fromGml( inputStream );
+            orgUnits = gmlImportService.fromGml( inputStream );
         }
         catch ( Exception ex )
         {
-            log.error( "Unable to read meta-data while reading input stream", ex );
+            log.error( "Unable to read data while reading input stream", ex ); // TODO better exception
             return;
         }
 
-        importService.importMetaData( userUid, metaData, importOptions, taskId );
+        // TODO Import the actual data and merge with DB.
+
+        //importService.importMetaData( userUid, metaData, importOptions, taskId );
     }
 }

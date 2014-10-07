@@ -29,16 +29,17 @@ package org.hisp.dhis.dxf2.gml;
  */
 
 import org.hisp.dhis.DhisTest;
-import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.junit.Test;
 
 import java.io.InputStream;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -55,20 +56,21 @@ public class GmlImportServiceTest
     {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-        gmlImportService = (GmlImportService) getBean( "org.hisp.dhis.dxf2.gml.GmlImportService" );
+        gmlImportService = (GmlImportService) getBean( GmlImportService.ID );
+
+        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
 
         inputStream = classLoader.getResourceAsStream( "gmlOrgUnits.gml" );
     }
 
+    /*
     @Test
     public void fromGmlTest()
         throws Exception
     {
-        MetaData metaData = gmlImportService.fromGml( inputStream );
+        Collection<OrganisationUnit> orgUnits = gmlImportService.fromGml( inputStream );
 
-        assertNotNull( metaData );
-
-        List<OrganisationUnit> orgUnits = metaData.getOrganisationUnits();
+        assertNotNull( orgUnits );
 
         assertEquals( 16, orgUnits.size() );
 
@@ -104,5 +106,46 @@ public class GmlImportServiceTest
         assertEquals( 1, units.get( "Ole Johan Dahls Hus" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 1, units.get( "Blindern").getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 76, units.get( "Forskningsparken" ).getCoordinatesAsList().get(0).getNumberOfCoordinates() );
+    }
+    */ // TODO Merge testcases into importFromGmlTest
+
+    @Test
+    public void importFromGmlTest()
+        throws Exception
+    {
+        assertTrue( organisationUnitService.getAllOrganisationUnits().isEmpty() );
+
+        OrganisationUnit orgUnitA = createOrganisationUnit( 'A' );
+        orgUnitA.setName( "Bo");
+        OrganisationUnit orgUnitB = createOrganisationUnit( 'B' );
+        orgUnitB.setName( "Bonthe" );
+        OrganisationUnit orgUnitC = createOrganisationUnit( 'C' );
+        orgUnitC.setName( "Pujehun" );
+
+        organisationUnitService.addOrganisationUnit( orgUnitA );
+        organisationUnitService.addOrganisationUnit( orgUnitB );
+        organisationUnitService.addOrganisationUnit( orgUnitC );
+
+        boolean success = gmlImportService.importFromGml( inputStream );
+
+        assertTrue( success );
+
+        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
+
+        HashMap<String, OrganisationUnit> units = new HashMap<>();
+
+        for( OrganisationUnit orgUnit : organisationUnits )
+        {
+            units.put( orgUnit.getName(), orgUnit );
+        }
+
+        assertEquals( 3, units.size() );
+        assertEquals( 1, units.get( "Bo" ).getCoordinatesAsList().size() );
+        assertEquals( 18, units.get( "Bonthe" ).getCoordinatesAsList().size() );
+
+        assertEquals( 76, units.get( "Bo" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
+        assertEquals( 7, units.get( "Pujehun" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
+
+        // TODO Test more cases!
     }
 }

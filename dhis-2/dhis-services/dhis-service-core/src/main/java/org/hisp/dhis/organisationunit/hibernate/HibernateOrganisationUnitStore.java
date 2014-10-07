@@ -94,7 +94,6 @@ public class HibernateOrganisationUnitStore
     {
         Query query = getQuery( "from OrganisationUnit where name in :names" );
         query.setParameterList( "names", names );
-
         return query.list();
     }
 

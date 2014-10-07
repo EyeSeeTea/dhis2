@@ -28,9 +28,13 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
 
@@ -42,6 +46,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -49,25 +56,54 @@ import java.io.InputStream;
 public class DefaultGmlImportService
     implements GmlImportService
 {
-    private static final String GML_TO_DXF_TRANSFORM = "gml/gml2metadata.xsl";
+    private static final String GML_TO_DXF_TRANSFORM = "gml/gml2dxf2.xsl";
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
     private RenderService renderService;
 
-    public void setRenderService( RenderService renderService )
-    {
-        this.renderService = renderService;
-    }
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
 
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
+
     @Override
-    public MetaData fromGml( InputStream input )
+    public boolean importFromGml( InputStream gmlInput )
+        throws IOException, TransformerException
+    {
+        Collection<OrganisationUnit> organisationUnits = fromGml( gmlInput );
+
+        Map<String, OrganisationUnit> namedMap = Maps.uniqueIndex( organisationUnits, new Function<OrganisationUnit, String>()
+        {
+            public String apply( OrganisationUnit organisationUnit )
+            {
+                return organisationUnit.getName();
+            }
+        } );
+
+        Collection<OrganisationUnit> persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( namedMap.keySet() );
+
+        for( OrganisationUnit unit : persistedOrgUnits )
+        {
+            unit.mergeWith( namedMap.get( unit.getName() ) );
+            organisationUnitService.updateOrganisationUnit( unit );
+        }
+
+        return true; // TODO return false on error? Return ImportSummary?
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    // TODO merge fromGml and transformGml?
+    private List<OrganisationUnit> fromGml( InputStream input )
         throws IOException, TransformerException
     {
         InputStream dxfStream = transformGml( input );
@@ -76,17 +112,12 @@ public class DefaultGmlImportService
 
         dxfStream.close();
 
-        return metaData;
+        return metaData.getOrganisationUnits();
     }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
 
     private InputStream transformGml( InputStream input )
         throws IOException, TransformerException
     {
-        //InputStream s = Thread.currentThread().getContextClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
         ResourceLoader resourceLoader = new DefaultResourceLoader( );
         InputStream s = resourceLoader.getClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
 
@@ -98,6 +129,7 @@ public class DefaultGmlImportService
 
         s.close();
 
-        return new ByteArrayInputStream( output.toByteArray() );
+        return new ByteArrayInputStream( output.toByteArray() ); // TODO Use IOUtils?
     }
+
 }

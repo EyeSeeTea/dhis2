@@ -65,7 +65,7 @@
 
 <xsl:template match="gml:featureMember">
   <xsl:variable name="name" select=".//*[local-name()='Name' or local-name()='NAME' or local-name()='name']"/>
-  <xsl:variable name="code" select=".//*[local-name()='code']" />
+  <!-- <xsl:variable name="code" select=".//*[local-name()='code']" /> --> <!-- TODO conditional: null if empty -->
   <organisationUnit>
     <xsl:attribute name="name">
       <xsl:value-of select="$name" />
@@ -73,9 +73,11 @@
     <xsl:attribute name="shortName">
       <xsl:value-of select="substring($name,1,50)" />
     </xsl:attribute>
+    <!--
     <xsl:attribute name="code">
       <xsl:value-of select="$code" />
     </xsl:attribute>
+    -->
     <xsl:apply-templates select="./child::node()/child::node()/gml:Polygon|./child::node()/child::node()/gml:MultiPolygon|./child::node()/child::node()/gml:Point"/>
     <active>true</active>
   </organisationUnit>

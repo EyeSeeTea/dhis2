@@ -28,8 +28,8 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dxf2.metadata.MetaData;
-
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -37,6 +37,7 @@ import java.io.InputStream;
  */
 public interface GmlImportService
 {
-    MetaData fromGml( InputStream input )
-        throws Exception;
+    String ID = GmlImportService.class.getName();
+
+    boolean importFromGml( InputStream gmlInput ) throws IOException, TransformerException;
 }
