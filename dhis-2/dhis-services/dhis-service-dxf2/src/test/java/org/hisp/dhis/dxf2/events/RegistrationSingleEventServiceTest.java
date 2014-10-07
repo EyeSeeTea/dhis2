@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.hamcrest.CoreMatchers;
 import org.hisp.dhis.DhisSpringTest;
@@ -79,7 +79,13 @@ public class RegistrationSingleEventServiceTest
 
     @Autowired
     private EnrollmentService enrollmentService;
-
+    
+    @Autowired 
+    private IdentifiableObjectManager _identifiableObjectManager;
+    
+    @Autowired
+    private UserService _userService;
+    
     private org.hisp.dhis.trackedentity.TrackedEntityInstance maleA;
     private org.hisp.dhis.trackedentity.TrackedEntityInstance maleB;
     private org.hisp.dhis.trackedentity.TrackedEntityInstance femaleA;
@@ -96,8 +102,8 @@ public class RegistrationSingleEventServiceTest
     @Override
     protected void setUpTest() throws Exception
     {
-        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
-        userService = (UserService) getBean( UserService.ID );
+        identifiableObjectManager = _identifiableObjectManager;
+        userService = _userService;
 
         organisationUnitA = createOrganisationUnit( 'A' );
         organisationUnitB = createOrganisationUnit( 'B' );
@@ -131,7 +137,7 @@ public class RegistrationSingleEventServiceTest
         programStageA = createProgramStage( 'A', 0 );
         identifiableObjectManager.save( programStageA );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.SINGLE_EVENT_WITH_REGISTRATION );
         identifiableObjectManager.save( programA );
 

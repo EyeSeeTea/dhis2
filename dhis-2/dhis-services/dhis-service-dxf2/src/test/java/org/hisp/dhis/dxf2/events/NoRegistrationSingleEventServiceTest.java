@@ -32,8 +32,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 
 import org.hisp.dhis.DhisTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
@@ -74,6 +74,12 @@ public class NoRegistrationSingleEventServiceTest
     @Autowired
     private ProgramStageInstanceService programStageInstanceService;
 
+    @Autowired 
+    private IdentifiableObjectManager _identifiableObjectManager;
+    
+    @Autowired
+    private UserService _userService;
+    
     private OrganisationUnit organisationUnitA;
     private DataElement dataElementA;
     private Program programA;
@@ -82,8 +88,8 @@ public class NoRegistrationSingleEventServiceTest
     @Override
     protected void setUpTest() throws Exception
     {
-        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
-        userService = (UserService) getBean( UserService.ID );
+        identifiableObjectManager = _identifiableObjectManager;
+        userService = _userService;
 
         organisationUnitA = createOrganisationUnit( 'A' );
         identifiableObjectManager.save( organisationUnitA );
@@ -95,7 +101,7 @@ public class NoRegistrationSingleEventServiceTest
         programStageA = createProgramStage( 'A', 0 );
         identifiableObjectManager.save( programStageA );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.SINGLE_EVENT_WITHOUT_REGISTRATION );
         identifiableObjectManager.save( programA );
 
