@@ -38,7 +38,6 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -48,6 +47,8 @@ public class GmlImportServiceTest
     extends DhisTest
 {
     private GmlImportService gmlImportService;
+
+    private OrganisationUnitService organisationUnitService;
 
     private InputStream inputStream;
 

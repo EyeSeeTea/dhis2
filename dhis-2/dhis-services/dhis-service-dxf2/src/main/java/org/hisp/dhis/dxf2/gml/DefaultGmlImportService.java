@@ -30,6 +30,8 @@ package org.hisp.dhis.dxf2.gml;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -46,8 +48,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -72,38 +74,7 @@ public class DefaultGmlImportService
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
-
-    @Override
-    public boolean importFromGml( InputStream gmlInput )
-        throws IOException, TransformerException
-    {
-        Collection<OrganisationUnit> organisationUnits = fromGml( gmlInput );
-
-        Map<String, OrganisationUnit> namedMap = Maps.uniqueIndex( organisationUnits, new Function<OrganisationUnit, String>()
-        {
-            public String apply( OrganisationUnit organisationUnit )
-            {
-                return organisationUnit.getName();
-            }
-        } );
-
-        Collection<OrganisationUnit> persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( namedMap.keySet() );
-
-        for( OrganisationUnit unit : persistedOrgUnits )
-        {
-            unit.mergeWith( namedMap.get( unit.getName() ) );
-            organisationUnitService.updateOrganisationUnit( unit );
-        }
-
-        return true; // TODO return false on error? Return ImportSummary?
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    // TODO merge fromGml and transformGml?
-    private List<OrganisationUnit> fromGml( InputStream input )
+    public MetaData fromGml( InputStream input )
         throws IOException, TransformerException
     {
         InputStream dxfStream = transformGml( input );
@@ -112,8 +83,45 @@ public class DefaultGmlImportService
 
         dxfStream.close();
 
-        return metaData.getOrganisationUnits();
+        Map<String, OrganisationUnit> namedMap = Maps.uniqueIndex( metaData.getOrganisationUnits(),
+            new Function<OrganisationUnit, String>()
+            {
+                @Override
+                public String apply( OrganisationUnit organisationUnit )
+                {
+                    return organisationUnit.getName(); // TODO identify by code as well
+                }
+            }
+        );
+
+        Collection<OrganisationUnit> persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( namedMap.keySet() );
+
+        for( OrganisationUnit persisted : persistedOrgUnits )
+        {
+            OrganisationUnit unit = namedMap.get( persisted.getName() );
+            persisted.setCoordinates( unit.getCoordinates() ); // TODO null-check
+            persisted.setFeatureType( unit.getFeatureType() );
+
+            try
+            {
+                BeanUtils.copyProperties( unit, persisted );
+            }
+            catch ( IllegalAccessException iae )
+            {
+                iae.printStackTrace();
+            }
+            catch ( InvocationTargetException ite )
+            {
+                ite.printStackTrace();
+            }
+        }
+
+        return metaData;
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
 
     private InputStream transformGml( InputStream input )
         throws IOException, TransformerException

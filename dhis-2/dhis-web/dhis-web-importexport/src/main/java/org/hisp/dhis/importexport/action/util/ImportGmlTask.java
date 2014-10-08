@@ -32,7 +32,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.metadata.ImportService;
+import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.scheduling.TaskId;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
@@ -46,8 +49,15 @@ public class ImportGmlTask
 {
     private static final Log log = LogFactory.getLog( ImportGmlTask.class );
 
-    // TODO Inject as spring bean
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    @Autowired
     private GmlImportService gmlImportService;
+
+    @Autowired
+    private ImportService importService;
 
     private ImportOptions importOptions;
 
@@ -74,22 +84,24 @@ public class ImportGmlTask
     @Override
     public void run()
     {
-        boolean success = false;
+        MetaData metaData = null;
 
         try
         {
-            //importService.importMetaData( userUid, metaData, importOptions, taskId );
-            success = gmlImportService.importFromGml( inputStream );
+            metaData = gmlImportService.fromGml( inputStream );
         }
         catch ( IOException ix )
         {
             log.error( "Unable to read GML data while reading input stream", ix );
+            return;
         }
         catch ( TransformerException te )
         {
             log.error( "Unable to transform GML file", te );
+            return;
         }
 
+        importService.importMetaData( userUid, metaData, importOptions, taskId );
         // TODO LOG SUCCESS ?
     }
 }
