@@ -357,6 +357,8 @@ Ext.onReady( function() {
 
                 // baseLineTitle: string
 
+                // sortOrder: number
+
                 // rangeAxisMaxValue: number
 
                 // rangeAxisMinValue: number
@@ -602,6 +604,7 @@ Ext.onReady( function() {
                     layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
                     layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
                         (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
+                    layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 
 					layout.rangeAxisMaxValue = Ext.isNumber(config.rangeAxisMaxValue) ? config.rangeAxisMaxValue : null;
 					layout.rangeAxisMinValue = Ext.isNumber(config.rangeAxisMinValue) ? config.rangeAxisMinValue : null;
