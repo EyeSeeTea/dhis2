@@ -1809,6 +1809,30 @@ Ext.onReady( function() {
                         return map;
                     }(),
 
+                    sortStoreBySum = function(store, ids, sortOrder) {
+                        var key = Ext.data.IdGenerator.get('uuid').generate(),
+                            total;
+
+                        // add totals
+                        store.each( function(record) {
+                            total = 0;
+
+                            for (var i = 0; i < ids.length; i++) {
+                                total += parseFloat(record.data[ids[i]]);
+
+                                record.set(key, total);
+                            }
+                        });
+
+                        // sort
+                        store.sort(key, sortOrder === -1 ? 'ASC' : 'DESC');
+
+                        // remove totals
+                        store.each( function(record) {
+                            delete record.data[key];
+                        });
+                    },
+
 					getSyncronizedXLayout,
                     getExtendedResponse,
                     validateUrl,
@@ -1917,6 +1941,11 @@ Ext.onReady( function() {
                         }(),
                         data: data
                     });
+
+                    // sort order
+                    if (xLayout.sortOrder) {
+                        store.sort(replacedColumnIds[0], xLayout.sortOrder === -1 ? 'ASC' : 'DESC');
+                    }
 
                     store.rangeFields = columnIds;
                     store.domainFields = [conf.finals.data.domain];
@@ -2229,8 +2258,10 @@ Ext.onReady( function() {
                         trackMouse: true,
                         cls: 'dv-chart-tips',
                         renderer: function(si, item) {
-                            var value = item.value[1] === '0.0' ? '-' : item.value[1];
-                            this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                            if (item.value) {
+                                var value = item.value[1] === '0.0' ? '-' : item.value[1];
+                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                            }
                         }
                     };
                 };
@@ -2482,6 +2513,11 @@ Ext.onReady( function() {
                 generator.stackedcolumn = function() {
                     var chart = this.column();
 
+                    // sort order
+                    if (xLayout.sortOrder) {
+                        sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
+                    }
+
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
 
@@ -2567,6 +2603,11 @@ Ext.onReady( function() {
 
                 generator.stackedbar = function() {
                     var chart = this.bar();
+
+                    // sort order
+                    if (xLayout.sortOrder) {
+                        sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
+                    }
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
@@ -2655,7 +2696,7 @@ Ext.onReady( function() {
 
                 generator.area = function() {
 
-                    // NB, always on for area charts as area extjs area charts cannot handle nulls
+                    // NB, always true for area charts as extjs area charts cannot handle nulls
                     xLayout.hideEmptyRows = true;
                     
                     var store = getDefaultStore(),
@@ -2663,6 +2704,11 @@ Ext.onReady( function() {
                         categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
                         series = getDefaultSeries(store);
+                        
+                    // sort order
+                    if (xLayout.sortOrder) {
+                        sortStoreBySum(store, replacedColumnIds, xLayout.sortOrder);
+                    }
 
                     series.type = 'area';
                     series.style.opacity = 0.7;
