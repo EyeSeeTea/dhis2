@@ -70,7 +70,6 @@ import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
@@ -145,7 +144,6 @@ public abstract class AbstractEventService
     // -------------------------------------------------------------------------
 
     @Override
-    @Transactional
     public ImportSummaries addEvents( List<Event> events, ImportOptions importOptions )
     {
         ImportSummaries importSummaries = new ImportSummaries();
@@ -169,7 +167,6 @@ public abstract class AbstractEventService
     }
 
     @Override
-    @Transactional
     public ImportSummaries addEvents( List<Event> events, ImportOptions importOptions, TaskId taskId )
     {
         notifier.clear( taskId ).notify( taskId, "Importing events" );
@@ -194,14 +191,12 @@ public abstract class AbstractEventService
     }
 
     @Override
-    @Transactional
     public ImportSummary addEvent( Event event )
     {
         return addEvent( event, null );
     }
 
     @Override
-    @Transactional
     public ImportSummary addEvent( Event event, ImportOptions importOptions )
     {
         Program program = programService.getProgram( event.getProgram() );
@@ -449,9 +444,6 @@ public abstract class AbstractEventService
             dueDate = DateUtils.parseDate( event.getDueDate() );
         }
 
-        System.err.println( "ed: " + executionDate );
-        System.err.println( "dd: " + dueDate );
-
         String storedBy = getStoredBy( event, null );
 
         if ( event.getStatus() == EventStatus.ACTIVE )
@@ -510,8 +502,7 @@ public abstract class AbstractEventService
         {
             DataElement dataElement = dataElementService.getDataElement( value.getDataElement() );
 
-            TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance,
-                dataElement );
+            TrackedEntityDataValue dataValue = dataValueService.getTrackedEntityDataValue( programStageInstance, dataElement );
 
             if ( dataValue != null )
             {
