@@ -30,14 +30,21 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.timer.SystemNanoTimer;
+import org.hisp.dhis.dxf2.timer.Timer;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -51,9 +58,11 @@ import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.program.ProgramStatus;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.NotificationLevel;
+import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
-import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentService;
@@ -79,51 +88,110 @@ import java.util.Set;
 public abstract class AbstractEventService
     implements EventService
 {
+    private static final Log log = LogFactory.getLog( AbstractEventService.class );
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
     @Autowired
-    private ProgramService programService;
+    protected ProgramService programService;
 
     @Autowired
-    private ProgramStageService programStageService;
+    protected ProgramStageService programStageService;
 
     @Autowired
-    private ProgramInstanceService programInstanceService;
+    protected ProgramInstanceService programInstanceService;
 
     @Autowired
-    private ProgramStageInstanceService programStageInstanceService;
+    protected ProgramStageInstanceService programStageInstanceService;
 
     @Autowired
-    private OrganisationUnitService organisationUnitService;
+    protected OrganisationUnitService organisationUnitService;
 
     @Autowired
-    private DataElementService dataElementService;
+    protected DataElementService dataElementService;
 
     @Autowired
     protected CurrentUserService currentUserService;
 
     @Autowired
-    private TrackedEntityDataValueService dataValueService;
+    protected TrackedEntityDataValueService dataValueService;
 
     @Autowired
-    private TrackedEntityInstanceService entityInstanceService;
+    protected TrackedEntityInstanceService entityInstanceService;
 
     @Autowired
-    private TrackedEntityCommentService commentService;
+    protected TrackedEntityCommentService commentService;
 
     @Autowired
-    private EventStore eventStore;
+    protected EventStore eventStore;
 
     @Autowired
-    private I18nManager i18nManager;
+    protected I18nManager i18nManager;
+
+    @Autowired
+    protected Notifier notifier;
+
+    @Autowired
+    protected SessionFactory sessionFactory;
+
+    protected final int FLUSH_FREQUENCY = 20;
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     // -------------------------------------------------------------------------
     // CREATE
     // -------------------------------------------------------------------------
+
+    @Override
+    @Transactional
+    public ImportSummaries addEvents( List<Event> events, ImportOptions importOptions )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+
+        int counter = 0;
+
+        for ( Event event : events )
+        {
+            importSummaries.addImportSummary( addEvent( event, importOptions ) );
+
+            if ( counter % FLUSH_FREQUENCY == 0 )
+            {
+                sessionFactory.getCurrentSession().flush();
+                sessionFactory.getCurrentSession().clear();
+            }
+
+            counter++;
+        }
+
+        return importSummaries;
+    }
+
+    @Override
+    @Transactional
+    public ImportSummaries addEvents( List<Event> events, ImportOptions importOptions, TaskId taskId )
+    {
+        notifier.clear( taskId ).notify( taskId, "Importing events" );
+
+        Timer<Long> timer = new SystemNanoTimer().start();
+
+        ImportSummaries importSummaries = addEvents( events, importOptions );
+
+        timer.stop();
+
+        if ( taskId != null )
+        {
+            notifier.notify( taskId, NotificationLevel.INFO, "Import done. Completed in " + timer.toString() + ".", true ).
+                addTaskSummary( taskId, importSummaries );
+        }
+        else
+        {
+            log.info( "Import done. Completed in " + timer.toString() + "." );
+        }
+
+        return importSummaries;
+    }
 
     @Override
     @Transactional
@@ -347,8 +415,7 @@ public abstract class AbstractEventService
     @Override
     public void updateEvent( Event event, boolean singleValue, ImportOptions importOptions )
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event
-            .getEvent() );
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
         if ( programStageInstance == null )
         {
@@ -371,7 +438,7 @@ public abstract class AbstractEventService
 
         if ( event.getEventDate() != null )
         {
-            executionDate = DateUtils.getMediumDate( event.getEventDate() );
+            executionDate = DateUtils.parseDate( event.getEventDate() );
             programStageInstance.setExecutionDate( executionDate );
         }
 
@@ -379,8 +446,11 @@ public abstract class AbstractEventService
 
         if ( event.getDueDate() != null )
         {
-            dueDate = DateUtils.getMediumDate( event.getDueDate() );
+            dueDate = DateUtils.parseDate( event.getDueDate() );
         }
+
+        System.err.println( "ed: " + executionDate );
+        System.err.println( "dd: " + dueDate );
 
         String storedBy = getStoredBy( event, null );
 
@@ -477,14 +547,14 @@ public abstract class AbstractEventService
         {
             return;
         }
+
         saveTrackedEntityComment( programStageInstance, event, getStoredBy( event, null ) );
 
     }
 
     public void updateEventForEventDate( Event event )
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event
-            .getEvent() );
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
         if ( programStageInstance == null )
         {
@@ -495,7 +565,7 @@ public abstract class AbstractEventService
 
         if ( event.getEventDate() != null )
         {
-            executionDate = DateUtils.getMediumDate( event.getEventDate() );
+            executionDate = DateUtils.parseDate( event.getEventDate() );
         }
 
         if ( event.getStatus() == EventStatus.COMPLETED )
@@ -506,6 +576,8 @@ public abstract class AbstractEventService
         {
             programStageInstance.setStatus( EventStatus.VISITED );
         }
+
+        System.err.println( "updateEventForEventDate.ed: " + executionDate );
 
         programStageInstance.setExecutionDate( executionDate );
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
@@ -519,8 +591,7 @@ public abstract class AbstractEventService
     @Override
     public void deleteEvent( Event event )
     {
-        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event
-            .getEvent() );
+        ProgramStageInstance programStageInstance = programStageInstanceService.getProgramStageInstance( event.getEvent() );
 
         if ( programStageInstance != null )
         {
@@ -719,7 +790,7 @@ public abstract class AbstractEventService
 
     private ProgramStageInstance createProgramStageInstance( ProgramStage programStage,
 
-    ProgramInstance programInstance, OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status,
+        ProgramInstance programInstance, OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status,
         Coordinate coordinate, String storedBy, String programStageInstanceUid )
     {
         ProgramStageInstance programStageInstance = new ProgramStageInstance();
@@ -736,8 +807,7 @@ public abstract class AbstractEventService
     }
 
     private void updateProgramStageInstance( ProgramStage programStage, ProgramInstance programInstance,
-
-    OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
+        OrganisationUnit organisationUnit, Date dueDate, Date executionDate, int status, Coordinate coordinate,
         String storedBy, ProgramStageInstance programStageInstance )
     {
         programStageInstance.setProgramInstance( programInstance );
@@ -767,8 +837,7 @@ public abstract class AbstractEventService
             programStageInstance.setStatus( EventStatus.COMPLETED );
             programStageInstance.setCompletedDate( new Date() );
             programStageInstance.setCompletedUser( storedBy );
-            programStageInstanceService
-                .completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
+            programStageInstanceService.completeProgramStageInstance( programStageInstance, i18nManager.getI18nFormat() );
         }
     }
 
@@ -784,9 +853,9 @@ public abstract class AbstractEventService
         importSummary.setStatus( ImportStatus.SUCCESS );
         boolean dryRun = importOptions != null && importOptions.isDryRun();
 
-        Date eventDate = DateUtils.getMediumDate( event.getEventDate() );
+        Date eventDate = DateUtils.parseDate( event.getEventDate() );
 
-        Date dueDate = DateUtils.getMediumDate( event.getDueDate() );
+        Date dueDate = DateUtils.parseDate( event.getDueDate() );
 
         String storedBy = getStoredBy( event, importSummary );
 

@@ -1,4 +1,4 @@
-package org.hisp.dhis.attribute;
+package org.hisp.dhis.dxf2.events.event;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,57 +28,42 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.scheduling.TaskId;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import static org.junit.Assert.*;
+import java.util.List;
 
-import org.hisp.dhis.DhisSpringTest;
-
-public class AttributeStoreTest
-    extends DhisSpringTest
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public class ImportEventsTask
+    implements Runnable
 {
-    @Autowired
-    private AttributeStore attributeStore;
+    private final List<Event> events;
 
-    private Attribute attribute1;
+    private final EventService eventService;
 
-    private Attribute attribute2;
+    private final ImportOptions importOptions;
+
+    private final TaskId taskId;
+
+    private final Authentication authentication;
+
+    public ImportEventsTask( List<Event> events, EventService eventService, ImportOptions importOptions, TaskId taskId )
+    {
+        this.events = events;
+        this.eventService = eventService;
+        this.importOptions = importOptions;
+        this.taskId = taskId;
+        this.authentication = SecurityContextHolder.getContext().getAuthentication();
+    }
 
     @Override
-    protected void setUpTest()
+    public void run()
     {
-        attribute1 = new Attribute();
-        attribute1.setName( "attribute_simple" );
-        attribute1.setValueType( "string" );
-        attribute1.setIndicatorAttribute( true );
-        attribute1.setDataElementAttribute( true );
-
-        attribute2 = new Attribute();
-        attribute2.setName( "attribute_with_options" );
-        attribute2.setValueType( "string" );
-        attribute2.setOrganisationUnitAttribute( true );
-        attribute2.setDataElementAttribute( true );
-
-        attributeStore.save( attribute1 );
-        attributeStore.save( attribute2 );
-    }
-
-    @Test
-    public void testGetDataElementAttributes()
-    {
-        assertEquals( 2, attributeStore.getDataElementAttributes().size() );
-    }
-
-    @Test
-    public void testGetIndicatorAttributes()
-    {
-        assertEquals( 1, attributeStore.getIndicatorAttributes().size() );
-    }
-
-    @Test
-    public void testGetOrganisationUnitAttributes()
-    {
-        assertEquals( 1, attributeStore.getOrganisationUnitAttributes().size() );
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+        eventService.addEvents( events, importOptions, taskId );
     }
 }

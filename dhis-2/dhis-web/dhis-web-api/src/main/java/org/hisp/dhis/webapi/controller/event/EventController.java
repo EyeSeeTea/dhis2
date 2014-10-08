@@ -38,7 +38,8 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.event.ImportEventTask;
-import org.hisp.dhis.dxf2.events.event.csv.CsvEventUtils;
+import org.hisp.dhis.dxf2.events.event.ImportEventsTask;
+import org.hisp.dhis.dxf2.events.event.csv.CsvEventService;
 import org.hisp.dhis.dxf2.events.report.EventRowService;
 import org.hisp.dhis.dxf2.events.report.EventRows;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -111,6 +112,9 @@ public class EventController
     private EventService eventService;
 
     @Autowired
+    private CsvEventService csvEventService;
+
+    @Autowired
     private EventRowService eventRowService;
 
     @Autowired
@@ -139,7 +143,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
-        @RequestParam( required = false, defaultValue = "true") boolean withHeaders,
+        @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
         @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
         WebOptions options = new WebOptions( parameters );
@@ -198,7 +202,7 @@ public class EventController
             events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );
         }
 
-        CsvEventUtils.writeEvents( response.getOutputStream(), events, withHeaders );
+        csvEventService.writeEvents( response.getOutputStream(), events, !skipHeader );
     }
 
     @RequestMapping( value = "", method = RequestMethod.GET )
@@ -480,6 +484,29 @@ public class EventController
         {
             TaskId taskId = new TaskId( TaskCategory.EVENT_IMPORT, currentUserService.getCurrentUser() );
             scheduler.executeTask( new ImportEventTask( inputStream, eventService, importOptions, taskId, true ) );
+            response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.EVENT_IMPORT );
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+        }
+    }
+
+
+    @RequestMapping( method = RequestMethod.POST, consumes = { "application/csv", "text/csv" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
+    public void postCsvEvents(
+        @RequestParam( required = false, defaultValue = "false" ) boolean skipFirst,
+        HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws IOException
+    {
+        Events events = csvEventService.readEvents( request.getInputStream(), skipFirst );
+
+        if ( !importOptions.isAsync() )
+        {
+            ImportSummaries importSummaries = eventService.addEvents( events.getEvents(), importOptions );
+            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            TaskId taskId = new TaskId( TaskCategory.EVENT_IMPORT, currentUserService.getCurrentUser() );
+            scheduler.executeTask( new ImportEventsTask( events.getEvents(), eventService, importOptions, taskId ) );
             response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.EVENT_IMPORT );
             response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         }

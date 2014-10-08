@@ -30,8 +30,9 @@ package org.hisp.dhis.dxf2.events.event.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import org.hisp.dhis.event.EventStatus;
 import org.springframework.util.Assert;
+
+import java.util.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -40,41 +41,31 @@ import org.springframework.util.Assert;
     "event",
     "status",
     "program",
-    "programInstance",
     "programStage",
     "enrollment",
-    "enrollmentStatus",
     "orgUnit",
-    "trackedEntityInstance",
     "eventDate",
     "dueDate",
     "latitude",
     "longitude",
-    "followUp",
     "dataElement",
     "value",
-    "providedElsewhere",
-    "storedBy"
+    "storedBy",
+    "providedElsewhere"
 } )
 public class CsvEventDataValue
 {
     private String event;
 
-    private EventStatus status = EventStatus.ACTIVE;
+    private String status;
 
     private String program;
 
-    private String programInstance;
-
     private String programStage;
-
-    private String enrollment;
-
-    private EventStatus enrollmentStatus;
 
     private String orgUnit;
 
-    private String trackedEntityInstance;
+    private String enrollment;
 
     private String eventDate;
 
@@ -84,15 +75,13 @@ public class CsvEventDataValue
 
     private Double longitude;
 
-    private Boolean followup;
-
     private String dataElement;
 
     private String value;
 
-    private Boolean providedElsewhere = false;
-
     private String storedBy;
+
+    private Boolean providedElsewhere;
 
     public CsvEventDataValue()
     {
@@ -105,21 +94,17 @@ public class CsvEventDataValue
         this.event = dataValue.getEvent();
         this.status = dataValue.getStatus();
         this.program = dataValue.getProgram();
-        this.programInstance = dataValue.getProgramInstance();
         this.programStage = dataValue.getProgramStage();
         this.enrollment = dataValue.getEnrollment();
-        this.enrollmentStatus = dataValue.getEnrollmentStatus();
         this.orgUnit = dataValue.getOrgUnit();
-        this.trackedEntityInstance = dataValue.getTrackedEntityInstance();
         this.eventDate = dataValue.getEventDate();
         this.dueDate = dataValue.getDueDate();
         this.latitude = dataValue.getLatitude();
         this.longitude = dataValue.getLongitude();
-        this.followup = dataValue.getFollowup();
         this.dataElement = dataValue.getDataElement();
         this.value = dataValue.getValue();
-        this.providedElsewhere = dataValue.getProvidedElsewhere();
         this.storedBy = dataValue.getStoredBy();
+        this.providedElsewhere = dataValue.getProvidedElsewhere();
     }
 
     @JsonProperty
@@ -134,12 +119,12 @@ public class CsvEventDataValue
     }
 
     @JsonProperty
-    public EventStatus getStatus()
+    public String getStatus()
     {
         return status;
     }
 
-    public void setStatus( EventStatus status )
+    public void setStatus( String status )
     {
         this.status = status;
     }
@@ -153,17 +138,6 @@ public class CsvEventDataValue
     public void setProgram( String program )
     {
         this.program = program;
-    }
-
-    @JsonProperty
-    public String getProgramInstance()
-    {
-        return programInstance;
-    }
-
-    public void setProgramInstance( String programInstance )
-    {
-        this.programInstance = programInstance;
     }
 
     @JsonProperty
@@ -189,17 +163,6 @@ public class CsvEventDataValue
     }
 
     @JsonProperty
-    public EventStatus getEnrollmentStatus()
-    {
-        return enrollmentStatus;
-    }
-
-    public void setEnrollmentStatus( EventStatus enrollmentStatus )
-    {
-        this.enrollmentStatus = enrollmentStatus;
-    }
-
-    @JsonProperty
     public String getOrgUnit()
     {
         return orgUnit;
@@ -208,17 +171,6 @@ public class CsvEventDataValue
     public void setOrgUnit( String orgUnit )
     {
         this.orgUnit = orgUnit;
-    }
-
-    @JsonProperty
-    public String getTrackedEntityInstance()
-    {
-        return trackedEntityInstance;
-    }
-
-    public void setTrackedEntityInstance( String trackedEntityInstance )
-    {
-        this.trackedEntityInstance = trackedEntityInstance;
     }
 
     @JsonProperty
@@ -266,17 +218,6 @@ public class CsvEventDataValue
     }
 
     @JsonProperty
-    public Boolean getFollowup()
-    {
-        return followup;
-    }
-
-    public void setFollowup( Boolean followup )
-    {
-        this.followup = followup;
-    }
-
-    @JsonProperty
     public String getDataElement()
     {
         return dataElement;
@@ -318,5 +259,56 @@ public class CsvEventDataValue
     public void setStoredBy( String storedBy )
     {
         this.storedBy = storedBy;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash( event, status, program, programStage, orgUnit, enrollment, eventDate, dueDate, latitude, longitude,
+            dataElement, value, storedBy, providedElsewhere );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+        if ( obj == null || getClass() != obj.getClass() )
+        {
+            return false;
+        }
+
+        final CsvEventDataValue other = (CsvEventDataValue) obj;
+
+        return Objects.equals( this.event, other.event ) && Objects.equals( this.status, other.status ) && Objects.equals( this.program,
+            other.program ) && Objects.equals( this.programStage, other.programStage ) && Objects.equals( this.orgUnit,
+            other.orgUnit ) && Objects.equals( this.enrollment, other.enrollment ) && Objects.equals( this.eventDate,
+            other.eventDate ) && Objects.equals( this.dueDate, other.dueDate ) && Objects.equals( this.latitude,
+            other.latitude ) && Objects.equals( this.longitude, other.longitude ) && Objects.equals( this.dataElement,
+            other.dataElement ) && Objects.equals( this.value, other.value ) && Objects.equals( this.storedBy,
+            other.storedBy ) && Objects.equals( this.providedElsewhere, other.providedElsewhere );
+    }
+
+    @Override
+    public String toString()
+    {
+        return com.google.common.base.Objects.toStringHelper( this )
+            .add( "event", event )
+            .add( "status", status )
+            .add( "program", program )
+            .add( "programStage", programStage )
+            .add( "enrollment", enrollment )
+            .add( "orgUnit", orgUnit )
+            .add( "eventDate", eventDate )
+            .add( "dueDate", dueDate )
+            .add( "latitude", latitude )
+            .add( "longitude", longitude )
+            .add( "dataElement", dataElement )
+            .add( "value", value )
+            .add( "storedBy", storedBy )
+            .add( "providedElsewhere", providedElsewhere )
+            .toString();
     }
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.attribute;
+package org.hisp.dhis.util;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,57 +28,66 @@ package org.hisp.dhis.attribute;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import static org.junit.Assert.*;
-
-import org.hisp.dhis.DhisSpringTest;
-
-public class AttributeStoreTest
-    extends DhisSpringTest
+public class Timer
 {
-    @Autowired
-    private AttributeStore attributeStore;
-
-    private Attribute attribute1;
-
-    private Attribute attribute2;
-
-    @Override
-    protected void setUpTest()
+    private static final Log log = LogFactory.getLog( Timer.class );
+    
+    private long startTime;
+    
+    private boolean printDisabled;
+    
+    public Timer disablePrint()
     {
-        attribute1 = new Attribute();
-        attribute1.setName( "attribute_simple" );
-        attribute1.setValueType( "string" );
-        attribute1.setIndicatorAttribute( true );
-        attribute1.setDataElementAttribute( true );
-
-        attribute2 = new Attribute();
-        attribute2.setName( "attribute_with_options" );
-        attribute2.setValueType( "string" );
-        attribute2.setOrganisationUnitAttribute( true );
-        attribute2.setDataElementAttribute( true );
-
-        attributeStore.save( attribute1 );
-        attributeStore.save( attribute2 );
+        this.printDisabled = true;
+        return this;
+    }
+    
+    public Timer start()
+    {
+        startTime = System.nanoTime();
+        return this;
+    }
+    
+    public long getSplitTime()
+    {
+        return getSplitTime( "Split" );
+    }
+    
+    public long getSplitTime( String msg )
+    {
+        long endTime = System.nanoTime();
+        
+        long time = ( endTime - startTime ) / 1000;
+        
+        if ( !printDisabled )
+        {
+            log.info( "Time: " + time + " micros: " + msg );
+        }
+        
+        return time;
     }
 
-    @Test
-    public void testGetDataElementAttributes()
+    public long getMilliSec()
     {
-        assertEquals( 2, attributeStore.getDataElementAttributes().size() );
+        long endTime = System.nanoTime();
+        long time = ( endTime - startTime ) / 1000000;
+        return time;
     }
-
-    @Test
-    public void testGetIndicatorAttributes()
+    
+    public long getTime( String msg )
     {
-        assertEquals( 1, attributeStore.getIndicatorAttributes().size() );
+        long time = getSplitTime( msg );
+                
+        start();
+        
+        return time;
     }
-
-    @Test
-    public void testGetOrganisationUnitAttributes()
+    
+    public long getTime()
     {
-        assertEquals( 1, attributeStore.getOrganisationUnitAttributes().size() );
+        return getTime( "Time" );
     }
 }

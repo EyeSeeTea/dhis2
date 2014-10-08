@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.dxf2.events.event.csv;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,66 +28,18 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dxf2.events.event.Events;
 
-public class Timer
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+/**
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
+ */
+public interface CsvEventService
 {
-    private static final Log log = LogFactory.getLog( Timer.class );
-    
-    private long startTime;
-    
-    private boolean printDisabled;
-    
-    public Timer disablePrint()
-    {
-        this.printDisabled = true;
-        return this;
-    }
-    
-    public Timer start()
-    {
-        startTime = System.nanoTime();
-        return this;
-    }
-    
-    public long getSplitTime()
-    {
-        return getSplitTime( "Split" );
-    }
-    
-    public long getSplitTime( String msg )
-    {
-        long endTime = System.nanoTime();
-        
-        long time = ( endTime - startTime ) / 1000;
-        
-        if ( !printDisabled )
-        {
-            log.info( "Time: " + time + " micros: " + msg );
-        }
-        
-        return time;
-    }
+    void writeEvents( OutputStream outputStream, Events events, boolean withHeader ) throws IOException;
 
-    public long getMilliSec()
-    {
-        long endTime = System.nanoTime();
-        long time = ( endTime - startTime ) / 1000000;
-        return time;
-    }
-    
-    public long getTime( String msg )
-    {
-        long time = getSplitTime( msg );
-                
-        start();
-        
-        return time;
-    }
-    
-    public long getTime()
-    {
-        return getTime( "Time" );
-    }
+    Events readEvents( InputStream inputStream, boolean skipFirst ) throws IOException;
 }
