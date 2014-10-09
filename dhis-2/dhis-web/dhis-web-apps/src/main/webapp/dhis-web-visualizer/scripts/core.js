@@ -215,7 +215,8 @@ Ext.onReady( function() {
                     fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
                 },
                 theme: {
-                    dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+                    //dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+                    dv1: ['#94ae0a', '#1d5991', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                 }
             };
 
@@ -1775,7 +1776,8 @@ Ext.onReady( function() {
 			web.chart = {};
 
 			web.chart.createChart = function(ns) {
-                var xLayout = ns.app.xLayout,
+                var dataTotalKey = Ext.data.IdGenerator.get('uuid').generate(),
+                    xLayout = ns.app.xLayout,
                     xResponse = ns.app.xResponse,
                     //columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
                     columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
@@ -1809,26 +1811,15 @@ Ext.onReady( function() {
                         return map;
                     }(),
 
-                    sortDataByTotal = function(data, ids, sortOrder) {
-                        var key = Ext.data.IdGenerator.get('uuid').generate();
-
-                        // add totals
+                    addDataTotals = function(data, ids) {
                         for (var i = 0, obj, total; i < data.length; i++) {
                             obj = data[i];
                             total = 0;
 
                             for (var j = 0; j < ids.length; j++) {
                                 total += parseFloat(obj[ids[j]]);
-                                obj[key] = total;
+                                obj[dataTotalKey] = total;
                             }
-                        }
-
-                        // sort
-                        support.prototype.array.sort(data, sortOrder === -1 ? 'ASC' : 'DESC', key);
-
-                        // remove totals
-                        for (var i = 0; i < data.length; i++) {
-                            delete data[i].key;
                         }
                     },
 
@@ -1860,8 +1851,6 @@ Ext.onReady( function() {
                         rowDimensionName = xLayout.rows[0].dimensionName,
 
                         data = [],
-                        //columnIds = xLayout.columnIds,
-                        //rowIds = xLayout.rowIds,
                         trendLineFields = [],
                         targetLineFields = [],
                         baseLineFields = [],
@@ -1892,36 +1881,59 @@ Ext.onReady( function() {
                         }
                     }
 
-                    // sort by first series or total if stacked
+                    // stacked
+                    if (isStacked) {
+                        addDataTotals(data, columnIds);
+                    }
+                    
+                    // sort order
                     if (xLayout.sortOrder) {
-                        if (isStacked) {
-                            sortDataByTotal(data, columnIds, xLayout.sortOrder);
-                        }
-                        else {
-                            support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', columnIds[0]);
-                        }
+                        var sortingKey = isStacked ? dataTotalKey : columnIds[0];
+                        
+                        support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortingKey);
                     }
 
                     // trend lines
                     if (xLayout.showTrendLine) {
-                        for (var i = 0, regression, key; i < columnIds.length; i++) {
+                        var regression,
+                            regressionKey;
+
+                        if (isStacked) {
                             regression = new SimpleRegression();
-                            key = conf.finals.data.trendLine + columnIds[i];
+                            regressionKey = conf.finals.data.trendLine + dataTotalKey;
 
-                            for (var j = 0, value; j < data.length; j++) {
-                                value = data[j][replacedColumnIds[i]];
-                                regression.addData(j, parseFloat(value));
+                            for (var i = 0, value; i < data.length; i++) {
+                                value = data[i][dataTotalKey];
+                                regression.addData(i, parseFloat(value));
                             }
 
-                            for (var j = 0; j < data.length; j++) {
-                                data[j][key] = parseFloat(regression.predict(j).toFixed(1));
+                            for (var i = 0; i < data.length; i++) {
+                                data[i][regressionKey] = parseFloat(regression.predict(i).toFixed(1));
                             }
 
-                            trendLineFields.push(key);
-                            xResponse.metaData.names[key] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                            trendLineFields.push(regressionKey);
+                            xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (Stacked total)';
+                        }
+                        else {
+                            for (var i = 0; i < columnIds.length; i++) {
+                                regression = new SimpleRegression();
+                                regressionKey = conf.finals.data.trendLine + columnIds[i];
+
+                                for (var j = 0, value; j < data.length; j++) {
+                                    value = data[j][replacedColumnIds[i]];
+                                    regression.addData(j, parseFloat(value));
+                                }
+
+                                for (var j = 0; j < data.length; j++) {
+                                    data[j][regressionKey] = parseFloat(regression.predict(j).toFixed(1));
+                                }
+
+                                trendLineFields.push(regressionKey);
+                                xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                            }
                         }
                     }
-
+                    
                     // target line
                     if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
                         for (var i = 0; i < data.length; i++) {
@@ -2198,10 +2210,12 @@ Ext.onReady( function() {
                     return main;
                 };
 
-                getDefaultTrendLines = function(store) {
+                getDefaultTrendLines = function(store, isStacked) {
                     var a = [];
 
-                    for (var i = 0; i < store.trendLineFields.length; i++) {
+                    for (var i = 0, strokeColor; i < store.trendLineFields.length; i++) {
+                        strokeColor = isStacked ? '#000' : conf.chart.theme.dv1[i];
+                        
                         a.push({
                             type: 'line',
                             axis: 'left',
@@ -2209,12 +2223,15 @@ Ext.onReady( function() {
                             yField: store.trendLineFields[i],
                             style: {
                                 opacity: 0.8,
-                                lineWidth: 3,
-                                'stroke-dasharray': 8
+                                lineWidth: 2,
+                                'stroke-dasharray': 14,
+                                stroke: strokeColor
                             },
+                            //showMarkers: false,
                             markerConfig: {
                                 type: 'circle',
-                                radius: 0
+                                radius: 0,
+                                fill: strokeColor
                             },
                             title: xResponse.metaData.names[store.trendLineFields[i]]
                         });
@@ -2231,9 +2248,9 @@ Ext.onReady( function() {
                         yField: store.targetLineFields,
                         style: {
                             opacity: 1,
-                            lineWidth: 2,
+                            lineWidth: 1,
                             'stroke-width': 1,
-                            stroke: '#041423'
+                            stroke: '#000'
                         },
                         showMarkers: false,
                         title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
@@ -2248,9 +2265,9 @@ Ext.onReady( function() {
                         yField: store.baseLineFields,
                         style: {
                             opacity: 1,
-                            lineWidth: 2,
+                            lineWidth: 1,
                             'stroke-width': 1,
-                            stroke: '#041423'
+                            stroke: '#000'
                         },
                         showMarkers: false,
                         title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
@@ -2270,19 +2287,23 @@ Ext.onReady( function() {
                     };
                 };
 
-                setDefaultTheme = function(store) {
+                setDefaultTheme = function(store, isStacked) {
                     var colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+                    
+                    //if (xLayout.showTrendLine && isStacked) {
+                        //colors.push('#ff0000');
+                    //}
 
                     if (xLayout.targetLineValue || xLayout.baseLineValue) {
                         colors.push('#051a2e');
                     }
 
                     if (xLayout.targetLineValue) {
-                        colors.push('#051a2e');
+                        //colors.push('#051a2e');
                     }
 
                     if (xLayout.baseLineValue) {
-                        colors.push('#051a2e');
+                        //colors.push('#051a2e');
                     }
 
                     Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
@@ -2491,9 +2512,9 @@ Ext.onReady( function() {
                         axes = [numericAxis, categoryAxis],
                         series = [getDefaultSeries(store)];
 
-                    // Options
+                    // options
                     if (xLayout.showTrendLine) {
-                        series = getDefaultTrendLines(store).concat(series);
+                        series = series.concat(getDefaultTrendLines(store, isStacked));
                     }
 
                     if (xLayout.targetLineValue) {
@@ -2504,8 +2525,8 @@ Ext.onReady( function() {
                         series.push(getDefaultBaseLine(store));
                     }
 
-                    // Theme
-                    setDefaultTheme(store);
+                    // theme
+                    setDefaultTheme(store, isStacked);
 
                     return getDefaultChart({
                         store: store,
@@ -2516,11 +2537,6 @@ Ext.onReady( function() {
 
                 generator.stackedcolumn = function() {
                     var chart = this.column(true);
-
-                    // sort order
-                    //if (xLayout.sortOrder) {
-                        //sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
-                    //}
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
