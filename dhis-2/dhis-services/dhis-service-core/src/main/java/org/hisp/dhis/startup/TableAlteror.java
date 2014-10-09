@@ -501,6 +501,7 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
+        executeSql( "update chart set sortorder = 0 where sortorder is null" );
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
@@ -515,7 +516,9 @@ public class TableAlteror
 
         // eventreport col/row subtotals
         executeSql( "update eventreport set colsubtotals = subtotals where colsubtotals is null" );
-        executeSql( "update eventreport set rowsubtotals = subtotals where rowsubtotals is null" );
+        executeSql( "update eventreport set rowsubtotals = subtotals where rowsubtotals is null" );        
+
+        executeSql( "update eventchart set sortorder = 0 where sortorder is null" );
 
         // Move chart filters to chart_filters table
 

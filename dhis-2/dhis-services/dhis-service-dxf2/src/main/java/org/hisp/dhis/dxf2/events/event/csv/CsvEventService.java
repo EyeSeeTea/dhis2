@@ -1,4 +1,4 @@
-package org.hisp.dhis.calendar;
+package org.hisp.dhis.dxf2.events.event.csv;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,64 +28,18 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import org.hisp.dhis.dxf2.events.event.Events;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * Simple service for returning all available calendars, and also giving the current system calendar.
  * @author Morten Olav Hansen <mortenoh@gmail.com>
- * @see Calendar
  */
-public interface CalendarService
+public interface CsvEventService
 {
-    final String KEY_CALENDAR = "keyCalendar";
-    final String KEY_DATE_FORMAT = "keyDateFormat";
-    
-    /**
-     * Gets all available calendars as a sorted list.
-     * @return All available calendars
-     */
-    List<Calendar> getAllCalendars();
+    void writeEvents( OutputStream outputStream, Events events, boolean withHeader ) throws IOException;
 
-    /**
-     * Gets all available date formats as list.
-     * @return All available date formats
-     */
-    List<DateFormat> getAllDateFormats();
-
-    /**
-     * Gets the currently selected system calendar.
-     * @return System calendar
-     */
-    Calendar getSystemCalendar();
-
-    /**
-     * Gets the currently selected date format.
-     * @return Date format
-     * @see DateFormat
-     */
-    DateFormat getSystemDateFormat();
-    
-    /**
-     * Gets the system calendar key.
-     * @return the system calendar key
-     */
-    String getSystemCalendarKey();
-    
-    /**
-     * Sets the system calendar key.
-     * @param calendarKey the system calendar key
-     */
-    void setSystemCalendarKey( String calendarKey );
-    
-    /**
-     * Gets the system date format key.
-     * @return the system date format key
-     */
-    String getSystemDateFormatKey();
-    
-    /**
-     * Sets the system date format key.
-     * @param dateFormatKey the system date format key
-     */
-    void setSystemDateFormatKey( String dateFormatKey );
+    Events readEvents( InputStream inputStream, boolean skipFirst ) throws IOException;
 }

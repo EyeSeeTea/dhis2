@@ -1,4 +1,4 @@
-package org.hisp.dhis.calendar;
+package org.hisp.dhis.dxf2.events.event;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,64 +28,42 @@ package org.hisp.dhis.calendar;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.scheduling.TaskId;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import java.util.List;
 
 /**
- * Simple service for returning all available calendars, and also giving the current system calendar.
  * @author Morten Olav Hansen <mortenoh@gmail.com>
- * @see Calendar
  */
-public interface CalendarService
+public class ImportEventsTask
+    implements Runnable
 {
-    final String KEY_CALENDAR = "keyCalendar";
-    final String KEY_DATE_FORMAT = "keyDateFormat";
-    
-    /**
-     * Gets all available calendars as a sorted list.
-     * @return All available calendars
-     */
-    List<Calendar> getAllCalendars();
+    private final List<Event> events;
 
-    /**
-     * Gets all available date formats as list.
-     * @return All available date formats
-     */
-    List<DateFormat> getAllDateFormats();
+    private final EventService eventService;
 
-    /**
-     * Gets the currently selected system calendar.
-     * @return System calendar
-     */
-    Calendar getSystemCalendar();
+    private final ImportOptions importOptions;
 
-    /**
-     * Gets the currently selected date format.
-     * @return Date format
-     * @see DateFormat
-     */
-    DateFormat getSystemDateFormat();
-    
-    /**
-     * Gets the system calendar key.
-     * @return the system calendar key
-     */
-    String getSystemCalendarKey();
-    
-    /**
-     * Sets the system calendar key.
-     * @param calendarKey the system calendar key
-     */
-    void setSystemCalendarKey( String calendarKey );
-    
-    /**
-     * Gets the system date format key.
-     * @return the system date format key
-     */
-    String getSystemDateFormatKey();
-    
-    /**
-     * Sets the system date format key.
-     * @param dateFormatKey the system date format key
-     */
-    void setSystemDateFormatKey( String dateFormatKey );
+    private final TaskId taskId;
+
+    private final Authentication authentication;
+
+    public ImportEventsTask( List<Event> events, EventService eventService, ImportOptions importOptions, TaskId taskId )
+    {
+        this.events = events;
+        this.eventService = eventService;
+        this.importOptions = importOptions;
+        this.taskId = taskId;
+        this.authentication = SecurityContextHolder.getContext().getAuthentication();
+    }
+
+    @Override
+    public void run()
+    {
+        SecurityContextHolder.getContext().setAuthentication( authentication );
+        eventService.addEvents( events, importOptions, taskId );
+    }
 }

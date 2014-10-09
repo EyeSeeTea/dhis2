@@ -647,7 +647,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         
         angular.forEach(attributes, function(attribute){           
 
-            if(attribute.valueType === 'date' || attribute.valueType === 'number'){
+            if(attribute.type === 'date' || attribute.type === 'number'){
                 var q = '';
                 
                 if(attribute.operator === OperatorFactory.defaultOperators[0]){
@@ -1213,10 +1213,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .service('DateUtils', function($filter){
     
     return {
-        format: function(dateValue) {            
-            dateValue = moment(dateValue, 'YYYY-MM-DD')._d;
+        format: function(dateValue) {
+            dateValue = moment(dateValue, 'YYYY-MM-DD')._d;            
             dateValue = Date.parse(dateValue);
-            dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
+            dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');            
             return dateValue;
         },
         formatToHrsMins: function(dateValue) {            
@@ -1274,8 +1274,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         },
         getEventDueDate: function(programStage, enrollment){
             var dueDate = DateUtils.format(enrollment.dateOfIncident);
-            dueDate = moment(dueDate).add('d', programStage.minDaysFromStart)._d;
-            dueDate = DateUtils.format(dueDate);
+            dueDate = moment(enrollment.dateOfIncident).add('d', programStage.minDaysFromStart);
+            dueDate = DateUtils.format(dueDate);            
             return dueDate;
         },
         getEventOrgUnitName: function(orgUnitId){            
