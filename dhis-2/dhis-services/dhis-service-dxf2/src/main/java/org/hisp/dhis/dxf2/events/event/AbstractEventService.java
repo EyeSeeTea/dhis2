@@ -30,6 +30,8 @@ package org.hisp.dhis.dxf2.events.event;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -82,6 +84,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -201,9 +206,9 @@ public abstract class AbstractEventService
     @Override
     public ImportSummary addEvent( Event event, ImportOptions importOptions )
     {
-        Program program = programService.getProgram( event.getProgram() );
+        Program program = getProgram( event.getProgram() );
         ProgramInstance programInstance;
-        ProgramStage programStage = programStageService.getProgramStage( event.getProgramStage() );
+        ProgramStage programStage = getProgramStage( event.getProgramStage() );
         ProgramStageInstance programStageInstance = null;
 
         if ( importOptions == null )
@@ -303,8 +308,7 @@ public abstract class AbstractEventService
                         {
                             if ( !CodeGenerator.isValidCode( event.getEvent() ) )
                             {
-                                return new ImportSummary( ImportStatus.ERROR,
-                                    "Event.event did not point to a valid event" );
+                                return new ImportSummary( ImportStatus.ERROR, "Event.event did not point to a valid event" );
                             }
                         }
                     }
@@ -515,7 +519,7 @@ public abstract class AbstractEventService
                 TrackedEntityDataValue existingDataValue = existingDataValues.get( value.getDataElement() );
 
                 saveDataValue( programStageInstance, event.getStoredBy(), dataElement, value.getValue(),
-                    value.getProvidedElsewhere(), existingDataValue );
+                    value.getProvidedElsewhere(), existingDataValue, null );
             }
         }
 
@@ -651,8 +655,7 @@ public abstract class AbstractEventService
             }
         }
 
-        Collection<TrackedEntityDataValue> dataValues = dataValueService
-            .getTrackedEntityDataValues( programStageInstance );
+        Collection<TrackedEntityDataValue> dataValues = dataValueService.getTrackedEntityDataValues( programStageInstance );
 
         for ( TrackedEntityDataValue dataValue : dataValues )
         {
@@ -740,7 +743,7 @@ public abstract class AbstractEventService
     }
 
     private void saveDataValue( ProgramStageInstance programStageInstance, String storedBy, DataElement dataElement,
-        String value, Boolean providedElsewhere, TrackedEntityDataValue dataValue )
+        String value, Boolean providedElsewhere, TrackedEntityDataValue dataValue, ImportSummary importSummary )
     {
         if ( value != null && value.trim().length() == 0 )
         {
@@ -756,6 +759,11 @@ public abstract class AbstractEventService
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
                 dataValueService.saveTrackedEntityDataValue( dataValue );
+
+                if ( importSummary != null )
+                {
+                    importSummary.getDataValueCount().incrementImported();
+                }
             }
             else
             {
@@ -765,11 +773,21 @@ public abstract class AbstractEventService
                 dataValue.setProvidedElsewhere( providedElsewhere );
 
                 dataValueService.updateTrackedEntityDataValue( dataValue );
+
+                if ( importSummary != null )
+                {
+                    importSummary.getDataValueCount().incrementUpdated();
+                }
             }
         }
         else if ( dataValue != null )
         {
             dataValueService.deleteTrackedEntityDataValue( dataValue );
+
+            if ( importSummary != null )
+            {
+                importSummary.getDataValueCount().incrementDeleted();
+            }
         }
     }
 
@@ -888,10 +906,8 @@ public abstract class AbstractEventService
                         TrackedEntityDataValue existingDataValue = dataElementValueMap.get( dataValue.getDataElement() );
 
                         saveDataValue( programStageInstance, dataValueStoredBy, dataElement, dataValue.getValue(),
-                            dataValue.getProvidedElsewhere(), existingDataValue );
+                            dataValue.getProvidedElsewhere(), existingDataValue, importSummary );
                     }
-
-                    importSummary.getDataValueCount().incrementImported();
                 }
             }
             else
@@ -961,5 +977,36 @@ public abstract class AbstractEventService
         }
 
         return organisationUnit;
+    }
+
+    private static Cache<String, Program> programCache = CacheBuilder.newBuilder()
+        .expireAfterAccess( 30, TimeUnit.SECONDS )
+        .initialCapacity( 10 )
+        .maximumSize( 50 )
+        .build();
+
+    private Program getProgram( final String id )
+    {
+        try
+        {
+            return programCache.get( id, new Callable<Program>()
+            {
+                @Override
+                public Program call() throws Exception
+                {
+                    return programService.getProgram( id );
+                }
+            } );
+        }
+        catch ( ExecutionException ignored )
+        {
+        }
+
+        return null;
+    }
+
+    private ProgramStage getProgramStage( String id )
+    {
+        return programStageService.getProgramStage( id );
     }
 }
