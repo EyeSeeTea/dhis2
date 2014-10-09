@@ -215,7 +215,6 @@ Ext.onReady( function() {
                     fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
                 },
                 theme: {
-                    //dv1: ['#94ae0a', '#0b3b68', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                     dv1: ['#94ae0a', '#1d5991', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
                 }
             };
@@ -1381,9 +1380,9 @@ Ext.onReady( function() {
 					delete layout.rangeAxisDecimals;
 				}
 
-				if (!layout.sorting) {
-					delete layout.sorting;
-				}
+                if (!layout.sorting) {
+                    delete layout.sorting;
+                }
 
 				if (!layout.legend) {
 					delete layout.legend;
@@ -1401,7 +1400,6 @@ Ext.onReady( function() {
 				delete layout.parentOrganisationUnit;
 				delete layout.regression;
 				delete layout.cumulative;
-				delete layout.sortOrder;
 				delete layout.topLimit;
 
 				return layout;
@@ -1912,7 +1910,7 @@ Ext.onReady( function() {
                             }
 
                             trendLineFields.push(regressionKey);
-                            xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (Stacked total)';
+                            xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (Total)';
                         }
                         else {
                             for (var i = 0; i < columnIds.length; i++) {
@@ -2549,8 +2547,8 @@ Ext.onReady( function() {
                     return chart;
                 };
 
-                generator.bar = function() {
-                    var store = getDefaultStore(),
+                generator.bar = function(isStacked) {
+                    var store = getDefaultStore(isStacked),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
                         axes,
@@ -2582,7 +2580,7 @@ Ext.onReady( function() {
                     series = [series];
 
                     if (xLayout.showTrendLine) {
-                        trendLines = getDefaultTrendLines(store);
+                        trendLines = getDefaultTrendLines(store, isStacked);
 
                         for (var i = 0; i < trendLines.length; i++) {
                             trendLines[i].axis = 'bottom';
@@ -2590,7 +2588,7 @@ Ext.onReady( function() {
                             trendLines[i].yField = store.domainFields;
                         }
 
-                        series = trendLines.concat(series);
+                        series = series.concat(trendLines);
                     }
 
                     if (xLayout.targetLineValue) {
@@ -2622,12 +2620,7 @@ Ext.onReady( function() {
                 };
 
                 generator.stackedbar = function() {
-                    var chart = this.bar();
-
-                    // sort order
-                    if (xLayout.sortOrder) {
-                        sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
-                    }
+                    var chart = this.bar(true);
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
@@ -2719,17 +2712,12 @@ Ext.onReady( function() {
                     // NB, always true for area charts as extjs area charts cannot handle nulls
                     xLayout.hideEmptyRows = true;
                     
-                    var store = getDefaultStore(),
+                    var store = getDefaultStore(true),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
                         series = getDefaultSeries(store);
                         
-                    // sort order
-                    if (xLayout.sortOrder) {
-                        sortStoreBySum(store, replacedColumnIds, xLayout.sortOrder);
-                    }
-
                     series.type = 'area';
                     series.style.opacity = 0.7;
                     series.style.lineWidth = 0;
@@ -2739,7 +2727,7 @@ Ext.onReady( function() {
 
                     // Options
                     if (xLayout.showTrendLine) {
-                        series = getDefaultTrendLines(store).concat(series);
+                        series = series.concat(getDefaultTrendLines(store, true));
                     }
 
                     if (xLayout.targetLineValue) {
