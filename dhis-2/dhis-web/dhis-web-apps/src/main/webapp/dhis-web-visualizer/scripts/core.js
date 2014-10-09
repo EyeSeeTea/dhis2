@@ -1809,28 +1809,27 @@ Ext.onReady( function() {
                         return map;
                     }(),
 
-                    sortStoreBySum = function(store, ids, sortOrder) {
-                        var key = Ext.data.IdGenerator.get('uuid').generate(),
-                            total;
+                    sortDataByTotal = function(data, ids, sortOrder) {
+                        var key = Ext.data.IdGenerator.get('uuid').generate();
 
                         // add totals
-                        store.each( function(record) {
+                        for (var i = 0, obj, total; i < data.length; i++) {
+                            obj = data[i];
                             total = 0;
 
-                            for (var i = 0; i < ids.length; i++) {
-                                total += parseFloat(record.data[ids[i]]);
-
-                                record.set(key, total);
+                            for (var j = 0; j < ids.length; j++) {
+                                total += parseFloat(obj[ids[j]]);
+                                obj[key] = total;
                             }
-                        });
+                        }
 
                         // sort
-                        store.sort(key, sortOrder === -1 ? 'ASC' : 'DESC');
+                        support.prototype.array.sort(data, sortOrder === -1 ? 'ASC' : 'DESC', key);
 
                         // remove totals
-                        store.each( function(record) {
-                            delete record.data[key];
-                        });
+                        for (var i = 0; i < data.length; i++) {
+                            delete data[i].key;
+                        }
                     },
 
 					getSyncronizedXLayout,
@@ -1855,7 +1854,7 @@ Ext.onReady( function() {
 
                     generator = {};
 
-                getDefaultStore = function() {
+                getDefaultStore = function(isStacked) {
                     var pe = conf.finals.dimension.period.dimensionName,
                         columnDimensionName = xLayout.columns[0].dimensionName,
                         rowDimensionName = xLayout.rows[0].dimensionName,
@@ -1890,6 +1889,16 @@ Ext.onReady( function() {
 
                         if (!(isEmpty && xLayout.hideEmptyRows)) {
                             data.push(obj);
+                        }
+                    }
+
+                    // sort by first series or total if stacked
+                    if (xLayout.sortOrder) {
+                        if (isStacked) {
+                            sortDataByTotal(data, columnIds, xLayout.sortOrder);
+                        }
+                        else {
+                            support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', columnIds[0]);
                         }
                     }
 
@@ -1941,11 +1950,6 @@ Ext.onReady( function() {
                         }(),
                         data: data
                     });
-
-                    // sort order
-                    if (xLayout.sortOrder) {
-                        store.sort(replacedColumnIds[0], xLayout.sortOrder === -1 ? 'ASC' : 'DESC');
-                    }
 
                     store.rangeFields = columnIds;
                     store.domainFields = [conf.finals.data.domain];
@@ -2480,8 +2484,8 @@ Ext.onReady( function() {
                     return chart;
                 };
 
-                generator.column = function() {
-                    var store = getDefaultStore(),
+                generator.column = function(isStacked) {
+                    var store = getDefaultStore(isStacked),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
@@ -2511,12 +2515,12 @@ Ext.onReady( function() {
                 };
 
                 generator.stackedcolumn = function() {
-                    var chart = this.column();
+                    var chart = this.column(true);
 
                     // sort order
-                    if (xLayout.sortOrder) {
-                        sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
-                    }
+                    //if (xLayout.sortOrder) {
+                        //sortStoreBySum(chart.store, replacedColumnIds, xLayout.sortOrder);
+                    //}
 
                     for (var i = 0, item; i < chart.series.items.length; i++) {
                         item = chart.series.items[i];
