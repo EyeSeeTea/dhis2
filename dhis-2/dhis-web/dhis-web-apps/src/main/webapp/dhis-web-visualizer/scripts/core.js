@@ -12,7 +12,7 @@ Ext.onReady( function() {
 
 	// namespace
 	DV = {};
-	var NS = DV;
+	NS = DV;
 
 	NS.instances = [];
 	NS.i18n = {};
@@ -46,19 +46,19 @@ Ext.onReady( function() {
                 dimension: {
                     data: {
                         value: 'data',
-                        name: DV.i18n.data,
+                        name: NS.i18n.data,
                         dimensionName: 'dx',
                         objectName: 'dx'
                     },
                     indicator: {
                         value: 'indicator',
-                        name: DV.i18n.indicator,
+                        name: NS.i18n.indicator,
                         dimensionName: 'dx',
                         objectName: 'in'
                     },
                     dataElement: {
                         value: 'dataelement',
-                        name: DV.i18n.data_element,
+                        name: NS.i18n.data_element,
                         dimensionName: 'dx',
                         objectName: 'de'
                     },
@@ -70,18 +70,18 @@ Ext.onReady( function() {
                     },
                     dataSet: {
                         value: 'dataset',
-                        name: DV.i18n.dataset,
+                        name: NS.i18n.dataset,
                         dimensionName: 'dx',
                         objectName: 'ds'
                     },
                     category: {
-                        name: DV.i18n.assigned_categories,
+                        name: NS.i18n.assigned_categories,
                         dimensionName: 'co',
                         objectName: 'co',
                     },
                     period: {
                         value: 'period',
-                        name: DV.i18n.period,
+                        name: NS.i18n.period,
                         dimensionName: 'pe',
                         objectName: 'pe',
                     },
@@ -93,7 +93,7 @@ Ext.onReady( function() {
                     },
                     organisationUnit: {
                         value: 'organisationUnits',
-                        name: DV.i18n.organisation_units,
+                        name: NS.i18n.organisation_units,
                         dimensionName: 'ou',
                         objectName: 'ou',
                     },
@@ -688,7 +688,7 @@ Ext.onReady( function() {
 					}
                     
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-                        if (!DV.plugin) {
+                        if (!NS.plugin) {
                             alert('No values found');
                         }
                         return;
@@ -1910,7 +1910,7 @@ Ext.onReady( function() {
                             }
 
                             trendLineFields.push(regressionKey);
-                            xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (Total)';
+                            xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (Total)';
                         }
                         else {
                             for (var i = 0; i < columnIds.length; i++) {
@@ -1927,7 +1927,7 @@ Ext.onReady( function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
                             }
                         }
                     }
@@ -2040,7 +2040,7 @@ Ext.onReady( function() {
                         return Ext.Array.max(values);
                     };
 
-                    if (DV.isDebug) {
+                    if (NS.isDebug) {
                         console.log("data", data);
                         console.log("rangeFields", store.rangeFields);
                         console.log("domainFields", store.domainFields);
@@ -2250,7 +2250,7 @@ Ext.onReady( function() {
                             stroke: '#000'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
+                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : NS.i18n.target) + ' (' + xLayout.targetLineValue + ')'
                     };
                 };
 
@@ -2267,7 +2267,7 @@ Ext.onReady( function() {
                             stroke: '#000'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
+                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : NS.i18n.base) + ' (' + xLayout.baseLineValue + ')'
                     };
                 };
 
