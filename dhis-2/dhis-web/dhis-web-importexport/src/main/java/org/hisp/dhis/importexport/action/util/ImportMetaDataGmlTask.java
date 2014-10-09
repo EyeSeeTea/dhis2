@@ -33,11 +33,10 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+
 import org.hisp.dhis.scheduling.TaskId;
 
 import java.io.InputStream;
-import java.util.Collection;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -46,8 +45,6 @@ public class ImportMetaDataGmlTask
     implements Runnable
 {
     private static final Log log = LogFactory.getLog( ImportMetaDataGmlTask.class );
-
-    private ImportService importService;
 
     private GmlImportService gmlImportService;
 
@@ -63,7 +60,6 @@ public class ImportMetaDataGmlTask
         ImportOptions importOptions, InputStream inputStream, TaskId taskId )
     {
         this.userUid = userUid;
-        this.importService = importService;
         this.gmlImportService = gmlImportService;
         this.importOptions = importOptions;
         this.inputStream = inputStream;
@@ -77,20 +73,16 @@ public class ImportMetaDataGmlTask
     @Override
     public void run()
     {
-        Collection<OrganisationUnit> orgUnits;
+        importOptions.setImportStrategy( "update" );
 
         try
         {
-            orgUnits = gmlImportService.fromGml( inputStream );
+            gmlImportService.importGml( inputStream, userUid, taskId, importOptions );
         }
         catch ( Exception ex )
         {
             log.error( "Unable to read data while reading input stream", ex ); // TODO better exception
-            return;
         }
-
-        // TODO Import the actual data and merge with DB.
-
-        //importService.importMetaData( userUid, metaData, importOptions, taskId );
+        log.info( "GML data was imported." );
     }
 }

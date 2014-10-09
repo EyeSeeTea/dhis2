@@ -30,15 +30,17 @@ package org.hisp.dhis.dxf2.gml;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import org.apache.commons.beanutils.BeanUtils;
+import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.scheduling.TaskId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -48,7 +50,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -70,14 +72,17 @@ public class DefaultGmlImportService
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
+    @Autowired
+    private ImportService importService;
+
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
-    public MetaData fromGml( InputStream input )
+    public MetaData fromGml( InputStream inputStream )
         throws IOException, TransformerException
     {
-        InputStream dxfStream = transformGml( input );
+        InputStream dxfStream = transformGml( inputStream );
 
         MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
 
@@ -89,7 +94,7 @@ public class DefaultGmlImportService
                 @Override
                 public String apply( OrganisationUnit organisationUnit )
                 {
-                    return organisationUnit.getName(); // TODO identify by code as well
+                    return organisationUnit.getName();
                 }
             }
         );
@@ -99,24 +104,34 @@ public class DefaultGmlImportService
         for( OrganisationUnit persisted : persistedOrgUnits )
         {
             OrganisationUnit unit = namedMap.get( persisted.getName() );
-            persisted.setCoordinates( unit.getCoordinates() ); // TODO null-check
-            persisted.setFeatureType( unit.getFeatureType() );
 
-            try
+            String coordinates = unit.getCoordinates(),
+                   featureType = unit.getFeatureType();
+
+            unit.mergeWith( persisted );
+
+            unit.setCoordinates( coordinates );
+            unit.setFeatureType( featureType );
+
+            if( persisted.getParent() != null )
             {
-                BeanUtils.copyProperties( unit, persisted );
-            }
-            catch ( IllegalAccessException iae )
-            {
-                iae.printStackTrace();
-            }
-            catch ( InvocationTargetException ite )
-            {
-                ite.printStackTrace();
+                OrganisationUnit parent = new OrganisationUnit();
+                parent.setUid( persisted.getParent().getUid() );
+                unit.setParent( parent );
             }
         }
 
+        metaData.setOrganisationUnits( new ArrayList<>( namedMap.values() ) );
+
         return metaData;
+    }
+
+    @Override
+    @Transactional
+    public void importGml( InputStream inputStream, String userUid, TaskId taskId, ImportOptions importOptions )
+        throws IOException, TransformerException
+    {
+        importService.importMetaData( userUid, fromGml( inputStream ), importOptions, taskId );
     }
 
     // -------------------------------------------------------------------------

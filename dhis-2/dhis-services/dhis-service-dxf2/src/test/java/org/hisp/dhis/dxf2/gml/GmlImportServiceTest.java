@@ -29,6 +29,7 @@ package org.hisp.dhis.dxf2.gml;
  */
 
 import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -64,12 +66,13 @@ public class GmlImportServiceTest
         inputStream = classLoader.getResourceAsStream( "gmlOrgUnits.gml" );
     }
 
-    /*
+/*
     @Test
     public void fromGmlTest()
         throws Exception
     {
-        Collection<OrganisationUnit> orgUnits = gmlImportService.fromGml( inputStream );
+        MetaData metaData = gmlImportService.fromGml( inputStream );
+        Collection<OrganisationUnit> orgUnits = metaData.getOrganisationUnits();
 
         assertNotNull( orgUnits );
 
@@ -108,10 +111,10 @@ public class GmlImportServiceTest
         assertEquals( 1, units.get( "Blindern").getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 76, units.get( "Forskningsparken" ).getCoordinatesAsList().get(0).getNumberOfCoordinates() );
     }
-    */ // TODO Merge testcases into importFromGmlTest
+*/
 
     @Test
-    public void importFromGmlTest()
+    public void fromGmlTest()
         throws Exception
     {
         assertTrue( organisationUnitService.getAllOrganisationUnits().isEmpty() );
@@ -127,12 +130,14 @@ public class GmlImportServiceTest
         organisationUnitService.addOrganisationUnit( orgUnitB );
         organisationUnitService.addOrganisationUnit( orgUnitC );
 
-        boolean success = gmlImportService.importFromGml( inputStream );
+        MetaData metaData = gmlImportService.fromGml( inputStream );
+        Collection<OrganisationUnit> organisationUnits = metaData.getOrganisationUnits();
 
-        assertTrue( success );
+        assertNotNull( organisationUnits );
 
+        /*
         Collection<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
-
+        */
         HashMap<String, OrganisationUnit> units = new HashMap<>();
 
         for( OrganisationUnit orgUnit : organisationUnits )
