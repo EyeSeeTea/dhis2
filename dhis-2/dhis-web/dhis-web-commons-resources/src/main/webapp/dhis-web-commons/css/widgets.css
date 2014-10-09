@@ -391,6 +391,16 @@ table.notificationTable td
   padding: 3px;
 }
 
+.warningBox
+{
+    background-color: #f48d8d;
+    border: 1px solid #9d0006;
+    padding: 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+    margin-bottom: 10px;
+}
+
 /*----------------------------------------------------------------------------*/
 /* Sorting                                                                    */
 /*----------------------------------------------------------------------------*/

@@ -28,6 +28,7 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.MetaData;
 import org.hisp.dhis.scheduling.TaskId;
@@ -43,7 +44,7 @@ public interface GmlImportService
 {
     String ID = GmlImportService.class.getName();
 
-    MetaData fromGml( InputStream inputStream ) throws IOException, TransformerException;
+    MetaData fromGml( InputStream inputStream, IdentifiableProperty identifiableProperty ) throws IOException, TransformerException;
 
     void importGml( InputStream inputStream, String userUid, TaskId taskId, ImportOptions importOptions )
         throws IOException, TransformerException;

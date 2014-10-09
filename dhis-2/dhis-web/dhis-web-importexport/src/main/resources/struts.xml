@@ -330,17 +330,17 @@
 
     <!-- GML MetaData import -->
 
-    <action name="importGmlMetaData" class="org.hisp.dhis.importexport.action.dxf2.MetaDataImportAction">
+    <action name="importGml" class="org.hisp.dhis.importexport.action.dxf2.MetaDataImportAction">
       <param name="importFormat">gml</param>
       <param name="strategy">update</param>
-      <result name="success" type="redirect">gmlMetaDataImport.action</result>
+      <result name="success" type="redirect">gmlImport.action</result>
       <interceptor-ref name="fileUploadStack" />
     </action>
 
-    <action name="gmlMetaDataImport" class="org.hisp.dhis.importexport.action.NoAction">
+    <action name="gmlImport" class="org.hisp.dhis.importexport.action.NoAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="menu">/dhis-web-importexport/mainMenu.vm</param>
-      <param name="page">/dhis-web-importexport/gmlMetaDataImport.vm</param>
+      <param name="page">/dhis-web-importexport/gmlImport.vm</param>
       <param name="javascripts">javascript/importMetaData.js</param>
       <param name="requiredAuthorities">F_METADATA_IMPORT</param>
     </action>

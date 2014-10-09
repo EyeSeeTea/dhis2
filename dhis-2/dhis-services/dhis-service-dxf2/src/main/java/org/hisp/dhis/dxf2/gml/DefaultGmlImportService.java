@@ -30,6 +30,7 @@ package org.hisp.dhis.dxf2.gml;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
+import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.MetaData;
@@ -79,9 +80,11 @@ public class DefaultGmlImportService
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
-    public MetaData fromGml( InputStream inputStream )
+    // TODO use chosen identifiableproperty (name or code)
+    public MetaData fromGml( InputStream inputStream, IdentifiableProperty identifiableProperty )
         throws IOException, TransformerException
     {
+        System.out.println( "org unit id scheme is: " + identifiableProperty.toString() );
         InputStream dxfStream = transformGml( inputStream );
 
         MetaData metaData = renderService.fromXml( dxfStream, MetaData.class );
@@ -131,7 +134,7 @@ public class DefaultGmlImportService
     public void importGml( InputStream inputStream, String userUid, TaskId taskId, ImportOptions importOptions )
         throws IOException, TransformerException
     {
-        importService.importMetaData( userUid, fromGml( inputStream ), importOptions, taskId );
+        importService.importMetaData( userUid, fromGml( inputStream, importOptions.getOrgUnitIdScheme() ), importOptions, taskId );
     }
 
     // -------------------------------------------------------------------------
