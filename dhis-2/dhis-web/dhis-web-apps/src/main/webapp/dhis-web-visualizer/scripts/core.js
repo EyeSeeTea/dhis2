@@ -2225,7 +2225,6 @@ Ext.onReady( function() {
                                 'stroke-dasharray': 14,
                                 stroke: strokeColor
                             },
-                            //showMarkers: false,
                             markerConfig: {
                                 type: 'circle',
                                 radius: 0,
@@ -2285,24 +2284,8 @@ Ext.onReady( function() {
                     };
                 };
 
-                setDefaultTheme = function(store, isStacked) {
+                setDefaultTheme = function(store) {
                     var colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length);
-                    
-                    //if (xLayout.showTrendLine && isStacked) {
-                        //colors.push('#ff0000');
-                    //}
-
-                    if (xLayout.targetLineValue || xLayout.baseLineValue) {
-                        colors.push('#051a2e');
-                    }
-
-                    if (xLayout.targetLineValue) {
-                        //colors.push('#051a2e');
-                    }
-
-                    if (xLayout.baseLineValue) {
-                        //colors.push('#051a2e');
-                    }
 
                     Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
                         constructor: function(config) {
@@ -2826,7 +2809,7 @@ Ext.onReady( function() {
                         seriesTitles = getDefaultSeriesTitle(store),
                         chart;
 
-                    // Axes
+                    // axes
                     axes.push({
                         type: 'Radial',
                         position: 'radial',
@@ -2835,7 +2818,7 @@ Ext.onReady( function() {
                         }
                     });
 
-                    // Series
+                    // series
                     for (var i = 0, obj; i < store.rangeFields.length; i++) {
                         obj = {
                             showInLegend: true,
@@ -2858,7 +2841,7 @@ Ext.onReady( function() {
 
                         series.push(obj);
                     }
-
+                    
                     chart = getDefaultChart({
                         store: store,
                         axes: axes,
