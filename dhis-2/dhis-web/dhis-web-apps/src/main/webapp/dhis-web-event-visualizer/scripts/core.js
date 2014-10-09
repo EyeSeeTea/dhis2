@@ -2374,6 +2374,9 @@ Ext.onReady( function() {
                         label: {
                             renderer: Ext.util.Format.numberRenderer(renderer)
                         },
+                        labelTitle: {
+                            font: 'bold 13px ' + conf.chart.style.fontFamily
+                        },
                         grid: {
                             odd: {
                                 opacity: 1,
@@ -2422,13 +2425,19 @@ Ext.onReady( function() {
                         fields: store.domainFields,
                         label: {
                             rotate: {
-                                degrees: 330
+                                degrees: 320
+                            },
+                            style: {
+                                fontSize: '11px'
                             }
                         }
                     };
 
                     if (xLayout.domainAxisTitle) {
                         axis.title = xLayout.domainAxisTitle;
+                        axis.labelTitle = {
+                            font: 'bold 13px ' + conf.chart.style.fontFamily
+                        };
                     }
 
                     return axis;
