@@ -920,6 +920,11 @@
         <artifactId>jackson-dataformat-xml</artifactId>
         <version>${jackson.version}</version>
       </dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-csv</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
 
       <!-- GeoTools -->
       <dependency>
@@ -953,11 +958,11 @@
         <artifactId>gt-referencing</artifactId>
         <version>${geotools.version}</version>
       </dependency>
-	<dependency>
-	  <groupId>org.geotools</groupId>
-	  <artifactId>gt-geojson</artifactId>
-	  <version>${geotools.version}</version>
-	</dependency>   
+      <dependency>
+        <groupId>org.geotools</groupId>
+        <artifactId>gt-geojson</artifactId>
+        <version>${geotools.version}</version>
+      </dependency>
 
       <!-- JAXB -->
       <dependency>

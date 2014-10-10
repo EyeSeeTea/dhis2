@@ -28,6 +28,40 @@ Ext.onReady( function() {
 			}
 		});
 
+        Ext.override(Ext.grid.Scroller, {
+            afterRender: function() {
+                var me = this;
+                me.callParent();
+                me.mon(me.scrollEl, 'scroll', me.onElScroll, me);
+                Ext.cache[me.el.id].skipGarbageCollection = true;
+                // add another scroll event listener to check, if main listeners is active
+                Ext.EventManager.addListener(me.scrollEl, 'scroll', me.onElScrollCheck, me);
+                // ensure this listener doesn't get removed
+                Ext.cache[me.scrollEl.id].skipGarbageCollection = true;
+            },
+
+            // flag to check, if main listeners is active
+            wasScrolled: false,
+
+            // synchronize the scroller with the bound gridviews
+            onElScroll: function(event, target) {
+                this.wasScrolled = true; // change flag -> show that listener is alive
+                this.fireEvent('bodyscroll', event, target);
+            },
+
+            // executes just after main scroll event listener and check flag state
+            onElScrollCheck: function(event, target, options) {
+                var me = this;
+
+                if (!me.wasScrolled) {
+                    // Achtung! Event listener was disappeared, so we'll add it again
+                    me.mon(me.scrollEl, 'scroll', me.onElScroll, me);
+                }
+                me.wasScrolled = false; // change flag to initial value
+            }
+
+        });
+
 		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
@@ -436,9 +470,10 @@ Ext.onReady( function() {
 	};
 
 	OptionsWindow = function() {
-		var showRowTotals,
-            showColTotals,
-			showSubTotals,
+		var showColTotals,
+            showRowTotals,
+			showColSubTotals,
+            showRowSubTotals,
 			showDimensionLabels,
 			hideEmptyRows,
             aggregationType,
@@ -457,6 +492,7 @@ Ext.onReady( function() {
 			comboboxWidth = 262,
             comboBottomMargin = 1,
             checkboxBottomMargin = 2,
+            separatorTopMargin = 6,
 			window;
 
         showColTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -471,9 +507,21 @@ Ext.onReady( function() {
 			checked: true
 		});
 
-		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_subtotals,
+		showColSubTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_col_subtotals,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showRowSubTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_row_subtotals,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_dimension_labels,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + comboBottomMargin + 'px',
 			checked: true
 		});
 
@@ -482,14 +530,9 @@ Ext.onReady( function() {
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
-		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_dimension_labels,
-			style: 'margin-bottom:' + comboBottomMargin + 'px'
-		});
-
 		aggregationType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-top:3px; margin-bottom:' + comboBottomMargin + 'px',
+			style: 'margin-top:' + (separatorTopMargin + 1) + 'px; margin-bottom:' + comboBottomMargin + 'px',
 			width: comboboxWidth,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.aggregation_type,
@@ -596,33 +639,33 @@ Ext.onReady( function() {
 
 		reportingPeriod = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.reporting_period,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
 		});
 
 		organisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.organisation_unit,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
 		});
 
 		parentOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.parent_organisation_unit,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
 		});
 
 		regression = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.include_regression,
-			style: 'margin-bottom:4px',
+			style: 'margin-bottom:' + checkboxBottomMargin + 'px'
 		});
 
 		cumulative = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.include_cumulative,
-			style: 'margin-bottom:6px',
+			style: 'margin-bottom:6px'
 		});
 
 		sortOrder = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:3px',
-			width: 250,
+			style: 'margin-bottom:1px',
+			width: 254,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.sort_order,
 			labelStyle: 'color:#333',
@@ -642,8 +685,8 @@ Ext.onReady( function() {
 
 		topLimit = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
-			style: 'margin-bottom:0',
-			width: 250,
+			style: 'margin-bottom:3px',
+			width: 254,
 			labelWidth: 130,
 			fieldLabel: NS.i18n.top_limit,
 			labelStyle: 'color:#333',
@@ -670,9 +713,10 @@ Ext.onReady( function() {
 			items: [
                 showColTotals,
 				showRowTotals,
-				showSubTotals,
-				hideEmptyRows,
+				showColSubTotals,
+                showRowSubTotals,
                 showDimensionLabels,
+				hideEmptyRows,
                 aggregationType
 			]
 		};
@@ -696,7 +740,7 @@ Ext.onReady( function() {
 			]
 		};
 
-		parameters = {
+		parameters = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border:0 none; background:transparent',
 			style: 'margin-left:14px',
 			items: [
@@ -707,12 +751,13 @@ Ext.onReady( function() {
 				cumulative,
 				sortOrder,
 				topLimit
-			]
-		};
+			],
+            hidden: true
+		});
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:3px',
+			bodyStyle: 'background-color:#fff; padding:2px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -722,7 +767,8 @@ Ext.onReady( function() {
 				return {
 					showRowTotals: showRowTotals.getValue(),
                     showColTotals: showColTotals.getValue(),
-					showSubTotals: showSubTotals.getValue(),
+					showColSubTotals: showColSubTotals.getValue(),
+                    showRowSubTotals: showRowSubTotals.getValue(),
                     showDimensionLabels: showDimensionLabels.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     aggregationType: aggregationType.getValue(),
@@ -743,7 +789,8 @@ Ext.onReady( function() {
 			setOptions: function(layout) {
 				showRowTotals.setValue(Ext.isBoolean(layout.showRowTotals) ? layout.showRowTotals : true);
 				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
-				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
+				showColSubTotals.setValue(Ext.isBoolean(layout.showColSubTotals) ? layout.showColSubTotals : true);
+				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
 				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
                 aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
@@ -763,7 +810,7 @@ Ext.onReady( function() {
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-top:2px; margin-bottom:6px; margin-left:3px',
+					style: 'margin-top:4px; margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.data
 				},
 				data,
@@ -772,7 +819,7 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:3px',
+					style: 'margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.organisation_units
 				},
 				organisationUnits,
@@ -781,7 +828,7 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:3px',
+					style: 'margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.style
 				},
 				style,
@@ -789,13 +836,30 @@ Ext.onReady( function() {
 					bodyStyle: 'border:0 none; padding:3px'
 				},
 				{
-					bodyStyle: 'border:1px solid #d5d5d5; padding:5px; background-color:#f0f0f0',
+					bodyStyle: 'border:1px solid #d5d5d5; padding:3px 3px 0 3px; background-color:#f0f0f0',
 					items: [
-						{
-							bodyStyle: 'border:0 none; padding:0 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
-							html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>'
-						},
-						parameters
+                        {
+                            xtype: 'container',
+                            layout: 'column',
+                            items: [
+                                {
+                                    bodyStyle: 'border:0 none; padding:2px 5px 6px 2px; background-color:transparent; color:#222; font-size:12px',
+                                    html: '<b>' + NS.i18n.parameters + '</b> <span style="font-size:11px"> (' + NS.i18n.for_standard_reports_only + ')</span>',
+                                    columnWidth: 1
+                                },
+                                {
+                                    xtype: 'button',
+                                    text: NS.i18n.show,
+                                    height: 19,
+                                    handler: function() {
+                                        parameters.setVisible(!parameters.isVisible());
+
+                                        this.setText(parameters.isVisible() ? NS.i18n.hide : NS.i18n.show);
+                                    }
+                                }
+                            ]
+                        },
+                        parameters
 					]
 				}
 			],
@@ -838,9 +902,10 @@ Ext.onReady( function() {
 					}
 
 					// cmp
-					w.showRowTotals = showRowTotals;
                     w.showColTotals = showColTotals;
-					w.showSubTotals = showSubTotals;
+					w.showRowTotals = showRowTotals;
+					w.showColSubTotals = showColSubTotals
+					w.showRowSubTotals = showRowSubTotals;
                     w.showDimensionLabels = showDimensionLabels;
 					w.hideEmptyRows = hideEmptyRows;
                     w.aggregationType = aggregationType;
@@ -925,8 +990,11 @@ Ext.onReady( function() {
                 favorite.colTotals = favorite.showColTotals;
 				delete favorite.showColTotals;
 
-				favorite.subtotals = favorite.showSubTotals;
-				delete favorite.showSubTotals;
+				favorite.rowSubTotals = favorite.showRowSubTotals;
+				delete favorite.showRowSubTotals;
+
+				favorite.colSubTotals = favorite.showColSubTotals;
+				delete favorite.showColSubTotals;
 
 				favorite.reportParams = {
 					paramReportingPeriod: favorite.reportingPeriod,
@@ -2672,6 +2740,8 @@ Ext.onReady( function() {
             },
             loadStore: function(data, pager, append) {
                 this.loadData(data, append);
+                this.sortStore();
+
                 this.lastPage = this.nextPage;
 
                 if (pager.pageCount > this.nextPage) {
@@ -2848,6 +2918,8 @@ Ext.onReady( function() {
 			},
             loadStore: function(data, pager, append) {
                 this.loadData(data, append);
+                this.sortStore();
+
                 this.lastPage = this.nextPage;
 
                 if (pager.pageCount > this.nextPage) {
@@ -2950,6 +3022,8 @@ Ext.onReady( function() {
             },
             loadStore: function(data, pager, append) {
                 this.loadData(data, append);
+                this.sortStore();
+
                 this.lastPage = this.nextPage;
 
                 if (pager.pageCount > this.nextPage) {

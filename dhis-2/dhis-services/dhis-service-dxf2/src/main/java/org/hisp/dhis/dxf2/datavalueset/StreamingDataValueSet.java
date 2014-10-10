@@ -33,25 +33,15 @@ import org.amplecode.staxwax.writer.XMLWriter;
 import org.hisp.dhis.dxf2.datavalue.DataValue;
 import org.hisp.dhis.dxf2.datavalue.StreamingDataValue;
 
+/**
+ * @author Lars Helge Overland
+ */
 public class StreamingDataValueSet
     extends DataValueSet
 {
     private static final String XMLNS = "xmlns";
     private static final String NS = "http://dhis2.org/schema/dxf/2.0";
     private static final String TRUE = "true";
-
-    private static final String FIELD_DATAELEMENTIDSCHEME = "dataElementIdScheme";
-    private static final String FIELD_ORGUNITIDSCHEME = "orgUnitIdScheme";
-    private static final String FIELD_DRYRUN = "dryRun";
-    private static final String FIELD_IMPORTSTRATEGY = "importStrategy";
-
-    private static final String FIELD_DATAVALUESET = "dataValueSet";
-    private static final String FIELD_DATAVALUE = "dataValue";
-    private static final String FIELD_DATASET = "dataSet";
-    private static final String FIELD_COMPLETEDATE = "completeDate";
-    private static final String FIELD_PERIOD = "period";
-    private static final String FIELD_ORGUNIT = "orgUnit";
-    private static final String FIELD_ATTRIBUTE_OPTION_COMBO = "attributeOptionCombo";
 
     private XMLWriter writer;
 
@@ -81,6 +71,12 @@ public class StreamingDataValueSet
     //--------------------------------------------------------------------------
 
     @Override
+    public String getIdScheme()
+    {
+        return idScheme = idScheme == null ? reader.getAttributeValue( FIELD_IDSCHEME ) : idScheme;
+    }
+    
+    @Override
     public String getDataElementIdScheme()
     {
         return dataElementIdScheme = dataElementIdScheme == null ? reader.getAttributeValue( FIELD_DATAELEMENTIDSCHEME ) : dataElementIdScheme;
@@ -95,7 +91,7 @@ public class StreamingDataValueSet
     @Override
     public Boolean getDryRun()
     {
-        return dryRun = dryRun == null ? (TRUE.equals( reader.getAttributeValue( FIELD_DRYRUN ) ) ? Boolean.TRUE : null) : dryRun;
+        return dryRun = dryRun == null ? ( TRUE.equals( reader.getAttributeValue( FIELD_DRYRUN ) ) ? Boolean.TRUE : null ) : dryRun;
     }
 
     @Override
@@ -150,6 +146,12 @@ public class StreamingDataValueSet
     // Setters
     //--------------------------------------------------------------------------
 
+    @Override
+    public void setIdScheme( String idScheme )
+    {
+        writer.writeAttribute( FIELD_IDSCHEME, idScheme );
+    }
+    
     @Override
     public void setDataElementIdScheme( String dataElementIdScheme )
     {
