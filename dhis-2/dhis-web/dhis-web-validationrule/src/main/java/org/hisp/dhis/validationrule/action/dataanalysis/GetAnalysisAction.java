@@ -217,7 +217,9 @@ public class GetAnalysisAction
             if( service instanceof FollowupAnalysisService )
             {
                 OrganisationUnit sourceUnit = organisationUnitService.getOrganisationUnit( "fwH9ipvXde9" );
-                dataValues = ((FollowupAnalysisService) service).getDataValuesMarkedForFollowupLimitLevel( sourceUnit.getId() + "" , sourceUnit.getOrganisationUnitLevel() );
+                ArrayList<OrganisationUnit> organisationUnits = new ArrayList<>();
+                organisationUnits.add( sourceUnit );
+                dataValues = service.analyse( organisationUnits, null, null, null );
             }
             else
             {
