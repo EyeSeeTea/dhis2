@@ -40,7 +40,6 @@ import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -49,8 +48,6 @@ public class GmlImportServiceTest
     extends DhisTest
 {
     private GmlImportService gmlImportService;
-
-    private OrganisationUnitService organisationUnitService;
 
     private InputStream inputStream;
 
@@ -61,12 +58,9 @@ public class GmlImportServiceTest
 
         gmlImportService = (GmlImportService) getBean( GmlImportService.ID );
 
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-
         inputStream = classLoader.getResourceAsStream( "gmlOrgUnits.gml" );
     }
 
-/*
     @Test
     public void fromGmlTest()
         throws Exception
@@ -110,45 +104,5 @@ public class GmlImportServiceTest
         assertEquals( 1, units.get( "Ole Johan Dahls Hus" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 1, units.get( "Blindern").getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
         assertEquals( 76, units.get( "Forskningsparken" ).getCoordinatesAsList().get(0).getNumberOfCoordinates() );
-    }
-*/
-
-    @Test
-    public void fromGmlTest()
-        throws Exception
-    {
-        assertTrue( organisationUnitService.getAllOrganisationUnits().isEmpty() );
-
-        OrganisationUnit orgUnitA = createOrganisationUnit( 'A' );
-        orgUnitA.setName( "Bo");
-        OrganisationUnit orgUnitB = createOrganisationUnit( 'B' );
-        orgUnitB.setName( "Bonthe" );
-        OrganisationUnit orgUnitC = createOrganisationUnit( 'C' );
-        orgUnitC.setName( "Pujehun" );
-
-        organisationUnitService.addOrganisationUnit( orgUnitA );
-        organisationUnitService.addOrganisationUnit( orgUnitB );
-        organisationUnitService.addOrganisationUnit( orgUnitC );
-
-        MetaData metaData = gmlImportService.fromGml( inputStream );
-        Collection<OrganisationUnit> organisationUnits = metaData.getOrganisationUnits();
-
-        assertNotNull( organisationUnits );
-
-        HashMap<String, OrganisationUnit> units = new HashMap<>();
-
-        for( OrganisationUnit orgUnit : organisationUnits )
-        {
-            units.put( orgUnit.getName(), orgUnit );
-        }
-
-        assertEquals( 3, units.size() );
-        assertEquals( 1, units.get( "Bo" ).getCoordinatesAsList().size() );
-        assertEquals( 18, units.get( "Bonthe" ).getCoordinatesAsList().size() );
-
-        assertEquals( 76, units.get( "Bo" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
-        assertEquals( 7, units.get( "Pujehun" ).getCoordinatesAsList().get( 0 ).getNumberOfCoordinates() );
-
-        // TODO Test more cases!
     }
 }

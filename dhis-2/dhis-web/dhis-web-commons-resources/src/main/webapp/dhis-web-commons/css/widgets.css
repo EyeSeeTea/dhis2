@@ -391,16 +391,6 @@ table.notificationTable td
   padding: 3px;
 }
 
-.infoBox
-{
-    background-color: #f9edbe;
-    border: 1px solid #dbae56;
-    padding: 6px;
-    border-radius: 3px;
-    margin-top: 4px;
-    margin-bottom: 10px;
-}
-
 /*----------------------------------------------------------------------------*/
 /* Sorting                                                                    */
 /*----------------------------------------------------------------------------*/

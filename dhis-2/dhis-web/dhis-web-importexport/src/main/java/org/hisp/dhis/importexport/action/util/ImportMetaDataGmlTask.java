@@ -32,10 +32,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
-import org.hisp.dhis.dxf2.metadata.ImportService;
 
 import org.hisp.dhis.scheduling.TaskId;
 
+import javax.xml.transform.TransformerException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -45,6 +46,10 @@ public class ImportMetaDataGmlTask
     implements Runnable
 {
     private static final Log log = LogFactory.getLog( ImportMetaDataGmlTask.class );
+
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
     private GmlImportService gmlImportService;
 
@@ -56,7 +61,11 @@ public class ImportMetaDataGmlTask
 
     private String userUid;
 
-    public ImportMetaDataGmlTask( String userUid, ImportService importService, GmlImportService gmlImportService,
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
+
+    public ImportMetaDataGmlTask( String userUid, GmlImportService gmlImportService,
         ImportOptions importOptions, InputStream inputStream, TaskId taskId )
     {
         this.userUid = userUid;
@@ -73,16 +82,15 @@ public class ImportMetaDataGmlTask
     @Override
     public void run()
     {
-        importOptions.setImportStrategy( "update" );
+        importOptions.setImportStrategy( "update" ); // Force update only for GML import
 
         try
         {
-            gmlImportService.importGml( inputStream, userUid, taskId, importOptions );
+            gmlImportService.importGml( inputStream, userUid, importOptions, taskId );
         }
-        catch ( Exception ex )
+        catch ( IOException | TransformerException e)
         {
-            log.error( "Unable to read data while reading input stream", ex ); // TODO better exception
+            log.error( "Unable to read GML data from input stream", e );
         }
-        log.info( "GML data was imported." );
     }
 }

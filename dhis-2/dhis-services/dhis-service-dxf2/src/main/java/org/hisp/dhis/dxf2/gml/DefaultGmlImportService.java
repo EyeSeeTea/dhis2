@@ -39,7 +39,6 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.transform.TransformerException;
@@ -50,7 +49,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 
@@ -61,10 +59,14 @@ public class DefaultGmlImportService
     implements GmlImportService
 {
     private static final String GML_TO_DXF_TRANSFORM = "gml/gml2dxf2.xsl";
+    private static final ClassLoader CL = new DefaultResourceLoader().getClassLoader();
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
+
+    @Autowired
+    private ImportService importService;
 
     @Autowired
     private RenderService renderService;
@@ -72,13 +74,11 @@ public class DefaultGmlImportService
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
-    @Autowired
-    private ImportService importService;
-
     // -------------------------------------------------------------------------
     // GmlImportService implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public MetaData fromGml( InputStream inputStream )
         throws IOException, TransformerException
     {
@@ -91,7 +91,6 @@ public class DefaultGmlImportService
         Map<String, OrganisationUnit> namedMap = Maps.uniqueIndex( metaData.getOrganisationUnits(),
             new Function<OrganisationUnit, String>()
             {
-                @Override
                 public String apply( OrganisationUnit organisationUnit )
                 {
                     return organisationUnit.getName();
@@ -99,11 +98,17 @@ public class DefaultGmlImportService
             }
         );
 
+        // Fetch persisted OrganisationUnits and merge imported GML properties
         Collection<OrganisationUnit> persistedOrgUnits = organisationUnitService.getOrganisationUnitsByNames( namedMap.keySet() );
 
         for( OrganisationUnit persisted : persistedOrgUnits )
         {
             OrganisationUnit unit = namedMap.get( persisted.getName() );
+
+            if( unit == null || unit.getCoordinates() == null || unit.getFeatureType() == null )
+            {
+                continue;
+            }
 
             String coordinates = unit.getCoordinates(),
                    featureType = unit.getFeatureType();
@@ -121,14 +126,12 @@ public class DefaultGmlImportService
             }
         }
 
-        metaData.setOrganisationUnits( new ArrayList<>( namedMap.values() ) );
-
         return metaData;
     }
 
-    @Override
     @Transactional
-    public void importGml( InputStream inputStream, String userUid, TaskId taskId, ImportOptions importOptions )
+    @Override
+    public void importGml( InputStream inputStream, String userUid, ImportOptions importOptions, TaskId taskId )
         throws IOException, TransformerException
     {
         importService.importMetaData( userUid, fromGml( inputStream ), importOptions, taskId );
@@ -141,18 +144,17 @@ public class DefaultGmlImportService
     private InputStream transformGml( InputStream input )
         throws IOException, TransformerException
     {
-        ResourceLoader resourceLoader = new DefaultResourceLoader( );
-        InputStream s = resourceLoader.getClassLoader().getResourceAsStream( GML_TO_DXF_TRANSFORM );
-
-        StreamSource gml = new StreamSource( input ), xsl = new StreamSource( s );
+        StreamSource gml = new StreamSource( input );
+        StreamSource xsl = new StreamSource( CL.getResourceAsStream( GML_TO_DXF_TRANSFORM ) );
 
         ByteArrayOutputStream output = new ByteArrayOutputStream();
 
         TransformerFactory.newInstance().newTransformer( xsl ).transform( gml, new StreamResult( output ) );
 
-        s.close();
+        xsl.getInputStream().close();
+        gml.getInputStream().close();
 
-        return new ByteArrayInputStream( output.toByteArray() ); // TODO Use IOUtils?
+        return new ByteArrayInputStream( output.toByteArray() );
     }
 
 }

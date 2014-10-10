@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" 
   xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
-  xmlns:gml="http://www.opengis.net/gml">
+  xmlns:gml="http://www.opengis.net/gml"
+  xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"
+  exclude-result-prefixes="java">
 
 <xsl:param name="precision">4</xsl:param>
 
 <xsl:template match="gml:coordinates">
   <xsl:value-of select="java:gmlCoordinatesToString(normalize-space(.),$precision)"
-    disable-output-escaping="yes"
-    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
+    disable-output-escaping="yes"/>
 </xsl:template>
 
 <xsl:template match="gml:pos">
   <xsl:value-of select="java:gmlPosToString(normalize-space(.),$precision)"
-    disable-output-escaping="yes"
-    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
+    disable-output-escaping="yes"/>
 </xsl:template>
 
 <xsl:template match="gml:posList">
   <xsl:value-of select="java:gmlPosListToString(normalize-space(.),$precision)"
-    disable-output-escaping="yes"
-    xmlns:java="org.hisp.dhis.dxf2.gml.GmlConversionUtils"/>
+    disable-output-escaping="yes"/>
 </xsl:template>
 
 <xsl:template match="gml:Polygon">
@@ -65,19 +64,13 @@
 
 <xsl:template match="gml:featureMember">
   <xsl:variable name="name" select=".//*[local-name()='Name' or local-name()='NAME' or local-name()='name']"/>
-  <!-- <xsl:variable name="code" select=".//*[local-name()='code']" /> --> <!-- TODO conditional: null if empty -->
   <organisationUnit>
     <xsl:attribute name="name">
-      <xsl:value-of select="$name" />
+      <xsl:value-of select="$name"/>
     </xsl:attribute>
     <xsl:attribute name="shortName">
-      <xsl:value-of select="substring($name,1,50)" />
+      <xsl:value-of select="substring($name,1,50)"/>
     </xsl:attribute>
-    <!--
-    <xsl:attribute name="code">
-      <xsl:value-of select="$code" />
-    </xsl:attribute>
-    -->
     <xsl:apply-templates select="./child::node()/child::node()/gml:Polygon|./child::node()/child::node()/gml:MultiPolygon|./child::node()/child::node()/gml:Point"/>
     <active>true</active>
   </organisationUnit>

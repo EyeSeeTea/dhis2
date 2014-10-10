@@ -1,13 +1,5 @@
 <h3>$i18n.getString( "gml_import" )</h3>
-<div class="infoBox" style="width:388px;">
-  <span>Important information about GML import:</span><a style="float:right;" id="toggleLink" href="javascript:toggleInfo( 'show', 'hide' )">show</a>
-  <div id="infoContent" style="display:none;">
-  The only supported use case for GML import is updating the geographical data of existing organisation units.
-  Therefore, only updates to existing organisation units will be imported. Also make sure you GML featureMembers
-  contain a valid identifier ('Name' or 'code') tag.
-  For more information, please refer to the DHIS 2 user manual.
-  </div>
-</div>
+<p class="tipText">$i18n.getString( "gml_import_info_text" )</p>
 <div id="inputCriteria" class="inputCriteria" style="width: 380px">
   <form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importGml.action">
     <table>

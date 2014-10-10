@@ -43,8 +43,9 @@ public interface GmlImportService
 {
     String ID = GmlImportService.class.getName();
 
-    MetaData fromGml( InputStream inputStream ) throws IOException, TransformerException;
+    MetaData fromGml( InputStream inputStream )
+        throws IOException, TransformerException;
 
-    void importGml( InputStream inputStream, String userUid, TaskId taskId, ImportOptions importOptions )
+    public void importGml( InputStream inputStream, String userUid, ImportOptions importOptions, TaskId taskId )
         throws IOException, TransformerException;
 }

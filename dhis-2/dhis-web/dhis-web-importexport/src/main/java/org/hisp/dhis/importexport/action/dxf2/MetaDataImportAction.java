@@ -166,8 +166,6 @@ public class MetaDataImportAction
         importOptions.setStrategy( strategy.toString() );
         importOptions.setDryRun( dryRun );
 
-        System.out.println( "dry run: " + dryRun );
-
         String userId = user != null ? user.getUid() : null;
 
         switch( importFormat )
@@ -180,25 +178,12 @@ public class MetaDataImportAction
                 }
                 break;
             case "gml":
-                scheduler.executeTask( new ImportMetaDataGmlTask( userId, importService, gmlImportService,
-                    importOptions, in, taskId ) );
+                scheduler.executeTask( new ImportMetaDataGmlTask( userId, gmlImportService, importOptions, in, taskId ) );
                 break;
             default:
                 scheduler.executeTask( new ImportMetaDataTask( userId, importService, importOptions, in, taskId ) );
                 break;
         }
-
-        /*
-        if ( "csv".equals( importFormat ) && classKey != null && KEY_CLASS_MAP.get( classKey ) != null )
-        {
-            scheduler.executeTask( new ImportMetaDataCsvTask( userId, importService, csvImportService,
-                importOptions, in, taskId, KEY_CLASS_MAP.get( classKey ) ) );
-        }
-        else
-        {
-            scheduler.executeTask( new ImportMetaDataTask( userId, importService, importOptions, in, taskId ) );
-        }
-        */
         
         return SUCCESS;
     }
