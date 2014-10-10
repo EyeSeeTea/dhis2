@@ -391,10 +391,10 @@ table.notificationTable td
   padding: 3px;
 }
 
-.warningBox
+.infoBox
 {
-    background-color: #f48d8d;
-    border: 1px solid #9d0006;
+    background-color: #f9edbe;
+    border: 1px solid #dbae56;
     padding: 6px;
     border-radius: 3px;
     margin-top: 4px;

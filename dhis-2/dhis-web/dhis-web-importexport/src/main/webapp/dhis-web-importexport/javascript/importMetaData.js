@@ -34,3 +34,10 @@ function displaySummary()
 	$( '#notificationDiv' ).hide();
 	$( '#importSummaryDiv' ).show( 'fast' ).load( 'getMetaDataImportSummary.action' );
 }
+
+function toggleInfo( showText, hideText )
+{
+  var $link = $( "#toggleLink" );
+  $link.text( $link.text() === showText ? hideText : showText );
+  $( '#infoContent' ).slideToggle( 150 );
+}

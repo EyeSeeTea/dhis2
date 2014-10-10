@@ -135,9 +135,6 @@ public class GmlImportServiceTest
 
         assertNotNull( organisationUnits );
 
-        /*
-        Collection<OrganisationUnit> organisationUnits = organisationUnitService.getAllOrganisationUnits();
-        */
         HashMap<String, OrganisationUnit> units = new HashMap<>();
 
         for( OrganisationUnit orgUnit : organisationUnits )
