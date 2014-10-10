@@ -33,7 +33,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ServiceProvider;
 import org.hisp.dhis.dataanalysis.DataAnalysisService;
-import org.hisp.dhis.dataanalysis.FollowupAnalysisService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
