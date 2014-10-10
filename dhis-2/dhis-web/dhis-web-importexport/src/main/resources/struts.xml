@@ -328,7 +328,7 @@
       <param name="onExceptionReturn">plainTextError</param>
     </action>
 
-    <!-- GML MetaData import -->
+    <!-- GML import -->
 
     <action name="importGml" class="org.hisp.dhis.importexport.action.dxf2.MetaDataImportAction">
       <param name="importFormat">gml</param>
