@@ -242,7 +242,8 @@ public class JdbcDataAnalysisStore
         
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper( lowerBoundMap, upperBoundMap, null ) );
     }
-    
+
+    /*
     public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup()
     {
         final String sql =
@@ -260,13 +261,14 @@ public class JdbcDataAnalysisStore
         
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );        
     }
+    */
 
     @Override
-    public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( String sourceId, int level )
+    public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( OrganisationUnit organisationUnit )
     {
         // TODO Sanitize input parameters (also for the rest of this class?)
 
-        final String idLevelColumn = "idlevel" + level;
+        final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
 
         final String sql =
             "select dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, " +
@@ -278,10 +280,9 @@ public class JdbcDataAnalysisStore
             "join period pe on dv.periodid = pe.periodid " +
             "join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
             "left join organisationunit ou on ou.organisationunitid = dv.sourceid " +
-            "left join organisationunit ou on " +
             "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
             "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
-            "where ous." + idLevelColumn + " = sourceId " +
+            "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
             "and dv.followup = true";
 
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );

@@ -93,20 +93,20 @@ public interface DataAnalysisStore
      */
     Collection<DeflatedDataValue> getDeflatedDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo,
         Collection<Period> periods, Map<Integer, Integer> lowerBoundMap, Map<Integer, Integer> upperBoundMap );
-    
+
     /**
      * Returns a collection of DeflatedDataValues which are marked for followup.
-     * 
+     *
      * @return a collection of DeflatedDataValues.
      */
-    Collection<DeflatedDataValue> getDataValuesMarkedForFollowup();
+    //Collection<DeflatedDataValue> getDataValuesMarkedForFollowup();
 
     /**
      * Returns a collection of DeflatedDataValues which are marked for followup and
-     * whose source OrganisationUnit is lower or equal to the given sourceId hierarchically.
+     * whose source OrganisationUnit is equal or subordinate to the given OrganisationUnit.
      *
-     * @param sourceId the id of the OrganisationUnit for which to get the DeflatedDataValues.
+     * @param organisationUnit the source OrganisationUnit.
      * @return a collection of DeflatedDataValues.
      */
-    Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( String sourceId, int level );
+    Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( OrganisationUnit organisationUnit );
 }

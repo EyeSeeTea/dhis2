@@ -60,15 +60,6 @@ public class FollowupAnalysisService
     public Collection<DeflatedDataValue> analyse( Collection<OrganisationUnit> organisationUnits,
         Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor )
     {
-        return dataAnalysisStore.getDataValuesMarkedForFollowup();
-    }
-
-    // -------------------------------------------------------------------------
-    // DataAnalysisService implementation
-    // -------------------------------------------------------------------------
-
-    private Collection<DeflatedDataValue> getDataValuesMarkedForFollowupLimitLevel( String sourceId, int level )
-    {
-        return dataAnalysisStore.getDataValuesMarkedForFollowup( sourceId, level );
+        return dataAnalysisStore.getDataValuesMarkedForFollowup( organisationUnits );
     }
 }

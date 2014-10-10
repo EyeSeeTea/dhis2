@@ -33,6 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.ServiceProvider;
 import org.hisp.dhis.dataanalysis.DataAnalysisService;
+import org.hisp.dhis.dataanalysis.FollowupAnalysisService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
@@ -212,7 +213,16 @@ public class GetAnalysisAction
 
         if ( service != null ) // Follow-up analysis has no input params
         {
-            dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
+            // TODO UG-LY HACK. REMOVE.
+            if( service instanceof FollowupAnalysisService )
+            {
+                OrganisationUnit sourceUnit = organisationUnitService.getOrganisationUnit( "fwH9ipvXde9" );
+                dataValues = ((FollowupAnalysisService) service).getDataValuesMarkedForFollowupLimitLevel( sourceUnit.getId() + "" , sourceUnit.getOrganisationUnitLevel() );
+            }
+            else
+            {
+                dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
+            }
 
             maxExceeded = dataValues.size() > DataAnalysisService.MAX_OUTLIERS;
         }
