@@ -8,5 +8,13 @@
 
 <h3>$i18n.getString( "followup_analysis" ) #openHelp( "followupAnalysis" )</h3>
 
+<div id="selectionTree" style="width:400px;height:250px;overflow:auto;"></div>
+<script type="text/javascript">
+  selectionTreeSelection.setMultipleSelectionAllowed( false );
+  selectionTreeSelection.setListenerFunction( organisationUnitSelected );
+  selectionTree.clearSelectedOrganisationUnits();
+  selectionTree.buildSelectionTree();
+</script>
+
 <span id="message"></span>
 <div id="analysisResult"></div>

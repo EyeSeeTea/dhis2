@@ -198,9 +198,9 @@ public class GetAnalysisAction
 
             periods = periodService.getPeriodsBetweenDates( format.parseDate( fromDate ), format.parseDate( toDate ) );
 
-            for ( String id : dataSets )
+            for ( String uid : dataSets )
             {
-                dataElements.addAll( dataSetService.getDataSet( Integer.parseInt( id ) ).getDataElements() );
+                dataElements.addAll( dataSetService.getDataSet( uid ).getDataElements() );
             }
 
             log.info( "From date: " + fromDate + ", To date: " + toDate + ", Organisation unit: " + unit
@@ -213,18 +213,13 @@ public class GetAnalysisAction
 
         if ( service != null ) // Follow-up analysis has no input params
         {
-            // TODO UG-LY HACK. REMOVE.
-            if( service instanceof FollowupAnalysisService )
+            if( key.equals( "followup" ) )
             {
-                OrganisationUnit sourceUnit = organisationUnitService.getOrganisationUnit( "fwH9ipvXde9" );
-                ArrayList<OrganisationUnit> organisationUnits = new ArrayList<>();
-                organisationUnits.add( sourceUnit );
-                dataValues = service.analyse( organisationUnits, null, null, null );
+                orgUnits = new ArrayList<OrganisationUnit>();
+                orgUnits.add( unit );
             }
-            else
-            {
-                dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
-            }
+
+            dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
 
             maxExceeded = dataValues.size() > DataAnalysisService.MAX_OUTLIERS;
         }
