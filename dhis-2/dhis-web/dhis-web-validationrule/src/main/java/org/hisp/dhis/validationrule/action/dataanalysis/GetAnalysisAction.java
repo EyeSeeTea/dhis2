@@ -63,6 +63,8 @@ public class GetAnalysisAction
 
     public static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
 
+    public static final String KEY_FOLLOWUP = "followup";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -210,12 +212,15 @@ public class GetAnalysisAction
 
         DataAnalysisService service = serviceProvider.provide( key );
 
-        if ( service != null ) // Follow-up analysis has no input params
+        if ( service != null )
         {
-            if( key.equals( "followup" ) )
+            if( KEY_FOLLOWUP.equals( key ) )
             {
                 orgUnits = new ArrayList<OrganisationUnit>();
-                orgUnits.add( unit );
+                if(unit != null )
+                {
+                    orgUnits.add( unit );
+                }
             }
 
             dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );

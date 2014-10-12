@@ -5,11 +5,6 @@ function organisationUnitSelected( organisationUnits )
     selectedOrganisationUnit = organisationUnits[0];
 }
 
-function getFollowUpAnalysis2( organisationUnits )
-{
-    getFollowUpAnalysisByOrgUnit( organisationUnits[0] );
-}
-
 function validateRunAnalyseData()
 {
     if ( analyseDataInvalid() )
@@ -88,7 +83,7 @@ function getFollowUpAnalysis()
 {
     setHeaderWaitMessage( i18n_analysing_please_wait );
 
-    var url = "getAnalysis.action?key=followup";
+    var url = "getFollowup.action?key=followup";
 
     $.get( url, function( data )
     {
@@ -100,7 +95,7 @@ function getFollowUpAnalysis()
 
 function displayAnalysisInput()
 {
-	$( 'div#analysisInput' ).show();
+    $( 'div#analysisInput' ).show();
     $( 'div#analysisResult' ).empty().hide();
 }
 

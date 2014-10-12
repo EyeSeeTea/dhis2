@@ -28,6 +28,7 @@ package org.hisp.dhis.dataanalysis;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.hisp.dhis.dataelement.DataElement;
@@ -60,6 +61,17 @@ public class FollowupAnalysisService
     public Collection<DeflatedDataValue> analyse( Collection<OrganisationUnit> organisationUnits,
         Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor )
     {
-        return dataAnalysisStore.getDataValuesMarkedForFollowup( organisationUnits.iterator().next() );
+        Collection<DeflatedDataValue> dataValues;
+
+        if( organisationUnits != null && !organisationUnits.isEmpty() )
+        {
+            dataValues = dataAnalysisStore.getDataValuesMarkedForFollowup( organisationUnits.iterator().next() );
+        }
+        else
+        {
+            dataValues = new ArrayList<>();
+        }
+
+        return dataValues;
     }
 }
