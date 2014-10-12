@@ -28,24 +28,25 @@ package org.hisp.dhis.dxf2.gml;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.DhisTest;
-import org.hisp.dhis.dxf2.metadata.MetaData;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashMap;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.dxf2.metadata.MetaData;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
 
 /**
  * @author Halvdan Hoem Grelland
  */
 public class GmlImportServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
     private GmlImportService gmlImportService;
 
@@ -53,12 +54,11 @@ public class GmlImportServiceTest
 
     @Override
     public void setUpTest()
+        throws IOException
     {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
         gmlImportService = (GmlImportService) getBean( GmlImportService.ID );
 
-        inputStream = classLoader.getResourceAsStream( "gmlOrgUnits.gml" );
+        inputStream = new ClassPathResource( "gmlOrgUnits.gml" ).getInputStream();        
     }
 
     @Test
