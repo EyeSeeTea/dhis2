@@ -32,7 +32,10 @@
   <input type="button" value="$i18n.getString( 'get_report_as_xls' )" style="width:140px" onclick="exportAnalysisResult( 'xls' )">
   <input type="button" value="$i18n.getString( 'get_report_as_csv' )" style="width:140px" onclick="exportAnalysisResult( 'cvs' )">
 </div>
-<div id="selectionTree" style="height:150px; overflow:auto;"></div>
+<table>
+<tr><th>$i18n.getString( "select_parent_organisation_unit" )</th></tr>
+<tr><td><div id="selectionTree" style="height:150px;;overflow:auto;"></div></td></tr>
+</table>
 
 <span id="message"></span>
 

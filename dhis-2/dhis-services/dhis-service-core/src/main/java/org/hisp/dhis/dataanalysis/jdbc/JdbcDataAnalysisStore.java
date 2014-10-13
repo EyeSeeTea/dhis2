@@ -243,54 +243,10 @@ public class JdbcDataAnalysisStore
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper( lowerBoundMap, upperBoundMap, null ) );
     }
 
-    /*
-    public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup()
-    {
-        final String sql =
-            "select dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, " +
-            "dv.storedby, dv.lastupdated, dv.created, dv.comment, dv.followup, mm.minimumvalue, mm.maximumvalue, de.name as dataelementname, " +
-            "pe.startdate, pe.enddate, pt.name AS periodtypename, ou.name AS sourcename, cc.categoryoptioncomboname " +
-            "from datavalue dv " +
-            "left join minmaxdataelement mm on (dv.sourceid = mm.sourceid and dv.dataelementid = mm.dataelementid and dv.categoryoptioncomboid = mm.categoryoptioncomboid) " +
-            "join dataelement de on dv.dataelementid = de.dataelementid " +
-            "join period pe on dv.periodid = pe.periodid " +
-            "join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
-            "left join organisationunit ou on ou.organisationunitid = dv.sourceid " +
-            "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
-            "where dv.followup = true";
-        
-        return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );        
-    }
-    */
-
     @Override
-    public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( OrganisationUnit organisationUnit )
+    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit )
     {
-        // TODO Sanitize input parameters (also for the rest of this class?)
-
-        final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
-
-        final String sql =
-            "select dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, " +
-            "dv.storedby, dv.lastupdated, dv.created, dv.comment, dv.followup, mm.minimumvalue, mm.maximumvalue, de.name AS dataelementname, " +
-            "pe.startdate, pe.enddate, pt.name AS periodtypename, ou.name AS sourcename, cc.categoryoptioncomboname " +
-            "from datavalue dv " +
-            "left join minmaxdataelement mm on (dv.sourceid = mm.sourceid and dv.dataelementid = mm.dataelementid and dv.categoryoptioncomboid = mm.categoryoptioncomboid) " +
-            "join dataelement de on dv.dataelementid = de.dataelementid " +
-            "join period pe on dv.periodid = pe.periodid " +
-            "join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
-            "left join organisationunit ou on ou.organisationunitid = dv.sourceid " +
-            "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
-            "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
-            "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
-            "and dv.followup = true";
-
-        return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );
-    }
-
-    @Override
-    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, Integer first, Integer max )
-    {
+        // TODO Sanitize input
         final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
 
         String sql =
@@ -306,12 +262,8 @@ public class JdbcDataAnalysisStore
             "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
             "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
             "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
-            "and dv.followup = true";
-
-        if( first != null && max != null )
-        {
-            sql += statementBuilder.limitRecord( first, max );
-        }
+            "and dv.followup = true " +
+            "limit " + limit;
 
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );
     }
@@ -320,6 +272,7 @@ public class JdbcDataAnalysisStore
     @Override
     public int getFollowupDataValuesCount( OrganisationUnit organisationUnit )
     {
+        // TODO Sanitize input
         final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
 
         final String sql =

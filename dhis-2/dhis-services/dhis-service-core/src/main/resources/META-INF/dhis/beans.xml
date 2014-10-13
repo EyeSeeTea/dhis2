@@ -586,12 +586,6 @@
           </key>
           <ref bean="org.hisp.dhis.dataanalysis.MinMaxOutlierAnalysisService" />
         </entry>
-        <entry>
-          <key>
-            <value>followup</value>
-          </key>
-          <ref bean="org.hisp.dhis.dataanalysis.FollowupAnalysisService" />
-        </entry>
       </map>
     </property>
   </bean>

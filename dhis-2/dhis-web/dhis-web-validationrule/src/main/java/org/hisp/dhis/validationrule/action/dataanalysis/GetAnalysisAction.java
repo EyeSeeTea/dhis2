@@ -63,8 +63,6 @@ public class GetAnalysisAction
 
     public static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
 
-    public static final String KEY_FOLLOWUP = "followup";
-
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -214,16 +212,6 @@ public class GetAnalysisAction
 
         if ( service != null )
         {
-            if( KEY_FOLLOWUP.equals( key ) )
-            {
-                orgUnits = new ArrayList<OrganisationUnit>();
-
-                if( unit != null )
-                {
-                    orgUnits.add( unit );
-                }
-            }
-
             dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
 
             maxExceeded = dataValues.size() > DataAnalysisService.MAX_OUTLIERS;

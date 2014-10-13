@@ -1,12 +1,12 @@
 package org.hisp.dhis.validationrule.action.dataanalysis;
 
+import com.opensymphony.xwork2.Action;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataanalysis.FollowupAnalysisService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.paging.ActionPagingSupport;
 import org.hisp.dhis.util.SessionUtils;
 
 import java.util.ArrayList;
@@ -16,9 +16,11 @@ import java.util.Collection;
  * @author Halvdan Hoem Grelland
  */
 public class GetFollowUpAction
-    extends ActionPagingSupport<DeflatedDataValue>
+    implements Action
 {
-    public static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
+    private static final int MAX_RESULTS = 500;
+
+    private static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
 
     private static final Log log = LogFactory.getLog( GetFollowUpAction.class );
 
@@ -51,6 +53,13 @@ public class GetFollowUpAction
         return dataValues;
     }
 
+    private boolean maxExceeded;
+
+    public boolean getMaxExceeded()
+    {
+        return maxExceeded;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -59,16 +68,25 @@ public class GetFollowUpAction
     public String execute() throws Exception
     {
         OrganisationUnit orgUnit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
+        int totalResults;
 
-        this.paging = createPaging( followupAnalysisService.getFollowupDataValuesCount( orgUnit ) );
-
-        if( paging.getPageSize() > 0 )
+        if( orgUnit != null )
         {
-            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, paging.getStartPos(), paging.getPageSize() );
+            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, MAX_RESULTS );
+
+            totalResults = dataValues.size();
+
+            if( totalResults == MAX_RESULTS )
+            {
+                totalResults = followupAnalysisService.getFollowupDataValuesCount( orgUnit );
+            }
+
+            maxExceeded = totalResults > dataValues.size();
         }
         else
         {
             dataValues = new ArrayList<>();
+            maxExceeded = false;
         }
 
         SessionUtils.setSessionVar( KEY_ANALYSIS_DATA_VALUES, dataValues );

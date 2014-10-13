@@ -79,12 +79,4 @@
       </tbody>
     </table>
     #end
-    #parse( "/dhis-web-commons/paging/paging.vm" )
 </div>
-<style>
-  .downloadAnalysisButtons 
-  {
-    color: red;
-    float: left;
-  }
-</style>

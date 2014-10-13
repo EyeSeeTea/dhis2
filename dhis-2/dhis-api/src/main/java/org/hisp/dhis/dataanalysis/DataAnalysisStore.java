@@ -95,22 +95,15 @@ public interface DataAnalysisStore
         Collection<Period> periods, Map<Integer, Integer> lowerBoundMap, Map<Integer, Integer> upperBoundMap );
 
     /**
-     * Returns a collection of DeflatedDataValues which are marked for followup.
-     *
-     * @return a collection of DeflatedDataValues.
-     */
-    //Collection<DeflatedDataValue> getDataValuesMarkedForFollowup();
-
-    /**
      * Returns a collection of DeflatedDataValues which are marked for followup and
      * whose source OrganisationUnit is equal or subordinate to the given OrganisationUnit.
+     * The result set is limited by the given maximun.
      *
      * @param organisationUnit the source OrganisationUnit.
+     * @param limit the maximum number of DeflatedDataValues in the returned Collection.
      * @return a collection of DeflatedDataValues.
      */
-    Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( OrganisationUnit organisationUnit );
-
-    Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, Integer first, Integer max );
+    Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit );
 
     // TODO Document
     int getFollowupDataValuesCount( OrganisationUnit organisationUnit );

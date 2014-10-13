@@ -31,16 +31,15 @@ package org.hisp.dhis.dataanalysis;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
 
 /**
  * @author Lars Helge Overland
+ * @author Halvdan Hoem Grelland
  */
 public class FollowupAnalysisService
-    implements DataAnalysisService
+    // TODO implement interface...
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -57,24 +56,6 @@ public class FollowupAnalysisService
     // DataAnalysisService implementation
     // -------------------------------------------------------------------------
 
-    @Override
-    public Collection<DeflatedDataValue> analyse( Collection<OrganisationUnit> organisationUnits,
-        Collection<DataElement> dataElements, Collection<Period> periods, Double stdDevFactor )
-    {
-        Collection<DeflatedDataValue> dataValues;
-
-        if( organisationUnits != null && !organisationUnits.isEmpty() )
-        {
-            dataValues = dataAnalysisStore.getDataValuesMarkedForFollowup( organisationUnits.iterator().next() );
-        }
-        else
-        {
-            dataValues = new ArrayList<>();
-        }
-
-        return dataValues;
-    }
-
     public int getFollowupDataValuesCount( OrganisationUnit organisationUnit )
     {
         if ( organisationUnit == null )
@@ -85,13 +66,13 @@ public class FollowupAnalysisService
         return dataAnalysisStore.getFollowupDataValuesCount( organisationUnit );
     }
 
-    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int first, int max )
+    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit )
     {
-        if( organisationUnit == null )
+        if( organisationUnit == null || limit < 1)
         {
             return new ArrayList<>();
         }
 
-        return dataAnalysisStore.getFollowupDataValues( organisationUnit, first, max );
+        return dataAnalysisStore.getFollowupDataValues( organisationUnit, limit );
     }
 }
