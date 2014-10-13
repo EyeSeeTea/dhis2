@@ -72,16 +72,9 @@ public class GetFollowupAction
 
         if( orgUnit != null )
         {
-            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, MAX_RESULTS );
+            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, MAX_RESULTS + 1 );
 
-            totalResults = dataValues.size();
-
-            if( totalResults == MAX_RESULTS )
-            {
-                totalResults = followupAnalysisService.getFollowupDataValuesCount( orgUnit );
-            }
-
-            maxExceeded = totalResults > dataValues.size();
+            maxExceeded = dataValues.size() > MAX_RESULTS;
         }
         else
         {

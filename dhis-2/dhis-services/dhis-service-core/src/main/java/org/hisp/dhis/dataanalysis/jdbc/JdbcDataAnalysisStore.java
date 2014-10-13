@@ -58,6 +58,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * @author Lars Helge Overland
+ * @author Halvdan Hoem Grelland
  */
 public class JdbcDataAnalysisStore
     implements DataAnalysisStore
@@ -267,28 +268,4 @@ public class JdbcDataAnalysisStore
 
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );
     }
-
-
-    @Override
-    public int getFollowupDataValuesCount( OrganisationUnit organisationUnit )
-    {
-        // TODO Sanitize input
-        final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
-
-        final String sql =
-            "select count(*) from datavalue dv " +
-            "left join minmaxdataelement mm on (dv.sourceid = mm.sourceid and dv.dataelementid = mm.dataelementid and dv.categoryoptioncomboid = mm.categoryoptioncomboid) " +
-            "join dataelement de on dv.dataelementid = de.dataelementid " +
-            "join period pe on dv.periodid = pe.periodid " +
-            "join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
-            "left join organisationunit ou on ou.organisationunitid = dv.sourceid " +
-            "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
-            "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
-            "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
-            "and dv.followup = true";
-
-        return jdbcTemplate.queryForObject( sql, Integer.class );
-    }
-
-
 }

@@ -1,21 +1,26 @@
 <script type="text/javascript">
+
   jQuery( document ).ready( function() {
     tableSorter( 'listTable' );
     setTableStyles();
 
-    var numResults = $dataValues.size();
+    NUM_RESULTS = $dataValues.size();
 
-    if( numResults == 0 )
+    if( NUM_RESULTS == 0 )
     {
+      $( "#info" ).html( "no results" );
       $( "#downloadAnalysisButtons" ).hide();
     }
     else
     {
+      $( "#info" ).html( "Results" + NUM_RESULTS );
       $( "#downloadAnalysisButtons" ).show();
     }
-
   });
 
+  var i18n_values_found = '$encoder.jsEscape( $i18n.getString( "values_found" ), "'")';
+  var i18n_max_values_exceeded = '$encoder.jsEscape( $i18n.getString( "max_values_exceeded" ), "'" )';
+  var i18n_no_values_found = '$encoder.jsEscape( $i18n.getString( "no_values_found" ), "'" )';
   var i18n_value_must_be_a_number = '$encoder.jsEscape( $i18n.getString( "value_must_be_a_number" ) , "'")';
   var i18n_value_is_lower_than_min_value = '$encoder.jsEscape( $i18n.getString( "value_is_lower_than_min_value" ) , "'")';
   var i18n_value_is_higher_than_max_value = '$encoder.jsEscape( $i18n.getString( "value_is_higher_than_max_value" ) , "'")';
@@ -23,13 +28,16 @@
   var i18n_unmark_value_for_followup = '$encoder.jsEscape( $i18n.getString( "unmark_value_for_followup" ) , "'")';
 </script>
 
+<span id="info"></span>
+
 #if ( $dataValues.size() == 0 )
-
+#*
 <span id="info">$i18n.getString( "no_values_found" )</span>
-
+*#
 #else
-
+#*
 <span id="info">#if( $maxExceeded )$i18n.getString( "max_values_exceeded" ) #else $!dataValues.size() $i18n.getString( "values_found" ) #end</span>
+*#
 <div style="width:100%">
     <table class="listTable" id="listTable" style="width:100%;">
       <thead>

@@ -53,18 +53,8 @@ public class FollowupAnalysisService
     }
 
     // -------------------------------------------------------------------------
-    // DataAnalysisService implementation
+    // DataAnalysisService implementation // TODO not really
     // -------------------------------------------------------------------------
-
-    public int getFollowupDataValuesCount( OrganisationUnit organisationUnit )
-    {
-        if ( organisationUnit == null )
-        {
-            return 0;
-        }
-
-        return dataAnalysisStore.getFollowupDataValuesCount( organisationUnit );
-    }
 
     public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit )
     {

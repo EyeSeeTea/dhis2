@@ -104,7 +104,4 @@ public interface DataAnalysisStore
      * @return a collection of DeflatedDataValues.
      */
     Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit );
-
-    // TODO Document
-    int getFollowupDataValuesCount( OrganisationUnit organisationUnit );
 }
