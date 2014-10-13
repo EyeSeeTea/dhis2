@@ -2339,7 +2339,10 @@ Ext.onReady( function() {
 				var xResponse,
 					xColAxis,
 					xRowAxis,
-					config;
+					config,
+                    ind = dimConf.indicator.objectName,
+                    legendSet,
+                    fn;
 
 				if (!xLayout) {
 					xLayout = service.layout.getExtendedLayout(layout);
@@ -2354,31 +2357,49 @@ Ext.onReady( function() {
 				ns.app.response = response;
 				ns.app.xResponse = xResponse;
 
-				// create chart
-				ns.app.chart = ns.core.web.chart.createChart(ns);
+                // legend set
+                if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
+                    Ext.Ajax.request({
+                        ns.core.init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[mapLegends[id,name,startValue,endValue,color]]',
+                        success: function(r) {
+                            legendSet = Ext.decode(r.responseText).legendSet;
 
-				// update viewport
-                ns.app.centerRegion.update();
-				ns.app.centerRegion.removeAll();
-				ns.app.centerRegion.add(ns.app.chart);
+                            fn();
+                        }
+                    });
+                }
+                else {
+                    fn();
+                }
 
-				// after render
-				if (NS.isSessionStorage) {
-					web.storage.session.set(layout, 'chart');
-				}
+                fn = function() {
+                    
+                    // create chart
+                    ns.app.chart = ns.core.web.chart.createChart(ns, legendSet);
 
-				ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+                    // update viewport
+                    ns.app.centerRegion.update();
+                    ns.app.centerRegion.removeAll();
+                    ns.app.centerRegion.add(ns.app.chart);
 
-				web.mask.hide(ns.app.centerRegion);
+                    // after render
+                    if (NS.isSessionStorage) {
+                        web.storage.session.set(layout, 'chart');
+                    }
 
-				if (NS.isDebug) {
-                    console.log("layout", ns.app.layout);
-                    console.log("xLayout", ns.app.xLayout);
-                    console.log("response", ns.app.response);
-                    console.log("xResponse", ns.app.xResponse);
-					console.log("core", ns.core);
-					console.log("app", ns.app);
-				}
+                    ns.app.viewport.setGui(layout, xLayout, isUpdateGui);
+
+                    web.mask.hide(ns.app.centerRegion);
+
+                    if (NS.isDebug) {
+                        console.log("layout", ns.app.layout);
+                        console.log("xLayout", ns.app.xLayout);
+                        console.log("response", ns.app.response);
+                        console.log("xResponse", ns.app.xResponse);
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
+                }
 			};
 		}());
     };
@@ -6332,6 +6353,15 @@ Ext.onReady( function() {
                                             alert('User is not assigned to any organisation units');
                                         }
 
+                                        fn();
+                                    }
+                                });
+
+                                // legend sets
+                                requests.push({
+                                    url: contextPath + '/api/mapLegendSets.json?fields=id,name,mapLegends[id,name,startValue,endValue,color]&paging=false',
+                                    success: function(r) {
+                                        init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
                                         fn();
                                     }
                                 });

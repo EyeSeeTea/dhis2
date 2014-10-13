@@ -1648,6 +1648,15 @@ Ext.onReady( function() {
                     //return response;
 			};
 
+            // legend set
+            service.mapLegend = {};
+
+            //service.mapLegend.getColorByValue = function(legendSet, value) {
+                //for (var i = 0, legend; i < legendSet.length; i++) {
+                    //legend = legendSet[i];
+                    
+            
+
 		}());
 
 		// web
@@ -1795,7 +1804,6 @@ Ext.onReady( function() {
                         return ids;
                     }(),
                     replacedFilterIds = support.prototype.str.replaceAll(Ext.clone(filterIds), '.', ''),
-
                     replacedIdMap = function() {
                         var map = {},
                             names = xResponse.metaData.names,
@@ -1808,7 +1816,6 @@ Ext.onReady( function() {
 
                         return map;
                     }(),
-
                     addDataTotals = function(data, ids) {
                         for (var i = 0, obj, total; i < data.length; i++) {
                             obj = data[i];
@@ -1841,14 +1848,13 @@ Ext.onReady( function() {
                     getDefaultChartTitlePositionHandler,
                     getDefaultChart,
 
-                    generator = {};
+                    generate,
+                    generator = {},
+
+                    legendSet;
 
                 getDefaultStore = function(isStacked) {
-                    var pe = conf.finals.dimension.period.dimensionName,
-                        columnDimensionName = xLayout.columns[0].dimensionName,
-                        rowDimensionName = xLayout.rows[0].dimensionName,
-
-                        data = [],
+                    var data = [],
                         trendLineFields = [],
                         targetLineFields = [],
                         baseLineFields = [],
@@ -1859,8 +1865,7 @@ Ext.onReady( function() {
                         obj = {};
                         category = rowIds[i];
                         rowValues = [];
-                        isEmpty = false;
-                        
+                        isEmpty = false;                        
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
                         
@@ -2495,6 +2500,33 @@ Ext.onReady( function() {
                     return chart;
                 };
 
+                generate = function() {
+                    var ind = dimConf.indicator.objectName,
+                        chart;
+
+                    // legend set if indicator and meter/gauge
+                    return function() {
+                        if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.objectNames, ind)) {
+                            if (xLayout.objectNameIdsMap[ind] && xLayout.objectNameIdsMap[ind].length) {
+                                Ext.Ajax.request({
+                                    url: init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[mapLegends[id,name,startValue,endValue,color]]',
+                                    success: function(r) {
+                                        var set = Ext.decode(r.responseText).legendSet;
+
+                                        if (!(set && set.mapLegends && set.mapLegends.length)) {
+                                            legendSet = set;
+                                        }
+                                    },
+                                    callback: function() {
+                                });
+                            }
+                        }
+                        else {
+                            return generator[xLayout.type]();
+                        }
+                    }();
+                };
+
                 generator.column = function(isStacked) {
                     var store = getDefaultStore(isStacked),
                         numericAxis = getDefaultNumericAxis(store),
@@ -2872,13 +2904,24 @@ Ext.onReady( function() {
                 };
 
                 generator.gauge = function() {
-                    var store = getDefaultStore(),
+                    var valueColor = '#82B525',
+                        store,
                         axis,
                         series,
                         legend,
                         config,
                         chart;
-                        
+
+                    // overwrite items
+                    columnIds = [columnIds[0]];
+                    replacedColumnIds = [replacedColumnIds[0]];
+                    rowIds = [rowIds[0]];
+                    replacedRowIds = [replacedRowIds[0]];
+
+                    // store
+                    store = getDefaultStore();
+                    
+                    // axis
                     axis = {
                         type: 'gauge',
                         position: 'gauge',
@@ -2888,11 +2931,24 @@ Ext.onReady( function() {
                         margin: -7
                     };
 
+                    // series, legendset
+                    if (legendSet) {
+                        var value = store.getRange()[0].data[columnIds[0]],
+                            mapLegends = legendSet.mapLegends;
+
+                        for (var i = 0; i < mapLegends.length; i++) {
+                            if (value >= mapLegends[i].startValue && value < mapLegends[i].endValue) {
+                                valueColor = mapLegends[i].color;
+                                break;
+                            }
+                        }
+                    }
+                        
                     series = {
                         type: 'gauge',
                         field: store.rangeFields[0],
                         //donut: 5,
-                        colorSet: ['#82B525', '#ddd']
+                        colorSet: [valueColor, '#ddd']
                     };
                     
                     chart = getDefaultChart({
@@ -2952,7 +3008,7 @@ Ext.onReady( function() {
                 };
 
                 // initialize
-                return generator[xLayout.type]();
+                return generate();
             };
 
         }());
