@@ -201,7 +201,7 @@
     <property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
   </bean>
 
-  <bean id="org.hisp.dhis.validationrule.action.dataanalysis.GetFollowUpAction"
+  <bean id="org.hisp.dhis.validationrule.action.dataanalysis.GetFollowupAction"
     class="org.hisp.dhis.validationrule.action.dataanalysis.GetFollowupAction"
     scope="prototype">
     <property name="followupAnalysisService" ref="org.hisp.dhis.dataanalysis.FollowupAnalysisService" />

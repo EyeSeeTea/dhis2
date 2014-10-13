@@ -22,7 +22,7 @@ public class GetFollowupAction
 
     private static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
 
-    private static final Log log = LogFactory.getLog( GetFollowUpAction.class );
+    private static final Log log = LogFactory.getLog( GetFollowupAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies

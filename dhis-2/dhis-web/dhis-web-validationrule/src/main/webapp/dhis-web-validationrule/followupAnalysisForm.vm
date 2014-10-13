@@ -37,6 +37,6 @@
 <tr><td><div id="selectionTree" style="height:150px;;overflow:auto;"></div></td></tr>
 </table>
 
-<span id="message"></span>
+##<span id="message"></span>
 
 <div id="analysisResult"></div>
