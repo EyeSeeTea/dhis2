@@ -79,7 +79,7 @@ function analyseData()
     } );
 }
 
-function getFollowUpAnalysis()
+function getFollowupAnalysis()
 {
     setHeaderWaitMessage( i18n_analysing_please_wait );
 
@@ -105,7 +105,7 @@ function exportAnalysisResult( type )
     window.location.href = url;
 }
 
-function markFollowUp( valueId )
+function markFollowup( valueId )
 {	
     var dataElementId = $( '#value-' + valueId + '-de' ).val();
     var categoryOptionComboId = $( '#value-' + valueId + '-coc' ).val();

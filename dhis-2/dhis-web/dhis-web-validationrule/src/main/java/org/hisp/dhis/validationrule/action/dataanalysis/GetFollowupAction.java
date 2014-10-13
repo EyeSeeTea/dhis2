@@ -15,7 +15,7 @@ import java.util.Collection;
 /**
  * @author Halvdan Hoem Grelland
  */
-public class GetFollowUpAction
+public class GetFollowupAction
     implements Action
 {
     private static final int MAX_RESULTS = 500;
