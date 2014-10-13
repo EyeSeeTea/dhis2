@@ -42,6 +42,8 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 
+import static org.hisp.dhis.dataapproval.DataApprovalState.*;
+
 /**
  * This package-private class is used by the data approval service to
  * describe selected data from a data set, such as could appear in a data set
@@ -102,7 +104,7 @@ class DataApprovalSelection
     // Preconstructed Status object
     // -------------------------------------------------------------------------
 
-    private static final DataApprovalStatus STATUS_UNAPPROVABLE = new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null);
+    private static final DataApprovalStatus STATUS_UNAPPROVABLE = new DataApprovalStatus( UNAPPROVABLE, null, null);
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -156,7 +158,7 @@ class DataApprovalSelection
 
         if ( allApprovalLevels.isEmpty() ) // No approval levels defined!
         {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null );
+            return new DataApprovalStatus( UNAPPROVABLE, null, null );
         }
 
         DataApprovalStatus status = null;
@@ -184,7 +186,7 @@ class DataApprovalSelection
                 log.info( "Mismatch org unit " + ( daIn.getOrganisationUnit() == null ? "(null)" : daIn.getOrganisationUnit().getName() )
                         + " with " + ( selectedOrgUnit == null ? "(null)" : selectedOrgUnit.getName() ) );
 
-                return new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null );
+                return new DataApprovalStatus( UNAPPROVABLE, null, null );
             }
 
             status = combineStatus( status, getStatus() );
@@ -258,250 +260,92 @@ class DataApprovalSelection
     /**
      * Gets that status for the data described by an approval object.
      * <p>
-     * If the approval object's level is null, then find the highest level
-     * (if any) where there is some approval status.
+     * If the input approval level is null, it means start at the highest
+     * level and go down all the way to the lowest, until we find an approval
+     * level where there is an approval. If we find one, return the status
+     * for approving at that level.
      * <p>
-     * If the approval object has an explicit level, check for the status
-     * at that level.
+     * If the input approval level is not null, it means start at the highest
+     * level and go down to that level, to see if we find a level where there
+     * is approval. If we find one, return the status for approving at the
+     * given input approval level. If we don't find any approval down to
+     * that level, then check to see if there is unapproved data at a lower
+     * level (meaning not ready to approve at this level.)
      *
      * @return the approval status
      */
     private DataApprovalStatus getStatus()
     {
-        if ( daIn.getDataApprovalLevel() == null )
-        {
-            return getHighestStatus();
-        }
-        else
-        {
-            return getLevelStatus();
-        }
-    }
-
-    /**
-     * Finds the highest approval status from a single approval data selection.
-     *
-     * @return the approval status
-     */
-    private DataApprovalStatus getHighestStatus()
-    {
         int checkToLevel = ( daIn.getDataApprovalLevel() == null ? allApprovalLevels.size() : daIn.getDataApprovalLevel().getLevel() );
+
+        DataApprovalLevel lowestLevelThatApplies = null;
 
         for ( DataApprovalLevel dal : allApprovalLevels )
         {
             if ( optionApplies( dal ) )
             {
-                if ( dal.getOrgUnitLevel() < organisationUnitLevel )
+                lowestLevelThatApplies = dal;
+
+                if ( dal.getLevel() <= checkToLevel )
                 {
-                    if ( isApproved( dal, organisationUnitAndAncestors.get( dal.getOrgUnitLevel() ) ) )
+                    if ( isApproved( dal, organisationUnitAndAncestors.get( dal.getOrgUnitLevel() - 1 ) ) )
                     {
-                        if ( daOut.isAccepted() )
+                        if ( daIn.getDataApprovalLevel() == null || ( dal.getLevel() == checkToLevel && dal.getOrgUnitLevel() == organisationUnitLevel ) )
                         {
-                            return new DataApprovalStatus( DataApprovalState.ACCEPTED_ELSEWHERE, daOut, dal );
+                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_HERE : APPROVED_HERE, daOut, dal );
                         }
-                        else
+                        else // data approval level is higher (lower number) and/or organisation unit level is higher (lower number)
                         {
-                            return new DataApprovalStatus( DataApprovalState.APPROVED_ELSEWHERE, daOut, dal );
-                        }
-                    }
-                }
-                else if ( dal.getOrgUnitLevel() == organisationUnitLevel )
-                {
-                    if ( isApproved( dal, selectedOrgUnit ) )
-                    {
-                        if ( daOut.isAccepted() )
-                        {
-                            return new DataApprovalStatus( DataApprovalState.ACCEPTED_HERE, daOut, dal );
-                        }
-                        else
-                        {
-                            return new DataApprovalStatus( DataApprovalState.APPROVED_HERE, daOut, dal );
+                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_ELSEWHERE : APPROVED_ELSEWHERE, daOut, dal );
                         }
                     }
                 }
                 else if ( isUnapprovedBelow( dal, selectedOrgUnit, organisationUnitLevel ) )
                 {
-                    return new DataApprovalStatus( DataApprovalState.UNAPPROVED_WAITING, daIn, dal );
+                    return new DataApprovalStatus( UNAPPROVED_WAITING, daIn, dal );
+                }
+                else if ( dal.getOrgUnitLevel() == organisationUnitLevel )
+                {
+                    return new DataApprovalStatus( UNAPPROVED_READY, daIn, dal );
                 }
                 else
                 {
-                    return new DataApprovalStatus( DataApprovalState.UNAPPROVED_READY, daIn, dal );
+                    return new DataApprovalStatus( UNAPPROVED_ELSEWHERE, daIn, dal );
                 }
             }
         }
 
-        return new DataApprovalStatus( DataApprovalState.UNAPPROVED_READY, daIn, allApprovalLevels.get( allApprovalLevels.size() - 1 ) );
-    }
-
-    /**
-     * Finds the approval status at the specified level.
-     * <p>
-     * If the specified level is lower than the org unit level (higher org
-     * unit level number), or if the level does not apply to the selected
-     * category option combo, then look for approval status at the next
-     * higher level that applies to the data.
-     * <p>
-     * If the specified level is at the org unit level, then look for the
-     * status at this level.
-     * <p>
-     * If the specified level is higher than the org unit level (lower
-     * org unit level number), then look for approval status
-     *
-     * @return the approval status
-     */
-    private DataApprovalStatus getLevelStatus()
-    {
-        DataApprovalLevel dal = daIn.getDataApprovalLevel();
-
-        if ( dal.getOrgUnitLevel() > organisationUnitLevel || !optionApplies( dal ) )
+        if ( lowestLevelThatApplies != null )
         {
-            return getStatusAtHigherLevel();
-        }
-        else if ( dal.getOrgUnitLevel() == organisationUnitLevel )
-        {
-            return getStatusAtSameLevel();
+            return new DataApprovalStatus( UNAPPROVED_READY, daIn, lowestLevelThatApplies );
         }
         else
         {
-            return getStatusAtLowerLevel();
+            return new DataApprovalStatus( UNAPPROVABLE, daIn, allApprovalLevels.get( allApprovalLevels.size() - 1 ) );
         }
     }
 
     /**
-     * Finds the approval status at the specified level, where the specified
-     * level has a higher orgUnitLevel than the selected organisation unit.
+     * Tests if approval level options apply to this data approval selection.
      *
-     * @return the approval status
+     * @param dal approval level with options to test
+     * @return true if this approval level applies, else false
      */
-    private DataApprovalStatus getStatusAtHigherLevel()
-    {
-        DataApprovalLevel dal = daIn.getDataApprovalLevel();
-        DataApprovalLevel higherLevel = getNextHigherApplicableLevel( dal );
-
-        if ( higherLevel == null )
-        {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, daIn, dal );
-        }
-        else if ( isApproved( higherLevel, organisationUnitAndAncestors.get( dal.getOrgUnitLevel() ) ) )
-        {
-            if ( daOut.isAccepted() )
-            {
-                return new DataApprovalStatus( DataApprovalState.ACCEPTED_ELSEWHERE, daIn, dal );
-            }
-            else
-            {
-                return new DataApprovalStatus( DataApprovalState.APPROVED_ELSEWHERE, daIn, dal );
-            }
-        }
-        else
-        {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVED_ELSEWHERE, daIn, dal );
-        }
-    }
-
-    /**
-     * Finds the approval status at the specified level, where the specified
-     * level has the same orgUnitLevel as the selected organisation unit.
-     *
-     * @return the approval status
-     */
-    private DataApprovalStatus getStatusAtSameLevel()
-    {
-        DataApprovalLevel dal = daIn.getDataApprovalLevel();
-
-        if ( isApproved( dal, selectedOrgUnit ) )
-        {
-            DataApproval daAtLevel = daOut;
-
-            DataApprovalLevel higherLevel = getNextHigherApplicableLevel( dal );
-
-            if ( higherLevel != null && isApproved( higherLevel, selectedOrgUnit ) )
-            {
-                if ( daOut.isAccepted() )
-                {
-                    return new DataApprovalStatus( DataApprovalState.ACCEPTED_ELSEWHERE, daIn, dal );
-                }
-                else
-                {
-                    return new DataApprovalStatus( DataApprovalState.APPROVED_ELSEWHERE, daIn, dal );
-                }
-            }
-            else
-            {
-                if ( daAtLevel.isAccepted() )
-                {
-                    return new DataApprovalStatus( DataApprovalState.ACCEPTED_HERE, daIn, dal );
-                }
-                else
-                {
-                    return new DataApprovalStatus( DataApprovalState.APPROVED_HERE, daIn, dal );
-                }
-            }
-        }
-        else if ( isUnapprovedAtLowerLevel( dal ) )
-        {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVED_WAITING, daIn, dal );
-        }
-        else
-        {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVED_READY, daIn, dal );
-        }
-    }
-
-    /**
-     * Finds the approval status at the specified level, where the specified
-     * level has a lower orgUnitLevel than the selected organisation unit.
-     *
-     * @return the approval status
-     */
-    private DataApprovalStatus getStatusAtLowerLevel()
-    {
-        DataApprovalLevel dal = daIn.getDataApprovalLevel();
-        DataApprovalLevel higherLevel = getNextHigherApplicableLevel( dal );
-
-        if ( isApproved( higherLevel, organisationUnitAndAncestors.get( dal.getOrgUnitLevel() ) ) )
-        {
-            if ( daOut.isAccepted() )
-            {
-                return new DataApprovalStatus( DataApprovalState.ACCEPTED_ELSEWHERE, daIn, dal );
-            }
-            else
-            {
-                return new DataApprovalStatus( DataApprovalState.APPROVED_ELSEWHERE, daIn, dal );
-            }
-        }
-        else
-        {
-            return new DataApprovalStatus( DataApprovalState.UNAPPROVED_ELSEWHERE, daIn, dal );
-        }
-    }
-
-    private DataApprovalLevel getNextHigherApplicableLevel ( DataApprovalLevel dal )
-    {
-        do
-        {
-            if ( dal.getLevel() > 0 )
-            {
-                dal = allApprovalLevels.get ( dal.getLevel() - 1 );
-            }
-            else
-            {
-                return null;
-            }
-        }
-        while ( dal.getOrgUnitLevel() > organisationUnitLevel || !optionApplies( dal ) );
-
-        return dal;
-    }
-
     private boolean optionApplies( DataApprovalLevel dal )
     {
         return dal.getCategoryOptionGroupSet() == null
                 || ( !daIn.getAttributeOptionCombo().equals( categoryService.getDefaultDataElementCategoryOptionCombo() )
-                && getApprovalLevelOptionCombos( daIn.getAttributeOptionCombo() ).contains(dal.getCategoryOptionGroupSet() ) );
+                && getOptionComboGroupSets( daIn.getAttributeOptionCombo() ).contains( dal.getCategoryOptionGroupSet() ) );
     }
 
-    private Set<CategoryOptionGroupSet> getApprovalLevelOptionCombos( DataElementCategoryOptionCombo optionCombo )
+    /**
+     * Finds the category option group sets containing groups having options
+     * in this combination.
+     *
+     * @param optionCombo attribute option combination to test
+     * @return attribute option group sets containing this combo
+     */
+    private Set<CategoryOptionGroupSet> getOptionComboGroupSets( DataElementCategoryOptionCombo optionCombo )
     {
         Set<CategoryOptionGroupSet> groupSets = optionComboGroupSetCache.get ( optionCombo );
 
@@ -520,6 +364,17 @@ class DataApprovalSelection
         return groupSets;
     }
 
+    /**
+     * Tests whether the input data approval object is found in the database
+     * using a specified data approval level and organisation unit.
+     * <p>
+     * Also, the daOut object reference is set to the data approval object
+     * found (if any).
+     *
+     * @param dal data approval level to test
+     * @param orgUnit organisation unit to test
+     * @return true if the data approval exists in the database
+     */
     private boolean isApproved( DataApprovalLevel dal, OrganisationUnit orgUnit )
     {
         daOut = dataApprovalStore.getDataApproval( dal, daIn.getDataSet(), daIn.getPeriod(), orgUnit, daIn.getAttributeOptionCombo() );
@@ -527,26 +382,8 @@ class DataApprovalSelection
         return daOut != null;
     }
 
-    private boolean isUnapprovedAtLowerLevel ( DataApprovalLevel dal )
-    {
-        do
-        {
-            if ( dal.getLevel() < allApprovalLevels.size() - 1 )
-            {
-                dal = allApprovalLevels.get ( dal.getLevel() + 1 );
-            }
-            else
-            {
-                return false;
-            }
-        }
-        while ( dal.getOrgUnitLevel() > organisationUnitLevel || !optionApplies( dal ) );
-
-        return isUnapprovedBelow( dal, selectedOrgUnit, organisationUnitLevel );
-    }
-
     /**
-     * Test to see if we are waiting for approval at a lower level that could
+     * Tests to see if we are waiting for approval at a lower level that could
      * exist, but does not yet.
      * <p>
      * Also, look to see if the data set is assigned to any descendant
