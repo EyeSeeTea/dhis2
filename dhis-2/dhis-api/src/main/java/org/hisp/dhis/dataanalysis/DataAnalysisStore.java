@@ -109,4 +109,9 @@ public interface DataAnalysisStore
      * @return a collection of DeflatedDataValues.
      */
     Collection<DeflatedDataValue> getDataValuesMarkedForFollowup( OrganisationUnit organisationUnit );
+
+    Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, Integer first, Integer max );
+
+    // TODO Document
+    int getFollowupDataValuesCount( OrganisationUnit organisationUnit );
 }

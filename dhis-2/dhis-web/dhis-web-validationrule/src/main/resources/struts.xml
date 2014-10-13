@@ -192,8 +192,13 @@
       <interceptor-ref name="organisationUnitTreeStack" />
       <param name="requiredAuthorities">F_RUN_VALIDATION</param>
     </action>
-
+<!--
     <action name="getFollowup" class="org.hisp.dhis.validationrule.action.dataanalysis.GetAnalysisAction">
+      <result name="success" type="velocity">/dhis-web-validationrule/followUpResult.vm</result>
+      <param name="requiredAuthorities">F_RUN_VALIDATION</param>
+    </action>
+-->
+    <action name="getFollowup" class="org.hisp.dhis.validationrule.action.dataanalysis.GetFollowUpAction">
       <result name="success" type="velocity">/dhis-web-validationrule/followUpResult.vm</result>
       <param name="requiredAuthorities">F_RUN_VALIDATION</param>
     </action>

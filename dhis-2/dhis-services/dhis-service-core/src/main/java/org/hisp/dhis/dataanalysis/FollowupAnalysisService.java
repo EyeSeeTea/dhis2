@@ -74,4 +74,24 @@ public class FollowupAnalysisService
 
         return dataValues;
     }
+
+    public int getFollowupDataValuesCount( OrganisationUnit organisationUnit )
+    {
+        if ( organisationUnit == null )
+        {
+            return 0;
+        }
+
+        return dataAnalysisStore.getFollowupDataValuesCount( organisationUnit );
+    }
+
+    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int first, int max )
+    {
+        if( organisationUnit == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return dataAnalysisStore.getFollowupDataValues( organisationUnit, first, max );
+    }
 }

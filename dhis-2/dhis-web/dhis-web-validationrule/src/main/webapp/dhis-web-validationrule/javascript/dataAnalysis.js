@@ -83,7 +83,7 @@ function getFollowUpAnalysis()
 {
     setHeaderWaitMessage( i18n_analysing_please_wait );
 
-    var url = "getFollowup.action?key=followup";
+    var url = "getFollowup.action";
 
     $.get( url, function( data )
     {

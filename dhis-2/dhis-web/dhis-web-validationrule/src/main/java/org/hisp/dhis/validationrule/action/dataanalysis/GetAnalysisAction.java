@@ -217,7 +217,8 @@ public class GetAnalysisAction
             if( KEY_FOLLOWUP.equals( key ) )
             {
                 orgUnits = new ArrayList<OrganisationUnit>();
-                if(unit != null )
+
+                if( unit != null )
                 {
                     orgUnits.add( unit );
                 }
