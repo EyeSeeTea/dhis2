@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,16 +28,18 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
+
 /**
  * @author Jim Grace
  * @version $Id$
  */
-public class DataSetNotMarkedForApprovalException
+public class NoAttributeOptionsFoundInGroupsException
         extends DataApprovalException
 {
-    private static final long serialVersionUID = 6661288395024958390L;
+    private static final long serialVersionUID = -781185389702703948L;
 
-    public DataSetNotMarkedForApprovalException()
+    public NoAttributeOptionsFoundInGroupsException()
     {
         super();
     }

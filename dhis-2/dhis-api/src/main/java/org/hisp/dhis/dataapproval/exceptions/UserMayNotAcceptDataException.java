@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -32,12 +32,12 @@ package org.hisp.dhis.dataapproval;
  * @author Jim Grace
  * @version $Id$
  */
-public class UserCannotApproveAttributeComboException
+public class UserMayNotAcceptDataException
         extends DataApprovalException
 {
-    private static final long serialVersionUID = 4733220902600832778L;
+    private static final long serialVersionUID = 2765006990627122000L;
 
-    public UserCannotApproveAttributeComboException()
+    public UserMayNotAcceptDataException()
     {
         super();
     }

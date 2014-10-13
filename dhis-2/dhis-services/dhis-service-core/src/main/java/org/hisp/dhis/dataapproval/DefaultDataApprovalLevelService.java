@@ -36,9 +36,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -119,7 +121,7 @@ public class DefaultDataApprovalLevelService
     {
         Set<CategoryOptionGroupSet> cogSets = null;
 
-        if ( cogs != null )
+        if ( cogs != null && !cogs.isEmpty() )
         {
             cogSets = new HashSet<>();
 
@@ -138,12 +140,49 @@ public class DefaultDataApprovalLevelService
         {
             if ( level.getCategoryOptionGroupSet() == null )
             {
-                if ( cogs == null )
+                if ( cogSets == null )
                 {
                     return level;
                 }
             }
-            else if ( cogs != null && cogSets.contains( level.getCategoryOptionGroupSet() ) )
+            else if ( cogSets != null && cogSets.contains( level.getCategoryOptionGroupSet() ) )
+            {
+                return level;
+            }
+        }
+
+        return null;
+    }
+
+    public DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, Set<DataElementCategoryOption> options )
+    {
+        Set<CategoryOptionGroupSet> cogSets = null;
+
+        if ( options != null && !options.isEmpty() )
+        {
+            cogSets = new HashSet<>();
+
+            for ( DataElementCategoryOption option : options )
+            {
+                if ( option.getGroupSets() != null )
+                {
+                    cogSets.addAll( option.getGroupSets() );
+                }
+            }
+        }
+
+        int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
+
+        for ( DataApprovalLevel level : Lists.reverse( getDataApprovalLevelsByOrgUnitLevel( orgUnitLevel ) ) )
+        {
+            if ( level.getCategoryOptionGroupSet() == null )
+            {
+                if ( cogSets == null )
+                {
+                    return level;
+                }
+            }
+            else if ( cogSets != null && cogSets.contains( level.getCategoryOptionGroupSet() ) )
             {
                 return level;
             }
@@ -366,6 +405,8 @@ public class DefaultDataApprovalLevelService
     {
         User user = currentUserService.getCurrentUser();
 
+        System.out.println( "getUserApprovalLevel( " + orgUnit.getName() + " ) User " + ( user == null ? "(null)" : user.getName() ) );
+
         if ( user != null )
         {
             for ( OrganisationUnit ou : user.getOrganisationUnits() )
@@ -531,10 +572,10 @@ public class DefaultDataApprovalLevelService
     }
 
     /**
-     * Get the approval for a user for a given organisation unit. It is
+     * Get the approval level for a user for a given organisation unit. It is
      * assumed that the user has access to the organisation unit (must be
-     * checked elsewhere, it not checked here.) If the organisation unit is
-     * above all approval levels, returns 0 (no approval levels apply.)
+     * checked elsewhere, it is not checked here.) If the organisation unit is
+     * above all approval levels, returns null (no approval levels apply.)
      * <p>
      * If users are restricted to viewing approved data only, users may
      * see data from lower levels *only* if it is approved *below* this approval
@@ -554,9 +595,9 @@ public class DefaultDataApprovalLevelService
      */
     private DataApprovalLevel userApprovalLevel( OrganisationUnit orgUnit )
     {
-        int orgUnitLevel = orgUnit.getLevel() != 0 ?
-                orgUnit.getLevel() :
-                organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() );
+        int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
+
+        System.out.println( "userApprovalLevel( " + orgUnit.getName() + " ) Level " + orgUnitLevel );
 
         DataApprovalLevel userLevel = null;
 
@@ -599,7 +640,7 @@ public class DefaultDataApprovalLevelService
 
         for ( CategoryOptionGroup cog : cogs.getMembers() )
         {
-            if ( securityService.canRead(cog) )
+            if ( securityService.canRead( cog ) )
             {
                 return true;
             }

@@ -31,6 +31,20 @@ package org.hisp.dhis.dataapproval;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
+import org.hisp.dhis.dataapproval.exceptions.DataMayNotBeAcceptedException;
+import org.hisp.dhis.dataapproval.exceptions.DataMayNotBeApprovedException;
+import org.hisp.dhis.dataapproval.exceptions.DataMayNotBeUnacceptedException;
+import org.hisp.dhis.dataapproval.exceptions.DataMayNotBeUnapprovedException;
+import org.hisp.dhis.dataapproval.exceptions.DataSetNotMarkedForApprovalException;
+import org.hisp.dhis.dataapproval.exceptions.NoAttributeOptionsFoundInGroupsException;
+import org.hisp.dhis.dataapproval.exceptions.PeriodShorterThanDataSetPeriodException;
+import org.hisp.dhis.dataapproval.exceptions.UserCannotAccessApprovalLevelException;
+import org.hisp.dhis.dataapproval.exceptions.UserCannotApproveAttributeComboException;
+import org.hisp.dhis.dataapproval.exceptions.UserMayNotAcceptDataException;
+import org.hisp.dhis.dataapproval.exceptions.UserMayNotApproveDataException;
+import org.hisp.dhis.dataapproval.exceptions.UserMayNotUnacceptDataException;
+import org.hisp.dhis.dataapproval.exceptions.UserMayNotUnapproveDataException;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -135,9 +149,13 @@ public class DefaultDataApprovalService
             {
                 it.remove(); // Already approved at this level -- no action needed.
             }
-            else if ( !status.getDataApprovalState().isApprovable() || !mayApprove( da, status ) )
+            else if ( !status.getDataApprovalState().isApprovable() )
             {
-                throw new ApprovalActionNotAllowedException();
+                throw new DataMayNotBeApprovedException();
+            }
+            else if ( !mayApprove( da, status ) )
+            {
+                throw new UserMayNotApproveDataException();
             }
         }
 
@@ -158,9 +176,13 @@ public class DefaultDataApprovalService
 
             if ( status.getDataApprovalState().isApproved() )
             {
-                if ( !status.getDataApprovalState().isUnapprovable() || !mayUnapprove( da, status ) )
+                if ( !status.getDataApprovalState().isUnapprovable() )
                 {
-                    throw new ApprovalActionNotAllowedException();
+                    throw new DataMayNotBeUnapprovedException();
+                }
+                else if ( !mayUnapprove( da, status ) )
+                {
+                    throw new UserMayNotUnapproveDataException();
                 }
                 storedDataApprovals.add ( status.getDataApproval() );
             }
@@ -183,10 +205,13 @@ public class DefaultDataApprovalService
 
             if ( !status.getDataApprovalState().isAccepted() )
             {
-                if ( !mayAcceptOrUnaccept( da, status )
-                        || !status.getDataApprovalState().isAcceptable() )
+                if ( !status.getDataApprovalState().isAcceptable() )
                 {
-                    throw new ApprovalActionNotAllowedException();
+                    throw new DataMayNotBeAcceptedException();
+                }
+                else if ( !mayAcceptOrUnaccept( da, status ) )
+                {
+                    throw new UserMayNotAcceptDataException();
                 }
                 storedDataApprovals.add( status.getDataApproval() );
             }
@@ -211,10 +236,13 @@ public class DefaultDataApprovalService
 
             if ( status.getDataApprovalState().isAccepted() )
             {
-                if ( !mayAcceptOrUnaccept( da, status )
-                        || !status.getDataApprovalState().isUnacceptable() )
+                if ( !status.getDataApprovalState().isUnacceptable() )
                 {
-                    throw new ApprovalActionNotAllowedException();
+                    throw new DataMayNotBeUnacceptedException();
+                }
+                else if ( !mayAcceptOrUnaccept( da, status ) )
+                {
+                    throw new UserMayNotUnacceptDataException();
                 }
                 storedDataApprovals.add( status.getDataApproval() );
             }
@@ -235,24 +263,55 @@ public class DefaultDataApprovalService
         Set<DataElementCategoryOption> attributeCategoryOptions = ( attributeOptionCombo == null || attributeOptionCombo.equals( categoryService.getDefaultDataElementCategoryOptionCombo() ) )
                 ? null : attributeOptionCombo.getCategoryOptions();
 
-        List<DataApproval> dataApprovalList = makeApprovalsList( da, null, null, attributeCategoryOptions, true );
+        DataApprovalStatus status;
 
-        return ( doGetDataApprovalStatus( dataApprovalList, da ) );
+        try
+        {
+            List<DataApproval> dataApprovalList = makeApprovalsList( da, null, null, attributeCategoryOptions, true );
+
+            status = doGetDataApprovalStatus( dataApprovalList, da );
+        }
+        catch ( DataApprovalException ex )
+        {
+            status = new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null );
+        }
+
+        return status;
     }
 
     public DataApprovalStatusAndPermissions getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
                                     OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups,
                                     Set<DataElementCategoryOption> attributeCategoryOptions )
     {
-        DataApproval da = new DataApproval( null, null, period, organisationUnit, null, false, null, null );
+        DataApprovalStatusAndPermissions permissions = new DataApprovalStatusAndPermissions();
+
+        DataApprovalLevel dal = null;
+
+        if ( categoryOptionGroups != null && !categoryOptionGroups.isEmpty() )
+        {
+            dal = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit, categoryOptionGroups );
+        }
+        else if ( attributeCategoryOptions != null && !attributeCategoryOptions.isEmpty() )
+        {
+            Set<CategoryOptionGroup> groups = new HashSet<>();
+
+            for ( DataElementCategoryOption option : attributeCategoryOptions )
+            {
+                groups.addAll( option.getGroups() );
+            }
+        }
+
+        if ( dal == null )
+        {
+            permissions.setDataApprovalStatus( new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null ) );
+            return permissions;
+        }
+
+        DataApproval da = new DataApproval( dal, null, period, organisationUnit, null, false, null, null );
 
         DataApprovalStatus status = doGetDataApprovalStatus( makeApprovalsList( da, asSet( dataSet) , categoryOptionGroups, attributeCategoryOptions, true ), da );
 
-        DataApprovalStatusAndPermissions permissions = new DataApprovalStatusAndPermissions();
-
         permissions.setDataApprovalStatus( status );
-
-        DataApprovalLevel dal = status.getDataApprovalLevel();
 
         if ( dal != null && securityService.canRead( dal )
             && ( dal.getCategoryOptionGroupSet() == null || securityService.canRead( dal.getCategoryOptionGroupSet() ) )
@@ -260,10 +319,10 @@ public class DefaultDataApprovalService
         {
             DataApprovalState state = status.getDataApprovalState();
 
-            permissions.setMayApprove( state.isApprovable() && mayApprove( status.getDataApprovalLevel(), organisationUnit ) );
-            permissions.setMayUnapprove( state.isUnapprovable() && mayUnapprove( status.getDataApprovalLevel(), organisationUnit, status.getDataApprovalState().isAccepted() ) );
-            permissions.setMayAccept( state.isAcceptable() && mayAcceptOrUnaccept( status.getDataApprovalLevel(), organisationUnit ) );
-            permissions.setMayUnaccept( state.isUnacceptable() && mayAcceptOrUnaccept( status.getDataApprovalLevel(), organisationUnit ) );
+            permissions.setMayApprove( state.isApprovable() && mayApprove( dal, organisationUnit ) );
+            permissions.setMayUnapprove( state.isUnapprovable() && mayUnapprove( dal, organisationUnit, status.getDataApprovalState().isAccepted() ) );
+            permissions.setMayAccept( state.isAcceptable() && mayAcceptOrUnaccept( dal, organisationUnit ) );
+            permissions.setMayUnaccept( state.isUnacceptable() && mayAcceptOrUnaccept( dal, organisationUnit ) );
         }
 
         log.debug( "Returning permissions for " + organisationUnit.getName()
@@ -431,6 +490,9 @@ public class DefaultDataApprovalService
 
         DataApprovalLevel userLevel = dataApprovalLevelService.getUserApprovalLevel( da.getOrganisationUnit(), includeDataViewOrgUnits );
 
+        System.out.println( "userLevel: " + ( userLevel == null ? "(null)" : userLevel.getLevel() ) );
+        log.info( "userLevel: " + ( userLevel == null ? "(null)" : userLevel.getLevel() ) );
+
         if ( userLevel != null )
         {
             if ( userLevel.equals( da.getDataApprovalLevel() ) )
@@ -443,7 +505,7 @@ public class DefaultDataApprovalService
 
                 return da;
             }
-            else if ( userLevel.getLevel() > da.getDataApprovalLevel().getLevel() )
+            else if ( userLevel.getLevel() < da.getDataApprovalLevel().getLevel() )
             {
                 User user = currentUserService.getCurrentUser();
 
@@ -534,7 +596,7 @@ public class DefaultDataApprovalService
             boolean mayApproveAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
             if ( ( mayApprove && userDal.getLevel() == dataApprovalStatus.getDataApprovalLevel().getLevel() )
-                || ( mayApproveAtLowerLevels && userDal.getLevel() > dataApprovalStatus.getDataApprovalLevel().getLevel() ) )
+                || ( mayApproveAtLowerLevels && userDal.getLevel() < dataApprovalStatus.getDataApprovalLevel().getLevel() ) )
             {
                 return true;
             }
@@ -560,7 +622,7 @@ public class DefaultDataApprovalService
             boolean mayAcceptAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_ACCEPT_LOWER_LEVELS )
                     || user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS );
 
-            if ( mayAcceptAtLowerLevels && userDal.getLevel() > dataApprovalStatus.getDataApprovalLevel().getLevel() )
+            if ( mayAcceptAtLowerLevels && userDal.getLevel() < dataApprovalStatus.getDataApprovalLevel().getLevel() )
             {
                 return true;
             }

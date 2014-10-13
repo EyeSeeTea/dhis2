@@ -29,6 +29,7 @@ package org.hisp.dhis.dataapproval;
  */
 
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 import java.util.List;
@@ -79,11 +80,24 @@ public interface DataApprovalLevelService
      * having a category option group set containing one of the category
      * option groups.
      *
-     * @param orgUnit
-     * @param cogs
-     * @return
+     * @param orgUnit organisation unit to look for.
+     * @param cogs attribute option groups (if any) to look for.
+     * @return a data approval level, or null if not found.
      */
     DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit, Set<CategoryOptionGroup> cogs );
+
+    /**
+     * Gets the lowest approval level for a given organisation unit and
+     * (optionally) a set of attribute options. Returns the last
+     * approval level matching both the orgUnit's level and (optionally)
+     * having a category option group set containing one of the category
+     * option groups containing one of the options.
+     *
+     * @param orgUnit organisation unit to look for.
+     * @param options attribute options (if any) to look for.
+     * @return a data approval level, or null if not found.
+     */
+    DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, Set<DataElementCategoryOption> options );
 
     /**
      * Gets a list of all data approval levels.

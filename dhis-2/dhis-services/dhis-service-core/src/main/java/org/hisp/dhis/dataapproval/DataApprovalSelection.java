@@ -166,12 +166,12 @@ class DataApprovalSelection
         organisationUnitAndAncestors = selectedOrgUnit.getAncestors();
         organisationUnitAndAncestors.add( selectedOrgUnit );
 
-        log.debug( "----------------------------------------------------------------------" );
-        log.debug( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
+        log.info( "----------------------------------------------------------------------" );
+        log.info( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
                 + " (" + organisationUnitLevel + ") "
                 + ") data set " + originalDataApproval.getDataSet().getName()
                 + " original period " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName()
-                + " approval level " + originalDataApproval.getDataApprovalLevel().getLevel()
+                + " approval level " + ( originalDataApproval == null ? "(null)" : originalDataApproval.getDataApprovalLevel().getLevel() )
                 + " approval count " + dataApprovals.size()
                 + " starting." );
 
@@ -195,7 +195,7 @@ class DataApprovalSelection
             status.getDataApproval().setPeriod( originalDataApproval.getPeriod() );
         }
 
-        log.debug( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
+        log.info( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
                 + " (" + organisationUnitLevel + ") "
                 + ") data set " + originalDataApproval.getDataSet().getName()
                 + " original period " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName()
@@ -239,7 +239,7 @@ class DataApprovalSelection
             }
         }
 
-        log.debug( "combineStatus( " + logStatus( oldStatus ) + ", " + logStatus( newStatus ) + " ) -> " + logStatus ( status ) );
+        log.info( "combineStatus( " + logStatus( oldStatus ) + ", " + logStatus( newStatus ) + " ) -> " + logStatus ( status ) );
 
         return status;
     }
@@ -285,6 +285,8 @@ class DataApprovalSelection
      */
     private DataApprovalStatus getHighestStatus()
     {
+        int checkToLevel = ( daIn.getDataApprovalLevel() == null ? allApprovalLevels.size() : daIn.getDataApprovalLevel().getLevel() );
+
         for ( DataApprovalLevel dal : allApprovalLevels )
         {
             if ( optionApplies( dal ) )
@@ -563,7 +565,7 @@ class DataApprovalSelection
      */
     private boolean isUnapprovedBelow ( DataApprovalLevel dal, OrganisationUnit orgUnit, int orgUnitLevel )
     {
-        log.debug( "isUnapprovedBelow( " + dal.getLevel() + ", " + orgUnit.getName() + ", " + orgUnitLevel + " )" );
+        log.info( "isUnapprovedBelow( " + dal.getLevel() + ", " + orgUnit.getName() + ", " + orgUnitLevel + " )" );
 
         if ( orgUnitLevel == dal.getOrgUnitLevel() )
         {
@@ -582,7 +584,7 @@ class DataApprovalSelection
         {
             if ( isUnapprovedBelow( dal, child, orgUnitLevel + 1 ) )
             {
-                log.debug( "isUnapprovedBelow( " + dal.getLevel() + ", " + orgUnit.getName() + ", " + orgUnitLevel
+                log.info( "isUnapprovedBelow( " + dal.getLevel() + ", " + orgUnit.getName() + ", " + orgUnitLevel
                         + " ) returns true because unapproved from below." );
 
                 return true;

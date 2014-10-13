@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,16 +28,18 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
+
 /**
  * @author Jim Grace
  * @version $Id$
  */
-public class ApprovalActionNotAllowedException
+public class UserCannotAccessApprovalLevelException
         extends DataApprovalException
 {
-    private static final long serialVersionUID = 2765006990627122000L;
+    private static final long serialVersionUID = -571500237431167490L;
 
-    public ApprovalActionNotAllowedException()
+    public UserCannotAccessApprovalLevelException()
     {
         super();
     }
