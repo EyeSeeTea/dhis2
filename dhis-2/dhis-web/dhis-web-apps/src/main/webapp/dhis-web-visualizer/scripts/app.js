@@ -2344,38 +2344,10 @@ Ext.onReady( function() {
                     legendSet,
                     fn;
 
-				if (!xLayout) {
-					xLayout = service.layout.getExtendedLayout(layout);
-				}
-
-				// extend response
-				xResponse = service.response.getExtendedResponse(xLayout, response);
-
-				// references
-				ns.app.layout = layout;
-				ns.app.xLayout = xLayout;
-				ns.app.response = response;
-				ns.app.xResponse = xResponse;
-
-                // legend set
-                if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
-                    Ext.Ajax.request({
-                        ns.core.init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[mapLegends[id,name,startValue,endValue,color]]',
-                        success: function(r) {
-                            legendSet = Ext.decode(r.responseText).legendSet;
-
-                            fn();
-                        }
-                    });
-                }
-                else {
-                    fn();
-                }
-
                 fn = function() {
                     
                     // create chart
-                    ns.app.chart = ns.core.web.chart.createChart(ns, legendSet);
+                    ns.app.chart = ns.core.web.chart.createChart(ns ,legendSet);
 
                     // update viewport
                     ns.app.centerRegion.update();
@@ -2399,6 +2371,36 @@ Ext.onReady( function() {
                         console.log("core", ns.core);
                         console.log("app", ns.app);
                     }
+                };
+
+				if (!xLayout) {
+					xLayout = service.layout.getExtendedLayout(layout);
+				}
+
+				// extend response
+				xResponse = service.response.getExtendedResponse(xLayout, response);
+
+				// references
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.response = response;
+				ns.app.xResponse = xResponse;
+
+                // legend set
+                if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.axisObjectNames, ind) && xLayout.objectNameIdsMap[ind].length) {
+                    Ext.Ajax.request({
+                        url: ns.core.init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[mapLegends[id,name,startValue,endValue,color]]',
+                        disableCaching: false,
+                        success: function(r) {
+                            legendSet = Ext.decode(r.responseText).legendSet;
+                        },
+                        callback: function() {
+                            fn();
+                        }
+                    });
+                }
+                else {
+                    fn();
                 }
 			};
 		}());
@@ -6353,15 +6355,6 @@ Ext.onReady( function() {
                                             alert('User is not assigned to any organisation units');
                                         }
 
-                                        fn();
-                                    }
-                                });
-
-                                // legend sets
-                                requests.push({
-                                    url: contextPath + '/api/mapLegendSets.json?fields=id,name,mapLegends[id,name,startValue,endValue,color]&paging=false',
-                                    success: function(r) {
-                                        init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
                                         fn();
                                     }
                                 });

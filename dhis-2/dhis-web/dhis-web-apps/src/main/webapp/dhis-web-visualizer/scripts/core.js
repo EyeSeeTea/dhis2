@@ -1651,12 +1651,23 @@ Ext.onReady( function() {
             // legend set
             service.mapLegend = {};
 
-            //service.mapLegend.getColorByValue = function(legendSet, value) {
-                //for (var i = 0, legend; i < legendSet.length; i++) {
-                    //legend = legendSet[i];
-                    
-            
+            service.mapLegend.getColorByValue = function(legendSet, value) {
+                var color;
+                
+                if (!(legendSet && value)) {
+                    return;
+                }
+                
+                for (var i = 0, legend; i < legendSet.mapLegends.length; i++) {
+                    legend = legendSet.mapLegends[i];
 
+                    if (value >= parseFloat(legend.startValue) && value < parseFloat(legend.endValue)) {
+                        return legend.color;
+                    }
+                }
+
+                return;
+            };
 		}());
 
 		// web
@@ -1782,7 +1793,7 @@ Ext.onReady( function() {
 			// chart
 			web.chart = {};
 
-			web.chart.createChart = function(ns) {
+			web.chart.createChart = function(ns, legendSet) {
                 var dataTotalKey = Ext.data.IdGenerator.get('uuid').generate(),
                     xLayout = ns.app.xLayout,
                     xResponse = ns.app.xResponse,
@@ -1847,11 +1858,8 @@ Ext.onReady( function() {
                     getDefaultChartSizeHandler,
                     getDefaultChartTitlePositionHandler,
                     getDefaultChart,
-
-                    generate,
-                    generator = {},
-
-                    legendSet;
+                    
+                    generator = {};
 
                 getDefaultStore = function(isStacked) {
                     var data = [],
@@ -2500,33 +2508,6 @@ Ext.onReady( function() {
                     return chart;
                 };
 
-                generate = function() {
-                    var ind = dimConf.indicator.objectName,
-                        chart;
-
-                    // legend set if indicator and meter/gauge
-                    return function() {
-                        if (xLayout.type === 'gauge' && Ext.Array.contains(xLayout.objectNames, ind)) {
-                            if (xLayout.objectNameIdsMap[ind] && xLayout.objectNameIdsMap[ind].length) {
-                                Ext.Ajax.request({
-                                    url: init.contextPath + '/api/indicators/' + xLayout.objectNameIdsMap[ind][0] + '.json?fields=legendSet[mapLegends[id,name,startValue,endValue,color]]',
-                                    success: function(r) {
-                                        var set = Ext.decode(r.responseText).legendSet;
-
-                                        if (!(set && set.mapLegends && set.mapLegends.length)) {
-                                            legendSet = set;
-                                        }
-                                    },
-                                    callback: function() {
-                                });
-                            }
-                        }
-                        else {
-                            return generator[xLayout.type]();
-                        }
-                    }();
-                };
-
                 generator.column = function(isStacked) {
                     var store = getDefaultStore(isStacked),
                         numericAxis = getDefaultNumericAxis(store),
@@ -2904,7 +2885,7 @@ Ext.onReady( function() {
                 };
 
                 generator.gauge = function() {
-                    var valueColor = '#82B525',
+                    var valueColor = '#aaa',
                         store,
                         axis,
                         series,
@@ -2933,15 +2914,7 @@ Ext.onReady( function() {
 
                     // series, legendset
                     if (legendSet) {
-                        var value = store.getRange()[0].data[columnIds[0]],
-                            mapLegends = legendSet.mapLegends;
-
-                        for (var i = 0; i < mapLegends.length; i++) {
-                            if (value >= mapLegends[i].startValue && value < mapLegends[i].endValue) {
-                                valueColor = mapLegends[i].color;
-                                break;
-                            }
-                        }
+                        valueColor = service.mapLegend.getColorByValue(legendSet, store.getRange()[0].data[columnIds[0]]) || valueColor;
                     }
                         
                     series = {
@@ -3008,7 +2981,7 @@ Ext.onReady( function() {
                 };
 
                 // initialize
-                return generate();
+                return generator[xLayout.type]();
             };
 
         }());
