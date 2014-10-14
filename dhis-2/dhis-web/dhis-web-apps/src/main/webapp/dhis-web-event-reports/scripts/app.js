@@ -4293,7 +4293,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:5px 0 0 8px',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
