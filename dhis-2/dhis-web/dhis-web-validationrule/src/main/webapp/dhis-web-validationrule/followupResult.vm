@@ -17,27 +17,24 @@
 
     if( NUM_VALUES == 0 )
     {
-      $( "#downloadButtons" ).hide();
       $( "#analysisResult" ).hide();
-      $( "#info" ).hide();
+      $( "#controls" ).hide();
       $( "#info" ).html( i18n_no_values_found );
     }
     else if ( !maxExceeded )
     {
-      $( "#info" ).html( NUM_VALUES + " " + i18n_values_found ).show();
+      $( "#info" ).html( NUM_VALUES + " " + i18n_values_found );
       $( "#analysisResult" ).show();
-      $( "#downloadButtons" ).show();
+      $( "#controls" ).show();
     }
     else
     {
-      $( "#info" ).html( i18n_max_values_exceeded ).show();
+      $( "#info" ).html( i18n_max_values_exceeded );
       $( "#analysisResult" ).show();
-      $( "#downloadButtons" ).show();
+      $( "#controls" ).show();
     }
   });
 </script>
-
-##<span id="info"></span>
 
 <table class="listTable" id="listTable" style="width:100%;">
   <thead>
