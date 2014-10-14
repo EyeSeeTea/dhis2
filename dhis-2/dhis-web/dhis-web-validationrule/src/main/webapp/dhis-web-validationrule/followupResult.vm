@@ -8,28 +8,32 @@
   var i18n_mark_value_for_followup = '$encoder.jsEscape( $i18n.getString( "mark_value_for_followup" ) , "'")';
   var i18n_unmark_value_for_followup = '$encoder.jsEscape( $i18n.getString( "unmark_value_for_followup" ) , "'")';
 
-  jQuery( document ).ready( function() {
+  $( document ).ready( function() {
     tableSorter( 'listTable' );
     setTableStyles();
 
     NUM_VALUES = $dataValues.size();
+
     var maxExceeded = $maxExceeded;
 
     if( NUM_VALUES == 0 )
     {
       $( "#analysisResult" ).hide();
-      $( "#controls" ).hide();
+      $( "#downloadButtons input:button" ).attr( "disabled", true );
+      $( "#info" ).show();
       $( "#info" ).html( i18n_no_values_found );
     }
     else if ( !maxExceeded )
     {
       $( "#info" ).html( NUM_VALUES + " " + i18n_values_found );
+      $( "#downloadButtons input:button" ).attr( "disabled", false );
       $( "#analysisResult" ).show();
       $( "#controls" ).show();
     }
     else
     {
       $( "#info" ).html( i18n_max_values_exceeded );
+      $( "#downloadButtons input:button" ).attr( "disabled", false );
       $( "#analysisResult" ).show();
       $( "#controls" ).show();
     }
