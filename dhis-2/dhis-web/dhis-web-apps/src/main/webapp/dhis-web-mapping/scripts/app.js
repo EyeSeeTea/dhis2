@@ -1489,7 +1489,7 @@ Ext.onReady( function() {
                 if (items.length) {
                     record.filter = 'IN:' + items.join(';');
                 }
-                
+
                 return record;
             },
             setRecord: function(record) {
@@ -1681,7 +1681,7 @@ Ext.onReady( function() {
                     },
                     setOptionValues: function(optionArray) {
                         var options = [];
-                        
+
                         for (var i = 0; i < optionArray.length; i++) {
                             options.push({
                                 code: optionArray[i],
@@ -1693,7 +1693,7 @@ Ext.onReady( function() {
                         container.valueStore.loadData(options);
 
                         this.setValue(options);
-                    },                            
+                    },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
                             newVal = Ext.Array.from(newVal);
@@ -3651,7 +3651,7 @@ Ext.onReady( function() {
 			});
 
 			if (id) {
-				legendStore.proxy.url = gis.init.contextPath + '/api/mapLegendSets/' + id + '.json?fields=mapLegends[id,name,startValue,endValue,color]';                
+				legendStore.proxy.url = gis.init.contextPath + '/api/mapLegendSets/' + id + '.json?fields=mapLegends[id,name,startValue,endValue,color]';
 				legendStore.load();
 
 				legendSetName.setValue(legendSetStore.getById(id).data.name);
@@ -7350,7 +7350,7 @@ Ext.onReady( function() {
                 periodOffset = periodType.periodOffset,
                 generator = gis.init.periodGenerator,
                 periods;
-                
+
             if (type === 'relativePeriods') {
                 periodsByTypeStore.loadData(gis.conf.period.relativePeriods);
 
@@ -7359,20 +7359,20 @@ Ext.onReady( function() {
             }
             else {
                 periods = generator.generateReversedPeriods(type, type === 'Yearly' ? periodOffset - 5 : periodOffset);
-                
+
                 for (var i = 0; i < periods.length; i++) {
                     periods[i].id = periods[i].iso;
                 }
 
                 periodsByTypeStore.setIndex(periods);
                 periodsByTypeStore.loadData(periods);
-                
+
                 periodPrev.enable();
                 periodNext.enable();
             }
 
             period.selectFirst();
-        };            
+        };
 
 		periodType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'gis-combo',
@@ -9219,7 +9219,7 @@ Ext.onReady( function() {
                     success: function(r) {
                         init.systemInfo = Ext.decode(r.responseText);
                         init.contextPath = init.systemInfo.contextPath || init.contextPath;
-                        
+
                         // date, calendar
                         Ext.Ajax.request({
                             url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat',
@@ -9233,7 +9233,7 @@ Ext.onReady( function() {
                                     url: init.contextPath + '/api/me/user-account.json',
                                     success: function(r) {
                                         init.userAccount = Ext.decode(r.responseText);
-                                        
+
                                         // init
                                         var defaultKeyUiLocale = 'en',
                                             defaultKeyAnalysisDisplayProperty = 'name',
@@ -9252,7 +9252,7 @@ Ext.onReady( function() {
                                         namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
                                         dateFormat = init.systemInfo.dateFormat;
 
-                                        init.namePropertyUrl = namePropertyUrl;                                        
+                                        init.namePropertyUrl = namePropertyUrl;
 
                                         // calendar
                                         (function() {
