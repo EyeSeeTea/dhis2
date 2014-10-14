@@ -29,125 +29,139 @@ package org.hisp.dhis.dxf2.message;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.BaseIdentifiableObject;
+import com.google.common.base.Objects;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroup;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @JacksonXmlRootElement( localName = "message", namespace = DxfNamespaces.DXF_2_0 )
+@JsonPropertyOrder( {
+    "status", "code", "message", "devMessage", "response"
+} )
 public class Message
 {
-    private String subject;
+    /**
+     * Message status, currently two statuses are available: OK, ERROR.
+     *
+     * @see org.hisp.dhis.dxf2.message.MessageStatus
+     */
+    protected MessageStatus status;
 
-    private String text;
+    /**
+     * Internal code for this message. Should be used to help with third party clients which
+     * should not have to resort to string parsing of message to know what is happening.
+     */
+    protected Integer code;
 
-    private Set<OrganisationUnit> organisationUnits = new HashSet<>();
+    /**
+     * Non-technical message, should be simple and could possibly be used to display message
+     * to an end-user.
+     */
+    protected String message;
 
-    private Set<User> users = new HashSet<>();
+    /**
+     * Technical message that should explain as much details as possible, mainly to be used
+     * for debugging.
+     */
+    protected String devMessage;
 
-    private Set<UserGroup> userGroups = new HashSet<>();
+    /**
+     * When a simple text feedback is not enough, you can use this interface to implement your
+     * own message responses.
+     *
+     * @see org.hisp.dhis.dxf2.message.MessageResponse
+     */
+    protected MessageResponse response;
 
     public Message()
     {
+        this.status = MessageStatus.OK;
     }
 
-    public Message( String subject, String text )
+    public Message( MessageStatus status )
     {
-        this.subject = subject;
-        this.text = text;
+        this.status = status;
+    }
+
+    public Message( MessageStatus status, String message )
+    {
+        this.status = status;
+        this.message = message;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public MessageStatus getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus( MessageStatus status )
+    {
+        this.status = status;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( isAttribute = true )
+    public Integer getCode()
+    {
+        return code;
+    }
+
+    public void setCode( Integer code )
+    {
+        this.code = code;
     }
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getSubject()
+    public String getMessage()
     {
-        return subject;
+        return message;
     }
 
-    public void setSubject( String subject )
+    public void setMessage( String message )
     {
-        this.subject = subject;
+        this.message = message;
     }
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getText()
+    public String getDevMessage()
     {
-        return text;
+        return devMessage;
     }
 
-    public void setText( String text )
+    public void setDevMessage( String devMessage )
     {
-        this.text = text;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlElementWrapper( localName = "organisationUnits", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "organisationUnit", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<OrganisationUnit> getOrganisationUnits()
-    {
-        return organisationUnits;
-    }
-
-    public void setOrganisationUnits( Set<OrganisationUnit> organisationUnits )
-    {
-        this.organisationUnits = organisationUnits;
+        this.devMessage = devMessage;
     }
 
     @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<User> getUsers()
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public MessageResponse getResponse()
     {
-        return users;
+        return response;
     }
 
-    public void setUsers( Set<User> users )
+    public void setResponse( MessageResponse response )
     {
-        this.users = users;
-    }
-
-    @JsonProperty
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class } )
-    @JacksonXmlElementWrapper( localName = "userGroups", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "userGroup", namespace = DxfNamespaces.DXF_2_0 )
-    public Set<UserGroup> getUserGroups()
-    {
-        return userGroups;
-    }
-
-    public void setUserGroups( Set<UserGroup> userGroups )
-    {
-        this.userGroups = userGroups;
+        this.response = response;
     }
 
     @Override
     public String toString()
     {
-        return "Message{" +
-            "subject='" + subject + '\'' +
-            ", text='" + text + '\'' +
-            ", organisationUnits=" + organisationUnits +
-            ", users=" + users +
-            ", userGroups=" + userGroups +
-            '}';
+        return Objects.toStringHelper( this )
+            .add( "status", status )
+            .add( "code", code )
+            .add( "message", message )
+            .add( "devMessage", devMessage )
+            .add( "response", response )
+            .toString();
     }
 }

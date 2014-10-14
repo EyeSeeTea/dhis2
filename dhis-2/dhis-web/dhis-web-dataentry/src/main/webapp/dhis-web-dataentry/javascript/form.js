@@ -597,7 +597,8 @@ function loadForm()
 	                loadDataValues();
 	                dhis2.de.insertOptionSets();
 	            } );
-	        } else {
+	        } 
+	    	else {
                 dhis2.de.storageManager.formExistsRemotely( dataSetId ).done( function( value ) {
                     console.log( 'Loading form remotely: ' + dataSetId );
 
@@ -1287,6 +1288,8 @@ dhis2.de.getCurrentCategoryOptionsQueryValue = function()
 
 /**
  * Tests to see if a category option is valid during a period.
+ * 
+ * TODO proper date comparison
  */
 dhis2.de.optionValidWithinPeriod = function( option, period )
 {
