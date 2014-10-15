@@ -2,7 +2,7 @@ package org.hisp.dhis.validationrule.action.dataanalysis;
 
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataanalysis.DataAnalysisService;
-import org.hisp.dhis.dataanalysis.DefaultFollowupAnalysisService;
+import org.hisp.dhis.dataanalysis.FollowupAnalysisService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
@@ -23,9 +23,9 @@ public class GetFollowupAction
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private DefaultFollowupAnalysisService followupAnalysisService;
+    private FollowupAnalysisService followupAnalysisService;
 
-    public void setFollowupAnalysisService( DefaultFollowupAnalysisService followupAnalysisService )
+    public void setFollowupAnalysisService( FollowupAnalysisService followupAnalysisService )
     {
         this.followupAnalysisService = followupAnalysisService;
     }
