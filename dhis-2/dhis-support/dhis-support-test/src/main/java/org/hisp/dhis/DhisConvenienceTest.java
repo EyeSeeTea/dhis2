@@ -34,7 +34,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -56,7 +55,6 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
@@ -105,6 +103,7 @@ import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
+import org.joda.time.DateTime;
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -150,17 +149,14 @@ public abstract class DhisConvenienceTest
 
     static
     {
-        Calendar calendar = Calendar.getInstance();
-        calendar.clear();
-        calendar.set( 1970, Calendar.JANUARY, 1 );
-
-        date = calendar.getTime();
+        DateTime dateTime = new DateTime(1970, 1, 1, 0, 0);
+        date = dateTime.toDate();
     }
 
     // -------------------------------------------------------------------------
     // Convenience methods
     // -------------------------------------------------------------------------
-
+    
     /**
      * Creates a date.
      *
@@ -171,14 +167,8 @@ public abstract class DhisConvenienceTest
      */
     public static Date getDate( int year, int month, int day )
     {
-        final Calendar calendar = Calendar.getInstance();
-
-        calendar.clear();
-        calendar.set( Calendar.YEAR, year );
-        calendar.set( Calendar.MONTH, month - 1 );
-        calendar.set( Calendar.DAY_OF_MONTH, day );
-
-        return calendar.getTime();
+        DateTime dateTime = new DateTime(year, month, day, 0, 0);
+        return dateTime.toDate();
     }
 
     /**
@@ -189,12 +179,11 @@ public abstract class DhisConvenienceTest
      */
     public Date getDay( int day )
     {
-        final Calendar calendar = Calendar.getInstance();
+        DateTime dataTime = DateTime.now();
+        dataTime = dataTime.withTimeAtStartOfDay() ;
+        dataTime = dataTime.withDayOfYear( day );
 
-        calendar.clear();
-        calendar.set( Calendar.DAY_OF_YEAR, day );
-
-        return calendar.getTime();
+        return dataTime.toDate();
     }
 
     /**
@@ -610,21 +599,6 @@ public abstract class DhisConvenienceTest
         groupSet.setName( "DataElementGroupSet" + uniqueCharacter );
 
         return groupSet;
-    }
-
-    /**
-     * @param uniqueCharacter A unique character to identify the object.
-     */
-    public static DataDictionary createDataDictionary( char uniqueCharacter )
-    {
-        DataDictionary dictionary = new DataDictionary();
-        dictionary.setAutoFields();
-
-        dictionary.setName( "DataDictionary" + uniqueCharacter );
-        dictionary.setDescription( "Description" + uniqueCharacter );
-        dictionary.setRegion( "Region" + uniqueCharacter );
-
-        return dictionary;
     }
 
     /**

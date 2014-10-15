@@ -1,9 +1,8 @@
 package org.hisp.dhis.validationrule.action.dataanalysis;
 
 import com.opensymphony.xwork2.Action;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.dataanalysis.FollowupAnalysisService;
+import org.hisp.dhis.dataanalysis.DataAnalysisService;
+import org.hisp.dhis.dataanalysis.DefaultFollowupAnalysisService;
 import org.hisp.dhis.datavalue.DeflatedDataValue;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
@@ -18,19 +17,15 @@ import java.util.Collection;
 public class GetFollowupAction
     implements Action
 {
-    private static final int MAX_RESULTS = 500;
-
     private static final String KEY_ANALYSIS_DATA_VALUES = "analysisDataValues";
-
-    private static final Log log = LogFactory.getLog( GetFollowupAction.class );
 
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private FollowupAnalysisService followupAnalysisService;
+    private DefaultFollowupAnalysisService followupAnalysisService;
 
-    public void setFollowupAnalysisService( FollowupAnalysisService followupAnalysisService )
+    public void setFollowupAnalysisService( DefaultFollowupAnalysisService followupAnalysisService )
     {
         this.followupAnalysisService = followupAnalysisService;
     }
@@ -68,17 +63,17 @@ public class GetFollowupAction
     public String execute() throws Exception
     {
         OrganisationUnit orgUnit = selectionTreeManager.getReloadedSelectedOrganisationUnit();
-        int totalResults;
 
         if( orgUnit != null )
         {
-            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, MAX_RESULTS + 1 );
+            dataValues = followupAnalysisService.getFollowupDataValues( orgUnit, DataAnalysisService.MAX_OUTLIERS + 1 ); // +1 to detect overflow
 
-            maxExceeded = dataValues.size() > MAX_RESULTS;
+            maxExceeded = dataValues.size() > DataAnalysisService.MAX_OUTLIERS;
         }
         else
         {
             dataValues = new ArrayList<>();
+
             maxExceeded = false;
         }
 

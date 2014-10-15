@@ -63,12 +63,6 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.datadictionary.DataDictionaryStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
-    <property name="clazz" value="org.hisp.dhis.datadictionary.DataDictionary" />
-    <property name="sessionFactory" ref="sessionFactory" />
-    <property name="cacheable" value="true" />
-  </bean>
-
   <bean id="org.hisp.dhis.datavalue.DataValueStore" class="org.hisp.dhis.datavalue.hibernate.HibernateDataValueStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="periodStore" ref="org.hisp.dhis.period.PeriodStore" />
@@ -461,11 +455,6 @@
     <property name="minMaxDataElementStore" ref="org.hisp.dhis.minmax.MinMaxDataElementStore" />
   </bean>
 
-  <bean id="org.hisp.dhis.datadictionary.DataDictionaryService" class="org.hisp.dhis.datadictionary.DefaultDataDictionaryService">
-    <property name="dataDictionaryStore" ref="org.hisp.dhis.datadictionary.DataDictionaryStore" />
-    <property name="i18nService" ref="org.hisp.dhis.i18n.I18nService" />
-  </bean>
-
   <bean id="org.hisp.dhis.indicator.IndicatorService" class="org.hisp.dhis.indicator.DefaultIndicatorService">
     <property name="indicatorStore" ref="org.hisp.dhis.indicator.IndicatorStore" />
     <property name="indicatorTypeStore" ref="org.hisp.dhis.indicator.IndicatorTypeStore" />
@@ -567,7 +556,7 @@
     <property name="batchHandlerFactory" ref="batchHandlerFactory" />
   </bean>
 
-  <bean id="org.hisp.dhis.dataanalysis.FollowupAnalysisService" class="org.hisp.dhis.dataanalysis.FollowupAnalysisService">
+  <bean id="org.hisp.dhis.dataanalysis.FollowupAnalysisService" class="org.hisp.dhis.dataanalysis.DefaultFollowupAnalysisService">
     <property name="dataAnalysisStore" ref="org.hisp.dhis.dataanalysis.DataAnalysisStore" />
   </bean>
 
@@ -993,7 +982,6 @@
         <value>indicator</value>
         <value>indicatorgroup</value>
         <value>indicatorgroupset</value>
-        <value>datadictionary</value>
         <value>validationrule</value>
         <value>validationrulegroup</value>
         <value>dataset</value>
@@ -1081,10 +1069,6 @@
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler" class="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler">
     <property name="jdbcTemplate" ref="jdbcTemplate" />
-  </bean>
-
-  <bean id="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler" class="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler">
-    <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
   </bean>
 
   <bean id="org.hisp.dhis.dataelement.DataElementDeletionHandler" class="org.hisp.dhis.dataelement.DataElementDeletionHandler">
@@ -1253,7 +1237,6 @@
       <list>
         <list>
           <ref local="org.hisp.dhis.dataapproval.DataApprovalDeletionHandler" />
-          <ref local="org.hisp.dhis.datadictionary.DataDictionaryDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementGroupDeletionHandler" />
           <ref local="org.hisp.dhis.dataelement.DataElementCategoryOptionDeletionHandler" />
@@ -1301,7 +1284,6 @@
 
     <aop:aspect ref="deletionInterceptor">
       <aop:before pointcut="execution( * org.hisp.dhis.dataapproval.DataApprovalLevelService.delete*(..) )" method="intercept" />
-      <aop:before pointcut="execution( * org.hisp.dhis.datadictionary.DataDictionaryService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.dataelement.DataElementCategoryService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.dataset.DataSetService.deleteDataSet(..) )" method="intercept" />
@@ -1328,7 +1310,6 @@
     <!-- <aop:aspect ref="i18nTranslationInterceptor"> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataelement.DataElementCategoryService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.indicator.IndicatorService.get*(..)
-      )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.datadictionary.DataDictionaryService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.dataset.DataSetService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.organisationunit.OrganisationUnitService.get*(..)
       )" method="intercept" returning="idObject"/> <aop:after-returning pointcut="execution( * org.hisp.dhis.organisationunit.OrganisationUnitGroupService.get*(..)

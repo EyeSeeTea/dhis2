@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.SortOrder;
@@ -94,6 +96,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
 {    
+    private static final Log log = LogFactory.getLog( DefaultEventAnalyticsService.class );
+    
     private static final String ITEM_EVENT = "psi";
     private static final String ITEM_PROGRAM_STAGE = "ps";
     private static final String ITEM_EXECUTION_DATE = "eventdate";
@@ -173,12 +177,18 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
+        Timer t = new Timer().start();
+
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
+
+        log.debug( "Planned event query, got partitions: " + params.getPartitions() );
 
         for ( EventQueryParams query : queries )
         {
             analyticsManager.getAggregatedEventData( query, grid, maxLimit );
         }
+        
+        t.getTime( "Got aggregated events" );
         
         if ( maxLimit > 0 && grid.getHeight() > maxLimit )
         {
@@ -272,7 +282,7 @@ public class DefaultEventAnalyticsService
 
         params = queryPlanner.planEventQuery( params );
 
-        t.getSplitTime( "Planned query, got partitions: " + params.getPartitions() );
+        log.debug( "Planned event query, got partitions: " + params.getPartitions() );
 
         int count = 0;
 
@@ -285,7 +295,7 @@ public class DefaultEventAnalyticsService
     
             analyticsManager.getEvents( params, grid, queryPlanner.getMaxLimit() );
     
-            t.getTime( "Queried events, got: " + grid.getHeight() );
+            t.getTime( "Got events " + grid.getHeight() );
         }
         
         // ---------------------------------------------------------------------

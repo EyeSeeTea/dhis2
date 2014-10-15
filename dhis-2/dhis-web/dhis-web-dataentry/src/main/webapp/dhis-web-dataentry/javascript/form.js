@@ -451,7 +451,24 @@ function addEventListeners()
 
         if ( type == 'date' )
         {
-            dhis2.period.picker.createInstance( '#' + id );
+            // fake event, needed for valueBlur / valueFocus when using date-picker (it doesn't send the event object through).
+            var fakeEvent = {
+                target: {
+                    id: id
+                }
+            };
+
+            dhis2.period.picker.createInstance( '#' + id, false, {
+                onSelect: function() {
+                    saveVal( dataElementId, optionComboId, id );
+                },
+                onClose: function() {
+                    valueBlur(fakeEvent);
+                },
+                onShow: function() {
+                    valueFocus(fakeEvent);
+                }
+            } );
         }
     } );
     
@@ -1288,6 +1305,8 @@ dhis2.de.getCurrentCategoryOptionsQueryValue = function()
 
 /**
  * Tests to see if a category option is valid during a period.
+ * 
+ * TODO proper date comparison
  */
 dhis2.de.optionValidWithinPeriod = function( option, period )
 {

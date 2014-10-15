@@ -46,13 +46,13 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
+import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,8 @@ public class EnrollmentServiceTest
     private ProgramStage programStage;
 
     @Override
-    protected void setUpTest() throws Exception
+    protected void setUpTest() 
+        throws Exception
     {
         organisationUnitA = createOrganisationUnit( 'A' );
         organisationUnitB = createOrganisationUnit( 'B' );
@@ -226,7 +227,7 @@ public class EnrollmentServiceTest
         assertEquals( maleA.getUid(), enrollment.getTrackedEntityInstance() );
         assertEquals( programA.getUid(), enrollment.getProgram() );
 
-        Date MARCH_20_81 = new Cal( 81, 2, 20 ).time();
+        Date MARCH_20_81 = new DateTime( 81, 2, 20, 0, 0 ).toDate();
 
         enrollment.setDateOfEnrollment( MARCH_20_81 );
         enrollmentService.updateEnrollment( enrollment );
@@ -347,7 +348,6 @@ public class EnrollmentServiceTest
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
 
         TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( maleA );
-        // person.setName( "Changed Name" );
         trackedEntityInstanceService.updateTrackedEntityInstance( trackedEntityInstance );
 
         List<Enrollment> enrollments = enrollmentService.getEnrollments( trackedEntityInstance ).getEnrollments();

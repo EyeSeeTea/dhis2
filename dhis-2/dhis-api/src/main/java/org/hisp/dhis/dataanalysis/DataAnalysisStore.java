@@ -97,10 +97,9 @@ public interface DataAnalysisStore
     /**
      * Returns a collection of DeflatedDataValues which are marked for followup and
      * whose source OrganisationUnit is equal or subordinate to the given OrganisationUnit.
-     * The result set is limited by the given maximun.
      *
      * @param organisationUnit the source OrganisationUnit.
-     * @param limit the maximum number of DeflatedDataValues in the returned Collection.
+     * @param limit the maximum number of DeflatedDataValues to return.
      * @return a collection of DeflatedDataValues.
      */
     Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit );

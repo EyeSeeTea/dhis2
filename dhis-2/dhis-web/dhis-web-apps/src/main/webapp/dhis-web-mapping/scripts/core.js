@@ -697,45 +697,6 @@ Ext.onReady( function() {
 		selectHandlers.activate();
 	};
 
-	GIS.core.OrganisationUnitLevelStore = function(gis) {
-        var isPlugin = GIS.plugin && !GIS.app;
-
-		return Ext.create('Ext.data.Store', {
-			fields: ['id', 'name', 'level'],
-			proxy: {
-				type: isPlugin ? 'jsonp' : 'ajax',
-				url: gis.init.contextPath + '/api/organisationUnitLevels.' + (isPlugin ? 'jsonp' : 'json') + '?fields=id,name,level&paging=false',
-				reader: {
-					type: 'json',
-					root: 'organisationUnitLevels'
-				}
-			},
-			autoLoad: true,
-			cmp: [],
-			isLoaded: false,
-			loadFn: function(fn) {
-				if (this.isLoaded) {
-					fn.call();
-				}
-				else {
-					this.load(fn);
-				}
-			},
-			getRecordByLevel: function(level) {
-				return this.getAt(this.findExact('level', level));
-			},
-			listeners: {
-				load: function() {
-					if (!this.isLoaded) {
-						this.isLoaded = true;
-						gis.util.gui.combo.setQueryMode(this.cmp, 'local');
-					}
-					this.sort('level', 'ASC');
-				}
-			}
-		});
-	};
-
 	GIS.core.StyleMap = function(labelConfig) {
 		var defaults = {
 				fillOpacity: 1,
@@ -1347,10 +1308,13 @@ Ext.onReady( function() {
                 isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
+
                     for (var i = 0; i < items.length; i++) {
                         params += items[i].id;
                         params += i !== items.length - 1 ? ';' : '';
                     }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
                     return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params + '&viewClass=detailed';
                 }(),
@@ -1616,10 +1580,14 @@ Ext.onReady( function() {
                 isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
+
                     for (var i = 0; i < items.length; i++) {
                         params += items[i].id;
                         params += i !== items.length - 1 ? ';' : '';
                     }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
                     return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
@@ -1960,10 +1928,14 @@ Ext.onReady( function() {
                 isPlugin = GIS.plugin && !GIS.app,
                 url = function() {
                     var params = '?ou=ou:';
+
                     for (var i = 0; i < items.length; i++) {
                         params += items[i].id;
                         params += i !== items.length - 1 ? ';' : '';
                     }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
                     return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
                 }(),
                 success,
@@ -2057,6 +2029,9 @@ Ext.onReady( function() {
 				paramString += peItems[i].id;
 				paramString += i < peItems.length - 1 ? ';' : '';
 			}
+
+            // display property
+            paramString += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
 			success = function(json) {
 				var response = gis.api.response.Response(json),
@@ -3205,11 +3180,6 @@ Ext.onReady( function() {
 					return response;
 				}();
 			};
-		}());
-
-		// store
-		(function() {
-			store.organisationUnitLevels = GIS.core.OrganisationUnitLevelStore(gis);
 		}());
 
 		gis.api = api;

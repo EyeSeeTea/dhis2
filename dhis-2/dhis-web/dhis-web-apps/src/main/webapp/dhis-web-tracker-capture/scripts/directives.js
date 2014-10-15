@@ -17,60 +17,17 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
     };   
 })
 
-.directive('selectedOrgUnit', function() {
+.directive('selectedOrgUnit', function(storage) {
     return {        
         restrict: 'A',        
         link: function(scope, element, attrs){  
-            
-            //when tree has loaded, get selected orgunit - if there is any - and inform angular           
-            /*$(function() {                 
-                
-                var adapters = [];
-                var partial_adapters = [];
-
-                if( dhis2.ou.memoryOnly ) {
-                    adapters = [ dhis2.storage.InMemoryAdapter ];
-                    partial_adapters = [ dhis2.storage.InMemoryAdapter ];
-                } else {
-                    adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomLocalStorageAdapter, dhis2.storage.InMemoryAdapter ];
-                    partial_adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter ];
-                }
-
-                dhis2.ou.store = new dhis2.storage.Store({
-                    name: OU_STORE_NAME,
-                    objectStores: [
-                        {
-                            name: OU_KEY,
-                            adapters: adapters
-                        },
-                        {
-                            name: OU_PARTIAL_KEY,
-                            adapters: partial_adapters
-                        }
-                    ]
-                });
-
-                dhis2.ou.store.open().done( function() {
-                    selection.load();
-                    $( "#orgUnitTree" ).one( "ouwtLoaded", function() {
-                        var selected = selection.getSelected()[0];
-                        selection.getOrganisationUnit(selected).done(function(data){                            
-                            if( data ){
-                                scope.selectedOrgUnit = {id: selected, name: data[selected].n};
-                                scope.$apply();                                                              
-                            }                        
-                        });
-                    });
-                    
-                });
-            });*/
-            
+           
             //listen to user selection, and inform angular         
-            selection.setListenerFunction( organisationUnitSelected );
+            selection.setListenerFunction( organisationUnitSelected, true );
             selection.responseReceived();
             
-            function organisationUnitSelected( orgUnits, orgUnitNames ) {
-                scope.selectedOrgUnit = {id: orgUnits[0], name: orgUnitNames[0]};                    
+            function organisationUnitSelected( orgUnits, orgUnitNames ) {                
+                scope.selectedOrgUnit = {id: orgUnits[0], name: orgUnitNames[0]};
                 scope.$apply();
             }            
         }  
@@ -127,8 +84,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                 placeholder: "ui-state-highlight",
                 tolerance: "pointer",
                 handle: '.handle'
-            }).disableSelection();  
-            //scope.$apply();
+            });
         }  
     };
 })
@@ -185,23 +141,30 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
     };
 })
 
-.directive('ngDate', function(DateUtils, $rootScope) {
+.directive('d2Date', function(DateUtils, CalendarService, storage, $parse) {
     return {
         restrict: 'A',
         require: 'ngModel',        
-        link: function(scope, element, attrs, ctrl) {
-
-            var dateFormat = 'yy-mm-dd';
-            if($rootScope.keyDateFormat === 'dd-MM-yyyy'){
-                dateFormat = 'dd-mm-yy';
-            }
-            element.datepicker({
-                changeYear: true,
+        link: function(scope, element, attrs, ctrl) {    
+            
+            var calendarSetting = CalendarService.getSetting();            
+            var dateFormat = 'yyyy-mm-dd';
+            if(calendarSetting.keyDateFormat === 'dd-MM-yyyy'){
+                dateFormat = 'dd-mm-yyyy';
+            }            
+            
+            var minDate = $parse(attrs.minDate)(scope), 
+                maxDate = $parse(attrs.maxDate)(scope),
+                calendar = $.calendars.instance(calendarSetting.keyCalendar);
+            
+            element.calendarsPicker({
                 changeMonth: true,
                 dateFormat: dateFormat,
                 yearRange: '-120:+30',
-                minDate: attrs.minDate,
-                maxDate: attrs.maxDate,
+                minDate: minDate,
+                maxDate: maxDate,
+                calendar: calendar, 
+                renderer: $.calendars.picker.themeRollerRenderer,
                 onSelect: function(date) {
                     //scope.date = date;
                     ctrl.$setViewValue(date);
@@ -209,7 +172,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
                     scope.$apply();
                 }
             })
-            .change(function() {
+            .change(function() {                
                 var rawDate = this.value;
                 var convertedDate = DateUtils.format(this.value);
 
@@ -233,7 +196,7 @@ var trackerCaptureDirectives = angular.module('trackerCaptureDirectives', [])
 .directive('blurOrChange', function() {
     
     return function( scope, elem, attrs) {
-        elem.datepicker({
+        elem.calendarsPicker({
             onSelect: function() {
                 scope.$apply(attrs.blurOrChange);
                 $(this).change();                                        

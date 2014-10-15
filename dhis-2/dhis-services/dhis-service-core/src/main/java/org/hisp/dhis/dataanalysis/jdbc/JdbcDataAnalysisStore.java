@@ -247,7 +247,6 @@ public class JdbcDataAnalysisStore
     @Override
     public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit )
     {
-        // TODO Sanitize input
         final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
 
         String sql =
@@ -264,8 +263,8 @@ public class JdbcDataAnalysisStore
             "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
             "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
             "and dv.followup = true " +
-            "limit " + limit;
-
+            statementBuilder.limitRecord( 0, limit );
+        
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );
     }
 }
