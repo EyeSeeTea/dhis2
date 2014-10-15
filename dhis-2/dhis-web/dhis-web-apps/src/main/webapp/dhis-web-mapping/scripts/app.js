@@ -9253,7 +9253,7 @@ Ext.onReady( function() {
                                         dateFormat = init.systemInfo.dateFormat;
 
                                         init.namePropertyUrl = namePropertyUrl;
-console.log(init.userAccount.settings.keyAnalysisDisplayProperty, init.namePropertyUrl);
+
                                         // calendar
                                         (function() {
                                             var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
