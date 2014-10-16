@@ -30,9 +30,9 @@ package org.hisp.dhis.dxf2.events.enrollment;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.QueryItem;
 import org.hisp.dhis.common.QueryOperator;
@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -93,10 +94,10 @@ public abstract class AbstractEnrollmentService
 
     @Autowired
     private TrackedEntityAttributeValueService trackedEntityAttributeValueService;
-    
+
     @Autowired
     protected CurrentUserService currentUserService;
-    
+
     @Autowired
     private TrackedEntityCommentService commentService;
 
@@ -188,6 +189,24 @@ public abstract class AbstractEnrollmentService
     }
 
     @Override
+    public Enrollments getEnrollments( Program program, EnrollmentStatus status, OrganisationUnit organisationUnit, Date startDate, Date endDate )
+    {
+        List<ProgramInstance> programInstances = new ArrayList<>(
+            programInstanceService.getProgramInstancesByStatus( status.getValue(), program, Arrays.asList( organisationUnit.getId() ), startDate, endDate ) );
+
+        return getEnrollments( programInstances );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Program program, EnrollmentStatus status, List<OrganisationUnit> organisationUnits, Date startDate, Date endDate )
+    {
+        List<ProgramInstance> programInstances = new ArrayList<>(
+            programInstanceService.getProgramInstancesByStatus( status.getValue(), program, IdentifiableObjectUtils.getIdentifiers( organisationUnits ), startDate, endDate ) );
+
+        return getEnrollments( programInstances );
+    }
+
+    @Override
     public Enrollments getEnrollments( OrganisationUnit organisationUnit )
     {
         List<Program> programs = getProgramsWithRegistration();
@@ -211,6 +230,13 @@ public abstract class AbstractEnrollmentService
     public Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit )
     {
         return getEnrollments( programInstanceService.getProgramInstances( program, organisationUnit, 0, null ) );
+    }
+
+    @Override
+    public Enrollments getEnrollments( Program program, OrganisationUnit organisationUnit, Date startDate, Date endDate )
+    {
+        return getEnrollments(
+            programInstanceService.getProgramInstances( program, Arrays.asList( organisationUnit.getId() ), startDate, endDate, 0, Integer.MAX_VALUE ) );
     }
 
     @Override
@@ -348,7 +374,7 @@ public abstract class AbstractEnrollmentService
         updateAttributeValues( enrollment );
         programInstance.setFollowup( enrollment.getFollowup() );
         programInstanceService.updateProgramInstance( programInstance );
-        
+
         saveTrackedEntityComment( programInstance, enrollment );
 
         importSummary.setReference( programInstance.getUid() );
@@ -430,7 +456,7 @@ public abstract class AbstractEnrollmentService
 
         updateAttributeValues( enrollment );
         programInstanceService.updateProgramInstance( programInstance );
-        
+
         saveTrackedEntityComment( programInstance, enrollment );
 
         importSummary.setReference( enrollment.getEnrollment() );
@@ -548,7 +574,7 @@ public abstract class AbstractEnrollmentService
 
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
-        QueryItem queryItem = new QueryItem( attribute, QueryOperator.EQ, value, false );
+        QueryItem queryItem = new QueryItem( attribute, QueryOperator.EQ, value, attribute.isNumericType(), attribute.hasOptionSet() );
         params.addAttribute( queryItem );
 
         if ( attribute.getOrgunitScope() && attribute.getProgramScope() )
@@ -712,11 +738,11 @@ public abstract class AbstractEnrollmentService
 
         return importConflicts;
     }
-    
+
     private void saveTrackedEntityComment( ProgramInstance programInstance, Enrollment enrollment )
     {
         String storedBy = currentUserService.getCurrentUsername();
-        
+
         for ( Note note : enrollment.getNotes() )
         {
             TrackedEntityComment comment = new TrackedEntityComment();
