@@ -176,5 +176,19 @@
       <result name="error" type="velocity">/dhis-web-commons/ajax/jsonResponseError.vm</result>
     </action>
 
+    <!-- TODO Collate the two below? -->
+
+    <action name="joinUserGroup" class="org.hisp.dhis.dashboard.usergroup.action.ChangeUserGroupMembershipAction">
+      <param name="key">join</param>
+      <result name="success" type="velocity">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="error" type="velocity">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+    </action>
+
+    <action name="leaveUserGroup" class="org.hisp.dhis.dashboard.usergroup.action.ChangeUserGroupMembershipAction">
+      <param name="key">leave</param>
+      <result name="success" type="velocity">/dhis-web-commons/ajax/jsonResponseSuccess.vm</result>
+      <result name="error" type="velocity">/dhis-web-commons/ajax/jsonResponseError.vm</result>
+    </action>
+
   </package>
 </struts>

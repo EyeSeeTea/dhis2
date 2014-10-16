@@ -27,3 +27,28 @@ function showUserGroupDetails( context ) {
 function removeUserGroup( context ) {
   removeItem(context.id, context.name, i18n_confirm_delete, 'removeUserGroup.action');
 }
+
+function joinUserGroup( context ) {
+    // TODO pre-checks
+
+    jQuery.post( 'joinUserGroup.action', { userGroupUid: context.uid },
+      function( json ) {
+          if( json.response === "success" )
+          {
+            // TODO
+          }
+          else // Error
+          {
+
+          }
+      }
+    );
+}
+
+function leaveUserGroup( context ) {
+    jQuery.post( 'leaveUserGroup.action', { userGroupUid: context.uid },
+      function( json ) {
+        console.log( json )
+      }
+    );
+}
