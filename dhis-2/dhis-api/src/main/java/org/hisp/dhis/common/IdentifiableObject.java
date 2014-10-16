@@ -43,15 +43,11 @@ public interface IdentifiableObject
 {
     final String[] I18N_PROPERTIES = { "name" };
 
-    enum IdentifiableProperty
-    {
-        ID, UID, UUID, NAME, CODE
-    }
-
     int getId();
 
     String getUid();
 
+    @Override
     String getName();
 
     String getDisplayName();

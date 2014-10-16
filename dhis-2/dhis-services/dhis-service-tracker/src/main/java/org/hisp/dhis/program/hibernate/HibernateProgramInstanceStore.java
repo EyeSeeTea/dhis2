@@ -28,12 +28,6 @@ package org.hisp.dhis.program.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -51,6 +45,12 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+
 /**
  * @author Abyot Asalefew
  */
@@ -60,18 +60,20 @@ public class HibernateProgramInstanceStore
 {
     @Autowired
     private TrackedEntityInstanceReminderService reminderService;
-    
+
     // -------------------------------------------------------------------------
     // Implemented methods
     // -------------------------------------------------------------------------
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Program program )
     {
         return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Collection<Program> programs )
     {
         if ( programs == null || programs.isEmpty() )
@@ -83,7 +85,7 @@ public class HibernateProgramInstanceStore
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit )
     {
         if ( programs == null || programs.isEmpty() )
@@ -91,14 +93,14 @@ public class HibernateProgramInstanceStore
             return new ArrayList<>();
         }
 
-        return getCriteria( 
+        return getCriteria(
             Restrictions.in( "program", programs ) ).
             createAlias( "entityInstance", "entityInstance" ).
             add( Restrictions.eq( "entityInstance.organisationUnit", organisationUnit ) ).list();
     }
 
     @Override
-    @SuppressWarnings( "unchecked" )
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Collection<Program> programs, OrganisationUnit organisationUnit, int status )
     {
         if ( programs == null || programs.isEmpty() )
@@ -106,20 +108,22 @@ public class HibernateProgramInstanceStore
             return new ArrayList<>();
         }
 
-        return getCriteria( 
-            Restrictions.eq( "status", status ), 
+        return getCriteria(
+            Restrictions.eq( "status", status ),
             Restrictions.in( "program", programs ) ).
             createAlias( "entityInstance", "entityInstance" ).
             add( Restrictions.eq( "entityInstance.organisationUnit", organisationUnit ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Program program, Integer status )
     {
         return getCriteria( Restrictions.eq( "program", program ), Restrictions.eq( "status", status ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Collection<Program> programs, Integer status )
     {
         if ( programs == null || programs.isEmpty() )
@@ -130,29 +134,33 @@ public class HibernateProgramInstanceStore
         return getCriteria( Restrictions.in( "program", programs ), Restrictions.eq( "status", status ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( TrackedEntityInstance entityInstance, Integer status )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "status", status ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( TrackedEntityInstance entityInstance, Program program )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "program", program ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( TrackedEntityInstance entityInstance, Program program, Integer status )
     {
         return getCriteria( Restrictions.eq( "entityInstance", entityInstance ), Restrictions.eq( "program", program ),
             Restrictions.eq( "status", status ) ).list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Program program, OrganisationUnit organisationUnit, Integer min, Integer max )
     {
-        Criteria criteria = getCriteria( 
+        Criteria criteria = getCriteria(
             Restrictions.eq( "program", program ), Restrictions.isNull( "endDate" ) ).
             add( Restrictions.eq( "entityInstance.organisationUnit", organisationUnit ) ).
             createAlias( "entityInstance", "entityInstance" ).
@@ -162,16 +170,17 @@ public class HibernateProgramInstanceStore
         {
             criteria.setFirstResult( min );
         }
-        
+
         if ( max != null )
         {
             criteria.setMaxResults( max );
         }
-        
+
         return criteria.list();
     }
 
-    @SuppressWarnings( "unchecked" )
+    @Override
+    @SuppressWarnings("unchecked")
     public Collection<ProgramInstance> get( Program program, Collection<Integer> orgunitIds, Date startDate,
         Date endDate, Integer min, Integer max )
     {
@@ -184,31 +193,33 @@ public class HibernateProgramInstanceStore
         {
             criteria.setFirstResult( min );
         }
-        
+
         if ( max != null )
         {
             criteria.setMaxResults( max );
         }
-        
+
         return criteria.list();
     }
 
+    @Override
     public int count( Program program, OrganisationUnit organisationUnit )
     {
-        Number rs = (Number) getCriteria( 
+        Number rs = (Number) getCriteria(
             Restrictions.eq( "program", program ), Restrictions.isNull( "endDate" ) ).
             createAlias( "entityInstance", "entityInstance" ).
             add( Restrictions.eq( "entityInstance.organisationUnit", organisationUnit ) ).
             setProjection( Projections.rowCount() ).uniqueResult();
-        
+
         return rs != null ? rs.intValue() : 0;
     }
 
+    @Override
     public int count( Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate )
     {
-        Number rs = (Number) getCriteria( 
+        Number rs = (Number) getCriteria(
             Restrictions.eq( "program", program ),
-            Restrictions.ge( "enrollmentDate", startDate ), 
+            Restrictions.ge( "enrollmentDate", startDate ),
             Restrictions.le( "enrollmentDate", endDate ) ).
             createAlias( "entityInstance", "entityInstance" ).
             createAlias( "entityInstance.organisationUnit", "organisationUnit" ).
@@ -218,9 +229,10 @@ public class HibernateProgramInstanceStore
         return rs != null ? rs.intValue() : 0;
     }
 
+    @Override
     public int countByStatus( Integer status, Program program, Collection<Integer> orgunitIds, Date startDate, Date endDate )
     {
-        Number rs = (Number) getCriteria( 
+        Number rs = (Number) getCriteria(
             Restrictions.eq( "program", program ),
             Restrictions.between( "enrollmentDate", startDate, endDate ) ).
             createAlias( "entityInstance", "entityInstance" ).
@@ -232,11 +244,12 @@ public class HibernateProgramInstanceStore
         return rs != null ? rs.intValue() : 0;
     }
 
+    @Override
     @SuppressWarnings( "unchecked" )
     public Collection<ProgramInstance> getByStatus( Integer status, Program program, Collection<Integer> orgunitIds,
         Date startDate, Date endDate )
     {
-        return getCriteria( 
+        return getCriteria(
             Restrictions.eq( "program", program ),
             Restrictions.between( "enrollmentDate", startDate, endDate ) ).
             createAlias( "entityInstance", "entityInstance" ).
@@ -244,9 +257,36 @@ public class HibernateProgramInstanceStore
             add( Restrictions.in( "organisationUnit.id", orgunitIds ) ).
             add( Restrictions.eq( "status", status ) ).list();
     }
-    
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Collection<ProgramInstance> getByStatus( Integer status, Program program, Collection<Integer> orgunitIds,
+        Date startDate, Date endDate, Integer min, Integer max )
+    {
+        Criteria criteria = getCriteria(
+            Restrictions.eq( "program", program ),
+            Restrictions.between( "enrollmentDate", startDate, endDate ) ).
+            createAlias( "entityInstance", "entityInstance" ).
+            createAlias( "entityInstance.organisationUnit", "organisationUnit" ).
+            add( Restrictions.in( "organisationUnit.id", orgunitIds ) ).
+            add( Restrictions.eq( "status", status ) );
+
+        if ( min != null )
+        {
+            criteria.setFirstResult( min );
+        }
+
+        if ( max != null )
+        {
+            criteria.setMaxResults( max );
+        }
+
+        return criteria.list();
+    }
+
     //TODO from here this class must be rewritten
 
+    @Override
     public Collection<SchedulingProgramObject> getSendMesssageEvents( String dateToCompare )
     {
         String sql = " ( " + sendMessageToTrackedEntityInstanceSql( dateToCompare ) + " ) ";
@@ -260,7 +300,7 @@ public class HibernateProgramInstanceStore
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
 
         Collection<SchedulingProgramObject> schedulingProgramObjects = new HashSet<>();
-        
+
         if ( rs.getRow() > 0 )
         {
             while ( rs.next() )
@@ -311,7 +351,7 @@ public class HibernateProgramInstanceStore
                 schedulingProgramObjects.add( schedulingProgramObject );
             }
         }
-        
+
         return schedulingProgramObjects;
     }
 
