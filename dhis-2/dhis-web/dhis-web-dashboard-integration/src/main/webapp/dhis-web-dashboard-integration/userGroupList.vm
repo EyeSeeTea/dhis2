@@ -54,6 +54,8 @@
                   <td>$encoder.htmlEncode( $!userGroup.displayName )
                     #if( $isCurrentUserMemberMap.get( $userGroup ) )
                     <i style="margin-left: 5px;" class="fa fa-user"></i>
+                    #else
+                      <i style="margin-left: 5px; visibility: hidden;" class="fa fa-user"></i>
                     #end
                   </td>
               </tr>
