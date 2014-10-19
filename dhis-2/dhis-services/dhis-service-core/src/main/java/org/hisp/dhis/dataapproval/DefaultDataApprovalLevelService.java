@@ -41,6 +41,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -73,6 +75,13 @@ public class DefaultDataApprovalLevelService
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
     {
         this.organisationUnitService = organisationUnitService;
+    }
+
+    private DataElementCategoryService categoryService;
+
+    public void setCategoryService( DataElementCategoryService categoryService )
+    {
+        this.categoryService = categoryService;
     }
 
     private CurrentUserService currentUserService;
@@ -154,15 +163,15 @@ public class DefaultDataApprovalLevelService
         return null;
     }
 
-    public DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, Set<DataElementCategoryOption> options )
+    public DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         Set<CategoryOptionGroupSet> cogSets = null;
 
-        if ( options != null && !options.isEmpty() )
+        if ( attributeOptionCombo != null && attributeOptionCombo != categoryService.getDefaultDataElementCategoryOptionCombo()  )
         {
             cogSets = new HashSet<>();
 
-            for ( DataElementCategoryOption option : options )
+            for ( DataElementCategoryOption option : attributeOptionCombo.getCategoryOptions() )
             {
                 if ( option.getGroupSets() != null )
                 {

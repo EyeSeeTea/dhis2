@@ -161,6 +161,9 @@ public class DefaultDataApprovalService
 
         for ( DataApproval da : checkedList )
         {
+            System.out.println("addDataApproval( " + da.getDataApprovalLevel().getLevel() + ", " + da.getDataSet().getName() + ", "
+                    + da.getPeriod().getName() + ", " + da.getOrganisationUnit().getName() + ", " + da.getAttributeOptionCombo().getName() + " )" );
+
             dataApprovalStore.addDataApproval( da );
         }
     }
@@ -258,12 +261,20 @@ public class DefaultDataApprovalService
 
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        DataApproval da = new DataApproval( null, dataSet, period, organisationUnit, attributeOptionCombo, false, null, null );
-
         Set<DataElementCategoryOption> attributeCategoryOptions = ( attributeOptionCombo == null || attributeOptionCombo.equals( categoryService.getDefaultDataElementCategoryOptionCombo() ) )
                 ? null : attributeOptionCombo.getCategoryOptions();
 
         DataApprovalStatus status;
+
+        DataApprovalLevel dal = dataApprovalLevelService.getLowestDataApprovalLevel( organisationUnit, attributeOptionCombo );
+
+        if ( dal == null )
+        {
+            status = new DataApprovalStatus( DataApprovalState.UNAPPROVABLE, null, null );
+            return status;
+        }
+
+        DataApproval da = new DataApproval( dal, dataSet, period, organisationUnit, attributeOptionCombo, false, null, null );
 
         try
         {
@@ -285,21 +296,7 @@ public class DefaultDataApprovalService
     {
         DataApprovalStatusAndPermissions permissions = new DataApprovalStatusAndPermissions();
 
-        DataApprovalLevel dal = null;
-
-        if ( categoryOptionGroups != null && !categoryOptionGroups.isEmpty() )
-        {
-            dal = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit, categoryOptionGroups );
-        }
-        else if ( attributeCategoryOptions != null && !attributeCategoryOptions.isEmpty() )
-        {
-            Set<CategoryOptionGroup> groups = new HashSet<>();
-
-            for ( DataElementCategoryOption option : attributeCategoryOptions )
-            {
-                groups.addAll( option.getGroups() );
-            }
-        }
+        DataApprovalLevel dal = dataApprovalLevelService.getHighestDataApprovalLevel( organisationUnit, categoryOptionGroups );
 
         if ( dal == null )
         {
@@ -307,9 +304,9 @@ public class DefaultDataApprovalService
             return permissions;
         }
 
-        DataApproval da = new DataApproval( dal, null, period, organisationUnit, null, false, null, null );
+        DataApproval da = new DataApproval( dal, dataSet, period, organisationUnit, null, false, null, null );
 
-        DataApprovalStatus status = doGetDataApprovalStatus( makeApprovalsList( da, asSet( dataSet) , categoryOptionGroups, attributeCategoryOptions, true ), da );
+        DataApprovalStatus status = doGetDataApprovalStatus( makeApprovalsList( da, asSet( dataSet ) , categoryOptionGroups, attributeCategoryOptions, true ), da );
 
         permissions.setDataApprovalStatus( status );
 
@@ -486,6 +483,8 @@ public class DefaultDataApprovalService
         if ( da.getAttributeOptionCombo() == null )
         {
             da.setAttributeOptionCombo( categoryService.getDefaultDataElementCategoryOptionCombo() );
+
+            System.out.println( "getDefaultDataElementCategoryOptionCombo() -> " + ( da.getAttributeOptionCombo() == null ? "(null)" : da.getAttributeOptionCombo().getName() ) );
         }
 
         DataApprovalLevel userLevel = dataApprovalLevelService.getUserApprovalLevel( da.getOrganisationUnit(), includeDataViewOrgUnits );
@@ -493,29 +492,9 @@ public class DefaultDataApprovalService
         System.out.println( "userLevel: " + ( userLevel == null ? "(null)" : userLevel.getLevel() ) );
         log.info( "userLevel: " + ( userLevel == null ? "(null)" : userLevel.getLevel() ) );
 
-        if ( userLevel != null )
+        if ( userLevel != null && userLevel.getLevel() <= da.getDataApprovalLevel().getLevel() )
         {
-            if ( userLevel.equals( da.getDataApprovalLevel() ) )
-            {
-                return da;
-            }
-            else if ( da.getDataApprovalLevel() == null )
-            {
-                da.setDataApprovalLevel( userLevel );
-
-                return da;
-            }
-            else if ( userLevel.getLevel() < da.getDataApprovalLevel().getLevel() )
-            {
-                User user = currentUserService.getCurrentUser();
-
-                boolean mayApproveAtLowerLevels = user.getUserCredentials().isAuthorized( DataApproval.AUTH_APPROVE_LOWER_LEVELS );
-
-                if ( mayApproveAtLowerLevels )
-                {
-                    return da;
-                }
-            }
+            return da;
         }
 
         throw new UserCannotAccessApprovalLevelException();
