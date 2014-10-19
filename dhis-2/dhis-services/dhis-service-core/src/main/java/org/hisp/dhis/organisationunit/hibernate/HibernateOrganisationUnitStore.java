@@ -89,6 +89,16 @@ public class HibernateOrganisationUnitStore
     }
 
     @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<OrganisationUnit> getByNames( Collection<String> names )
+    {
+        Query query = getQuery( "from OrganisationUnit where name in :names" );
+        query.setParameterList( "names", names );
+
+        return query.list();
+    }
+
+    @Override
     @SuppressWarnings("unchecked")
     public Collection<OrganisationUnit> getAllOrganisationUnitsByStatus( boolean active )
     {
@@ -188,6 +198,7 @@ public class HibernateOrganisationUnitStore
         return q.list();
     }
 
+    @Override
     public Map<String, Set<String>> getOrganisationUnitDataSetAssocationMap()
     {
         final String sql = "select ds.uid as ds_uid, ou.uid as ou_uid from datasetsource d " +
@@ -198,6 +209,7 @@ public class HibernateOrganisationUnitStore
 
         jdbcTemplate.query( sql, new RowCallbackHandler()
         {
+            @Override
             public void processRow( ResultSet rs ) throws SQLException
             {
                 String dataSetId = rs.getString( "ds_uid" );
@@ -209,6 +221,7 @@ public class HibernateOrganisationUnitStore
         return map;
     }
 
+    @Override
     public Set<Integer> getOrganisationUnitIdsWithoutData()
     {
         final String sql = "select organisationunitid from organisationunit ou where not exists (" +
@@ -218,6 +231,7 @@ public class HibernateOrganisationUnitStore
 
         jdbcTemplate.query( sql, new RowCallbackHandler()
         {
+            @Override
             public void processRow( ResultSet rs ) throws SQLException
             {
                 units.add( rs.getInt( 1 ) );
@@ -260,6 +274,7 @@ public class HibernateOrganisationUnitStore
         return criteria.list();
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Collection<OrganisationUnit> getWithinCoordinateArea( double[] box )
     {
@@ -277,6 +292,7 @@ public class HibernateOrganisationUnitStore
     // OrganisationUnitHierarchy
     // -------------------------------------------------------------------------
 
+    @Override
     public OrganisationUnitHierarchy getOrganisationUnitHierarchy()
     {
         final String sql = "select organisationunitid, parentid from organisationunit";
@@ -284,6 +300,7 @@ public class HibernateOrganisationUnitStore
         return new OrganisationUnitHierarchy( jdbcTemplate.query( sql, new OrganisationUnitRelationshipRowMapper() ) );
     }
 
+    @Override
     public void updateOrganisationUnitParent( int organisationUnitId, int parentId )
     {
         Timestamp now = new Timestamp( new Date().getTime() );

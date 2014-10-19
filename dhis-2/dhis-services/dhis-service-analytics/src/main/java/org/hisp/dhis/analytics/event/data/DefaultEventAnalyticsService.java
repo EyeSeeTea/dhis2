@@ -83,9 +83,9 @@ import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ListUtils;
-import org.hisp.dhis.system.util.Timer;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -93,7 +93,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
-{    
+{
     private static final String ITEM_EVENT = "psi";
     private static final String ITEM_PROGRAM_STAGE = "ps";
     private static final String ITEM_EXECUTION_DATE = "eventdate";
@@ -143,6 +143,7 @@ public class DefaultEventAnalyticsService
     // TODO order event analytics tables on execution date to avoid default
     // TODO sorting in queries
 
+    @Override
     public Grid getAggregatedEventData( EventQueryParams params )
     {
         securityManager.decideAccess( params );
@@ -173,12 +174,18 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
+        Timer t = new Timer().start().disablePrint();
+
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
+
+        t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
 
         for ( EventQueryParams query : queries )
         {
             analyticsManager.getAggregatedEventData( query, grid, maxLimit );
         }
+        
+        t.getTime( "Got aggregated events" );
         
         if ( maxLimit > 0 && grid.getHeight() > maxLimit )
         {
@@ -225,6 +232,7 @@ public class DefaultEventAnalyticsService
         return grid;
     }
     
+    @Override
     public Grid getAggregatedEventData( AnalyticalObject object, I18nFormat format )
     {
         EventQueryParams params = getFromAnalyticalObject( (EventAnalyticalObject) object, format );
@@ -232,6 +240,7 @@ public class DefaultEventAnalyticsService
         return getAggregatedEventData( params );
     }
 
+    @Override
     public Grid getEvents( EventQueryParams params )
     {
         securityManager.decideAccess( params );
@@ -261,7 +270,7 @@ public class DefaultEventAnalyticsService
 
         for ( QueryItem item : params.getItems() )
         {
-            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString() ) );
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true, item.isOptionSet() ) );
         }
 
         // ---------------------------------------------------------------------
@@ -272,7 +281,7 @@ public class DefaultEventAnalyticsService
 
         params = queryPlanner.planEventQuery( params );
 
-        t.getSplitTime( "Planned query, got partitions: " + params.getPartitions() );
+        t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
 
         int count = 0;
 
@@ -285,7 +294,7 @@ public class DefaultEventAnalyticsService
     
             analyticsManager.getEvents( params, grid, queryPlanner.getMaxLimit() );
     
-            t.getTime( "Queried events, got: " + grid.getHeight() );
+            t.getTime( "Got events " + grid.getHeight() );
         }
         
         // ---------------------------------------------------------------------
@@ -315,6 +324,7 @@ public class DefaultEventAnalyticsService
         return grid;
     }
 
+    @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, boolean skipMeta, boolean hierarchyMeta, SortOrder sortOrder, 
         Integer limit, boolean uniqueInstances, I18nFormat format )
@@ -330,6 +340,7 @@ public class DefaultEventAnalyticsService
         return params;
     }
 
+    @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
         boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, Integer page, Integer pageSize, I18nFormat format )
@@ -444,6 +455,7 @@ public class DefaultEventAnalyticsService
         return params;
     }
 
+    @Override
     public EventQueryParams getFromAnalyticalObject( EventAnalyticalObject object, I18nFormat format )
     {        
         EventQueryParams params = new EventQueryParams();
@@ -552,19 +564,30 @@ public class DefaultEventAnalyticsService
             }
         }
 
-        for ( QueryItem item : params.getItems() )
-        {
-            map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
-        }
-
-        for ( QueryItem item : params.getItemFilters() )
-        {
-            map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
-        }
-
+        map.putAll( getUidNameMap( params.getItems(), params.getDisplayProperty() ) );
+        map.putAll( getUidNameMap( params.getItemFilters(), params.getDisplayProperty() ) );
         map.putAll( getUidNameMap( params.getDimensions(), params.isHierarchyMeta(), params.getDisplayProperty() ) );
         map.putAll( getUidNameMap( params.getFilters(), params.isHierarchyMeta(), params.getDisplayProperty() ) );
 
+        return map;
+    }
+    
+    private Map<String, String> getUidNameMap( List<QueryItem> queryItems, DisplayProperty displayProperty )
+    {
+        Map<String, String> map = new HashMap<>();
+        
+        for ( QueryItem item : queryItems )
+        {
+            if ( DisplayProperty.SHORTNAME.equals( displayProperty ) )
+            {
+                map.put( item.getItem().getUid(), item.getItem().getDisplayShortName() );
+            }
+            else
+            {
+                map.put( item.getItem().getUid(), item.getItem().getDisplayName() );
+            }
+        }
+        
         return map;
     }
 
@@ -620,14 +643,14 @@ public class DefaultEventAnalyticsService
 
         if ( de != null ) //TODO check if part of program
         {
-            return new QueryItem( de, de.isNumericType() );
+            return new QueryItem( de, de.isNumericType(), de.hasOptionSet() );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
         if ( at != null )
         {
-            return new QueryItem( at, at.isNumericType() );
+            return new QueryItem( at, at.isNumericType(), at.hasOptionSet() );
         }
 
         throw new IllegalQueryException( "Item identifier does not reference any item part of the program: " + item );

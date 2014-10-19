@@ -30,7 +30,7 @@ package org.hisp.dhis.dxf2.datavalueset;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.apache.commons.lang.StringUtils.trimToNull;
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UUID;
+import static org.hisp.dhis.common.IdentifiableProperty.UUID;
 import static org.hisp.dhis.system.notification.NotificationLevel.ERROR;
 import static org.hisp.dhis.system.notification.NotificationLevel.INFO;
 import static org.hisp.dhis.system.util.ConversionUtils.wrap;
@@ -55,8 +55,7 @@ import org.amplecode.staxwax.factory.XMLFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty;
+import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.dataelement.DataElement;
@@ -141,6 +140,11 @@ public class DefaultDataValueSetService
 
     @Autowired
     private Notifier notifier;
+
+    public void setBatchHandlerFactory( BatchHandlerFactory batchHandlerFactory )
+    {
+        this.batchHandlerFactory = batchHandlerFactory; // Test purpose
+    }
 
     //--------------------------------------------------------------------------
     // DataValueSet implementation
@@ -380,7 +384,7 @@ public class DefaultDataValueSetService
                 complexNode.setComment( "Data element: " + label );
             }
 
-            if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase()
+            if ( IdentifiableProperty.CODE.toString().toLowerCase()
                 .equals( deScheme.toLowerCase() ) )
             {
                 SimpleNode simpleNode = complexNode.addChild( new SimpleNode( "dataElement", dataElement.getCode() ) );
@@ -400,7 +404,7 @@ public class DefaultDataValueSetService
 
             if ( organisationUnit != null )
             {
-                if ( IdentifiableObject.IdentifiableProperty.CODE.toString().toLowerCase().equals( ouScheme.toLowerCase() ) )
+                if ( IdentifiableProperty.CODE.toString().toLowerCase().equals( ouScheme.toLowerCase() ) )
                 {
                     simpleNode = complexNode.addChild( new SimpleNode( "orgUnit", organisationUnit.getCode() == null ? "" : organisationUnit.getCode() ) );
                     simpleNode.setAttribute( true );
@@ -419,26 +423,31 @@ public class DefaultDataValueSetService
         return collectionNode;
     }
 
+    @Override
     public ImportSummary saveDataValueSet( InputStream in )
     {
         return saveDataValueSet( in, ImportOptions.getDefaultImportOptions(), null );
     }
 
+    @Override
     public ImportSummary saveDataValueSetJson( InputStream in )
     {
         return saveDataValueSetJson( in, ImportOptions.getDefaultImportOptions(), null );
     }
 
+    @Override
     public ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions )
     {
         return saveDataValueSet( in, importOptions, null );
     }
 
+    @Override
     public ImportSummary saveDataValueSetJson( InputStream in, ImportOptions importOptions )
     {
         return saveDataValueSetJson( in, importOptions, null );
     }
 
+    @Override
     public ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions, TaskId id )
     {
         try
@@ -454,6 +463,7 @@ public class DefaultDataValueSetService
         }
     }
 
+    @Override
     public ImportSummary saveDataValueSetJson( InputStream in, ImportOptions importOptions, TaskId id )
     {
         try
@@ -469,6 +479,7 @@ public class DefaultDataValueSetService
         }
     }
 
+    @Override
     public ImportSummary saveDataValueSetCsv( InputStream in, ImportOptions importOptions, TaskId id )
     {
         try
@@ -484,6 +495,7 @@ public class DefaultDataValueSetService
         }
     }
 
+    @Override
     public ImportSummary saveDataValueSetPdf( InputStream in, ImportOptions importOptions, TaskId id )
     {
         try
@@ -508,15 +520,15 @@ public class DefaultDataValueSetService
 
         importOptions = importOptions != null ? importOptions : ImportOptions.getDefaultImportOptions();
 
+        IdentifiableProperty idScheme = dataValueSet.getIdSchemeProperty() != null ?
+            dataValueSet.getIdSchemeProperty() : importOptions.getIdScheme();
+                    
         IdentifiableProperty dataElementIdScheme = dataValueSet.getDataElementIdSchemeProperty() != null ?
             dataValueSet.getDataElementIdSchemeProperty() : importOptions.getDataElementIdScheme();
-            
+                
         IdentifiableProperty orgUnitIdScheme = dataValueSet.getOrgUnitIdSchemeProperty() != null ?
             dataValueSet.getOrgUnitIdSchemeProperty() : importOptions.getOrgUnitIdScheme();
             
-        IdentifiableProperty idScheme = dataValueSet.getIdSchemeProperty() != null ?
-            dataValueSet.getIdSchemeProperty() : importOptions.getIdScheme();
-        
         log.info( "Data element scheme: " + dataElementIdScheme + ", org unit scheme: " + orgUnitIdScheme + ", scheme: " + idScheme );
             
         boolean dryRun = dataValueSet.getDryRun() != null ? dataValueSet.getDryRun() : importOptions.isDryRun();
@@ -575,6 +587,8 @@ public class DefaultDataValueSetService
         // Data values
         // ---------------------------------------------------------------------
 
+        Date now = new Date();
+        
         notifier.notify( id, "Importing data values" );
         log.info( "importing data values" );
 
@@ -668,8 +682,8 @@ public class DefaultDataValueSetService
                 internalValue.setStoredBy( dataValue.getStoredBy() );
             }
 
-            internalValue.setCreated( parseDate( dataValue.getCreated() ) );
-            internalValue.setLastUpdated( parseDate( dataValue.getLastUpdated() ) );
+            internalValue.setCreated( dataValue.hasCreated() ? parseDate( dataValue.getCreated() ) : now );
+            internalValue.setLastUpdated( dataValue.hasLastUpdated() ? parseDate( dataValue.getLastUpdated() ) : now );
             internalValue.setComment( trimToNull( dataValue.getComment() ) );
             internalValue.setFollowup( dataValue.getFollowup() );
 

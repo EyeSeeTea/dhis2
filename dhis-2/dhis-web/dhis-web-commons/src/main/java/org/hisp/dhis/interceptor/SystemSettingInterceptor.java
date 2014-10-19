@@ -30,6 +30,7 @@ package org.hisp.dhis.interceptor;
 
 import com.opensymphony.xwork2.ActionInvocation;
 import com.opensymphony.xwork2.interceptor.Interceptor;
+
 import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -75,21 +76,25 @@ public class SystemSettingInterceptor
     // AroundInterceptor implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public void destroy()
     {
     }
 
+    @Override
     public void init()
     {
     }
 
+    @Override
     public String intercept( ActionInvocation invocation )
         throws Exception
     {
         Map<String, Object> map = new HashMap<>();
 
-        map.put( KEY_CALENDAR, systemSettingManager.getSystemSetting( KEY_CALENDAR, DEFAULT_CALENDAR ) );
-        map.put( KEY_DATE_FORMAT, systemSettingManager.getSystemSetting( KEY_DATE_FORMAT, DEFAULT_DATE_FORMAT ) );
+        map.put( CalendarService.KEY_CALENDAR, calendarService.getSystemCalendarKey() );
+        map.put( CalendarService.KEY_DATE_FORMAT, calendarService.getSystemDateFormatKey() );
+        
         map.put( DATE_FORMAT, calendarService.getSystemDateFormat() );
         map.put( KEY_CACHE_STRATEGY, systemSettingManager.getSystemSetting( KEY_CACHE_STRATEGY, DEFAULT_CACHE_STRATEGY ) );
         map.put( KEY_ANALYTICS_MAX_LIMIT, systemSettingManager.getSystemSetting( KEY_ANALYTICS_MAX_LIMIT, DEFAULT_ANALYTICS_MAX_LIMIT ) );
@@ -120,6 +125,7 @@ public class SystemSettingInterceptor
         map.put( KEY_ANALYTICS_MAINTENANCE_MODE, systemSettingManager.getSystemSetting( KEY_ANALYTICS_MAINTENANCE_MODE, false ) );
         map.put( KEY_DATABASE_SERVER_CPUS, systemSettingManager.getSystemSetting( KEY_DATABASE_SERVER_CPUS, DEFAULT_DATABASE_SERVER_CPUS ) );
         map.put( KEY_HELP_PAGE_LINK, systemSettingManager.getSystemSetting( KEY_HELP_PAGE_LINK, DEFAULT_HELP_PAGE_LINK ) );
+        map.put( KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, systemSettingManager.getSystemSetting( KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, false ) );
         map.put( SYSPROP_PORTAL, defaultIfEmpty( System.getProperty( SYSPROP_PORTAL ), String.valueOf( false ) ) );
 
         invocation.getStack().push( map );

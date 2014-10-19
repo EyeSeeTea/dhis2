@@ -38,6 +38,7 @@ trackerCapture.controller('DashboardController',
     $scope.selectedTeiId = ($location.search()).tei; 
     $scope.selectedProgramId = ($location.search()).program; 
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+
     $scope.selectedProgram;    
     $scope.selectedTei;    
     
@@ -71,8 +72,7 @@ trackerCapture.controller('DashboardController',
                 });
             });            
         });      
-    }
-    
+    }    
     
     //listen for any change to program selection
     //it is possible that such could happen during enrollment.
@@ -123,6 +123,5 @@ trackerCapture.controller('DashboardController',
 
         modalInstance.result.then(function () {
         });
-    };   
-
+    };
 });

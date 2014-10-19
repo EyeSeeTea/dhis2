@@ -41,8 +41,6 @@ import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -71,7 +69,6 @@ import org.hisp.dhis.importexport.ImportType;
 import org.hisp.dhis.importexport.Importer;
 import org.hisp.dhis.importexport.importer.ChartImporter;
 import org.hisp.dhis.importexport.importer.ConstantImporter;
-import org.hisp.dhis.importexport.importer.DataDictionaryImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryComboImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryImporter;
 import org.hisp.dhis.importexport.importer.DataElementCategoryOptionImporter;
@@ -103,9 +100,6 @@ import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.jdbc.batchhandler.CategoryCategoryOptionAssociationBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.CategoryComboCategoryAssociationBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.ConstantBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.DataDictionaryBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.DataDictionaryDataElementBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.DataDictionaryIndicatorBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementCategoryBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementCategoryComboBatchHandler;
@@ -204,13 +198,6 @@ public class DefaultImportObjectManager
         this.dataElementService = dataElementService;
     }
 
-    private DataDictionaryService dataDictionaryService;
-
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
-    {
-        this.dataDictionaryService = dataDictionaryService;
-    }
-
     private IndicatorService indicatorService;
 
     public void setIndicatorService( IndicatorService indicatorService )
@@ -299,6 +286,7 @@ public class DefaultImportObjectManager
     // ImportObjectManager implementation
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void importConstants()
     {
@@ -321,6 +309,7 @@ public class DefaultImportObjectManager
         log.info( "Imported Constants" );
     }
 
+    @Override
     @Transactional
     public void importCategoryOptions()
     {
@@ -344,6 +333,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementCategoryOptions" );
     }
 
+    @Override
     @Transactional
     public void importCategories()
     {
@@ -366,6 +356,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementCategories" );
     }
 
+    @Override
     @Transactional
     public void importCategoryCombos()
     {
@@ -389,6 +380,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementCategoryCombos" );
     }
 
+    @Override
     @Transactional
     public void importCategoryOptionCombos() // TODO reuse importer
     {
@@ -444,6 +436,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementCategoryOptionCombos" );
     }
 
+    @Override
     @Transactional
     public void importCategoryCategoryOptionAssociations()
     {
@@ -456,6 +449,7 @@ public class DefaultImportObjectManager
         log.info( "Imported CategoryCategoryOption associations" );
     }
 
+    @Override
     @Transactional
     public void importCategoryComboCategoryAssociations()
     {
@@ -468,6 +462,7 @@ public class DefaultImportObjectManager
         log.info( "Imported CategoryComboCategory associations" );
     }
 
+    @Override
     @Transactional
     public void importDataElements()
     {
@@ -494,6 +489,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElements" );
     }
 
+    @Override
     @Transactional
     public void importDataElementGroups()
     {
@@ -516,6 +512,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementGroups" );
     }
 
+    @Override
     @Transactional
     public void importDataElementGroupMembers()
     {
@@ -528,6 +525,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementGroup members" );
     }
 
+    @Override
     @Transactional
     public void importDataElementGroupSets()
     {
@@ -550,6 +548,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementGroupSets" );
     }
 
+    @Override
     @Transactional
     public void importDataElementGroupSetMembers()
     {
@@ -562,6 +561,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataElementGroupSet members" );
     }
 
+    @Override
     @Transactional
     public void importIndicatorTypes()
     {
@@ -584,6 +584,7 @@ public class DefaultImportObjectManager
         log.info( "Imported IndicatorTypes" );
     }
 
+    @Override
     @Transactional
     public void importIndicators()
     {
@@ -610,6 +611,7 @@ public class DefaultImportObjectManager
         log.info( "Imported Indicators" );
     }
 
+    @Override
     @Transactional
     public void importIndicatorGroups()
     {
@@ -632,6 +634,7 @@ public class DefaultImportObjectManager
         log.info( "Imported IndicatorGroups" );
     }
 
+    @Override
     @Transactional
     public void importIndicatorGroupMembers()
     {
@@ -644,6 +647,7 @@ public class DefaultImportObjectManager
         log.info( "Imported IndicatorGroup members" );
     }
 
+    @Override
     @Transactional
     public void importIndicatorGroupSets()
     {
@@ -666,6 +670,7 @@ public class DefaultImportObjectManager
         log.info( "Imported IndicatorGroupSets" );
     }
 
+    @Override
     @Transactional
     public void importIndicatorGroupSetMembers()
     {
@@ -677,53 +682,8 @@ public class DefaultImportObjectManager
 
         log.info( "Imported IndicatorGroupSet members" );
     }
-
-    @Transactional
-    public void importDataDictionaries()
-    {
-        BatchHandler<DataDictionary> batchHandler = batchHandlerFactory.createBatchHandler(
-            DataDictionaryBatchHandler.class ).init();
-
-        Collection<ImportObject> importObjects = importObjectStore.getImportObjects( DataDictionary.class );
-
-        Importer<DataDictionary> importer = new DataDictionaryImporter( batchHandler, dataDictionaryService );
-
-        for ( ImportObject importObject : importObjects )
-        {
-            importer.importObject( (DataDictionary) importObject.getObject(), params );
-        }
-
-        batchHandler.flush();
-
-        importObjectStore.deleteImportObjects( DataDictionary.class );
-
-        log.info( "Imported DataDictionaries" );
-    }
-
-    @Transactional
-    public void importDataDictionaryDataElements()
-    {
-        BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-            .createBatchHandler( DataDictionaryDataElementBatchHandler.class );
-
-        importGroupMemberAssociation( batchHandler, GroupMemberType.DATADICTIONARY_DATAELEMENT, objectMappingGenerator
-            .getDataDictionaryMapping( false ), objectMappingGenerator.getDataElementMapping( false ) );
-
-        log.info( "Imported DataDictionary DataElements" );
-    }
-
-    @Transactional
-    public void importDataDictionaryIndicators()
-    {
-        BatchHandler<GroupMemberAssociation> batchHandler = batchHandlerFactory
-            .createBatchHandler( DataDictionaryIndicatorBatchHandler.class );
-
-        importGroupMemberAssociation( batchHandler, GroupMemberType.DATADICTIONARY_INDICATOR, objectMappingGenerator
-            .getDataDictionaryMapping( false ), objectMappingGenerator.getIndicatorMapping( false ) );
-
-        log.info( "Imported DataDictionary Indicators" );
-    }
-
+    
+    @Override
     @Transactional
     public void importDataSets()
     {
@@ -745,6 +705,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataSets" );
     }
 
+    @Override
     @Transactional
     public void importDataSetMembers()
     {
@@ -757,6 +718,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataSet members" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnits()
     {
@@ -780,6 +742,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnits" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitRelationships()
     {
@@ -811,6 +774,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnit relationships" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitGroups()
     {
@@ -834,6 +798,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnitGroups" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitGroupMembers()
     {
@@ -846,6 +811,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganissationUnitGroup members" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitGroupSets()
     {
@@ -868,6 +834,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnitGroupSets" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitGroupSetMembers()
     {
@@ -881,6 +848,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnitGroupSet members" );
     }
 
+    @Override
     @Transactional
     public void importOrganisationUnitLevels()
     {
@@ -898,6 +866,7 @@ public class DefaultImportObjectManager
         log.info( "Imported OrganisationUnitLevels" );
     }
 
+    @Override
     @Transactional
     public void importDataSetSourceAssociations()
     {
@@ -910,6 +879,7 @@ public class DefaultImportObjectManager
         log.info( "Imported DataSet Source associations" );
     }
 
+    @Override
     @Transactional
     public void importValidationRules()
     {
@@ -927,6 +897,7 @@ public class DefaultImportObjectManager
         log.info( "Imported ValidationRules" );
     }
 
+    @Override
     @Transactional
     public void importPeriods()
     {
@@ -948,6 +919,7 @@ public class DefaultImportObjectManager
         log.info( "Imported Periods" );
     }
 
+    @Override
     @Transactional
     public void importReports()
     {
@@ -965,6 +937,7 @@ public class DefaultImportObjectManager
         log.info( "Imported Reports" );
     }
 
+    @Override
     @Transactional
     public void importReportTables()
     {
@@ -987,6 +960,7 @@ public class DefaultImportObjectManager
         log.info( "Imported ReportTables" );
     }
 
+    @Override
     @Transactional
     public void importCharts()
     {
@@ -1004,6 +978,7 @@ public class DefaultImportObjectManager
         log.info( "Imported Reports" );
     }
 
+    @Override
     @Transactional
     public void importDataValues()
     {

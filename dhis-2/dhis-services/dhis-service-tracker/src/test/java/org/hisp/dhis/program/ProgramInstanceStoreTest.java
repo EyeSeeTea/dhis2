@@ -31,21 +31,18 @@ package org.hisp.dhis.program;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -115,7 +112,7 @@ public class ProgramInstanceStoreTest
         orgunitIds.add( idA );
         orgunitIds.add( idB );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
 
         TrackedEntityInstanceReminder reminderA = new TrackedEntityInstanceReminder( "A", 0,
             "Test program message template", TrackedEntityInstanceReminder.ENROLLEMENT_DATE_TO_COMPARE,
@@ -134,21 +131,23 @@ public class ProgramInstanceStoreTest
         programService.addProgram( programA );
 
         ProgramStage stageA = new ProgramStage( "StageA", programA );
+        stageA.setSortOrder( 1 );
         programStageService.saveProgramStage( stageA );
 
         ProgramStage stageB = new ProgramStage( "StageB", programA );
+        stageB.setSortOrder( 2 );
         programStageService.saveProgramStage( stageB );
 
-        List<ProgramStage> programStages = new ArrayList<>();
+        Set<ProgramStage> programStages = new HashSet<>();
         programStages.add( stageA );
         programStages.add( stageB );
         programA.setProgramStages( programStages );
         programService.updateProgram( programA );
 
-        programB = createProgram( 'B', new ArrayList<ProgramStage>(), organisationUnitA );
+        programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnitA );
         programService.addProgram( programB );
 
-        programC = createProgram( 'C', new ArrayList<ProgramStage>(), organisationUnitA );
+        programC = createProgram( 'C', new HashSet<ProgramStage>(), organisationUnitA );
         programService.addProgram( programC );
 
         entityInstanceA = createTrackedEntityInstance( 'A', organisationUnitA );
@@ -157,14 +156,14 @@ public class ProgramInstanceStoreTest
         TrackedEntityInstance entityInstanceB = createTrackedEntityInstance( 'B', organisationUnitB );
         entityInstanceService.addTrackedEntityInstance( entityInstanceB );
 
-        Calendar calIncident = Calendar.getInstance();
-        PeriodType.clearTimeOfDay( calIncident );
-        calIncident.add( Calendar.DATE, -70 );
-        incidenDate = calIncident.getTime();
-
-        Calendar calEnrollment = Calendar.getInstance();
-        PeriodType.clearTimeOfDay( calEnrollment );
-        enrollmentDate = calEnrollment.getTime();
+        DateTime testDate1 = DateTime.now();
+        testDate1.withTimeAtStartOfDay();
+        testDate1 = testDate1.minusDays( 70 );
+        incidenDate = testDate1.toDate();
+        
+        DateTime testDate2 = DateTime.now();
+        testDate2.withTimeAtStartOfDay();
+        enrollmentDate = testDate2.toDate();
 
         programInstanceA = new ProgramInstance( enrollmentDate, incidenDate, entityInstanceA, programA );
         programInstanceA.setUid( "UID-A" );

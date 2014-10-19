@@ -64,6 +64,7 @@ public class HibernateDataApprovalStore
     // DataApproval
     // -------------------------------------------------------------------------
 
+    @Override
     public void addDataApproval( DataApproval dataApproval )
     {
         dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
@@ -71,6 +72,7 @@ public class HibernateDataApprovalStore
         save( dataApproval );
     }
 
+    @Override
     public void updateDataApproval( DataApproval dataApproval )
     {
         dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
@@ -78,6 +80,7 @@ public class HibernateDataApprovalStore
         update ( dataApproval );
     }
     
+    @Override
     public void deleteDataApproval( DataApproval dataApproval )
     {
         dataApproval.setPeriod( periodService.reloadPeriod( dataApproval.getPeriod() ) );
@@ -85,6 +88,7 @@ public class HibernateDataApprovalStore
         delete( dataApproval );
     }
 
+    @Override
     public DataApproval getDataApproval( DataApprovalLevel dataApprovalLevel, DataSet dataSet, Period period,
         OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {

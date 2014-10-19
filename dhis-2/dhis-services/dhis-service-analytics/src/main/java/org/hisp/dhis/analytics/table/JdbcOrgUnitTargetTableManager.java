@@ -55,16 +55,19 @@ public class JdbcOrgUnitTargetTableManager
         return tables;
     }
 
+    @Override
     public String validState()
     {
         return null;
     }    
     
+    @Override
     public String getTableName()
     {
         return ORGUNIT_TARGET_TABLE_NAME;
     }
 
+    @Override
     public void createTable( AnalyticsTable table )
     {
         final String tableName = table.getTempTableName();
@@ -75,7 +78,11 @@ public class JdbcOrgUnitTargetTableManager
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns( table ) )
+        List<String[]> columns = getDimensionColumns( table );
+        
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -89,6 +96,7 @@ public class JdbcOrgUnitTargetTableManager
         executeSilently( sqlCreate );
     }
 
+    @Override
     @Async
     public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
@@ -100,6 +108,8 @@ public class JdbcOrgUnitTargetTableManager
             {
                 break taskLoop;
             }
+
+            final String tableName = table.getTempTableName();
             
             String sql = "insert into " + table.getTempTableName() + " (";
     
@@ -122,14 +132,13 @@ public class JdbcOrgUnitTargetTableManager
                 "left join _orgunitstructure ous on ougm.organisationunitid=ous.organisationunitid " +
                 "left join _organisationunitgroupsetstructure ougs on ougm.organisationunitid=ougs.organisationunitid";            
 
-            log.info( "Populate SQL: "+ sql );
-            
-            jdbcTemplate.execute( sql );
+            populateAndLog( sql, tableName );
         }
         
         return null;
     }
 
+    @Override
     public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<>();
@@ -151,16 +160,19 @@ public class JdbcOrgUnitTargetTableManager
         return columns;
     }
 
+    @Override
     public Date getEarliestData()
     {
         return null; // Not relevant
     }
 
+    @Override
     public Date getLatestData()
     {
         return null; // Not relevant
     }
 
+    @Override
     @Async
     public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {

@@ -30,6 +30,40 @@ Ext.onReady( function() {
 			}
 		});
 
+        Ext.override(Ext.grid.Scroller, {
+            afterRender: function() {
+                var me = this;
+                me.callParent();
+                me.mon(me.scrollEl, 'scroll', me.onElScroll, me);
+                Ext.cache[me.el.id].skipGarbageCollection = true;
+                // add another scroll event listener to check, if main listeners is active
+                Ext.EventManager.addListener(me.scrollEl, 'scroll', me.onElScrollCheck, me);
+                // ensure this listener doesn't get removed
+                Ext.cache[me.scrollEl.id].skipGarbageCollection = true;
+            },
+
+            // flag to check, if main listeners is active
+            wasScrolled: false,
+
+            // synchronize the scroller with the bound gridviews
+            onElScroll: function(event, target) {
+                this.wasScrolled = true; // change flag -> show that listener is alive
+                this.fireEvent('bodyscroll', event, target);
+            },
+
+            // executes just after main scroll event listener and check flag state
+            onElScrollCheck: function(event, target, options) {
+                var me = this;
+
+                if (!me.wasScrolled) {
+                    // Achtung! Event listener was disappeared, so we'll add it again
+                    me.mon(me.scrollEl, 'scroll', me.onElScroll, me);
+                }
+                me.wasScrolled = false; // change flag to initial value
+            }
+
+        });
+
 		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
@@ -410,7 +444,7 @@ Ext.onReady( function() {
                 if (items.length) {
                     record.filter = 'IN:' + items.join(';');
                 }
-                
+
                 return record;
             },
             setRecord: function(record) {
@@ -602,7 +636,7 @@ Ext.onReady( function() {
                     },
                     setOptionValues: function(optionArray) {
                         var options = [];
-                        
+
                         for (var i = 0; i < optionArray.length; i++) {
                             options.push({
                                 code: optionArray[i],
@@ -614,7 +648,7 @@ Ext.onReady( function() {
                         container.valueStore.loadData(options);
 
                         this.setValue(options);
-                    },                            
+                    },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
                             newVal = Ext.Array.from(newVal);
@@ -1618,9 +1652,10 @@ Ext.onReady( function() {
     AggregateOptionsWindow = function() {
 		var showColTotals,
             showRowTotals,
-			showSubTotals,
-			hideEmptyRows,
+			showColSubTotals,
+            showRowSubTotals,
 			showDimensionLabels,
+			hideEmptyRows,
             limit,
             countType,
             aggregationType,
@@ -1639,6 +1674,7 @@ Ext.onReady( function() {
 			comboboxWidth = 280,
             comboBottomMargin = 1,
             checkboxBottomMargin = 2,
+            separatorTopMargin = 6,
 			window;
 
         showColTotals = Ext.create('Ext.form.field.Checkbox', {
@@ -1653,20 +1689,26 @@ Ext.onReady( function() {
 			checked: true
 		});
 
-		showSubTotals = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_subtotals,
+		showColSubTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_col_subtotals,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showRowSubTotals = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_row_subtotals,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
+			checked: true
+		});
+
+		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
+			boxLabel: NS.i18n.show_dimension_labels,
+			style: 'margin-top:' + separatorTopMargin + 'px; margin-bottom:' + comboBottomMargin + 'px',
 			checked: true
 		});
 
 		hideEmptyRows = Ext.create('Ext.form.field.Checkbox', {
 			boxLabel: NS.i18n.hide_empty_rows,
-			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
-            checked: true
-		});
-
-		showDimensionLabels = Ext.create('Ext.form.field.Checkbox', {
-			boxLabel: NS.i18n.show_dimension_labels,
 			style: 'margin-bottom:' + checkboxBottomMargin + 'px',
 		});
 
@@ -1675,7 +1717,8 @@ Ext.onReady( function() {
             sortOrder: 1,
             topLimit: 10,
             comboboxWidth: comboboxWidth,
-            comboBottomMargin: comboBottomMargin
+            comboBottomMargin: comboBottomMargin,
+            style: 'margin-top:' + separatorTopMargin + 'px'
         });
 
         countType = Ext.create('Ext.form.field.ComboBox', {
@@ -1770,11 +1813,12 @@ Ext.onReady( function() {
 			bodyStyle: 'border:0 none',
 			style: 'margin-left:14px',
 			items: [
-				showColTotals,
-                showRowTotals,
-				showSubTotals,
-				hideEmptyRows,
+                showColTotals,
+				showRowTotals,
+				showColSubTotals,
+                showRowSubTotals,
                 showDimensionLabels,
+				hideEmptyRows,
                 limit,
                 countType
                 //aggregationType
@@ -1802,7 +1846,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.table_options,
-			bodyStyle: 'background-color:#fff; padding:3px',
+			bodyStyle: 'background-color:#fff; padding:2px',
 			closeAction: 'hide',
 			autoShow: true,
 			modal: true,
@@ -1810,9 +1854,11 @@ Ext.onReady( function() {
 			hideOnBlur: true,
 			getOptions: function() {
 				return {
-					showColTotals: showColTotals.getValue(),
 					showRowTotals: showRowTotals.getValue(),
-					showSubTotals: showSubTotals.getValue(),
+                    showColTotals: showColTotals.getValue(),
+					showColSubTotals: showColSubTotals.getValue(),
+                    showRowSubTotals: showRowSubTotals.getValue(),
+                    showDimensionLabels: showDimensionLabels.getValue(),
 					hideEmptyRows: hideEmptyRows.getValue(),
                     sortOrder: limit.getSortOrder(),
                     topLimit: limit.getTopLimit(),
@@ -1826,15 +1872,16 @@ Ext.onReady( function() {
 				};
 			},
 			setOptions: function(layout) {
-				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
 				showRowTotals.setValue(Ext.isBoolean(layout.showRowTotals) ? layout.showRowTotals : true);
-				showSubTotals.setValue(Ext.isBoolean(layout.showSubTotals) ? layout.showSubTotals : true);
+				showColTotals.setValue(Ext.isBoolean(layout.showColTotals) ? layout.showColTotals : true);
+				showColSubTotals.setValue(Ext.isBoolean(layout.showColSubTotals) ? layout.showColSubTotals : true);
+				showRowSubTotals.setValue(Ext.isBoolean(layout.showRowSubTotals) ? layout.showRowSubTotals : true);
+				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				hideEmptyRows.setValue(Ext.isBoolean(layout.hideEmptyRows) ? layout.hideEmptyRows : false);
 				limit.setValues(layout.sortOrder, layout.topLimit);
 				countType.setValue(Ext.isString(layout.countType) ? layout.countType : 'events');
                 //aggregationType.setValue(Ext.isString(layout.aggregationType) ? layout.aggregationType : 'default');
 				showHierarchy.setValue(Ext.isBoolean(layout.showHierarchy) ? layout.showHierarchy : false);
-				showDimensionLabels.setValue(Ext.isBoolean(layout.showDimensionLabels) ? layout.showDimensionLabels : true);
 				displayDensity.setValue(Ext.isString(layout.displayDensity) ? layout.displayDensity : 'normal');
 				fontSize.setValue(Ext.isString(layout.fontSize) ? layout.fontSize : 'normal');
 				digitGroupSeparator.setValue(Ext.isString(layout.digitGroupSeparator) ? layout.digitGroupSeparator : 'space');
@@ -1850,7 +1897,7 @@ Ext.onReady( function() {
 			items: [
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-top:2px; margin-bottom:6px; margin-left:3px',
+					style: 'margin-top:4px; margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.data
 				},
 				data,
@@ -1859,7 +1906,7 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:3px',
+					style: 'margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.organisation_units
 				},
 				organisationUnits,
@@ -1868,7 +1915,7 @@ Ext.onReady( function() {
 				},
 				{
 					bodyStyle: 'border:0 none; color:#222; font-size:12px; font-weight:bold',
-					style: 'margin-bottom:6px; margin-left:3px',
+					style: 'margin-bottom:6px; margin-left:5px',
 					html: NS.i18n.style
 				},
 				style
@@ -1912,14 +1959,15 @@ Ext.onReady( function() {
 					//}
 
 					// cmp
-					w.showColTotals = showColTotals;
+                    w.showColTotals = showColTotals;
 					w.showRowTotals = showRowTotals;
-					w.showSubTotals = showSubTotals;
+					w.showColSubTotals = showColSubTotals
+					w.showRowSubTotals = showRowSubTotals;
+                    w.showDimensionLabels = showDimensionLabels;
 					w.hideEmptyRows = hideEmptyRows;
                     w.limit = limit;
 					w.countType = countType;
 					w.showHierarchy = showHierarchy;
-                    w.showDimensionLabels = showDimensionLabels;
 					w.displayDensity = displayDensity;
 					w.fontSize = fontSize;
 					w.digitGroupSeparator = digitGroupSeparator;
@@ -2215,8 +2263,11 @@ Ext.onReady( function() {
 				favorite.colTotals = favorite.showColTotals;
 				delete favorite.showColTotals;
 
-				favorite.subtotals = favorite.showSubTotals;
-				delete favorite.showSubTotals;
+				favorite.rowSubTotals = favorite.showRowSubTotals;
+				delete favorite.showRowSubTotals;
+
+				favorite.colSubTotals = favorite.showColSubTotals;
+				delete favorite.showColSubTotals;
 
 				delete favorite.type;
 				delete favorite.parentGraphMap;
@@ -4059,7 +4110,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:0 0 0 8px',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4082,6 +4133,11 @@ Ext.onReady( function() {
                     xtype: 'checkbox',
                     relativePeriodId: 'LAST_12_WEEKS',
                     boxLabel: NS.i18n.last_12_weeks
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'LAST_52_WEEKS',
+                    boxLabel: NS.i18n.last_52_weeks
                 }
             ]
         });
@@ -4091,7 +4147,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4112,6 +4168,11 @@ Ext.onReady( function() {
                 },
                 {
                     xtype: 'checkbox',
+                    relativePeriodId: 'LAST_6_MONTHS',
+                    boxLabel: NS.i18n.last_6_months
+                },
+                {
+                    xtype: 'checkbox',
                     relativePeriodId: 'LAST_12_MONTHS',
                     boxLabel: NS.i18n.last_12_months,
                     checked: true
@@ -4124,7 +4185,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4151,7 +4212,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:5px 0 0 8px',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4178,7 +4239,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:5px 0 0',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4205,7 +4266,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:5px 0 0',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -4232,7 +4293,7 @@ Ext.onReady( function() {
             bodyStyle: 'border-style:none; padding:5px 0 0 8px',
             defaults: {
                 labelSeparator: '',
-                style: 'margin-bottom:2px',
+                style: 'margin-bottom:0',
                 listeners: intervalListeners
             },
             items: [
@@ -5731,7 +5792,7 @@ Ext.onReady( function() {
 				if (selected.length) {
 					var array = [];
 					Ext.Array.each(selected, function(item) {
-						array.push({id: item, name: a.store.getAt(a.store.findExact('id', item)).data.name});
+                        array.push(a.store.getAt(a.store.findExact('id', item)));
 					});
 					s.store.add(array);
 				}
@@ -5739,10 +5800,7 @@ Ext.onReady( function() {
 			};
 
 			web.multiSelect.selectAll = function(a, s, isReverse) {
-				var array = [];
-				a.store.each( function(r) {
-					array.push({id: r.data.id, name: r.data.name});
-				});
+                var array = a.store.getRange();
 				if (isReverse) {
 					array.reverse();
 				}
@@ -6220,8 +6278,11 @@ Ext.onReady( function() {
 						config.showColTotals = config.colTotals;
 						delete config.colTotals;
 
-						config.showSubTotals = config.subtotals;
-						delete config.subtotals;
+						config.showColSubTotals = config.colSubTotals;
+						delete config.colSubTotals;
+
+						config.showRowSubTotals = config.rowSubTotals;
+						delete config.rowSubTotals;
 
 						if (config.startDate) {
 							config.startDate = config.startDate.substr(0,10);
@@ -7165,177 +7226,187 @@ Ext.onReady( function() {
 			success: function(r) {
 				init.contextPath = Ext.decode(r.responseText).activities.dhis.href;
 
-                // user-account
+                // system info
                 Ext.Ajax.request({
-                    url: init.contextPath + '/api/me/user-account.json',
+                    url: init.contextPath + '/api/system/info.json',
                     success: function(r) {
-                        init.userAccount = Ext.decode(r.responseText);
+                        init.systemInfo = Ext.decode(r.responseText);
+                        init.contextPath = init.systemInfo.contextPath || init.contextPath;
 
-                        // system info
+                        // date, calendar
                         Ext.Ajax.request({
-                            url: init.contextPath + '/api/system/info.json',
+                            url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat',
                             success: function(r) {
-                                init.systemInfo = Ext.decode(r.responseText);
+                                var systemSettings = Ext.decode(r.responseText);
+                                init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
+                                init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                                // init
-                                var defaultKeyUiLocale = 'en',
-                                    defaultKeyAnalysisDisplayProperty = 'name',
-                                    namePropertyUrl,
-                                    contextPath,
-                                    keyUiLocale,
-                                    dateFormat;
-
-                                init.contextPath = init.systemInfo.contextPath || init.contextPath;
-                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
-                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
-                                init.systemInfo.dateFormat = init.systemInfo.dateFormat || 'yyyy-mm-dd';
-
-                                contextPath = init.contextPath;
-                                keyUiLocale = init.userAccount.settings.keyUiLocale;
-                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
-                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
-                                dateFormat = init.systemInfo.dateFormat;
-
-                                init.namePropertyUrl = namePropertyUrl;
-
-                                // calendar
-                                (function() {
-                                    var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
-                                        defaultCalendarId = 'gregorian',
-                                        calendarIdMap = {'iso8601': defaultCalendarId},
-                                        calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
-                                        calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
-                                        calendarScriptUrl,
-                                        createGenerator;
-
-                                    // calendar
-                                    createGenerator = function() {
-                                        init.calendar = $.calendars.instance(calendarId);
-                                        init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
-                                    };
-
-                                    if (Ext.Array.contains(calendarIds, calendarId)) {
-                                        calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
-
-                                        Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
-                                            Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                                        });
-                                    }
-                                    else {
-                                        Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                                    }
-                                }());
-
-                                // i18n
-                                requests.push({
-                                    url: 'i18n/' + keyUiLocale + '.properties',
+                                // user-account
+                                Ext.Ajax.request({
+                                    url: init.contextPath + '/api/me/user-account.json',
                                     success: function(r) {
-                                        NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                        init.userAccount = Ext.decode(r.responseText);
 
-                                        if (keyUiLocale !== defaultKeyUiLocale) {
-                                            Ext.Ajax.request({
-                                                url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                success: function(r) {
-                                                    Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
-                                                },
-                                                callback: fn
-                                            })
-                                        }
-                                        else {
-                                            fn();
-                                        }
-                                    },
-                                    failure: function() {
-                                        var onFailure = function() {
-                                            alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                        };
+                                        // init
+                                        var defaultKeyUiLocale = 'en',
+                                            defaultKeyAnalysisDisplayProperty = 'name',
+                                            namePropertyUrl,
+                                            contextPath,
+                                            keyUiLocale,
+                                            dateFormat;
 
-                                        if (keyUiLocale !== defaultKeyUiLocale) {
-                                            Ext.Ajax.request({
-                                                url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                success: function(r) {
-                                                    console.log('No translations found for system locale (' + keyUiLocale + ').');
-                                                    NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                },
-                                                failure: function() {
+                                        init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                        init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+
+                                        // local vars
+                                        contextPath = init.contextPath;
+                                        keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                        keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                        namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                        dateFormat = init.systemInfo.dateFormat;
+
+                                        init.namePropertyUrl = namePropertyUrl;
+
+                                        // calendar
+                                        (function() {
+                                            var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
+                                                defaultCalendarId = 'gregorian',
+                                                calendarIdMap = {'iso8601': defaultCalendarId},
+                                                calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
+                                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
+                                                calendarScriptUrl,
+                                                createGenerator;
+
+                                            // calendar
+                                            createGenerator = function() {
+                                                init.calendar = $.calendars.instance(calendarId);
+                                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
+                                            };
+
+                                            if (Ext.Array.contains(calendarIds, calendarId)) {
+                                                calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+
+                                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
+                                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                                });
+                                            }
+                                            else {
+                                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                            }
+                                        }());
+
+                                        // i18n
+                                        requests.push({
+                                            url: 'i18n/' + keyUiLocale + '.properties',
+                                            success: function(r) {
+                                                NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+
+                                                if (keyUiLocale !== defaultKeyUiLocale) {
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                        },
+                                                        callback: fn
+                                                    })
+                                                }
+                                                else {
+                                                    fn();
+                                                }
+                                            },
+                                            failure: function() {
+                                                var onFailure = function() {
+                                                    alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                };
+
+                                                if (keyUiLocale !== defaultKeyUiLocale) {
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
+                                                        success: function(r) {
+                                                            console.log('No translations found for system locale (' + keyUiLocale + ').');
+                                                            NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                        },
+                                                        failure: function() {
+                                                            onFailure();
+                                                        },
+                                                        callback: fn
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
                                                     onFailure();
-                                                },
-                                                callback: fn
-                                            });
-                                        }
-                                        else {
-                                            fn();
-                                            onFailure();
-                                        }
-                                    }
-                                });
-
-                                // root nodes
-                                requests.push({
-                                    url: contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']',
-                                    success: function(r) {
-                                        init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
-                                        fn();
-                                    }
-                                });
-
-                                // organisation unit levels
-                                requests.push({
-                                    url: contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
-                                    success: function(r) {
-                                        init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
-
-                                        if (!init.organisationUnitLevels.length) {
-                                            alert('No organisation unit levels');
-                                        }
-
-                                        fn();
-                                    }
-                                });
-
-                                // user orgunits and children
-                                requests.push({
-                                    url: contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']&paging=false',
-                                    success: function(r) {
-                                        var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
-                                            ou = [],
-                                            ouc = [];
-
-                                        if (organisationUnits.length) {
-                                            for (var i = 0, org; i < organisationUnits.length; i++) {
-                                                org = organisationUnits[i];
-
-                                                ou.push(org.id);
-
-                                                if (org.children) {
-                                                    ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
                                                 }
                                             }
+                                        });
 
-                                            init.user = init.user || {};
-                                            init.user.ou = ou;
-                                            init.user.ouc = ouc;
-                                        }
-                                        else {
-                                            alert('User is not assigned to any organisation units');
-                                        }
+                                        // root nodes
+                                        requests.push({
+                                            url: contextPath + '/api/organisationUnits.json?userDataViewFallback=true&paging=false&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']',
+                                            success: function(r) {
+                                                init.rootNodes = Ext.decode(r.responseText).organisationUnits || [];
+                                                fn();
+                                            }
+                                        });
 
-                                        fn();
+                                        // organisation unit levels
+                                        requests.push({
+                                            url: contextPath + '/api/organisationUnitLevels.json?fields=id,name,level&paging=false',
+                                            success: function(r) {
+                                                init.organisationUnitLevels = Ext.decode(r.responseText).organisationUnitLevels || [];
+
+                                                if (!init.organisationUnitLevels.length) {
+                                                    alert('No organisation unit levels');
+                                                }
+
+                                                fn();
+                                            }
+                                        });
+
+                                        // user orgunits and children
+                                        requests.push({
+                                            url: contextPath + '/api/organisationUnits.json?userOnly=true&fields=id,' + namePropertyUrl + ',children[id,' + namePropertyUrl + ']&paging=false',
+                                            success: function(r) {
+                                                var organisationUnits = Ext.decode(r.responseText).organisationUnits || [],
+                                                    ou = [],
+                                                    ouc = [];
+
+                                                if (organisationUnits.length) {
+                                                    for (var i = 0, org; i < organisationUnits.length; i++) {
+                                                        org = organisationUnits[i];
+
+                                                        ou.push(org.id);
+
+                                                        if (org.children) {
+                                                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                                                        }
+                                                    }
+
+                                                    init.user = init.user || {};
+                                                    init.user.ou = ou;
+                                                    init.user.ouc = ouc;
+                                                }
+                                                else {
+                                                    alert('User is not assigned to any organisation units');
+                                                }
+
+                                                fn();
+                                            }
+                                        });
+
+                                        // dimensions
+                                        requests.push({
+                                            url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + namePropertyUrl + '&paging=false',
+                                            success: function(r) {
+                                                init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
+                                                fn();
+                                            }
+                                        });
+
+                                        for (var i = 0; i < requests.length; i++) {
+                                            Ext.Ajax.request(requests[i]);
+                                        }
                                     }
                                 });
-
-                                // dimensions
-								requests.push({
-									url: init.contextPath + '/api/organisationUnitGroupSets.json?fields=id,' + namePropertyUrl + '&paging=false',
-									success: function(r) {
-										init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
-										fn();
-									}
-								});
-
-                                for (var i = 0; i < requests.length; i++) {
-                                    Ext.Ajax.request(requests[i]);
-                                }
                             }
                         });
                     }

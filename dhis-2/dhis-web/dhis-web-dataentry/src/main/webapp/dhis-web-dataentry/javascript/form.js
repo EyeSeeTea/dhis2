@@ -451,7 +451,24 @@ function addEventListeners()
 
         if ( type == 'date' )
         {
-            dhis2.period.picker.createInstance( '#' + id );
+            // fake event, needed for valueBlur / valueFocus when using date-picker (it doesn't send the event object through).
+            var fakeEvent = {
+                target: {
+                    id: id + '-dp'
+                }
+            };
+
+            dhis2.period.picker.createInstance( '#' + id, false, {
+                onSelect: function() {
+                    saveVal( dataElementId, optionComboId, id, fakeEvent.target.id );
+                },
+                onClose: function() {
+                    valueBlur(fakeEvent);
+                },
+                onShow: function() {
+                    valueFocus(fakeEvent);
+                }
+            } );
         }
     } );
     
@@ -597,7 +614,8 @@ function loadForm()
 	                loadDataValues();
 	                dhis2.de.insertOptionSets();
 	            } );
-	        } else {
+	        } 
+	    	else {
                 dhis2.de.storageManager.formExistsRemotely( dataSetId ).done( function( value ) {
                     console.log( 'Loading form remotely: ' + dataSetId );
 
@@ -815,73 +833,147 @@ function organisationUnitSelected( orgUnits, orgUnitNames, children )
     $( '#selectedOrganisationUnit' ).val( organisationUnitName );
     $( '#currentOrganisationUnit' ).html( organisationUnitName );
 
-    var dataSetList = getSortedDataSetList();
+    dhis2.de.getOrFetchDataSetList().then(function(data) {
+        var dataSetList = data;
 
-    $( '#selectedDataSetId' ).removeAttr( 'disabled' );
+        $( '#selectedDataSetId' ).removeAttr( 'disabled' );
 
-    var dataSetId = $( '#selectedDataSetId' ).val();
-    var periodId = $( '#selectedPeriodId').val();
+        var dataSetId = $( '#selectedDataSetId' ).val();
+        var periodId = $( '#selectedPeriodId').val();
 
-    clearListById( 'selectedDataSetId' );
-    addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
+        clearListById( 'selectedDataSetId' );
+        addOptionById( 'selectedDataSetId', '-1', '[ ' + i18n_select_data_set + ' ]' );
 
-    var dataSetValid = false;
-    var multiDataSetValid = false;
+        var dataSetValid = false;
+        var multiDataSetValid = false;
 
-    $.safeEach( dataSetList, function( idx, item ) 
-    {
-        addOptionById( 'selectedDataSetId', item.id, item.name );
-
-        if ( dataSetId == item.id )
+        $.safeEach( dataSetList, function( idx, item )
         {
-            dataSetValid = true;
-        }
-    } );
+            addOptionById( 'selectedDataSetId', item.id, item.name );
 
-    if ( children )
-    {
-        var childrenDataSets = getSortedDataSetListForOrgUnits( children );
-
-        if ( childrenDataSets && childrenDataSets.length > 0 )
-        {
-            $( '#selectedDataSetId' ).append( '<optgroup label="' + i18n_childrens_forms + '">' );
-
-            $.safeEach( childrenDataSets, function( idx, item )
+            if ( dataSetId == item.id )
             {
-                if ( dataSetId == item.id && dhis2.de.multiOrganisationUnit )
+                dataSetValid = true;
+            }
+        } );
+
+        if ( children )
+        {
+            var childrenDataSets = getSortedDataSetListForOrgUnits( children );
+
+            if ( childrenDataSets && childrenDataSets.length > 0 )
+            {
+                $( '#selectedDataSetId' ).append( '<optgroup label="' + i18n_childrens_forms + '">' );
+
+                $.safeEach( childrenDataSets, function( idx, item )
                 {
-                    multiDataSetValid = true;
-                }
+                    if ( dataSetId == item.id && dhis2.de.multiOrganisationUnit )
+                    {
+                        multiDataSetValid = true;
+                    }
 
-                $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html( item.name ).appendTo( '#selectedDataSetId' );
-            } );
+                    $( '<option />' ).attr( 'data-multiorg', true ).attr( 'value', item.id).html( item.name ).appendTo( '#selectedDataSetId' );
+                } );
 
-            $( '#selectDataSetId' ).append( '</optgroup>' );
+                $( '#selectDataSetId' ).append( '</optgroup>' );
+            }
         }
-    }
 
-    if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId ) {
-        $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
+        if ( !dhis2.de.multiOrganisationUnit && dataSetValid && dataSetId ) {
+            $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
 
-        if ( dhis2.de.inputSelected() && dhis2.de.dataEntryFormIsLoaded ) {
-            resetSectionFilters();
-            showLoader();
-            loadDataValues();
+            if ( dhis2.de.inputSelected() && dhis2.de.dataEntryFormIsLoaded ) {
+                resetSectionFilters();
+                showLoader();
+                loadDataValues();
+            }
         }
-    } 
-    else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId ) {
-        $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
-        dataSetSelected();
-    }
-    else {
-    	dhis2.de.multiOrganisationUnit = false;
-        dhis2.de.currentDataSetId = null;
+        else if ( dhis2.de.multiOrganisationUnit && multiDataSetValid && dataSetId ) {
+            $( '#selectedDataSetId' ).val( dataSetId ); // Restore selected data set
+            dataSetSelected();
+        }
+        else {
+        	dhis2.de.multiOrganisationUnit = false;
+            dhis2.de.currentDataSetId = null;
 
-        clearSectionFilters();
-        clearPeriod();
-        dhis2.de.clearAttributes();
-    }
+            clearSectionFilters();
+            clearPeriod();
+            dhis2.de.clearAttributes();
+        }
+    });
+
 }
+
+/**
+ * Fetch data-sets for a orgUnit + data-sets for its children.
+ *
+ * @param {String} ou Organisation Unit ID to fetch data-sets for
+ * @returns {$.Deferred}
+ */
+dhis2.de.fetchDataSets = function( ou )
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        type: 'GET',
+        url: '../api/organisationUnits/' + ou,
+        data: {
+            fields: 'id,dataSets[id],children[id,dataSets[id]]'
+        }
+    }).done(function(data) {
+        dhis2.de._updateDataSets(data);
+
+        data.children.forEach(function( item ) {
+            dhis2.de._updateDataSets(item);
+        });
+
+        def.resolve(data);
+    });
+
+    return def.promise();
+};
+
+/**
+ * Internal method that will go through all data-sets on the object and add them to
+ * {@see dhis2.de.dataSetAssociationSets} and {@see dhis2.de.organisationUnitAssociationSetMap}.
+ *
+ * @param {Object} ou Object that matches the format id,dataSets[id].
+ * @private
+ */
+dhis2.de._updateDataSets = function( ou ) {
+    var dataSets = [];
+
+    ou.dataSets.forEach(function( item ) {
+        dataSets.push(item.id);
+    });
+
+    dhis2.de.dataSetAssociationSets[Object.keys(dhis2.de.dataSetAssociationSets).length] = dataSets;
+    dhis2.de.organisationUnitAssociationSetMap[ou.id] = Object.keys(dhis2.de.dataSetAssociationSets).length - 1;
+};
+
+/**
+ * Get a list of sorted data-sets for a orgUnit, if data-set list is empty, it will try and fetch
+ * data-sets from the server.
+ *
+ * @param {String} [ou] Organisation unit to fetch data-sets for
+ * @returns {$.Deferred}
+ */
+dhis2.de.getOrFetchDataSetList = function( ou ) {
+    var def = $.Deferred();
+
+    var dataSets = getSortedDataSetList(ou);
+    ou = ou || dhis2.de.getCurrentOrganisationUnit();
+
+    if( dataSets.length > 0 ) {
+        def.resolve(dataSets);
+    } else {
+        dhis2.de.fetchDataSets(ou).then(function() {
+            def.resolve(getSortedDataSetList(ou));
+        });
+    }
+
+    return def.promise();
+};
 
 /**
  * Returns an array containing associative array elements with id and name
@@ -1213,6 +1305,8 @@ dhis2.de.getCurrentCategoryOptionsQueryValue = function()
 
 /**
  * Tests to see if a category option is valid during a period.
+ * 
+ * TODO proper date comparison
  */
 dhis2.de.optionValidWithinPeriod = function( option, period )
 {

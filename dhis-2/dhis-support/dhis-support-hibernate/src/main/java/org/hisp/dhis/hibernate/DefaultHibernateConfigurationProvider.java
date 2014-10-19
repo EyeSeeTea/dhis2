@@ -142,9 +142,9 @@ public class DefaultHibernateConfigurationProvider
         // Choose which properties file to look for
         // ---------------------------------------------------------------------
 
-        String testing = System.getProperty( "org.hisp.dhis.test", "false" );
+        boolean testing = "true".equals( System.getProperty( "org.hisp.dhis.test", "false" ) );
 
-        String propertiesFile = testing.equals( "true" ) ? testPropertiesFile : regularPropertiesFile;
+        String propertiesFile = testing ? testPropertiesFile : regularPropertiesFile;
 
         // ---------------------------------------------------------------------
         // Add custom properties from classpath
@@ -169,6 +169,16 @@ public class DefaultHibernateConfigurationProvider
         {
             log.info( "Could not read external configuration from file system" );
         }
+
+        // ---------------------------------------------------------------------
+        // Disable second-level cache during testing
+        // ---------------------------------------------------------------------
+        
+        if ( testing )
+        {
+            configuration.setProperty( "hibernate.cache.use_second_level_cache", "false" );
+            configuration.setProperty( "hibernate.cache.use_query_cache", "false" );
+        }
         
         log.info( "Hibernate configuration loaded, using dialect: " + configuration.getProperty( "hibernate.dialect" ) );
         
@@ -179,17 +189,20 @@ public class DefaultHibernateConfigurationProvider
     // HibernateConfigurationProvider implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public Configuration getConfiguration()
     {
         return configuration;
     }
 
-    public List<Resource> getJarResources() 
+    @Override
+    public List<Resource> getJarResources()
     {
         return jarResources;
     }
 
-    public List<Resource> getDirectoryResources() 
+    @Override
+    public List<Resource> getDirectoryResources()
     {
         return dirResources;
     }    

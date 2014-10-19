@@ -28,17 +28,18 @@ package org.hisp.dhis.dxf2.datavalueset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.CODE;
-import static org.hisp.dhis.common.IdentifiableObject.IdentifiableProperty.UID;
+import static org.hisp.dhis.common.IdentifiableProperty.CODE;
+import static org.hisp.dhis.common.IdentifiableProperty.UID;
 import static org.hisp.dhis.importexport.ImportStrategy.NEW_AND_UPDATES;
 import static org.hisp.dhis.importexport.ImportStrategy.UPDATES;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.Collection;
 
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -51,9 +52,11 @@ import org.hisp.dhis.dataset.CompleteDataSetRegistrationService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.datavalue.DataValue;
-import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.jdbc.batchhandler.DataValueBatchHandler;
+import org.hisp.dhis.mock.batchhandler.MockBatchHandler;
+import org.hisp.dhis.mock.batchhandler.MockBatchHandlerFactory;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
@@ -68,7 +71,7 @@ import org.springframework.core.io.ClassPathResource;
  * @author Lars Helge Overland
  */
 public class DataValueSetServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
     @Autowired
     private DataElementService dataElementService;
@@ -87,9 +90,6 @@ public class DataValueSetServiceTest
     
     @Autowired
     private DataValueSetService dataValueSetService;
-    
-    @Autowired
-    private DataValueService dataValueService;
     
     @Autowired
     private CompleteDataSetRegistrationService registrationService;
@@ -112,15 +112,19 @@ public class DataValueSetServiceTest
     private Period peA;
     private Period peB;
     
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
-    }
+    private InputStream in;
+
+    private MockBatchHandler<DataValue> mockDataValueBatchHandler = null;
+    private MockBatchHandlerFactory mockBatchHandlerFactory = null;
     
     @Override
     public void setUpTest()
     {
+        mockDataValueBatchHandler = new MockBatchHandler<>();
+        mockBatchHandlerFactory = new MockBatchHandlerFactory();
+        mockBatchHandlerFactory.registerBatchHandler( DataValueBatchHandler.class, mockDataValueBatchHandler );
+        setDependency( dataValueSetService, "batchHandlerFactory", mockBatchHandlerFactory );
+        
         categoryOptionA = createCategoryOption( 'A' );
         categoryOptionB = createCategoryOption( 'B' );
         categoryA = createDataElementCategory( 'A', categoryOptionA, categoryOptionB );
@@ -175,17 +179,23 @@ public class DataValueSetServiceTest
         periodService.addPeriod( peA );
         periodService.addPeriod( peB );        
     }
-    
+
+    // -------------------------------------------------------------------------
+    // Tests
+    // -------------------------------------------------------------------------
+
     @Test
     public void testImportDataValueSetXml()
         throws Exception
     {
-        ImportSummary summary = dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetA.xml" ).getInputStream() );
+        in = new ClassPathResource( "datavalueset/dataValueSetA.xml" ).getInputStream();
+        
+        ImportSummary summary = dataValueSetService.saveDataValueSet( in );
         
         assertNotNull( summary );
         assertNotNull( summary.getDataValueCount() );
         
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
         
         assertNotNull( dataValues );
         assertEquals( 3, dataValues.size() );
@@ -201,22 +211,54 @@ public class DataValueSetServiceTest
         assertEquals( ouA, registration.getSource() );
         assertEquals( getDate( 2012, 1, 9 ), registration.getDate() );
     }
-    
+
+    @Test
+    public void testImportDataValuesXmlWithCodeA()
+        throws Exception
+    {
+        in = new ClassPathResource( "datavalueset/dataValueSetACode.xml" ).getInputStream();
+            
+        ImportSummary summary = dataValueSetService.saveDataValueSet( in );
+        
+        assertNotNull( summary );
+        assertNotNull( summary.getDataValueCount() );
+
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
+        assertNotNull( dataValues );
+        assertEquals( 3, dataValues.size() );
+        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, ocDef, ocDef ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, ocDef, ocDef ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, ocDef, ocDef ) ) );
+        
+        CompleteDataSetRegistration registration = registrationService.getCompleteDataSetRegistration( dsA, peA, ouA, ocDef );
+        
+        assertNotNull( registration );
+        assertEquals( dsA, registration.getDataSet() );
+        assertEquals( peA, registration.getPeriod() );
+        assertEquals( ouA, registration.getSource() );
+        assertEquals( getDate( 2012, 1, 9 ), registration.getDate() );
+    }
+
     @Test
     public void testImportDataValuesXml()
         throws Exception
     {
-        ImportSummary summary = dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream() );
+        in = new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream();
+        
+        ImportSummary summary = dataValueSetService.saveDataValueSet( in );
         
         assertImportDataValues( summary );
     }
-    
+
     @Test
-    public void testImportDataValuesXmlWithCode()
+    public void testImportDataValuesXmlWithCodeB()
         throws Exception
     {
+        in = new ClassPathResource( "datavalueset/dataValueSetBcode.xml" ).getInputStream();
+        
         ImportOptions options = new ImportOptions( CODE, CODE, false, true, NEW_AND_UPDATES, false );
-        ImportSummary summary = dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetBcode.xml" ).getInputStream(), options );
+        ImportSummary summary = dataValueSetService.saveDataValueSet( in, options );
         
         assertImportDataValues( summary );
     }
@@ -225,19 +267,85 @@ public class DataValueSetServiceTest
     public void testImportDataValuesCsv()
         throws Exception
     {
-        ImportSummary summary = dataValueSetService.saveDataValueSetCsv( 
-            new ClassPathResource( "datavalueset/dataValueSetB.csv" ).getInputStream(), null, null );
+        in = new ClassPathResource( "datavalueset/dataValueSetB.csv" ).getInputStream();
+        
+        ImportSummary summary = dataValueSetService.saveDataValueSetCsv( in, null, null );
         
         assertImportDataValues( summary );
     }
     
+    @Test
+    public void testImportDataValuesXmlDryRun()
+        throws Exception
+    {
+        in = new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream();
+        
+        ImportOptions options = new ImportOptions( UID, UID, true, true, NEW_AND_UPDATES, false );
+        
+        dataValueSetService.saveDataValueSet( in, options );
+
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
+        assertNotNull( dataValues );
+        assertEquals( 0, dataValues.size() );
+    }
+    
+    @Test
+    public void testImportDataValuesXmlUpdatesOnly()
+        throws Exception
+    {
+        in = new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream();
+        
+        ImportOptions options = new ImportOptions( UID, UID, false, true, UPDATES, false );
+        
+        dataValueSetService.saveDataValueSet( in, options );
+
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
+        assertNotNull( dataValues );
+        assertEquals( 0, dataValues.size() );
+    }
+
+    @Test
+    public void testImportDataValuesWithNewPeriod()
+        throws Exception
+    {
+        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetC.xml" ).getInputStream() );
+
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
+        assertNotNull( dataValues );
+        assertEquals( 3, dataValues.size() );
+    }
+    
+    @Test
+    public void testImportDataValuesWithAttributeOptionCombo()
+        throws Exception
+    {
+        in = new ClassPathResource( "datavalueset/dataValueSetD.xml" ).getInputStream();
+        
+        dataValueSetService.saveDataValueSet( in );
+
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
+        assertNotNull( dataValues );
+        assertEquals( 3, dataValues.size() );
+        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, ocDef, ocA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, ocDef, ocA ) ) );
+        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, ocDef, ocA ) ) );        
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
     private void assertImportDataValues( ImportSummary summary )
     {
         assertNotNull( summary );
         assertNotNull( summary.getDataValueCount() );
 
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
-
+        Collection<DataValue> dataValues = mockDataValueBatchHandler.getInserts();
+        
         assertNotNull( dataValues );
         assertEquals( 12, dataValues.size() );
         assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, ocDef, ocDef ) ) );
@@ -252,60 +360,5 @@ public class DataValueSetServiceTest
         assertTrue( dataValues.contains( new DataValue( deC, peA, ouB, ocDef, ocDef ) ) );
         assertTrue( dataValues.contains( new DataValue( deC, peB, ouA, ocDef, ocDef ) ) );
         assertTrue( dataValues.contains( new DataValue( deC, peB, ouB, ocDef, ocDef ) ) );        
-    }
-    
-    @Test
-    public void testImportDataValuesXmlDryRun()
-        throws Exception
-    {
-        ImportOptions options = new ImportOptions( UID, UID, true, true, NEW_AND_UPDATES, false );
-        
-        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream(), options );
-        
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
-        
-        assertNotNull( dataValues );
-        assertEquals( 0, dataValues.size() );
-    }
-    
-    @Test
-    public void testImportDataValuesXmlUpdatesOnly()
-        throws Exception
-    {
-        ImportOptions options = new ImportOptions( UID, UID, false, true, UPDATES, false );
-        
-        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetB.xml" ).getInputStream(), options );
-        
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
-        
-        assertNotNull( dataValues );
-        assertEquals( 0, dataValues.size() );
-    }
-
-    @Test
-    public void testImportDataValuesWithNewPeriod()
-        throws Exception
-    {
-        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetC.xml" ).getInputStream() );
-        
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
-        
-        assertNotNull( dataValues );
-        assertEquals( 3, dataValues.size() );
-    }
-    
-    @Test
-    public void testImportDataValuesWithAttributeOptionCombo()
-        throws Exception
-    {
-        dataValueSetService.saveDataValueSet( new ClassPathResource( "datavalueset/dataValueSetD.xml" ).getInputStream() );
-        
-        Collection<DataValue> dataValues = dataValueService.getAllDataValues();
-        
-        assertNotNull( dataValues );
-        assertEquals( 3, dataValues.size() );
-        assertTrue( dataValues.contains( new DataValue( deA, peA, ouA, ocDef, ocA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deB, peA, ouA, ocDef, ocA ) ) );
-        assertTrue( dataValues.contains( new DataValue( deC, peA, ouA, ocDef, ocA ) ) );        
     }
 }

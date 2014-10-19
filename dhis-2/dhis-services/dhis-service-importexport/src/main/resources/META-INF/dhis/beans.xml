@@ -70,7 +70,6 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
@@ -96,7 +95,6 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -176,12 +174,7 @@
     <property name="sqlMapClientProvider" ref="org.hisp.dhis.importexport.dhis14.file.sqlmap.SqlMapClientProvider" />
   </bean>
 
-  <bean id="org.hisp.dhis.importexport.IbatisConfigurationManager" class="org.hisp.dhis.importexport.dhis14.file.configuration.DefaultIbatisConfigurationManager">
-    <property name="configDir" value="importexport" />
-    <property name="configFile" value="ibatisConfiguration.xml" />
-    <property name="locationManager" ref="locationManager" />
-    <property name="configurationManager" ref="configurationManager" />
-  </bean>
+  <bean id="org.hisp.dhis.importexport.IbatisConfigurationManager" class="org.hisp.dhis.importexport.dhis14.file.configuration.DefaultIbatisConfigurationManager"/>
 
 	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<!-- DXF Import                                                    -->
@@ -199,7 +192,6 @@
     <property name="constantService" ref="org.hisp.dhis.constant.ConstantService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />
@@ -217,20 +209,6 @@
 
   <bean id="org.hisp.dhis.importexport.ImportService" class="org.hisp.dhis.importexport.DefaultImportService">
     <property name="converter" ref="dxfv1-Converter" />
-    <property name="preConverter" ref="preConverter" />
-  </bean>
-
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-	<!-- XSLT based import                                                    -->
-	<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-  <bean id="xsltLocator" class="org.hisp.dhis.importexport.xml.LocManagerXSLTLocator">
-    <property name="locationManager" ref="locationManager" />
-  </bean>
-
-  <bean id="preConverter" class="org.hisp.dhis.importexport.xml.XMLPreConverter">
-    <property name="xsltLocator" ref="xsltLocator" />
-    <property name="dhisResolver" ref="dhisResolver" />
   </bean>
 
   <bean id="org.hisp.dhis.importexport.invoker.ConverterInvoker" class="org.hisp.dhis.importexport.invoker.DefaultConverterInvoker" />
@@ -246,7 +224,6 @@
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
-    <property name="dataDictionaryService" ref="org.hisp.dhis.datadictionary.DataDictionaryService" />
     <property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
     <property name="organisationUnitGroupService" ref="org.hisp.dhis.organisationunit.OrganisationUnitGroupService" />

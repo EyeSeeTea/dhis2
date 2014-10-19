@@ -32,6 +32,7 @@ import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.DataQueryParams;
 import org.hisp.dhis.common.DimensionalObject;
+import org.hisp.dhis.common.DisplayProperty;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -72,15 +73,12 @@ public class GeoFeatureController
 {
     public static final String RESOURCE_PATH = "/geoFeatures";
 
-    private static final Map<String, Integer> FEATURE_TYPE_MAP = new HashMap<String, Integer>()
-    {
-        {
-            put( OrganisationUnit.FEATURETYPE_POINT, GeoFeature.TYPE_POINT );
-            put( OrganisationUnit.FEATURETYPE_MULTIPOLYGON, GeoFeature.TYPE_POLYGON );
-            put( OrganisationUnit.FEATURETYPE_POLYGON, GeoFeature.TYPE_POLYGON );
-            put( null, 0 );
-        }
-    };
+    private static final Map<String, Integer> FEATURE_TYPE_MAP = new HashMap<String, Integer>() { {
+        put( OrganisationUnit.FEATURETYPE_POINT, GeoFeature.TYPE_POINT );
+        put( OrganisationUnit.FEATURETYPE_MULTIPOLYGON, GeoFeature.TYPE_POLYGON );
+        put( OrganisationUnit.FEATURETYPE_POLYGON, GeoFeature.TYPE_POLYGON );
+        put( null, 0 );
+    } };
 
     @Autowired
     private AnalyticsService analyticsService;
@@ -89,7 +87,10 @@ public class GeoFeatureController
     private OrganisationUnitGroupService organisationUnitGroupService;
 
     @RequestMapping( method = RequestMethod.GET, produces = "application/json" )
-    public void getGeoFeatures( @RequestParam String ou, @RequestParam Map<String, String> parameters,
+    public void getGeoFeatures( 
+        @RequestParam String ou, 
+        @RequestParam( required = false ) DisplayProperty displayProperty,
+        @RequestParam Map<String, String> parameters,
         HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         WebOptions options = new WebOptions( parameters );
@@ -98,9 +99,9 @@ public class GeoFeatureController
         Set<String> set = new HashSet<>();
         set.add( ou );
 
-        DataQueryParams params = analyticsService.getFromUrl( set, null, AggregationType.SUM, null, false, false, false, false, false, false, null, null );
+        DataQueryParams params = analyticsService.getFromUrl( set, null, AggregationType.SUM, null, false, false, false, false, false, false, displayProperty, null );
 
-        DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );
+        DimensionalObject dim = params.getDimension( DimensionalObject.ORGUNIT_DIM_ID );       
 
         List<OrganisationUnit> organisationUnits = NameableObjectUtils.asTypedList( dim.getItems() );
 
@@ -121,7 +122,6 @@ public class GeoFeatureController
         {
             GeoFeature feature = new GeoFeature();
             feature.setId( unit.getUid() );
-            feature.setNa( unit.getDisplayName() );
             feature.setHcd( unit.hasChildrenWithCoordinates() );
             feature.setHcu( unit.hasCoordinatesUp() );
             feature.setLe( unit.getLevel() );
@@ -130,6 +130,15 @@ public class GeoFeatureController
             feature.setPn( unit.getParent() != null ? unit.getParent().getDisplayName() : null );
             feature.setTy( FEATURE_TYPE_MAP.get( unit.getFeatureType() ) );
             feature.setCo( unit.getCoordinates() );
+            
+            if ( DisplayProperty.SHORTNAME.equals( params.getDisplayProperty() ) )
+            {
+                feature.setNa( unit.getDisplayShortName() );
+            }
+            else
+            {
+                feature.setNa( unit.getDisplayName() );
+            }
 
             if ( includeGroupSets )
             {

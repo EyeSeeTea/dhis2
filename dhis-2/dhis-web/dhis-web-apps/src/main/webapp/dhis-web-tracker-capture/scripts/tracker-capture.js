@@ -20,6 +20,8 @@ var PROGRAMS_METADATA = 'TRACKER_PROGRAMS';
 
 var TRACKER_VALUES = 'TRACKER_VALUES';
 
+var optionSetsInPromise = [];
+
 dhis2.tc.store = new dhis2.storage.Store({
     name: TC_STORE_NAME,
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
@@ -58,6 +60,7 @@ $(document).ready(function()
         
         promise = promise.then( dhis2.tc.store.open );
         promise = promise.then( getUserProfile );
+        promise = promise.then( getCalendarSetting );
         promise = promise.then( getLoginDetails );
         promise = promise.then( getRelationships );
         promise = promise.then( getAttributes );
@@ -179,7 +182,6 @@ function ajax_login()
     });
 }
 
-
 function getUserProfile()
 {
     var def = $.Deferred();
@@ -189,6 +191,21 @@ function getUserProfile()
         type: 'GET'
     }).done(function(response) {
         localStorage['USER_PROFILE'] = JSON.stringify(response);
+        def.resolve();
+    });
+
+    return def.promise();
+}
+
+function getCalendarSetting()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/systemSettings?key=keyCalendar&key=keyDateFormat',
+        type: 'GET'
+    }).done(function(response) {
+        localStorage['CALENDAR_SETTING'] = JSON.stringify(response);
         def.resolve();
     });
 
@@ -262,7 +279,8 @@ function getOptionSetsForAttributes( attributes )
                 var d = $.Deferred();
                 var p = d.promise();
                 dhis2.tc.store.get('optionSets', attribute.optionSet.id).done(function(obj) {                    
-                    if(!obj || obj.version !== attribute.optionSet.version) {
+                    if((!obj || obj.version !== attribute.optionSet.version) && !optionSetsInPromise[attribute.optionSet.id]) {
+                        optionSetsInPromise[attribute.optionSet.id] = attribute.optionSet.id;
                         promise = promise.then( getOptionSet( attribute.optionSet.id ) );
                     }
                     d.resolve();
@@ -379,7 +397,7 @@ function getProgram( id )
         return $.ajax( {
             url: '../api/programs.json',
             type: 'GET',
-            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,dataEntryMethod,relationshipText,relationshipFromA,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,relationshipFromA,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,minDaysFromStart,reportDateDescription,repeatable,autoGenerateEvent],programTrackedEntityAttributes[displayInList,mandatory,trackedEntityAttribute[id]]'
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,version,dataEntryMethod,relationshipText,relationshipFromA,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,realionshipText,relationshipFromA,selectEnrollmentDatesInFuture,selectIncidentDatesInFuture,onlyEnrollOnce,externalAccess,displayOnAllOrgunit,registration,trackedEntity[id,name,description],userRoles[id,name],organisationUnits[id,name],programStages[id,name,version,minDaysFromStart,standardInterval,reportDateDescription,repeatable,autoGenerateEvent],programTrackedEntityAttributes[displayInList,mandatory,trackedEntityAttribute[id]]'
         }).done( function( response ){
             
             _.each( _.values( response.programs ), function ( program ) { 
@@ -456,7 +474,7 @@ function getProgramStage( id )
         return $.ajax( {
             url: '../api/programStages.json',
             type: 'GET',
-            data: 'filter=id:eq:' + id +'&fields=id,name,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,reportDateDescription,minDaysFromStart,repeatable,programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,formName,type,optionSet[id]]]'
+            data: 'filter=id:eq:' + id +'&fields=id,name,version,dataEntryForm,captureCoordinates,blockEntryForm,autoGenerateEvent,reportDateDescription,minDaysFromStart,standardInterval,repeatable,programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,formName,type,optionSet[id]]]'
         }).done( function( response ){            
             _.each( _.values( response.programStages ), function( programStage ) {
                 dhis2.tc.store.set( 'programStages', programStage );
@@ -481,22 +499,25 @@ function getOptionSetsForPrograms( programs )
     var build = builder.promise();    
 
     _.each( _.values( programs ), function ( program ) {
-        _.each(_.values( program.programStages[0].programStageDataElements), function(prStDe){
-            if( prStDe.dataElement.optionSet && prStDe.dataElement.optionSet.id ){
-                build = build.then(function() {
-                    var d = $.Deferred();
-                    var p = d.promise();
-                    dhis2.tc.store.get('optionSets', prStDe.dataElement.optionSet.id).done(function(obj) {                    
-                        if(!obj || obj.version !== prStDe.dataElement.optionSet.version) {
-                            promise = promise.then( getOptionSet( prStDe.dataElement.optionSet.id ) );
-                        }
-                        d.resolve();
-                    });
+        _.each(_.values( program.programStages), function( programStage) {
+            _.each(_.values( programStage.programStageDataElements), function(prStDe){            
+                if( prStDe.dataElement.optionSet && prStDe.dataElement.optionSet.id ){
+                    build = build.then(function() {
+                        var d = $.Deferred();
+                        var p = d.promise();
+                        dhis2.tc.store.get('optionSets', prStDe.dataElement.optionSet.id).done(function(obj) {                            
+                            if((!obj || obj.version !== prStDe.dataElement.optionSet.version) && !optionSetsInPromise[prStDe.dataElement.optionSet.id]) {                                
+                                optionSetsInPromise[prStDe.dataElement.optionSet.id] = prStDe.dataElement.optionSet.id;                                
+                                promise = promise.then( getOptionSet( prStDe.dataElement.optionSet.id ) );
+                            }
+                            d.resolve();
+                        });
 
-                    return p;
-                });
-            }            
-        });                      
+                        return p;
+                    });
+                }            
+            });
+        });                              
     });
 
     build.done(function() {

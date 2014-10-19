@@ -15,7 +15,7 @@
  * selection.setMultipleSelectionAllowed function to change this.
  */
 
-var organisationUnitTreePath = '../dhis-web-commons/ouwt/';
+var organisationUnitTreePath = "../dhis-web-commons/ouwt/";
 var organisationUnits = {};
 
 var selection = new Selection();
@@ -23,6 +23,7 @@ var subtree = new Subtree();
 
 var dhis2 = dhis2 || {};
 dhis2.ou = dhis2.ou || {};
+dhis2.ou.event = dhis2.ou.event || {};
 
 var OU_STORE_NAME = "dhis2ou";
 var OU_KEY = "ou";
@@ -31,6 +32,8 @@ var OU_ROOTS_KEY = "ouRoots";
 var OU_VERSION_KEY = "ouVersion";
 var OU_USERNAME_KEY = "ouUsername";
 var OU_SELECTED_KEY = "ouSelected";
+
+dhis2.ou.event.orgUnitSelected = "dhis2.ou.event.orgUnitSelected";
 
 dhis2.ou.store = null;
 dhis2.ou.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
@@ -400,43 +403,51 @@ function Selection()
         } else {
             selection.busy( true );
 
-            $.ajax( {
-                url: organisationUnitTreePath + "clearselected.action",
-                type: 'POST'
-            }).done(function() {
-                var selected = selection.getSelected();
+            if( selection.getSelected() && selection.getSelected().length === 0 ) {
+                setTimeout(doSync, 1000);
+            } else {
+                doSync();
+            }
 
-                if( multipleSelectionAllowed ) {
-                    var q = '';
+            function doSync() {
+                $.ajax( {
+                    url: organisationUnitTreePath + "clearselected.action",
+                    type: 'POST'
+                }).done(function() {
+                    var selected = selection.getSelected();
 
-                    $.each( selected, function( i, item ) {
-                        q += "id=" + item;
+                    if( multipleSelectionAllowed ) {
+                        var q = '';
 
-                        if( i < (selected.length - 1) ) {
-                            q += '&';
-                        }
-                    });
+                        $.each( selected, function( i, item ) {
+                            q += "id=" + item;
 
-                    $.ajax({
-                        url: organisationUnitTreePath + "addorgunit.action",
-                        data: q,
-                        type: 'POST'
-                    } ).complete( function() {
-                        selection.busy( false );
-                    });
-                } else {
-                    selected = $.isArray( selected ) ? selected[0] : selected;
+                            if( i < (selected.length - 1) ) {
+                                q += '&';
+                            }
+                        });
 
-                    $.post( organisationUnitTreePath + "setorgunit.action", {
-                        id: selected
-                    } ).complete( function() {
-                        selection.busy( false );
-                        fn();
-                    } );
-                }
-            }).always(function() {
-                selection.busy( false );
-            });
+                        $.ajax({
+                            url: organisationUnitTreePath + "addorgunit.action",
+                            data: q,
+                            type: 'POST'
+                        } ).complete( function() {
+                            selection.busy( false );
+                        });
+                    } else {
+                        selected = $.isArray( selected ) ? selected[0] : selected;
+
+                        $.post( organisationUnitTreePath + "setorgunit.action", {
+                            id: selected
+                        } ).complete( function() {
+                            selection.busy( false );
+                            fn();
+                        } );
+                    }
+                }).always(function() {
+                    selection.busy( false );
+                });
+            }
         }
     };
 
@@ -549,10 +560,6 @@ function Selection()
     };
 
     this.responseReceived = function() {
-        if( typeof listenerFunction !== 'function') {
-            return;
-        }
-
         var children = [];
         var ids = [];
         var names = [];
@@ -565,7 +572,11 @@ function Selection()
                 names.push( name );
             } );
 
-            listenerFunction( ids, names, children );
+            $( document ).trigger( dhis2.ou.event.orgUnitSelected, [ids, names, children] );
+            
+            if( typeof listenerFunction === 'function') {
+            	listenerFunction( ids, names, children );
+            }
         } else {
             selected = selected[0];
 
@@ -579,7 +590,11 @@ function Selection()
                 ids.push( selected );
                 names.push( name );
 
-                listenerFunction( ids, names, children );
+                $( document ).trigger( dhis2.ou.event.orgUnitSelected, [ids, names, children] );
+                
+                if( typeof listenerFunction === 'function') {
+                	listenerFunction( ids, names, children );
+                }                
             }
         }
     };

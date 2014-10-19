@@ -30,10 +30,8 @@ package org.hisp.dhis;
 
 import java.lang.reflect.Method;
 
-import org.hisp.dhis.cache.HibernateCacheManager;
 import org.junit.Before;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.test.context.ContextConfiguration;
@@ -56,14 +54,12 @@ public abstract class DhisSpringTest
 
     protected ApplicationContext context;
 
+    @Override
     public void setApplicationContext( ApplicationContext context )
     {
         this.context = context;
     }
     
-    @Autowired
-    private HibernateCacheManager cacheManager;
-
     // -------------------------------------------------------------------------
     // Fixture
     // -------------------------------------------------------------------------
@@ -72,8 +68,6 @@ public abstract class DhisSpringTest
     public final void before()
         throws Exception
     {
-        cacheManager.clearCache();
-        
         executeStartupRoutines();
         
         setUpTest();

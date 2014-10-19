@@ -48,6 +48,7 @@ import org.springframework.scheduling.annotation.Async;
 public class JdbcCompletenessTableManager
     extends AbstractJdbcTableManager
 {
+    @Override
     public String validState()
     {
         boolean hasData = jdbcTemplate.queryForRowSet( "select datasetid from completedatasetregistration limit 1" ).next();
@@ -60,11 +61,13 @@ public class JdbcCompletenessTableManager
         return null;
     }
     
+    @Override
     public String getTableName()
     {
         return COMPLETENESS_TABLE_NAME;
     }
     
+    @Override
     public void createTable( AnalyticsTable table )
     {
         final String tableName = table.getTempTableName();
@@ -74,8 +77,12 @@ public class JdbcCompletenessTableManager
         executeSilently( sqlDrop );
         
         String sqlCreate = "create table " + tableName + " (";
+
+        List<String[]> columns = getDimensionColumns( table );
         
-        for ( String[] col : getDimensionColumns( table ) )
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -89,6 +96,7 @@ public class JdbcCompletenessTableManager
         executeSilently( sqlCreate );
     }
     
+    @Override
     @Async
     public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
@@ -103,6 +111,7 @@ public class JdbcCompletenessTableManager
             
             final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
             final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
+            final String tableName = table.getTempTableName();
         
             String insert = "insert into " + table.getTempTableName() + " (";
             
@@ -136,14 +145,13 @@ public class JdbcCompletenessTableManager
     
             final String sql = insert + select;
             
-            log.info( "Populate SQL: "+ sql );
-            
-            jdbcTemplate.execute( sql );
+            populateAndLog( sql, tableName );
         }
         
         return null;
     }
     
+    @Override
     public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<>();
@@ -181,6 +189,7 @@ public class JdbcCompletenessTableManager
         return columns;
     }
 
+    @Override
     public Date getEarliestData()
     {
         final String sql = "select min(pe.startdate) from completedatasetregistration cdr " +
@@ -190,6 +199,7 @@ public class JdbcCompletenessTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
+    @Override
     public Date getLatestData()
     {
         final String sql = "select max(pe.enddate) from completedatasetregistration cdr " +
@@ -199,6 +209,7 @@ public class JdbcCompletenessTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
+    @Override
     @Async
     public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {

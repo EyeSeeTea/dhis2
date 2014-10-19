@@ -30,6 +30,7 @@ package org.hisp.dhis.dataelement.hibernate;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataelement.CategoryComboStore;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -41,10 +42,10 @@ public class HibernateCategoryComboStore
     extends HibernateIdentifiableObjectStore<DataElementCategoryCombo>
     implements CategoryComboStore
 {
+    @Override
     @SuppressWarnings("unchecked")
     public Collection<DataElementCategoryCombo> getCategoryCombosByDimensionType( String dimensionType )
     {
-        return getQueryWithSelect( "dimensionType = :dimensionType or name = :name" ).
-            setString( "dimensionType", dimensionType).setString( "name", "default" ).list();
+        return getSharingCriteria( Restrictions.or( Restrictions.eq( "dimensionType", dimensionType ), Restrictions.eq( "name", "default" ) ) ).list();
     }
 }

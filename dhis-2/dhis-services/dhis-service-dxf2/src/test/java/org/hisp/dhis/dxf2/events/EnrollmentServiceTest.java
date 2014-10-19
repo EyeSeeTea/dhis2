@@ -31,8 +31,8 @@ package org.hisp.dhis.dxf2.events;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
@@ -46,13 +46,13 @@ import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramInstanceService;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityService;
+import org.joda.time.DateTime;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +90,8 @@ public class EnrollmentServiceTest
     private ProgramStage programStage;
 
     @Override
-    protected void setUpTest() throws Exception
+    protected void setUpTest() 
+        throws Exception
     {
         organisationUnitA = createOrganisationUnit( 'A' );
         organisationUnitB = createOrganisationUnit( 'B' );
@@ -121,7 +122,7 @@ public class EnrollmentServiceTest
         programStage.setGeneratedByEnrollmentDate( true );
         manager.save( programStage );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.SINGLE_EVENT_WITH_REGISTRATION );
         manager.save( programA );
 
@@ -226,7 +227,7 @@ public class EnrollmentServiceTest
         assertEquals( maleA.getUid(), enrollment.getTrackedEntityInstance() );
         assertEquals( programA.getUid(), enrollment.getProgram() );
 
-        Date MARCH_20_81 = new Cal( 81, 2, 20 ).time();
+        Date MARCH_20_81 = new DateTime( 81, 2, 20, 0, 0 ).toDate();
 
         enrollment.setDateOfEnrollment( MARCH_20_81 );
         enrollmentService.updateEnrollment( enrollment );
@@ -347,7 +348,6 @@ public class EnrollmentServiceTest
         assertEquals( ImportStatus.SUCCESS, importSummary.getStatus() );
 
         TrackedEntityInstance trackedEntityInstance = trackedEntityInstanceService.getTrackedEntityInstance( maleA );
-        // person.setName( "Changed Name" );
         trackedEntityInstanceService.updateTrackedEntityInstance( trackedEntityInstance );
 
         List<Enrollment> enrollments = enrollmentService.getEnrollments( trackedEntityInstance ).getEnrollments();

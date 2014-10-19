@@ -47,12 +47,20 @@ public interface SecurityService
     boolean prepareUserForInvite( User user );
     
     /**
-     * Validates whether a restore is allowed.
+     * Indicates whether a restore/invite is allowed for the given user. The
+     * requirements are:</p>
      * 
-     * @param credentials the credentials for the user to send restore message.
-     * @param restoreOptions restore options, including type of restore.
+     * <ul>
+     * <li>email_not_configured_for_system</li>
+     * <li>no_user_credentials</li>
+     * <li>user_does_not_have_valid_email</li>
+     * <li>user_has_critical_authorities</li>
+     * </ul>
+     * 
+     * @param credentials
+     * @return a string if restore cannot be performed, null otherwise.
      */
-    boolean validateRestore( UserCredentials credentials, RestoreOptions restoreOptions );
+    String validateRestore( UserCredentials credentials );
 
     /**
      * Invokes the initRestore method and dispatches email messages with

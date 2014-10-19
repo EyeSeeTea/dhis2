@@ -84,6 +84,7 @@ public class TableAlteror
     // Action Implementation
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void execute()
         throws Exception
@@ -294,6 +295,9 @@ public class TableAlteror
         updateProgramStageList();
         updateProgramAttributeList();
         
+        updateFixedAttributeInCaseAggregate( "DEDATEDIFF", CaseAggregationCondition.MINUS_OPERATOR );
+        executeSql( "update userroleauthorities set authority='F_ADD_TRACKED_ENTITY_FORM' where authority='F_TRACKED_ENTITY_FORM_ADD'" );
+
     }
 
     // -------------------------------------------------------------------------
@@ -359,7 +363,7 @@ public class TableAlteror
             holder.close();
         }
     }
-
+    
     private void updateProgramInstanceStatus()
     {
         // Set active status for events
@@ -506,7 +510,7 @@ public class TableAlteror
             holder.close();
         }
     }
-
+    
     private int executeSql( String sql )
     {
         try

@@ -144,6 +144,7 @@ public class DefaultResourceTableService
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateOrganisationUnitStructures()
     {
@@ -197,6 +198,7 @@ public class DefaultResourceTableService
     // DataElementCategoryOptionComboName
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateCategoryOptionComboNames()
     {
@@ -224,6 +226,7 @@ public class DefaultResourceTableService
         log.info( "Category option combo name table generated" );
     }
 
+    @Override
     @Transactional
     public void generateCategoryOptionGroupSetTable()
     {
@@ -272,6 +275,7 @@ public class DefaultResourceTableService
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementGroupSetTable()
     {
@@ -290,6 +294,7 @@ public class DefaultResourceTableService
     // IndicatorGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateIndicatorGroupSetTable()
     {
@@ -308,6 +313,7 @@ public class DefaultResourceTableService
     // OrganisationUnitGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateOrganisationUnitGroupSetTable()
     {
@@ -327,6 +333,7 @@ public class DefaultResourceTableService
     // CategoryTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateCategoryTable()
     {
@@ -349,6 +356,7 @@ public class DefaultResourceTableService
     // DataElementTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementTable()
     {
@@ -379,13 +387,14 @@ public class DefaultResourceTableService
             values.add( dataSet != null ? dataSet.getId() : null );
             values.add( dataSet != null ? dataSet.getUid() : null );
             values.add( dataSet != null ? dataSet.getName() : null );
+            values.add( dataSet != null ? dataSet.isApproveData() : false );
             values.add( periodType != null ? periodType.getId() : null );
             values.add( periodType != null ? periodType.getName() : null );
 
             batchArgs.add( values.toArray() );
         }
 
-        resourceTableStore.batchUpdate( 8, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
+        resourceTableStore.batchUpdate( 9, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
 
         log.info( "Data element table generated" );
     }
@@ -394,6 +403,7 @@ public class DefaultResourceTableService
     // PeriodTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void generateDatePeriodTable()
     {
         // ---------------------------------------------------------------------
@@ -436,6 +446,7 @@ public class DefaultResourceTableService
         log.info( "Period table generated" );
     }
 
+    @Override
     @Transactional
     public void generatePeriodTable()
     {
@@ -493,6 +504,7 @@ public class DefaultResourceTableService
     // DataElementCategoryOptionComboTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementCategoryOptionComboTable()
     {

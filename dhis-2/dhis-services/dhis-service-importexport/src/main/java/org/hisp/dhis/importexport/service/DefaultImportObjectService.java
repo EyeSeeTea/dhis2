@@ -40,8 +40,6 @@ import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.ImportableObject;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.datadictionary.DataDictionary;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -137,13 +135,6 @@ public class DefaultImportObjectService<T>
         this.indicatorService = indicatorService;
     }
 
-    private DataDictionaryService dataDictionaryService;
-
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
-    {
-        this.dataDictionaryService = dataDictionaryService;
-    }
-
     private DataSetService dataSetService;
 
     public void setDataSetService( DataSetService dataSetService )
@@ -215,6 +206,7 @@ public class DefaultImportObjectService<T>
     // ImportObject operations
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, ImportableObject object )
     {
@@ -223,6 +215,7 @@ public class DefaultImportObjectService<T>
         return importObjectStore.addImportObject( importObject );
     }
 
+    @Override
     @Transactional
     public int addImportObject( ImportObjectStatus status, ImportableObject object, ImportableObject compareObject )
     {
@@ -231,6 +224,7 @@ public class DefaultImportObjectService<T>
         return importObjectStore.addImportObject( importObject );
     }
 
+    @Override
     @Transactional
     public int addImportObject( ImportObjectStatus status, GroupMemberType groupMemberType, ImportableObject object,
         ImportableObject compareObject )
@@ -241,30 +235,35 @@ public class DefaultImportObjectService<T>
         return importObjectStore.addImportObject( importObject );
     }
 
+    @Override
     @Transactional
     public ImportObject getImportObject( int id )
     {
         return importObjectStore.getImportObject( id );
     }
 
+    @Override
     @Transactional
     public Collection<ImportObject> getImportObjects( Class<?> clazz )
     {
         return importObjectStore.getImportObjects( clazz );
     }
 
+    @Override
     @Transactional
     public Collection<ImportObject> getImportObjects( ImportObjectStatus status, Class<?> clazz )
     {
         return importObjectStore.getImportObjects( status, clazz );
     }
 
+    @Override
     @Transactional
     public Collection<ImportObject> getImportObjects( GroupMemberType groupMemberType )
     {
         return importObjectStore.getImportObjects( groupMemberType );
     }
 
+    @Override
     @Transactional
     public void deleteImportObject( int importObjectId )
     {
@@ -276,12 +275,14 @@ public class DefaultImportObjectService<T>
         }
     }
 
+    @Override
     @Transactional
     public void deleteImportObjects( Class<?> clazz )
     {
         importObjectStore.deleteImportObjects( clazz );
     }
 
+    @Override
     @Transactional
     public void deleteImportObjects()
     {
@@ -292,6 +293,7 @@ public class DefaultImportObjectService<T>
     // TODO Refactor: this code is not extensible and is error-prone in terms of
     // cascading deletion of associated objects
 
+    @Override
     @Transactional
     public void cascadeDeleteImportObject( int importObjectId )
     {
@@ -305,7 +307,6 @@ public class DefaultImportObjectService<T>
 
                 deleteMemberAssociations( GroupMemberType.DATAELEMENTGROUP, element.getId() );
                 deleteMemberAssociations( GroupMemberType.DATASET, element.getId() );
-                deleteMemberAssociations( GroupMemberType.DATADICTIONARY_DATAELEMENT, element.getId() );
 
                 deleteIndicatorsContainingDataElement( element.getId() );
 
@@ -335,7 +336,6 @@ public class DefaultImportObjectService<T>
                 Indicator indicator = (Indicator) importObject.getObject();
 
                 deleteMemberAssociations( GroupMemberType.INDICATORGROUP, indicator.getId() );
-                deleteMemberAssociations( GroupMemberType.DATADICTIONARY_INDICATOR, indicator.getId() );
             }
             else if ( importObject.getClassName().equals( IndicatorGroup.class.getName() ) )
             {
@@ -349,13 +349,6 @@ public class DefaultImportObjectService<T>
                 IndicatorGroupSet groupSet = (IndicatorGroupSet) importObject.getObject();
 
                 deleteGroupAssociations( GroupMemberType.INDICATORGROUPSET, groupSet.getId() );
-            }
-            else if ( importObject.getClassName().equals( DataDictionary.class.getName() ) )
-            {
-                DataDictionary dictionary = (DataDictionary) importObject.getObject();
-
-                deleteGroupAssociations( GroupMemberType.DATADICTIONARY_DATAELEMENT, dictionary.getId() );
-                deleteGroupAssociations( GroupMemberType.DATADICTIONARY_INDICATOR, dictionary.getId() );
             }
             else if ( importObject.getClassName().equals( DataSet.class.getName() ) )
             {
@@ -397,6 +390,7 @@ public class DefaultImportObjectService<T>
         deleteImportObject( importObjectId );
     }
 
+    @Override
     @Transactional
     public void cascadeDeleteImportObjects( Class<?> clazz )
     {
@@ -420,9 +414,6 @@ public class DefaultImportObjectService<T>
 
             importObjectStore.deleteImportObjects( Indicator.class );
             importObjectStore.deleteImportObjects( GroupMemberType.INDICATORGROUP );
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_INDICATOR );
-
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_DATAELEMENT );
 
             importDataValueService.deleteImportDataValues();
         }
@@ -439,12 +430,10 @@ public class DefaultImportObjectService<T>
         {
             importObjectStore.deleteImportObjects( Indicator.class );
             importObjectStore.deleteImportObjects( GroupMemberType.INDICATORGROUP );
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_INDICATOR );
         }
         else if ( clazz.equals( Indicator.class ) )
         {
             importObjectStore.deleteImportObjects( GroupMemberType.INDICATORGROUP );
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_INDICATOR );
         }
         else if ( clazz.equals( IndicatorGroup.class ) )
         {
@@ -454,11 +443,6 @@ public class DefaultImportObjectService<T>
         else if ( clazz.equals( IndicatorGroupSet.class ) )
         {
             importObjectStore.deleteImportObjects( GroupMemberType.INDICATORGROUPSET );
-        }
-        else if ( clazz.equals( DataDictionary.class ) )
-        {
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_DATAELEMENT );
-            importObjectStore.deleteImportObjects( GroupMemberType.DATADICTIONARY_INDICATOR );
         }
         else if ( clazz.equals( DataSet.class ) )
         {
@@ -490,6 +474,7 @@ public class DefaultImportObjectService<T>
     // Object
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void matchObject( int importObjectId, int existingObjectId )
     {
@@ -548,12 +533,6 @@ public class DefaultImportObjectService<T>
             IndicatorGroupSet groupSet = (IndicatorGroupSet) object;
 
             groupSet.setName( indicatorService.getIndicatorGroupSet( existingObjectId ).getName() );
-        }
-        else if ( object.getClass().equals( DataDictionary.class ) )
-        {
-            DataDictionary dictionary = (DataDictionary) object;
-
-            dictionary.setName( dataDictionaryService.getDataDictionary( existingObjectId ).getName() );
         }
         else if ( object.getClass().equals( DataSet.class ) )
         {
@@ -632,6 +611,7 @@ public class DefaultImportObjectService<T>
     // Import
     // -------------------------------------------------------------------------
 
+    @Override
     public void importAll()
     {
         importObjectManager.importConstants();
@@ -652,9 +632,6 @@ public class DefaultImportObjectService<T>
         importObjectManager.importIndicatorGroupMembers();
         importObjectManager.importIndicatorGroupSets();
         importObjectManager.importIndicatorGroupSetMembers();
-        importObjectManager.importDataDictionaries();
-        importObjectManager.importDataDictionaryDataElements();
-        importObjectManager.importDataDictionaryIndicators();
         importObjectManager.importDataSets();
         importObjectManager.importDataSetMembers();
         importObjectManager.importOrganisationUnits();
@@ -772,8 +749,6 @@ public class DefaultImportObjectService<T>
                 importObjectStore.deleteImportObject( importObject );
 
                 deleteMemberAssociations( GroupMemberType.INDICATORGROUP, indicator.getId() );
-
-                deleteMemberAssociations( GroupMemberType.DATADICTIONARY_INDICATOR, indicator.getId() );
             }
         }
     }
@@ -791,8 +766,6 @@ public class DefaultImportObjectService<T>
                 importObjectStore.deleteImportObject( importObject );
 
                 deleteMemberAssociations( GroupMemberType.INDICATORGROUP, indicator.getId() );
-
-                deleteMemberAssociations( GroupMemberType.DATADICTIONARY_INDICATOR, indicator.getId() );
             }
         }
     }

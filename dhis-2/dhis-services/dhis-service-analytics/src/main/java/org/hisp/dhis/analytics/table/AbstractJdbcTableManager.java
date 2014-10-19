@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -50,6 +51,10 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.timer.SystemTimer;
+import org.hisp.dhis.system.timer.Timer;
+import org.hisp.dhis.system.util.ListUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -68,8 +73,8 @@ public abstract class AbstractJdbcTableManager
     public static final String PREFIX_ORGUNITLEVEL = "uidlevel";
     public static final String PREFIX_INDEX = "in_";
     
-    private static Date MIN_EARLIEST_DATE = new Cal().set( 1800, 1, 1 ).time();
-    private static Date MAX_LATEST_DATE = new Cal().set( 2100, 1, 1 ).time();
+    private static Date MIN_EARLIEST_DATE = new DateTime( 1800, 1, 1, 0, 0 ).toDate();
+    private static Date MAX_LATEST_DATE = new DateTime( 2100, 1, 1, 0, 0 ).toDate();
     
     @Autowired
     protected OrganisationUnitService organisationUnitService;
@@ -113,6 +118,7 @@ public abstract class AbstractJdbcTableManager
     // Implementation
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public List<AnalyticsTable> getTables( Integer lastYears )
     {
@@ -135,6 +141,7 @@ public abstract class AbstractJdbcTableManager
         return getTables( earliest, latest );
     }
 
+    @Override
     @Transactional
     public List<AnalyticsTable> getTables( Date earliest, Date latest )
     {
@@ -157,11 +164,13 @@ public abstract class AbstractJdbcTableManager
         return tables;
     }
     
+    @Override
     public String getTempTableName()
     {
         return getTableName() + TABLE_TEMP_SUFFIX;
     }
     
+    @Override
     @Async
     public Future<?> createIndexesAsync( ConcurrentLinkedQueue<AnalyticsIndex> indexes )
     {
@@ -188,6 +197,7 @@ public abstract class AbstractJdbcTableManager
         return null;
     }
 
+    @Override
     public void swapTable( AnalyticsTable table )
     {
         final String tempTable = table.getTempTableName();
@@ -202,6 +212,7 @@ public abstract class AbstractJdbcTableManager
         executeSilently( sqlAlter );
     }
 
+    @Override
     public boolean pruneTable( AnalyticsTable table )
     {
         String tableName = table.getTempTableName();
@@ -220,6 +231,7 @@ public abstract class AbstractJdbcTableManager
         return false;
     }
 
+    @Override
     @Async
     public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
@@ -242,6 +254,7 @@ public abstract class AbstractJdbcTableManager
         return null;
     }
 
+    @Override
     public void dropTable( String tableName )
     {
         final String realTable = tableName.replaceFirst( TABLE_TEMP_SUFFIX, "" );
@@ -318,5 +331,45 @@ public abstract class AbstractJdbcTableManager
         {
             log.debug( ex.getMessage() );
         }
+    }
+    
+    /**
+     * Checks whether the given list of dimensions are valid.
+     * @throws IllegalStateException if not valid.
+     */
+    protected void validateDimensionColumns( List<String[]> dimensions )
+    {
+        if ( dimensions == null || dimensions.isEmpty() )
+        {
+            throw new IllegalStateException( "Analytics table dimensions are empty" );
+        }
+        
+        List<String> columns = new ArrayList<>();
+        
+        for ( String[] dimension : dimensions )
+        {
+            columns.add( dimension[0] );
+        }
+        
+        Set<String> duplicates = ListUtils.getDuplicates( columns );
+        
+        if ( !duplicates.isEmpty() )
+        {
+            throw new IllegalStateException( "Analytics table dimensions contain duplicates: " + duplicates );
+        }
+    }
+
+    /**
+     * Executes the given table population SQL statement, log and times the operation.
+     */
+    protected void populateAndLog( String sql, String tableName )
+    {
+        log.info( "Populate SQL for " + tableName + ": " + sql );
+
+        Timer t = new SystemTimer().start();
+        
+        jdbcTemplate.execute( sql );
+        
+        log.info( "Populated " + tableName + ": " + t.stop().toString() );
     }
 }

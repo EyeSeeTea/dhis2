@@ -509,6 +509,7 @@ public class DefaultProgramDataEntryService
         return populateI18nStrings( sb.toString(), i18n );
     }
 
+    @Override
     public String prepareDataEntryFormForEdit( String htmlCode )
     {
         // ---------------------------------------------------------------------
@@ -572,7 +573,7 @@ public class DefaultProgramDataEntryService
         String inputHTML = "";
         if ( dataElement != null )
         {
-            String metaData = "<input id=\'" + id + "\' name=\'" + id + "\' options=\'no\' type=\'radio\' optionset='"
+            String metaData = "<input class='optionset' id=\'" + id + "\' name=\'" + id + "\' options=\'no\' type=\'radio\' optionset='"
                 + dataElement.getOptionSet().getUid() + "'";
             metaData += " data=\"{compulsory:$COMPULSORY, deName:\'$DATAELEMENTNAME\', deType:\'"
                 + dataElement.getDetailedNumberType() + "\' }\" ";
@@ -587,7 +588,7 @@ public class DefaultProgramDataEntryService
                 inputHTML += " checked ";
             }
 
-            inputHTML += "onclick=\"saveRadio( \'" + dataElement.getUid() + "\', \'$option\' )\" />"
+            inputHTML += " value='' onclick=\"saveRadio( \'" + dataElement.getUid() + "\', \'$option\' )\" />"
                 + i18n.getString( "non_value" );
             inputHTML += " </td>";
 

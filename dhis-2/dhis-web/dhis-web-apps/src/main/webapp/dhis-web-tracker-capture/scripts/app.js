@@ -51,6 +51,11 @@ var trackerCapture = angular.module('trackerCapture',
         suffix: '.json'
     });
     
-    $translateProvider.preferredLanguage('en');	
-    
+    $translateProvider.preferredLanguage('en');
+})
+
+.run(function($rootScope){    
+    setTimeout(function () {
+        $rootScope.$apply(function () {});
+    }, 1000);
 });

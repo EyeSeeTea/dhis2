@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.HashSet;
 
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -46,14 +46,30 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Kristian Nordal
  * @version $Id: DataValueServiceTest.java 5715 2008-09-17 14:05:28Z larshelg $
  */
 public class DataValueServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
+    @Autowired
+    private DataElementCategoryService categoryService;
+
+    @Autowired
+    private DataElementService dataElementService;
+
+    @Autowired
+    private DataValueService dataValueService;
+
+    @Autowired
+    private PeriodService periodService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
     // -------------------------------------------------------------------------
     // Supporting data
     // -------------------------------------------------------------------------
@@ -91,17 +107,7 @@ public class DataValueServiceTest
     @Override
     public void setUpTest()
         throws Exception
-    {
-        dataValueService = (DataValueService) getBean( DataValueService.ID );
-        
-        dataElementService = (DataElementService) getBean( DataElementService.ID );
-
-        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
-        
-        periodService = (PeriodService) getBean( PeriodService.ID );
-
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-        
+    { 
         // ---------------------------------------------------------------------
         // Add supporting data
         // ---------------------------------------------------------------------
@@ -134,12 +140,6 @@ public class DataValueServiceTest
         optionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
     }
     
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
-    }
-
     // -------------------------------------------------------------------------
     // Basic DataValue
     // -------------------------------------------------------------------------

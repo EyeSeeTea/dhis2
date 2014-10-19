@@ -19,15 +19,15 @@
 
         <h3>{{'profile' | translate}}</h3>
         <table class="table-borderless table-striped">
-            <tr ng-repeat="attribute in attributes">
+            <tr ng-repeat="attribute in attributesLighter">
                 <td>
                     {{attribute.name}}
                 </td>
                 <td>
                     <ng-form name="innerForm">     
-                        <div ng-switch="attribute.valueType">
+                        <div ng-switch="attribute.type">
                             <div ng-switch-when="date">
-                                <input type="text" placeholder="yyyy-mm-dd" name="foo" class="form-control" ng-date ng-model="attribute.value" ng-required="attribute.mandatory" />
+                                <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" name="foo" class="form-control" d2-date ng-model="attribute.value" ng-required="attribute.mandatory" />
                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
                             </div>
                             <div ng-switch-when="trueOnly">
@@ -48,7 +48,7 @@
                                        name="foo"
                                        class="form-control"
                                        ng-model="attribute.value"                                                 
-                                       typeahead="option.code as option.name for option in attribute.optionSet.options | filter:$viewValue | limitTo:20" 
+                                       typeahead="option.code as option.name for option in attributes[attribute.id].optionSet.options | filter:$viewValue | limitTo:20" 
                                        typeahead-open-on-focus
                                        ng-required="attribute.mandatory"/>
                                 </div>
@@ -58,7 +58,7 @@
                                            name="foo"
                                            class="form-control"
                                            ng-model="attribute.value"                                                 
-                                           typeahead="option.code as option.name for option in attribute.optionSet.options | filter:$viewValue | limitTo:20" 
+                                           typeahead="option.code as option.name for option in attributes[attribute.id].optionSet.options | filter:$viewValue | limitTo:20" 
                                            typeahead-open-on-focus
                                            ng-required="attribute.mandatory"/>
                                     </div>
@@ -87,6 +87,10 @@
                                 <input type="number" name="foo" class="form-control" ng-model="attribute.value" ng-required="attribute.mandatory"/>
                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
                             </div>
+                            <div ng-switch-when="email">
+                                <input type="email" name="foo" class="form-control" ng-model="attribute.value" ng-required="attribute.mandatory"/>
+                                <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
+                            </div>
                             <div ng-switch-default>
                                 <input type="text" name="foo" class="form-control" ng-model="attribute.value" ng-required="attribute.mandatory"/>
                                 <span ng-show="outerForm.submitted && innerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
@@ -107,12 +111,13 @@
                     </td>
                     <td>
                         <input type="text" 
-                               placeholder="yyyy-mm-dd" 
+                               placeholder="{{dhis2CalendarFormat.keyDateFormat}}" 
                                name="dateOfEnrollment" 
                                class="form-control" 
-                               ng-date 
-                               ng-model="enrollment.enrollmentDate" 
-                               max-date="selectedProgram.selectEnrollmentDatesInFuture ? '' : today" 
+                               d2-date 
+                               ng-model="enrollment.dateOfEnrollment" 
+                               max-date="selectedProgram.selectEnrollmentDatesInFuture ? '' : 0"
+                               min-date=""
                                ng-required="true"/>
                         <span ng-show="outerForm.submitted && outerForm.dateOfEnrollment.$invalid" class="error">{{'required'| translate}}</span>
                     </td>
@@ -123,11 +128,13 @@
                     </td>
                     <td>
                         <input type="text" 
-                               placeholder="yyyy-mm-dd" 
+                               placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
+                               name="dateOfIncident"
                                class="form-control" 
-                               ng-date 
-                               max-date="selectedProgram.selectIncidentDatesInFuture ? '' : today"
-                               ng-model="enrollment.incidentDate"/>
+                               d2-date 
+                               max-date="selectedProgram.selectIncidentDatesInFuture ? '' : 0"
+                               min-date=""
+                               ng-model="enrollment.dateOfIncident"/>
                     </td>
                 </tr>
             </table>

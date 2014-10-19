@@ -149,11 +149,12 @@ order by type,name;
 
 -- Display overview of data elements and related category option combos
 
-select de.uid as deuid, de.name as dename, coc.uid as cocuid, con.categoryoptioncomboname
-from dataelement de
-join categorycombos_optioncombos cc using(categorycomboid)
-join categoryoptioncombo coc using(categoryoptioncomboid)
-join _categoryoptioncomboname con using(categoryoptioncomboid);
+select de.uid as dataelement_uid, de.name as dataelement_name, de.code as dataelement_code, coc.uid as optioncombo_uid, cocn.categoryoptioncomboname as optioncombo_name 
+from _dataelementcategoryoptioncombo dcoc 
+inner join dataelement de on dcoc.dataelementuid=de.uid 
+inner join categoryoptioncombo coc on dcoc.categoryoptioncombouid=coc.uid 
+inner join _categoryoptioncomboname cocn on coc.categoryoptioncomboid=cocn.categoryoptioncomboid 
+order by de.name;
 
 -- Display category option combo identifier and name
 
@@ -161,6 +162,18 @@ select cc.categoryoptioncomboid as id, uid, categoryoptioncomboname as name, cod
 from categoryoptioncombo cc
 join _categoryoptioncomboname cn
 on (cc.categoryoptioncomboid=cn.categoryoptioncomboid);
+
+-- Display overview of category option combo
+
+select coc.categoryoptioncomboid as coc_id, coc.uid as coc_uid, co.categoryoptionid as co_id, co.name as co_name, ca.categoryid as ca_id, ca.name as ca_name, cc.categorycomboid as cc_id, cc.name as cc_name
+from categoryoptioncombo coc 
+inner join categoryoptioncombos_categoryoptions coo on coc.categoryoptioncomboid=coo.categoryoptioncomboid
+inner join dataelementcategoryoption co on coo.categoryoptionid=co.categoryoptionid
+inner join categories_categoryoptions cco on co.categoryoptionid=cco.categoryoptionid
+inner join dataelementcategory ca on cco.categoryid=ca.categoryid
+inner join categorycombos_optioncombos ccoc on coc.categoryoptioncomboid=ccoc.categoryoptioncomboid
+inner join categorycombo cc on ccoc.categorycomboid=cc.categorycomboid
+where coc.categoryoptioncomboid=2118430;
 
 -- Display data out of reasonable time range
 
@@ -193,9 +206,13 @@ join categorycombos_optioncombos co
 on (cc.categoryoptioncomboid=co.categoryoptioncomboid)
 where categorycomboid=12414 );
 
--- (Write) Reset password to "district" for account with given username
+-- (Write) MD5 set password to "district" for admin user
 
 update users set password='48e8f1207baef1ef7fe478a57d19f2e5' where username='admin';
+
+-- (Write) Bcrypt set password to "district" for admin user
+
+update users set password='$2a$10$wjLPViry3bkYEcjwGRqnYO1bT2Kl.ZY0kO.fwFDfMX53hitfx5.3C' where username='admin';
 
 -- (Write) Generate random coordinates based on org unit location for events
 
@@ -255,3 +272,12 @@ end;
 $$ language plpgsql;
 
 select setrandomcode();
+
+-- (Write) Remove data elements from data sets which are not part of sections
+
+delete from datasetmembers dsm
+where dataelementid not in (
+  select dataelementid from sectiondataelements ds
+  inner join section s on (ds.sectionid=s.sectionid)
+  where s.datasetid=dsm.datasetid)
+and dsm.datasetid=1979200;

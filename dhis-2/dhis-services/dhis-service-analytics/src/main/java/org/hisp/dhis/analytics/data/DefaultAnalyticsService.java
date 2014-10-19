@@ -138,7 +138,7 @@ import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.system.util.ListUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
-import org.hisp.dhis.system.util.Timer;
+import org.hisp.dhis.util.Timer;
 import org.hisp.dhis.system.util.UniqueArrayList;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -577,8 +577,6 @@ public class DefaultAnalyticsService
         Grid grid = getAggregatedDataValues( params );
 
         Map<String, Double> valueMap = getAggregatedDataValueMapping( grid );
-
-        log.info( "Got aggregated values for table layout" );
         
         return reportTable.getGrid( new ListGrid( grid.getMetaData() ), valueMap, false );
     }
@@ -743,11 +741,11 @@ public class DefaultAnalyticsService
 
         int optimalQueries = MathUtils.getWithin( getProcessNo(), 1, MAX_QUERIES );
 
-        Timer t = new Timer().start();
+        Timer t = new Timer().start().disablePrint();
 
         DataQueryGroups queryGroups = queryPlanner.planQuery( params, optimalQueries, tableName );
 
-        t.getSplitTime( "Planned query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
+        t.getSplitTime( "Planned analytics query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
 
         Map<String, Object> map = new HashMap<>();
 
@@ -779,11 +777,9 @@ public class DefaultAnalyticsService
                     throw new RuntimeException( "Error during execution of aggregation query task", ex );
                 }
             }
-
-            t.getSplitTime( "Got aggregated values for query group" );
         }
 
-        t.getTime( "Got aggregated values" );
+        t.getTime( "Got analytics values" );
 
         return map;
     }
@@ -878,6 +874,7 @@ public class DefaultAnalyticsService
     // TODO verify that current user can read each dimension and dimension item
     // TODO optimize so that org unit levels + boundary are used in query instead of fetching all org units one by one
 
+    @Override
     public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull )
     {
         if ( DATA_X_DIM_ID.equals( dimension ) )

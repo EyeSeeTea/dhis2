@@ -31,7 +31,7 @@
             <span ng-if='showReportDiv'>
                 {{selectedProgram.name}} {{'report'| translate}}
             </span>
-            <div class="pull-right">
+            <div class="pull-right not-printable">
                 <div class="btn-group" dropdown is-open="status.isopen">
                     <button type="button" class="btn btn-default dropdown-toggle" ng-disabled="trackedEntityList.rows.length <= 0">
                         <i class="fa fa-cog" title="{{'settings'| translate}}"></i>
@@ -50,6 +50,14 @@
     <!--- selected org unit ends  -->
 
     <!--- search, registration and reporting menu begins -->
+    <div class="row vertical-spacing not-for-screen">
+        <div class="col-md-4">
+            <h4>{{'org_unit' | translate}}</h4>
+        </div>
+        <div class="col-md-4">
+            <input type="text" class="form-control" ng-disabled='true' value="{{selectedOrgUnit.name}}">
+        </div>
+    </div>
     <div class="row"> 
         <div id="selectDropDownParent" class="input-group col-md-4">            
             <button type="button" class="select-dropdown-button form-control" ng-show="programs.length > 0">{{selectedProgram ? selectedProgram.name : 'please_select_a_program'| translate}}</button>
@@ -66,15 +74,13 @@
                 </ul>
             </div>                
         </div>
-        <div id="searchDropDownParent" class="input-group col-md-4">
+        <div id="searchDropDownParent" class="input-group col-md-4 not-printable">
             <input type="text" placeholder="{{'type_here_for_simple_search'| translate}}" ng-model="searchText" class="form-control expanded" d2-enter="search(searchMode.freeText)" ng-class="{true: 'invalid-input'} [!searchText && emptySearchText]" ng-focus="showHideSearch()" ng-disabled="showRegistrationDiv || showReportDiv">
             <div class="input-group-btn">
                 <button class="btn btn-default search-dropdown-button trim" type="button" title="{{'advanced_search'| translate}}" data-toggle="dropdown" ng-click="showHideSearch()" ng-disabled="showRegistrationDiv || showReportDiv"><i class="fa fa-caret-down"></i></button>
                 <button class="btn btn-primary trim" type="button" title="{{'search'| translate}}" ng-disabled="showRegistrationDiv || showReportDiv" ng-click="search(searchMode.freeText)"><i class="fa fa-search"></i></button>
                 <div id="searchDropDown" class="dropdown-menu dropdown-menu-right">
                     <form ng-submit="search(searchMode.attributeBased)">
-                        <!-- had to disable ng-include to avoid dealing with a separate controller/scope issue-->
-                        <!--<div ng-include="'views/search.html'"></div>-->
                         <div class="search-container-main">
                             <div class="search-container">    
                                 <table data-stop-propagation="true" class="table-borderless table-striped">
@@ -96,25 +102,25 @@
                                                     </select>
                                                 </div>
                                                 <div class="filter-value" ng-show="enrollment.operator === defaultOperators[0]">
-                                                    <input type="text" placeholder="{{'exact_date'| translate}}" class="form-control-select2" ng-date ng-model="enrollment.programExactDate"/>
+                                                    <input type="text" placeholder="{{'exact_date'| translate}}" class="form-control-select2" d2-date ng-model="enrollment.programExactDate"/>
                                                 </div>
                                                 <div class="filter-value" ng-show="enrollment.operator === defaultOperators[1]">
                                                     <div class="container-1-2">
-                                                        <input type="text" placeholder="{{'start_date'| translate}}" class="form-control-select2" ng-date ng-model="enrollment.programStartDate"/>
+                                                        <input type="text" placeholder="{{'start_date'| translate}}" class="form-control-select2" d2-date ng-model="enrollment.programStartDate"/>
                                                     </div>
                                                     <div class="container-1-2">
-                                                        <input type="text" placeholder="{{'end_date'| translate}}" class="form-control-select2" ng-date ng-model="enrollment.programEndDate"/>                
+                                                        <input type="text" placeholder="{{'end_date'| translate}}" class="form-control-select2" d2-date ng-model="enrollment.programEndDate"/>                
                                                     </div>
                                                 </div>                    
                                             </div>                
                                         </td>
                                     </tr>
-                                    <tr ng-repeat="attribute in attributes">
+                                    <tr ng-repeat="attribute in attributesLighter">
                                         <td>
                                             {{attribute.name}}
                                         </td>
                                         <td>
-                                            <div ng-switch="attribute.valueType">
+                                            <div ng-switch="attribute.type">
                                                 <div ng-switch-when="number">
                                                     <div class="dataelement-filter">                                                
                                                         <div class="filter-operator">
@@ -141,25 +147,25 @@
                                                             </select>
                                                         </div>
                                                         <div class="filter-value" ng-show="attribute.operator === defaultOperators[0]">
-                                                            <input type="text" placeholder="{{'exact_date'| translate}}" class="form-control-select2" ng-date ng-model="attribute.exactValue"/>
+                                                            <input type="text" placeholder="{{'exact_date'| translate}}" class="form-control-select2" d2-date ng-model="attribute.exactValue"/>
                                                         </div>
                                                         <div class="filter-value" ng-show="attribute.operator === defaultOperators[1]">
                                                             <div class="container-1-2">
-                                                                <input type="text" placeholder="{{'start_date'| translate}}" class="form-control-select2" ng-date ng-model="attribute.startValue"/>
+                                                                <input type="text" placeholder="{{'start_date'| translate}}" class="form-control-select2" d2-date ng-model="attribute.startValue"/>
                                                             </div>
                                                             <div class="container-1-2">
-                                                                <input type="text" placeholder="{{'end_date'| translate}}" class="form-control-select2" ng-date ng-model="attribute.endValue"/>                
+                                                                <input type="text" placeholder="{{'end_date'| translate}}" class="form-control-select2" d2-date ng-model="attribute.endValue"/>                
                                                             </div>
                                                         </div>                            
                                                     </div> 
                                                 </div>                        
                                                 <div ng-switch-when="optionSet">
                                                     <select multiple ui-select2  ng-model="attribute.value" data-placeholder="{{'please_select'| translate}}" style="width:100%;">
-                                                        <option ng-repeat="option in attribute.optionSet.options" value="{{option.code}}">{{option.name}}</option>
+                                                        <option ng-repeat="option in attributes[attribute.id].optionSet.options | filter:$viewValue | limitTo:100" value="{{option.code}}">{{option.name}}</option>
                                                     </select>
                                                 </div>
                                                 <div ng-switch-when="bool">
-                                                    <select ui-select2  ng-model="attribute.value" data-placeholder="{{'please_select'| translate}}" style="width:100%;">
+                                                    <select ui-select2 multiple ng-model="attribute.value" data-placeholder="{{'please_select'| translate}}" style="width:100%;">
                                                         <option ng-repeat="option in boolOperators" value="{{option}}">{{option| translate}}</option>
                                                     </select>
                                                 </div> 
@@ -189,7 +195,7 @@
                 </div>
             </div>                
         </div>        
-        <div class="col-md-4 trim">            
+        <div class="col-md-4 trim not-printable">            
             <button type="button" 
                     class="btn btn-success"
                     ng-disabled="showRegistrationDiv || showReportDiv"
@@ -201,6 +207,12 @@
                     ng-disabled="showReportDiv"
                     ng-click="showRegistration()">                    
                 {{'register'| translate}}
+            </button>
+            <button type="button" 
+                    class="btn btn-info"
+                    ng-if="teiCount > 0"
+                    onclick="javascript:window.print()">                    
+                {{'print'| translate}}
             </button>
         </div>
     </div>

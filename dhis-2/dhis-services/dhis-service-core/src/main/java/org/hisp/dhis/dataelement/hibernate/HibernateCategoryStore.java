@@ -30,6 +30,7 @@ package org.hisp.dhis.dataelement.hibernate;
 
 import java.util.Collection;
 
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateDimensionalObjectStore;
 import org.hisp.dhis.dataelement.CategoryStore;
 import org.hisp.dhis.dataelement.DataElementCategory;
@@ -41,9 +42,10 @@ public class HibernateCategoryStore
     extends HibernateDimensionalObjectStore<DataElementCategory>
     implements CategoryStore
 {
+    @Override
     @SuppressWarnings("unchecked")
     public Collection<DataElementCategory> getCategoriesByDimensionType( String dimensionType )
     {
-        return getQueryWithSelect( "dataDimensionType = :dimensionType" ).setString( "dimensionType", dimensionType ).list();
+        return getSharingCriteria( Restrictions.eq( "dataDimensionType", dimensionType ) ).list();
     }
 }

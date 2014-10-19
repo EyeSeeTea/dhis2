@@ -45,9 +45,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
-import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.joda.time.DateTime;
 
 import com.opensymphony.xwork2.Action;
 
@@ -202,6 +202,7 @@ public class GetDataSetReportOptionsAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
     {        
         periodTypes = getAvailablePeriodTypes();
@@ -212,7 +213,7 @@ public class GetDataSetReportOptionsAction
         {
             Period period = getPeriodFromIsoString( pe );
                         
-            offset = new Cal().set( period.getStartDate() ).getYear() - new Cal().now().getYear();
+            offset = new DateTime( period.getStartDate() ).getYear() - new DateTime().getYear();
             
             periodType = period.getPeriodType();
             

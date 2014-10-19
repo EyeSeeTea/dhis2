@@ -76,7 +76,6 @@ import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.system.util.TextUtils;
-import org.hisp.dhis.system.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -111,6 +110,7 @@ public class JdbcAnalyticsManager
     // Implementation
     // -------------------------------------------------------------------------
     
+    @Override
     @Async
     public Future<Map<String, Object>> getAggregatedDataValues( DataQueryParams params )
     {
@@ -160,6 +160,7 @@ public class JdbcAnalyticsManager
         }
     }
     
+    @Override
     public void replaceDataPeriodsWithAggregationPeriods( Map<String, Object> dataValueMap, DataQueryParams params, ListMap<NameableObject, NameableObject> dataPeriodAggregationPeriodMap )
     {
         if ( params.isDisaggregation() )
@@ -388,11 +389,9 @@ public class JdbcAnalyticsManager
     {
         Map<String, Object> map = new HashMap<>();
         
-        Timer t = new Timer().start();
-        
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
         
-        t.getTime( "Analytics SQL: " + sql );
+        log.debug( "Analytics SQL: " + sql );
         
         while ( rowSet.next() )
         {

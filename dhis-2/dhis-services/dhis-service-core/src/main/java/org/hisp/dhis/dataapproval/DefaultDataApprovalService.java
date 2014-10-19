@@ -135,6 +135,7 @@ public class DefaultDataApprovalService
     // DataApproval
     // -------------------------------------------------------------------------
 
+    @Override
     public void approveData( List<DataApproval> dataApprovalList )
     {
         List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
@@ -168,6 +169,7 @@ public class DefaultDataApprovalService
         }
     }
 
+    @Override
     public void unapproveData( List<DataApproval> dataApprovalList )
     {
         List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
@@ -197,6 +199,7 @@ public class DefaultDataApprovalService
         }
     }
 
+    @Override
     public void acceptData( List<DataApproval> dataApprovalList )
     {
         List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
@@ -228,6 +231,7 @@ public class DefaultDataApprovalService
         }
     }
 
+    @Override
     public void unacceptData( List<DataApproval> dataApprovalList )
     {
         List<DataApproval> checkedList = checkApprovalsList( dataApprovalList, false );
@@ -259,6 +263,7 @@ public class DefaultDataApprovalService
         }
     }
 
+    @Override
     public DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         Set<DataElementCategoryOption> attributeCategoryOptions = ( attributeOptionCombo == null || attributeOptionCombo.equals( categoryService.getDefaultDataElementCategoryOptionCombo() ) )
@@ -290,6 +295,7 @@ public class DefaultDataApprovalService
         return status;
     }
 
+    @Override
     public DataApprovalStatusAndPermissions getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
                                     OrganisationUnit organisationUnit, Set<CategoryOptionGroup> categoryOptionGroups,
                                     Set<DataElementCategoryOption> attributeCategoryOptions )

@@ -205,6 +205,7 @@ public abstract class BaseAnalyticalObject
     public abstract void init( User user, Date date, OrganisationUnit organisationUnit,
         List<OrganisationUnit> organisationUnitsAtLevel, List<OrganisationUnit> organisationUnitsInGroups, I18nFormat format );
 
+    @Override
     public abstract void populateAnalyticalProperties();
 
     public boolean hasUserOrgUnit()
@@ -728,7 +729,7 @@ public abstract class BaseAnalyticalObject
 
         for ( NameableObject item : dimensions )
         {
-            if ( item.getClass().isAssignableFrom( DataElementOperand.class ) )
+            if ( item.getClass().equals( DataElementOperand.class ) )
             {
                 ids.add( ((DataElementOperand) item).getDataElement().getUid() );
                 ids.add( ((DataElementOperand) item).getCategoryOptionCombo().getUid() );
@@ -1148,12 +1149,14 @@ public abstract class BaseAnalyticalObject
         return transientOrganisationUnits;
     }
 
+    @Override
     @JsonIgnore
     public Date getRelativePeriodDate()
     {
         return relativePeriodDate;
     }
 
+    @Override
     @JsonIgnore
     public OrganisationUnit getRelativeOrganisationUnit()
     {
@@ -1164,6 +1167,7 @@ public abstract class BaseAnalyticalObject
     // Web domain properties
     // -------------------------------------------------------------------------
 
+    @Override
     @JsonProperty
     @JsonDeserialize( contentAs = BaseDimensionalObject.class )
     @JsonSerialize( contentAs = BaseDimensionalObject.class )
@@ -1180,6 +1184,7 @@ public abstract class BaseAnalyticalObject
         this.columns = columns;
     }
 
+    @Override
     @JsonProperty
     @JsonDeserialize( contentAs = BaseDimensionalObject.class )
     @JsonSerialize( contentAs = BaseDimensionalObject.class )
@@ -1196,6 +1201,7 @@ public abstract class BaseAnalyticalObject
         this.rows = rows;
     }
 
+    @Override
     @JsonProperty
     @JsonDeserialize( contentAs = BaseDimensionalObject.class )
     @JsonSerialize( contentAs = BaseDimensionalObject.class )
@@ -1212,6 +1218,7 @@ public abstract class BaseAnalyticalObject
         this.filters = filters;
     }
 
+    @Override
     @JsonProperty
     @JsonView( { DimensionalView.class } )
     public Map<String, String> getParentGraphMap()

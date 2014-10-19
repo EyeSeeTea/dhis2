@@ -30,6 +30,7 @@ package org.hisp.dhis.calendar;
 
 import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -101,6 +102,7 @@ public abstract class AbstractCalendar implements Calendar
         return dateFormat;
     }
 
+    @Override
     public void setDateFormat( String dateFormat )
     {
         this.dateFormat = dateFormat;
@@ -189,7 +191,7 @@ public abstract class AbstractCalendar implements Calendar
     @Override
     public DateTimeUnit today()
     {
-        DateTime dateTime = DateTime.now( ISOChronology.getInstance() );
+        DateTime dateTime = DateTime.now( ISOChronology.getInstance( DateTimeZone.getDefault() ) );
         DateTimeUnit dateTimeUnit = new DateTimeUnit( dateTime.getYear(), dateTime.getMonthOfYear(), dateTime.getDayOfMonth(), true );
         return fromIso( dateTimeUnit );
     }

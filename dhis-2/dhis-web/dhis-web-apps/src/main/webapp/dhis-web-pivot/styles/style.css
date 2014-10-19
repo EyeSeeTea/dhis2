@@ -52,6 +52,7 @@ body,
 .x-grid-cell-inner,
 .x-form-item-label,
 .x-window-header-text-default {
+    font-size: 11px;
 	font-family: arial,sans-serif,ubuntu,consolas;
 }
 
@@ -218,12 +219,22 @@ table.pivot {
 }
 
 .pivot-dim-label {
-	background-color: #f2f6fc;
+	background-color: #cddaed;
 	white-space: nowrap;
     text-align: center;
 }
 .pivot-empty {
-	background-color: #dae6f8;
+	background-color: #cddaed;
+}
+.pivot-transparent-column {
+	background-color: #fff;
+    border-top-color: #fff !important;
+    border-right-color: #fff !important;
+}
+.pivot-transparent-row {
+	background-color: #fff;
+    border-bottom-color: #fff !important;
+    border-left-color: #fff !important;
 }
 
 .pivot-value {
@@ -858,7 +869,7 @@ table.pivot {
     font-size: 11px;
     font-weight: bold;
     color: #333;
-    line-height: 20px;
+    line-height: 18px;
 }
 .ns-label-period-heading-options {
     background-color: #e1e1e1;

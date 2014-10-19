@@ -88,8 +88,8 @@
                         </div>
                         <div ng-switch-when="date">
                             <input type="text" 
-                                   placeholder="yyyy-mm-dd" 
-                                   ng-date 
+                                   placeholder="{{dhis2CalendarFormat.keyDateFormat}}" 
+                                   d2-date 
                                    ng-class='getInputNotifcationClass(prStDe.dataElement.id,false)'
                                    ng-model="currentEvent[prStDe.dataElement.id]"
                                    ng-required={{prStDe.compulsory}}  

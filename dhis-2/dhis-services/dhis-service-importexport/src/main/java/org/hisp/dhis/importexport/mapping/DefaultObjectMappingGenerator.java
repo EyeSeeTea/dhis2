@@ -35,7 +35,6 @@ import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
 import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -51,7 +50,6 @@ import org.hisp.dhis.indicator.IndicatorGroupSet;
 import org.hisp.dhis.indicator.IndicatorType;
 import org.hisp.dhis.jdbc.batchhandler.ConceptBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.ConstantBatchHandler;
-import org.hisp.dhis.jdbc.batchhandler.DataDictionaryBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementCategoryBatchHandler;
 import org.hisp.dhis.jdbc.batchhandler.DataElementCategoryComboBatchHandler;
@@ -108,6 +106,7 @@ public class DefaultObjectMappingGenerator
     // Constant
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getConstantMapping( boolean skipMapping )
     {
         BatchHandler<Constant> batchHandler = batchHandlerFactory.createBatchHandler( ConstantBatchHandler.class );
@@ -119,6 +118,7 @@ public class DefaultObjectMappingGenerator
     // Concept
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getConceptMapping( boolean skipMapping )
     {
         BatchHandler<Concept> batchHandler = batchHandlerFactory.createBatchHandler( ConceptBatchHandler.class );
@@ -137,6 +137,7 @@ public class DefaultObjectMappingGenerator
     // DataElementCategory
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getCategoryMapping( boolean skipMapping )
     {
         BatchHandler<DataElementCategory> batchHandler = batchHandlerFactory
@@ -149,6 +150,7 @@ public class DefaultObjectMappingGenerator
     // DataElementCategoryCombo
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getCategoryComboMapping( boolean skipMapping )
     {
         BatchHandler<DataElementCategoryCombo> batchHandler = batchHandlerFactory
@@ -161,6 +163,7 @@ public class DefaultObjectMappingGenerator
     // DataElementCategoryOption
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getCategoryOptionMapping( boolean skipMapping )
     {
         BatchHandler<DataElementCategoryOption> batchHandler = batchHandlerFactory
@@ -173,6 +176,7 @@ public class DefaultObjectMappingGenerator
     // DataElementCategoryOptionCombo
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getCategoryOptionComboMapping( boolean skipMapping )
     {
         return getMapping( NameMappingUtil.getCategoryOptionComboMap(), skipMapping );
@@ -182,6 +186,7 @@ public class DefaultObjectMappingGenerator
     // DataElement
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getDataElementMapping( boolean skipMapping )
     {
         BatchHandler<DataElement> batchHandler = batchHandlerFactory.createBatchHandler( DataElementBatchHandler.class );
@@ -193,6 +198,7 @@ public class DefaultObjectMappingGenerator
     // DataElementGroup
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getDataElementGroupMapping( boolean skipMapping )
     {
         BatchHandler<DataElementGroup> batchHandler = batchHandlerFactory
@@ -205,6 +211,7 @@ public class DefaultObjectMappingGenerator
     // DataElementGroupSet
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getDataElementGroupSetMapping( boolean skipMapping )
     {
         BatchHandler<DataElementGroupSet> batchHandler = batchHandlerFactory
@@ -217,6 +224,7 @@ public class DefaultObjectMappingGenerator
     // Indicator
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getIndicatorMapping( boolean skipMapping )
     {
         BatchHandler<Indicator> batchHandler = batchHandlerFactory.createBatchHandler( IndicatorBatchHandler.class );
@@ -228,6 +236,7 @@ public class DefaultObjectMappingGenerator
     // IndicatorGroup
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getIndicatorGroupMapping( boolean skipMapping )
     {
         BatchHandler<IndicatorGroup> batchHandler = batchHandlerFactory
@@ -240,6 +249,7 @@ public class DefaultObjectMappingGenerator
     // IndicatorGroupSet
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getIndicatorGroupSetMapping( boolean skipMapping )
     {
         BatchHandler<IndicatorGroupSet> batchHandler = batchHandlerFactory
@@ -252,6 +262,7 @@ public class DefaultObjectMappingGenerator
     // IndicatorType
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getIndicatorTypeMapping( boolean skipMapping )
     {
         BatchHandler<IndicatorType> batchHandler = batchHandlerFactory
@@ -261,21 +272,10 @@ public class DefaultObjectMappingGenerator
     }
 
     // -------------------------------------------------------------------------
-    // DataDictionary
-    // -------------------------------------------------------------------------
-
-    public Map<Object, Integer> getDataDictionaryMapping( boolean skipMapping )
-    {
-        BatchHandler<DataDictionary> batchHandler = batchHandlerFactory
-            .createBatchHandler( DataDictionaryBatchHandler.class );
-
-        return getMapping( batchHandler, NameMappingUtil.getDataDictionaryMap(), skipMapping );
-    }
-
-    // -------------------------------------------------------------------------
     // DataSet
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getDataSetMapping( boolean skipMapping )
     {
         BatchHandler<DataSet> batchHandler = batchHandlerFactory.createBatchHandler( DataSetBatchHandler.class );
@@ -287,6 +287,7 @@ public class DefaultObjectMappingGenerator
     // OrganisationUnit
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getOrganisationUnitMapping( boolean skipMapping )
     {
         BatchHandler<OrganisationUnit> batchHandler = batchHandlerFactory
@@ -299,6 +300,7 @@ public class DefaultObjectMappingGenerator
     // OrganisationUnitGroup
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getOrganisationUnitGroupMapping( boolean skipMapping )
     {
         BatchHandler<OrganisationUnitGroup> batchHandler = batchHandlerFactory
@@ -311,6 +313,7 @@ public class DefaultObjectMappingGenerator
     // OrganisationUnitGroupSet
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getOrganisationUnitGroupSetMapping( boolean skipMapping )
     {
         BatchHandler<OrganisationUnitGroupSet> batchHandler = batchHandlerFactory
@@ -323,6 +326,7 @@ public class DefaultObjectMappingGenerator
     // ReportTable
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getReportTableMapping( boolean skipMapping )
     {
         BatchHandler<ReportTable> batchHandler = batchHandlerFactory.createBatchHandler( ReportTableBatchHandler.class );
@@ -334,6 +338,7 @@ public class DefaultObjectMappingGenerator
     // Period
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Object, Integer> getPeriodMapping( boolean skipMapping ) // Original
     // identifier,
     // new
@@ -367,6 +372,7 @@ public class DefaultObjectMappingGenerator
         return periodMap;
     }
 
+    @Override
     public Map<Period, Integer> getPeriodObjectMapping( boolean skipMapping ) // Original
     // object,
     // new
@@ -406,6 +412,7 @@ public class DefaultObjectMappingGenerator
     // PeriodType
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public Map<String, Integer> getPeriodTypeMapping()
     {

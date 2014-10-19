@@ -138,7 +138,7 @@ Ext.onReady( function() {
 				west_fill_accordion_indicator: 56,
 				west_fill_accordion_dataelement: 59,
 				west_fill_accordion_dataset: 31,
-				west_fill_accordion_period: 293,
+				west_fill_accordion_period: 284,
 				west_fill_accordion_organisationunit: 58,
 				west_maxheight_accordion_indicator: 400,
 				west_maxheight_accordion_dataelement: 400,
@@ -310,7 +310,9 @@ Ext.onReady( function() {
 
 				// showColTotals: boolean (true)
 
-				// showSubTotals: boolean (true)
+				// showColSubTotals: boolean (true)
+
+				// showRowSubTotals: boolean (true)
 
                 // showDimensionLabels: boolean (false)
 
@@ -477,9 +479,10 @@ Ext.onReady( function() {
 					layout.filters = config.filters;
 
 					// properties
-					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
 					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
-					layout.showSubTotals = Ext.isBoolean(config.subtotals) ? config.subtotals : (Ext.isBoolean(config.showSubTotals) ? config.showSubTotals : true);
+					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
+					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
+					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
                     layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
@@ -1630,8 +1633,12 @@ Ext.onReady( function() {
 					delete layout.showColTotals;
 				}
 
-				if (layout.showSubTotals) {
-					delete layout.showSubTotals;
+				if (layout.showColSubTotals) {
+					delete layout.showColSubTotals;
+				}
+
+				if (layout.showRowSubTotals) {
+					delete layout.showRowSubTotals;
 				}
 
 				if (!layout.hideEmptyRows) {
@@ -1961,6 +1968,9 @@ Ext.onReady( function() {
                     paramString += '&aggregationType=' + aggTypes[xLayout.aggregationType];
                 }
 
+                // display property
+                paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
 				return paramString;
 			};
 
@@ -2183,16 +2193,20 @@ Ext.onReady( function() {
 					return html;
 				};
 
-				doSubTotals = function(xAxis) {
-					return !!xLayout.showSubTotals && xAxis && xAxis.dims > 1;
+                doColTotals = function() {
+					return !!xLayout.showColTotals;
 				};
 
 				doRowTotals = function() {
 					return !!xLayout.showRowTotals;
 				};
 
-                doColTotals = function() {
-					return !!xLayout.showColTotals;
+				doColSubTotals = function() {
+					return !!xLayout.showColSubTotals && xRowAxis && xRowAxis.dims > 1;
+				};
+
+				doRowSubTotals = function() {
+					return !!xLayout.showRowSubTotals && xColAxis && xColAxis.dims > 1;
 				};
 
 				doSortableColumnHeaders = function() {
@@ -2217,6 +2231,7 @@ Ext.onReady( function() {
                     getEmptyHtmlArray = function(i) {
                         var a = [];
 
+                        // if not the intersection cell
                         if (i < xColAxis.dims - 1) {
                             if (xRowAxis && xRowAxis.dims) {
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
@@ -2243,14 +2258,32 @@ Ext.onReady( function() {
 
                             a.push(getEmptyNameTdConfig({
                                 cls: 'pivot-dim-label',
-                                htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + ', ' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;/&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
                             }));
                         }
 
                         return a;
                     };
 
-					if (!(xColAxis && Ext.isObject(xColAxis))) {
+					if (!xColAxis) {
+
+                        // show row dimension labels
+                        if (xRowAxis && xLayout.showDimensionLabels) {
+                            var dimLabelHtml = [];
+
+                            // labels from row object names
+                            for (var i = 0; i < xLayout.rowObjectNames.length; i++) {
+                                dimLabelHtml.push(getEmptyNameTdConfig({
+                                    cls: 'pivot-dim-label',
+                                    htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[i]].name
+                                }));
+                            }
+
+                            // pivot-transparent-column unnecessary
+
+                            a.push(dimLabelHtml);
+                        }
+                        
 						return a;
 					}
 
@@ -2289,7 +2322,7 @@ Ext.onReady( function() {
 
 							dimHtml.push(getTdHtml(obj, condoId));
 
-							if (i === 0 && spanCount === xColAxis.span[i] && doSubTotals(xColAxis) ) {
+							if (i === 0 && spanCount === xColAxis.span[i] && doRowSubTotals() ) {
 								dimHtml.push(getTdHtml({
 									type: 'dimensionSubtotal',
 									cls: 'pivot-dim-subtotal cursor-default',
@@ -2363,6 +2396,16 @@ Ext.onReady( function() {
 							axisAllObjects.push(row);
 						}
 					}
+                    else {
+                        if (xLayout.showDimensionLabels) {
+                            axisAllObjects.push([{
+                                type: 'transparent',
+                                cls: 'pivot-transparent-row'
+                            }]);
+                        }
+                    }
+                        
+                        
 	//axisAllObjects = [ [ dim, dim ]
 	//				     [ dim, dim ]
 	//				     [ dim, dim ]
@@ -2486,7 +2529,7 @@ Ext.onReady( function() {
                     xValueObjects = valueObjects;
 
 					// col subtotals
-					if (doSubTotals(xColAxis)) {
+					if (doRowSubTotals()) {
 						var tmpValueObjects = [];
 
 						for (var i = 0, row, rowSubTotal, colCount; i < xValueObjects.length; i++) {
@@ -2528,7 +2571,7 @@ Ext.onReady( function() {
 					}
 
 					// row subtotals
-					if (doSubTotals(xRowAxis)) {
+					if (doColSubTotals()) {
 						var tmpAxisAllObjects = [],
 							tmpValueObjects = [],
 							tmpTotalValueObjects = [],
@@ -2642,9 +2685,9 @@ Ext.onReady( function() {
 					for (var i = 0, row; i < xValueObjects.length; i++) {
 						row = [];
 
-						if (xRowAxis) {
+						//if (xRowAxis) {
 							row = row.concat(axisAllObjects[i]);
-						}
+						//}
 
 						row = row.concat(xValueObjects[i]);
 
@@ -2699,7 +2742,7 @@ Ext.onReady( function() {
 
 						xTotalColObjects = totalColObjects;
 
-						if (xColAxis && doSubTotals(xColAxis)) {
+						if (xColAxis && doRowSubTotals()) {
 							var tmp = [];
 
 							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < xTotalColObjects.length; i++) {
