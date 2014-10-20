@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.system.timer;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,47 +28,16 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.junit.Test;
-
-import static org.junit.Assert.*;
-
 /**
- * @author Lars Helge Overland
+ * Simple interface that captures time, and pretty prints it back to you
+ *
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class ListUtilsTest
+public interface Timer
 {
-    @Test
-    public void testRemoveAll()
-    {
-        List<String> list = new ArrayList<>( Arrays.asList( "a", "b", "c", "d", "e", "f", "g", "h" ) );
-        
-        Integer[] indexes = { 0, 2, 5, 7 };
+    Timer start();
 
-        assertEquals( 8, list.size() );
-        
-        ListUtils.removeAll( list, indexes );
-        
-        assertEquals( 4, list.size() );
-        assertTrue( list.contains( "b" ) );
-        assertTrue( list.contains( "d" ) );
-        assertTrue( list.contains( "e" ) );
-        assertTrue( list.contains( "g" ) );
-    }
-    
-    @Test
-    public void testGetDuplicates()
-    {
-        List<String> list = new ArrayList<>( Arrays.asList( "a", "b", "c", "c", "d", "e", "e", "e", "f" ) );
-        Set<String> expected = new HashSet<>( Arrays.asList( "c", "e" ) );
-        assertEquals( expected, ListUtils.getDuplicates( list ) );
-        
-        list = new ArrayList<>( Arrays.asList( "a", "b", "c", "d", "e", "f", "g", "h" ) );
-        assertEquals( 0, ListUtils.getDuplicates( list ).size() );
-    }
+    Timer stop();
+
+    Long duration();
 }

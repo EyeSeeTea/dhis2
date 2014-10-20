@@ -28,38 +28,24 @@ function removeUserGroup( context ) {
   removeItem(context.id, context.name, i18n_confirm_delete, 'removeUserGroup.action');
 }
 
+// TODO combine functions below?
+
 function joinUserGroup( context ) {
-    // TODO pre-checks
-
-    $.ajax( {
-        type: "POST",
-        dataType: "json",
-        url: "joinUserGroup.action",
-        data: { userGroupId: context.id },
-        accepts: "application/json",
-        success: function( json ) {
-            if( $.parseJSON( json ).response == "success" )
+    jQuery.postJSON( 'joinUserGroup.action', { userGroupUid: context.uid },
+        function( json ) {
+            if( json.response === "success" )
             {
-                console.log( "joined group " + context.id );
-                $( "#tr" + context.id ).children().find( ".fa-user" ).show();
+                var $userGroup = $( "#tr" + context.id );
+                $userGroup.children().find( ".memberIcon" ).show();
+                $userGroup.data( "can-join", false );
+                $userGroup.data( "can-leave", true );
             }
-        },
-        error: function( json ) {
+            else // Error
+            {
 
+            }
         }
-    } );
-//    jQuery.postJSON( 'joinUserGroup.action', { userGroupUid: context.uid },
-//      function( json ) {
-//          if( json.response === "success" )
-//          {
-//              $( "#tr" + context.id ).children().find( ".fa-user" ).show();
-//          }
-//          else // Error
-//          {
-//
-//          }
-//      }
-//    );
+    );
 }
 
 function leaveUserGroup( context ) {
@@ -67,7 +53,10 @@ function leaveUserGroup( context ) {
       function( json ) {
         if( json.response === "success" )
         {
-            $( "#tr" + context.id ).children().find( ".fa-user" ).hide();
+            var $userGroup = $( "#tr" + context.id );
+            $userGroup.children().find( ".memberIcon" ).hide();
+            $userGroup.data("can-join", true );
+            $userGroup.data("can-leave", false );
         }
         else // Error
         {

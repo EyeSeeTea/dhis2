@@ -1,4 +1,4 @@
-package org.hisp.dhis.system.util;
+package org.hisp.dhis.dataelement.hibernate;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,47 +28,26 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.junit.Test;
-
-import static org.junit.Assert.*;
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.dataelement.CategoryOptionStore;
+import org.hisp.dhis.dataelement.DataElementCategory;
+import org.hisp.dhis.dataelement.DataElementCategoryOption;
 
 /**
  * @author Lars Helge Overland
  */
-public class ListUtilsTest
+public class HibernateCategoryOptionStore
+    extends HibernateIdentifiableObjectStore<DataElementCategoryOption>
+    implements CategoryOptionStore
 {
-    @Test
-    public void testRemoveAll()
+    @SuppressWarnings("unchecked")
+    public List<DataElementCategoryOption> getCategoryOptions( DataElementCategory category )
     {
-        List<String> list = new ArrayList<>( Arrays.asList( "a", "b", "c", "d", "e", "f", "g", "h" ) );
-        
-        Integer[] indexes = { 0, 2, 5, 7 };
-
-        assertEquals( 8, list.size() );
-        
-        ListUtils.removeAll( list, indexes );
-        
-        assertEquals( 4, list.size() );
-        assertTrue( list.contains( "b" ) );
-        assertTrue( list.contains( "d" ) );
-        assertTrue( list.contains( "e" ) );
-        assertTrue( list.contains( "g" ) );
-    }
-    
-    @Test
-    public void testGetDuplicates()
-    {
-        List<String> list = new ArrayList<>( Arrays.asList( "a", "b", "c", "c", "d", "e", "e", "e", "f" ) );
-        Set<String> expected = new HashSet<>( Arrays.asList( "c", "e" ) );
-        assertEquals( expected, ListUtils.getDuplicates( list ) );
-        
-        list = new ArrayList<>( Arrays.asList( "a", "b", "c", "d", "e", "f", "g", "h" ) );
-        assertEquals( 0, ListUtils.getDuplicates( list ).size() );
+        return getSharingCriteria().
+            createAlias( "categories", "category" ).
+            add( Restrictions.eq( "category.id", category.getId() ) ).list();
     }
 }

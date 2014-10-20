@@ -79,7 +79,11 @@ public class JdbcCompletenessTargetTableManager
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns( table ) )
+        List<String[]> columns = getDimensionColumns( table );
+        
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -105,6 +109,8 @@ public class JdbcCompletenessTargetTableManager
             {
                 break taskLoop;
             }
+
+            final String tableName = table.getTempTableName();
             
             String sql = "insert into " + table.getTempTableName() + " (";
     
@@ -127,9 +133,7 @@ public class JdbcCompletenessTargetTableManager
                 "left join _orgunitstructure ous on dss.sourceid=ous.organisationunitid " +
                 "left join _organisationunitgroupsetstructure ougs on dss.sourceid=ougs.organisationunitid";            
     
-            log.info( "Populate SQL: "+ sql );
-            
-            jdbcTemplate.execute( sql );
+            populateAndLog( sql, tableName );
         }
         
         return null;

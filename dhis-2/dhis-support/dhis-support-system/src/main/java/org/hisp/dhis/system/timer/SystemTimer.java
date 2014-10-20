@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.timer;
+package org.hisp.dhis.system.timer;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,16 +28,42 @@ package org.hisp.dhis.dxf2.timer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.concurrent.TimeUnit;
+
 /**
- * Simple interface that captures time, and pretty prints it back to you
- *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface Timer<T>
+public class SystemTimer 
+    implements Timer
 {
-    Timer<T> start();
+    private long _start = 0;
 
-    Timer<T> stop();
+    private long _end = 0;
 
-    T getDuration();
+    @Override
+    public Timer start()
+    {
+        _start = System.nanoTime();
+        return this;
+    }
+
+    @Override
+    public Timer stop()
+    {
+        _end = System.nanoTime();
+        return this;
+    }
+
+    @Override
+    public Long duration()
+    {
+        return _end - _start;
+    }
+
+    @Override
+    public String toString()
+    {
+        double seconds = TimeUnit.MILLISECONDS.convert( duration(), TimeUnit.NANOSECONDS ) / 1000.0f;
+        return String.format( "%.2f seconds", seconds );
+    }
 }

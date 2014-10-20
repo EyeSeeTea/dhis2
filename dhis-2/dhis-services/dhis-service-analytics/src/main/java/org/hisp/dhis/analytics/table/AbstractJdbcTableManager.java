@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -50,6 +51,9 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.timer.SystemTimer;
+import org.hisp.dhis.system.timer.Timer;
+import org.hisp.dhis.system.util.ListUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.BadSqlGrammarException;
@@ -327,5 +331,45 @@ public abstract class AbstractJdbcTableManager
         {
             log.debug( ex.getMessage() );
         }
+    }
+    
+    /**
+     * Checks whether the given list of dimensions are valid.
+     * @throws IllegalStateException if not valid.
+     */
+    protected void validateDimensionColumns( List<String[]> dimensions )
+    {
+        if ( dimensions == null || dimensions.isEmpty() )
+        {
+            throw new IllegalStateException( "Analytics table dimensions are empty" );
+        }
+        
+        List<String> columns = new ArrayList<>();
+        
+        for ( String[] dimension : dimensions )
+        {
+            columns.add( dimension[0] );
+        }
+        
+        Set<String> duplicates = ListUtils.getDuplicates( columns );
+        
+        if ( !duplicates.isEmpty() )
+        {
+            throw new IllegalStateException( "Analytics table dimensions contain duplicates: " + duplicates );
+        }
+    }
+
+    /**
+     * Executes the given table population SQL statement, log and times the operation.
+     */
+    protected void populateAndLog( String sql, String tableName )
+    {
+        log.info( "Populate SQL for " + tableName + ": " + sql );
+
+        Timer t = new SystemTimer().start();
+        
+        jdbcTemplate.execute( sql );
+        
+        log.info( "Populated " + tableName + ": " + t.stop().toString() );
     }
 }

@@ -92,7 +92,6 @@ function changeAccountAction()
         $('#retypePassword').val( saved["retypePassword"] );
         $('#surname').val( saved["surname"] );
         $('#firstName').val( saved["firstName"] );
-        $('#phoneNumber').val( saved["phoneNumber"] );
         $('#email').val( $('#inviteEmail').val() );
         $('#inviteEmail').val( 'validEmail@domain.com' );
 
@@ -108,7 +107,6 @@ function changeAccountAction()
         saved["retypePassword"] = $('#retypePassword').val();
         saved["surname"] = $('#surname').val();
         saved["firstName"] = $('#firstName').val();
-        saved["phoneNumber"] = $('#phoneNumber').val();
 
         $('#inviteUsername').val( $('#username').val() );
         $('#username').val( 'nonExistingUserName_RpuECtIlVoRKTpYmEkYrAHmPtX4m1U' );
@@ -116,11 +114,40 @@ function changeAccountAction()
         $('#retypePassword').val( 'validPassword_123' );
         $('#surname').val( 'validSurname' );
         $('#firstName').val( 'validFirstName' );
-        $('#phoneNumber').val( '5555555555' );
         $('#inviteEmail').val( $('#email').val() );
         $('#email').val( '' );
     }
 }
+
+function validateInvite() {
+	var def = $.Deferred();
+	var action = $('#accountAction').val();
+	
+	if ( "invite" == action ) {
+		var url = 'validateInvite.action?email=' + $('#inviteEmail').val();
+		var options = $('#urSelected').val();
+		$.each(options, function(inx,val) {
+			url += '&urSelected=' + val;
+		});
+		
+		$.getJSON(url, function(json) {
+			if (json.response == "error") {
+				setHeaderDelayMessage(json.message);
+				def.reject();
+			}
+			else if (json.response == "success") {
+				def.resolve();
+			}
+		});
+	}
+	else {
+		def.resolve();
+	}
+	
+	return def.promise();
+}
+
+
 
 // -----------------------------------------------------------------------------
 // Remove user

@@ -1,6 +1,8 @@
 package org.hisp.dhis.dashboard.usergroup.action;
 
 import com.opensymphony.xwork2.Action;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -13,6 +15,8 @@ import org.hisp.dhis.user.UserGroupService;
 public class ChangeUserGroupMembershipAction
     implements Action
 {
+    private static final Log log = LogFactory.getLog( ChangeUserGroupMembershipAction.class );
+
     private static final String KEY_JOIN_GROUP = "join";
     private static final String KEY_LEAVE_GROUP = "leave";
 
@@ -70,11 +74,27 @@ public class ChangeUserGroupMembershipAction
 
         UserGroup userGroup = userGroupService.getUserGroup( userGroupUid );
 
-        if( currentUser == null || userGroup == null || key == null ||
-            !securityService.canUpdate( userGroup ) )
+        if( currentUser == null )
         {
-            // TODO Better error checking/handling, maybe?
+            log.error( "Could not get current user" );
             return ERROR;
+        }
+
+        if( userGroup == null )
+        {
+            log.error( "Could not get user group: " + userGroupUid );
+            return ERROR;
+        }
+
+        if( key == null )
+        {
+            log.error( "No key." );
+            return ERROR;
+        }
+
+        if( !securityService.canUpdate( userGroup ) )
+        {
+            log.info( "User " + currentUser.getUid() + " cannot update user group " + userGroupUid );
         }
 
         switch( key )

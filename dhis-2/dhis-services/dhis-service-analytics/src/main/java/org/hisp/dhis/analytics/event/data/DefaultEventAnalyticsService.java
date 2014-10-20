@@ -48,8 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.analytics.SortOrder;
@@ -85,9 +83,9 @@ import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ListUtils;
-import org.hisp.dhis.util.Timer;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -95,9 +93,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  */
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
-{    
-    private static final Log log = LogFactory.getLog( DefaultEventAnalyticsService.class );
-    
+{
     private static final String ITEM_EVENT = "psi";
     private static final String ITEM_PROGRAM_STAGE = "ps";
     private static final String ITEM_EXECUTION_DATE = "eventdate";
@@ -178,11 +174,11 @@ public class DefaultEventAnalyticsService
         // Data
         // ---------------------------------------------------------------------
 
-        Timer t = new Timer().start();
+        Timer t = new Timer().start().disablePrint();
 
         List<EventQueryParams> queries = queryPlanner.planAggregateQuery( params );
 
-        log.debug( "Planned event query, got partitions: " + params.getPartitions() );
+        t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
 
         for ( EventQueryParams query : queries )
         {
@@ -274,7 +270,7 @@ public class DefaultEventAnalyticsService
 
         for ( QueryItem item : params.getItems() )
         {
-            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString() ) );
+            grid.addHeader( new GridHeader( item.getItem().getUid(), item.getItem().getName(), item.getTypeAsString(), false, true, item.isOptionSet() ) );
         }
 
         // ---------------------------------------------------------------------
@@ -285,7 +281,7 @@ public class DefaultEventAnalyticsService
 
         params = queryPlanner.planEventQuery( params );
 
-        log.debug( "Planned event query, got partitions: " + params.getPartitions() );
+        t.getSplitTime( "Planned event query, got partitions: " + params.getPartitions() );
 
         int count = 0;
 
@@ -647,14 +643,14 @@ public class DefaultEventAnalyticsService
 
         if ( de != null ) //TODO check if part of program
         {
-            return new QueryItem( de, de.isNumericType() );
+            return new QueryItem( de, de.isNumericType(), de.hasOptionSet() );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
         if ( at != null )
         {
-            return new QueryItem( at, at.isNumericType() );
+            return new QueryItem( at, at.isNumericType(), at.hasOptionSet() );
         }
 
         throw new IllegalQueryException( "Item identifier does not reference any item part of the program: " + item );

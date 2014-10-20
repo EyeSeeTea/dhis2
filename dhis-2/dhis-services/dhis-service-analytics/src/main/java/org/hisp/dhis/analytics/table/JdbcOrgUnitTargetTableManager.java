@@ -78,7 +78,11 @@ public class JdbcOrgUnitTargetTableManager
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns( table ) )
+        List<String[]> columns = getDimensionColumns( table );
+        
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -104,6 +108,8 @@ public class JdbcOrgUnitTargetTableManager
             {
                 break taskLoop;
             }
+
+            final String tableName = table.getTempTableName();
             
             String sql = "insert into " + table.getTempTableName() + " (";
     
@@ -126,9 +132,7 @@ public class JdbcOrgUnitTargetTableManager
                 "left join _orgunitstructure ous on ougm.organisationunitid=ous.organisationunitid " +
                 "left join _organisationunitgroupsetstructure ougs on ougm.organisationunitid=ougs.organisationunitid";            
 
-            log.info( "Populate SQL: "+ sql );
-            
-            jdbcTemplate.execute( sql );
+            populateAndLog( sql, tableName );
         }
         
         return null;

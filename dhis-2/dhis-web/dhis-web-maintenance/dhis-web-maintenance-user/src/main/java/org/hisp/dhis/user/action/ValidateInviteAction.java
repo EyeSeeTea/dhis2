@@ -1,4 +1,5 @@
-package org.hisp.dhis.settings.action.system;
+package org.hisp.dhis.user.action;
+
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -27,77 +28,99 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.hisp.dhis.dataapproval.DataApprovalLevel;
-import org.hisp.dhis.dataapproval.DataApprovalLevelService;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Jim Grace
- */
-public class GetApprovalSettingsAction
+public class ValidateInviteAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
+    @Autowired
+    private UserService userService;
 
-    private DataApprovalLevelService dataApprovalLevelService;
+    @Autowired
+    private SecurityService securityService;
 
-    public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
     {
-        this.dataApprovalLevelService = dataApprovalLevelService;
+        this.i18n = i18n;
+    }
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private String email;
+
+    public void setEmail( String email )
+    {
+        this.email = email;
+    }
+
+    private List<String> urSelected = new ArrayList<>();
+
+    public void setUrSelected( List<String> urSelected )
+    {
+        this.urSelected = urSelected;
     }
 
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataApprovalLevel> dataApprovalLevels;
+    private String message;
 
-    public List<DataApprovalLevel> getDataApprovalLevels()
+    public String getMessage()
     {
-        return dataApprovalLevels;
+        return message;
     }
-
-    private DataApprovalLevelService approvalLevelService;
-
-    public DataApprovalLevelService getApprovalLevelService()
-    {
-        return approvalLevelService;
-    }
-
-    private boolean categoryOptionGroupSetsPresent;
-
-    public boolean isCategoryOptionGroupSetsPresent()
-    {
-        return categoryOptionGroupSetsPresent;
-    }
-
-    // -------------------------------------------------------------------------
-    // Action implementation
-    // -------------------------------------------------------------------------
 
     @Override
     public String execute()
+        throws Exception
     {
-        dataApprovalLevels = dataApprovalLevelService.getAllDataApprovalLevels();
+        UserCredentials credentials = new UserCredentials();
+        User user = new User();
 
-        categoryOptionGroupSetsPresent = false;
+        credentials.setUser( user );
+        user.setUserCredentials( credentials );
 
-        for ( DataApprovalLevel level : dataApprovalLevels )
+        user.setEmail( email );
+
+        Set<UserAuthorityGroup> userAuthorityGroups = new HashSet<>();
+
+        for ( String id : urSelected )
         {
-            if ( level.getCategoryOptionGroupSet() != null )
-            {
-                categoryOptionGroupSetsPresent = true;
-                break;
-            }
+            userAuthorityGroups.add( userService.getUserAuthorityGroup( id ) );
         }
 
-        approvalLevelService = dataApprovalLevelService;
+        credentials.setUserAuthorityGroups( userAuthorityGroups );
+
+        String valid = securityService.validateRestore( credentials );
+        
+        if ( valid != null )
+        {
+            message = i18n.getString( valid );
+            
+            return ERROR;
+        }
+        
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }
+
 }
