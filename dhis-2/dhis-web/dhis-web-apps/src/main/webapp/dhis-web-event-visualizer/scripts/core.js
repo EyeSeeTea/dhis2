@@ -327,7 +327,7 @@ Ext.onReady( function() {
 				// rows: [Dimension]
 
 				// filters: [Dimension]
-                
+
                 // showTrendLine: boolean (false)
 
                 // targetLineValue: number
@@ -503,7 +503,7 @@ Ext.onReady( function() {
                         alert('At least one fixed period, one relative period or start/end dates must be specified');
                         return;
                     }
-                    
+
 					config.columns = getValidatedDimensionArray(config.columns);
 					config.rows = getValidatedDimensionArray(config.rows);
 					config.filters = getValidatedDimensionArray(config.filters);
@@ -545,7 +545,7 @@ Ext.onReady( function() {
 					layout.columns = config.columns;
 					layout.rows = config.rows;
 					layout.filters = config.filters;
-                    
+
                     layout.type = Ext.isString(config.type) ? config.type : 'column';
                     layout.program = config.program;
                     layout.programStage = config.programStage;
@@ -576,7 +576,7 @@ Ext.onReady( function() {
                         (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
 					layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
                         (Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
-                        
+
                     layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
                     layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
                     layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
@@ -1299,7 +1299,7 @@ Ext.onReady( function() {
 
                                     if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
                                         var items = [];
-                                        
+
                                         for (var k = 0, option; k < options.length; k++) {
                                             option = options[k];
 
@@ -1762,7 +1762,7 @@ Ext.onReady( function() {
                     ouHierarchy,
                     names,
 					headers;
-                    
+
 				response = Ext.clone(response);
 				headers = response.headers;
                 ouHierarchy = response.metaData.ouHierarchy,
@@ -1867,7 +1867,7 @@ Ext.onReady( function() {
 					for (var j = 0; j < idIndexOrder.length; j++) {
 						id += row[idIndexOrder[j]];
 					}
-                    
+
 					response.idValueMap[id] = row[valueHeaderIndex];
 				}
 
@@ -1964,7 +1964,7 @@ Ext.onReady( function() {
 				}
 
                 // filters
-                if (layout.filters) {                    
+                if (layout.filters) {
 					for (var i = 0, dim; i < layout.filters.length; i++) {
 						dim = layout.filters[i];
 
@@ -2068,13 +2068,13 @@ Ext.onReady( function() {
                     createFailSafeIds = function() {
                         for (var i = 0, uuid; i < columnIds.length; i++) {
                             uuid = Ext.data.IdGenerator.get('uuid').generate();
-                            
+
                             failSafeColumnIds.push(uuid);
                             failSafeColumnIdMap[uuid] = columnIds[i];
 
                             xResponse.metaData.names[uuid] = xResponse.metaData.names[columnIds[i]];
                         }
-                    }(),                    
+                    }(),
 
                     // row ids
                     rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
@@ -2082,7 +2082,7 @@ Ext.onReady( function() {
                     // filter ids
                     filterIds = function() {
                         var ids = [];
-                        
+
                         if (xLayout.filters) {
                             for (var i = 0; i < xLayout.filters.length; i++) {
                                 ids = ids.concat(xLayout.filters[i].ids || []);
@@ -2129,11 +2129,7 @@ Ext.onReady( function() {
                     generator = {};
 
                 getDefaultStore = function(isStacked) {
-                    var pe = conf.finals.dimension.period.dimensionName,
-                        columnDimensionName = xLayout.columns[0].dimensionName,
-                        rowDimensionName = xLayout.rows[0].dimensionName,
-
-                        data = [],
+                    var data = [],
                         trendLineFields = [],
                         targetLineFields = [],
                         baseLineFields = [],
@@ -2145,10 +2141,9 @@ Ext.onReady( function() {
                         category = rowIds[i];
                         rowValues = [];
                         isEmpty = false;
-                        
 
                         obj[conf.finals.data.domain] = xResponse.metaData.names[category];
-                        
+
                         for (var j = 0, id, value; j < columnIds.length; j++) {
                             id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
                             value = xResponse.idValueMap[id];
@@ -2168,11 +2163,11 @@ Ext.onReady( function() {
                     if (isStacked) {
                         addDataTotals(data, failSafeColumnIds);
                     }
-                    
+
                     // sort order
                     if (xLayout.sortOrder) {
                         var sortingKey = isStacked ? dataTotalKey : failSafeColumnIds[0];
-                        
+
                         support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortingKey);
                     }
 
@@ -2216,7 +2211,7 @@ Ext.onReady( function() {
                             }
                         }
                     }
-                    
+
                     // target line
                     if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
                         for (var i = 0; i < data.length; i++) {
@@ -2292,11 +2287,11 @@ Ext.onReady( function() {
 
                     store.hasDecimals = function() {
                         var records = store.getRange();
-                        
+
                         for (var i = 0; i < records.length; i++) {
                             for (var j = 0, value; j < store.rangeFields.length; j++) {
                                 value = records[i].data[store.rangeFields[j]];
-                                
+
                                 if (Ext.isNumber(value) && (value % 1)) {
                                     return true;
                                 }
@@ -2309,11 +2304,11 @@ Ext.onReady( function() {
                     store.getNumberOfDecimals = function() {
                         var records = store.getRange(),
                             values = [];
-                        
+
                         for (var i = 0; i < records.length; i++) {
                             for (var j = 0, value; j < store.rangeFields.length; j++) {
                                 value = records[i].data[store.rangeFields[j]];
-                                
+
                                 if (Ext.isNumber(value) && (value % 1)) {
                                     value = value.toString();
 
@@ -2410,7 +2405,7 @@ Ext.onReady( function() {
 
 					if (xLayout.rangeAxisDecimals) {
 						axis.label.renderer = Ext.util.Format.numberRenderer(getRenderer(xLayout.rangeAxisDecimals));
-					}                    
+					}
 
                     if (xLayout.rangeAxisTitle) {
                         axis.title = xLayout.rangeAxisTitle;
@@ -2462,7 +2457,7 @@ Ext.onReady( function() {
                                     name = name.substr(0, mxl) + '..';
                                 }
                             }
-                            
+
                             a.push(name);
                         }
                     }
@@ -2495,7 +2490,7 @@ Ext.onReady( function() {
                             field: store.rangeFields,
                             font: conf.chart.style.fontFamily,
                             renderer: function(n) {
-                                return n === '0.0' ? '' : n;                                    
+                                return n === '0.0' ? '' : n;
                             }
                         };
                     }
@@ -2508,7 +2503,7 @@ Ext.onReady( function() {
 
                     for (var i = 0, strokeColor; i < store.trendLineFields.length; i++) {
                         strokeColor = isStacked ? '#000' : conf.chart.theme.dv1[i];
-                        
+
                         a.push({
                             type: 'line',
                             axis: 'left',
@@ -2702,7 +2697,7 @@ Ext.onReady( function() {
                                 if (Ext.Array.contains(meta, dim.dimension)) {
                                     var ids = xResponse.metaData[dim.dimension],
                                     tmpText = '';
-                                    
+
                                     for (var ii = 0; ii < ids.length; ii++) {
                                         tmpText += (tmpText.length ? ', ' : '') + names[ids[ii]];
                                     }
@@ -2712,7 +2707,7 @@ Ext.onReady( function() {
                                 else {
                                     if (dim.filter) {
                                         var a = dim.filter.split(':');
-                                        
+
                                         if (a.length === 2) {
                                             var operator = a[0],
                                                 valueArray = a[1].split(';'),
@@ -3060,13 +3055,13 @@ Ext.onReady( function() {
 
                     // NB, always true for area charts as extjs area charts cannot handle nulls
                     xLayout.hideEmptyRows = true;
-                    
+
                     var store = getDefaultStore(true),
                         numericAxis = getDefaultNumericAxis(store),
                         categoryAxis = getDefaultCategoryAxis(store),
                         axes = [numericAxis, categoryAxis],
                         series = getDefaultSeries(store);
-                        
+
                     series.type = 'area';
                     series.style.opacity = 0.7;
                     series.style.lineWidth = 0;
@@ -3159,7 +3154,7 @@ Ext.onReady( function() {
                         store: store,
                         series: series
                     });
-                    
+
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
@@ -3207,7 +3202,7 @@ Ext.onReady( function() {
 
                         series.push(obj);
                     }
-                    
+
                     chart = getDefaultChart({
                         store: store,
                         axes: axes,
