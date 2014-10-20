@@ -264,8 +264,6 @@ Ext.onReady( function() {
 						return;
 					}
 
-					//config.id = config.id.replace('.', '-');
-
 					return config;
 				}();
 			};
@@ -1759,7 +1757,7 @@ Ext.onReady( function() {
 			service.response.aggregate = {};
 
 			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
-				var emptyId = '(N/A)',
+				var emptyId = '[N/A]',
                     meta = ['ou', 'pe'],
                     ouHierarchy,
                     names,
@@ -2064,13 +2062,24 @@ Ext.onReady( function() {
 			};
 
 			web.report.aggregate.createChart = function(layout, xLayout, xResponse, centerRegion) {
-                var dataTotalKey = Ext.data.IdGenerator.get('uuid').generate(),
-                    //columnIds = xLayout.columns[0] ? xLayout.columns[0].ids : [],
-                    columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
-                    replacedColumnIds = support.prototype.str.replaceAll(Ext.clone(columnIds), '.', ''),
-                    //rowIds = xLayout.rows[0] ? xLayout.rows[0].ids : [],
+                var columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
+                    failSafeColumnIds = [],
+                    failSafeColumnIdMap = {},
+                    createFailSafeIds = function() {
+                        for (var i = 0, uuid; i < columnIds.length; i++) {
+                            uuid = Ext.data.IdGenerator.get('uuid').generate();
+                            
+                            failSafeColumnIds.push(uuid);
+                            failSafeColumnIdMap[uuid] = columnIds[i];
+
+                            xResponse.metaData.names[uuid] = xResponse.metaData.names[columnIds[i]];
+                        }
+                    }(),                    
+
+                    // row ids
                     rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
-                    replacedRowIds = support.prototype.str.replaceAll(Ext.clone(rowIds), '.', ''),
+
+                    // filter ids
                     filterIds = function() {
                         var ids = [];
                         
@@ -2082,21 +2091,9 @@ Ext.onReady( function() {
 
                         return ids;
                     }(),
-                    replacedFilterIds = support.prototype.str.replaceAll(Ext.clone(filterIds), '.', ''),
 
-                    replacedIdMap = function() {
-                        var map = {},
-                            names = xResponse.metaData.names,
-                            ids = Ext.clean([].concat(columnIds || [], rowIds || [], filterIds || [])),
-                            replacedIds = Ext.clean([].concat(replacedColumnIds || [], replacedRowIds || [], replacedFilterIds || []));
-
-                        for (var i = 0; i < replacedIds.length; i++) {
-                            map[replacedIds[i]] = ids[i];
-                        }
-
-                        return map;
-                    }(),                          
-
+                    // totals
+                    dataTotalKey = Ext.data.IdGenerator.get('uuid').generate(),
                     addDataTotals = function(data, ids) {
                         for (var i = 0, obj, total; i < data.length; i++) {
                             obj = data[i];
@@ -2157,7 +2154,7 @@ Ext.onReady( function() {
                             value = xResponse.idValueMap[id];
                             rowValues.push(value);
 
-                            obj[columnIds[j]] = value ? parseFloat(value) : '0.0';
+                            obj[failSafeColumnIds[j]] = value ? parseFloat(value) : '0.0';
                         }
 
                         isEmpty = !(Ext.Array.clean(rowValues).length);
@@ -2169,12 +2166,12 @@ Ext.onReady( function() {
 
                     // stacked
                     if (isStacked) {
-                        addDataTotals(data, columnIds);
+                        addDataTotals(data, failSafeColumnIds);
                     }
                     
                     // sort order
                     if (xLayout.sortOrder) {
-                        var sortingKey = isStacked ? dataTotalKey : columnIds[0];
+                        var sortingKey = isStacked ? dataTotalKey : failSafeColumnIds[0];
                         
                         support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortingKey);
                     }
@@ -2201,12 +2198,12 @@ Ext.onReady( function() {
                             xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (Total)';
                         }
                         else {
-                            for (var i = 0; i < columnIds.length; i++) {
+                            for (var i = 0; i < failSafeColumnIds.length; i++) {
                                 regression = new SimpleRegression();
-                                regressionKey = conf.finals.data.trendLine + columnIds[i];
+                                regressionKey = conf.finals.data.trendLine + failSafeColumnIds[i];
 
                                 for (var j = 0, value; j < data.length; j++) {
-                                    value = data[j][replacedColumnIds[i]];
+                                    value = data[j][failSafeColumnIds[i]];
                                     regression.addData(j, parseFloat(value));
                                 }
 
@@ -2215,7 +2212,7 @@ Ext.onReady( function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (' + xResponse.metaData.names[columnIds[i]] + ')';
+                                xResponse.metaData.names[regressionKey] = NS.i18n.trend + ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')';
                             }
                         }
                     }
@@ -2240,7 +2237,7 @@ Ext.onReady( function() {
 
                     store = Ext.create('Ext.data.Store', {
                         fields: function() {
-                            var fields = Ext.clone(columnIds);
+                            var fields = Ext.clone(failSafeColumnIds);
                             fields.push(conf.finals.data.domain);
                             fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
 
@@ -2249,7 +2246,7 @@ Ext.onReady( function() {
                         data: data
                     });
 
-                    store.rangeFields = columnIds;
+                    store.rangeFields = failSafeColumnIds;
                     store.domainFields = [conf.finals.data.domain];
                     store.trendLineFields = trendLineFields;
                     store.targetLineFields = targetLineFields;
@@ -2329,6 +2326,7 @@ Ext.onReady( function() {
                     };
 
                     if (NS.isDebug) {
+                        console.log("store", store);
                         console.log("data", data);
                         console.log("rangeFields", store.rangeFields);
                         console.log("domainFields", store.domainFields);
@@ -2454,7 +2452,7 @@ Ext.onReady( function() {
                     }
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
-                            id = store.rangeFields[i];
+                            id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
                             if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
