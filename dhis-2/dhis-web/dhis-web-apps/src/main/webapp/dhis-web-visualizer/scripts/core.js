@@ -2096,7 +2096,7 @@ Ext.onReady( function() {
                     }
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
-                            id = store.rangeFields[i];
+                            id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
                             if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
