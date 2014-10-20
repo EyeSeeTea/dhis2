@@ -10,10 +10,10 @@
 <div id="contextMenu" class="contextMenu">
   <ul id="contextMenuItems" class="contextMenuItems">
     <li data-enabled="canJoin">
-      <a data-target-fn="joinUserGroup"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;&nbsp;Join group</a> ## TODO i18n
+      <a data-target-fn="joinUserGroup"><i class="fa fa-check-circle"></i>&nbsp;&nbsp;&nbsp;$i18n.getString( "join_group" )</a>
     </li>
     <li data-enabled="canLeave">
-      <a data-target-fn="leaveUserGroup"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;&nbsp;Leave group</a>
+      <a data-target-fn="leaveUserGroup"><i class="fa fa-times-circle"></i>&nbsp;&nbsp;&nbsp;$i18n.getString( "leave_group" )</a>
     </li>
     <li data-enabled="canManage">
        <a data-target-fn="showSharingDialogWithContext"><i class="fa fa-share"></i>&nbsp;&nbsp;$i18n.getString( "sharing_settings" )</a>
@@ -61,14 +61,14 @@
                   data-can-update="$security.canUpdate( $userGroup )"
                   data-can-delete="$security.canDelete( $userGroup )"
                   #if( $isCurrentUserMemberMap.get( $userGroup ) && $security.canUpdate( $userGroup ) )
-                  data-can-join="false"
-                  data-can-leave="true"
+                    data-can-join="false"
+                    data-can-leave="true"
                   #elseif ( $security.canUpdate( $userGroup ) )
-                  data-can-join="true"
-                  data-can-leave="false"
+                    data-can-join="true"
+                    data-can-leave="false"
                   #else
-                  data-can-join="false" ## TODO necessary?
-                  data-can-leave="false"
+                     data-can-join="false"
+                     data-can-leave="false"
                   #end >
                   <td>$encoder.htmlEncode( $!userGroup.displayName )
                   <i class="memberIcon fa fa-user"
