@@ -129,7 +129,7 @@ public class GetUserGroupListAction
 
         for( UserGroup ug : userGroups )
         {
-            map.put( ug, ug.isMember( currentUser ) );
+            map.put( ug, ug.getMembers().contains( currentUser ) );
         }
 
         return map;

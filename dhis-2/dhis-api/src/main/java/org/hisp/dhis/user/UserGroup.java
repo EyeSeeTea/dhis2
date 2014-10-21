@@ -117,11 +117,6 @@ public class UserGroup
         }
     }
 
-    public boolean isMember( User user )
-    {
-        return members.contains( user );
-    }
-
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------

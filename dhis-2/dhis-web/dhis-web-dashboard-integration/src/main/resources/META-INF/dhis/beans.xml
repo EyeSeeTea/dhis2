@@ -70,13 +70,6 @@
     
   <!-- User groups -->
 
-  <bean id="org.hisp.dhis.dashboard.usergroup.action.ChangeUserGroupMembershipAction" class="org.hisp.dhis.dashboard.usergroup.action.ChangeUserGroupMembershipAction"
-    scope="prototype">
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
-    <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
-  </bean>
-
   <bean id="org.hisp.dhis.dashboard.usergroup.action.AddUserGroupAction" class="org.hisp.dhis.dashboard.usergroup.action.AddUserGroupAction"
     scope="prototype">
     <property name="userService" ref="org.hisp.dhis.user.UserService" />

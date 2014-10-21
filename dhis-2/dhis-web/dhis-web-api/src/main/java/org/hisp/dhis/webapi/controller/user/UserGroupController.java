@@ -33,11 +33,9 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
- * @author Halvdan Hoem Grelland
- *
- * halvdan : dhis-2 $ userGroups/ugid/membership/ (uid)  post delete GET djiwd/ugid/membership
  */
 @Controller
 @RequestMapping( value = UserGroupSchemaDescriptor.API_ENDPOINT )
