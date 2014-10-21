@@ -106,7 +106,7 @@ public class ChangeUserGroupMembershipAction
                 userGroup.removeUser( currentUser );
                 break;
             default: // Empty or non-valid key
-                return ERROR; // TODO explicit error message plz
+                return ERROR;
         }
 
         userGroupService.updateUserGroup( userGroup );

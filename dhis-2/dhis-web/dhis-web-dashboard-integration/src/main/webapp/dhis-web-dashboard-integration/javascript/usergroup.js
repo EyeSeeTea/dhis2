@@ -40,10 +40,6 @@ function joinUserGroup( context ) {
         $userGroup.data( "can-join", false );
         $userGroup.data( "can-leave", true );
       }
-      else // Error
-      {
-
-      }
     }
   );
 }
@@ -55,12 +51,8 @@ function leaveUserGroup( context ) {
       {
         var $userGroup = $( "#tr" + context.id );
         $userGroup.find( ".memberIcon" ).hide();
-        $userGroup.data("can-join", true );
-        $userGroup.data("can-leave", false );
-      }
-      else // Error
-      {
-
+        $userGroup.data( "can-join", true );
+        $userGroup.data( "can-leave", false );
       }
     }
   );
