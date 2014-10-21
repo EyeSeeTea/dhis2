@@ -234,21 +234,23 @@ public class OrganisationUnitController
 
     @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/json+geo", "application/json+geojson" } )
     public void getGeoJson(
-        @RequestParam( value = "level", defaultValue = "1" ) int pvLevel,
-        @RequestParam( value = "parent", required = false ) String pvParent,
+        @RequestParam( value = "level", defaultValue = "1" ) int rpLevel,
+        @RequestParam( value = "parent", required = false ) String rpParent,
         HttpServletResponse response ) throws IOException
     {
-        OrganisationUnit parent = manager.search( OrganisationUnit.class, pvParent );
+        OrganisationUnit parent = manager.search( OrganisationUnit.class, rpParent );
         List<OrganisationUnit> organisationUnits;
 
         if ( parent != null )
         {
-            organisationUnits = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( pvLevel, parent ) );
+            organisationUnits = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( rpLevel, parent ) );
         }
         else
         {
-            organisationUnits = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( pvLevel ) );
+            organisationUnits = new ArrayList<>( organisationUnitService.getOrganisationUnitsAtLevel( rpLevel ) );
         }
+
+        response.setContentType( "application/json" );
 
         JsonFactory jsonFactory = new JsonFactory();
         JsonGenerator generator = jsonFactory.createGenerator( response.getOutputStream() );
@@ -277,9 +279,14 @@ public class OrganisationUnitController
 
         String featureType = organisationUnit.getFeatureType();
 
-        if ( OrganisationUnit.FEATURETYPE_POLYGON.equals( featureType ) )
+        // if featureType is anything other than Point (MultiPoint), just assume MultiPolygon
+        if ( !OrganisationUnit.FEATURETYPE_POINT.equals( featureType ) )
         {
-            featureType = OrganisationUnit.FEATURETYPE_MULTIPOLYGON;
+            featureType = OrganisationUnit.FEATURETYPE_POLYGON;
+        }
+        else
+        {
+            featureType = OrganisationUnit.FEATURETYPE_MULTIPOINT;
         }
 
         generator.writeStartObject();
@@ -291,6 +298,7 @@ public class OrganisationUnitController
         generator.writeStringField( "type", featureType );
 
         generator.writeArrayFieldStart( "coordinates" );
+
         generator.writeRawValue( organisationUnit.getCoordinates() );
         generator.writeEndArray();
 
