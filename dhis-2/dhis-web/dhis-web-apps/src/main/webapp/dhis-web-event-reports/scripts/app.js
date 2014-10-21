@@ -7402,6 +7402,81 @@ Ext.onReady( function() {
                                             }
                                         });
 
+                                        // option sets
+                                        dhis2.util.namespace('dhis2.pt');
+
+                                        dhis2.pt.store = dhis2.pt.store || new dhis2.storage.Store({
+                                            name: 'dhis2',
+                                            adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                            objectStores: ['optionSets']
+                                        });
+
+                                        requests.push({
+                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
+                                            success: function(r) {
+                                                var optionSets = Ext.decode(r.responseText).optionSets,
+                                                    store = dhis2.pt.store,
+                                                    ids = [],
+                                                    url = '',
+                                                    callbacks = 0,
+                                                    checkOptionSet,
+                                                    updateDatabase;
+
+                                                updateDatabase = function() {
+                                                    if (++callbacks === optionSets.length) {
+                                                        if (ids.length) {
+
+                                                            for (var i = 0; i < ids.length; i++) {
+                                                                url += '&filter=id:eq:' + ids[i];
+                                                            }
+                                                            console.log(url);
+
+                                                            Ext.Ajax.request({
+                                                                url: contextPath + '/api/optionSets.json?fields=id,name,options[code,name]&paging=false' + url,
+                                                                success: function(r) {
+                                                                    var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                    for (var j = 0; j < sets.length; j++) {
+                                                                        store.set('optionSets', sets[j]);
+                                                                    }
+
+                                                                    fn();
+                                                                }
+                                                            });
+                                                        }
+                                                        else {
+                                                            fn();
+                                                        }
+                                                    }
+                                                };
+
+                                                checkOptionSet = function(optionSet) {
+                                                    store.get('optionSets', optionSet.id).done( function(obj) {
+                                                        if (!obj || obj.version !== optionSet.version) {
+                                                            ids.push(optionSet.id);
+                                                        }
+
+                                                        updateDatabase();
+                                                    });
+                                                };
+
+                                                store.open().done( function() {
+                                                    for (var i = 0; i < optionSets.length; i++) {
+                                                        checkOptionSet(optionSets[i]);
+                                                    }
+                                                });
+                                            }
+                                        });
+
+
+
+
+
+
+
+
+
+
                                         for (var i = 0; i < requests.length; i++) {
                                             Ext.Ajax.request(requests[i]);
                                         }
