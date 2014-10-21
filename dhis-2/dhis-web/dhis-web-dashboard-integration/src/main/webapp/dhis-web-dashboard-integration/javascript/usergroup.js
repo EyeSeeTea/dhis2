@@ -28,32 +28,37 @@ function removeUserGroup( context ) {
   removeItem(context.id, context.name, i18n_confirm_delete, 'removeUserGroup.action');
 }
 
-// TODO combine functions below?
-
 function joinUserGroup( context ) {
-  jQuery.postJSON( 'joinUserGroup.action', { userGroupUid: context.uid },
-    function( json ) {
-      if( json.response === "success" )
-      {
-        var $userGroup = $( "#tr" + context.id );
-        $userGroup.find( ".memberIcon" ).show();
-        $userGroup.data( "can-join", false );
-        $userGroup.data( "can-leave", true );
-      }
+  $.ajax( {
+    type: 'POST',
+    url: '../api/me/groups',
+    data: JSON.stringify( context.uid ),
+    contentType: 'application/json',
+    success: function( data ) {
+      var $userGroup = $( "#tr" + context.id );
+      $userGroup.find( ".memberIcon" ).show();
+      $userGroup.data( "can-join", false );
+      $userGroup.data( "can-leave", true );
+    },
+    error: function( data ) {
+      console.log( data );
     }
-  );
+  });
 }
 
 function leaveUserGroup( context ) {
-  jQuery.postJSON( 'leaveUserGroup.action', { userGroupUid: context.uid },
-    function( json ) {
-      if( json.response === "success" )
-      {
-        var $userGroup = $( "#tr" + context.id );
-        $userGroup.find( ".memberIcon" ).hide();
-        $userGroup.data( "can-join", true );
-        $userGroup.data( "can-leave", false );
-      }
+  $.ajax( {
+    type: 'DELETE',
+    url: '../api/me/groups/' + context.uid,
+    contentType: 'application/json',
+    success: function( data ) {
+      var $userGroup = $( "#tr" + context.id );
+      $userGroup.find( ".memberIcon" ).hide();
+      $userGroup.data( "can-join", true );
+      $userGroup.data( "can-leave", false );
+    },
+    error: function( data ) {
+      console.log( data );
     }
-  );
+  });
 }
