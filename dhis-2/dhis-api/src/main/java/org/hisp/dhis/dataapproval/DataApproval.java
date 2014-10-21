@@ -236,4 +236,102 @@ public class DataApproval
     {
         this.creator = creator;
     }
+
+    // ----------------------------------------------------------------------
+    // hashCode and equals
+    // ----------------------------------------------------------------------
+
+    @Override
+    public int hashCode()
+    {
+        final int prime = 31;
+
+        int result = 1;
+
+        result = prime * result + ((dataApprovalLevel == null) ? 0 : dataApprovalLevel.hashCode());
+        result = prime * result + ((dataSet == null) ? 0 : dataSet.hashCode());
+        result = prime * result + ((period == null) ? 0 : period.hashCode());
+        result = prime * result + ((organisationUnit == null) ? 0 : organisationUnit.hashCode());
+        result = prime * result + ((attributeOptionCombo == null) ? 0 : attributeOptionCombo.hashCode());
+
+        return result;
+    }
+
+    @Override
+    public boolean equals( Object object )
+    {
+        if ( this == object )
+        {
+            return true;
+        }
+
+        if ( object == null || !( object instanceof DataApproval ) )
+        {
+            return false;
+        }
+
+        DataApproval that = (DataApproval) object;
+
+        if ( dataApprovalLevel != null )
+        {
+            if ( !dataApprovalLevel.equals( that.getDataApprovalLevel() ) )
+            {
+                return false;
+            }
+        }
+        else if ( that.getDataApprovalLevel() != null )
+        {
+            return false;
+        }
+
+        if ( dataSet != null )
+        {
+            if ( !dataSet.equals( that.getDataSet() ) )
+            {
+                return false;
+            }
+        }
+        else if ( that.getDataSet() != null )
+        {
+            return false;
+        }
+
+        if ( period != null )
+        {
+            if ( !period.equals( that.getPeriod() ) )
+            {
+                return false;
+            }
+        }
+        else if ( that.getPeriod() != null )
+        {
+            return false;
+        }
+
+        if ( organisationUnit != null )
+        {
+            if ( !organisationUnit.equals( that.getOrganisationUnit() ) )
+            {
+                return false;
+            }
+        }
+        else if ( that.getOrganisationUnit() != null )
+        {
+            return false;
+        }
+
+        if ( attributeOptionCombo != null )
+        {
+            if ( !attributeOptionCombo.equals( that.getAttributeOptionCombo() ) )
+            {
+                return false;
+            }
+        }
+        else if ( that.getAttributeOptionCombo() != null )
+        {
+            return false;
+        }
+
+        return true;
+    }
 }

@@ -90,7 +90,7 @@ public enum DataApprovalState
      * Data is approved, and was approved here (so could be unapproved here.)
      */
     APPROVED_HERE ( /* approved */ true, /* approvable */ false, /* unapprovable */ true,
-                    /* accepted */ false, /* acceptable */ false, /* unacceptable */ false ),
+                    /* accepted */ false, /* acceptable */ true, /* unacceptable */ false ),
 
     /**
      * Some periods within this multi-period selection are accepted elsewhere
@@ -124,32 +124,32 @@ public enum DataApprovalState
     /**
      * Is this (entire) data selection approved (and therefore locked)?
      */
-    private boolean approved;
+    private final boolean approved;
 
     /**
      * Is this data selection able to be approved?
      */
-    private boolean approvable;
+    private final boolean approvable;
 
     /**
      * Is this data selection able to be unapproved?
      */
-    private boolean unapprovable;
+    private final boolean unapprovable;
 
     /**
      * Is this (entire) data selection accepted?
      */
-    private boolean accepted;
+    private final boolean accepted;
 
     /**
      * Is this data selection able to be accepted?
      */
-    private boolean acceptable;
+    private final boolean acceptable;
 
     /**
      * Is this data selection able to be unaccepted?
      */
-    private boolean unacceptable;
+    private final boolean unacceptable;
 
     // -------------------------------------------------------------------------
     // Constructor
