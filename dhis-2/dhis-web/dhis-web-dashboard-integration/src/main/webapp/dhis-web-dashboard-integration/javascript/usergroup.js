@@ -32,16 +32,15 @@ function joinUserGroup( context ) {
   $.ajax( {
     type: 'POST',
     url: '../api/me/groups',
-    data: JSON.stringify( context.uid ),
-    contentType: 'application/json',
-    success: function( data ) {
+    data: { 'groupUid'  : context.uid },
+    success: function() {
       var $userGroup = $( "#tr" + context.id );
       $userGroup.find( ".memberIcon" ).show();
       $userGroup.data( "can-join", false );
       $userGroup.data( "can-leave", true );
     },
-    error: function( data ) {
-      console.log( data );
+    error: function( jqXHR, textStatus, errorThrown ) {
+      console.log( "Failed to join user group: " + jqXHR.responseText );
     }
   });
 }
@@ -50,15 +49,14 @@ function leaveUserGroup( context ) {
   $.ajax( {
     type: 'DELETE',
     url: '../api/me/groups/' + context.uid,
-    contentType: 'application/json',
     success: function( data ) {
       var $userGroup = $( "#tr" + context.id );
       $userGroup.find( ".memberIcon" ).hide();
       $userGroup.data( "can-join", true );
       $userGroup.data( "can-leave", false );
     },
-    error: function( data ) {
-      console.log( data );
+    error: function( jqXHR, textStatus, errorThrown ) {
+      console.log( "Failed to leave user group: " + jqXHR.responseText );
     }
   });
 }

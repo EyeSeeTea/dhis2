@@ -576,46 +576,6 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), forms );
     }
 
-    @RequestMapping( method = RequestMethod.POST, value = "/groups" )
-    public void joinUserGroup( HttpServletResponse response,
-        @RequestBody( required = true ) String groupUid )
-        throws NotAuthenticatedException
-    {
-        User currentUser = currentUserService.getCurrentUser();
-
-        if ( currentUser == null )
-        {
-            throw new NotAuthenticatedException();
-        }
-
-        UserGroup group = manager.get( UserGroup.class, groupUid );
-
-        if ( group == null )
-        {
-            ContextUtils.notFoundResponse( response, "UserGroup does not exist:" + groupUid );
-            return;
-        }
-
-        Collection<UserGroup> userGroups = currentUser.getGroups();
-
-        if ( userGroups.contains( group ) )
-        {
-            ContextUtils.okResponse( response, "Already a member of this group." );
-            return;
-        }
-
-        if ( !aclService.canUpdate( currentUser, group ) )
-        {
-            throw new UpdateAccessDeniedException( "You don't have permissions modify this group." );
-        }
-
-        group.addUser( currentUser );
-
-        manager.update( group );
-
-        ContextUtils.okResponse( response, "Joined group." );
-    }
-
     @SuppressWarnings( "unchecked" )
     @RequestMapping( value = { "/assignedDataSets", "/dataSets" }, produces = { "application/json", "text/*" } )
     public void getDataSets( @RequestParam( defaultValue = "false" ) boolean optionSets, @RequestParam( defaultValue = "50" ) int maxOptions,
@@ -738,8 +698,47 @@ public class CurrentUserController
         JacksonUtils.toJson( response.getOutputStream(), forms );
     }
 
-    @RequestMapping( method = RequestMethod.DELETE, value = "/groups/{uid}",
-        consumes = { MediaType.TEXT_PLAIN_VALUE, MediaType.APPLICATION_JSON_VALUE } )
+    @RequestMapping( method = RequestMethod.POST, value = "/groups" )
+    public void joinUserGroup(
+        HttpServletResponse response, @RequestParam( value = "groupUid", required = true ) String groupUid )
+        throws NotAuthenticatedException
+    {
+        User currentUser = currentUserService.getCurrentUser();
+
+        if ( currentUser == null )
+        {
+            throw new NotAuthenticatedException();
+        }
+
+        UserGroup group = manager.get( UserGroup.class, groupUid );
+
+        if ( group == null )
+        {
+            ContextUtils.notFoundResponse( response, "UserGroup does not exist: " + groupUid );
+            return;
+        }
+
+        Collection<UserGroup> userGroups = currentUser.getGroups();
+
+        if ( userGroups.contains( group ) )
+        {
+            ContextUtils.okResponse( response, "Already a member of this group." );
+            return;
+        }
+
+        if ( !aclService.canUpdate( currentUser, group ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have permissions modify this group." );
+        }
+
+        group.addUser( currentUser );
+
+        manager.update( group );
+
+        ContextUtils.okResponse( response, "Joined group." );
+    }
+
+    @RequestMapping( method = RequestMethod.DELETE, value = "/groups/{uid}" )
     public void leaveUserGroup( HttpServletResponse response, @PathVariable( "uid" ) String groupUid )
         throws NotAuthenticatedException
     {
@@ -754,7 +753,7 @@ public class CurrentUserController
 
         if ( group == null )
         {
-            ContextUtils.notFoundResponse( response, "UserGroup does not exist:" + groupUid );
+            ContextUtils.notFoundResponse( response, "UserGroup does not exist: " + groupUid );
             return;
         }
 
