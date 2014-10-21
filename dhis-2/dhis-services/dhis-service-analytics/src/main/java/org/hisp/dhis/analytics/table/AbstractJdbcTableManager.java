@@ -43,6 +43,7 @@ import org.hisp.dhis.analytics.AnalyticsIndex;
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -51,6 +52,8 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.timer.SystemTimer;
+import org.hisp.dhis.system.timer.Timer;
 import org.hisp.dhis.system.util.ListUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +91,9 @@ public abstract class AbstractJdbcTableManager
     
     @Autowired
     protected SystemSettingManager systemSettingManager;
+    
+    @Autowired
+    protected DataApprovalLevelService dataApprovalLevelService;
    
     @Autowired
     protected StatementBuilder statementBuilder;
@@ -355,5 +361,19 @@ public abstract class AbstractJdbcTableManager
         {
             throw new IllegalStateException( "Analytics table dimensions contain duplicates: " + duplicates );
         }
+    }
+
+    /**
+     * Executes the given table population SQL statement, log and times the operation.
+     */
+    protected void populateAndLog( String sql, String tableName )
+    {
+        log.info( "Populate SQL for " + tableName + ": " + sql );
+
+        Timer t = new SystemTimer().start();
+        
+        jdbcTemplate.execute( sql );
+        
+        log.info( "Populated " + tableName + ": " + t.stop().toString() );
     }
 }

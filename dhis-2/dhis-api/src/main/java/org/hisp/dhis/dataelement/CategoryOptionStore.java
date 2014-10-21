@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.timer;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,41 +28,15 @@ package org.hisp.dhis.dxf2.timer;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.concurrent.TimeUnit;
+import java.util.List;
+
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class SystemNanoTimer implements Timer<Long>
+public interface CategoryOptionStore
+    extends GenericIdentifiableObjectStore<DataElementCategoryOption>
 {
-    private long _start = 0;
-
-    private long _end = 0;
-
-    @Override
-    public Timer<Long> start()
-    {
-        _start = System.nanoTime();
-        return this;
-    }
-
-    @Override
-    public Timer<Long> stop()
-    {
-        _end = System.nanoTime();
-        return this;
-    }
-
-    @Override
-    public Long getDuration()
-    {
-        return _end - _start;
-    }
-
-    @Override
-    public String toString()
-    {
-        double seconds = TimeUnit.MILLISECONDS.convert( getDuration(), TimeUnit.NANOSECONDS ) / 1000.0f;
-        return String.format( "%.2f seconds", seconds );
-    }
+    List<DataElementCategoryOption> getCategoryOptions( DataElementCategory category );
 }

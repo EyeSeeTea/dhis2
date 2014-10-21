@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -92,6 +93,8 @@ public class JdbcAnalyticsTableManager
         {
             return "No organisation unit levels exist, not updating aggregate analytics tables";
         }
+
+        log.info( "Approval enabled: " + isApprovalEnabled() );
         
         return null;
     }
@@ -152,7 +155,7 @@ public class JdbcAnalyticsTableManager
                 "dv.value " + statementBuilder.getRegexpMatch() + " '" + MathUtils.NUMERIC_LENIENT_REGEXP + "' " +
                 "and ( dv.value != '0' or de.aggregationtype = 'average' or de.zeroissignificant = true ) ";
             
-            populateTable( table, "cast(dv.value as " + dbl + ")", "null", "int", intClause );
+            populateTable( table, "cast(dv.value as " + dbl + ")", "null", DataElement.VALUE_TYPE_INT, intClause );
             
             populateTable( table, "1", "null", DataElement.VALUE_TYPE_BOOL, "dv.value = 'true'" );
     
@@ -181,6 +184,7 @@ public class JdbcAnalyticsTableManager
     {
         final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
         final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
+        final String tableName = table.getTempTableName();
         
         String sql = "insert into " + table.getTempTableName() + " (";
         
@@ -210,6 +214,7 @@ public class JdbcAnalyticsTableManager
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _periodstructure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
+            "left join _dataelementstructure des on de.dataelementid = des.dataelementid " +
             "left join categoryoptioncombo co on dv.categoryoptioncomboid=co.categoryoptioncomboid " +
             "left join period pe on dv.periodid=pe.periodid " +
             "where de.valuetype = '" + valueType + "' " +
@@ -223,22 +228,21 @@ public class JdbcAnalyticsTableManager
             sql += "and " + whereClause;
         }
 
-        log.info( "Populate SQL: "+ sql );
-        
-        jdbcTemplate.execute( sql );
+        populateAndLog( sql, tableName + ", " + valueType );
     }
 
-    private String getApprovalSubquery( Collection<OrganisationUnitLevel> levels )
+    private String getApprovalSubquery()
     {
         String sql = "(" +
-            "select coalesce(min(dal.level),999) " +
+            "select min(dal.level) " +
             "from dataapproval da " +
             "inner join dataapprovallevel dal on da.dataapprovallevelid = dal.dataapprovallevelid " +
-            "inner join _dataelementstructure des on da.datasetid = des.datasetid and des.dataelementid = dv.dataelementid " +
-            "inner join dataset ds on des.datasetid = ds.datasetid " +
             "where da.periodid = dv.periodid " +
-            "and ds.approvedata = true " +
+            "and des.datasetid = da.datasetid " +
+            "and des.datasetapprovedata = true " +
             "and (";
+        
+        Set<OrganisationUnitLevel> levels = dataApprovalLevelService.getOrganisationUnitApprovalLevels();
         
         for ( OrganisationUnitLevel level : levels )
         {
@@ -325,7 +329,7 @@ public class JdbcAnalyticsTableManager
 
         if ( isApprovalEnabled() )
         {            
-            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery( levels ) };
+            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery() };
             columns.add( al );
         }
         
