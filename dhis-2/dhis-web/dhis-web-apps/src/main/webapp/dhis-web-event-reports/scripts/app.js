@@ -489,43 +489,14 @@ Ext.onReady( function() {
 						var store = this;
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
-                        pageSize = pageSize || 15;
-
-						//if (key) {
-							//params['key'] = key;
-						//}
-
-						//params['max'] = pageSize || 15;
+                        pageSize = pageSize || 100;
 
                         dhis2.er.store.get('optionSets', optionSetId).done( function(obj) {
-                            store.removeAll();
-                            store.loadData(obj.options);
+                            if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
+                                store.removeAll();
+                                store.loadData(obj.options.slice(0, pageSize));
+                            }
                         });
-
-
-
-
-
-						//Ext.Ajax.request({
-							//url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
-							//params: params,
-							//disableCaching: false,
-							//success: function(r) {
-								//var options = Ext.decode(r.responseText).options,
-                                    //data = [];
-
-                                //for (var i = 0; i < options.length; i++) {
-                                    //if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
-                                        //data.push(options[i]);
-                                    //}
-                                //}
-
-								//store.removeAll();
-                                //store.loadData(data);
-
-                                //container.triggerCmp.storage = Ext.clone(options);
-							//}
-						//});
 					},
                     listeners: {
 						datachanged: function(s) {
@@ -563,20 +534,18 @@ Ext.onReady( function() {
                     },
                     store: this.searchStore,
                     listeners: {
-						keyup: {
-							fn: function() {
-								var value = this.getValue(),
-									optionSetId = container.dataElement.optionSet.id;
+						keyup: function() {
+                            var value = this.getValue(),
+                                optionSetId = container.dataElement.optionSet.id;
 
-								// search
-								container.searchStore.loadOptionSet(optionSetId, value);
+                            // search
+                            container.searchStore.loadOptionSet(optionSetId, value);
 
-                                // trigger
-                                if (!value || (Ext.isString(value) && value.length === 1)) {
-									container.triggerCmp.setDisabled(!!value);
-								}
-							}
-						},
+                            // trigger
+                            if (!value || (Ext.isString(value) && value.length === 1)) {
+                                container.triggerCmp.setDisabled(!!value);
+                            }
+                        },
 						select: function() {
                             var id = Ext.Array.from(this.getValue())[0];
 
@@ -605,15 +574,8 @@ Ext.onReady( function() {
                     disabledCls: 'ns-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
-                    storage: [],
                     handler: function(b) {
-                        if (b.storage.length) {
-							container.searchStore.removeAll();
-                            container.searchStore.add(Ext.clone(b.storage));
-                        }
-                        else {
-                            container.searchStore.loadOptionSet();
-                        }
+                        container.searchStore.loadOptionSet();
                     }
                 });
 
