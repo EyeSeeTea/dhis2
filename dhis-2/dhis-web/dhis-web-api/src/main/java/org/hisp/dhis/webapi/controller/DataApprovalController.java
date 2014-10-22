@@ -451,7 +451,6 @@ public class DataApprovalController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_APPROVE_DATA') or hasRole('F_APPROVE_DATA_LOWER_LEVELS')" )
     @RequestMapping( method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void removeApproval(
         @RequestParam Set<String> ds,
         @RequestParam String pe,
@@ -686,7 +685,6 @@ public class DataApprovalController
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_ACCEPT_DATA_LOWER_LEVELS')" )
     @RequestMapping( value = ACCEPTANCES_PATH, method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void unacceptApproval(
         @RequestParam String ds,
         @RequestParam String pe,

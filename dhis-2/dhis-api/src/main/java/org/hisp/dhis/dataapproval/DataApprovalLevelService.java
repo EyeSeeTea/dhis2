@@ -32,6 +32,7 @@ import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,13 @@ public interface DataApprovalLevelService
      * @return a list of data approval levels.
      */
     List<DataApprovalLevel> getDataApprovalLevelsByOrgUnitLevel( int orgUnitLevel );
+    
+    /**
+     * Retrieves all org unit levels which have approval levels associated.
+     * 
+     * @return a list of org unit levels.
+     */
+    Set<OrganisationUnitLevel> getOrganisationUnitApprovalLevels();
     
     /**
      * Tells whether a level can move down in the list (can switch places with

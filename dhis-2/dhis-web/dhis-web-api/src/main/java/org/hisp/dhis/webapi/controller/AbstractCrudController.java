@@ -31,7 +31,10 @@ package org.hisp.dhis.webapi.controller;
 import com.google.common.base.Enums;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
+import org.hibernate.LockOptions;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.acl.AclService;
+import org.hisp.dhis.cache.HibernateCacheManager;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -66,14 +69,12 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -125,6 +126,9 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @Autowired
     protected ContextService contextService;
+
+    @Autowired
+    private SessionFactory sessionFactory;
 
     //--------------------------------------------------------------------------
     // GET
@@ -464,7 +468,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid )
         throws Exception
     {
@@ -522,7 +525,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( value = "/{uid}/{property}/{itemId}", method = { RequestMethod.POST, RequestMethod.PUT } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @SuppressWarnings( "unchecked" )
     public void addCollectionItem(
         @PathVariable( "uid" ) String pvUid,
@@ -534,11 +536,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( objects.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+            return;
         }
 
         if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
         {
             ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+            return;
         }
 
         Property property = getSchema().getPropertyMap().get( pvProperty );
@@ -546,11 +550,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( !property.isCollection() || !property.isIdentifiableObject() )
         {
             ContextUtils.conflictResponse( response, "Only adds within identifiable collection are allowed." );
+            return;
         }
 
         if ( !property.isOwner() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+            return;
         }
 
         Collection<IdentifiableObject> identifiableObjects =
@@ -561,6 +567,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( candidate == null )
         {
             ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+            return;
         }
 
         // if it already contains this object, don't add it. It might be a list and not set, and we don't want duplicates.
@@ -577,10 +584,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         manager.update( objects.get( 0 ) );
+        sessionFactory.getCurrentSession().refresh( candidate  );
     }
 
     @RequestMapping( value = "/{uid}/{property}/{itemId}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @SuppressWarnings( "unchecked" )
     public void deleteCollectionItem(
         @PathVariable( "uid" ) String pvUid,
@@ -592,11 +599,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( objects.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+            return;
         }
 
         if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
         {
             ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+            return;
         }
 
         Property property = getSchema().getPropertyMap().get( pvProperty );
@@ -604,11 +613,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( !property.isCollection() || !property.isIdentifiableObject() )
         {
             ContextUtils.conflictResponse( response, "Only deletes within identifiable collection are allowed." );
+            return;
         }
 
         if ( !property.isOwner() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+            return;
         }
 
         Collection<IdentifiableObject> identifiableObjects =
@@ -633,6 +644,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( candidate == null )
         {
             ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+            return;
         }
 
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
@@ -641,6 +653,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         manager.update( objects.get( 0 ) );
+        sessionFactory.getCurrentSession().refresh( candidate  );
     }
 
     //--------------------------------------------------------------------------

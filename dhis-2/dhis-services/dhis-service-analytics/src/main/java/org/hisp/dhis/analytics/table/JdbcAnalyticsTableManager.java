@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics.table;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.dataapproval.DataApprovalLevelService.APPROVAL_LEVEL_UNAPPROVED;
 import static org.hisp.dhis.system.util.TextUtils.getQuotedCommaDelimitedString;
 
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -213,6 +215,7 @@ public class JdbcAnalyticsTableManager
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _periodstructure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
+            "left join _dataelementstructure des on de.dataelementid = des.dataelementid " +
             "left join categoryoptioncombo co on dv.categoryoptioncomboid=co.categoryoptioncomboid " +
             "left join period pe on dv.periodid=pe.periodid " +
             "where de.valuetype = '" + valueType + "' " +
@@ -229,16 +232,18 @@ public class JdbcAnalyticsTableManager
         populateAndLog( sql, tableName + ", " + valueType );
     }
 
-    private String getApprovalSubquery( Collection<OrganisationUnitLevel> levels )
+    private String getApprovalSubquery()
     {
         String sql = "(" +
-            "select coalesce(min(dal.level),999) " +
+            "select coalesce(min(dal.level)," + APPROVAL_LEVEL_UNAPPROVED + ") " +
             "from dataapproval da " +
             "inner join dataapprovallevel dal on da.dataapprovallevelid = dal.dataapprovallevelid " +
-            "inner join _dataelementstructure des on da.datasetid = des.datasetid and des.dataelementid = dv.dataelementid " +
             "where da.periodid = dv.periodid " +
-            "and des.approvedata = true " +
+            "and des.datasetid = da.datasetid " +
+            "and des.datasetapprovedata = true " +
             "and (";
+        
+        Set<OrganisationUnitLevel> levels = dataApprovalLevelService.getOrganisationUnitApprovalLevels();
         
         for ( OrganisationUnitLevel level : levels )
         {
@@ -325,7 +330,7 @@ public class JdbcAnalyticsTableManager
 
         if ( isApprovalEnabled() )
         {            
-            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery( levels ) };
+            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery() };
             columns.add( al );
         }
         

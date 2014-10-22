@@ -12,6 +12,7 @@ Ext.onReady( function() {
 	NS.isDebug = false;
 	NS.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
 
+    // core
 	NS.getCore = function(init) {
         var conf = {},
             api = {},
