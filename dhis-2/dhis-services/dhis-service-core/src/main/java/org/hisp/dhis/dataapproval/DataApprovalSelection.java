@@ -171,14 +171,16 @@ class DataApprovalSelection
         organisationUnitAndAncestors = selectedOrgUnit.getAncestors();
         organisationUnitAndAncestors.add( selectedOrgUnit );
 
-        System.out.println( "approval level: " + ( originalDataApproval.getDataApprovalLevel() == null ? "(null)" : originalDataApproval.getDataApprovalLevel().getLevel() ) );
-        System.out.println( "data set: " + originalDataApproval.getDataSet().getName() );
-        System.out.println( "period: " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName() + " " + originalDataApproval.getPeriod() );
-        System.out.println( "org unit: " + selectedOrgUnit.getName() );
-        System.out.println( "org unit level: " + organisationUnitLevel );
-        System.out.println( "attribute category option combo: " + ( originalDataApproval.getAttributeOptionCombo() == null ? "(null)" : originalDataApproval.getAttributeOptionCombo().getName() ) );
-        System.out.println( "approval count: " + dataApprovals.size() );
-        System.out.println( "approval level count: " + allApprovalLevels.size() );
+        tracePrint( "++++++++" );
+        tracePrint( "approval level: " + ( originalDataApproval.getDataApprovalLevel() == null ? "(null)" : originalDataApproval.getDataApprovalLevel().getLevel() ) );
+        tracePrint( "data set: " + originalDataApproval.getDataSet().getName() );
+        tracePrint( "period: " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName() + " " + originalDataApproval.getPeriod() );
+        tracePrint( "org unit: " + selectedOrgUnit.getName() );
+        tracePrint( "org unit level: " + organisationUnitLevel );
+        tracePrint( "attribute category option combo: " + ( originalDataApproval.getAttributeOptionCombo() == null ? "(null)" : originalDataApproval.getAttributeOptionCombo().getName() ) );
+        tracePrint( "approval count: " + dataApprovals.size() );
+        tracePrint( "approval level count: " + allApprovalLevels.size() );
+        tracePrint( "--------" );
 
         log.info( "----------------------------------------------------------------------" );
         log.info( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
@@ -214,8 +216,8 @@ class DataApprovalSelection
             status.setDataApprovalLevel( originalDataApproval.getDataApprovalLevel() );
         }
 
-        System.out.println("getDataApprovalStatus returning " + status.getDataApprovalLevel().getLevel() + "-" + status.getDataApprovalState().name() );
-        System.out.println( "-----------------------" );
+        tracePrint("getDataApprovalStatus returning " + status.getDataApprovalLevel().getLevel() + "-" + status.getDataApprovalState().name() );
+        tracePrint( "-----------------------" );
 
         log.info( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
                 + " (" + organisationUnitLevel + ") "
@@ -231,6 +233,14 @@ class DataApprovalSelection
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    private void tracePrint( String s ) // Temporary, for development
+    {
+        if ( true ) // Enable or disable.
+        {
+            System.out.println( s );
+        }
+    }
 
     /**
      * Combine old (existing) approval status with new approval status
@@ -273,8 +283,8 @@ class DataApprovalSelection
 
         log.info( "combineStatus( " + logStatus( oldStatus ) + ", " + logStatus( newStatus ) + " ) -> " + logStatus ( status ) );
 
-        System.out.println( "combineStatus( " + logStatus( oldStatus ) + ", " + logStatus( newStatus ) + " ) -> " + logStatus ( status ) );
-        System.out.println( "oldAccepted = " + ( oldStatus == null || oldStatus.getDataApproval() == null ? "(null)" : oldStatus.getDataApproval().isAccepted() )
+        tracePrint( "combineStatus( " + logStatus( oldStatus ) + ", " + logStatus( newStatus ) + " ) -> " + logStatus ( status ) );
+        tracePrint( "oldAccepted = " + ( oldStatus == null || oldStatus.getDataApproval() == null ? "(null)" : oldStatus.getDataApproval().isAccepted() )
                 + ", newAccepted = " + ( newStatus == null || newStatus.getDataApproval() == null ? "(null)" : newStatus.getDataApproval().isAccepted() )
                 + ", resultAccepted = " + ( status == null || status.getDataApproval() == null ? "(null)" : status.getDataApproval().isAccepted() ) );
 
@@ -315,8 +325,6 @@ class DataApprovalSelection
 
         DataApprovalLevel latestApplicableLevel = null;
 
-        boolean dataSetAssigned = false;
-
         for ( DataApprovalLevel dal : allApprovalLevels )
         {
             if ( optionApplies( dal ) )
@@ -345,7 +353,7 @@ class DataApprovalSelection
                     }
                     else
                     {
-                        System.out.println( "getStatus returning UNAPPROVABLE because not ready below and no data set assignment found at this level or below." );
+                        tracePrint( "getStatus returning UNAPPROVABLE because not ready below and no data set assignment found at this level or below." );
 
                         return new DataApprovalStatus( UNAPPROVABLE, null, dal );
                     }
@@ -363,7 +371,9 @@ class DataApprovalSelection
         }
         else
         {
-            System.out.println( "getStatus returning UNAPPROVABLE because we couldn't find a low enough level." );
+            tracePrint( "getStatus latestApplicableLevel " + ( latestApplicableLevel == null ? "(null)" : latestApplicableLevel.getLevel() ) );
+            tracePrint( "getStatus isDataSetAssignedHereOrBelow " + isDataSetAssignedHereOrBelow( selectedOrgUnit ) );
+            tracePrint( "getStatus returning UNAPPROVABLE because we couldn't find a low enough level:" );
 
             return new DataApprovalStatus( UNAPPROVABLE, null, allApprovalLevels.get( allApprovalLevels.size() - 1 ) );
         }
@@ -377,6 +387,12 @@ class DataApprovalSelection
      */
     private boolean optionApplies( DataApprovalLevel dal )
     {
+        tracePrint( "optionApplies - level " + dal.getLevel() + " COGS "
+                + ( dal.getCategoryOptionGroupSet() == null ? "(none)" : dal.getCategoryOptionGroupSet().getName() )
+                + " combo " + daIn.getAttributeOptionCombo().getName() );
+
+        tracePrint("optionApplies - option combo group sets " + getOptionComboGroupSets( daIn.getAttributeOptionCombo() ) );
+
         return dal.getCategoryOptionGroupSet() == null
                 || ( !daIn.getAttributeOptionCombo().equals( categoryService.getDefaultDataElementCategoryOptionCombo() )
                 && getOptionComboGroupSets( daIn.getAttributeOptionCombo() ).contains( dal.getCategoryOptionGroupSet() ) );
@@ -423,10 +439,10 @@ class DataApprovalSelection
     {
         daOut = dataApprovalStore.getDataApproval( dal, daIn.getDataSet(), daIn.getPeriod(), orgUnit, daIn.getAttributeOptionCombo() );
 
-        System.out.println( "getDataApproval ( level "
+        tracePrint( "getDataApproval ( level "
                 + ( dal == null ? "(null)" : dal.getLevel() ) + ", "
                 + ( daIn.getDataSet() == null ? "(null)" : daIn.getDataSet().getName() ) + ", "
-                + daIn.getPeriod().getName() + " " + daIn.getPeriod() + ", '"
+                + daIn.getPeriod().getName() + ", '"
                 + orgUnit.getName() + "', "
                 + ( daIn.getAttributeOptionCombo() == null ? "(null)" : daIn.getAttributeOptionCombo().getName() )
                 + " ) -> " + (daOut == null ? "unapproved" : daOut.isAccepted() ? "accepted" : "approved" )
@@ -461,12 +477,12 @@ class DataApprovalSelection
         log.info( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel + " ) DAL: " + dal.getLevel()
                 + " dataSet: " + daIn.getDataSet().getName() + " assigned: " + dataSetAssigned + " assignedBelow: " + dataSetFoundBelow );
 
-        System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+        tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                 + " ) dataSet " + daIn.getDataSet().getName() + " assigned: " + dataSetAssigned + " assignedBelow: " + dataSetFoundBelow );
 
         if ( orgUnitLevel == dal.getOrgUnitLevel() && isApproved( dal, orgUnit ) )
         {
-            System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+            tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                     + " ) returns true because approval found." );
 
             dataSetFoundBelow = true; // We found an approval object referring to this data set.
@@ -476,7 +492,7 @@ class DataApprovalSelection
 
         if ( dataSetAssigned && orgUnitLevel >= dal.getOrgUnitLevel() )
         {
-            System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+            tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                     + " ) returns false because data set assignment found without approval." );
 
             return false; // Missing approval below.
@@ -484,12 +500,12 @@ class DataApprovalSelection
 
         for ( OrganisationUnit child : orgUnit.getChildren() )
         {
-            System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+            tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                     + " ) recursing to child " + child.getName() + "-" + ( orgUnitLevel + 1 ) );
 
             if ( !isReadyBelow( dal, child, orgUnitLevel + 1 ) )
             {
-                System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+                tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                         + " ) returns false because child is not ready below." );
 
                 log.info( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
@@ -499,7 +515,7 @@ class DataApprovalSelection
             }
         }
 
-        System.out.println( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
+        tracePrint( "isReadyBelow( " + dal.getLevel() + ", " + orgUnit.getName() + " - " + orgUnitLevel
                 + " ) returns true at the end." );
 
         return true;
