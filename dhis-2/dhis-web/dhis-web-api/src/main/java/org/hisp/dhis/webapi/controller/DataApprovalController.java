@@ -155,7 +155,7 @@ public class DataApprovalController
         @RequestParam( required = false ) String cp, HttpServletResponse response )
         throws IOException
     {
-        demoUserDataApprovalsAndPermissions(); //TODO: remove
+//        demoUserDataApprovalsAndPermissions(); //TODO: remove
 
         log.info( "GET " + RESOURCE_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou
             + (cog == null || cog.isEmpty() ? "" : ("&cog=" + Arrays.toString( cog.toArray() )))
@@ -229,7 +229,7 @@ public class DataApprovalController
         throws IOException
     {
 
-        demoUserDataApprovalsAndPermissions(); //TODO: remove
+//        demoUserDataApprovalsAndPermissions(); //TODO: remove
 
         Set<DataSet> dataSets = new HashSet<>();
 
