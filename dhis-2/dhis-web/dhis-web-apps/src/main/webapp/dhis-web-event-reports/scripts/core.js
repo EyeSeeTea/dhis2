@@ -673,7 +673,24 @@ Ext.onReady( function() {
                 return uniqueItems;
             };
 
-				// object
+            support.prototype.array.getNameById = function(array, value, idProperty, nameProperty) {
+                if (!(Ext.isArray(array) && value)) {
+                    return;
+                }
+
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i][idProperty] === value) {
+                        return array[i][nameProperty];
+                    }
+                }
+
+                return;
+            };
+
+                // object
 			support.prototype.object = {};
 
 			support.prototype.object.getLength = function(object, suppressWarning) {
@@ -1175,13 +1192,27 @@ Ext.onReady( function() {
 						header = xResponse.nameHeaderMap[dim.dimension];
 
 						if (header) {
-							for (var j = 0, id; j < header.ids.length; j++) {
-								id = header.ids[j];
+                            if (header.optionSet && dhis2 && dhis2.er && dhis2.er.store) {
+                                dhis2.er.store.get('optionSets', header.name).done( function(obj) {
+                                    if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.length) {
+                                        for (var i = 0, id; i < header.ids.length; i++) {
+                                            dim.items.push({
+                                                id: id,
+                                                name: support.prototype.array.getNameById(obj.options, id, 'code', 'name')
+                                            });
+                                        }
+                                    }
+                                });
+                            }
+                            else {
+                                for (var j = 0, id; j < header.ids.length; j++) {
+                                    id = header.ids[j];
 
-								dim.items.push({
-									id: id,
-									name: xResponse.metaData.names[id] || id
-								});
+                                    dim.items.push({
+                                        id: id,
+                                        name: xResponse.metaData.names[id] || id
+                                    });
+                                }
 							}
 						}
 					}
