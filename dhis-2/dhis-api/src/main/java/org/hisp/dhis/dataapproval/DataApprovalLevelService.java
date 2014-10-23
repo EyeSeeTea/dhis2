@@ -102,6 +102,15 @@ public interface DataApprovalLevelService
     DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
+     * Gets the lowest approval level for a given attribute option (for
+     * any possible organisation unit.)
+     *
+     * @param option option (if any) that may belong to an approval level.
+     * @return lowest approval level that could contain the option.
+     */
+    DataApprovalLevel getLowestOptionApprovalLevel( DataElementCategoryOption option );
+
+    /**
      * Gets a list of all data approval levels.
      *
      * @return List of all data approval levels, ordered from 1 to n.

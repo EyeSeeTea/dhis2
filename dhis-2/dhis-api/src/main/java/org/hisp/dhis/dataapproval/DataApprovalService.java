@@ -107,4 +107,14 @@ public interface DataApprovalService
                                                                           OrganisationUnit organisationUnit,
                                                                           Set<CategoryOptionGroup> categoryOptionGroups,
                                                                           Set<DataElementCategoryOption> dataElementCategoryOptions );
+
+    /**
+     * Returns a list of approval status and permissions for all of the
+     * category option combos that the user is allowed to see.
+     *
+     * @param dataSets DataSets that we are getting the status for
+     * @param period period we are getting the status for
+     * @return list of status and permissions
+     */
+    List<DataApprovalStatusAndPermissions> getUserDataApprovalsAndPermissions( Set<DataSet> dataSets, Period period );
 }

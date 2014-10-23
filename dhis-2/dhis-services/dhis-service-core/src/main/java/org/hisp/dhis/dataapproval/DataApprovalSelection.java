@@ -174,7 +174,7 @@ class DataApprovalSelection
         tracePrint( "++++++++" );
         tracePrint( "approval level: " + ( originalDataApproval.getDataApprovalLevel() == null ? "(null)" : originalDataApproval.getDataApprovalLevel().getLevel() ) );
         tracePrint( "data set: " + originalDataApproval.getDataSet().getName() );
-        tracePrint( "period: " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName() + " " + originalDataApproval.getPeriod() );
+        tracePrint( "period: " + originalDataApproval.getPeriod().getPeriodType().getName() + " " + originalDataApproval.getPeriod().getName() );
         tracePrint( "org unit: " + selectedOrgUnit.getName() );
         tracePrint( "org unit level: " + organisationUnitLevel );
         tracePrint( "attribute category option combo: " + ( originalDataApproval.getAttributeOptionCombo() == null ? "(null)" : originalDataApproval.getAttributeOptionCombo().getName() ) );
@@ -236,7 +236,7 @@ class DataApprovalSelection
 
     private void tracePrint( String s ) // Temporary, for development
     {
-        if ( true ) // Enable or disable.
+        if ( false ) // Enable or disable.
         {
             System.out.println( s );
         }
@@ -299,7 +299,11 @@ class DataApprovalSelection
      */
     private String logStatus( DataApprovalStatus status )
     {
-        return status == null ? "(null)" : status.getDataApprovalLevel().getLevel() + "-" + status.getDataApprovalState().name();
+        return status == null ? "(null)" :
+                ( status.getDataApprovalLevel() == null ? "(null level)" : status.getDataApprovalLevel().getLevel() )
+                + "-" + ( status.getDataApprovalState() == null ? "(null state)" : status.getDataApprovalState().name() )
+                + " da " + ( status.getDataApproval() == null ? "(null)" : ( "level "
+                        + ( status.getDataApproval().getDataApprovalLevel() == null ? "(null)" : status.getDataApproval().getDataApprovalLevel().getLevel() ) ) );
     }
 
     /**
@@ -349,7 +353,7 @@ class DataApprovalSelection
                 {
                     if ( dataSetFoundBelow || daIn.getDataSet().getSources().contains( originalDataApproval.getOrganisationUnit() ) )
                     {
-                        return new DataApprovalStatus( UNAPPROVED_READY, null, dal );
+                        return new DataApprovalStatus( UNAPPROVED_READY, daIn, dal );
                     }
                     else
                     {
@@ -367,7 +371,7 @@ class DataApprovalSelection
 
         if ( latestApplicableLevel != null && isDataSetAssignedHereOrBelow( selectedOrgUnit ) )
         {
-            return new DataApprovalStatus( UNAPPROVED_READY, null, latestApplicableLevel );
+            return new DataApprovalStatus( UNAPPROVED_READY, daIn, latestApplicableLevel );
         }
         else
         {

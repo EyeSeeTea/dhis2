@@ -155,6 +155,8 @@ public class DataApprovalController
         @RequestParam( required = false ) String cp, HttpServletResponse response )
         throws IOException
     {
+        demoUserDataApprovalsAndPermissions(); //TODO: remove
+
         log.info( "GET " + RESOURCE_PATH + "?ds=" + ds + "&pe=" + pe + "&ou=" + ou
             + (cog == null || cog.isEmpty() ? "" : ("&cog=" + Arrays.toString( cog.toArray() )))
             + (cp == null ? "" : ("&cp=" + cp)) );
@@ -226,6 +228,8 @@ public class DataApprovalController
         HttpServletResponse response )
         throws IOException
     {
+
+        demoUserDataApprovalsAndPermissions(); //TODO: remove
 
         Set<DataSet> dataSets = new HashSet<>();
 
@@ -760,6 +764,21 @@ public class DataApprovalController
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    //TODO: temporary -- remove
+    private void demoUserDataApprovalsAndPermissions()
+    {
+        System.out.println("demoUserDataApprovalsAndPermissions");
+
+        Set<DataSet> dataSets = asSet( dataSetService.getDataSetByName( "MER: Community Based" ).iterator().next(), dataSetService.getDataSetByName( "MER: Facility Based" ).iterator().next() );
+
+        List<DataApprovalStatusAndPermissions> permissionsList = dataApprovalService.getUserDataApprovalsAndPermissions( dataSets, PeriodType.getPeriodFromIsoString( "2014Oct" ) );
+
+        for ( DataApprovalStatusAndPermissions p : permissionsList )
+        {
+            System.out.println( "status for - " + p.getDataApprovalStatus().getDataApproval().getAttributeOptionCombo().getName() + " " + p.getDataApprovalStatus().getDataApprovalLevel().getLevel() );
+        }
+    }
 
     private List<DataApproval> makeDataApprovalList( DataApprovalLevel dataApprovalLevel, DataSet dataSet,
                                                      Period period, OrganisationUnit organisationUnit,

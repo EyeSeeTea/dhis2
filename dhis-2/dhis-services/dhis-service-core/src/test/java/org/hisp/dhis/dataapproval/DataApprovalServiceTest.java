@@ -36,10 +36,13 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.dataapproval.exceptions.UserCannotAccessApprovalLevelException;
+import org.hisp.dhis.dataapproval.exceptions.UserMayNotApproveDataException;
 import org.hisp.dhis.dataelement.*;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.DataSetService;
@@ -371,7 +374,7 @@ public class DataApprovalServiceTest
     // -------------------------------------------------------------------------
     // Basic DataApproval
     // -------------------------------------------------------------------------
-/*
+
     @Test
     public void testAddAllAndGetDataApproval() throws Exception
     {
@@ -460,7 +463,7 @@ public class DataApprovalServiceTest
 
         status = dataApprovalService.getDataApprovalStatus( dataSetB, periodB, organisationUnitB, defaultCombo );
         assertEquals( DataApprovalState.UNAPPROVED_READY, status.getDataApprovalState() );
-        assertNull ( status.getDataApproval() );
+        assertNotNull( status.getDataApproval() );
         level = status.getDataApprovalLevel();
         assertNotNull( level );
         assertEquals( level2, level );
@@ -485,7 +488,7 @@ public class DataApprovalServiceTest
 
         Date date = new Date();
         DataApproval dataApprovalA = new DataApproval( level1, dataSetA, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA );
-        DataApproval dataApprovalB = new DataApproval( level1, dataSetA, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA );
+        DataApproval dataApprovalB = new DataApproval( level1, dataSetA, periodA, organisationUnitA, defaultCombo, NOT_ACCEPTED, date, userA ); // Same
 
         dataApprovalService.approveData( asList( dataApprovalA ) );
         dataApprovalService.approveData( asList( dataApprovalB ) ); // Redundant, call is so ignored.
@@ -532,7 +535,7 @@ public class DataApprovalServiceTest
         dataApprovalService.unapproveData( asList( dataApprovalA ) ); // Only A should be deleted.
 
         testA = dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitA, defaultCombo ).getDataApproval();
-        assertNull( testA );
+        assertNotNull( testA );
 
         testB = dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, defaultCombo ).getDataApproval();
         assertNotNull( testB );
@@ -543,7 +546,7 @@ public class DataApprovalServiceTest
         assertNull( testA );
 
         testB = dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, defaultCombo ).getDataApproval();
-        assertNull( testB );
+        assertNotNull( testB );
     }
 
     @Test
@@ -1589,7 +1592,6 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodC, organisationUnitB, defaultCombo ).getDataApprovalState() );
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodQ, organisationUnitB, defaultCombo ).getDataApprovalState() );
     }
-*/
 
     // ---------------------------------------------------------------------
     // Test with Categories
@@ -1996,5 +1998,4 @@ public class DataApprovalServiceTest
         assertEquals( DataApprovalState.UNAPPROVED_READY, dataApprovalService.getDataApprovalStatus( dataSetA, periodA, organisationUnitB, defaultCombo ).getDataApprovalState() );
     }
     */
-
 }

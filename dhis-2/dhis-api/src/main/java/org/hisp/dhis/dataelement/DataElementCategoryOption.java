@@ -147,6 +147,18 @@ public class DataElementCategoryOption
                 || ou.isEqualOrChildOf( organisationUnits );
     }
 
+    public boolean includesAny( Set<OrganisationUnit> orgUnits )
+    {
+        for ( OrganisationUnit ou : orgUnits )
+        {
+            if ( includes( ou ) )
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------

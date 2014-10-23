@@ -129,21 +129,22 @@ public class DefaultDataApprovalLevelService
         }
     }
 
+    @Override
     public DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit, Set<CategoryOptionGroup> cogs )
     {
         Set<CategoryOptionGroupSet> cogSets = null;
 
-        System.out.println( "getHighestDataApprovalLevel - org unit: " + orgUnit.getName() );
+        tracePrint( "getHighestDataApprovalLevel - org unit: " + orgUnit.getName() );
         if ( cogs != null && !cogs.isEmpty() )
         {
             cogSets = new HashSet<>();
 
             for ( CategoryOptionGroup cog : cogs )
             {
-                System.out.println( "getHighestDataApprovalLevel - COG: " + cog.getName() );
+                tracePrint( "getHighestDataApprovalLevel - COG: " + cog.getName() );
                 if ( cog.getGroupSet() != null )
                 {
-                    System.out.println( "getHighestDataApprovalLevel - COGS: " + cog.getGroupSet().getName() );
+                    tracePrint( "getHighestDataApprovalLevel - COGS: " + cog.getGroupSet().getName() );
                     cogSets.add( cog.getGroupSet() );
                 }
             }
@@ -155,11 +156,11 @@ public class DefaultDataApprovalLevelService
 
         int levelAboveOrgUnitLevel = 0;
 
-        System.out.println( "getHighestDataApprovalLevel - data approval level count: " + getAllDataApprovalLevels().size() );
+        tracePrint( "getHighestDataApprovalLevel - data approval level count: " + getAllDataApprovalLevels().size() );
 
         for ( DataApprovalLevel level : getAllDataApprovalLevels() )
         {
-            System.out.println( "getHighestDataApprovalLevel - data approval level: " + level.getName() );
+            tracePrint( "getHighestDataApprovalLevel - data approval level: " + level.getName() );
 
             if ( ( level.getCategoryOptionGroupSet() == null && cogSets == null )
                     || ( level.getCategoryOptionGroupSet() != null
@@ -182,6 +183,7 @@ public class DefaultDataApprovalLevelService
         return levelAbove; // Closest ancestor above, or null if none.
     }
 
+    @Override
     public DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo )
     {
         Set<CategoryOptionGroupSet> cogSets = null;
@@ -219,6 +221,36 @@ public class DefaultDataApprovalLevelService
         return null;
     }
 
+    @Override
+    public DataApprovalLevel getLowestOptionApprovalLevel( DataElementCategoryOption option )
+    {
+        Set<CategoryOptionGroupSet> cogSets = null;
+
+        if ( option != null && option.getGroupSets() != null
+                && !categoryService.getDefaultDataElementCategoryCombo().getCategoryOptions().contains( option ) )
+        {
+            cogSets = option.getGroupSets();
+        }
+
+        for ( DataApprovalLevel level : Lists.reverse( getAllDataApprovalLevels() ) )
+        {
+            if ( level.getCategoryOptionGroupSet() == null )
+            {
+                if ( cogSets == null )
+                {
+                    return level;
+                }
+            }
+            else if ( cogSets != null && cogSets.contains( level.getCategoryOptionGroupSet() ) )
+            {
+                return level;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
     public List<DataApprovalLevel> getAllDataApprovalLevels()
     {
         List<DataApprovalLevel> dataApprovalLevels = dataApprovalLevelStore.getAllDataApprovalLevels();
@@ -459,6 +491,7 @@ public class DefaultDataApprovalLevelService
         }
     }
 
+    @Override
     public DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits )
     {
         User user = currentUserService.getCurrentUser();
@@ -488,6 +521,7 @@ public class DefaultDataApprovalLevelService
         return null;
     }
 
+    @Override
     public Map<OrganisationUnit, Integer> getUserReadApprovalLevels()
     {
         Map<OrganisationUnit, Integer> map = new HashMap<>();
@@ -530,6 +564,14 @@ public class DefaultDataApprovalLevelService
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    private void tracePrint( String s ) // Temporary, for development
+    {
+        if ( false ) // Enable or disable.
+        {
+            System.out.println( s );
+        }
+    }
 
     /**
      * Swaps a data approval level with the next higher level.
@@ -657,6 +699,8 @@ public class DefaultDataApprovalLevelService
 
         for ( DataApprovalLevel level : getAllDataApprovalLevels() )
         {
+            tracePrint("userApprovalLevel( " + orgUnit.getName() + "-" + orgUnitLevel + " ) approval level " + level.getName() + " " + securityService.canRead( level ) );
+
             if ( level.getOrgUnitLevel() >= orgUnitLevel
                     && securityService.canRead( level )
                     && canReadCOGS( level.getCategoryOptionGroupSet() ) )
@@ -694,6 +738,8 @@ public class DefaultDataApprovalLevelService
 
         for ( CategoryOptionGroup cog : cogs.getMembers() )
         {
+            tracePrint("canReadCOGS( " + cogs.getName() + " ) cog " + cog.getName() + " " + securityService.canRead( cog ) );
+
             if ( securityService.canRead( cog ) )
             {
                 return true;
