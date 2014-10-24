@@ -690,6 +690,65 @@ Ext.onReady( function() {
                 return;
             };
 
+            support.prototype.array.cleanFalsy = function(array) {
+                if (!Ext.isArray(array)) {
+                    return [];
+                }
+
+                if (!array.length) {
+                    return array;
+                }
+
+                for (var i = 0; i < array.length; i++) {
+                    array[i] = array[i] || null;
+                }
+
+                var a = Ext.clean(array);
+                array = null;
+
+                return a;
+            };
+
+            support.prototype.array.pluckIf = function(array, valueProperty, value, pluckProperty) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return[];
+                }
+
+                valueProperty = valueProperty || 'id';
+                value = Ext.isDefined(value) ? value : true;
+                pluckProperty = pluckProperty || 'name';
+
+                var a = [];
+
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i][valueProperty] === value) {
+                        a.push(array[i][pluckProperty]);
+                    }
+                }
+
+                return a;
+            };
+
+            support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, append) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return {};
+                }
+
+                var o = {};
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+                append = append || '';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    o[obj[idProperty] + append] = obj[nameProperty];
+                }
+
+                return o;
+            };
+
+
                 // object
 			support.prototype.object = {};
 
@@ -1183,90 +1242,77 @@ Ext.onReady( function() {
 					return headerNames;
 				};
 
-				return function() {
+                // items
+                for (var i = 0, dim, header; i < dimensions.length; i++) {
+                    dim = dimensions[i];
+                    dim.items = [];
+                    header = xResponse.nameHeaderMap[dim.dimension];
+                    optionMap = {};
 
-					// items
-					for (var i = 0, dim, header; i < dimensions.length; i++) {
-						dim = dimensions[i];
-						dim.items = [];
-						header = xResponse.nameHeaderMap[dim.dimension];
-
-						if (header) {
-                            if (header.optionSet && dhis2 && dhis2.er && dhis2.er.store) {
-                                dhis2.er.store.get('optionSets', header.name).done( function(obj) {
-                                    if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.length) {
-                                        for (var i = 0, id; i < header.ids.length; i++) {
-                                            dim.items.push({
-                                                id: id,
-                                                name: support.prototype.array.getNameById(obj.options, id, 'code', 'name')
-                                            });
-                                        }
-                                    }
-                                });
-                            }
-                            else {
-                                for (var j = 0, id; j < header.ids.length; j++) {
-                                    id = header.ids[j];
-
-                                    dim.items.push({
-                                        id: id,
-                                        name: xResponse.metaData.names[id] || id
-                                    });
-                                }
-							}
-						}
-					}
-
-                    // restore order for options
-                    for (var i = 0, orgDim; i < originalDimensions.length; i++) {
-                        orgDim = originalDimensions[i];
-
-                        // if sorting and row dim, dont restore order
-                        if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
-                            continue;
+                    if (header) {
+                        if (header.optionSet) {
+                            var optionSet = init.optionSetStorage['fEDqAkq2X4o'];
+                            optionMap = support.prototype.array.getObjectMap(optionSet.options, 'code', 'name', 'fEDqAkq2X4o');
                         }
 
-                        if (Ext.isString(orgDim.filter)) {
-                            var a = orgDim.filter.split(':');
+                        for (var j = 0, id; j < header.ids.length; j++) {
+                            id = header.ids[j];
 
-                            if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
-                                var options = a[1].split(';'),
-                                    items = [];
+                            dim.items.push({
+                                id: id,
+                                name: xResponse.metaData.names[id] || optionMap[id] + ' Danslion' || id
+                            });
+                        }
+                    }
+                }
 
-                                for (var j = 0, dim; j < dimensions.length; j++) {
-                                    dim = dimensions[j];
+                // restore order for options
+                for (var i = 0, orgDim; i < originalDimensions.length; i++) {
+                    orgDim = originalDimensions[i];
 
-                                    if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
-                                        var items = [];
+                    // if sorting and row dim, dont restore order
+                    if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
+                        continue;
+                    }
 
-                                        for (var k = 0, option; k < options.length; k++) {
-                                            option = options[k];
+                    if (Ext.isString(orgDim.filter)) {
+                        var a = orgDim.filter.split(':');
 
-                                            for (var l = 0, item; l < dim.items.length; l++) {
-                                                item = dim.items[l];
+                        if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
+                            var options = a[1].split(';'),
+                                items = [];
 
-                                                if (item.name === option) {
-                                                    items.push(item);
-                                                }
+                            for (var j = 0, dim; j < dimensions.length; j++) {
+                                dim = dimensions[j];
+
+                                if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
+                                    var items = [];
+
+                                    for (var k = 0, option; k < options.length; k++) {
+                                        option = options[k];
+
+                                        for (var l = 0, item; l < dim.items.length; l++) {
+                                            item = dim.items[l];
+
+                                            if (item.name === option) {
+                                                items.push(item);
                                             }
                                         }
-
-                                        dim.items = items;
                                     }
+
+                                    dim.items = items;
                                 }
                             }
                         }
                     }
+                }
 
-					// Re-layout
-					layout = api.layout.Layout(xLayout);
+                // Re-layout
+                layout = api.layout.Layout(xLayout);
 
-					if (layout) {
-						return service.layout.getExtendedLayout(layout);
-					}
-
-					return null;
-				}();
+                if (layout) {
+                    return service.layout.getExtendedLayout(layout);
+                }
 			};
 
 			service.layout.getExtendedAxis = function(xLayout, type) {

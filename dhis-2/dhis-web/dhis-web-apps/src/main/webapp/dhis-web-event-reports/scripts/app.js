@@ -6335,6 +6335,7 @@ Ext.onReady( function() {
 
 				map['aggregated_values'] = function() {
 					var xLayout,
+                        xResponse,
 						xColAxis,
 						xRowAxis,
 						table,
@@ -6355,9 +6356,9 @@ Ext.onReady( function() {
 
 					xLayout = getXLayout(layout);
 					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-					xLayout = getSXLayout(layout, xLayout, xResponse);
+                    xLayout = getSXLayout(layout, xLayout, xResponse);
 
-					table = getHtml(xLayout, xResponse);
+                    table = getHtml(xLayout, xResponse);
 
                     if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
                         alert('Table has too many cells. Please reduce the table and try again.');
@@ -6365,44 +6366,44 @@ Ext.onReady( function() {
                         return;
                     }
 
-					if (layout.sorting) {
-						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-						xLayout = getSXLayout(layout, xLayout, xResponse);
-						table = getHtml(xLayout, xResponse);
-					}
+                    if (layout.sorting) {
+                        xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
+                        xLayout = getSXLayout(layout, xLayout, xResponse);
+                        table = getHtml(xLayout, xResponse);
+                    }
 
                     web.mask.show(ns.app.centerRegion, 'Rendering table..');
 
                     // timing
                     ns.app.dateRender = new Date();
 
-					ns.app.centerRegion.removeAll(true);
-					ns.app.centerRegion.update(table.html);
+                    ns.app.centerRegion.removeAll(true);
+                    ns.app.centerRegion.update(table.html);
 
                     // timing
                     ns.app.dateTotal = new Date();
 
-					// after render
-					ns.app.layout = layout;
-					ns.app.xLayout = xLayout;
-					ns.app.response = response;
-					ns.app.xResponse = xResponse;
-					ns.app.xColAxis = xColAxis;
-					ns.app.xRowAxis = xRowAxis;
-					ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
-					ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+                    // after render
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
+                    ns.app.xColAxis = xColAxis;
+                    ns.app.xRowAxis = xRowAxis;
+                    ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
+                    ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
-					if (NS.isSessionStorage) {
-						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-						web.storage.session.set(layout, 'eventtable');
-					}
+                    if (NS.isSessionStorage) {
+                        //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+                        web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                        web.storage.session.set(layout, 'eventtable');
+                    }
 
-					ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
+                    ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
 
-					web.mask.hide(ns.app.centerRegion);
+                    web.mask.hide(ns.app.centerRegion);
 
-					if (NS.isDebug) {
+                    if (NS.isDebug) {
                         console.log("Number of cells", table.tdCount);
                         console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
                         console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
@@ -6412,9 +6413,9 @@ Ext.onReady( function() {
                         console.log("response", response);
                         console.log("xResponse", xResponse);
                         console.log("xLayout", xLayout);
-						console.log("core", ns.core);
-						console.log("app", ns.app);
-					}
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
 				};
 
 				map['individual_cases'] = function() {
@@ -7193,6 +7194,8 @@ Ext.onReady( function() {
 			}
 		};
 
+        init.optionSetStorage = {};
+
 		// requests
 		Ext.Ajax.request({
 			url: 'manifest.webapp',
@@ -7395,12 +7398,25 @@ Ext.onReady( function() {
                                                     url = '',
                                                     callbacks = 0,
                                                     checkOptionSet,
-                                                    updateStore;
+                                                    updateStore,
+                                                    createStorage;
+
+                                                createStorage = function() {
+                                                    store.getAll('optionSets').done( function(array) {
+                                                        for (var i = 0, optionSet; i < array.length; i++) {
+                                                            optionSet = array[i];
+
+                                                            init.optionSetStorage[optionSet.id] = optionSet;
+                                                        }
+
+                                                        fn();
+                                                    });
+                                                };
 
                                                 updateStore = function() {
                                                     if (++callbacks === optionSets.length) {
                                                         if (!ids.length) {
-                                                            fn();
+                                                            createStorage();
                                                             return;
                                                         }
 
@@ -7413,7 +7429,7 @@ Ext.onReady( function() {
                                                             success: function(r) {
                                                                 var sets = Ext.decode(r.responseText).optionSets;
 
-                                                                store.setAll('optionSets', sets).done(fn);
+                                                                store.setAll('optionSets', sets).done(createStorage);
                                                             }
                                                         });
                                                     }
