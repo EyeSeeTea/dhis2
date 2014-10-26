@@ -463,7 +463,8 @@ dhis2.de.addEventListeners = function()
 
         if ( type == 'date' )
         {
-            /* fake event, needed for valueBlur / valueFocus when using date-picker */
+            // Fake event, needed for valueBlur / valueFocus when using date-picker
+        	
             var fakeEvent = {
                 target: {
                     id: id + '-dp'
@@ -1062,21 +1063,19 @@ function getSortedDataSetListForOrgUnits( orgUnits )
  * Callback for changes in data set list.
  */
 function dataSetSelected()
-{    
-    var dataSetId = $( '#selectedDataSetId' ).val();
-
+{
     var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
     var previousPeriodType = !!previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
 
-    dhis2.de.currentDataSetId = dataSetId;
+    dhis2.de.currentDataSetId = $( '#selectedDataSetId' ).val();
     
-    if ( dataSetId && dataSetId != -1 )
+    if ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 )
     {
         $( '#selectedPeriodId' ).removeAttr( 'disabled' );
         $( '#prevButton' ).removeAttr( 'disabled' );
         $( '#nextButton' ).removeAttr( 'disabled' );
 
-        var periodType = dhis2.de.dataSets[dataSetId].periodType;
+        var periodType = dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType;
 
         var previousPeriodTypeValid = !!( previousPeriodType && previousPeriodType == periodType );
         
@@ -1086,7 +1085,7 @@ function dataSetSelected()
             dhis2.de.clearSectionFilters();
         }
         
-        dhis2.de.currentCategories = dhis2.de.getCategories( dataSetId );
+        dhis2.de.currentCategories = dhis2.de.getCategories( dhis2.de.currentDataSetId );
 
         dhis2.de.setAttributesMarkup();   
 
