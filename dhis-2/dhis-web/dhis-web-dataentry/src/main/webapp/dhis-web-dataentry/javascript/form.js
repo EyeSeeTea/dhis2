@@ -1060,12 +1060,18 @@ function getSortedDataSetListForOrgUnits( orgUnits )
 // -----------------------------------------------------------------------------
 
 /**
- * Callback for changes in data set list.
+ * Callback for changes in data set list. For previous selection to be valid and
+ * the period selection to remain, the period type of the previous data set must
+ * equal the current data set, and the allow future periods property of the previous
+ * data set must equal the current data set or the current period offset must not
+ * be in the future.
  */
 function dataSetSelected()
 {
-    var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );    
-    var previousPeriodType = !!previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType : null;
+    var previousDataSetValid = ( dhis2.de.currentDataSetId && dhis2.de.currentDataSetId != -1 );
+    var previousDataSet = !!previousDataSetValid ? dhis2.de.dataSets[dhis2.de.currentDataSetId] : undefined;
+    var previousPeriodType = previousDataSet ? previousDataSet.periodType : undefined;
+    var previousAllowFuturePeriods = previousDataSet ? previousDataSet.allowFuturePeriods : false;
 
     dhis2.de.currentDataSetId = $( '#selectedDataSetId' ).val();
     
@@ -1076,14 +1082,10 @@ function dataSetSelected()
         $( '#nextButton' ).removeAttr( 'disabled' );
 
         var periodType = dhis2.de.dataSets[dhis2.de.currentDataSetId].periodType;
+        var allowFuturePeriods = dhis2.de.dataSets[dhis2.de.currentDataSetId].allowFuturePeriods;
 
-        var previousPeriodTypeValid = !!( previousPeriodType && previousPeriodType == periodType );
-        
-        if ( !previousPeriodTypeValid )
-        {
-            displayPeriods();
-            dhis2.de.clearSectionFilters();
-        }
+        var previousSelectionValid = !!( periodType == previousPeriodType && 
+        	( allowFuturePeriods == previousAllowFuturePeriods || dhis2.de.currentPeriodOffset <= 0 ) );
         
         dhis2.de.currentCategories = dhis2.de.getCategories( dhis2.de.currentDataSetId );
 
@@ -1091,13 +1093,16 @@ function dataSetSelected()
 
         dhis2.de.multiOrganisationUnit = !!$( '#selectedDataSetId :selected' ).data( 'multiorg' );
 
-        if ( dhis2.de.inputSelected() && previousPeriodTypeValid )
+        if ( dhis2.de.inputSelected() && previousSelectionValid )
         {
             showLoader();
             dhis2.de.loadForm();
         }
         else
         {
+        	dhis2.de.currentPeriodOffset = 0;
+        	displayPeriods();
+        	dhis2.de.clearSectionFilters();
             dhis2.de.clearEntryForm();
         }
     }
@@ -1152,7 +1157,9 @@ function periodSelected()
  */
 function nextPeriodsSelected()
 {
-    if ( dhis2.de.currentPeriodOffset < 0 ) // Cannot display future periods
+	var allowFuturePeriods = !!( dhis2.de.currentDataSetId && dhis2.de.dataSets[dhis2.de.currentDataSetId].allowFuturePeriods );
+	
+    if ( dhis2.de.currentPeriodOffset < 0 || allowFuturePeriods )
     {
     	dhis2.de.currentPeriodOffset++;
         displayPeriods();
