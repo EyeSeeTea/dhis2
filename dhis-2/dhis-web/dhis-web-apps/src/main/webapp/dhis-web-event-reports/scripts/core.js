@@ -1252,67 +1252,55 @@ Ext.onReady( function() {
                     optionMap = {};
 
                     if (header) {
-                        //if (Ext.isString(header.optionSet)) {
-                            //var optionSet = xResponse.optionSetMap[header.optionSet];
-                            //optionMap = support.prototype.array.getObjectMap(optionSet.options, 'code', 'name', header.name);
-                        //}
-//console.log("optionMap", optionMap);
-
                         for (var j = 0, id; j < header.ids.length; j++) {
                             id = header.ids[j];
-//console.log("id = ", id);
-
-//console.log("optionMap[id]", optionMap[id]);
-//console.log("xResponse.metaData.names[id]", xResponse.metaData.names[id]);
-//console.log("");
+// TODO, items used?
                             dim.items.push({
                                 id: id,
-                                name: optionMap[id] || xResponse.metaData.names[id] || id
+                                name: xResponse.metaData.optionNames[id] || xResponse.metaData.names[id] || id
                             });
                         }
                     }
                 }
 
                 // restore order for options
-                //for (var i = 0, orgDim; i < originalDimensions.length; i++) {
-                    //orgDim = originalDimensions[i];
+                for (var i = 0, orgDim; i < originalDimensions.length; i++) {
+                    orgDim = originalDimensions[i];
 
-                    //// if sorting and row dim, dont restore order
-                    //if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
-                        //continue;
-                    //}
+                    // if sorting and row dim, dont restore order
+                    if (layout.sorting && Ext.Array.contains(xLayout.rowDimensionNames, orgDim.dimension)) {
+                        continue;
+                    }
 
-                    //if (Ext.isString(orgDim.filter)) {
-                        //var a = orgDim.filter.split(':');
+                    if (Ext.isString(orgDim.filter)) {
+                        var a = orgDim.filter.split(':');
 
-                        //if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
-                            //var options = a[1].split(';'),
-                                //items = [];
+                        if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
+                            var options = a[1].split(';');
 
-                            //for (var j = 0, dim; j < dimensions.length; j++) {
-                                //dim = dimensions[j];
+                            for (var j = 0, dim, items; j < dimensions.length; j++) {
+                                dim = dimensions[j];
 
-                                //if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
-                                    //var items = [];
+                                if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
+                                    items = [];
 
-                                    //for (var k = 0, option; k < options.length; k++) {
-                                        //option = options[k];
+                                    for (var k = 0, option; k < options.length; k++) {
+                                        option = options[k];
 
-                                        //for (var l = 0, item; l < dim.items.length; l++) {
-                                            //item = dim.items[l];
+                                        for (var l = 0, item; l < dim.items.length; l++) {
+                                            item = dim.items[l];
+                                            if (item.id === option || item.id === (dim.dimension + option)) {
+                                                items.push(item);
+                                            }
+                                        }
+                                    }
 
-                                            //if (item.name === option) {
-                                                //items.push(item);
-                                            //}
-                                        //}
-                                    //}
-
-                                    //dim.items = items;
-                                //}
-                            //}
-                        //}
-                    //}
-                //}
+                                    dim.items = items;
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Re-layout
                 layout = api.layout.Layout(xLayout);
