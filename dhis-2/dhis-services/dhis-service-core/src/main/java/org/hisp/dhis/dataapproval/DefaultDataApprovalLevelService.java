@@ -36,9 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -50,7 +48,12 @@ import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
+import org.hisp.dhis.user.UserService;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Jim Grace
@@ -89,6 +92,13 @@ public class DefaultDataApprovalLevelService
     public void setCurrentUserService( CurrentUserService currentUserService )
     {
         this.currentUserService = currentUserService;
+    }
+
+    private UserService userService;
+
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
     }
 
     private SecurityService securityService;
@@ -130,26 +140,8 @@ public class DefaultDataApprovalLevelService
     }
 
     @Override
-    public DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit, Set<CategoryOptionGroup> cogs )
+    public DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit )
     {
-        Set<CategoryOptionGroupSet> cogSets = null;
-
-        tracePrint( "getHighestDataApprovalLevel - org unit: " + orgUnit.getName() );
-        if ( cogs != null && !cogs.isEmpty() )
-        {
-            cogSets = new HashSet<>();
-
-            for ( CategoryOptionGroup cog : cogs )
-            {
-                tracePrint( "getHighestDataApprovalLevel - COG: " + cog.getName() );
-                if ( cog.getGroupSet() != null )
-                {
-                    tracePrint( "getHighestDataApprovalLevel - COGS: " + cog.getGroupSet().getName() );
-                    cogSets.add( cog.getGroupSet() );
-                }
-            }
-        }
-
         int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
 
         DataApprovalLevel levelAbove = null;
@@ -158,25 +150,19 @@ public class DefaultDataApprovalLevelService
 
         tracePrint( "getHighestDataApprovalLevel - data approval level count: " + getAllDataApprovalLevels().size() );
 
-        for ( DataApprovalLevel level : getAllDataApprovalLevels() )
+        for ( DataApprovalLevel level : getUserDataApprovalLevels() )
         {
             tracePrint( "getHighestDataApprovalLevel - data approval level: " + level.getName() );
 
-            if ( ( level.getCategoryOptionGroupSet() == null && cogSets == null )
-                    || ( level.getCategoryOptionGroupSet() != null
-                         && cogSets != null
-                         && cogSets.contains( level.getCategoryOptionGroupSet() ) ) )
+            if ( level.getOrgUnitLevel() == orgUnitLevel )
             {
-                if ( level.getOrgUnitLevel() == orgUnitLevel )
-                {
-                    return level; // Exact match on org unit level.
-                }
-                else if ( level.getOrgUnitLevel() > levelAboveOrgUnitLevel )
-                {
-                    levelAbove = level; // Must be first matching approval level for this org unit level.
+                return level; // Exact match on org unit level.
+            }
+            else if ( level.getOrgUnitLevel() > levelAboveOrgUnitLevel )
+            {
+                levelAbove = level; // Must be first matching approval level for this org unit level.
 
-                    levelAboveOrgUnitLevel = level.getOrgUnitLevel();
-                }
+                levelAboveOrgUnitLevel = level.getOrgUnitLevel();
             }
         }
 
@@ -268,6 +254,19 @@ public class DefaultDataApprovalLevelService
 
         return dataApprovalLevels;
     }
+    
+    public Map<Integer, DataApprovalLevel> getDataApprovalLevelMap()
+    {
+        List<DataApprovalLevel> levels = dataApprovalLevelStore.getAllDataApprovalLevels();
+        
+        return Maps.uniqueIndex( levels, new Function<DataApprovalLevel, Integer>()
+        {
+            public Integer apply( DataApprovalLevel level )
+            {
+                return level.getLevel();
+            }            
+        } );
+    }
 
     @Override
     public List<DataApprovalLevel> getUserDataApprovalLevels()
@@ -296,10 +295,16 @@ public class DefaultDataApprovalLevelService
             boolean approvableAtLevel = false;
             boolean approvableAtAllLowerLevels = false;
 
+            boolean canSeeAllDimensions = CollectionUtils.isEmpty( userService.getCoDimensionConstraints( user.getUserCredentials() ) )
+                    && CollectionUtils.isEmpty( userService.getCogDimensionConstraints( user.getUserCredentials() ) );
+
             for ( DataApprovalLevel approvalLevel : getAllDataApprovalLevels() )
             {
-                Boolean canReadThisLevel = ( securityService.canRead( approvalLevel ) &&
-                    ( !approvalLevel.hasCategoryOptionGroupSet() || securityService.canRead( approvalLevel.getCategoryOptionGroupSet() ) ) );
+                CategoryOptionGroupSet cogs = approvalLevel.getCategoryOptionGroupSet();
+
+                Boolean canReadThisLevel = ( securityService.canRead( approvalLevel ) && (
+                    ( cogs == null && canSeeAllDimensions ) ||
+                    ( cogs != null && securityService.canRead( cogs ) && !CollectionUtils.isEmpty( categoryService.getCategoryOptionGroups( cogs ) ) ) ) );
 
                 //
                 // Test using assignedAtLevel and approvableAtLevel values from the previous (higher) level.
@@ -495,24 +500,30 @@ public class DefaultDataApprovalLevelService
     public DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits )
     {
         User user = currentUserService.getCurrentUser();
-
+        
+        return getUserApprovalLevel( user, orgUnit, includeDataViewOrgUnits );
+    }
+    
+    @Override
+    public DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit, boolean includeDataViewOrgUnits )
+    {
         if ( user != null )
         {
             for ( OrganisationUnit ou : user.getOrganisationUnits() )
             {
                 if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
                 {
-                    return userApprovalLevel( ou );
+                    return userApprovalLevel( ou, user );
                 }
             }
 
             if ( includeDataViewOrgUnits && user.getDataViewOrganisationUnits() != null )
             {
-                for ( OrganisationUnit ou : user.getOrganisationUnits() )
+                for ( OrganisationUnit ou : user.getDataViewOrganisationUnits() )
                 {
                     if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
                     {
-                        return userApprovalLevel( ou );
+                        return userApprovalLevel( ou, user );
                     }
                 }
             }
@@ -539,7 +550,7 @@ public class DefaultDataApprovalLevelService
         {
             for ( OrganisationUnit orgUnit : user.getOrganisationUnits() )
             {
-                map.put( orgUnit, requiredApprovalLevel( orgUnit ) );
+                map.put( orgUnit, requiredApprovalLevel( orgUnit, user ) );
             }
         }
 
@@ -554,7 +565,7 @@ public class DefaultDataApprovalLevelService
         {
             if ( !map.containsKey( orgUnit ) )
             {
-                map.put( orgUnit, requiredApprovalLevel( orgUnit ) );
+                map.put( orgUnit, requiredApprovalLevel( orgUnit, user ) );
             }
         }
 
@@ -567,7 +578,7 @@ public class DefaultDataApprovalLevelService
 
     private void tracePrint( String s ) // Temporary, for development
     {
-        //System.out.println( s );
+//        System.out.println( s );
     }
 
     /**
@@ -657,9 +668,9 @@ public class DefaultDataApprovalLevelService
      * @param orgUnit organisation unit to test.
      * @return required approval level for user to see the data.
      */
-    private int requiredApprovalLevel( OrganisationUnit orgUnit )
+    private int requiredApprovalLevel( OrganisationUnit orgUnit, User user )
     {
-        DataApprovalLevel userLevel = userApprovalLevel( orgUnit );
+        DataApprovalLevel userLevel = userApprovalLevel( orgUnit, user );
 
         return userLevel == null ? 0 :
                 userLevel.getLevel() == getAllDataApprovalLevels().size() ? APPROVAL_LEVEL_UNAPPROVED :
@@ -688,7 +699,7 @@ public class DefaultDataApprovalLevelService
      * @param orgUnit organisation unit to test.
      * @return approval level for user.
      */
-    private DataApprovalLevel userApprovalLevel( OrganisationUnit orgUnit )
+    private DataApprovalLevel userApprovalLevel( OrganisationUnit orgUnit, User user )
     {
         int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
 
@@ -700,7 +711,7 @@ public class DefaultDataApprovalLevelService
 
             if ( level.getOrgUnitLevel() >= orgUnitLevel
                     && securityService.canRead( level )
-                    && canReadCOGS( level.getCategoryOptionGroupSet() ) )
+                    && canReadCOGS( user, level.getCategoryOptionGroupSet() ) )
             {
                 userLevel = level;
                 break;
@@ -723,26 +734,16 @@ public class DefaultDataApprovalLevelService
      * @param cogs The category option group set to test
      * @return true if user can read at least one category option group.
      */
-    private boolean canReadCOGS( CategoryOptionGroupSet cogs )
+    private boolean canReadCOGS( User user, CategoryOptionGroupSet cogs )
     {
         if ( cogs == null )
         {
-            UserCredentials userCredentials = currentUserService.getCurrentUser().getUserCredentials();
+            UserCredentials userCredentials = user.getUserCredentials();
 
             return CollectionUtils.isEmpty( userCredentials.getCogsDimensionConstraints() )
                 && CollectionUtils.isEmpty( userCredentials.getCatDimensionConstraints() );
         }
 
-        for ( CategoryOptionGroup cog : cogs.getMembers() )
-        {
-            tracePrint("canReadCOGS( " + cogs.getName() + " ) cog " + cog.getName() + " " + securityService.canRead( cog ) );
-
-            if ( securityService.canRead( cog ) )
-            {
-                return true;
-            }
-        }
-        
-        return false;
+        return !CollectionUtils.isEmpty( categoryService.getCategoryOptionGroups( cogs ) );
     }
 }

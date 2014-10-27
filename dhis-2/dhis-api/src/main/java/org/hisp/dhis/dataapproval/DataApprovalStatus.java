@@ -40,7 +40,7 @@ public class DataApprovalStatus
     /**
      * State of data approval for a given selection of data from a data set.
      */
-    private DataApprovalState dataApprovalState;
+    private DataApprovalState state;
 
     /**
      * If the selection of data is approved, the data approval object.
@@ -55,7 +55,12 @@ public class DataApprovalStatus
      * one level, this is for the highest level of approval.
      */
     private DataApprovalLevel dataApprovalLevel;
-
+    
+    /**
+     * Permissions granted for current user for the this approval state.
+     */
+    private DataApprovalPermissions permissions;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -64,31 +69,32 @@ public class DataApprovalStatus
     {
     }
 
-    public DataApprovalStatus( DataApprovalState dataApprovalState, DataApproval dataApproval,
-        DataApprovalLevel dataApprovalLevel )
+    public DataApprovalStatus( DataApprovalState state, DataApproval dataApproval,
+        DataApprovalLevel dataApprovalLevel, DataApprovalPermissions permissions )
     {
-        this.dataApprovalState = dataApprovalState;
+        this.state = state;
         this.dataApproval = dataApproval;
         this.dataApprovalLevel = dataApprovalLevel;
+        this.permissions = permissions;
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public DataApprovalState getDataApprovalState()
-    {
-        return dataApprovalState;
-    }
-
-    public void setDataApprovalState( DataApprovalState dataApprovalState )
-    {
-        this.dataApprovalState = dataApprovalState;
-    }
-
     public DataApproval getDataApproval()
     {
         return dataApproval;
+    }
+
+    public DataApprovalState getState()
+    {
+        return state;
+    }
+
+    public void setState( DataApprovalState state )
+    {
+        this.state = state;
     }
 
     public void setDataApproval( DataApproval dataApproval )
@@ -104,5 +110,15 @@ public class DataApprovalStatus
     public void setDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
     {
         this.dataApprovalLevel = dataApprovalLevel;
+    }
+
+    public DataApprovalPermissions getPermissions()
+    {
+        return permissions;
+    }
+
+    public void setPermissions( DataApprovalPermissions permissions )
+    {
+        this.permissions = permissions;
     }
 }

@@ -28,15 +28,13 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.CategoryOptionGroup;
-import org.hisp.dhis.dataelement.DataElementCategoryOption;
+import java.util.List;
+import java.util.Set;
+
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
-
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author Jim Grace
@@ -87,34 +85,30 @@ public interface DataApprovalService
      * @return the data approval status.
      */
     DataApprovalStatus getDataApprovalStatus( DataSet dataSet, Period period,
-                                              OrganisationUnit organisationUnit,
-                                              DataElementCategoryOptionCombo attributeOptionCombo );
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
-     * Returns the data approval permissions and status for a given data set,
-     * period, organisation unit, category option group and/or and attribute
-     * category combination. If attributeOptionCombo is null, the default
-     * option combo will be used.
+     * Returns the data approval status and permissions for a given data set,
+     * period, organisation unit and attribute category combination.
+     * If attributeOptionCombo is null, the default option combo will be used.
+     * If data is approved at multiple levels, the lowest level is returned.
      *
      * @param dataSet DataSet to check for approval.
      * @param period Period to check for approval.
      * @param organisationUnit OrganisationUnit to check for approval.
-     * @param categoryOptionGroups CategoryOptionGroups (if any) for approval.
-     * @param dataElementCategoryOptions Selected category options (if any).
-     * @return the data approval permissions (including status.)
+     * @param attributeOptionCombo CategoryOptionCombo (if any) for approval.
+     * @return the data approval status.
      */
-    DataApprovalStatusAndPermissions getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
-                                                                          OrganisationUnit organisationUnit,
-                                                                          Set<CategoryOptionGroup> categoryOptionGroups,
-                                                                          Set<DataElementCategoryOption> dataElementCategoryOptions );
+    DataApprovalStatus getDataApprovalStatusAndPermissions( DataSet dataSet, Period period,
+        OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
      * Returns a list of approval status and permissions for all of the
      * category option combos that the user is allowed to see.
      *
      * @param dataSets DataSets that we are getting the status for
-     * @param period period we are getting the status for
+     * @param periods Periods we are getting the status for
      * @return list of status and permissions
      */
-    List<DataApprovalStatusAndPermissions> getUserDataApprovalsAndPermissions( Set<DataSet> dataSets, Period period );
+    List<DataApprovalStatus> getUserDataApprovalsAndPermissions( Set<DataSet> dataSets, Set<Period> periods );
 }

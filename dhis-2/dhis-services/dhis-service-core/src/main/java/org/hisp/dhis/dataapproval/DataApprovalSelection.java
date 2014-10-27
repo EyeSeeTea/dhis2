@@ -153,7 +153,7 @@ class DataApprovalSelection
 
         if ( allApprovalLevels.isEmpty() ) // No approval levels defined!
         {
-            return new DataApprovalStatus( UNAPPROVABLE, null, null );
+            return new DataApprovalStatus( UNAPPROVABLE, null, null, null );
         }
 
         DataApprovalStatus status = null;
@@ -192,7 +192,7 @@ class DataApprovalSelection
                 log.info( "Mismatch org unit " + ( daIn.getOrganisationUnit() == null ? "(null)" : daIn.getOrganisationUnit().getName() )
                         + " with " + ( selectedOrgUnit == null ? "(null)" : selectedOrgUnit.getName() ) );
 
-                return new DataApprovalStatus( UNAPPROVABLE, null, null );
+                return new DataApprovalStatus( UNAPPROVABLE, null, null, null );
             }
 
             status = combineStatus( status, getStatus() );
@@ -208,7 +208,7 @@ class DataApprovalSelection
             status.setDataApprovalLevel( originalDataApproval.getDataApprovalLevel() );
         }
 
-        tracePrint("getDataApprovalStatus returning " + status.getDataApprovalLevel().getLevel() + "-" + status.getDataApprovalState().name() );
+        tracePrint("getDataApprovalStatus returning " + status.getDataApprovalLevel().getLevel() + "-" + status.getState().name() );
         tracePrint( "-----------------------" );
 
         log.info( "getDataApprovalStatus() org unit " +  selectedOrgUnit.getName()
@@ -228,7 +228,7 @@ class DataApprovalSelection
 
     private void tracePrint( String s ) // Temporary, for development
     {
-        //System.out.println( s );
+//        System.out.println( s );
     }
 
     /**
@@ -252,7 +252,7 @@ class DataApprovalSelection
             }
             else if ( oldStatus.getDataApprovalLevel().getLevel() == newStatus.getDataApprovalLevel().getLevel() )
             {
-                DataApprovalState state = DataApprovalAggregator.nextState( oldStatus.getDataApprovalState(), newStatus.getDataApprovalState() );
+                DataApprovalState state = DataApprovalAggregator.nextState( oldStatus.getState(), newStatus.getState() );
 
                 DataApproval da = newStatus.getDataApproval();
 
@@ -266,7 +266,7 @@ class DataApprovalSelection
                     da = new DataApproval( da ); // Defensive copy.
                 }
 
-                status = new DataApprovalStatus( state, da, oldStatus.getDataApprovalLevel() );
+                status = new DataApprovalStatus( state, da, oldStatus.getDataApprovalLevel(), null );
             }
         }
 
@@ -290,7 +290,7 @@ class DataApprovalSelection
     {
         return status == null ? "(null)" :
                 ( status.getDataApprovalLevel() == null ? "(null level)" : status.getDataApprovalLevel().getLevel() )
-                + "-" + ( status.getDataApprovalState() == null ? "(null state)" : status.getDataApprovalState().name() )
+                + "-" + ( status.getState() == null ? "(null state)" : status.getState().name() )
                 + " da " + ( status.getDataApproval() == null ? "(null)" : ( "level "
                         + ( status.getDataApproval().getDataApprovalLevel() == null ? "(null)" : status.getDataApproval().getDataApprovalLevel().getLevel() ) ) );
     }
@@ -330,11 +330,11 @@ class DataApprovalSelection
                     {
                         if ( daIn.getDataApprovalLevel() == null || ( dal.getLevel() == checkToLevel && dal.getOrgUnitLevel() == organisationUnitLevel ) )
                         {
-                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_HERE : APPROVED_HERE, daOut, dal );
+                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_HERE : APPROVED_HERE, daOut, dal, null );
                         }
                         else // data approval level is higher (lower number) and/or organisation unit level is higher (lower number)
                         {
-                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_ELSEWHERE : APPROVED_ELSEWHERE, daOut, dal );
+                            return new DataApprovalStatus( daOut.isAccepted() ? ACCEPTED_ELSEWHERE : APPROVED_ELSEWHERE, daOut, dal, null );
                         }
                     }
                 }
@@ -342,25 +342,25 @@ class DataApprovalSelection
                 {
                     if ( dataSetFoundBelow || daIn.getDataSet().getSources().contains( originalDataApproval.getOrganisationUnit() ) )
                     {
-                        return new DataApprovalStatus( UNAPPROVED_READY, daIn, dal );
+                        return new DataApprovalStatus( UNAPPROVED_READY, daIn, dal, null );
                     }
                     else
                     {
                         tracePrint( "getStatus returning UNAPPROVABLE because not ready below and no data set assignment found at this level or below." );
 
-                        return new DataApprovalStatus( UNAPPROVABLE, null, dal );
+                        return new DataApprovalStatus( UNAPPROVABLE, null, dal, null );
                     }
                 }
                 else
                 {
-                    return new DataApprovalStatus( dal.getOrgUnitLevel() >= organisationUnitLevel ? UNAPPROVED_WAITING : UNAPPROVED_ELSEWHERE, null, dal );
+                    return new DataApprovalStatus( dal.getOrgUnitLevel() >= organisationUnitLevel ? UNAPPROVED_WAITING : UNAPPROVED_ELSEWHERE, null, dal, null );
                 }
             }
         }
 
         if ( latestApplicableLevel != null && isDataSetAssignedHereOrBelow( selectedOrgUnit ) )
         {
-            return new DataApprovalStatus( UNAPPROVED_READY, daIn, latestApplicableLevel );
+            return new DataApprovalStatus( UNAPPROVED_READY, daIn, latestApplicableLevel, null );
         }
         else
         {
@@ -368,7 +368,7 @@ class DataApprovalSelection
             tracePrint( "getStatus isDataSetAssignedHereOrBelow " + isDataSetAssignedHereOrBelow( selectedOrgUnit ) );
             tracePrint( "getStatus returning UNAPPROVABLE because we couldn't find a low enough level:" );
 
-            return new DataApprovalStatus( UNAPPROVABLE, null, allApprovalLevels.get( allApprovalLevels.size() - 1 ) );
+            return new DataApprovalStatus( UNAPPROVABLE, null, allApprovalLevels.get( allApprovalLevels.size() - 1 ), null );
         }
     }
 
@@ -382,7 +382,7 @@ class DataApprovalSelection
     {
         tracePrint( "optionApplies - level " + dal.getLevel() + " COGS "
                 + ( dal.getCategoryOptionGroupSet() == null ? "(none)" : dal.getCategoryOptionGroupSet().getName() )
-                + " combo " + daIn.getAttributeOptionCombo().getName() );
+                + " combo " + ( daIn.getAttributeOptionCombo() == null ? "(null)" : daIn.getAttributeOptionCombo().getName() ) );
 
         tracePrint("optionApplies - option combo group sets " + getOptionComboGroupSets( daIn.getAttributeOptionCombo() ) );
 

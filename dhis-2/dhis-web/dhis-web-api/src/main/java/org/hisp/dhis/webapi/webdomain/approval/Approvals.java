@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval.exceptions;
+package org.hisp.dhis.webapi.webdomain.approval;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,19 +28,61 @@ package org.hisp.dhis.dataapproval.exceptions;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * @author Jim Grace
- * @version $Id$
- */
-public class NoAttributeOptionsFoundInGroupsException
-        extends DataApprovalException
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+@JacksonXmlRootElement( localName = "approvals", namespace = DxfNamespaces.DXF_2_0 )
+public class Approvals
 {
-    private static final long serialVersionUID = -781185389702703948L;
+    private List<String> ds = new ArrayList<>();
+    
+    private List<String> pe = new ArrayList<>();
+    
+    private List<Approval> approvals = new ArrayList<>();
 
-    public NoAttributeOptionsFoundInGroupsException()
+    public Approvals()
     {
-        super();
+    }
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getDs()
+    {
+        return ds;
+    }
+
+    public void setDs( List<String> ds )
+    {
+        this.ds = ds;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getPe()
+    {
+        return pe;
+    }
+
+    public void setPe( List<String> pe )
+    {
+        this.pe = pe;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<Approval> getApprovals()
+    {
+        return approvals;
+    }
+
+    public void setApprovals( List<Approval> approvals )
+    {
+        this.approvals = approvals;
     }
 }
