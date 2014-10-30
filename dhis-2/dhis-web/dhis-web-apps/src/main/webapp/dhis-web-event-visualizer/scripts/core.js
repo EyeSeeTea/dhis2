@@ -1792,6 +1792,7 @@ Ext.onReady( function() {
                 names = response.metaData.names;
                 names[emptyId] = emptyId;
 
+                response.metaData.optionNames = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -2471,7 +2472,7 @@ Ext.onReady( function() {
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
-                            name = xResponse.metaData.names[id];
+                            name = xResponse.metaData.optionNames[id] || xResponse.metaData.names[id];
 
                             if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
                                 var mxl = parseInt(xLayout.legend.maxLength);
