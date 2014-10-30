@@ -755,6 +755,25 @@ Ext.onReady( function() {
                 return uniqueItems;
             };
 
+            support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return {};
+                }
+
+                var o = {};
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+                namePrefix = namePrefix || '';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    o[namePrefix + obj[idProperty]] = obj[nameProperty];
+                }
+
+                return o;
+            };
+
 				// object
 			support.prototype.object = {};
 
@@ -2787,7 +2806,7 @@ Ext.onReady( function() {
                                 legend = this.legend,
                                 legendCenterX,
                                 titleX;
-                                
+
                             if (this.legend.position === 'top') {
                                 legendCenterX = legend.x + (legend.width / 2);
                                 titleX = titleWidth ? legendCenterX - (titleWidth / 2) : titleXFallback;
