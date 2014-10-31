@@ -33,6 +33,7 @@ import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATA_ELE
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATE_PERIOD_STRUCTURE;
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_ORGANISATION_UNIT_STRUCTURE;
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_PERIOD_STRUCTURE;
+import static org.hisp.dhis.dataapproval.DataApprovalLevelService.APPROVAL_LEVEL_UNAPPROVED;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -279,7 +280,7 @@ public class DefaultResourceTableService
     @Transactional
     public void generateDataElementGroupSetTable()
     {
-        List<DataElementGroupSet> groupSets = new ArrayList<>( dataElementService.getAllDataElementGroupSets() );
+        List<DataElementGroupSet> groupSets = new ArrayList<>( dataElementService.getDataDimensionDataElementGroupSets() );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -318,7 +319,7 @@ public class DefaultResourceTableService
     public void generateOrganisationUnitGroupSetTable()
     {
         List<OrganisationUnitGroupSet> groupSets = new ArrayList<>(
-            organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
+            organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets() );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -338,10 +339,10 @@ public class DefaultResourceTableService
     public void generateCategoryTable()
     {
         // ---------------------------------------------------------------------
-        // Create table
+        // Create table - only using data dimension categories
         // ---------------------------------------------------------------------
 
-        List<DataElementCategory> categories = new ArrayList<>( categoryService.getAllDataElementCategories() );
+        List<DataElementCategory> categories = new ArrayList<>( categoryService.getDataDimensionDataElementCategories() );
 
         Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -387,7 +388,7 @@ public class DefaultResourceTableService
             values.add( dataSet != null ? dataSet.getId() : null );
             values.add( dataSet != null ? dataSet.getUid() : null );
             values.add( dataSet != null ? dataSet.getName() : null );
-            values.add( dataSet != null ? dataSet.isApproveData() : false );
+            values.add( dataSet != null && dataSet.isApproveData() ? APPROVAL_LEVEL_UNAPPROVED : 0 );
             values.add( periodType != null ? periodType.getId() : null );
             values.add( periodType != null ? periodType.getName() : null );
 

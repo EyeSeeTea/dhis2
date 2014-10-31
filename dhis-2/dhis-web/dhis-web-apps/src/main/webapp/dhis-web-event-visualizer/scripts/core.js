@@ -10,6 +10,10 @@ Ext.onReady( function() {
         }
     });
 
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
 	// namespace
 	EV = {};
 	var NS = EV;
@@ -749,6 +753,25 @@ Ext.onReady( function() {
                 }
 
                 return uniqueItems;
+            };
+
+            support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return {};
+                }
+
+                var o = {};
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+                namePrefix = namePrefix || '';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    o[namePrefix + obj[idProperty]] = obj[nameProperty];
+                }
+
+                return o;
             };
 
 				// object
@@ -1769,6 +1792,7 @@ Ext.onReady( function() {
                 names = response.metaData.names;
                 names[emptyId] = emptyId;
 
+                response.metaData.optionNames = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -2448,7 +2472,7 @@ Ext.onReady( function() {
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
-                            name = xResponse.metaData.names[id];
+                            name = xResponse.metaData.optionNames[id] || xResponse.metaData.names[id];
 
                             if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
                                 var mxl = parseInt(xLayout.legend.maxLength);
@@ -2778,17 +2802,19 @@ Ext.onReady( function() {
                     return function() {
                         if (this.items) {
                             var title = this.items[0],
+                                titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
+                                titleXFallback = 10,
                                 legend = this.legend,
                                 legendCenterX,
                                 titleX;
 
                             if (this.legend.position === 'top') {
                                 legendCenterX = legend.x + (legend.width / 2);
-                                titleX = legendCenterX - (title.el.getWidth() / 2);
+                                titleX = titleWidth ? legendCenterX - (titleWidth / 2) : titleXFallback;
                             }
                             else {
                                 var legendWidth = legend ? legend.width : 0;
-                                titleX = (this.width / 2) - (title.el.getWidth() / 2);
+                                titleX = titleWidth ? (this.width / 2) - (titleWidth / 2) : titleXFallback;
                             }
 
                             title.setAttributes({

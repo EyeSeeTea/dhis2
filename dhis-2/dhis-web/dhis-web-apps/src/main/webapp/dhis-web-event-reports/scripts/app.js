@@ -483,40 +483,43 @@ Ext.onReady( function() {
                 });
 
                 this.searchStore = Ext.create('Ext.data.Store', {
-					fields: [idProperty, 'name'],
+					fields: [idProperty, nameProperty],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
-						var store = this,
-							params = {};
+						var store = this;
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
+                        pageSize = pageSize || 100;
 
-						//if (key) {
-							//params['key'] = key;
-						//}
+                        dhis2.er.store.get('optionSets', optionSetId).done( function(obj) {
+                            if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
+                                var data = [];
 
-						params['max'] = pageSize || 15;
+                                if (key) {
+                                    var re = new RegExp(key, 'gi');
 
-						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
-							params: params,
-							disableCaching: false,
-							success: function(r) {
-								var options = Ext.decode(r.responseText).options,
-                                    data = [];
+                                    for (var i = 0, name, match; i < obj.options.length; i++) {
+                                        name = obj.options[i].name;
+                                        match = name.match(re);
 
-                                for (var i = 0; i < options.length; i++) {
-                                    if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
-                                        data.push(options[i]);
+                                        if (Ext.isArray(match) && match.length) {
+                                            data.push(obj.options[i]);
+
+                                            if (data.length === pageSize) {
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
+                                else {
+                                    data = obj.options;
+                                }
 
-								store.removeAll();
-                                store.loadData(data);
+                                store.removeAll();
+                                store.loadData(data.slice(0, pageSize));
 
-                                container.triggerCmp.storage = Ext.clone(options);
-							}
-						});
+                            }
+                        });
 					},
                     listeners: {
 						datachanged: function(s) {
@@ -546,28 +549,25 @@ Ext.onReady( function() {
                     valueField: idProperty,
                     displayField: nameProperty,
                     hideTrigger: true,
-                    delimiter: '; ',
                     enableKeyEvents: true,
                     queryMode: 'local',
                     listConfig: {
-                        minWidth: 304
+                        minWidth: 346
                     },
                     store: this.searchStore,
                     listeners: {
-						keyup: {
-							fn: function() {
-								var value = this.getValue(),
-									optionSetId = container.dataElement.optionSet.id;
+						keyup: function() {
+                            var value = this.getValue(),
+                                optionSetId = container.dataElement.optionSet.id;
 
-								// search
-								container.searchStore.loadOptionSet(optionSetId, value);
+                            // search
+                            container.searchStore.loadOptionSet(optionSetId, value);
 
-                                // trigger
-                                if (!value || (Ext.isString(value) && value.length === 1)) {
-									container.triggerCmp.setDisabled(!!value);
-								}
-							}
-						},
+                            // trigger
+                            if (!value || (Ext.isString(value) && value.length === 1)) {
+                                container.triggerCmp.setDisabled(!!value);
+                            }
+                        },
 						select: function() {
                             var id = Ext.Array.from(this.getValue())[0];
 
@@ -596,15 +596,8 @@ Ext.onReady( function() {
                     disabledCls: 'ns-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
-                    storage: [],
                     handler: function(b) {
-                        if (b.storage.length) {
-							container.searchStore.removeAll();
-                            container.searchStore.add(Ext.clone(b.storage));
-                        }
-                        else {
-                            container.searchStore.loadOptionSet();
-                        }
+                        container.searchStore.loadOptionSet();
                     }
                 });
 
@@ -632,6 +625,7 @@ Ext.onReady( function() {
                     store: container.valueStore,
                     queryMode: 'local',
                     listConfig: {
+                        minWidth: 266,
                         cls: 'optionselector'
                     },
                     setOptionValues: function(optionArray) {
@@ -6360,116 +6354,182 @@ Ext.onReady( function() {
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
-				var map = {};
+				var map = {},
+                    getOptionSets;
+
+                getOptionSets = function(xResponse, callbackFn) {
+                    var optionSetHeaders = [];
+
+                    for (var i = 0; i < xResponse.headers.length; i++) {
+                        if (Ext.isString(xResponse.headers[i].optionSet)) {
+                            optionSetHeaders.push(xResponse.headers[i]);
+                        }
+                    }
+
+                    if (optionSetHeaders.length) {
+                        var callbacks = 0,
+                            optionMap = {},
+                            getOptions,
+                            fn;
+
+                        fn = function() {
+                            if (++callbacks === optionSetHeaders.length) {
+                                xResponse.metaData.optionNames = optionMap;
+                                callbackFn();
+                            }
+                        };
+
+                        getOptions = function(optionSetId, dataElementId) {
+                            dhis2.er.store.get('optionSets', optionSetId).done( function(obj) {
+                                Ext.apply(optionMap, support.prototype.array.getObjectMap(obj.options, 'code', 'name', dataElementId));
+                                fn();
+                            });
+                        };
+
+                        // execute
+                        for (var i = 0, header, optionSetId, dataElementId; i < optionSetHeaders.length; i++) {
+                            header = optionSetHeaders[i];
+                            optionSetId = header.optionSet;
+                            dataElementId = header.name;
+
+                            getOptions(optionSetId, dataElementId);
+                        }
+                    }
+                    else {
+                        callbackFn();
+                    }
+                };
 
 				map['aggregated_values'] = function() {
 					var xLayout,
+                        xResponse,
 						xColAxis,
 						xRowAxis,
 						table,
-						getHtml,
-						getXLayout = service.layout.getExtendedLayout,
-						getSXLayout = service.layout.getSyncronizedXLayout,
-						getXResponse = service.response.aggregate.getExtendedResponse,
-						getXAxis = service.layout.getExtendedAxis;
+						getSXLayout,
+						getXResponse,
+                        getReport;
 
+                    getReport = function() {
+                        var getHtml = function(xLayout, xResponse) {
+                            xColAxis = service.layout.getExtendedAxis(xLayout, 'col');
+                            xRowAxis = service.layout.getExtendedAxis(xLayout, 'row');
+
+                            return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+                        };
+
+                        table = getHtml(xLayout, xResponse);
+
+                        if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
+                            alert('Table has too many cells. Please reduce the table and try again.');
+                            web.mask.hide(ns.app.centerRegion);
+                            return;
+                        }
+
+                        if (layout.sorting) {
+                            xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
+                            xLayout = service.layout.getSyncronizedXLayout(layout, xLayout, xResponse);
+                            table = getHtml(xLayout, xResponse);
+                        }
+
+                        web.mask.show(ns.app.centerRegion, 'Rendering table..');
+
+                        // timing
+                        ns.app.dateRender = new Date();
+
+                        ns.app.centerRegion.removeAll(true);
+                        ns.app.centerRegion.update(table.html);
+
+                        // timing
+                        ns.app.dateTotal = new Date();
+
+                        // after render
+                        ns.app.layout = layout;
+                        ns.app.xLayout = xLayout;
+                        ns.app.response = response;
+                        ns.app.xResponse = xResponse;
+                        ns.app.xColAxis = xColAxis;
+                        ns.app.xRowAxis = xRowAxis;
+                        ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
+                        ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+
+                        if (NS.isSessionStorage) {
+                            //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
+                            web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                            web.storage.session.set(layout, 'eventtable');
+                        }
+
+                        ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
+
+                        web.mask.hide(ns.app.centerRegion);
+
+                        if (NS.isDebug) {
+                            console.log("Number of cells", table.tdCount);
+                            console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                            console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                            console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                            console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                            console.log("layout", layout);
+                            console.log("response", response);
+                            console.log("xResponse", xResponse);
+                            console.log("xLayout", xLayout);
+                            console.log("core", ns.core);
+                            console.log("app", ns.app);
+                        }
+                    };
+
+                    getSXLayout = function() {
+                        xLayout = service.layout.getSyncronizedXLayout(layout, xLayout, xResponse);
+
+                        getReport();
+                    };
+
+                    getXResponse = function() {
+                        xLayout = service.layout.getExtendedLayout(layout);
+                        xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
+
+                        getOptionSets(xResponse, getSXLayout);
+                    };
+
+                    // execute
 					response = response || ns.app.response;
 
-					getHtml = function(xLayout, xResponse) {
-						xColAxis = getXAxis(xLayout, 'col');
-						xRowAxis = getXAxis(xLayout, 'row');
-
-						return web.report.aggregate.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
-					};
-
-					xLayout = getXLayout(layout);
-					xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-					xLayout = getSXLayout(layout, xLayout, xResponse);
-
-					table = getHtml(xLayout, xResponse);
-
-                    if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
-                        alert('Table has too many cells. Please reduce the table and try again.');
-                        web.mask.hide(ns.app.centerRegion);
-                        return;
-                    }
-
-					if (layout.sorting) {
-						xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-						xLayout = getSXLayout(layout, xLayout, xResponse);
-						table = getHtml(xLayout, xResponse);
-					}
-
-                    web.mask.show(ns.app.centerRegion, 'Rendering table..');
-
-                    // timing
-                    ns.app.dateRender = new Date();
-
-					ns.app.centerRegion.removeAll(true);
-					ns.app.centerRegion.update(table.html);
-
-                    // timing
-                    ns.app.dateTotal = new Date();
-
-					// after render
-					ns.app.layout = layout;
-					ns.app.xLayout = xLayout;
-					ns.app.response = response;
-					ns.app.xResponse = xResponse;
-					ns.app.xColAxis = xColAxis;
-					ns.app.xRowAxis = xRowAxis;
-					ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
-					ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
-
-					if (NS.isSessionStorage) {
-						//web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
-						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-						web.storage.session.set(layout, 'eventtable');
-					}
-
-					ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui, table);
-
-					web.mask.hide(ns.app.centerRegion);
-
-					if (NS.isDebug) {
-                        console.log("Number of cells", table.tdCount);
-                        console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-                        console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-                        console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-                        console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-                        console.log("layout", layout);
-                        console.log("response", response);
-                        console.log("xResponse", xResponse);
-                        console.log("xLayout", xLayout);
-						console.log("core", ns.core);
-						console.log("app", ns.app);
-					}
+                    getXResponse();
 				};
 
 				map['individual_cases'] = function() {
-					var xResponse = service.response.query.getExtendedResponse(layout, response),
+					var xResponse,
+                        getReport;
+
+                    getReport = function() {
                         table = web.report.query.getHtml(layout, xResponse);
 
-					//if (layout.sorting) {
-						//xResponse = web.report.query.sort(layout, xResponse);
-						//table = web.report.query.getHtml(layout, xResponse);
-					//}
+                        //if (layout.sorting) {
+                            //xResponse = web.report.query.sort(layout, xResponse);
+                            //table = web.report.query.getHtml(layout, xResponse);
+                        //}
 
-					ns.app.centerRegion.removeAll(true);
-					ns.app.centerRegion.update(table.html);
+                        ns.app.centerRegion.removeAll(true);
+                        ns.app.centerRegion.update(table.html);
 
-					// after render
-					ns.app.layout = layout;
-					ns.app.response = response;
-					ns.app.xResponse = xResponse;
+                        // after render
+                        ns.app.layout = layout;
+                        ns.app.response = response;
+                        ns.app.xResponse = xResponse;
 
-					if (NS.isSessionStorage) {
-						web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-					}
+                        if (NS.isSessionStorage) {
+                            web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
+                        }
 
-					ns.app.accordion.setGui(layout, null, response, isUpdateGui, table);
+                        ns.app.accordion.setGui(layout, null, response, isUpdateGui, table);
 
-					web.mask.hide(ns.app.centerRegion);
+                        web.mask.hide(ns.app.centerRegion);
+                    };
+
+                    // execute
+                    xResponse = service.response.query.getExtendedResponse(layout, response);
+
+                    getOptionSets(xResponse, getReport);
 				};
 
 				map[layout.dataType]();
@@ -7130,6 +7190,9 @@ Ext.onReady( function() {
 				render: function() {
 					ns.app.viewport = this;
 
+                    var initEl = document.getElementById('init');
+                    initEl.parentNode.removeChild(initEl);
+
 					ns.app.aggregateLayoutWindow = AggregateLayoutWindow();
 					ns.app.aggregateLayoutWindow.hide();
 					ns.app.queryLayoutWindow = QueryLayoutWindow();
@@ -7220,6 +7283,8 @@ Ext.onReady( function() {
 			}
 		};
 
+        init.optionSetStorage = {};
+
 		// requests
 		Ext.Ajax.request({
 			url: 'manifest.webapp',
@@ -7267,6 +7332,15 @@ Ext.onReady( function() {
 
                                         init.namePropertyUrl = namePropertyUrl;
 
+                                        // dhis2
+                                        dhis2.util.namespace('dhis2.er');
+
+                                        dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
+                                            name: 'dhis2',
+                                            adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                            objectStores: ['optionSets']
+                                        });
+
                                         // calendar
                                         (function() {
                                             var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
@@ -7300,6 +7374,7 @@ Ext.onReady( function() {
                                             url: 'i18n/' + keyUiLocale + '.properties',
                                             success: function(r) {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                Ext.get('init').update(NS.i18n.initializing + '..');
 
                                                 if (keyUiLocale !== defaultKeyUiLocale) {
                                                     Ext.Ajax.request({
@@ -7399,6 +7474,58 @@ Ext.onReady( function() {
                                             success: function(r) {
                                                 init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
                                                 fn();
+                                            }
+                                        });
+
+                                        // option sets
+                                        requests.push({
+                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
+                                            success: function(r) {
+                                                var optionSets = Ext.decode(r.responseText).optionSets || [],
+                                                    store = dhis2.er.store,
+                                                    ids = [],
+                                                    url = '',
+                                                    callbacks = 0,
+                                                    checkOptionSet,
+                                                    updateStore;
+
+                                                updateStore = function() {
+                                                    if (++callbacks === optionSets.length) {
+                                                        if (!ids.length) {
+                                                            fn();
+                                                            return;
+                                                        }
+
+                                                        for (var i = 0; i < ids.length; i++) {
+                                                            url += '&filter=id:eq:' + ids[i];
+                                                        }
+
+                                                        Ext.Ajax.request({
+                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            success: function(r) {
+                                                                var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        });
+                                                    }
+                                                };
+
+                                                registerOptionSet = function(optionSet) {
+                                                    store.get('optionSets', optionSet.id).done( function(obj) {
+                                                        if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                            ids.push(optionSet.id);
+                                                        }
+
+                                                        updateStore();
+                                                    });
+                                                };
+
+                                                store.open().done( function() {
+                                                    for (var i = 0; i < optionSets.length; i++) {
+                                                        registerOptionSet(optionSets[i]);
+                                                    }
+                                                });
                                             }
                                         });
 

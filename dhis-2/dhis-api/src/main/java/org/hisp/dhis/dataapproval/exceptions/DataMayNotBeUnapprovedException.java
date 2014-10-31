@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,17 +28,14 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.schema.descriptors.ConceptSchemaDescriptor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jim Grace
  */
-@Controller
-@RequestMapping( value = ConceptSchemaDescriptor.API_ENDPOINT )
-public class ConceptController
-    extends AbstractCrudController<Concept>
+public class DataMayNotBeUnapprovedException
+    extends DataApprovalException
 {
+    public DataMayNotBeUnapprovedException()
+    {
+        super();
+    }
 }

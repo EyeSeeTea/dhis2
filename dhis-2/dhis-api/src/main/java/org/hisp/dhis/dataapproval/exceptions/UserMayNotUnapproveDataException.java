@@ -1,4 +1,4 @@
-package org.hisp.dhis.common;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,16 +28,14 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-import org.hisp.dhis.concept.Concept;
-
 /**
- *
- * @author bobj
- * @version created 23-Nov-2011
+ * @author Jim Grace
  */
-public interface GenericDimensionalObjectStore<T> 
-    extends GenericIdentifiableObjectStore<T>
+public class UserMayNotUnapproveDataException
+    extends DataApprovalException
 {
-    Collection<T> getByConcept( Concept concept );    
+    public UserMayNotUnapproveDataException()
+    {
+        super();
+    }
 }

@@ -27,6 +27,9 @@ import org.hisp.dhis.dataset.comparator.SectionOrderComparator;
 import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.option.Option;
+import org.hisp.dhis.option.OptionService;
+import org.hisp.dhis.option.OptionSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -34,6 +37,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.rbf.api.Lookup;
 import org.hisp.dhis.rbf.api.LookupService;
 import org.hisp.dhis.rbf.api.PBFDataValue;
 import org.hisp.dhis.rbf.api.PBFDataValueService;
@@ -59,6 +63,10 @@ public class LoadDataEntryFormAction implements Action
     // Dependencies
     // -------------------------------------------------------------------------
 
+    @Autowired
+    private OptionService optionService;
+
+    
     private PBFDataValueService pbfDataValueService;
 
     public void setPbfDataValueService( PBFDataValueService pbfDataValueService )
@@ -286,10 +294,16 @@ public class LoadDataEntryFormAction implements Action
         return locked;
     }
     
+    private Map<Integer,Option> optionsMap = new HashMap<Integer, Option>();
+    
+    public void setOptionsMap( Map<Integer, Option> optionsMap )
+    {
+        this.optionsMap = optionsMap;
+    }
+    
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
-
     public String execute()
     {
         dataValueMap = new HashMap<String, String>();
@@ -300,6 +314,21 @@ public class LoadDataEntryFormAction implements Action
         if( totalDataElement != null )
         {
             totalDataElementId = totalDataElement.getId();
+        }
+        
+        Lookup partnerOptionSetLookup = lookupService.getLookupByName( Lookup.OPTION_SET_PARTNER );
+        
+        OptionSet activitesOptionSet = optionService.getOptionSet( Integer.parseInt( partnerOptionSetLookup.getValue() ) );
+        
+        List<Option> options = new ArrayList<Option>();
+        if( activitesOptionSet != null )
+        {
+            options.addAll( activitesOptionSet.getOptions() );
+        }
+        
+        for( Option option : options )
+        {
+            optionsMap.put( option.getId(), option );
         }
         
         /*
@@ -389,11 +418,19 @@ public class LoadDataEntryFormAction implements Action
             orgUnitBranchIds += "," + orgUnit.getId();
         }
         
+        
+        
+        
+        
+        
         OrganisationUnitGroup orgUnitGroup = findPBFOrgUnitGroupforTariff( organisationUnit, dataSet.getId(), orgUnitBranchIds );
         if( orgUnitGroup != null )
         {
             tariffDataValueMap.putAll( tariffDataValueService.getTariffDataValues( orgUnitGroup, orgUnitBranchIds, dataSet, period ) );
         }
+        
+        //System.out.println( orgUnitBranchIds + " : " + orgUnitGroup.getId() + " : " + organisationUnit.getId() + " : " + dataSet.getId() );
+        
         
         /*
         OrganisationUnit parentOrgunit = findParentOrgunitforTariff( organisationUnit, tariff_setting_authority );
@@ -419,6 +456,7 @@ public class LoadDataEntryFormAction implements Action
                     pbfDataValue.setStoredBy( currentUserService.getCurrentUsername() );
                     pbfDataValue.setTariffAmount( tariffAmount );
                     pbfDataValue.setTimestamp( new Date() );
+                                        
                     pbfDataValueService.updatePBFDataValue( pbfDataValue );
                 }
             }
@@ -556,10 +594,13 @@ public class LoadDataEntryFormAction implements Action
     {
         Set<Integer> orgUnitGroupIds = tariffDataValueService.getOrgUnitGroupsByDataset( dataSetId, orgUnitIds );
         
+        //System.out.println( " orgUnitGroupIds : " + orgUnitGroupIds  );
+        
         OrganisationUnitGroup orgUnitGroup = null;
         if( orgUnitGroupIds != null && orgUnitGroupIds.size() > 0 )
         {
              orgUnitGroup = orgUnitGroupService.getOrganisationUnitGroup( orgUnitGroupIds.iterator().next() );
+             //System.out.println( " 1 orgUnitGroup : " + orgUnitGroup.getId()  );
         }
         else
         {        
@@ -568,6 +609,8 @@ public class LoadDataEntryFormAction implements Action
             OrganisationUnitGroupSet orgUnitGroupSet = orgUnitGroupService.getOrganisationUnitGroupSet( (int) tariff_authority.getValue() );
         	
             orgUnitGroup = organisationUnit.getGroupInGroupSet( orgUnitGroupSet );
+            
+            //System.out.println( " 2 orgUnitGroup : " + orgUnitGroup.getId()  );
         }
     	
     	return orgUnitGroup;

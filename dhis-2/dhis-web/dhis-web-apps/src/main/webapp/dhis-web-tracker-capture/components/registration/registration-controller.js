@@ -42,22 +42,12 @@ trackerCapture.controller('RegistrationController',
 
         if($scope.selectedProgram){
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                $scope.attributesLighter = [];
-                $scope.attributes = [];
-                angular.forEach(atts, function(att){
-                    $scope.attributesLighter.push({id: att.id, name: att.name, type: att.valueType, displayInListNoProgram: att.displayInListNoProgram});
-                    $scope.attributes[att.id] = att;
-                });
+                $scope.attributes = atts;
             });           
         }
         else{            
             AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributesLighter = [];
-                $scope.attributes = [];
-                angular.forEach(atts, function(att){
-                    $scope.attributesLighter.push({id: att.id, name: att.name, type: att.valueType, displayInListNoProgram: att.displayInListNoProgram});
-                    $scope.attributes[att.id] = att;
-                });
+                $scope.attributes = atts;
             });
         }
     };
@@ -82,10 +72,17 @@ trackerCapture.controller('RegistrationController',
         //registration form comes empty, in this case enforce at least one value
         $scope.valueExists = false;
         var registrationAttributes = [];    
-        angular.forEach($scope.attributesLighter, function(attribute){
-            if(!angular.isUndefined(attribute.value)){
-                var att = {attribute: attribute.id, value: attribute.value};
-                registrationAttributes.push(att);
+        angular.forEach($scope.attributes, function(attribute){            
+            var val = attribute.value;
+            if(!angular.isUndefined(val)){
+                
+                if(attribute.valueType === 'date'){
+                    val = DateUtils.formatFromUserToApi(val);
+                }
+                if(attribute.valueType === 'optionSet' && $scope.optionSets.optionCodesByName[  '"' + val + '"']){   
+                    val = $scope.optionSets.optionCodesByName[  '"' + val + '"'];
+                }
+                registrationAttributes.push({attribute: attribute.id, value: val});
                 $scope.valueExists = true;
             } 
         });       
@@ -98,7 +95,6 @@ trackerCapture.controller('RegistrationController',
         //prepare tei model and do registration
         $scope.tei = {trackedEntity: selectedTrackedEntity, orgUnit: $scope.selectedOrgUnit.id, attributes: registrationAttributes };   
         var teiId = '';
-    
         TEIService.register($scope.tei).then(function(tei){
             
             if(tei.status === 'SUCCESS'){
@@ -112,9 +108,8 @@ trackerCapture.controller('RegistrationController',
                                 program: $scope.selectedProgram.id,
                                 status: 'ACTIVE',
                                 dateOfEnrollment: DateUtils.formatFromUserToApi($scope.enrollment.dateOfEnrollment),
-                                dateOfIncident: $scope.enrollment.dateOfIncident == '' ? DateUtils.formatFromUserToApi($scope.enrollment.dateOfEnrollment) : DateUtils.formatFromUserToApi($scope.enrollment.dateOfIncident)
+                                dateOfIncident: $scope.enrollment.dateOfIncident === '' ? DateUtils.formatFromUserToApi($scope.enrollment.dateOfEnrollment) : DateUtils.formatFromUserToApi($scope.enrollment.dateOfIncident)
                             };                           
-                    console.log('enrollment details:  ', enrollment);
                     EnrollmentService.enroll(enrollment).then(function(data){
                         if(data.status !== 'SUCCESS'){
                             //enrollment has failed
@@ -144,7 +139,7 @@ trackerCapture.controller('RegistrationController',
             
             $timeout(function() { 
                 //reset form
-                angular.forEach($scope.attributesLighter, function(attribute){
+                angular.forEach($scope.attributes, function(attribute){
                     delete attribute.value;                
                 });            
 
@@ -197,16 +192,22 @@ trackerCapture.controller('RegistrationController',
                             dueDate: DateUtils.formatFromUserToApi(EventUtils.getEventDueDate(null,stage, enrollment)),
                             status: 'SCHEDULE'
                         };
-                    console.log('enrollment details:  ', enrollment);     
-                    console.log('the event due date is:  ', EventUtils.getEventDueDate(null,stage, enrollment));    
+                    
+                    if(stage.openAfterEnrollment){
+                        if(stage.reportDateToUse === 'dateOfIncident'){
+                            newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfIncident);
+                        }
+                        else{
+                            newEvent.eventDate = DateUtils.formatFromUserToApi(enrollment.dateOfEnrollment);
+                        }
+                    }
+                    
                     dhis2Events.events.push(newEvent);    
                 }
             });
 
-            console.log('the events are:  ', dhis2Events);
             if(dhis2Events.events.length > 0){
                 DHIS2EventFactory.create(dhis2Events).then(function(data){
-
                 });
             }
         }

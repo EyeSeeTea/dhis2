@@ -11,6 +11,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 Paginator,
                 TranslationService, 
                 storage,
+                OptionSetFactory,
                 OperatorFactory,
                 ProgramFactory,
                 AttributesFactory,
@@ -38,7 +39,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.boolOperators = OperatorFactory.boolOperators;
     $scope.enrollment = {programStartDate: '', programEndDate: '', operator: $scope.defaultOperators[0]};
     $scope.searchState = true;   
-    $scope.searchMode = { listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED' };
+    $scope.searchMode = { listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED' };    
+    $scope.optionSets = null;
     
     //Registration
     $scope.showRegistrationDiv = false;
@@ -58,6 +60,20 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             //apply translation - by now user's profile is fetched from server.
             TranslationService.translate();
             
+            if(!$scope.optionSets){
+                $scope.optionSets = {optionSets: [], optionNamesByCode: new Object(), optionCodesByName: new Object()};
+                OptionSetFactory.getAll().then(function(optionSets){
+                    angular.forEach(optionSets, function(optionSet){
+                        angular.forEach(optionSet.options, function(option){
+                            if(option.name && option.code){
+                                $scope.optionSets.optionNamesByCode[ '"' + option.code + '"'] = option.name;
+                                $scope.optionSets.optionCodesByName[ '"' + option.name + '"'] = option.code;
+                            }                       
+                        });
+                        $scope.optionSets.optionSets[optionSet.id] = optionSet;
+                    });
+                });
+            }            
             $scope.loadPrograms($scope.selectedOrgUnit);                                
         }
     });
@@ -143,34 +159,22 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
 
         if($scope.selectedProgram){
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-                $scope.attributesLighter = [];
-                $scope.attributes = [];
-                
+                $scope.attributes = atts;
                 setTimeout(function () {
                     $scope.$apply(function () {                        
-                        angular.forEach(atts, function(att){
-                            $scope.attributesLighter.push({id: att.id, name: att.name, type: att.valueType, displayInListNoProgram: att.displayInListNoProgram});
-                            $scope.attributes[att.id] = att;
-                        });
-                        $scope.attributesLighter = $scope.generateAttributeFilters($scope.attributesLighter);
-                        $scope.gridColumns = TEIGridService.generateGridColumns($scope.attributesLighter, $scope.selectedOuMode.name);
+                        $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                        $scope.gridColumns = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
                     });
                 }, 100);
             });           
         }
         else{            
             AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributesLighter = [];
-                $scope.attributes = [];
-                
+                $scope.attributes = atts;
                 setTimeout(function () {
-                    $scope.$apply(function () {
-                        angular.forEach(atts, function(att){
-                            $scope.attributesLighter.push({id: att.id, name: att.name, type: att.valueType, displayInListNoProgram: att.displayInListNoProgram});
-                            $scope.attributes[att.id] = att;
-                        });
-                        $scope.attributesLighter = $scope.generateAttributeFilters($scope.attributesLighter);
-                        $scope.gridColumns = TEIGridService.generateGridColumns($scope.attributesLighter, $scope.selectedOuMode.name);
+                    $scope.$apply(function () {                        
+                        $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+                        $scope.gridColumns = TEIGridService.generateGridColumns($scope.attributes, $scope.selectedOuMode.name);
                     });
                 }, 100);
             });
@@ -179,7 +183,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
    
     //$scope.searchParam = {bools: []};
     $scope.search = function(mode){
-        
         $scope.teiFetched = false;
         $scope.selectedSearchMode = mode;
         $scope.emptySearchText = false;
@@ -210,14 +213,14 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             }       
  
             $scope.queryUrl = 'query=' + $scope.searchText;            
-            $scope.attributesLighter = EntityQueryFactory.resetAttributesQuery($scope.attributesLighter, $scope.enrollment);
+            $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
         }
         
         if( $scope.selectedSearchMode === $scope.searchMode.attributeBased ){
             
             $scope.searchText = '';
             
-            $scope.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.attributesLighter, $scope.enrollment);
+            $scope.attributeUrl = EntityQueryFactory.getAttributesQuery($scope.attributes, $scope.enrollment);
             
             if(!$scope.attributeUrl.hasValue && !$scope.selectedProgram){
                 $scope.emptySearchAttribute = true;
@@ -230,7 +233,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
         if( $scope.selectedSearchMode === $scope.searchMode.listAll ){
             $scope.searchText = '';
             
-            $scope.attributesLighter = EntityQueryFactory.resetAttributesQuery($scope.attributesLighter, $scope.enrollment);
+            $scope.attributes = EntityQueryFactory.resetAttributesQuery($scope.attributes, $scope.enrollment);
         }
         
         $scope.fetchTeis();
@@ -262,7 +265,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             }
             
             //process tei grid
-            $scope.trackedEntityList = TEIGridService.format(data,false);
+            $scope.trackedEntityList = TEIGridService.format(data,false, $scope.optionSets.optionNamesByCode);
             $scope.showTrackedEntityDiv = true;
             $scope.teiFetched = true;  
             $scope.doSearch = true;

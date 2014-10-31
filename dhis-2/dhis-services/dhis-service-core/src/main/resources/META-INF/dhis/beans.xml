@@ -71,8 +71,14 @@
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalStore" class="org.hisp.dhis.dataapproval.hibernate.HibernateDataApprovalStore">
     <property name="clazz" value="org.hisp.dhis.dataapproval.DataApproval" />
+    <property name="jdbcTemplate" ref="jdbcTemplate" />
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
+    <property name="dataApprovalLevelService" ref="org.hisp.dhis.dataapproval.DataApprovalLevelService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalLevelStore" class="org.hisp.dhis.dataapproval.hibernate.HibernateDataApprovalLevelStore">
@@ -307,11 +313,6 @@
     <property name="cacheable" value="true" />
   </bean>
 
-  <bean id="org.hisp.dhis.concept.ConceptStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
-    <property name="clazz" value="org.hisp.dhis.concept.Concept" />
-    <property name="sessionFactory" ref="sessionFactory" />
-  </bean>
-
   <bean id="org.hisp.dhis.configuration.ConfigurationStore" class="org.hisp.dhis.hibernate.HibernateGenericStore">
     <property name="sessionFactory" ref="sessionFactory" />
     <property name="clazz" value="org.hisp.dhis.configuration.Configuration" />
@@ -434,12 +435,15 @@
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
+    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
   </bean>
 
   <bean id="org.hisp.dhis.dataapproval.DataApprovalLevelService" class="org.hisp.dhis.dataapproval.DefaultDataApprovalLevelService">
     <property name="dataApprovalLevelStore" ref="org.hisp.dhis.dataapproval.DataApprovalLevelStore" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+    <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
   </bean>
 
@@ -640,10 +644,6 @@
     <property name="emailMessageSender" ref="emailMessageSender" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
-  </bean>
-
-  <bean id="org.hisp.dhis.concept.ConceptService" class="org.hisp.dhis.concept.DefaultConceptService">
-    <property name="conceptStore" ref="org.hisp.dhis.concept.ConceptStore" />
   </bean>
 
   <bean id="org.hisp.dhis.configuration.ConfigurationService" class="org.hisp.dhis.configuration.DefaultConfigurationService">
@@ -957,7 +957,6 @@
   <bean id="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator"
     class="org.hisp.dhis.dataelement.DataElementDefaultDimensionPopulator">
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
-    <property name="conceptService" ref="org.hisp.dhis.concept.ConceptService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
     <property name="name" value="DataElementDefaultDimensionPopulator" />
     <property name="runlevel" value="2" />
@@ -976,7 +975,6 @@
     <property name="tables">
       <list>
         <value>constant</value>
-        <value>concept</value>
         <value>attribute</value>
         <value>indicatortype</value>
         <value>indicator</value>
@@ -1296,7 +1294,6 @@
       <aop:before pointcut="execution( * org.hisp.dhis.organisationunit.OrganisationUnitService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.organisationunit.OrganisationUnitGroupService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.user.UserService.delete*(..) )" method="intercept" />
-      <aop:before pointcut="execution( * org.hisp.dhis.concept.ConceptService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.user.UserGroupService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.option.OptionService.delete*(..) )" method="intercept" />
       <aop:before pointcut="execution( * org.hisp.dhis.attribute.AttributeService.delete*(..) )" method="intercept" />

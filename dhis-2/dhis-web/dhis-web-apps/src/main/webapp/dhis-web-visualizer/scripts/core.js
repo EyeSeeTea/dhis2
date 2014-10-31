@@ -10,6 +10,10 @@ Ext.onReady( function() {
         }
     });
 
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
 	// namespace
 	DV = {};
 	NS = DV;
@@ -212,7 +216,7 @@ Ext.onReady( function() {
             conf.chart = {
                 style: {
                     inset: 30,
-                    fontFamily: 'Arial,Sans-serif,Helvetica,Helvetica Neue,Lucida Grande,Ubuntu'
+                    fontFamily: 'Arial,Sans-serif,Roboto,Helvetica,Consolas'
                 },
                 theme: {
                     dv1: ['#94ae0a', '#1d5991', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
@@ -2356,17 +2360,19 @@ Ext.onReady( function() {
                     return function() {
                         if (this.items) {
                             var title = this.items[0],
+                                titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
+                                titleXFallback = 10,
                                 legend = this.legend,
                                 legendCenterX,
                                 titleX;
-
+                                
                             if (this.legend.position === 'top') {
                                 legendCenterX = legend.x + (legend.width / 2);
-                                titleX = legendCenterX - (title.el.getWidth() / 2);
+                                titleX = titleWidth ? legendCenterX - (titleWidth / 2) : titleXFallback;
                             }
                             else {
                                 var legendWidth = legend ? legend.width : 0;
-                                titleX = (this.width / 2) - (title.el.getWidth() / 2);
+                                titleX = titleWidth ? (this.width / 2) - (titleWidth / 2) : titleXFallback;
                             }
 
                             title.setAttributes({
@@ -2875,17 +2881,20 @@ Ext.onReady( function() {
                     chart.setTitlePosition = function() {
                         if (this.items) {
                             var title = this.items[0],
-                                subTitle = this.items[1];
+                                subTitle = this.items[1],
+                                titleXFallback = 10;
 
                             if (title) {
-                                var titleX = (ns.app.centerRegion.getWidth() / 2) - (title.el.getWidth() / 2);
+                                var titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
+                                    titleX = titleWidth ? (ns.app.centerRegion.getWidth() / 2) - (titleWidth / 2) : titleXFallback;
                                 title.setAttributes({
                                     x: titleX
                                 }, true);
                             }
 
                             if (subTitle) {
-                                var subTitleX = (ns.app.centerRegion.getWidth() / 2) - (subTitle.el.getWidth() / 2);
+                                var subTitleWidth = Ext.isIE ? subTitle.el.dom.scrollWidth : subTitle.el.getWidth(),
+                                    subTitleX = subTitleWidth ? (ns.app.centerRegion.getWidth() / 2) - (subTitleWidth / 2) : titleXFallback;
                                 subTitle.setAttributes({
                                     x: subTitleX
                                 }, true);

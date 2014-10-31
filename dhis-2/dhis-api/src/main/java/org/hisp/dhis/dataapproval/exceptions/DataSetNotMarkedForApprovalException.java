@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,30 +28,16 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import org.hisp.dhis.dataapproval.exceptions.DataApprovalException;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Jim Grace
  */
-@Component
-public class ConceptSchemaDescriptor implements SchemaDescriptor
+public class DataSetNotMarkedForApprovalException
+    extends DataApprovalException
 {
-    public static final String SINGULAR = "concept";
-
-    public static final String PLURAL = "concepts";
-
-    public static final String API_ENDPOINT = "/" + PLURAL;
-
-    @Override
-    public Schema getSchema()
+    public DataSetNotMarkedForApprovalException()
     {
-        Schema schema = new Schema( Concept.class, SINGULAR, PLURAL );
-        schema.setApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1020 );
-
-        return schema;
+        super();
     }
 }

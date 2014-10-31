@@ -738,8 +738,15 @@ public class TableAlteror
         // update attribute.code, set to null if code=''
         executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
 
-        // data approval, new column accepted
+        // data approval
         executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
+        executeSql( "ALTER TABLE dataapproval ALTER COLUMN accepted SET NOT NULL" );
+        executeSql( "DELETE FROM dataapproval WHERE categoryoptiongroupid IS NOT NULL" );
+        executeSql( "ALTER TABLE dataapproval DROP COLUMN categoryoptiongroupid" );
+        executeSql( "UPDATE dataapproval SET attributeoptioncomboid=categoryoptioncomboid WHERE categoryoptioncomboid IS NOT NULL" );
+        executeSql( "ALTER TABLE dataapproval DROP COLUMN categoryoptioncomboid" );
+        executeSql( "UPDATE dataapproval SET attributeoptioncomboid=" + defaultCategoryComboId + " WHERE attributeoptioncomboid IS NULL" );
+        executeSql( "ALTER TABLE dataapproval ALTER COLUMN attributeoptioncomboid SET NOT NULL" );
 
         // validation rule group, new column alertbyorgunits
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );

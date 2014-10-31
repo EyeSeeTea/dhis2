@@ -63,21 +63,7 @@
 			ref="org.hisp.dhis.program.ProgramStageInstanceService" />
 		<property name="userService" ref="org.hisp.dhis.user.UserService" />
 	</bean>
-
-	<!-- Mobile DataSet -->
-
-	<bean id="org.hisp.dhis.mobile.action.MobileDataSetListAction"
-		class="org.hisp.dhis.mobile.action.MobileDataSetListAction" 
-		scope="prototype">
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-	</bean>
-
-	<bean id="org.hisp.dhis.mobile.action.UpdateMobileDataSetAction"
-		class="org.hisp.dhis.mobile.action.UpdateMobileDataSetAction" 
-		scope="prototype">
-		<property name="dataSetService" ref="org.hisp.dhis.dataset.DataSetService" />
-	</bean>
-
+	
 	<!-- SMS Service Configuration -->
 
 	<bean id="org.hisp.dhis.mobile.action.GetSmsConfigurationAction"
@@ -159,5 +145,11 @@
 	<bean id="org.hisp.dhis.mobile.action.incoming.ProcessingSendQuickSMSAction"
         class="org.hisp.dhis.mobile.action.incoming.ProcessingSendQuickSMSAction" 
         scope="prototype"/>
-
+        
+	<bean id="org.hisp.dhis.mobile.action.smscommand.ValidateSMSCommandAction"
+		class="org.hisp.dhis.mobile.action.smscommand.ValidateSMSCommandAction"
+		scope="prototype">
+		<property name="smsCommandService" ref="smsCommandService" />
+	</bean>
+	
 </beans>

@@ -1,5 +1,3 @@
-package org.hisp.dhis.mobile.action;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -27,71 +25,84 @@ package org.hisp.dhis.mobile.action;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.mobile.action.smscommand;
 
-import java.util.Collection;
-import java.util.HashSet;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.smscommand.SMSCommand;
+import org.hisp.dhis.smscommand.SMSCommandService;
 
 import com.opensymphony.xwork2.Action;
 
-public class UpdateMobileDataSetAction
+/**
+ * @author Chau Thu Tran
+ *
+ * @version $ ValidateSMSCommandAction.java Oct 23, 2014 11:05:06 PM $
+ */
+public class ValidateSMSCommandAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    private DataSetService dataSetService;
 
-    public void setDataSetService( DataSetService dataSetService )
+    private SMSCommandService smsCommandService;
+
+    public void setSmsCommandService( SMSCommandService smsCommandService )
     {
-        this.dataSetService = dataSetService;
+        this.smsCommandService = smsCommandService;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
-    // Input/Output
+    // Input & Output
     // -------------------------------------------------------------------------
-    private Collection<String> selectedList = new HashSet<>();
 
-    public void setSelectedList( Collection<String> selectedList )
+    private Integer id;
+
+    public void setId( Integer id )
     {
-        this.selectedList = selectedList;
+        this.id = id;
     }
 
-    private Collection<String> availableList = new HashSet<>();
+    private String name;
 
-    public void setAvailableList( Collection<String> availableList )
+    public void setName( String name )
     {
-        this.availableList = availableList;
+        this.name = name;
     }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
 
     @Override
     public String execute()
-        throws Exception
     {
-        DataSet dataset = null;
-        for ( String id : selectedList )
+        if ( name != null )
         {
-            dataset = dataSetService.getDataSet( Integer.parseInt( id ) );
-            if ( !dataset.isMobile() )
+            SMSCommand match = smsCommandService.getSMSCommand( name );
+
+            if ( match != null && (id == null || match.getId() != id) )
             {
-                dataset.setMobile( true );
-                dataSetService.updateDataSet( dataset );
-            }
-        }
-     
-        for ( String id : availableList )
-        {
-            dataset = dataSetService.getDataSet( Integer.parseInt( id ) );
-            if ( dataset.isMobile() )
-            {
-                dataset.setMobile( false );
-                dataSetService.updateDataSet( dataset );
+                message = i18n.getString( "name_in_used" );
+
+                return ERROR;
             }
         }
 
         return SUCCESS;
     }
-
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.common.hibernate;
+package org.hisp.dhis.dataapproval.exceptions;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,24 +28,14 @@ package org.hisp.dhis.common.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
-
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.GenericDimensionalObjectStore;
-import org.hisp.dhis.concept.Concept;
-
 /**
- * @author bobj
+ * @author Jim Grace
  */
-public class HibernateDimensionalObjectStore<T extends BaseIdentifiableObject>
-    extends HibernateIdentifiableObjectStore<T>
-        implements GenericDimensionalObjectStore<T>
+public class DataMayNotBeApprovedException
+    extends DataApprovalException
 {
-    @Override
-    @SuppressWarnings( "unchecked" )
-    public Collection<T> getByConcept( Concept concept )
+    public DataMayNotBeApprovedException()
     {
-        return getCriteria( Restrictions.eq( "concept", concept ) ).list();
+        super();
     }
 }

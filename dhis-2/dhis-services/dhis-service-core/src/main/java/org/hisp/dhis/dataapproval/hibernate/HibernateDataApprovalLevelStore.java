@@ -58,6 +58,6 @@ public class HibernateDataApprovalLevelStore
     @SuppressWarnings("unchecked")
     public List<DataApprovalLevel> getDataApprovalLevelsByOrgUnitLevel( int orgUnitLevel )
     {
-        return getCriteria( Restrictions.eq( "orgUnitLevel", orgUnitLevel ) ).list();
+        return getCriteria( Restrictions.eq( "orgUnitLevel", orgUnitLevel ) ).addOrder( Order.asc( "level" ) ).list();
     }
 }

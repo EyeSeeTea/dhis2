@@ -3,6 +3,10 @@ Ext.onReady( function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
 	// gis
 	GIS = {
 		core: {
@@ -705,7 +709,7 @@ Ext.onReady( function() {
                 pointRadius: 8,
                 labelAlign: 'cr',
                 labelYOffset: 13,
-                fontFamily: 'arial,sans-serif,roboto,helvetica neue,helvetica,consolas'
+                fontFamily: '"Arial","Sans-serif","Roboto","Helvetica","Consolas"'
 			},
 			select = {
 				fillOpacity: 0.9,
@@ -872,7 +876,7 @@ Ext.onReady( function() {
                 gis.olmap.mask.hide();
 
                 if (Ext.Array.contains([403], r.status)) {
-                    alert(NS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                    alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
                 }
                 else {
                     alert(r.status + '\n' + r.statusText + '\n' + r.responseText);

@@ -42,7 +42,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.GenericNameableObjectStore;
-import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
@@ -211,57 +210,27 @@ public class DefaultDataElementCategoryService
     }
 
     @Override
-    public Collection<DataElementCategory> getDataElementCategoriesByConcept( Concept concept )
-    {
-        return i18n( i18nService, categoryStore.getByConcept( concept ) );
-    }
-
-    @Override
     public Collection<DataElementCategory> getDisaggregationCategories()
     {
-        return i18n( i18nService,
-            categoryStore.getCategoriesByDimensionType( DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION ) );
+        return i18n( i18nService, categoryStore.getCategoriesByDimensionType( DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION ) );
     }
 
     @Override
     public Collection<DataElementCategory> getDisaggregationDataDimensionCategories()
     {
-        Collection<DataElementCategory> categories = getDisaggregationCategories();
-
-        FilterUtils.filter( categories, new Filter<DataElementCategory>()
-        {
-            @Override
-            public boolean retain( DataElementCategory category )
-            {
-                return category != null && category.isDataDimension();
-            }
-        } );
-
-        return categories;
+        return categoryStore.getCategories( DataElementCategoryCombo.DIMENSION_TYPE_DISAGGREGATION, true );
     }
 
     @Override
     public Collection<DataElementCategory> getAttributeCategories()
     {
-        return i18n( i18nService,
-            categoryStore.getCategoriesByDimensionType( DataElementCategoryCombo.DIMENSION_TYPE_ATTTRIBUTE ) );
+        return i18n( i18nService, categoryStore.getCategoriesByDimensionType( DataElementCategoryCombo.DIMENSION_TYPE_ATTTRIBUTE ) );
     }
 
     @Override
     public Collection<DataElementCategory> getAttributeDataDimensionCategories()
     {
-        Collection<DataElementCategory> categories = getAttributeCategories();
-
-        FilterUtils.filter( categories, new Filter<DataElementCategory>()
-        {
-            @Override
-            public boolean retain( DataElementCategory category )
-            {
-                return category != null && category.isDataDimension();
-            }
-        } );
-
-        return categories;
+        return categoryStore.getCategories( DataElementCategoryCombo.DIMENSION_TYPE_ATTTRIBUTE, true );
     }
 
     @Override

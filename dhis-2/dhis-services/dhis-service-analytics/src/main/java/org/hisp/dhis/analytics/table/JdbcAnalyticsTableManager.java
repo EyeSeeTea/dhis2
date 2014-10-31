@@ -234,12 +234,12 @@ public class JdbcAnalyticsTableManager
     private String getApprovalSubquery()
     {
         String sql = "(" +
-            "select min(dal.level) " +
+            "select coalesce(min(dal.level), des.datasetapprovallevel) " +
             "from dataapproval da " +
             "inner join dataapprovallevel dal on da.dataapprovallevelid = dal.dataapprovallevelid " +
             "where da.periodid = dv.periodid " +
+            "and da.attributeoptioncomboid = dv.attributeoptioncomboid " +
             "and des.datasetid = da.datasetid " +
-            "and des.datasetapprovedata = true " +
             "and (";
         
         Set<OrganisationUnitLevel> levels = dataApprovalLevelService.getOrganisationUnitApprovalLevels();

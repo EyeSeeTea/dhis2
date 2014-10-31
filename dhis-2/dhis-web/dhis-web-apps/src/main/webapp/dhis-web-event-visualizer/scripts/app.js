@@ -443,7 +443,7 @@ Ext.onReady( function() {
                 if (items.length) {
                     record.filter = 'IN:' + items.join(';');
                 }
-                
+
                 return record;
             },
             setRecord: function(record) {
@@ -482,40 +482,43 @@ Ext.onReady( function() {
                 });
 
                 this.searchStore = Ext.create('Ext.data.Store', {
-					fields: [idProperty, 'name'],
+					fields: [idProperty, nameProperty],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
-						var store = this,
-							params = {};
+						var store = this;
 
                         optionSetId = optionSetId || container.dataElement.optionSet.id;
+                        pageSize = pageSize || 100;
 
-						//if (key) {
-							//params['key'] = key;
-						//}
+                        dhis2.ev.store.get('optionSets', optionSetId).done( function(obj) {
+                            if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
+                                var data = [];
 
-						params['max'] = pageSize || 15;
+                                if (key) {
+                                    var re = new RegExp(key, 'gi');
 
-						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/optionSets/' + optionSetId + '.json?fields=options[' + idProperty + ',' + nameProperty + ']',
-							params: params,
-							disableCaching: false,
-							success: function(r) {
-								var options = Ext.decode(r.responseText).options,
-                                    data = [];
+                                    for (var i = 0, name, match; i < obj.options.length; i++) {
+                                        name = obj.options[i].name;
+                                        match = name.match(re);
 
-                                for (var i = 0; i < options.length; i++) {
-                                    if (container.valueStore.findExact(idProperty, options[i][idProperty]) === -1) {
-                                        data.push(options[i]);
+                                        if (Ext.isArray(match) && match.length) {
+                                            data.push(obj.options[i]);
+
+                                            if (data.length === pageSize) {
+                                                break;
+                                            }
+                                        }
                                     }
                                 }
+                                else {
+                                    data = obj.options;
+                                }
 
-								store.removeAll();
-                                store.loadData(data);
+                                store.removeAll();
+                                store.loadData(data.slice(0, pageSize));
 
-                                container.triggerCmp.storage = Ext.clone(options);
-							}
-						});
+                            }
+                        });
 					},
                     listeners: {
 						datachanged: function(s) {
@@ -545,28 +548,25 @@ Ext.onReady( function() {
                     valueField: idProperty,
                     displayField: nameProperty,
                     hideTrigger: true,
-                    delimiter: '; ',
                     enableKeyEvents: true,
                     queryMode: 'local',
                     listConfig: {
-                        minWidth: 304
+                        minWidth: 346
                     },
                     store: this.searchStore,
                     listeners: {
-						keyup: {
-							fn: function() {
-								var value = this.getValue(),
-									optionSetId = container.dataElement.optionSet.id;
+						keyup: function() {
+                            var value = this.getValue(),
+                                optionSetId = container.dataElement.optionSet.id;
 
-								// search
-								container.searchStore.loadOptionSet(optionSetId, value);
+                            // search
+                            container.searchStore.loadOptionSet(optionSetId, value);
 
-                                // trigger
-                                if (!value || (Ext.isString(value) && value.length === 1)) {
-									container.triggerCmp.setDisabled(!!value);
-								}
-							}
-						},
+                            // trigger
+                            if (!value || (Ext.isString(value) && value.length === 1)) {
+                                container.triggerCmp.setDisabled(!!value);
+                            }
+                        },
 						select: function() {
                             var id = Ext.Array.from(this.getValue())[0];
 
@@ -595,15 +595,8 @@ Ext.onReady( function() {
                     disabledCls: 'ns-button-combotrigger-disabled',
                     width: 18,
                     height: 22,
-                    storage: [],
                     handler: function(b) {
-                        if (b.storage.length) {
-							container.searchStore.removeAll();
-                            container.searchStore.add(Ext.clone(b.storage));
-                        }
-                        else {
-                            container.searchStore.loadOptionSet();
-                        }
+                        container.searchStore.loadOptionSet();
                     }
                 });
 
@@ -631,11 +624,12 @@ Ext.onReady( function() {
                     store: container.valueStore,
                     queryMode: 'local',
                     listConfig: {
+                        minWidth: 266,
                         cls: 'optionselector'
                     },
                     setOptionValues: function(optionArray) {
                         var options = [];
-                        
+
                         for (var i = 0; i < optionArray.length; i++) {
                             options.push({
                                 code: optionArray[i],
@@ -647,7 +641,7 @@ Ext.onReady( function() {
                         container.valueStore.loadData(options);
 
                         this.setValue(options);
-                    },                            
+                    },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
                             newVal = Ext.Array.from(newVal);
@@ -691,6 +685,7 @@ Ext.onReady( function() {
                 this.callParent();
             }
         });
+
     }());
 
 		// toolbar
@@ -1055,7 +1050,7 @@ Ext.onReady( function() {
 
 					ms.store.on('add', function(store, addedRecords) {
                         var range = store.getRange();
-                        
+
                         if (range.length > 1) {
                             var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
                                 records = Ext.clone(range);
@@ -1071,10 +1066,10 @@ Ext.onReady( function() {
                                 }
                             }
                         }
-                        
+
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
-						}, 10);                        
+						}, 10);
 					});
 				}
 			}
@@ -1107,7 +1102,7 @@ Ext.onReady( function() {
 
 					ms.store.on('add', function(store, addedRecords) {
                         var range = store.getRange();
-                        
+
                         if (range.length > 1) {
                             var addedIds = Ext.Array.pluck(addedRecords, 'internalId'),
                                 records = Ext.clone(range);
@@ -1123,10 +1118,10 @@ Ext.onReady( function() {
                                 }
                             }
                         }
-                        
+
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
-						}, 10);                        
+						}, 10);
 					});
 				}
 			}
@@ -1323,7 +1318,7 @@ Ext.onReady( function() {
 				{
 					text: '<b>' + NS.i18n.update + '</b>',
                     handler: function() {
-                        ns.app.viewport.update();                        
+                        ns.app.viewport.update();
 
                         window.hide();
                     }
@@ -1371,7 +1366,7 @@ Ext.onReady( function() {
             rangeAxisDecimals,
 			rangeAxisTitle,
 			domainAxisTitle,
-            
+
 			hideLegend,
 			hideTitle,
 			title,
@@ -1543,7 +1538,7 @@ Ext.onReady( function() {
 			enforceMaxLength: true,
 			style: 'margin-bottom:1px'
 		});
-		
+
 		domainAxisTitle = Ext.create('Ext.form.field.Text', {
 			width: cmpWidth,
 			fieldLabel: NS.i18n.domain_axis_label,
@@ -1617,7 +1612,7 @@ Ext.onReady( function() {
 				rangeAxisTitle,
 				domainAxisTitle
 			]
-		};			
+		};
 
 		general = {
 			bodyStyle: 'border:0 none',
@@ -1742,7 +1737,7 @@ Ext.onReady( function() {
 				else {
 					domainAxisTitle.reset();
 				}
-				
+
 				hideLegend.setValue(Ext.isBoolean(layout.hideLegend) ? layout.hideLegend : false);
 				hideTitle.setValue(Ext.isBoolean(layout.hideTitle) ? layout.hideTitle : false);
 
@@ -1823,7 +1818,7 @@ Ext.onReady( function() {
 					w.rangeAxisDecimals = rangeAxisDecimals;
 					w.rangeAxisTitle = rangeAxisTitle;
 					w.domainAxisTitle = domainAxisTitle;
-					
+
 					w.hideLegend = hideLegend;
 					w.hideTitle = hideTitle;
 					w.title = title;
@@ -1891,7 +1886,7 @@ Ext.onReady( function() {
 
 			if (ns.app.layout) {
 				favorite = Ext.clone(ns.app.layout);
-                
+
 				// server sync
 				favorite.showData = favorite.showValues;
 				delete favorite.showValues;
@@ -2980,7 +2975,7 @@ Ext.onReady( function() {
 				isOugc = false,
 				levels = [],
 				groups = [],
-                
+
 				optionsWindow = ns.app.aggregateOptionsWindow;
 
             reset();
@@ -3529,7 +3524,7 @@ Ext.onReady( function() {
 					for (var i = 0, record, dim; i < layout.columns.length; i++) {
                         dim = layout.columns[i];
                         record = recordMap[dim.dimension];
-                        
+
 						aggWindow.colStore.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
@@ -3538,7 +3533,7 @@ Ext.onReady( function() {
 					for (var i = 0, record, dim; i < layout.rows.length; i++) {
                         dim = layout.rows[i];
                         record = recordMap[dim.dimension];
-                        
+
 						aggWindow.rowStore.add(record || extendDim(Ext.clone(dim)));
 					}
 				}
@@ -3657,14 +3652,14 @@ Ext.onReady( function() {
                 }
             });
         };
-        
+
         onDateFieldRender = function(c) {
             $('#' + c.inputEl.id).calendarsPicker({
                 calendar: ns.core.init.calendar,
                 dateFormat: ns.core.init.systemInfo.dateFormat
             });
         };
-        
+
         startDate = Ext.create('Ext.form.field.Text', {
 			fieldLabel: 'Start date',
 			labelAlign: 'top',
@@ -4536,7 +4531,7 @@ Ext.onReady( function() {
 				},
 				afterrender: function() {
 					this.getSelectionModel().select(0);
-                    
+
                     Ext.defer(function() {
                         data.expand();
                     }, 20);
@@ -5148,7 +5143,7 @@ Ext.onReady( function() {
                 return;
             }
 
-			// pe            
+			// pe
             if (periodMode.getValue() === 'dates') {
                 view.startDate = startDate.getSubmitValue();
                 view.endDate = endDate.getSubmitValue();
@@ -5891,7 +5886,7 @@ Ext.onReady( function() {
                         direction: view.sortOrder == 1 ? 'DESC' : 'ASC'
                     };
                 }
-                
+
                 return view;
             };
 
@@ -5962,73 +5957,124 @@ Ext.onReady( function() {
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
                 var xLayout,
+                    xResponse,
                     xColAxis,
                     xRowAxis,
                     chart,
-                    getXLayout = service.layout.getExtendedLayout,
-                    getSXLayout = service.layout.getSyncronizedXLayout,
-                    getXResponse = service.response.aggregate.getExtendedResponse;
+                    getOptionSets,
+                    getReport,
+                    getSXLayout,
+                    getXResponse;
 
+                getOptionSets = function(xResponse, callbackFn) {
+                    var optionSetHeaders = [];
+
+                    for (var i = 0; i < xResponse.headers.length; i++) {
+                        if (Ext.isString(xResponse.headers[i].optionSet)) {
+                            optionSetHeaders.push(xResponse.headers[i]);
+                        }
+                    }
+
+                    if (optionSetHeaders.length) {
+                        var callbacks = 0,
+                            optionMap = {},
+                            getOptions,
+                            fn;
+
+                        fn = function() {
+                            if (++callbacks === optionSetHeaders.length) {
+                                xResponse.metaData.optionNames = optionMap;
+                                callbackFn();
+                            }
+                        };
+
+                        getOptions = function(optionSetId, dataElementId) {
+                            dhis2.ev.store.get('optionSets', optionSetId).done( function(obj) {
+                                Ext.apply(optionMap, support.prototype.array.getObjectMap(obj.options, 'code', 'name', dataElementId));
+                                fn();
+                            });
+                        };
+
+                        // execute
+                        for (var i = 0, header, optionSetId, dataElementId; i < optionSetHeaders.length; i++) {
+                            header = optionSetHeaders[i];
+                            optionSetId = header.optionSet;
+                            dataElementId = header.name;
+
+                            getOptions(optionSetId, dataElementId);
+                        }
+                    }
+                    else {
+                        callbackFn();
+                    }
+                };
+
+                getReport = function() {
+                    if (!xLayout) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
+
+                    web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
+
+                    chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
+
+                    // timing
+                    ns.app.dateRender = new Date();
+
+                    ns.app.centerRegion.update();
+                    ns.app.centerRegion.removeAll(true);
+                    ns.app.centerRegion.add(chart);
+
+                    // timing
+                    ns.app.dateTotal = new Date();
+
+                    // after render
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
+                    ns.app.chart = chart;
+
+                    if (NS.isSessionStorage) {
+                        web.storage.session.set(layout, 'eventchart');
+                    }
+
+                    ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui); //table);
+
+                    web.mask.hide(ns.app.centerRegion);
+
+                    if (NS.isDebug) {
+                        console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
+                        console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
+                        console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
+                        console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
+                };
+
+                getSXLayout = function() {
+                    xLayout = service.layout.getSyncronizedXLayout(layout, xLayout, xResponse);
+
+                    getReport();
+                };
+
+                getXResponse = function() {
+                    xLayout = service.layout.getExtendedLayout(layout);
+                    xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
+
+                    getOptionSets(xResponse, getSXLayout);
+                };
+
+                // execute
                 response = response || ns.app.response;
 
-                xLayout = getXLayout(layout);
-                xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
-                xLayout = getSXLayout(layout, xLayout, xResponse);
-
-                if (!xLayout) {
-                    web.mask.hide(ns.app.centerRegion);
-                    return;
-                }
-
-                web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
-                
-                chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
-
-                //if (layout.sorting) {
-                    //xResponse = web.report.aggregate.sort(xLayout, xResponse, xColAxis);
-                    //xLayout = getSXLayout(xLayout, xResponse);
-                    //table = getHtml(xLayout, xResponse);
-                //}
-
-                // timing
-                ns.app.dateRender = new Date();
-
-                ns.app.centerRegion.update();
-                ns.app.centerRegion.removeAll(true);
-				ns.app.centerRegion.add(chart);
-
-                // timing
-                ns.app.dateTotal = new Date();
-
-                // after render
-                ns.app.layout = layout;
-                ns.app.xLayout = xLayout;
-                ns.app.response = response;
-                ns.app.xResponse = xResponse;
-                ns.app.chart = chart;
-                
-                if (NS.isSessionStorage) {
-                    web.storage.session.set(layout, 'eventchart');
-                }
-
-                ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui); //table);
-
-                web.mask.hide(ns.app.centerRegion);
-                
-                if (NS.isDebug) {
-                    console.log("DATA", (ns.app.dateCreate - ns.app.dateData) / 1000);
-                    console.log("CREATE", (ns.app.dateRender - ns.app.dateCreate) / 1000);
-                    console.log("RENDER", (ns.app.dateTotal - ns.app.dateRender) / 1000);
-                    console.log("TOTAL", (ns.app.dateTotal - ns.app.dateData) / 1000);
-                    console.log("layout", layout);
-                    console.log("response", response);
-                    console.log("xResponse", xResponse);
-                    console.log("xLayout", xLayout);
-                    console.log("core", ns.core);
-                    console.log("app", ns.app);
-                }
-				//};
-
+                getXResponse();
 			};
 		}());
 	};
@@ -6056,7 +6102,7 @@ Ext.onReady( function() {
             category,
             filter,
             layout,
-            
+
 			accordion,
 			westRegion,
             layoutButton,
@@ -6602,7 +6648,7 @@ Ext.onReady( function() {
 				}
 			}
 		});
-        
+
 		defaultButton = Ext.create('Ext.button.Button', {
 			text: NS.i18n.chart,
 			iconCls: 'ns-button-icon-chart',
@@ -6773,6 +6819,9 @@ Ext.onReady( function() {
 				render: function() {
 					ns.app.viewport = this;
 
+                    var initEl = document.getElementById('init');
+                    initEl.parentNode.removeChild(initEl);
+
 					ns.app.aggregateLayoutWindow = AggregateLayoutWindow();
 					ns.app.aggregateLayoutWindow.hide();
 					ns.app.aggregateOptionsWindow = AggregateOptionsWindow();
@@ -6906,6 +6955,15 @@ Ext.onReady( function() {
 
                                         init.namePropertyUrl = namePropertyUrl;
 
+                                        // dhis2
+                                        dhis2.util.namespace('dhis2.ev');
+
+                                        dhis2.ev.store = dhis2.ev.store || new dhis2.storage.Store({
+                                            name: 'dhis2',
+                                            adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                            objectStores: ['optionSets']
+                                        });
+
                                         // calendar
                                         (function() {
                                             var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
@@ -6939,6 +6997,7 @@ Ext.onReady( function() {
                                             url: 'i18n/' + keyUiLocale + '.properties',
                                             success: function(r) {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                Ext.get('init').update(NS.i18n.initializing + '..');
 
                                                 if (keyUiLocale !== defaultKeyUiLocale) {
                                                     Ext.Ajax.request({
@@ -7038,6 +7097,58 @@ Ext.onReady( function() {
                                             success: function(r) {
                                                 init.dimensions = Ext.decode(r.responseText).organisationUnitGroupSets || [];
                                                 fn();
+                                            }
+                                        });
+
+                                        // option sets
+                                        requests.push({
+                                            url: contextPath + '/api/optionSets.json?fields=id,version&paging=false',
+                                            success: function(r) {
+                                                var optionSets = Ext.decode(r.responseText).optionSets || [],
+                                                    store = dhis2.ev.store,
+                                                    ids = [],
+                                                    url = '',
+                                                    callbacks = 0,
+                                                    checkOptionSet,
+                                                    updateStore;
+
+                                                updateStore = function() {
+                                                    if (++callbacks === optionSets.length) {
+                                                        if (!ids.length) {
+                                                            fn();
+                                                            return;
+                                                        }
+
+                                                        for (var i = 0; i < ids.length; i++) {
+                                                            url += '&filter=id:eq:' + ids[i];
+                                                        }
+
+                                                        Ext.Ajax.request({
+                                                            url: contextPath + '/api/optionSets.json?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            success: function(r) {
+                                                                var sets = Ext.decode(r.responseText).optionSets;
+
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        });
+                                                    }
+                                                };
+
+                                                registerOptionSet = function(optionSet) {
+                                                    store.get('optionSets', optionSet.id).done( function(obj) {
+                                                        if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                            ids.push(optionSet.id);
+                                                        }
+
+                                                        updateStore();
+                                                    });
+                                                };
+
+                                                store.open().done( function() {
+                                                    for (var i = 0; i < optionSets.length; i++) {
+                                                        registerOptionSet(optionSets[i]);
+                                                    }
+                                                });
                                             }
                                         });
 

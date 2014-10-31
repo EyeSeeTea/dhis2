@@ -1,13 +1,4 @@
-package org.hisp.dhis.importexport.importer;
-
-
-import org.amplecode.quick.BatchHandler;
-import org.hisp.dhis.concept.Concept;
-import org.hisp.dhis.concept.ConceptService;
-import org.hisp.dhis.importexport.GroupMemberType;
-import org.hisp.dhis.importexport.ImportParams;
-import org.hisp.dhis.importexport.Importer;
-import org.hisp.dhis.importexport.mapping.NameMappingUtil;
+package org.hisp.dhis.webapi.webdomain.approval;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -37,55 +28,61 @@ import org.hisp.dhis.importexport.mapping.NameMappingUtil;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *
- * @author bobj
- * @version created 15-Sep-2010
- */
-public class ConceptImporter
-    extends AbstractImporter<Concept> implements Importer<Concept>
+import java.util.ArrayList;
+import java.util.List;
+
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+@JacksonXmlRootElement( localName = "approvals", namespace = DxfNamespaces.DXF_2_0 )
+public class Approvals
 {
-    protected ConceptService conceptService;
+    private List<String> ds = new ArrayList<>();
+    
+    private List<String> pe = new ArrayList<>();
+    
+    private List<Approval> approvals = new ArrayList<>();
 
-    public ConceptImporter()
+    public Approvals()
     {
     }
-
-    public ConceptImporter( BatchHandler<Concept> batchHandler, ConceptService conceptService )
+    
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getDs()
     {
-        this.batchHandler = batchHandler;
-        this.conceptService = conceptService;
+        return ds;
     }
 
-    @Override
-    public void importObject( Concept object, ImportParams params )
+    public void setDs( List<String> ds )
     {
-        NameMappingUtil.addConceptMapping( object.getId(), object.getName() );
-
-        read( object, GroupMemberType.NONE, params );
+        this.ds = ds;
     }
 
-    @Override
-    protected void importUnique( Concept object )
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<String> getPe()
     {
-        batchHandler.addObject( object );
+        return pe;
     }
 
-    @Override
-    protected void importMatching( Concept object, Concept match )
+    public void setPe( List<String> pe )
     {
-        log.info( object.getName() + ": Concept can only be unique or duplicate" );
+        this.pe = pe;
     }
 
-    @Override
-    protected Concept getMatching( Concept object )
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public List<Approval> getApprovals()
     {
-        return conceptService.getConceptByName( object.getName() );
+        return approvals;
     }
 
-    @Override
-    protected boolean isIdentical( Concept object, Concept existing )
+    public void setApprovals( List<Approval> approvals )
     {
-        return object.getName().equals( existing.getName() );
+        this.approvals = approvals;
     }
 }

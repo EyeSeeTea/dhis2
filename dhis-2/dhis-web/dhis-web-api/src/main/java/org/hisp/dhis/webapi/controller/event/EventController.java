@@ -64,7 +64,6 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -72,7 +71,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -298,9 +296,9 @@ public class EventController
         return "events";
     }
 
-    @RequestMapping( value = "/overdue", method = RequestMethod.GET )
+    @RequestMapping( value = "/eventRows", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
-    public String getOverdueEvents(
+    public String getEventRows(
         @RequestParam( required = false ) String program,
         @RequestParam( required = false ) String orgUnit,
         @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
@@ -638,6 +636,7 @@ public class EventController
             return;
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         eventService.deleteEvent( event );
     }
 }
