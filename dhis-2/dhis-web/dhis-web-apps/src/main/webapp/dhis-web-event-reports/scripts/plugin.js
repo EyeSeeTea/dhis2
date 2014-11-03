@@ -3118,14 +3118,15 @@ Ext.onReady( function() {
 	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
 
 	css += '.pointer { \n cursor: pointer; \n } \n';
-	css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v214/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
+	css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v217/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
 
 	Ext.util.CSS.createStyleSheet(css);
 
 	ER.plugin = {};
 
 	var init = {
-			user: {}
+			user: {},
+            systemInfo: {}
 		},
 		configs = [],
 		isInitStarted = false,
@@ -3139,6 +3140,8 @@ Ext.onReady( function() {
 			callbacks = 0,
 			fn;
 
+        init.contextPath = url;
+
 		fn = function() {
 			if (++callbacks === requests.length) {
 				isInitComplete = true;
@@ -3151,109 +3154,83 @@ Ext.onReady( function() {
 			}
 		};
 
-		requests.push({
-			url: url + '/api/system/info.jsonp',
-			success: function(r) {
-				init.contextPath = r.contextPath;
-				fn();
-			}
-		});
-
-        init.systemSettings = {
-"keyDateFormat": "yyyy-MM-dd",
-"keyCalendar": "iso8601"
-};
-
-        init.userAccount = {
-"username": "system",
-"firstName": "Tom",
-"surname": "Wakiki",
-"phoneNumber": "+233223232",
-"introduction": "I am the system administrator in Sierra Leone",
-"jobTitle": "System Administrator",
-"gender": "gender_male",
-"birthday": "1976-06-03",
-"nationality": "Sierra Leone",
-"employer": "Sierra Leone Ministry of Health",
-"education": "System administration",
-"interests": "Computer systems",
-"languages": "English",
-"settings": {
-"keyDbLocale": "en",
-"keyMessageSmsNotification": "false",
-"keyUiLocale": "en",
-"keyAnalysisDisplayProperty": "shortName",
-"keyMessageEmailNotification": "false"
-}
-};
+		//requests.push({
+			//url: url + '/api/system/info.jsonp',
+			//success: function(r) {
+				//init.contextPath = r.contextPath;
+				//fn();
+			//}
+		//});
 
         // date, calendar
-        //requests.push({
-            //url: url + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
-            //success: function(r) {
-                //var systemSettings = Ext.decode(r.responseText);
-                //init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
-                //init.systemInfo.calendar = systemSettings.keyCalendar;
+        requests.push({
+            url: url + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            success: function(r) {
+                var systemSettings = r;
+                init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
+                init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                //// user-account
-                //Ext.Ajax.request({
-                    //url: init.contextPath + '/api/me/user-account.json',
-                    //success: function(r) {
-                        //init.userAccount = Ext.decode(r.responseText);
+                // user-account
+                Ext.data.JsonP.request({
+                    url: url + '/api/me/user-account.jsonp',
+                    success: function(r) {
+                        init.userAccount = r;
 
-                        //// init
-                        //var defaultKeyUiLocale = 'en',
-                            //defaultKeyAnalysisDisplayProperty = 'name',
-                            //namePropertyUrl,
-                            //contextPath,
-                            //keyUiLocale,
-                            //dateFormat;
+                        Ext.Loader.injectScriptElement(url + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            var callbacks = 0,
+                                urls = [],
+                                callback;
 
-                        //init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
-                        //init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+                            callback = function() {
+                                if (++callbacks === urls.length) {
 
-                        //// local vars
-                        //contextPath = init.contextPath;
-                        //keyUiLocale = init.userAccount.settings.keyUiLocale;
-                        //keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
-                        //namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
-                        //dateFormat = init.systemInfo.dateFormat;
+                                    // init
+                                    var defaultKeyUiLocale = 'en',
+                                        defaultKeyAnalysisDisplayProperty = 'name',
+                                        namePropertyUrl,
+                                        contextPath,
+                                        keyUiLocale,
+                                        dateFormat;
 
-                        //init.namePropertyUrl = namePropertyUrl;
+                                    init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                    init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
 
-                        //// calendar
-                        //(function() {
-                            //var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
-                                //defaultCalendarId = 'gregorian',
-                                //calendarIdMap = {'iso8601': defaultCalendarId},
-                                //calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
-                                //calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
-                                //calendarScriptUrl,
-                                //createGenerator;
+                                    // local vars
+                                    contextPath = init.contextPath;
+                                    keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                    keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                    namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                    dateFormat = init.systemInfo.dateFormat;
 
-                            //// calendar
-                            //createGenerator = function() {
-                                //init.calendar = $.calendars.instance(calendarId);
-                                //init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
-                            //};
+                                    init.namePropertyUrl = namePropertyUrl;
 
-                            //if (Ext.Array.contains(calendarIds, calendarId)) {
-                                //calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+                                    // dhis2
+                                    dhis2.util.namespace('dhis2.er');
 
-                                //Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
-                                    //Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                                //});
-                            //}
-                            //else {
-                                //Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                            //}
-                        //}());
+                                    dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
+                                        name: 'dhis2',
+                                        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                        objectStores: ['optionSets']
+                                    });
 
-                        //fn();
-                    //}
-                //});
-            //}
-        //});
+                                    fn();
+                                }
+                            };
+
+                            urls.push(url + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js');
+                            urls.push(url + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js');
+                            urls.push(url + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js');
+                            urls.push(url + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js');
+                            urls.push(url + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js');
+
+                            for (var i = 0; i < urls.length; i++) {
+                                Ext.Loader.injectScriptElement(urls[i], callback);
+                            }
+                        });
+                    }
+                });
+            }
+        });
 
 		requests.push({
 			url: url + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
@@ -3411,12 +3388,12 @@ Ext.onReady( function() {
 			};
 
 			web.report.getData = function(view, isUpdateGui) {
-				var paramString = web.analytics.getParamString(view);
+				var paramString = web.analytics.getParamString(view, 'jsonp');
 
 				// show mask
 				web.mask.show(ns.app.centerRegion);
 
-				Ext.Ajax.request({
+				Ext.data.JsonP.request({
 					url: ns.core.init.contextPath + paramString,
 					disableCaching: false,
 					scope: this,
@@ -3426,7 +3403,7 @@ Ext.onReady( function() {
                         console.log(r.status + '\n' + r.statusText + '\n' + r.responseText);
 					},
 					success: function(r) {
-                        var response = api.response.Response(Ext.decode(r.responseText));
+                        var response = api.response.Response(r);
 
                         if (!response) {
 							web.mask.hide(ns.app.centerRegion);
@@ -3529,10 +3506,14 @@ Ext.onReady( function() {
                             table = getHtml(xLayout, xResponse);
                         }
 
-                        web.mask.show(ns.app.centerRegion, 'Rendering table..');
-
                         //ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
+
+                        Ext.defer( function() {
+                            Ext.get(ns.core.init.el).fadeIn({
+                                duration: 400
+                            });
+                        }, 300 );
 
                         // after render
                         ns.app.layout = layout;
@@ -3545,9 +3526,7 @@ Ext.onReady( function() {
                         ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
                         if (ER.isSessionStorage) {
-                            //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-                            //web.storage.session.set(layout, 'eventtable');
                         }
 
                         web.mask.hide(ns.app.centerRegion);
@@ -3596,6 +3575,12 @@ Ext.onReady( function() {
 
                         ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
+
+                        Ext.defer( function() {
+                            Ext.get(ns.core.init.el).fadeIn({
+                                duration: 400
+                            });
+                        }, 300 );
 
                         // after render
                         ns.app.layout = layout;
