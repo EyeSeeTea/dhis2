@@ -33,6 +33,7 @@ import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -85,14 +86,15 @@ public interface DataApprovalStore
         OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
 
     /**
-     * Returns a set of DataApproval objects representing the approval states
-     * for organisation units & category option combos that the user is allowed
-     * to see.
+     * Returns a list of data approval results and corresponding states for a
+     * given organisation unit, either restricted to one attribute option combo
+     * or for all the category option combos that the user is allowed to see.
      *
+     * @param orgUnit Organisation unit to look for
      * @param dataSets Data sets to look within
-     * @param periods Periods to look within
-     * @return data approval objects for the user to see
+     * @param period Period to look within
+     * @param attributeOptionCombo (optional) attribute option combo to fetch
+     * @return data approval status objects
      */
-    Set<DataApproval> getUserDataApprovals( Set<DataSet> dataSets, Set<Period> periods);
-
+    List<DataApprovalStatus> getDataApprovals( OrganisationUnit orgUnit, Set<DataSet> dataSets, Period period, DataElementCategoryOptionCombo attributeOptionCombo );
 }

@@ -28,8 +28,15 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Date;
+import static org.hisp.dhis.dataapproval.DataApprovalState.*;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
+import static org.hisp.dhis.system.util.ConversionUtils.getIdentifiers;
+import static org.hisp.dhis.system.util.TextUtils.getCommaDelimitedString;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -44,6 +51,8 @@ import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.dataapproval.DataApproval;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
+import org.hisp.dhis.dataapproval.DataApprovalState;
+import org.hisp.dhis.dataapproval.DataApprovalStatus;
 import org.hisp.dhis.dataapproval.DataApprovalStore;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -53,11 +62,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserService;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 
@@ -73,15 +83,7 @@ public class HibernateDataApprovalStore
 {
     private static final Log log = LogFactory.getLog( HibernateDataApprovalStore.class );
     
-    private static Cache<Integer, Period> PERIOD_CACHE = CacheBuilder.newBuilder()
-        .expireAfterAccess( 10, TimeUnit.MINUTES ).initialCapacity( 1000 )
-        .maximumSize( 2000 ).build();
-
     private static Cache<Integer, DataElementCategoryOptionCombo> OPTION_COMBO_CACHE = CacheBuilder.newBuilder()
-        .expireAfterAccess( 10, TimeUnit.MINUTES ).initialCapacity( 10000 )
-        .maximumSize( 50000 ).build();
-
-    private static Cache<Integer, OrganisationUnit> ORGANISATION_UNIT_CACHE = CacheBuilder.newBuilder()
         .expireAfterAccess( 10, TimeUnit.MINUTES ).initialCapacity( 10000 )
         .maximumSize( 50000 ).build();
 
@@ -110,13 +112,6 @@ public class HibernateDataApprovalStore
         this.currentUserService = currentUserService;
     }
 
-    private UserService userService;
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
-
     private OrganisationUnitService organisationUnitService;
 
     public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
@@ -138,6 +133,13 @@ public class HibernateDataApprovalStore
         this.dataApprovalLevelService = dataApprovalLevelService;
     }
 
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
+
     // -------------------------------------------------------------------------
     // DataApproval
     // -------------------------------------------------------------------------
@@ -157,7 +159,7 @@ public class HibernateDataApprovalStore
 
         update ( dataApproval );
     }
-    
+
     @Override
     public void deleteDataApproval( DataApproval dataApproval )
     {
@@ -183,33 +185,39 @@ public class HibernateDataApprovalStore
     }
 
     @Override
-    public Set<DataApproval> getUserDataApprovals( Set<DataSet> dataSets, Set<Period> periods)
+    public List<DataApprovalStatus> getDataApprovals( OrganisationUnit orgUnit, Set<DataSet> dataSets, Period period, DataElementCategoryOptionCombo attributeOptionCombo )
     {
-        User user = currentUserService.getCurrentUser();
+        final User user = currentUserService.getCurrentUser();
 
-        boolean canSeeDefaultOptionCombo = CollectionUtils.isEmpty( userService.getCoDimensionConstraints( user.getUserCredentials() ) )
-                && CollectionUtils.isEmpty( userService.getCogDimensionConstraints( user.getUserCredentials() ) );
-
-        Date minDate = null;
-        Date maxDate = null;
-
-        for ( Period p : periods )
+        if ( CollectionUtils.isEmpty( dataSets ) )
         {
-            if ( minDate == null || p.getStartDate().before( minDate ) )
-            {
-                minDate = p.getStartDate();
-            }
-            if ( maxDate == null || p.getEndDate().after( maxDate ) )
-            {
-                maxDate = p.getEndDate();
-            }
+            return new ArrayList<>();
         }
 
-        String sPeriods = "";
+        PeriodType dataSetPeriodType = dataSets.iterator().next().getPeriodType();
+
+        Collection<Period> periods;
+
+        if ( period.getPeriodType() == dataSetPeriodType )
+        {
+            periods = org.hisp.dhis.system.util.CollectionUtils.asSet( period );
+        }
+        else
+        {
+            periods = periodService.getPeriodsBetweenDates(
+                    dataSetPeriodType,
+                    period.getStartDate(),
+                    period.getEndDate() );
+        }
+
+        final String minDate = DateUtils.getMediumDateString( period.getStartDate() );
+        final String maxDate = DateUtils.getMediumDateString( period.getEndDate() );
+
+        String periodIds = "";
 
         for ( Period p : periods )
         {
-            sPeriods += ( sPeriods.isEmpty() ? "" : ", " ) + periodService.reloadPeriod( p ).getId();
+            periodIds += ( periodIds.isEmpty() ? "" : ", " ) + periodService.reloadPeriod( p ).getId();
         }
 
         Set<Integer> categoryComboIds = new HashSet<>();
@@ -219,93 +227,113 @@ public class HibernateDataApprovalStore
             categoryComboIds.add( ds.getCategoryCombo().getId() );
         }
 
-        String sDataSetCCs = TextUtils.getCommaDelimitedString( categoryComboIds );
+        final String dataSetIds = getCommaDelimitedString( getIdentifiers( DataSet.class, dataSets ) );
+        final String dataSetCcIds = TextUtils.getCommaDelimitedString( categoryComboIds );
 
-        String limitCategoryOptionByOrgUnit = "";
-        String limitApprovalByOrgUnit = "";
+        final int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
 
-        for ( OrganisationUnit orgUnit : user.getOrganisationUnits() )
+        boolean isSuperUser = currentUserService.currentUserIsSuper();
+
+        DataApprovalLevel lowestApprovalLevelForOrgUnit = null;
+
+        String orgUnitAncestorLevels = "";
+
+        for ( int i = 1; i < orgUnitLevel; i++ )
         {
-            if ( orgUnit.getParent() == null ) // User has root org unit access
+            orgUnitAncestorLevels += ", ous.idlevel" + i;
+        }
+
+        String readyBelowSubquery = "true"; // Ready below if this is the lowest (highest number) approval orgUnit level.
+
+        int orgUnitLevelAbove = 0;
+
+        for ( DataApprovalLevel dal : dataApprovalLevelService.getAllDataApprovalLevels() )
+        {
+            if ( dal.getOrgUnitLevel() < orgUnitLevel )
             {
-                limitCategoryOptionByOrgUnit = "";
-                limitApprovalByOrgUnit = "";
-                break;
+                orgUnitLevelAbove = dal.getOrgUnitLevel(); // Keep getting the lowest org unit level above ours.
             }
 
-            int level = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
-            limitCategoryOptionByOrgUnit += "ous.idlevel" + level + " = " + orgUnit.getId() + " or ";
-            limitApprovalByOrgUnit += "ousda.idlevel" + level + " = " + orgUnit.getId() + " or ";
+            if ( dal.getOrgUnitLevel() == orgUnitLevel )
+            {
+                lowestApprovalLevelForOrgUnit = dal;
+            }
+
+            if ( dal.getOrgUnitLevel() > orgUnitLevel ) // If there is a lower (higher number) approval orgUnit level:
+            {
+                boolean acceptanceRequiredForApproval = (Boolean) systemSettingManager.getSystemSetting( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, false );
+
+                readyBelowSubquery = "exists (select 1 from _orgunitstructure ous " +
+                        "join dataapproval da on da.organisationunitid = ous.organisationunitid " +
+                        "and da.dataapprovallevelid = " + dal.getLevel() + " and da.periodid in (" + periodIds + ") " +
+                        "and da.datasetid in (" + dataSetIds + ") and da.organisationunitid = 1489640 " +
+                        "where ous.idlevel" + orgUnitLevel + " = " + orgUnit.getId() +
+                        ( acceptanceRequiredForApproval ? " or not da.accepted" : "") + ")";
+                break;
+            }
         }
 
-        if ( !limitCategoryOptionByOrgUnit.isEmpty() )
+        String approvedAboveSubquery = "false"; // Not approved above if this is the highest (lowest number) approval orgUnit level.
+
+        if ( orgUnitLevelAbove > 0 )
         {
-            limitCategoryOptionByOrgUnit = "and (" + limitCategoryOptionByOrgUnit + "coo.categoryoptionid is null) ";
-            limitApprovalByOrgUnit = "and (" + limitApprovalByOrgUnit + "ousda.organisationunitid is null) ";
+            OrganisationUnit ancestor = orgUnit;
+
+            for ( int i = orgUnitLevelAbove; i < orgUnitLevel; i++ )
+            {
+                ancestor = ancestor.getParent();
+            }
+            approvedAboveSubquery = "exists(select 1 from dataapproval da join dataapprovallevel dal on dal.dataapprovallevelid = da.dataapprovallevelid " +
+                    "where da.periodid in (" + periodIds + ") and da.datasetid in (" + dataSetIds + ") and da.organisationunitid = " + ancestor.getId() + ")";
         }
 
-        String limitBySharing = "";
-
-        if ( !currentUserService.currentUserIsSuper() )
-        {
-            limitBySharing = "and (ugm.userid = " + user.getId() + " or left(co.publicaccess,1) = 'r') ";
-        }
-
-        String sql = "select ccoc.categoryoptioncomboid, da.periodid, dal.level, coo.organisationunitid, da.accepted " +
-                "from categorycombos_optioncombos ccoc " +
-                "join categoryoptioncombos_categoryoptions cocco on cocco.categoryoptioncomboid = ccoc.categoryoptioncomboid " +
+        final String sql = "select ccoc.categoryoptioncomboid, " +
+                "(select min(dal.level) from dataapproval da join dataapprovallevel dal on dal.dataapprovallevelid = da.dataapprovallevelid " +
+                "where da.periodid in (" + periodIds + ") and da.datasetid in (" + dataSetIds + ") and da.organisationunitid = " + orgUnit.getId() + ") as highest_approved_level, " +
+                "(select substring(min(concat(100000 + dal.level, da.accepted)) from 7) from dataapproval da join dataapprovallevel dal on dal.dataapprovallevelid = da.dataapprovallevelid " +
+                "where da.periodid in (" + periodIds + ") and da.datasetid in (" + dataSetIds + ") and da.organisationunitid = " + orgUnit.getId() + ") as accepted_at_highest_level, " +
+                readyBelowSubquery + " as ready_below, " +
+                approvedAboveSubquery + " as approved_above " +
+                "from categoryoptioncombo coc " +
+                "join categorycombos_optioncombos ccoc on ccoc.categoryoptioncomboid = coc.categoryoptioncomboid and ccoc.categorycomboid in (" + dataSetCcIds + ") " +
+                "where coc.categoryoptioncomboid in ( " + // subquery for category option restriction by date, organisation unit, and sharing
+                "select distinct coc1.categoryoptioncomboid " +
+                "from categoryoptioncombo coc1 " +
+                "join categoryoptioncombos_categoryoptions cocco on cocco.categoryoptioncomboid = coc1.categoryoptioncomboid " +
                 "join dataelementcategoryoption co on co.categoryoptionid = cocco.categoryoptionid " +
-                "left outer join categoryoption_organisationunits coo on coo.categoryoptionid = cocco.categoryoptionid " +
-                "left outer join _orgunitstructure ous on ous.organisationunitid = coo.organisationunitid " +
-                "left outer join dataelementcategoryoptionusergroupaccesses couga on couga.categoryoptionid = cocco.categoryoptionid " +
-                "left outer join usergroupaccess uga on uga.usergroupaccessid = couga.usergroupaccessid " +
-                "left outer join usergroupmembers ugm on ugm.usergroupid = uga.usergroupid " +
-                "left outer join dataapproval da on da.attributeoptioncomboid = ccoc.categoryoptioncomboid and da.periodid in (" + sPeriods + ") " +
-                "left outer join dataapprovallevel dal on dal.dataapprovallevelid = da.dataapprovallevelid " +
-                "left outer join _orgunitstructure ousda on ousda.organisationunitid = da.organisationunitid " +
-                "where ccoc.categorycomboid in (" + sDataSetCCs + ") " +
-                "and (co.startdate is null or co.startdate <= '" + DateUtils.getMediumDateString( maxDate ) + "') " +
-                "and (co.enddate is null or co.enddate >= '" + DateUtils.getMediumDateString( minDate ) + "') " +
-                limitCategoryOptionByOrgUnit +
-                limitApprovalByOrgUnit +
-                limitBySharing +
-                "group by ccoc.categoryoptioncomboid, da.periodid, dal.level, coo.organisationunitid, da.accepted " +
-                "order by ccoc.categoryoptioncomboid, da.periodid, dal.level";
+                "and (co.startdate is null or co.startdate <= '" + maxDate + "') and (co.enddate is null or co.enddate >= '" + minDate + "') " +
+                "left join categoryoption_organisationunits coo on coo.categoryoptionid = co.categoryoptionid " +
+                "left join _orgunitstructure ous on ous.idlevel" + orgUnitLevel + " = " + orgUnit.getId() + " " +
+                "and coo.organisationunitid in ( ous.organisationunitid" + orgUnitAncestorLevels + " ) " +
+                "left join dataelementcategoryoptionusergroupaccesses couga on couga.categoryoptionid = cocco.categoryoptionid " +
+                "left join usergroupaccess uga on uga.usergroupaccessid = couga.usergroupaccessid " +
+                "left join usergroupmembers ugm on ugm.usergroupid = uga.usergroupid " +
+                "where ( coo.categoryoptionid is null or ous.organisationunitid is not null ) " + // no org unit assigned, or matching org unit assigned
+                ( isSuperUser || user == null ? "" : "and ( ugm.userid = " + user.getId() + " or co.userid = " + user.getId() + " or left(co.publicaccess, 1) = 'r' ) " ) +
+                ( attributeOptionCombo == null ? "" : "and ccoc.categoryoptioncomboid = " + attributeOptionCombo.getId() + " " ) +
+                ")"; // End of subquery
 
         log.info( "Get approval SQL: " + sql );
-        
+
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
-        int previousAttributeOptionComboId = 0;
-        int previousPeriodId = 0;
-        int previousLevel = 0;
-
-        DataElementCategoryOptionCombo defaultOptionCombo = categoryService.getDefaultDataElementCategoryOptionCombo();
-        
         Map<Integer, DataApprovalLevel> levelMap = dataApprovalLevelService.getDataApprovalLevelMap();
         
-        Set<DataApproval> userDataApprovals = new HashSet<>();
+        List<DataApprovalStatus> statusList = new ArrayList<>();
 
         try
         {
             while ( rowSet.next() )
             {
                 final Integer aoc = rowSet.getInt( 1 );
-                final Integer pe = rowSet.getInt( 2 );
-                final Integer level = rowSet.getInt( 3 );
-                final Integer ou = rowSet.getInt( 4 );
-                final Boolean accepted = rowSet.getBoolean( 5 );
-    
-                if ( aoc == previousAttributeOptionComboId && pe == previousPeriodId && level > previousLevel )
-                {
-                    continue; // Skip the lower-level approvals for the same categoryOptionCombo & period.
-                }
-    
-                previousAttributeOptionComboId = aoc;
-                previousPeriodId = pe;
-                previousLevel = level;
-    
-                DataApprovalLevel dataApprovalLevel = ( level == null ? null : levelMap.get( level ) );
+                final Integer level = rowSet.getInt( 2 );
+                final String acceptedString = rowSet.getString( 3 );
+                final boolean readyBelow = rowSet.getBoolean( 4 );
+                final boolean approvedAbove = rowSet.getBoolean( 5 );
+
+                final boolean accepted = ( acceptedString == null ? false : acceptedString.substring( 0, 1 ).equalsIgnoreCase( "t" ) );
+
+                DataApprovalLevel dataApprovalLevel = ( level == null ? lowestApprovalLevelForOrgUnit : levelMap.get( level ) );
                 
                 DataElementCategoryOptionCombo optionCombo = ( aoc == null || aoc == 0 ? null : OPTION_COMBO_CACHE.get( aoc, new Callable<DataElementCategoryOptionCombo>()
                 {
@@ -314,42 +342,21 @@ public class HibernateDataApprovalStore
                         return categoryService.getDataElementCategoryOptionCombo( aoc );
                     }
                 } ) );
-                
-                Period period = ( pe == null || pe == 0 ? null : PERIOD_CACHE.get( pe, new Callable<Period>()
-                {
-                    public Period call() throws ExecutionException
-                    {
-                        return periodService.getPeriod( pe );
-                    }
-                } ) );
-                
-                OrganisationUnit orgUnit = ( ou == null || ou == 0 ? null : ORGANISATION_UNIT_CACHE.get( ou, new Callable<OrganisationUnit>()
-                {
-                    public OrganisationUnit call() throws ExecutionException
-                    {
-                        return organisationUnitService.getOrganisationUnit( ou );
-                    }
-                } ) );
-    
-                //TODO: currently special cased for PEFPAR's requirements. Can we make it more generic?
-                if ( ( level == null || level != 1 ) && optionCombo.equals( defaultOptionCombo ) )
-                {
-                    if ( canSeeDefaultOptionCombo )
-                    {
-                        for ( OrganisationUnit unit : getUserOrgsAtLevel( 3 ) )
-                        {
-                            DataApproval da = new DataApproval( dataApprovalLevel, null, period, unit, optionCombo, accepted, null, null );
 
-                            userDataApprovals.add( da );
-                        }
-                    }
-
-                    continue;
-                }
-                
                 DataApproval da = new DataApproval( dataApprovalLevel, null, period, orgUnit, optionCombo, accepted, null, null );
-    
-                userDataApprovals.add( da );
+
+                DataApprovalState state = (
+                        dataApprovalLevel == null ?
+                                readyBelow ?
+                                        UNAPPROVED_READY :
+                                        UNAPPROVED_WAITING :
+                                approvedAbove ?
+                                        APPROVED_ABOVE :
+                                        accepted ?
+                                                ACCEPTED_HERE :
+                                                APPROVED_HERE );
+
+                statusList.add( new DataApprovalStatus( state, da, dataApprovalLevel, null ) );
             }
         }
         catch ( ExecutionException ex )
@@ -357,41 +364,6 @@ public class HibernateDataApprovalStore
             throw new RuntimeException( ex );
         }
 
-        return userDataApprovals;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private Set<OrganisationUnit> getUserOrgsAtLevel( int desiredLevel )
-    {
-        Set<OrganisationUnit> orgUnits = new HashSet<>();
-
-        for ( OrganisationUnit orgUnit : currentUserService.getCurrentUser().getOrganisationUnits() )
-        {
-            orgUnits.addAll( getOrgsAtLevel( orgUnit, desiredLevel, organisationUnitService.getLevelOfOrganisationUnit( orgUnit ) ) );
-        }
-
-        return orgUnits;
-    }
-
-    private Set<OrganisationUnit> getOrgsAtLevel( OrganisationUnit orgUnit, int desiredLevel, int thisLevel )
-    {
-        Set<OrganisationUnit> orgUnits = new HashSet<>();
-
-        if ( thisLevel < desiredLevel )
-        {
-            for ( OrganisationUnit child : orgUnit.getChildren() )
-            {
-                orgUnits.addAll( getOrgsAtLevel( child, desiredLevel, thisLevel + 1 ) );
-            }
-        }
-        else if ( thisLevel == desiredLevel )
-        {
-            orgUnits.add( orgUnit );
-        }
-
-        return orgUnits;
+        return statusList;
     }
 }

@@ -131,7 +131,9 @@ public class JdbcAnalyticsTableManager
         
         sqlCreate += statementBuilder.getTableOptions( false );
         
-        log.info( "Create SQL: " + sqlCreate );
+        log.info( "Creating table: " + tableName );
+        
+        log.debug( "Create SQL: " + sqlCreate );
         
         executeSilently( sqlCreate );
     }
@@ -390,6 +392,29 @@ public class JdbcAnalyticsTableManager
             jdbcTemplate.execute( sql.toString() );
         }
 
+        return null;
+    }
+
+    @Override
+    @Async
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
+    {
+        taskLoop : while ( true )
+        {
+            AnalyticsTable table = tables.poll();
+            
+            if ( table == null )
+            {
+                break taskLoop;
+            }
+            
+            final String sql = statementBuilder.getVacuum( table.getTempTableName() );
+            
+            log.info( "Vacuum SQL: " + sql );
+            
+            jdbcTemplate.execute( sql );
+        }
+        
         return null;
     }
 

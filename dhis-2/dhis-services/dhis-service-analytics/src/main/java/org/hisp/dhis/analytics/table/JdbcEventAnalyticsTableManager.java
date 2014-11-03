@@ -138,8 +138,10 @@ public class JdbcEventAnalyticsTableManager
 
         sqlCreate += statementBuilder.getTableOptions( false );
 
-        log.info( "Create SQL: " + sqlCreate );
-
+        log.info( "Creating table: " + tableName );
+        
+        log.debug( "Create SQL: " + sqlCreate );
+        
         executeSilently( sqlCreate );
     }
 
@@ -307,5 +309,12 @@ public class JdbcEventAnalyticsTableManager
         Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
+    }
+
+    @Override
+    @Async
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
+    {
+        return null; // Not needed
     }
 }

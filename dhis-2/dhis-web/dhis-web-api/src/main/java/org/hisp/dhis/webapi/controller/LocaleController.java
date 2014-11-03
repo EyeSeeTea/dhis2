@@ -1,4 +1,4 @@
-package org.hisp.dhis.datasetreport;
+package org.hisp.dhis.webapi.controller;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,25 +28,40 @@ package org.hisp.dhis.datasetreport;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
+import java.util.Locale;
 
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.period.Period;
+import org.hisp.dhis.i18n.I18nService;
+import org.hisp.dhis.i18n.locale.LocaleManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
-/**
- * @author Lars Helge Overland
- */
-public interface DataSetReportStore
+@Controller
+@RequestMapping( value = "/locales" )
+public class LocaleController
 {
-    final String SEPARATOR = "-";
+    @Autowired
+    private LocaleManager localeManager;
     
-    Map<String, Object> getAggregatedValues( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions, boolean rawData );
-
-    Map<String, Object> getAggregatedSubTotals( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions );
+    @Autowired
+    private I18nService i18nService;
     
-    Map<String, Object> getAggregatedTotals( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions );
+    @RequestMapping( value = "/ui", method = RequestMethod.GET )
+    public String getUiLocales( Model model )
+    {
+        List<Locale> locales = localeManager.getAvailableLocales();
+        model.addAttribute( "model", locales );
+        return "locales";
+    }
     
-    Map<String, Object> getAggregatedIndicatorValues( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions );
+    @RequestMapping( value = "/db", method = RequestMethod.GET )
+    public String getDbLocales( Model model )
+    {
+        List<Locale> locales = i18nService.getAvailableLocales();
+        model.addAttribute( "model", locales );
+        return "locales";
+    }
 }
