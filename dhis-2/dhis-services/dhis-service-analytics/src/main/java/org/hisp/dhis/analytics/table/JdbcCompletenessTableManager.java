@@ -90,8 +90,10 @@ public class JdbcCompletenessTableManager
         sqlCreate += "value date) ";
         
         sqlCreate += statementBuilder.getTableOptions( false );
+
+        log.info( "Creating table: " + tableName );
         
-        log.info( "Create SQL: " + sqlCreate );
+        log.debug( "Create SQL: " + sqlCreate );
         
         executeSilently( sqlCreate );
     }
@@ -214,5 +216,12 @@ public class JdbcCompletenessTableManager
     public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
+    }
+
+    @Override
+    @Async
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
+    {
+        return null; // Not needed
     }
 }

@@ -28,11 +28,6 @@ package org.hisp.dhis.i18n;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.calendar.DateTimeUnit;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.period.WeeklyPeriodType;
-
 import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
@@ -40,6 +35,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.ResourceBundle;
+
+import org.hisp.dhis.calendar.DateTimeUnit;
+import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.WeeklyPeriodType;
 
 /**
  * @author Pham Thi Thuy
@@ -51,6 +51,7 @@ public class I18nFormat
     private static final DecimalFormat FORMAT_VALUE = new DecimalFormat( "#.#" ); // Fixed for now
     private static final String EMPTY = "";
     private static final String NAN = "NaN";
+    
     private static final String INVALID_DATE = "Invalid date format";
 
     public static final String FORMAT_DATE = "yyyy-MM-dd";
@@ -245,7 +246,7 @@ public class I18nFormat
 
         if ( !dayPattern )
         {
-            // set day to first of month, so that we don't overflow when we convert to jdk date
+            // Set day to first of month to not overflow when converting to JDK date
             start.setDay( 1 );
             end.setDay( 1 );
 
@@ -267,10 +268,10 @@ public class I18nFormat
             return INVALID_DATE;
         }
     }
-
     /**
      * Formats value. Returns empty string if value is null. Returns NaN if value
-     * is not a number.
+     * is not a number. Return a formatted string if value is an instance of Number,
+     * if not returns the value as a string.
      *
      * @param value the value to format.
      */
@@ -280,17 +281,23 @@ public class I18nFormat
         {
             return EMPTY;
         }
-
-        try
+        
+        if ( value instanceof Number )
         {
-            return FORMAT_VALUE.format( value );
+            try
+            {
+                return FORMAT_VALUE.format( value );
+            }
+            catch ( IllegalArgumentException ex )
+            {
+                return NAN;
+            }
         }
-        catch ( IllegalArgumentException ex )
+        else
         {
-            return NAN;
+            return String.valueOf( value );
         }
     }
-
     // -------------------------------------------------------------------------
     // Support methods
     // -------------------------------------------------------------------------
