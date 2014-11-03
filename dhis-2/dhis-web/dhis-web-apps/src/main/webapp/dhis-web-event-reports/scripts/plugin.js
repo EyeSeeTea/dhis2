@@ -32,7 +32,7 @@ Ext.onReady( function() {
 				dimension: {
 					data: {
 						value: 'data',
-						name: ER.i18n.data,
+						name: ER.i18n.data || 'Data',
 						dimensionName: 'dx',
 						objectName: 'dx',
 						warning: {
@@ -40,19 +40,19 @@ Ext.onReady( function() {
 						}
 					},
 					category: {
-						name: ER.i18n.categories,
+						name: ER.i18n.categories || 'Assigned categories',
 						dimensionName: 'co',
 						objectName: 'co',
 					},
 					indicator: {
 						value: 'indicators',
-						name: ER.i18n.indicators,
+						name: ER.i18n.indicators || 'Indicators',
 						dimensionName: 'dx',
 						objectName: 'in'
 					},
 					dataElement: {
 						value: 'dataElements',
-						name: ER.i18n.data_elements,
+						name: ER.i18n.data_elements || 'Data elements',
 						dimensionName: 'dx',
 						objectName: 'de'
 					},
@@ -64,13 +64,13 @@ Ext.onReady( function() {
 					},
 					dataSet: {
 						value: 'dataSets',
-						name: ER.i18n.data_sets,
+						name: ER.i18n.data_sets || 'Data sets',
 						dimensionName: 'dx',
 						objectName: 'ds'
 					},
 					period: {
 						value: 'period',
-						name: ER.i18n.periods,
+						name: ER.i18n.periods || 'Periods',
 						dimensionName: 'pe',
 						objectName: 'pe'
 					},
@@ -87,7 +87,7 @@ Ext.onReady( function() {
                     },
 					organisationUnit: {
 						value: 'organisationUnits',
-						name: ER.i18n.organisation_units,
+						name: ER.i18n.organisation_units || 'Organisation units',
 						dimensionName: 'ou',
 						objectName: 'ou'
 					},
