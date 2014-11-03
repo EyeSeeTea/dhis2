@@ -1,172 +1,58 @@
 <script type="text/javascript">
-
-
-  function userProgressiveLoader( context ) {
-    if( context.page === undefined ) {
-      return;
-    }
-
-    var request = {
-      url: context.url,
-      data: {
-        paging: true,
-        pageSize: 100 + context.target.children().length,
-        page: context.page
-      },
-      dataType: 'json'
-    };
-
-    if( context.like !== undefined && context.like.length > 0 ) {
-      request.data.filter = 'firstName:like:' + context.like + '&surname:like:' + context.like; // No 'name' property of user object
-    }
-
-    context.searchButton.find('i').removeClass('fa-search');
-    context.searchButton.find('i').addClass('fa-spinner fa-spin');
-    context.searchButton.attr('disabled', true);
-
-    return $.ajax(request).done(function( data ) {
-      if( data.pager ) {
-        if( data.pager.page == 1 ) {
-          context.source.children().remove();
-        }
-
-        context.page++;
-      }
-
-      if( typeof data.pager === 'undefined' ) {
-        context.source.children().remove();
-      }
-
-      if( typeof data.pager === 'undefined' || context.page > data.pager.pageCount ) {
-        delete context.page;
-      }
-
-      if( data[context.iterator] === undefined ) {
-        return;
-      }
-
-      $.each(data[context.iterator], function() {
-        if( context.target.find('option[value=' + this.id + ']').length == 0 ) {
-          context.source.append(context.handler(this));
-        }
-      });
-    }).fail(function() {
-      context.source.children().remove();
-    }).always(function() {
-      context.searchButton.find('i').removeClass('fa-spinner fa-spin');
-      context.searchButton.find('i').addClass('fa-search');
-      context.searchButton.removeAttr('disabled');
-    });
-  }
-
-    jQuery(document).ready(function() {
-        validation2( 'editUserGroupForm', function( form )
-        {
-            form.submit();
-        }, {
-            'beforeValidateHandler' : function()
-            {
-                jQuery( "#groupMembersList" ).find( "option" ).attr( "selected", "selected" );
-                
-                #tblDynamicAttributesJavascript();
-            },
-            'rules' : getValidationRules( "userGroup" )
-        } );
-
-        jQuery("#availableUsersList").dhisAjaxSelect({
-            source: "../dhis-web-commons-ajax-json/getUsers.action",
-            iterator: "users",
-            connectedTo: 'groupMembersList',
-            handler: function(item) {
-                var option = jQuery("<option />");
-                option.text( item.surname + ", " + item.firstName );
-                option.attr( "value", item.id );
-
-                return option;
-            }
-        });
-
-        // Experimental
+    $( document ).ready( function() {
         $( '#usAvailable' ).selected( {
             url: '../api/users.json',
             target: '#usSelected',
             search: '#usAvailableSearch',
-            iterator: 'users',
-            defaultProgressiveLoader: userProgressiveLoader,
+            iterator: 'users'
         });
     });
+
+    $( function() {
+        validation2( 'editUserGroupForm', function( form ) {
+            form.submit();
+        }, {
+            'beforeValidateHandler': function() {
+                $( '#usSelected' ).find( 'option' ).attr( 'selected', 'selected' );
+                #tblDynamicAttributesJavascript();
+            },
+            'rules': getValidationRules( 'userGroup' )
+        } );
+    } );
 </script>
 
 <h3>$i18n.getString( "edit_user_group" )</h3>
 
 <form id="editUserGroupForm" name="editUserGroupForm" action="updateUserGroup.action" method="post" class="inputForm">
-	
+
 <input type="hidden" name="userGroupId" id="userGroupId" value="$group.id" />
 <table id="detailsList">
     <col style="width: 120px"/>
     <col style="width: 270px"/>
 
-	<tr>
-		<th colspan="2">$i18n.getString( "user_group_details" )</th>
-	</tr>
+    <tr>
+        <th colspan="2">$i18n.getString( "user_group_details" )</th>
+    </tr>
 
-	<tr>
-		<td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
-		<td><input type="text" id="name" name="name" value ="$encoder.htmlEncode( $group.name )"></td>
-	</tr>
+    <tr>
+        <td><label>$i18n.getString( "name" ) <em title="$i18n.getString( 'required' )" class="required">*</em></label></td>
+        <td><input type="text" id="name" name="name" value ="$encoder.htmlEncode( $group.name )"></td>
+    </tr>
 
 </table>
 
 #tblDynamicAttributes( { "attributes": $attributes, "attributeValues": $attributeValues } )
 
-<table>
-    <colgroup>
-      <col style="width: 500px;"/>
-      <col/>
-      <col style="width: 500px;"/>
-    </colgroup>
-
-    <tr>
-        <th>$i18n.getString( "available_users" )</th>
-		<th></th>
-        <th>$i18n.getString( "group_members" )</th>
-    </tr>
-
-    <tr>
-        <td>
-            <select id="availableUsersList" name="availableUsersList" multiple="multiple" style="height: 200px; width: 100%;"></select>
-        </td>
-
-        <td style="text-align:center">          
-        	<input type="button" value="&gt;" title="$i18n.getString( 'move_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'availableUsersList' );"/><br/>
-            <input type="button" value="&lt;" title="$i18n.getString( 'remove_selected' )" style="width:50px" onclick="dhisAjaxSelect_moveAllSelected( 'groupMembersList' );"/><br/>
-			<input type="button" value="&gt;&gt;" title="$i18n.getString('move_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'availableUsersList' );"/><br/>
-			<input type="button" value="&lt;&lt;" title="$i18n.getString('remove_all')" style="width:50px" onclick="dhisAjaxSelect_moveAll( 'groupMembersList' );"/>
-        </td>
-
-        <td>
-        	<select id="groupMembersList" name="groupMembersList" multiple="multiple" style="height: 200px; width: 100%; margin-top: 22px;">
-				#foreach( $user in $groupMembers )
-					<option value="$user.id">$encoder.htmlEncode( $user.surname ), $!encoder.htmlEncode( $user.firstName )</option>
-				#end
-        	</select>
-        </td>
-    </tr>
-</table>
-
-## Experimental
-
 #jqSelected({
     "prefix": "us",
-    "required": false,
     "i18n_available": "available_users",
     "i18n_selected": "group_members",
-    "objects": $users
+    "objects": $groupMembers
 })
 
 <p>
-	<input type="submit" value="$i18n.getString( 'save' )" style="width:10em" />
-	<input type="button" value="$i18n.getString( 'cancel' )" onclick="dhis2.commons.redirectCurrentPage( 'getAllUserGroups.action' )" style="width:10em" />
+    <input type="submit" value="$i18n.getString( 'save' )" style="width:10em" />
+    <input type="button" value="$i18n.getString( 'cancel' )" onclick="dhis2.commons.redirectCurrentPage( 'getAllUserGroups.action' )" style="width:10em" />
 </p>
 
 </form>

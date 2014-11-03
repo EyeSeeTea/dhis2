@@ -93,7 +93,7 @@ public class UpdateUserGroupAction
     {
         this.usSelected = usSelected;
     }
-
+/*
     private List<User> users;
 
     public void setUsers( List<User> users )
@@ -107,7 +107,7 @@ public class UpdateUserGroupAction
     {
         this.groupMembersList = groupMembersList;
     }
-
+*/
     private String name;
 
     public void setName( String name )
@@ -143,12 +143,18 @@ public class UpdateUserGroupAction
 
         Set<User> userList = new HashSet<>();
 
-        for ( Integer groupMember : groupMembersList )
+        for ( String userUid : usSelected )
         {
-            User user = userService.getUser( groupMember );
+            User user = userService.getUser( userUid );
+
+            if( user == null)
+            {
+                continue;
+            }
+
             userList.add( user );
 
-            if ( writeGroupRequired && !userGroup.getMembers().contains( user) && !userService.canUpdate( user.getUserCredentials() ) )
+            if ( writeGroupRequired && !userGroup.getMembers().contains( user ) && !userService.canUpdate( user.getUserCredentials() ) )
             {
                 throw new UpdateAccessDeniedException( "You don't have permission to add all selected users to this group" );
             }
