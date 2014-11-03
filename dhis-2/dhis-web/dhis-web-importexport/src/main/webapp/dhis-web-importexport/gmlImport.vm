@@ -1,3 +1,4 @@
+
 <h3>$i18n.getString( "gml_import" )</h3>
 <p class="tipText">$i18n.getString( "gml_import_info_text" )</p>
 <div id="inputCriteria" class="inputCriteria" style="width: 380px">

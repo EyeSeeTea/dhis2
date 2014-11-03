@@ -87,6 +87,20 @@ public class UpdateUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
+    private List<String> usSelected;
+
+    public void setUsSelected( List<String> usSelected )
+    {
+        this.usSelected = usSelected;
+    }
+
+    private List<User> users;
+
+    public void setUsers( List<User> users )
+    {
+        this.users = users;
+    }
+
     private List<Integer> groupMembersList;
 
     public void setGroupMembersList( List<Integer> groupMembersList )

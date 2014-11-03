@@ -1,5 +1,65 @@
 <script type="text/javascript">
-	jQuery(document).ready(function() {
+
+
+  function userProgressiveLoader( context ) {
+    if( context.page === undefined ) {
+      return;
+    }
+
+    var request = {
+      url: context.url,
+      data: {
+        paging: true,
+        pageSize: 100 + context.target.children().length,
+        page: context.page
+      },
+      dataType: 'json'
+    };
+
+    if( context.like !== undefined && context.like.length > 0 ) {
+      request.data.filter = 'firstName:like:' + context.like + '&surname:like:' + context.like; // No 'name' property of user object
+    }
+
+    context.searchButton.find('i').removeClass('fa-search');
+    context.searchButton.find('i').addClass('fa-spinner fa-spin');
+    context.searchButton.attr('disabled', true);
+
+    return $.ajax(request).done(function( data ) {
+      if( data.pager ) {
+        if( data.pager.page == 1 ) {
+          context.source.children().remove();
+        }
+
+        context.page++;
+      }
+
+      if( typeof data.pager === 'undefined' ) {
+        context.source.children().remove();
+      }
+
+      if( typeof data.pager === 'undefined' || context.page > data.pager.pageCount ) {
+        delete context.page;
+      }
+
+      if( data[context.iterator] === undefined ) {
+        return;
+      }
+
+      $.each(data[context.iterator], function() {
+        if( context.target.find('option[value=' + this.id + ']').length == 0 ) {
+          context.source.append(context.handler(this));
+        }
+      });
+    }).fail(function() {
+      context.source.children().remove();
+    }).always(function() {
+      context.searchButton.find('i').removeClass('fa-spinner fa-spin');
+      context.searchButton.find('i').addClass('fa-search');
+      context.searchButton.removeAttr('disabled');
+    });
+  }
+
+    jQuery(document).ready(function() {
         validation2( 'editUserGroupForm', function( form )
         {
             form.submit();
@@ -13,19 +73,28 @@
             'rules' : getValidationRules( "userGroup" )
         } );
 
-		jQuery("#availableUsersList").dhisAjaxSelect({
-			source: "../dhis-web-commons-ajax-json/getUsers.action",
-			iterator: "users",
-			connectedTo: 'groupMembersList',
-			handler: function(item) {
-				var option = jQuery("<option />");
-				option.text( item.surname + ", " + item.firstName );
-				option.attr( "value", item.id );
+        jQuery("#availableUsersList").dhisAjaxSelect({
+            source: "../dhis-web-commons-ajax-json/getUsers.action",
+            iterator: "users",
+            connectedTo: 'groupMembersList',
+            handler: function(item) {
+                var option = jQuery("<option />");
+                option.text( item.surname + ", " + item.firstName );
+                option.attr( "value", item.id );
 
-				return option;
-			}
-		});
-	});
+                return option;
+            }
+        });
+
+        // Experimental
+        $( '#usAvailable' ).selected( {
+            url: '../api/users.json',
+            target: '#usSelected',
+            search: '#usAvailableSearch',
+            iterator: 'users',
+            defaultProgressiveLoader: userProgressiveLoader,
+        });
+    });
 </script>
 
 <h3>$i18n.getString( "edit_user_group" )</h3>
@@ -84,6 +153,16 @@
         </td>
     </tr>
 </table>
+
+## Experimental
+
+#jqSelected({
+    "prefix": "us",
+    "required": false,
+    "i18n_available": "available_users",
+    "i18n_selected": "group_members",
+    "objects": $users
+})
 
 <p>
 	<input type="submit" value="$i18n.getString( 'save' )" style="width:10em" />
