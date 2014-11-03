@@ -1941,13 +1941,13 @@ Ext.onReady( function() {
 
 			web.mask.show = function(component, message) {
 				if (!Ext.isObject(component)) {
-					console.log('web.mask.show: component not an object');
+					console.log('support.gui.mask.show: component not an object');
 					return null;
 				}
 
 				message = message || 'Loading..';
 
-				if (component.mask) {
+				if (component.mask && component.mask.destroy) {
 					component.mask.destroy();
 					component.mask = null;
 				}
