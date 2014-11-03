@@ -3531,7 +3531,7 @@ Ext.onReady( function() {
 
                         web.mask.show(ns.app.centerRegion, 'Rendering table..');
 
-                        ns.app.centerRegion.removeAll(true);
+                        //ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
 
                         // after render
@@ -3544,15 +3544,15 @@ Ext.onReady( function() {
                         ns.app.uuidDimUuidsMap = table.uuidDimUuidsMap;
                         ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
 
-                        if (NS.isSessionStorage) {
+                        if (ER.isSessionStorage) {
                             //web.events.setValueMouseHandlers(layout, response || xResponse, ns.app.uuidDimUuidsMap, ns.app.uuidObjectMap);
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
-                            web.storage.session.set(layout, 'eventtable');
+                            //web.storage.session.set(layout, 'eventtable');
                         }
 
                         web.mask.hide(ns.app.centerRegion);
 
-                        if (NS.isDebug) {
+                        if (ER.isDebug) {
                             console.log("Number of cells", table.tdCount);
                             console.log("layout", layout);
                             console.log("response", response);
@@ -3602,7 +3602,7 @@ Ext.onReady( function() {
                         ns.app.response = response;
                         ns.app.xResponse = xResponse;
 
-                        if (NS.isSessionStorage) {
+                        if (ER.isSessionStorage) {
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
                         }
 

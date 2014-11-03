@@ -2991,7 +2991,7 @@ Ext.onReady( function() {
 
                 // user-account
                 Ext.Ajax.request({
-                    url: init.contextPath + '/api/me/user-account.json',
+                    url: init.contextPath + '/api/me/user-account.jsonp',
                     success: function(r) {
                         init.userAccount = Ext.decode(r.responseText);
 
