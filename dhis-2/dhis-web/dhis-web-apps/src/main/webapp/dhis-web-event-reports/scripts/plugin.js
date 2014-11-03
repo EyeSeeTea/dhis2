@@ -3618,7 +3618,7 @@ Ext.onReady( function() {
 				map[layout.dataType]();
 			};
 
-			web.pivot.sort = function(xLayout, response, id) {
+			web.report.sort = function(xLayout, response, id) {
 				var xLayout = Ext.clone(xLayout),
 					response = Ext.clone(response),
 					dim = xLayout.rows[0],
