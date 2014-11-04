@@ -2976,7 +2976,7 @@ Ext.onReady( function() {
 		};
 
         // user-account
-        Ext.data.JsonP.request({
+        requests.push({
             url: init.contextPath + '/api/me/user-account.jsonp',
             success: function(r) {
                 init.userAccount = r;
