@@ -37,6 +37,12 @@ import java.util.List;
  */
 public interface CalendarService
 {
+    final String KEY_CALENDAR = "keyCalendar";
+    final String KEY_DATE_FORMAT = "keyDateFormat";
+
+    final String DEFAULT_CALENDAR = "iso8601";
+    final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd"; // ISO 8601
+    
     /**
      * Gets all available calendars as a sorted list.
      * @return All available calendars
@@ -61,4 +67,28 @@ public interface CalendarService
      * @see DateFormat
      */
     DateFormat getSystemDateFormat();
+    
+    /**
+     * Gets the system calendar key.
+     * @return the system calendar key
+     */
+    String getSystemCalendarKey();
+    
+    /**
+     * Sets the system calendar key.
+     * @param calendarKey the system calendar key
+     */
+    void setSystemCalendarKey( String calendarKey );
+    
+    /**
+     * Gets the system date format key.
+     * @return the system date format key
+     */
+    String getSystemDateFormatKey();
+    
+    /**
+     * Sets the system date format key.
+     * @param dateFormatKey the system date format key
+     */
+    void setSystemDateFormatKey( String dateFormatKey );
 }

@@ -74,6 +74,7 @@ public class TableAlteror
     // Execute
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void execute()
     {
@@ -254,7 +255,6 @@ public class TableAlteror
         // set varchar to text
         executeSql( "ALTER TABLE dataelement ALTER description TYPE text" );
         executeSql( "ALTER TABLE indicator ALTER description TYPE text" );
-        executeSql( "ALTER TABLE datadictionary ALTER description TYPE text" );
         executeSql( "ALTER TABLE validationrule ALTER description TYPE text" );
         executeSql( "ALTER TABLE expression ALTER expression TYPE text" );
         executeSql( "ALTER TABLE translation ALTER value TYPE text" );
@@ -385,7 +385,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE chart DROP COLUMN uuid" );
         executeSql( "ALTER TABLE concept DROP COLUMN uuid" );
         executeSql( "ALTER TABLE constant DROP COLUMN uuid" );
-        executeSql( "ALTER TABLE datadictionary DROP COLUMN uuid" );
         executeSql( "ALTER TABLE dataelement DROP COLUMN uuid" );
         executeSql( "ALTER TABLE dataelementcategory DROP COLUMN uuid" );
         executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN uuid" );
@@ -467,13 +466,17 @@ public class TableAlteror
         executeSql( "update reporttable set showhierarchy = false where showhierarchy is null" );
         executeSql( "update reporttable set aggregationtype = 'default' where aggregationtype is null" );
 
-        // reporttable col/rowtotals = keep existing || copy from totals || true
+        // reporttable col/row totals = keep existing || copy from totals || true
         executeSql( "update reporttable set totals = true where totals is null" );
         executeSql( "update reporttable set coltotals = totals where coltotals is null" );
         executeSql( "update reporttable set coltotals = true where coltotals is null" );
         executeSql( "update reporttable set rowtotals = totals where rowtotals is null" );
         executeSql( "update reporttable set rowtotals = true where rowtotals is null" );        
         executeSql( "alter table reporttable drop column totals" );
+
+        // reporttable col/row subtotals
+        executeSql( "update reporttable set colsubtotals = subtotals where colsubtotals is null" );
+        executeSql( "update reporttable set rowsubtotals = subtotals where rowsubtotals is null" );
 
         executeSql( "update chart set reportingmonth = false where reportingmonth is null" );
         executeSql( "update chart set reportingbimonth = false where reportingbimonth is null" );
@@ -497,6 +500,7 @@ public class TableAlteror
         executeSql( "update chart set userorganisationunitchildren = false where userorganisationunitchildren is null" );
         executeSql( "update chart set userorganisationunitgrandchildren = false where userorganisationunitgrandchildren is null" );
         executeSql( "update chart set hidetitle = false where hidetitle is null" );
+        executeSql( "update chart set sortorder = 0 where sortorder is null" );
         
         executeSql( "update eventreport set showhierarchy = false where showhierarchy is null" );
         executeSql( "update eventreport set counttype = 'events' where counttype is null" );
@@ -508,6 +512,12 @@ public class TableAlteror
         executeSql( "update eventreport set rowtotals = totals where rowtotals is null" );
         executeSql( "update eventreport set rowtotals = true where rowtotals is null" );        
         executeSql( "alter table eventreport drop column totals" );
+
+        // eventreport col/row subtotals
+        executeSql( "update eventreport set colsubtotals = subtotals where colsubtotals is null" );
+        executeSql( "update eventreport set rowsubtotals = subtotals where rowsubtotals is null" );        
+
+        executeSql( "update eventchart set sortorder = 0 where sortorder is null" );
 
         // Move chart filters to chart_filters table
 
@@ -569,7 +579,6 @@ public class TableAlteror
         executeSql( "UPDATE userroleauthorities SET authority='F_REPORT_PUBLIC_ADD' WHERE authority='F_REPORT_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_REPORTTABLE_PUBLIC_ADD' WHERE authority='F_REPORTTABLE_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_DATASET_PUBLIC_ADD' WHERE authority='F_DATASET_ADD'" );
-        executeSql( "UPDATE userroleauthorities SET authority='F_DATADICTIONARY_PUBLIC_ADD' WHERE authority='F_DATADICTIONARY_ADD'" );
 
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENT_PUBLIC_ADD' WHERE authority='F_DATAELEMENT_ADD'" );
         executeSql( "UPDATE userroleauthorities SET authority='F_DATAELEMENTGROUP_PUBLIC_ADD' WHERE authority='F_DATAELEMENTGROUP_ADD'" );
@@ -599,7 +608,6 @@ public class TableAlteror
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENT_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENTGROUP_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENTGROUPSET_UPDATE'" );
-        executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATADICTIONARY_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATAELEMENT_MINMAX_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_DATASET_UPDATE'" );
         executeSql( "DELETE FROM userroleauthorities WHERE authority='F_SECTION_UPDATE'" );
@@ -647,11 +655,11 @@ public class TableAlteror
         executeSql( "ALTER TABLE reporttable DROP CONSTRAINT reporttable_name_key" );
         executeSql( "ALTER TABLE report DROP CONSTRAINT report_name_key" );
         executeSql( "ALTER TABLE usergroup DROP CONSTRAINT usergroup_name_key" );
-        executeSql( "ALTER TABLE datadictionary DROP CONSTRAINT datadictionary_name_key" );
 
         executeSql( "update relativeperiods set lastweek = false where lastweek is null" );
         executeSql( "update relativeperiods set last4weeks = false where last4weeks is null" );
         executeSql( "update relativeperiods set last12weeks = false where last12weeks is null" );
+        executeSql( "update relativeperiods set last6months = false where last6months is null" );
 
         upgradeChartRelativePeriods();
         upgradeReportTableRelativePeriods();
@@ -730,8 +738,15 @@ public class TableAlteror
         // update attribute.code, set to null if code=''
         executeSql( "UPDATE attribute SET code=NULL WHERE code=''" );
 
-        // data approval, new column accepted
+        // data approval
         executeSql( "UPDATE dataapproval SET accepted=false WHERE accepted IS NULL" );
+        executeSql( "ALTER TABLE dataapproval ALTER COLUMN accepted SET NOT NULL" );
+        executeSql( "DELETE FROM dataapproval WHERE categoryoptiongroupid IS NOT NULL" );
+        executeSql( "ALTER TABLE dataapproval DROP COLUMN categoryoptiongroupid" );
+        executeSql( "UPDATE dataapproval SET attributeoptioncomboid=categoryoptioncomboid WHERE categoryoptioncomboid IS NOT NULL" );
+        executeSql( "ALTER TABLE dataapproval DROP COLUMN categoryoptioncomboid" );
+        executeSql( "UPDATE dataapproval SET attributeoptioncomboid=" + defaultCategoryComboId + " WHERE attributeoptioncomboid IS NULL" );
+        executeSql( "ALTER TABLE dataapproval ALTER COLUMN attributeoptioncomboid SET NOT NULL" );
 
         // validation rule group, new column alertbyorgunits
         executeSql( "UPDATE validationrulegroup SET alertbyorgunits=false WHERE alertbyorgunits IS NULL" );
@@ -864,7 +879,7 @@ public class TableAlteror
                     rs.getBoolean( "reportingquarter" ), rs.getBoolean( "lastsixmonth" ),
                     rs.getBoolean( "monthsthisyear" ), rs.getBoolean( "quartersthisyear" ),
                     rs.getBoolean( "thisyear" ), false, false, rs.getBoolean( "lastyear" ),
-                    rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ), rs.getBoolean( "last3months" ),
+                    rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ), false, rs.getBoolean( "last3months" ),
                     false, rs.getBoolean( "last4quarters" ), rs.getBoolean( "last2sixmonths" ), false, false, false,
                     false, false, false, false );
 
@@ -924,7 +939,7 @@ public class TableAlteror
                     rs.getBoolean( "lastsixmonth" ), rs.getBoolean( "monthsthisyear" ),
                     rs.getBoolean( "quartersthisyear" ), rs.getBoolean( "thisyear" ),
                     rs.getBoolean( "monthslastyear" ), rs.getBoolean( "quarterslastyear" ),
-                    rs.getBoolean( "lastyear" ), rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ),
+                    rs.getBoolean( "lastyear" ), rs.getBoolean( "last5years" ), rs.getBoolean( "last12months" ), false,
                     rs.getBoolean( "last3months" ), false, rs.getBoolean( "last4quarters" ),
                     rs.getBoolean( "last2sixmonths" ), rs.getBoolean( "thisfinancialyear" ),
                     rs.getBoolean( "lastfinancialyear" ), rs.getBoolean( "last5financialyears" ), false, false, false,

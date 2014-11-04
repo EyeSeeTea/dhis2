@@ -58,6 +58,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 /**
  * @author Lars Helge Overland
+ * @author Halvdan Hoem Grelland
  */
 public class JdbcDataAnalysisStore
     implements DataAnalysisStore
@@ -86,6 +87,7 @@ public class JdbcDataAnalysisStore
     // OutlierAnalysisStore implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public Map<Integer, Double> getStandardDeviation( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Set<Integer> organisationUnits )
     {
         Map<Integer, Double> map = new HashMap<>();
@@ -119,6 +121,7 @@ public class JdbcDataAnalysisStore
         return map;
     }
     
+    @Override
     public Map<Integer, Double> getAverage( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo, Set<Integer> organisationUnits )
     {
         Map<Integer, Double> map = new HashMap<>();
@@ -152,6 +155,7 @@ public class JdbcDataAnalysisStore
         return map;        
     }
     
+    @Override
     public Collection<DeflatedDataValue> getMinMaxViolations( Collection<DataElement> dataElements, Collection<DataElementCategoryOptionCombo> categoryOptionCombos,
         Collection<Period> periods, Collection<OrganisationUnit> organisationUnits, int limit )
     {
@@ -189,6 +193,7 @@ public class JdbcDataAnalysisStore
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper( null, null, optionComboMap ) );
     }
     
+    @Override
     public Collection<DeflatedDataValue> getDeflatedDataValues( DataElement dataElement, DataElementCategoryOptionCombo categoryOptionCombo,
         Collection<Period> periods, Map<Integer, Integer> lowerBoundMap, Map<Integer, Integer> upperBoundMap )
     {
@@ -242,12 +247,15 @@ public class JdbcDataAnalysisStore
         
         return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper( lowerBoundMap, upperBoundMap, null ) );
     }
-    
-    public Collection<DeflatedDataValue> getDataValuesMarkedForFollowup()
+
+    @Override
+    public Collection<DeflatedDataValue> getFollowupDataValues( OrganisationUnit organisationUnit, int limit )
     {
-        final String sql =
+        final String idLevelColumn = "idlevel" + organisationUnit.getOrganisationUnitLevel();
+
+        String sql =
             "select dv.dataelementid, dv.periodid, dv.sourceid, dv.categoryoptioncomboid, dv.value, " +
-            "dv.storedby, dv.lastupdated, dv.created, dv.comment, dv.followup, mm.minimumvalue, mm.maximumvalue, de.name as dataelementname, " +
+            "dv.storedby, dv.lastupdated, dv.created, dv.comment, dv.followup, mm.minimumvalue, mm.maximumvalue, de.name AS dataelementname, " +
             "pe.startdate, pe.enddate, pt.name AS periodtypename, ou.name AS sourcename, cc.categoryoptioncomboname " +
             "from datavalue dv " +
             "left join minmaxdataelement mm on (dv.sourceid = mm.sourceid and dv.dataelementid = mm.dataelementid and dv.categoryoptioncomboid = mm.categoryoptioncomboid) " +
@@ -256,8 +264,11 @@ public class JdbcDataAnalysisStore
             "join periodtype pt on pe.periodtypeid = pt.periodtypeid " +
             "left join organisationunit ou on ou.organisationunitid = dv.sourceid " +
             "left join _categoryoptioncomboname cc on dv.categoryoptioncomboid = cc.categoryoptioncomboid " +
-            "where dv.followup = true";
+            "inner join _orgunitstructure ous on ous.organisationunitid = dv.sourceid " +
+            "where ous." + idLevelColumn + " = " + organisationUnit.getId() + " " +
+            "and dv.followup = true " +
+            statementBuilder.limitRecord( 0, limit );
         
-        return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );        
+        return jdbcTemplate.query( sql, new DeflatedDataValueNameMinMaxRowMapper() );
     }
 }

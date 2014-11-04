@@ -28,10 +28,15 @@ package org.hisp.dhis.de.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import org.hisp.dhis.acl.AclService;
-import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -52,13 +57,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
@@ -120,11 +119,8 @@ public class GetMetaDataAction
     }
 
     @Autowired
-    protected AclService aclService;
-
-    @Autowired
     private ConfigurationService configurationService;
-    
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -206,9 +202,9 @@ public class GetMetaDataAction
         return defaultCategoryCombo;
     }
 
-    private ListMap<String, DataElementCategoryOption> categoryOptionMap = new ListMap<>();
+    private Map<String, List<DataElementCategoryOption>> categoryOptionMap = new HashMap<String, List<DataElementCategoryOption>>();
 
-    public ListMap<String, DataElementCategoryOption> getCategoryOptionMap()
+    public Map<String, List<DataElementCategoryOption>> getCategoryOptionMap()
     {
         return categoryOptionMap;
     }
@@ -217,6 +213,7 @@ public class GetMetaDataAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
     {
         User user = currentUserService.getCurrentUser();
@@ -245,16 +242,23 @@ public class GetMetaDataAction
         expressionService.substituteExpressions( indicators, null );
 
         OrganisationUnitLevel offlineOrgUnitLevel = configurationService.getConfiguration().getOfflineOrganisationUnitLevel();
-        
+
         Integer level = offlineOrgUnitLevel != null ? offlineOrgUnitLevel.getLevel() : null;
-        
-        OrganisationUnitDataSetAssociationSet organisationUnitSet = organisationUnitService.getOrganisationUnitDataSetAssociationSet( null ); //TODO change null > "level"
+
+        OrganisationUnitDataSetAssociationSet organisationUnitSet = organisationUnitService.getOrganisationUnitDataSetAssociationSet( level );
 
         dataSetAssociationSets = organisationUnitSet.getDataSetAssociationSets();
 
         organisationUnitAssociationSetMap = organisationUnitSet.getOrganisationUnitAssociationSetMap();
 
-        dataSets = new ArrayList<>( dataSetService.getDataSetsByUidNoAcl( organisationUnitSet.getDistinctDataSets() ) );
+        if ( currentUserService.currentUserIsSuper() )
+        {
+            dataSets = new ArrayList<>( dataSetService.getAllDataSets() );
+        }
+        else if ( user != null )
+        {
+            dataSets = new ArrayList<>( user.getUserCredentials().getAllDataSets() );
+        }
 
         Set<DataElementCategoryCombo> categoryComboSet = new HashSet<>();
         Set<DataElementCategory> categorySet = new HashSet<>();
@@ -280,13 +284,9 @@ public class GetMetaDataAction
 
         for ( DataElementCategory category : categories )
         {
-            for ( DataElementCategoryOption categoryOption : category.getCategoryOptions() )
-            {
-                if ( aclService.canRead( user, categoryOption ) )
-                {
-                    categoryOptionMap.putValue( category.getUid(), categoryOption );
-                }
-            }
+            List<DataElementCategoryOption> categoryOptions = new ArrayList<>( categoryService.getDataElementCategoryOptions( category ) );
+            Collections.sort( categoryOptions, IdentifiableObjectNameComparator.INSTANCE );
+            categoryOptionMap.put( category.getUid(), categoryOptions );
         }
 
         Collections.sort( dataSets, IdentifiableObjectNameComparator.INSTANCE );

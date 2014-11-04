@@ -117,6 +117,7 @@ public class TrackedEntityAttributeController
     // POST
     //--------------------------------------------------------------------------
 
+    @Override
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
     @ResponseStatus( HttpStatus.CREATED )
     public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
@@ -127,6 +128,7 @@ public class TrackedEntityAttributeController
         response.setHeader( "Location", ContextUtils.getRootPath( request ) + TrackedEntityAttributeSchemaDescriptor.API_ENDPOINT + "/" + trackedEntityAttribute.getUid() );
     }
 
+    @Override
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
     @ResponseStatus( HttpStatus.CREATED )
     public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
@@ -141,8 +143,8 @@ public class TrackedEntityAttributeController
     // PUT
     //--------------------------------------------------------------------------
 
+    @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( uid );
@@ -157,11 +159,12 @@ public class TrackedEntityAttributeController
         newTrackedEntityAttribute.setUid( trackedEntityAttribute.getUid() );
         trackedEntityAttribute.mergeWith( newTrackedEntityAttribute );
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         trackedEntityAttributeService.updateTrackedEntityAttribute( trackedEntityAttribute );
     }
 
+    @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( uid );
@@ -176,6 +179,7 @@ public class TrackedEntityAttributeController
         newTrackedEntityAttribute.setUid( trackedEntityAttribute.getUid() );
         trackedEntityAttribute.mergeWith( newTrackedEntityAttribute );
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         trackedEntityAttributeService.updateTrackedEntityAttribute( trackedEntityAttribute );
     }
 
@@ -183,8 +187,8 @@ public class TrackedEntityAttributeController
     // DELETE
     //--------------------------------------------------------------------------
 
+    @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
     {
         TrackedEntityAttribute trackedEntityAttribute = trackedEntityAttributeService.getTrackedEntityAttribute( uid );
@@ -195,6 +199,7 @@ public class TrackedEntityAttributeController
             return;
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         trackedEntityAttributeService.deleteTrackedEntityAttribute( trackedEntityAttribute );
     }
 }

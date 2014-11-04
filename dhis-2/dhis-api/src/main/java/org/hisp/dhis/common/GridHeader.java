@@ -52,6 +52,12 @@ public class GridHeader
     private boolean hidden;
 
     private boolean meta;
+    
+    private String optionSet;
+
+    // -------------------------------------------------------------------------
+    // Constructors
+    // -------------------------------------------------------------------------
 
     public GridHeader()
     {
@@ -114,10 +120,36 @@ public class GridHeader
         this.meta = meta;
     }
 
+    /**
+     * @param name name
+     * @param column column
+     * @param type type
+     * @param hidden hidden
+     * @param meta meta
+     * @param optionSet optionSet
+     */
+    public GridHeader( String name, String column, String type, boolean hidden, boolean meta, String optionSet )
+    {
+        this.name = name;
+        this.column = column;
+        this.type = type;
+        this.hidden = hidden;
+        this.meta = meta;
+        this.optionSet = optionSet;
+    }
+
+    // -------------------------------------------------------------------------
+    // Logic
+    // -------------------------------------------------------------------------
+
     public boolean isNumeric()
     {
         return type != null && NUMERIC_TYPES.contains( type );
     }
+
+    // -------------------------------------------------------------------------
+    // Getters and setters
+    // -------------------------------------------------------------------------
 
     @JsonProperty
     @JsonView( {DetailedView.class} )
@@ -179,12 +211,22 @@ public class GridHeader
         this.meta = meta;
     }
 
-    @Override
-    public String toString()
+    @JsonProperty
+    @JsonView( {DetailedView.class} )
+    public String getOptionSet()
     {
-        return "[Name: " + name + ", column: " + column + ", type: " + type + "]";
+        return optionSet;
     }
-    
+
+    public void setOptionSet( String optionSet )
+    {
+        this.optionSet = optionSet;
+    }
+
+    // -------------------------------------------------------------------------
+    // hashCode, equals, toString
+    // -------------------------------------------------------------------------
+
     @Override
     public int hashCode()
     {
@@ -212,5 +254,11 @@ public class GridHeader
         final GridHeader other = (GridHeader) object;
 
         return name.equals( other.name );
+    }
+
+    @Override
+    public String toString()
+    {
+        return "[Name: " + name + ", column: " + column + ", type: " + type + "]";
     }
 }

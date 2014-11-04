@@ -13,6 +13,8 @@
     <param-value>databaseAdmin</param-value>
   </context-param>
 
+  <!-- Filters -->
+
   <filter>
     <filter-name>RedirectFilter</filter-name>
     <filter-class>org.hisp.dhis.servlet.filter.HttpRedirectFilter</filter-class>
@@ -41,7 +43,6 @@
     <filter-name>Struts</filter-name>
     <filter-class>org.apache.struts2.dispatcher.ng.filter.StrutsPrepareAndExecuteFilter</filter-class>
   </filter>
-
   <filter>
     <filter-name>encoding-filter</filter-name>
     <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
@@ -73,6 +74,10 @@
   </filter-mapping>
   <filter-mapping>
     <filter-name>shallowEtagHeaderFilter</filter-name>
+    <url-pattern>/api/*</url-pattern>
+  </filter-mapping>
+  <filter-mapping>
+    <filter-name>shallowEtagHeaderFilter</filter-name>
     <url-pattern>/ohie/*</url-pattern>
   </filter-mapping>
   <filter-mapping>
@@ -96,12 +101,16 @@
     <url-pattern>*.action</url-pattern>
   </filter-mapping>
 
+  <!-- Listeners -->
+
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
   <listener>
     <listener-class>org.hisp.dhis.system.startup.StartupListener</listener-class>
   </listener>
+
+  <!-- Servlets -->
 
   <servlet>
     <servlet-name>webapi</servlet-name>
@@ -112,7 +121,6 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
-
   <servlet>
     <servlet-name>mobile</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -122,7 +130,6 @@
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
-
   <servlet>
     <servlet-name>ohie</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
@@ -133,40 +140,29 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
-  <!-- Mobile -->
-
   <servlet-mapping>
     <servlet-name>mobile</servlet-name>
     <url-pattern>/mobile</url-pattern>
   </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>mobile</servlet-name>
     <url-pattern>/mobile/*</url-pattern>
   </servlet-mapping>
-
-  <!-- Web-API -->
-
   <servlet-mapping>
     <servlet-name>webapi</servlet-name>
     <url-pattern>/api</url-pattern>
   </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>webapi</servlet-name>
     <url-pattern>/api/*</url-pattern>
   </servlet-mapping>
-
-  <!-- OHIE Web-API -->
-
   <servlet-mapping>
     <servlet-name>ohie</servlet-name>
     <url-pattern>/ohie</url-pattern>
   </servlet-mapping>
-
   <servlet-mapping>
     <servlet-name>ohie</servlet-name>
     <url-pattern>/ohie/*</url-pattern>
   </servlet-mapping>
-  
+
 </web-app>

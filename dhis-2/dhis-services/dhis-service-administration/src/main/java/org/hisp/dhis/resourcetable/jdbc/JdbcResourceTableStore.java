@@ -80,6 +80,7 @@ public class JdbcResourceTableStore
     // ResourceTableStore implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public void batchUpdate( int columns, String tableName, List<Object[]> batchArgs )
     {
         if ( columns == 0 || tableName == null )
@@ -103,6 +104,7 @@ public class JdbcResourceTableStore
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
 
+    @Override
     public void createOrganisationUnitStructure( int maxLevel )
     {
         try
@@ -142,6 +144,7 @@ public class JdbcResourceTableStore
     // DataElementCategoryOptionComboName
     // -------------------------------------------------------------------------
     
+    @Override
     public void createDataElementCategoryOptionComboName()
     {
         try
@@ -165,6 +168,7 @@ public class JdbcResourceTableStore
     // CategoryOptionGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createCategoryOptionGroupSetStructure( List<CategoryOptionGroupSet> groupSets )
     {
         try
@@ -185,6 +189,7 @@ public class JdbcResourceTableStore
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createDataElementGroupSetStructure( List<DataElementGroupSet> groupSets )
     {
         try
@@ -201,6 +206,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( statement.getStatement() );
     }
 
+    @Override
     public void populateDataElementGroupSetStructure( List<DataElementGroupSet> groupSets )
     {
         String sql = 
@@ -236,6 +242,7 @@ public class JdbcResourceTableStore
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createIndicatorGroupSetStructure( List<IndicatorGroupSet> groupSets )
     {
         try
@@ -252,6 +259,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( statement.getStatement() );
     }
 
+    @Override
     public void populateIndicatorGroupSetStructure( List<IndicatorGroupSet> groupSets )
     {
         String sql =
@@ -287,6 +295,7 @@ public class JdbcResourceTableStore
     // OrganisationUnitGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createOrganisationUnitGroupSetStructure( List<OrganisationUnitGroupSet> groupSets )
     {
         try
@@ -303,6 +312,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( statement.getStatement() );
     }
     
+    @Override
     public void populateOrganisationUnitGroupSetStructure( List<OrganisationUnitGroupSet> groupSets )
     {
         String sql = 
@@ -338,6 +348,7 @@ public class JdbcResourceTableStore
     // CategoryTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createCategoryStructure( List<DataElementCategory> categories )
     {
         try
@@ -354,6 +365,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( statement.getStatement() );
     }
 
+    @Override
     public void populateCategoryStructure( List<DataElementCategory> categories )
     {
         String sql = 
@@ -393,6 +405,7 @@ public class JdbcResourceTableStore
     // DataElementStructure
     // -------------------------------------------------------------------------
 
+    @Override
     public void createDataElementStructure()
     {
         try
@@ -411,6 +424,7 @@ public class JdbcResourceTableStore
             "datasetid INTEGER, " +
             "datasetuid CHARACTER(11), " +
             "datasetname VARCHAR(250), " +
+            "datasetapprovallevel INTEGER, " +
             "periodtypeid INTEGER, " + 
             "periodtypename VARCHAR(250) )";
         
@@ -433,6 +447,7 @@ public class JdbcResourceTableStore
     // PeriodTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createDatePeriodStructure()
     {
         try
@@ -460,6 +475,7 @@ public class JdbcResourceTableStore
         jdbcTemplate.execute( sql );
     }
 
+    @Override
     public void createPeriodStructure()
     {
         try
@@ -495,6 +511,7 @@ public class JdbcResourceTableStore
     // DataElementCategoryOptionComboTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void createAndGenerateDataElementCategoryOptionCombo()
     {
         try
@@ -506,16 +523,21 @@ public class JdbcResourceTableStore
             // Do nothing, table does not exist
         }
         
-        final String create = "CREATE TABLE " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + 
-            " (dataelementuid VARCHAR(11) NOT NULL, categoryoptioncombouid VARCHAR(11) NOT NULL)";
+        final String create = "CREATE TABLE " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + " (" +
+            "dataelementid INTEGER NOT NULL, " +
+            "dataelementuid VARCHAR(11) NOT NULL, " +
+            "categoryoptioncomboid INTEGER NOT NULL, " +
+            "categoryoptioncombouid VARCHAR(11) NOT NULL)";
         
         jdbcTemplate.execute( create );
         
         log.info( "Create data element category option combo SQL: " + create );
         
         final String sql = 
-            "insert into " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + " (dataelementuid, categoryoptioncombouid) " +
-            "select de.uid as dataelementuid, coc.uid as categoryoptioncombouid " +
+            "insert into " + TABLE_NAME_DATA_ELEMENT_CATEGORY_OPTION_COMBO + 
+            " (dataelementid, dataelementuid, categoryoptioncomboid, categoryoptioncombouid) " +
+            "select de.dataelementid as dataelementid, de.uid as dataelementuid, " +
+            "coc.categoryoptioncomboid as categoryoptioncomboid, coc.uid as categoryoptioncombouid " +
             "from dataelement de " +
             "join categorycombos_optioncombos cc on de.categorycomboid = cc.categorycomboid " +
             "join categoryoptioncombo coc on cc.categoryoptioncomboid = coc.categoryoptioncomboid";

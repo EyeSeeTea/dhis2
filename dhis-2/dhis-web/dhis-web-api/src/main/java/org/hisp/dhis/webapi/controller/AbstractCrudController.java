@@ -66,14 +66,12 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -131,8 +129,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
-    public @ResponseBody RootNode getObjectList(
-        @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
+    public @ResponseBody RootNode getObjectList( @RequestParam Map<String, String> parameters, 
+        HttpServletResponse response, HttpServletRequest request )
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -336,7 +334,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) 
+        throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
         {
@@ -364,7 +363,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) 
+        throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
         {
@@ -396,8 +396,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE } )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
-        input ) throws Exception
+    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, 
+        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         List<T> objects = getEntity( uid );
 
@@ -428,8 +428,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
-        input ) throws Exception
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, 
+        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         List<T> objects = getEntity( uid );
 
@@ -464,9 +464,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid )
-        throws Exception
+    public void deleteObject( HttpServletResponse response, HttpServletRequest request, 
+        @PathVariable( "uid" ) String uid ) throws Exception
     {
         List<T> objects = getEntity( uid );
 
@@ -481,6 +480,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         manager.delete( objects.get( 0 ) );
     }
 
@@ -522,7 +522,6 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( value = "/{uid}/{property}/{itemId}", method = { RequestMethod.POST, RequestMethod.PUT } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @SuppressWarnings( "unchecked" )
     public void addCollectionItem(
         @PathVariable( "uid" ) String pvUid,
@@ -534,11 +533,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( objects.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+            return;
         }
 
         if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
         {
             ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+            return;
         }
 
         Property property = getSchema().getPropertyMap().get( pvProperty );
@@ -546,11 +547,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( !property.isCollection() || !property.isIdentifiableObject() )
         {
             ContextUtils.conflictResponse( response, "Only adds within identifiable collection are allowed." );
+            return;
         }
 
         if ( !property.isOwner() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+            return;
         }
 
         Collection<IdentifiableObject> identifiableObjects =
@@ -561,6 +564,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( candidate == null )
         {
             ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+            return;
         }
 
         // if it already contains this object, don't add it. It might be a list and not set, and we don't want duplicates.
@@ -576,11 +580,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+
         manager.update( objects.get( 0 ) );
+        manager.refresh( candidate );
     }
 
     @RequestMapping( value = "/{uid}/{property}/{itemId}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @SuppressWarnings( "unchecked" )
     public void deleteCollectionItem(
         @PathVariable( "uid" ) String pvUid,
@@ -592,11 +598,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( objects.isEmpty() )
         {
             ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+            return;
         }
 
         if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
         {
             ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+            return;
         }
 
         Property property = getSchema().getPropertyMap().get( pvProperty );
@@ -604,11 +612,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( !property.isCollection() || !property.isIdentifiableObject() )
         {
             ContextUtils.conflictResponse( response, "Only deletes within identifiable collection are allowed." );
+            return;
         }
 
         if ( !property.isOwner() )
         {
             ContextUtils.conflictResponse( response, getEntityName() + " is not the owner of this relationship." );
+            return;
         }
 
         Collection<IdentifiableObject> identifiableObjects =
@@ -633,6 +643,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         if ( candidate == null )
         {
             ContextUtils.notFoundResponse( response, "Collection " + pvProperty + " does not have an item with ID: " + pvItemId );
+            return;
         }
 
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), objects.get( 0 ) ) )
@@ -640,7 +651,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             throw new DeleteAccessDeniedException( "You don't have the proper permissions to delete this object." );
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+
         manager.update( objects.get( 0 ) );
+        manager.refresh( candidate );
     }
 
     //--------------------------------------------------------------------------
@@ -654,17 +668,14 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     protected void postProcessEntities( List<T> entityList, WebOptions options, Map<String, String> parameters )
     {
-
     }
 
     /**
      * Override to process entities after it has been retrieved from
      * storage and before it is returned to the view. Entities is null-safe.
      */
-
     protected void postProcessEntities( List<T> entityList )
     {
-
     }
 
     /**

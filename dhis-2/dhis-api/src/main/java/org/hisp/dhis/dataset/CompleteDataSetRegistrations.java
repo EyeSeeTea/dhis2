@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.Objects;
 import org.hisp.dhis.common.DxfNamespaces;
 
 import java.util.ArrayList;
@@ -43,22 +44,30 @@ import java.util.List;
 @JacksonXmlRootElement( localName = "completeDataSetRegistrations", namespace = DxfNamespaces.DXF_2_0 )
 public class CompleteDataSetRegistrations
 {
-    private List<CompleteDataSetRegistration> completeDataSetRegistrationList = new ArrayList<>();
+    private List<CompleteDataSetRegistration> completeDataSetRegistrations = new ArrayList<>();
 
     public CompleteDataSetRegistrations()
     {
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "completeDataSetRegistrationList", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( useWrapping = false, namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "completeDataSetRegistration", namespace = DxfNamespaces.DXF_2_0 )
-    public List<CompleteDataSetRegistration> getCompleteDataSetRegistrationList()
+    public List<CompleteDataSetRegistration> getCompleteDataSetRegistrations()
     {
-        return completeDataSetRegistrationList;
+        return completeDataSetRegistrations;
     }
 
-    public void setCompleteDataSetRegistrationList( List<CompleteDataSetRegistration> completeDataSetRegistrationList )
+    public void setCompleteDataSetRegistrations( List<CompleteDataSetRegistration> completeDataSetRegistrations )
     {
-        this.completeDataSetRegistrationList = completeDataSetRegistrationList;
+        this.completeDataSetRegistrations = completeDataSetRegistrations;
+    }
+
+    @Override
+    public String toString()
+    {
+        return Objects.toStringHelper( this )
+            .add( "completeDataSetRegistrations", completeDataSetRegistrations )
+            .toString();
     }
 }

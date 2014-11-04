@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.Collection;
 import java.util.Map;
 
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -51,16 +51,33 @@ import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
 public class DataIntegrityServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
+    @Autowired
     private DataIntegrityService dataIntegrityService;
-    
+
+    @Autowired
+    private DataElementService dataElementService;
+
+    @Autowired
+    private IndicatorService indicatorService;
+
+    @Autowired
+    private DataSetService dataSetService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private OrganisationUnitGroupService organisationUnitGroupService;
+
     private DataElement elementA;
     private DataElement elementB;
     private DataElement elementC;
@@ -98,17 +115,6 @@ public class DataIntegrityServiceTest
     @Override
     public void setUpTest()
     {
-        // ---------------------------------------------------------------------
-        // Services
-        // ---------------------------------------------------------------------
-
-        dataIntegrityService = (DataIntegrityService) getBean( DataIntegrityService.ID );        
-        dataElementService = (DataElementService) getBean( DataElementService.ID );        
-        indicatorService = (IndicatorService) getBean( IndicatorService.ID );        
-        dataSetService = (DataSetService) getBean( DataSetService.ID );        
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );        
-        organisationUnitGroupService = (OrganisationUnitGroupService) getBean( OrganisationUnitGroupService.ID );
-
         // ---------------------------------------------------------------------
         // Objects
         // ---------------------------------------------------------------------
@@ -218,12 +224,6 @@ public class DataIntegrityServiceTest
         organisationUnitGroupService.addOrganisationUnitGroup( unitGroupB );
         organisationUnitGroupService.addOrganisationUnitGroup( unitGroupC );
         organisationUnitGroupService.addOrganisationUnitGroup( unitGroupD );
-    }
-
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
     }
     
     // -------------------------------------------------------------------------

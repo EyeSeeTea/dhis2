@@ -5,16 +5,65 @@
 var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource'])
 
 
-.service('DateUtils', function($filter){
+.factory('StorageService', function(){
+    var store = new dhis2.storage.Store({
+        name: 'dhis2ec',
+        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+        objectStores: ['ecPrograms', 'programStages', 'geoJsons', 'optionSets']
+    });
+    return{
+        currentStore: store
+    };
+})
+
+.service('DateUtils', function($filter, CalendarService){
     
     return {
         format: function(dateValue) {            
+            if(!dateValue){
+                return;
+            }            
+            var calendarSetting = CalendarService.getSetting();
+            dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat);            
+            return dateValue;
+        },
+        formatToHrsMins: function(dateValue) {
+            var calendarSetting = CalendarService.getSetting();
+            var dateFormat = 'YYYY-MM-DD @ hh:mm A';
+            if(calendarSetting.keyDateFormat === 'dd-MM-yyyy'){
+                dateFormat = 'DD-MM-YYYY @ hh:mm A';
+            }            
+            return moment(dateValue).format(dateFormat);
+        },
+        getToday: function(){  
+            var calendarSetting = CalendarService.getSetting();
+            var tdy = $.calendars.instance(calendarSetting.keyCalendar).newDate();            
+            var today = moment(tdy._year + '-' + tdy._month + '-' + tdy._day, 'YYYY-MM-DD')._d;            
+            today = Date.parse(today);     
+            today = $filter('date')(today,  calendarSetting.keyDateFormat);
+            return today;
+        },
+        formatFromUserToApi: function(dateValue){            
+            if(!dateValue){
+                return;
+            }
+            var calendarSetting = CalendarService.getSetting();            
+            dateValue = moment(dateValue, calendarSetting.momentFormat)._d;
+            dateValue = Date.parse(dateValue);     
+            dateValue = $filter('date')(dateValue, 'yyyy-MM-dd'); 
+            return dateValue;            
+        },
+        formatFromApiToUser: function(dateValue){            
+            if(!dateValue){
+                return;
+            }            
+            var calendarSetting = CalendarService.getSetting();
             dateValue = moment(dateValue, 'YYYY-MM-DD')._d;
-            dateValue = Date.parse(dateValue);
-            dateValue = $filter('date')(dateValue, 'yyyy-MM-dd');
+            dateValue = Date.parse(dateValue);     
+            dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat); 
             return dateValue;
         }
-    };            
+    };
 })
 
 /* factory for loading logged in user profiles from DHIS2 */
@@ -34,14 +83,111 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
     };  
 })
 
+
+/* factory for fetching selected orgunit's coordinate */
+.factory('OrgUnitService', function($http) { 
+           
+    var orgUnitId, promise;
+    return {
+        get: function(id) {
+            if( !promise && id !== orgUnitId){
+                promise = $http.get('../api/me/profile').then(function(response){
+                   orgUnitId = id; 
+                   return response.data;;
+                });
+            }
+            return promise;         
+        }
+    };  
+})
+
+
+/* Factory to fetch geojsons */
+.factory('GeoJsonFactory', function($q, $rootScope, StorageService) { 
+    return {
+        getAll: function(){
+            
+            //console.log('I am trying to fetch geojsons');
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.getAll('geoJsons').done(function(geoJsons){
+                    $rootScope.$apply(function(){
+                        def.resolve(geoJsons);
+                    });                    
+                });
+            });
+            
+            return def.promise;            
+        },
+        get: function(level){
+            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('geoJsons', level).done(function(geoJson){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(geoJson);
+                    });
+                });
+            });                        
+            return def.promise;            
+        }
+    };
+})
+
+/* Factory to fetch optioSets */
+.factory('OptionSetService', function($q, $rootScope, StorageService) { 
+    return {
+        getAll: function(){
+            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.getAll('optionSets').done(function(optionSets){
+                    $rootScope.$apply(function(){
+                        def.resolve(optionSets);
+                    });                    
+                });
+            });            
+            
+            return def.promise;            
+        },
+        get: function(uid){
+            
+            var def = $q.defer();
+            
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('optionSets', uid).done(function(optionSet){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(optionSet);
+                    });
+                });
+            });                        
+            return def.promise;            
+        },
+        getNameOrCode: function(options, key){
+            var val = key;            
+
+            if(options){
+                for(var i=0; i<options.length; i++){
+                    if( key === options[i].name){
+                        val = options[i].code;
+                        break;
+                    }
+                    if( key === options[i].code){
+                        val = options[i].name;
+                        break;
+                    }
+                }
+            }            
+            return val;
+        }
+    };
+})
+
 /* Factory to fetch programs */
-.factory('ProgramFactory', function($q, $rootScope) {  
-    
-    dhis2.ec.store = new dhis2.storage.Store({
-        name: EC_STORE_NAME,
-        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
-    });
+.factory('ProgramFactory', function($q, $rootScope, StorageService) {  
         
     return {
         
@@ -49,47 +195,31 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
             
             var def = $q.defer();
             
-            dhis2.ec.store.open().done(function(){
-                dhis2.ec.store.getAll('eventCapturePrograms').done(function(programs){
-                    
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.getAll('ecPrograms').done(function(programs){                    
                     $rootScope.$apply(function(){
                         def.resolve(programs);
                     });                    
                 });
-            });            
-            
-            return def.promise;            
+            });
+            return def.promise;
         }        
-        
     };
 })
 
 /* Factory to fetch programStages */
-.factory('ProgramStageFactory', function($q, $rootScope) {  
-
-    dhis2.ec.store = new dhis2.storage.Store({
-        name: EC_STORE_NAME,
-        adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
-    });
+.factory('ProgramStageFactory', function($q, $rootScope, StorageService) {  
     
     return {        
         get: function(uid){
             
             var def = $q.defer();
             
-            dhis2.ec.store.open().done(function(){
-                dhis2.ec.store.get('programStages', uid).done(function(pst){                    
-                    angular.forEach(pst.programStageDataElements, function(pstDe){   
-                        if(pstDe.dataElement.optionSet){
-                            dhis2.ec.store.get('optionSets', pstDe.dataElement.optionSet.id).done(function(optionSet){
-                                pstDe.dataElement.optionSet = optionSet;                                
-                            });                            
-                        }
-                        $rootScope.$apply(function(){
-                            def.resolve(pst);
-                        });
-                    });                                        
+            StorageService.currentStore.open().done(function(){
+                StorageService.currentStore.get('programStages', uid).done(function(pst){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(pst);
+                    });
                 });
             });                        
             return def.promise;            
@@ -241,36 +371,40 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                             attributes['name'] = deId;
                         }
                         
+                        var maxDate = programStageDataElements[deId].allowFutureDate ? '' : 0;
+                        
                         //check data element type and generate corresponding angular input field
                         if(programStageDataElements[deId].dataElement.type == "int"){
                             newInputField = '<input type="number" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '"' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">';
+                                            ' ng-required="prStDes.' + deId + '.compulsory">';
                         }
                         if(programStageDataElements[deId].dataElement.type == "string"){
                             if(programStageDataElements[deId].dataElement.optionSet){
+                                var optionSetId = programStageDataElements[deId].dataElement.optionSet.id;
                         		newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory"' +
-                                            ' typeahead="option.code as option.name for option in programStageDataElements.'+deId+'.dataElement.optionSet.options | filter:$viewValue | limitTo:20"' +
-                                            ' typeahead-open-on-focus ng-required="programStageDataElements.'+deId+'.compulsory">';
+                                            ' ng-required="prStDes.' + deId + '.compulsory"' +
+                                            ' typeahead="option.name as option.name for option in optionSets.'+optionSetId+'.options | filter:$viewValue | limitTo:20"' +
+                                            ' typeahead-editable="false" ' +
+                                            ' typeahead-open-on-focus ng-required="prStDes.'+deId+'.compulsory">';
                         	}
                         	else{
                         		newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">';
+                                            ' ng-required="prStDes.' + deId + '.compulsory">';
                         	}
                         }
                         if(programStageDataElements[deId].dataElement.type == "bool"){
                             newInputField = '<select ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '" ' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">' + 
+                                            ' ng-required="prStDes.' + deId + '.compulsory">' + 
                                             '<option value="">{{\'please_select\'| translate}}</option>' +
                                             '<option value="false">{{\'no\'| translate}}</option>' + 
                                             '<option value="true">{{\'yes\'| translate}}</option>' +
@@ -280,14 +414,15 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
                             newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '"' +
-                                            ' ng-date' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">';
+                                            ' d2-date ' +
+                                            ' max-date="' + maxDate + '"' + '\'' +
+                                            ' ng-required="prStDes.' + deId + '.compulsory">';
                         }
                         if(programStageDataElements[deId].dataElement.type == "trueOnly"){
                             newInputField = '<input type="checkbox" ' +
                                             this.getAttributesAsString(attributes) +
                                             ' ng-model="currentEvent.' + deId + '"' +
-                                            ' ng-required="programStageDataElements.' + deId + '.compulsory">';
+                                            ' ng-required="prStDes.' + deId + '.compulsory">';
                         }
 
                         newInputField = //'<ng-form name="innerForm">' + 
@@ -521,4 +656,30 @@ var eventCaptureServices = angular.module('eventCaptureServices', ['ngResource']
         }
     };
             
+})
+
+/* service for getting calendar setting */
+.service('CalendarService', function(storage, $rootScope){    
+
+    return {
+        getSetting: function() {
+            
+            var dhis2CalendarFormat = {keyDateFormat: 'yyyy-MM-dd', keyCalendar: 'gregorian', momentFormat: 'YYYY-MM-DD'};                
+            var storedFormat = storage.get('CALENDAR_SETTING');
+            if(angular.isObject(storedFormat) && storedFormat.keyDateFormat && storedFormat.keyCalendar){
+                if(storedFormat.keyCalendar === 'iso8601'){
+                    storedFormat.keyCalendar = 'gregorian';
+                }
+
+                if(storedFormat.keyDateFormat === 'dd-MM-yyyy'){
+                    dhis2CalendarFormat.momentFormat = 'DD-MM-YYYY';
+                }
+                
+                dhis2CalendarFormat.keyCalendar = storedFormat.keyCalendar;
+                dhis2CalendarFormat.keyDateFormat = storedFormat.keyDateFormat;
+            }
+            $rootScope.dhis2CalendarFormat = dhis2CalendarFormat;
+            return dhis2CalendarFormat;
+        }
+    };            
 });

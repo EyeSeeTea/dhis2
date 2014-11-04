@@ -28,7 +28,6 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.validator.routines.DateValidator;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.period.Period;
@@ -51,7 +50,7 @@ import static org.hisp.dhis.period.Period.DEFAULT_DATE_FORMAT;
  */
 public class DateUtils
 {
-    public static final SimpleDateFormat[] SUPPORTED_DATE_FORMATS = new SimpleDateFormat[] {
+    public static final SimpleDateFormat[] SUPPORTED_DATE_FORMATS = new SimpleDateFormat[]{
         new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ssZ" ),
         new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" ),
         new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm" ),
@@ -61,11 +60,11 @@ public class DateUtils
         new SimpleDateFormat( "yyyy-MM" ),
         new SimpleDateFormat( "yyyy" )
     };
-    
+
     public static final SimpleDateFormat LONG_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss" );
     public static final SimpleDateFormat ACCESS_DATE_FORMAT = new SimpleDateFormat( "yyyy/MM/dd HH:mm:ss" );
     public static final SimpleDateFormat HTTP_DATE_FORMAT = new SimpleDateFormat( "EEE, dd MMM yyyy HH:mm:ss" );
-    
+
     public static final double DAYS_IN_YEAR = 365.0;
 
     private static final long MS_PER_DAY = 86400000;
@@ -225,8 +224,8 @@ public class DateUtils
             return false;
         }
 
-        if ( ( startDate.before( baseDate ) || startDate.equals( baseDate ) )
-            && ( endDate.after( baseDate ) || endDate.equals( baseDate ) ) )
+        if ( (startDate.before( baseDate ) || startDate.equals( baseDate ))
+            && (endDate.after( baseDate ) || endDate.equals( baseDate )) )
         {
             return true;
         }
@@ -385,17 +384,18 @@ public class DateUtils
         return yearString + "-" + monthString + "-" + dayString;
     }
 
+    private static final String DEFAULT_DATE_REGEX = "\\b\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-2])\\b";
+
     /**
      * This method checks whether the String inDate is a valid date following
      * the format "yyyy-MM-dd".
      *
-     * @param date the string to be checked.
-     * @return true/false depending on whether the string is a date according to
-     * the format "yyyy-MM-dd".
+     * @param dateString the string to be checked.
+     * @return true/false depending on whether the string is a date according to the format "yyyy-MM-dd".
      */
     public static boolean dateIsValid( String dateString )
     {
-        return DateValidator.getInstance().isValid( dateString, DEFAULT_DATE_FORMAT );
+        return dateString.matches( DEFAULT_DATE_REGEX );
     }
 
     /**

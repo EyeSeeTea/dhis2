@@ -33,6 +33,7 @@ import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATA_ELE
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATE_PERIOD_STRUCTURE;
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_ORGANISATION_UNIT_STRUCTURE;
 import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_PERIOD_STRUCTURE;
+import static org.hisp.dhis.dataapproval.DataApprovalLevelService.APPROVAL_LEVEL_UNAPPROVED;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -144,6 +145,7 @@ public class DefaultResourceTableService
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateOrganisationUnitStructures()
     {
@@ -197,6 +199,7 @@ public class DefaultResourceTableService
     // DataElementCategoryOptionComboName
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateCategoryOptionComboNames()
     {
@@ -224,6 +227,7 @@ public class DefaultResourceTableService
         log.info( "Category option combo name table generated" );
     }
 
+    @Override
     @Transactional
     public void generateCategoryOptionGroupSetTable()
     {
@@ -272,10 +276,11 @@ public class DefaultResourceTableService
     // DataElementGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementGroupSetTable()
     {
-        List<DataElementGroupSet> groupSets = new ArrayList<>( dataElementService.getAllDataElementGroupSets() );
+        List<DataElementGroupSet> groupSets = new ArrayList<>( dataElementService.getDataDimensionDataElementGroupSets() );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -290,6 +295,7 @@ public class DefaultResourceTableService
     // IndicatorGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateIndicatorGroupSetTable()
     {
@@ -308,11 +314,12 @@ public class DefaultResourceTableService
     // OrganisationUnitGroupSetTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateOrganisationUnitGroupSetTable()
     {
         List<OrganisationUnitGroupSet> groupSets = new ArrayList<>(
-            organisationUnitGroupService.getAllOrganisationUnitGroupSets() );
+            organisationUnitGroupService.getDataDimensionOrganisationUnitGroupSets() );
 
         Collections.sort( groupSets, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -327,14 +334,15 @@ public class DefaultResourceTableService
     // CategoryTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateCategoryTable()
     {
         // ---------------------------------------------------------------------
-        // Create table
+        // Create table - only using data dimension categories
         // ---------------------------------------------------------------------
 
-        List<DataElementCategory> categories = new ArrayList<>( categoryService.getAllDataElementCategories() );
+        List<DataElementCategory> categories = new ArrayList<>( categoryService.getDataDimensionDataElementCategories() );
 
         Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
 
@@ -349,6 +357,7 @@ public class DefaultResourceTableService
     // DataElementTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementTable()
     {
@@ -379,13 +388,14 @@ public class DefaultResourceTableService
             values.add( dataSet != null ? dataSet.getId() : null );
             values.add( dataSet != null ? dataSet.getUid() : null );
             values.add( dataSet != null ? dataSet.getName() : null );
+            values.add( dataSet != null && dataSet.isApproveData() ? APPROVAL_LEVEL_UNAPPROVED : 0 );
             values.add( periodType != null ? periodType.getId() : null );
             values.add( periodType != null ? periodType.getName() : null );
 
             batchArgs.add( values.toArray() );
         }
 
-        resourceTableStore.batchUpdate( 8, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
+        resourceTableStore.batchUpdate( 9, TABLE_NAME_DATA_ELEMENT_STRUCTURE, batchArgs );
 
         log.info( "Data element table generated" );
     }
@@ -394,6 +404,7 @@ public class DefaultResourceTableService
     // PeriodTable
     // -------------------------------------------------------------------------
 
+    @Override
     public void generateDatePeriodTable()
     {
         // ---------------------------------------------------------------------
@@ -436,6 +447,7 @@ public class DefaultResourceTableService
         log.info( "Period table generated" );
     }
 
+    @Override
     @Transactional
     public void generatePeriodTable()
     {
@@ -493,6 +505,7 @@ public class DefaultResourceTableService
     // DataElementCategoryOptionComboTable
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void generateDataElementCategoryOptionComboTable()
     {

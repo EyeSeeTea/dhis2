@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 
 import org.hisp.dhis.common.Grid;
@@ -102,19 +103,21 @@ public class DefaultDataSetReportService
     // DataSetReportService implementation
     // -------------------------------------------------------------------------
 
-    public String getCustomDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions,
+    @Override
+    public String getCustomDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions,
         boolean selectedUnitOnly, I18nFormat format )
     {
-        Map<String, Double> valueMap = dataSetReportStore.getAggregatedValues( dataSet, period, unit, dimensions, selectedUnitOnly );
+        Map<String, Object> valueMap = dataSetReportStore.getAggregatedValues( dataSet, period, unit, dimensions, selectedUnitOnly );
         
         valueMap.putAll( dataSetReportStore.getAggregatedTotals( dataSet, period, unit, dimensions ) );
         
-        Map<String, Double> indicatorValueMap = dataSetReportStore.getAggregatedIndicatorValues( dataSet, period, unit, dimensions );
+        Map<String, Object> indicatorValueMap = dataSetReportStore.getAggregatedIndicatorValues( dataSet, period, unit, dimensions );
         
         return prepareReportContent( dataSet.getDataEntryForm(), valueMap, indicatorValueMap, format );
     }
     
-    public List<Grid> getCustomDataSetReportAsGrid( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions,
+    @Override
+    public List<Grid> getCustomDataSetReportAsGrid( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions,
         boolean selectedUnitOnly, I18nFormat format )
     {
         String html = getCustomDataSetReport( dataSet, period, unit, dimensions, selectedUnitOnly, format );
@@ -129,15 +132,16 @@ public class DefaultDataSetReportService
         }
     }
 
-    public List<Grid> getSectionDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions,
+    @Override
+    public List<Grid> getSectionDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions,
         boolean selectedUnitOnly, I18nFormat format, I18n i18n )
     {
         List<Section> sections = new ArrayList<>( dataSet.getSections() );
         Collections.sort( sections, new SectionOrderComparator() );
 
-        Map<String, Double> valueMap = dataSetReportStore.getAggregatedValues( dataSet, period, unit, dimensions, selectedUnitOnly );
-        Map<String, Double> subTotalMap = dataSetReportStore.getAggregatedSubTotals( dataSet, period, unit, dimensions );
-        Map<String, Double> totalMap = dataSetReportStore.getAggregatedTotals( dataSet, period, unit, dimensions );
+        Map<String, Object> valueMap = dataSetReportStore.getAggregatedValues( dataSet, period, unit, dimensions, selectedUnitOnly );
+        Map<String, Object> subTotalMap = dataSetReportStore.getAggregatedSubTotals( dataSet, period, unit, dimensions );
+        Map<String, Object> totalMap = dataSetReportStore.getAggregatedTotals( dataSet, period, unit, dimensions );
 
         List<Grid> grids = new ArrayList<>();
         
@@ -194,7 +198,7 @@ public class DefaultDataSetReportService
             for ( DataElement dataElement : dataElements )
             {
                 grid.addRow();
-                grid.addValue( new GridValue( dataElement.getFormName() ) ); // Data element name
+                grid.addValue( new GridValue( dataElement.getFormNameFallback() ) ); // Data element name
 
                 for ( DataElementCategoryOptionCombo optionCombo : optionCombos ) // Values
                 {
@@ -202,7 +206,7 @@ public class DefaultDataSetReportService
                     attributes.put( ATTR_DE, dataElement.getUid() );
                     attributes.put( ATTR_CO, optionCombo.getUid() );
                     
-                    Double value = null;
+                    Object value = null;
 
                     if ( selectedUnitOnly )
                     {
@@ -222,7 +226,7 @@ public class DefaultDataSetReportService
                 {
                     for ( DataElementCategoryOption categoryOption : categoryCombo.getCategoryOptions() )
                     {
-                        Double value = subTotalMap.get( dataElement.getUid() + SEPARATOR + categoryOption.getUid() );
+                        Object value = subTotalMap.get( dataElement.getUid() + SEPARATOR + categoryOption.getUid() );
 
                         grid.addValue( new GridValue( value ) );
                     }
@@ -230,7 +234,7 @@ public class DefaultDataSetReportService
 
                 if ( categoryCombo.doTotal() && !selectedUnitOnly ) // Total
                 {
-                    Double value = totalMap.get( String.valueOf( dataElement.getUid() ) );
+                    Object value = totalMap.get( String.valueOf( dataElement.getUid() ) );
 
                     grid.addValue( new GridValue( value ) );
                 }
@@ -242,7 +246,8 @@ public class DefaultDataSetReportService
         return grids;
     }
 
-    public List<Grid> getDefaultDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Map<String, String> dimensions, 
+    @Override
+    public List<Grid> getDefaultDataSetReport( DataSet dataSet, Period period, OrganisationUnit unit, Set<String> dimensions,
         boolean selectedUnitOnly, I18nFormat format, I18n i18n )
     {
         ListMap<DataElementCategoryCombo, DataElement> map = new ListMap<>();
@@ -282,8 +287,8 @@ public class DefaultDataSetReportService
      * @return data entry form HTML code populated with aggregated data in the
      *         input fields.
      */
-    private String prepareReportContent( DataEntryForm dataEntryForm, Map<String, Double> dataValues,
-        Map<String, Double> indicatorValues, I18nFormat format )
+    private String prepareReportContent( DataEntryForm dataEntryForm, Map<String, Object> dataValues,
+        Map<String, Object> indicatorValues, I18nFormat format )
     {
         StringBuffer buffer = new StringBuffer();
 
@@ -314,7 +319,7 @@ public class DefaultDataSetReportService
                 String dataElementId = identifierMatcher.group( 1 );
                 String optionComboId = identifierMatcher.group( 2 );
 
-                Double dataValue = dataValues.get( dataElementId + SEPARATOR + optionComboId );
+                Object dataValue = dataValues.get( dataElementId + SEPARATOR + optionComboId );
 
                 String value = "<span class=\"val\" data-de=\"" + dataElementId + "\" data-co=\"" + optionComboId + "\">" + format.formatValue( dataValue ) + "</span>";
                 
@@ -324,7 +329,7 @@ public class DefaultDataSetReportService
             {
                 String dataElementId = dataElementTotalMatcher.group( 1 );
                 
-                Double dataValue = dataValues.get( dataElementId );
+                Object dataValue = dataValues.get( dataElementId );
 
                 inputMatcher.appendReplacement( buffer, format.formatValue( dataValue ) );
             }
@@ -332,7 +337,7 @@ public class DefaultDataSetReportService
             {
                 String indicatorId = indicatorMatcher.group( 1 );
 
-                Double indicatorValue = indicatorValues.get( indicatorId );
+                Object indicatorValue = indicatorValues.get( indicatorId );
 
                 inputMatcher.appendReplacement( buffer, format.formatValue( indicatorValue ) );
             }

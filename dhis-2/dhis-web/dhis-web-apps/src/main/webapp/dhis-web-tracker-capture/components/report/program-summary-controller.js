@@ -13,7 +13,7 @@ trackerCapture.controller('ProgramSummaryController',
 
     TranslationService.translate();
     
-    $scope.today = DateUtils.format(moment());
+    $scope.today = DateUtils.getToday();
     
     $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
     $scope.selectedOuMode = $scope.ouModes[0];
@@ -82,17 +82,21 @@ trackerCapture.controller('ProgramSummaryController',
                             false).then(function(data){                     
             
             //process tei grid
-            var teis = TEIGridService.format(data,true);     
+            var teis = TEIGridService.format(data,true, null);     
             $scope.teiList = [];
 
-            DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, $scope.selectedOuMode.name, $scope.selectedProgram.id, report.startDate, report.endDate).then(function(eventList){
+            DHIS2EventFactory.getByOrgUnitAndProgram($scope.selectedOrgUnit.id, 
+                                                    $scope.selectedOuMode.name, 
+                                                    $scope.selectedProgram.id, 
+                                                    DateUtils.formatFromUserToApi(report.startDate), 
+                                                    DateUtils.formatFromUserToApi(report.endDate)).then(function(eventList){
                 $scope.dhis2Events = [];                
                 angular.forEach(eventList, function(ev){
                     if(ev.trackedEntityInstance){
                         ev.name = $scope.programStages[ev.programStage].name;
                         ev.programName = $scope.selectedProgram.name;
                         ev.statusColor = EventUtils.getEventStatusColor(ev); 
-                        ev.eventDate = DateUtils.format(ev.eventDate);
+                        ev.eventDate = DateUtils.formatFromApiToUser(ev.eventDate);
                         
                         if($scope.dhis2Events[ev.trackedEntityInstance]){
                             if(teis.rows[ev.trackedEntityInstance]){

@@ -28,15 +28,18 @@ package org.hisp.dhis.datamart.crosstab;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 import org.amplecode.quick.BatchHandler;
 import org.amplecode.quick.BatchHandlerFactory;
@@ -60,7 +63,9 @@ import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.WeeklyPeriodType;
+import org.joda.time.DateTime;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
@@ -69,8 +74,25 @@ import org.junit.Test;
 public class CrossTabServiceTest
     extends DhisTest
 {
+    @Autowired
     private CrossTabService crossTabService;
     
+    @Autowired
+    private DataElementCategoryService categoryService;
+
+    @Autowired
+    private DataElementService dataElementService;
+
+    @Autowired
+    private PeriodService periodService;
+
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private DataValueService dataValueService;
+   
+    @Resource(name="inMemoryBatchHandlerFactory")
     private BatchHandlerFactory batchHandlerFactory;
     
     private Iterator<Period> generatedPeriods;
@@ -87,28 +109,12 @@ public class CrossTabServiceTest
 
     @Override
     public void setUpTest()
-    {
-        crossTabService = (CrossTabService) getBean( CrossTabService.ID );
-        
-        batchHandlerFactory = (BatchHandlerFactory) getBean( "inMemoryBatchHandlerFactory" );
-        
-        categoryService = (DataElementCategoryService) getBean( DataElementCategoryService.ID );
-        
-        dataElementService = (DataElementService) getBean( DataElementService.ID );
-        
-        periodService = (PeriodService) getBean( PeriodService.ID );
-        
-        organisationUnitService = (OrganisationUnitService) getBean( OrganisationUnitService.ID );
-        
-        dataValueService = (DataValueService) getBean( DataValueService.ID );
-        
-        Calendar calendar = Calendar.getInstance();
-        
-        calendar.set( 2007, 0, 1 );
+    { 
+        DateTime testDate = new DateTime(2007, 1, 1, 0 , 0);
         
         WeeklyPeriodType periodType = (WeeklyPeriodType) periodService.getPeriodTypeByName( WeeklyPeriodType.NAME );
         
-        Period period = createPeriod( periodType, calendar.getTime(), calendar.getTime() );
+        Period period = createPeriod( periodType, testDate.toDate(), testDate.toDate() );
 
         generatedPeriods = periodType.generatePeriods( period ).iterator();
         

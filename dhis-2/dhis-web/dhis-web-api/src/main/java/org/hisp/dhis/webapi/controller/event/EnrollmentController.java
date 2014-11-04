@@ -28,10 +28,8 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.hisp.dhis.webapi.controller.exception.NotFoundException;
-import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.dxf2.events.enrollment.Enrollment;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentService;
 import org.hisp.dhis.dxf2.events.enrollment.EnrollmentStatus;
@@ -43,8 +41,13 @@ import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.webapi.controller.exception.NotFoundException;
+import org.hisp.dhis.webapi.utils.ContextUtils;
+import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,7 +61,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -78,6 +85,9 @@ public class EnrollmentController
 
     @Autowired
     private IdentifiableObjectManager manager;
+    
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
 
     // -------------------------------------------------------------------------
     // READ
@@ -88,13 +98,27 @@ public class EnrollmentController
         @RequestParam( value = "orgUnit", required = false ) String orgUnitUid,
         @RequestParam( value = "program", required = false ) String programUid,
         @RequestParam( value = "trackedEntityInstance", required = false ) String trackedEntityInstanceUid,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
         @RequestParam( value = "status", required = false ) EnrollmentStatus status,
         @RequestParam Map<String, String> parameters, Model model ) throws NotFoundException
     {
         WebOptions options = new WebOptions( parameters );
         Enrollments enrollments;
 
-        if ( orgUnitUid == null && programUid == null && trackedEntityInstanceUid == null )
+        if ( startDate != null && endDate != null && programUid != null && orgUnitUid != null && ouMode != null )
+        {
+            OrganisationUnit organisationUnit = getOrganisationUnit( orgUnitUid );
+            List<OrganisationUnit> organisationUnits = getOrganisationUnits( organisationUnit, ouMode );
+            
+            Program program = getProgram( programUid );
+
+            enrollments = status != null ?
+                enrollmentService.getEnrollments( program, status, organisationUnits, startDate, endDate ) :
+                enrollmentService.getEnrollments( program, organisationUnits, startDate, endDate );
+        }
+        else if ( orgUnitUid == null && programUid == null && trackedEntityInstanceUid == null )
         {
             enrollments = status != null ? enrollmentService.getEnrollments( status ) : enrollmentService.getEnrollments();
         }
@@ -152,11 +176,12 @@ public class EnrollmentController
     // CREATE
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE )
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
     public void postEnrollmentXml( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummaries importSummaries = enrollmentService.addEnrollmentsXml( request.getInputStream() );
+        response.setContentType( MediaType.APPLICATION_XML_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
@@ -177,11 +202,12 @@ public class EnrollmentController
         }
     }
 
-    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE )
+    @RequestMapping( value = "", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_ENROLLMENT')" )
     public void postEnrollmentJson( HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummaries importSummaries = enrollmentService.addEnrollmentsJson( request.getInputStream() );
+        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
 
         if ( importSummaries.getImportSummaries().size() > 1 )
         {
@@ -206,41 +232,45 @@ public class EnrollmentController
     // UPDATE
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_XML_VALUE, produces = MediaType.APPLICATION_XML_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void updateEnrollmentXml( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentXml( id, request.getInputStream() );
+        response.setContentType( MediaType.APPLICATION_XML_VALUE );
+
         JacksonUtils.toXml( response.getOutputStream(), importSummary );
     }
 
-    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
+    @RequestMapping( value = "/{id}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
     public void updateEnrollmentJson( @PathVariable String id, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
         ImportSummary importSummary = enrollmentService.updateEnrollmentJson( id, request.getInputStream() );
+        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
+
         JacksonUtils.toJson( response.getOutputStream(), importSummary );
     }
 
     @RequestMapping( value = "/{id}/cancelled", method = RequestMethod.PUT )
-    @ResponseStatus( HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
     public void cancelEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
         enrollment.setStatus( EnrollmentStatus.CANCELLED );
+
         enrollmentService.cancelEnrollment( enrollment );
     }
 
     @RequestMapping( value = "/{id}/completed", method = RequestMethod.PUT )
-    @ResponseStatus( HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
     public void completedEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
         enrollment.setStatus( EnrollmentStatus.COMPLETED );
+
         enrollmentService.completeEnrollment( enrollment );
     }
 
@@ -249,8 +279,8 @@ public class EnrollmentController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "/{id}", method = RequestMethod.DELETE )
-    @ResponseStatus( HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_PROGRAM_UNENROLLMENT')" )
+    @ResponseStatus( HttpStatus.NO_CONTENT )
     public void deleteEnrollment( @PathVariable String id ) throws NotFoundException
     {
         Enrollment enrollment = getEnrollment( id );
@@ -295,6 +325,27 @@ public class EnrollmentController
         }
 
         return organisationUnit;
+    }
+    
+    private List<OrganisationUnit> getOrganisationUnits( OrganisationUnit rootOrganisationUnit, OrganisationUnitSelectionMode ouMode )
+    {
+        List<OrganisationUnit> organisationUnits = new ArrayList<>();
+        
+        if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
+        {
+            organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
+        }
+        else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
+        {
+            organisationUnits.add( rootOrganisationUnit );
+            organisationUnits.addAll( rootOrganisationUnit.getChildren() );
+        }
+        else // SELECTED
+        {
+            organisationUnits.add( rootOrganisationUnit );
+        }
+        
+        return organisationUnits;        
     }
 
     private Program getProgram( String id ) throws NotFoundException

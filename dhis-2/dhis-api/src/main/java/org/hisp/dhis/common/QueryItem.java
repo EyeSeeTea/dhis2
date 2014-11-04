@@ -40,31 +40,35 @@ import java.util.List;
  */
 public class QueryItem
 {
-    private IdentifiableObject item;
+    private NameableObject item;
 
     private List<QueryFilter> filters = new ArrayList<>();
     
     private boolean numeric;
+    
+    private String optionSet;
 
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
 
-    public QueryItem( IdentifiableObject item )
+    public QueryItem( NameableObject item )
     {
         this.item = item;
     }
 
-    public QueryItem( IdentifiableObject item, boolean numeric )
+    public QueryItem( NameableObject item, boolean numeric, String optionSet )
     {
         this.item = item;
         this.numeric = numeric;
+        this.optionSet = optionSet;
     }
     
-    public QueryItem( IdentifiableObject item, QueryOperator operator, String filter, boolean numeric )
+    public QueryItem( NameableObject item, QueryOperator operator, String filter, boolean numeric, String optionSet )
     {
         this.item = item;
         this.numeric = numeric;
+        this.optionSet = optionSet;
         
         if ( operator != null && filter != null )
         {
@@ -72,11 +76,12 @@ public class QueryItem
         }
     }
     
-    public QueryItem( IdentifiableObject item, List<QueryFilter> filters, boolean numeric )
+    public QueryItem( NameableObject item, List<QueryFilter> filters, boolean numeric, String optionSet )
     {
         this.item = item;
         this.filters = filters;
         this.numeric = numeric;
+        this.optionSet = optionSet;
     }
     
     // -------------------------------------------------------------------------
@@ -98,13 +103,13 @@ public class QueryItem
         return filters != null && !filters.isEmpty();
     }
 
-    public static List<QueryItem> getQueryItems( Collection<? extends IdentifiableObject> objects )
+    public static List<QueryItem> getQueryItems( Collection<? extends NameableObject> objects )
     {
         List<QueryItem> queryItems = new ArrayList<>();
         
-        for ( IdentifiableObject object : objects )
+        for ( NameableObject object : objects )
         {
-            queryItems.add( new QueryItem( object, false ) );
+            queryItems.add( new QueryItem( object, false, null ) );
         }
         
         return queryItems;
@@ -146,19 +151,19 @@ public class QueryItem
     @Override
     public String toString()
     {
-        return "[Item: " + item + ", filters: " + filters + "]";
+        return "[Item: " + item + ", filters: " + filters + ", numeric: " + numeric + ", optionSet: " + optionSet + "]";
     }
     
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public IdentifiableObject getItem()
+    public NameableObject getItem()
     {
         return item;
     }
 
-    public void setItem( IdentifiableObject item )
+    public void setItem( NameableObject item )
     {
         this.item = item;
     }
@@ -181,5 +186,15 @@ public class QueryItem
     public void setNumeric( boolean numeric )
     {
         this.numeric = numeric;
+    }
+
+    public String getOptionSet()
+    {
+        return optionSet;
+    }
+
+    public void setOptionSet( String optionSet )
+    {
+        this.optionSet = optionSet;
     }
 }

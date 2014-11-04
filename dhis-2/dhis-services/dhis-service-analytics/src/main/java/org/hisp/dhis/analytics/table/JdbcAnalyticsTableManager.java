@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 
@@ -76,6 +77,7 @@ public class JdbcAnalyticsTableManager
     // Implementation
     // -------------------------------------------------------------------------
     
+    @Override
     public String validState()
     {
         boolean hasData = jdbcTemplate.queryForRowSet( "select dataelementid from datavalue limit 1" ).next();
@@ -91,15 +93,19 @@ public class JdbcAnalyticsTableManager
         {
             return "No organisation unit levels exist, not updating aggregate analytics tables";
         }
+
+        log.info( "Approval enabled: " + isApprovalEnabled() );
         
         return null;
     }
     
+    @Override
     public String getTableName()
     {
         return ANALYTICS_TABLE_NAME;
     }
     
+    @Override
     public void createTable( AnalyticsTable table )
     {
         final String tableName = table.getTempTableName();
@@ -111,8 +117,12 @@ public class JdbcAnalyticsTableManager
         executeSilently( sqlDrop );
         
         String sqlCreate = "create table " + tableName + " (";
+
+        List<String[]> columns = getDimensionColumns( table );
         
-        for ( String[] col : getDimensionColumns( table ) )
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -121,11 +131,14 @@ public class JdbcAnalyticsTableManager
         
         sqlCreate += statementBuilder.getTableOptions( false );
         
-        log.info( "Create SQL: " + sqlCreate );
+        log.info( "Creating table: " + tableName );
+        
+        log.debug( "Create SQL: " + sqlCreate );
         
         executeSilently( sqlCreate );
     }
     
+    @Override
     @Async
     public Future<?> populateTableAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
     {
@@ -144,7 +157,7 @@ public class JdbcAnalyticsTableManager
                 "dv.value " + statementBuilder.getRegexpMatch() + " '" + MathUtils.NUMERIC_LENIENT_REGEXP + "' " +
                 "and ( dv.value != '0' or de.aggregationtype = 'average' or de.zeroissignificant = true ) ";
             
-            populateTable( table, "cast(dv.value as " + dbl + ")", "null", "int", intClause );
+            populateTable( table, "cast(dv.value as " + dbl + ")", "null", DataElement.VALUE_TYPE_INT, intClause );
             
             populateTable( table, "1", "null", DataElement.VALUE_TYPE_BOOL, "dv.value = 'true'" );
     
@@ -173,6 +186,7 @@ public class JdbcAnalyticsTableManager
     {
         final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
         final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
+        final String tableName = table.getTempTableName();
         
         String sql = "insert into " + table.getTempTableName() + " (";
         
@@ -202,6 +216,7 @@ public class JdbcAnalyticsTableManager
             "left join _orgunitstructure ous on dv.sourceid=ous.organisationunitid " +
             "left join _periodstructure ps on dv.periodid=ps.periodid " +
             "left join dataelement de on dv.dataelementid=de.dataelementid " +
+            "left join _dataelementstructure des on de.dataelementid = des.dataelementid " +
             "left join categoryoptioncombo co on dv.categoryoptioncomboid=co.categoryoptioncomboid " +
             "left join period pe on dv.periodid=pe.periodid " +
             "where de.valuetype = '" + valueType + "' " +
@@ -215,22 +230,21 @@ public class JdbcAnalyticsTableManager
             sql += "and " + whereClause;
         }
 
-        log.info( "Populate SQL: "+ sql );
-        
-        jdbcTemplate.execute( sql );
+        populateAndLog( sql, tableName + ", " + valueType );
     }
 
-    private String getApprovalSubquery( Collection<OrganisationUnitLevel> levels )
+    private String getApprovalSubquery()
     {
         String sql = "(" +
-            "select coalesce(min(dal.level),999) " +
+            "select coalesce(min(dal.level), des.datasetapprovallevel) " +
             "from dataapproval da " +
             "inner join dataapprovallevel dal on da.dataapprovallevelid = dal.dataapprovallevelid " +
-            "inner join _dataelementstructure des on da.datasetid = des.datasetid and des.dataelementid = dv.dataelementid " +
-            "inner join dataset ds on des.datasetid = ds.datasetid " +
             "where da.periodid = dv.periodid " +
-            "and ds.approvedata = true " +
+            "and da.attributeoptioncomboid = dv.attributeoptioncomboid " +
+            "and des.datasetid = da.datasetid " +
             "and (";
+        
+        Set<OrganisationUnitLevel> levels = dataApprovalLevelService.getOrganisationUnitApprovalLevels();
         
         for ( OrganisationUnitLevel level : levels )
         {
@@ -240,6 +254,7 @@ public class JdbcAnalyticsTableManager
         return TextUtils.removeLastOr( sql ) + ") ) as approvallevel";        
     }
 
+    @Override
     public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         List<String[]> columns = new ArrayList<>();
@@ -316,13 +331,14 @@ public class JdbcAnalyticsTableManager
 
         if ( isApprovalEnabled() )
         {            
-            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery( levels ) };
+            String[] al = { quote( "approvallevel" ), "integer", getApprovalSubquery() };
             columns.add( al );
         }
         
         return columns;
     }
     
+    @Override
     public Date getEarliestData()
     {
         final String sql = "select min(pe.startdate) from datavalue dv " +
@@ -332,6 +348,7 @@ public class JdbcAnalyticsTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
+    @Override
     public Date getLatestData()
     {
         final String sql = "select max(pe.enddate) from datavalue dv " +
@@ -341,6 +358,7 @@ public class JdbcAnalyticsTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
     
+    @Override
     @Async
     public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables, Collection<String> dataElements, int aggregationLevel )
     {
@@ -374,6 +392,29 @@ public class JdbcAnalyticsTableManager
             jdbcTemplate.execute( sql.toString() );
         }
 
+        return null;
+    }
+
+    @Override
+    @Async
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
+    {
+        taskLoop : while ( true )
+        {
+            AnalyticsTable table = tables.poll();
+            
+            if ( table == null )
+            {
+                break taskLoop;
+            }
+            
+            final String sql = statementBuilder.getVacuum( table.getTempTableName() );
+            
+            log.info( "Vacuum SQL: " + sql );
+            
+            jdbcTemplate.execute( sql );
+        }
+        
         return null;
     }
 

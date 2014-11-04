@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.hierarchy.HierarchyViolationException;
 
 /**
@@ -244,14 +243,14 @@ public interface DataElementCategoryService
     Collection<DataElementCategoryOption> getAllDataElementCategoryOptions();
 
     /**
-     * Returns all DataElementCategoryOptions for a given concept
+     * Returns all DataElementCategoryOptions for the given DataElementCategory.
      * 
-     * @param concept the Concept
+     * @param category the DataElementCategory.
      * @return a collection of all DataElementCategoryOptions, or an empty
      *         collection if there are no DataElementCategoryOptions.
      */
-    Collection<DataElementCategoryOption> getDataElementCategoryOptionsByConcept( Concept concept );
-
+    Collection<DataElementCategoryOption> getDataElementCategoryOptions( DataElementCategory category );
+    
     // -------------------------------------------------------------------------
     // CategoryCombo
     // -------------------------------------------------------------------------
@@ -542,15 +541,6 @@ public interface DataElementCategoryService
 
     Collection<DataElementCategory> getDataElementCategoriesBetweenByName( String name, int first, int max );
 
-    /**
-     * Returns all DataElementCategories for a given concept
-     * 
-     * @param concept the Concept
-     * @return a collection of all DataElementCategories, or an empty
-     *         collection.
-     */
-    Collection<DataElementCategory> getDataElementCategoriesByConcept( Concept concept );
-
     Map<String, Integer> getDataElementCategoryOptionComboUidIdMap();
 
     int getDataElementCategoryCount();
@@ -602,6 +592,8 @@ public interface DataElementCategoryService
     Collection<CategoryOptionGroup> getCategoryOptionGroupsBetweenByName( int first, int max, String name );
 
     Collection<CategoryOptionGroup> getAllCategoryOptionGroups();
+    
+    List<CategoryOptionGroup> getCategoryOptionGroups( CategoryOptionGroupSet groupSet );
 
     CategoryOptionGroup getCategoryOptionGroupByName( String name );
 

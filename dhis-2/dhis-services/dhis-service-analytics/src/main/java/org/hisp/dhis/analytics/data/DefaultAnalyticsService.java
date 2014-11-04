@@ -138,7 +138,7 @@ import org.hisp.dhis.system.util.DebugUtils;
 import org.hisp.dhis.system.util.ListUtils;
 import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.system.util.SystemUtils;
-import org.hisp.dhis.system.util.Timer;
+import org.hisp.dhis.util.Timer;
 import org.hisp.dhis.system.util.UniqueArrayList;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.CurrentUserService;
@@ -529,9 +529,11 @@ public class DefaultAnalyticsService
     @Override
     public Grid getAggregatedDataValues( DataQueryParams params, boolean tableLayout, List<String> columns, List<String> rows )
     {
+        Grid grid = getAggregatedDataValues( params );
+        
         if ( !tableLayout )
         {
-            return getAggregatedDataValues( params );
+            return grid;
         }
 
         ListUtils.removeEmptys( columns );
@@ -574,17 +576,13 @@ public class DefaultAnalyticsService
         reportTable.setHideEmptyRows( params.isHideEmptyRows() );
         reportTable.setShowHierarchy( params.isShowHierarchy() );
 
-        Grid grid = getAggregatedDataValues( params );
-
-        Map<String, Double> valueMap = getAggregatedDataValueMapping( grid );
-
-        log.info( "Got aggregated values for table layout" );
+        Map<String, Object> valueMap = getAggregatedDataValueMapping( grid );
         
         return reportTable.getGrid( new ListGrid( grid.getMetaData() ), valueMap, false );
     }
 
     @Override
-    public Map<String, Double> getAggregatedDataValueMapping( DataQueryParams params )
+    public Map<String, Object> getAggregatedDataValueMapping( DataQueryParams params )
     {
         Grid grid = getAggregatedDataValues( params );
 
@@ -592,7 +590,7 @@ public class DefaultAnalyticsService
     }
 
     @Override
-    public Map<String, Double> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format )
+    public Map<String, Object> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format )
     {
         DataQueryParams params = getFromAnalyticalObject( object, format );
 
@@ -638,9 +636,9 @@ public class DefaultAnalyticsService
      * @param grid the grid.
      * @return a mapping between item identifiers and aggregated values.
      */
-    private Map<String, Double> getAggregatedDataValueMapping( Grid grid )
+    private Map<String, Object> getAggregatedDataValueMapping( Grid grid )
     {
-        Map<String, Double> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         int metaCols = grid.getWidth() - 1;
         int valueIndex = grid.getWidth() - 1;
@@ -656,7 +654,7 @@ public class DefaultAnalyticsService
 
             key.deleteCharAt( key.length() - 1 );
 
-            Double value = (Double) row.get( valueIndex );
+            Object value = row.get( valueIndex );
 
             map.put( key.toString(), value );
         }
@@ -743,11 +741,11 @@ public class DefaultAnalyticsService
 
         int optimalQueries = MathUtils.getWithin( getProcessNo(), 1, MAX_QUERIES );
 
-        Timer t = new Timer().start();
+        Timer t = new Timer().start().disablePrint();
 
         DataQueryGroups queryGroups = queryPlanner.planQuery( params, optimalQueries, tableName );
 
-        t.getSplitTime( "Planned query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
+        t.getSplitTime( "Planned analytics query, got: " + queryGroups.getLargestGroupSize() + " for optimal: " + optimalQueries );
 
         Map<String, Object> map = new HashMap<>();
 
@@ -779,11 +777,9 @@ public class DefaultAnalyticsService
                     throw new RuntimeException( "Error during execution of aggregation query task", ex );
                 }
             }
-
-            t.getSplitTime( "Got aggregated values for query group" );
         }
 
-        t.getTime( "Got aggregated values" );
+        t.getTime( "Got analytics values" );
 
         return map;
     }
@@ -804,30 +800,12 @@ public class DefaultAnalyticsService
 
         if ( dimensionParams != null && !dimensionParams.isEmpty() )
         {
-            for ( String param : dimensionParams )
-            {
-                String dimension = DimensionalObjectUtils.getDimensionFromParam( param );
-                List<String> options = DimensionalObjectUtils.getDimensionItemsFromParam( param );
-
-                if ( dimension != null && options != null )
-                {
-                    params.getDimensions().addAll( getDimension( dimension, options, null, format, false ) );
-                }
-            }
+            params.getDimensions().addAll( getDimensionalObjects( dimensionParams, format ) );
         }
 
         if ( filterParams != null && !filterParams.isEmpty() )
         {
-            for ( String param : filterParams )
-            {
-                String dimension = DimensionalObjectUtils.getDimensionFromParam( param );
-                List<String> options = DimensionalObjectUtils.getDimensionItemsFromParam( param );
-
-                if ( dimension != null && options != null )
-                {
-                    params.getFilters().addAll( getDimension( dimension, options, null, format, false ) );
-                }
-            }
+            params.getFilters().addAll( getDimensionalObjects( filterParams, format ) );
         }
 
         if ( measureCriteria != null && !measureCriteria.isEmpty() )
@@ -875,9 +853,32 @@ public class DefaultAnalyticsService
         return params;
     }
 
+    @Override
+    public List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, I18nFormat format )
+    {
+        List<DimensionalObject> list = new ArrayList<>();
+        
+        if ( dimensionParams != null )
+        {
+            for ( String param : dimensionParams )
+            {
+                String dimension = DimensionalObjectUtils.getDimensionFromParam( param );
+                List<String> options = DimensionalObjectUtils.getDimensionItemsFromParam( param );
+
+                if ( dimension != null && options != null )
+                {
+                    list.addAll( getDimension( dimension, options, null, format, false ) );
+                }
+            }
+        }
+        
+        return list;
+    }
+    
     // TODO verify that current user can read each dimension and dimension item
     // TODO optimize so that org unit levels + boundary are used in query instead of fetching all org units one by one
 
+    @Override
     public List<DimensionalObject> getDimension( String dimension, List<String> items, Date relativePeriodDate, I18nFormat format, boolean allowNull )
     {
         if ( DATA_X_DIM_ID.equals( dimension ) )

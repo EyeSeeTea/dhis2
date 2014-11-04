@@ -182,6 +182,7 @@ public class GetAnalysisAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
     {
         Set<DataElement> dataElements = new HashSet<>();
@@ -197,9 +198,9 @@ public class GetAnalysisAction
 
             periods = periodService.getPeriodsBetweenDates( format.parseDate( fromDate ), format.parseDate( toDate ) );
 
-            for ( String id : dataSets )
+            for ( String uid : dataSets )
             {
-                dataElements.addAll( dataSetService.getDataSet( Integer.parseInt( id ) ).getDataElements() );
+                dataElements.addAll( dataSetService.getDataSet( uid ).getDataElements() );
             }
 
             log.info( "From date: " + fromDate + ", To date: " + toDate + ", Organisation unit: " + unit
@@ -210,7 +211,7 @@ public class GetAnalysisAction
 
         DataAnalysisService service = serviceProvider.provide( key );
 
-        if ( service != null ) // Follow-up analysis has no input params
+        if ( service != null )
         {
             dataValues = service.analyse( orgUnits, dataElements, periods, standardDeviation );
 

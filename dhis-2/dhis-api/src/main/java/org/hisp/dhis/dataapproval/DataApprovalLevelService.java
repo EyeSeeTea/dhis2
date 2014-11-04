@@ -28,10 +28,14 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
+import org.hisp.dhis.user.User;
 
 /**
  * @author Jim Grace
@@ -71,11 +75,42 @@ public interface DataApprovalLevelService
     DataApprovalLevel getDataApprovalLevelByLevelNumber( int levelNumber );
 
     /**
+     * Gets the highest approval at which the current user may approve the
+     * organisation unit.
+     *
+     * @param orgUnit organisation unit to look for.
+     * @return a data approval level, or null if not found.
+     */
+    DataApprovalLevel getHighestDataApprovalLevel( OrganisationUnit orgUnit );
+
+    /**
+     * Gets the lowest approval level for a given organisation unit and
+     * (optionally) a set of attribute options. Returns the last
+     * approval level matching both the orgUnit's level and (optionally)
+     * having a category option group set containing one of the category
+     * option groups containing one of the options.
+     *
+     * @param orgUnit organisation unit to look for.
+     * @param attributeOptionCombo attribute option combination.
+     * @return a data approval level, or null if not found.
+     */
+    DataApprovalLevel getLowestDataApprovalLevel( OrganisationUnit orgUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+
+    /**
      * Gets a list of all data approval levels.
      *
-     * @return List of all data approval levels, ordered from 1 to n.
+     * @return list of all data approval levels, ordered from 1 to n.
      */
     List<DataApprovalLevel> getAllDataApprovalLevels();
+    
+    /**
+     * Gets a mapping of all data approval levels between level number and approval
+     * level.
+     * 
+     * @return map of all data approval levels between level number and approval
+     * level.
+     */
+    Map<Integer, DataApprovalLevel> getDataApprovalLevelMap();
     
     List<DataApprovalLevel> getUserDataApprovalLevels();
 
@@ -87,6 +122,13 @@ public interface DataApprovalLevelService
      */
     List<DataApprovalLevel> getDataApprovalLevelsByOrgUnitLevel( int orgUnitLevel );
     
+    /**
+     * Retrieves all org unit levels which have approval levels associated.
+     * 
+     * @return a list of org unit levels.
+     */
+    Set<OrganisationUnitLevel> getOrganisationUnitApprovalLevels();
+
     /**
      * Tells whether a level can move down in the list (can switch places with
      * the level below.)
@@ -156,6 +198,27 @@ public interface DataApprovalLevelService
      * @param dataApprovalLevel the data approval level to delete.
      */
     void deleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel );
+
+    /**
+     * Gets the approval level at which this user may make approval actions
+     * (if the user is authorized for any) on this organisation unit.
+     *
+     * @param orgUnit org unit to test
+     * @param includeDataViewOrgUnits include data view org units in test?
+     * @return approval level
+     */
+    DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits );
+
+    /**
+     * Gets the approval level at which this user may make approval actions
+     * (if the user is authorized for any) on this organisation unit.
+     *
+     * @param orgUnit org unit to test
+     * @param includeDataViewOrgUnits include data view org units in test?
+     * @param user user to get approval level from.
+     * @return approval level
+     */
+    DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit, boolean includeDataViewOrgUnits );
 
     /**
      * By organisation unit subhierarchy, returns the lowest data approval

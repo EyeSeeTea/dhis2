@@ -56,21 +56,31 @@ public class DefaultSMSCommandService
         this.smsCommandStore = smsCommandStore;
     }
 
+    @Override
     public void save( SMSCommand cmd )
     {
         smsCommandStore.save( cmd );
     }
 
+    @Override
     public SMSCommand getSMSCommand( int id )
     {
         return smsCommandStore.getSMSCommand( id );
     }
 
+    @Override
+    public SMSCommand getSMSCommand( String name )
+    {
+        return smsCommandStore.getSMSCommand( name );
+    }
+    
+    @Override
     public void save( Set<SMSCode> codes )
     {
         smsCommandStore.save( codes );
     }
 
+    @Override
     public void delete( SMSCommand cmd )
     {
         smsCommandStore.delete( cmd );

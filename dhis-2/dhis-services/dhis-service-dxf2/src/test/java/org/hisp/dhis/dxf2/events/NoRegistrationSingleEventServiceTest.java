@@ -28,14 +28,7 @@ package org.hisp.dhis.dxf2.events;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import java.util.ArrayList;
-import java.util.Date;
-
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dxf2.events.event.DataValue;
@@ -56,11 +49,16 @@ import org.hisp.dhis.user.UserService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
+import java.util.HashSet;
+
+import static org.junit.Assert.*;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public class NoRegistrationSingleEventServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
     @Autowired
     private EventService eventService;
@@ -74,16 +72,23 @@ public class NoRegistrationSingleEventServiceTest
     @Autowired
     private ProgramStageInstanceService programStageInstanceService;
 
+    @Autowired
+    private IdentifiableObjectManager _identifiableObjectManager;
+
+    @Autowired
+    private UserService _userService;
+
     private OrganisationUnit organisationUnitA;
     private DataElement dataElementA;
     private Program programA;
     private ProgramStage programStageA;
 
     @Override
-    protected void setUpTest() throws Exception
+    protected void setUpTest() 
+        throws Exception
     {
-        identifiableObjectManager = (IdentifiableObjectManager) getBean( IdentifiableObjectManager.ID );
-        userService = (UserService) getBean( UserService.ID );
+        identifiableObjectManager = _identifiableObjectManager;
+        userService = _userService;
 
         organisationUnitA = createOrganisationUnit( 'A' );
         identifiableObjectManager.save( organisationUnitA );
@@ -95,7 +100,7 @@ public class NoRegistrationSingleEventServiceTest
         programStageA = createProgramStage( 'A', 0 );
         identifiableObjectManager.save( programStageA );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnitA );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnitA );
         programA.setType( Program.SINGLE_EVENT_WITHOUT_REGISTRATION );
         identifiableObjectManager.save( programA );
 
@@ -120,12 +125,6 @@ public class NoRegistrationSingleEventServiceTest
         identifiableObjectManager.update( programA );
 
         createUserAndInjectSecurityContext( true );
-    }
-
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
     }
 
     @Test

@@ -32,12 +32,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
@@ -54,6 +52,7 @@ import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -128,7 +127,7 @@ public class TrackedEntityDataValueStoreTest
         entityInstance = createTrackedEntityInstance( 'A', organisationUnit );
         entityInstanceService.addTrackedEntityInstance( entityInstance );
 
-        Program program = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnit );
+        Program program = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
         programService.addProgram( program );
 
         ProgramStage stageA = createProgramStage( 'A', 0 );
@@ -139,18 +138,22 @@ public class TrackedEntityDataValueStoreTest
         stageB.setProgram( program );
         programStageService.saveProgramStage( stageB );
 
-        List<ProgramStage> programStages = new ArrayList<>();
+        Set<ProgramStage> programStages = new HashSet<>();
         programStages.add( stageA );
         programStages.add( stageB );
         program.setProgramStages( programStages );
         programService.updateProgram( program );
 
-        Calendar calYesterday = Calendar.getInstance();
-        calYesterday.add( Calendar.DATE, -1 );
-        yesterday = calYesterday.getTime();
-        Calendar calTomorrow = Calendar.getInstance();
-        calTomorrow.add( Calendar.DATE, 1 );
-        tomorrow = calTomorrow.getTime();
+         DateTime yesterDate = DateTime.now();
+        yesterDate.withTimeAtStartOfDay();
+        yesterDate.minusDays( 1 );
+        yesterday = yesterDate.toDate();
+
+        DateTime tomorrowDate = DateTime.now();
+        tomorrowDate.withTimeAtStartOfDay();
+        tomorrowDate.plusDays( 1 );
+        tomorrow = tomorrowDate.toDate();
+        
 
         programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, program, yesterday, yesterday,
             organisationUnit );

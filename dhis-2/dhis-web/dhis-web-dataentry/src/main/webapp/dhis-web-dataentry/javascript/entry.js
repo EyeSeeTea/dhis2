@@ -77,13 +77,12 @@ dhis2.de.updateIndicators = function()
 dhis2.de.getDataElementTotalValue = function( de )
 {
 	var sum = new Number();
-	
-	$( 'input[name="entryfield"]' ).each( function( index )
-	{	
-		var key = $( this ).attr( 'id' );
-		var entryFieldId = key.substring( 0, key.indexOf( '-' ) );
 		
-		if ( de && $( this ).attr( 'value' ) && de == entryFieldId )
+	$( '[id^="' + de + '"]' ).each( function( index )
+	{
+		var val = $( this ).attr( 'value' );
+		
+		if ( val && dhis2.validation.isNumber( val ) )
 		{
 			sum += new Number( $( this ).attr( 'value' ) );
 		}
@@ -149,9 +148,10 @@ dhis2.de.generateExpression = function( expression )
     return expression;
 }
 
-function saveVal( dataElementId, optionComboId, fieldId )
+function saveVal( dataElementId, optionComboId, fieldId, feedbackId )
 {
 	var fieldIds = fieldId.split( "-" );
+  feedbackId = '#' + (feedbackId || fieldId);
 
 	if ( fieldIds.length > 3 )
 	{
@@ -164,7 +164,7 @@ function saveVal( dataElementId, optionComboId, fieldId )
     var value = $( fieldId ).val();
     var type = getDataElementType( dataElementId );
 
-    $( fieldId ).css( 'background-color', dhis2.de.cst.colorYellow );
+    $( feedbackId ).css( 'background-color', dhis2.de.cst.colorYellow );
 
     var periodId = $( '#selectedPeriodId' ).val();
 
@@ -249,7 +249,7 @@ function saveVal( dataElementId, optionComboId, fieldId )
     
     var color = warning ? dhis2.de.cst.colorOrange : dhis2.de.cst.colorGreen;
     
-    var valueSaver = new ValueSaver( dataElementId,	periodId, optionComboId, value, fieldId, color );
+    var valueSaver = new ValueSaver( dataElementId,	periodId, optionComboId, value, feedbackId, color );
     valueSaver.save();
 
     dhis2.de.updateIndicators(); // Update indicators for custom form
@@ -368,12 +368,12 @@ function ValueSaver( de, pe, co, value, fieldId, resultColor )
     	if ( 409 == xhr.status || 500 == xhr.status ) // Invalid value or locked
     	{
     		markValue( fieldId, dhis2.de.cst.colorRed );
-    		setHeaderMessage( xhr.responseText );
+    		setHeaderDelayMessage( xhr.responseText );
     	}
     	else // Offline, keep local value
     	{
     		markValue( fieldId, resultColor );
-    		setHeaderMessage( i18n_offline_notification );
+    		setHeaderDelayMessage( i18n_offline_notification );
     	}
     }
 

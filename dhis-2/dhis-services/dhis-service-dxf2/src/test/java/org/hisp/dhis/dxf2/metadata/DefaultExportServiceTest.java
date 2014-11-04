@@ -36,7 +36,7 @@ import java.util.HashMap;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.hisp.dhis.DhisConvenienceTest;
-import org.hisp.dhis.DhisTest;
+import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -58,7 +58,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author bobj
  */
 public class DefaultExportServiceTest
-    extends DhisTest
+    extends DhisSpringTest
 {
     @Autowired
     private ExportService exportService;
@@ -87,16 +87,6 @@ public class DefaultExportServiceTest
     @Autowired
     private CompleteDataSetRegistrationService registrationService;
 
-    public ExportService getExportService()
-    {
-        return exportService;
-    }
-
-    public void setExportService( ExportService exportService )
-    {
-        this.exportService = exportService;
-    }
-
     private DataElement deA;
 
     private DataElement deB;
@@ -112,12 +102,6 @@ public class DefaultExportServiceTest
     private Period peA;
 
     private Period peB;
-
-    @Override
-    public boolean emptyDatabaseAfterTest()
-    {
-        return true;
-    }
 
     @Override
     public void setUpTest()

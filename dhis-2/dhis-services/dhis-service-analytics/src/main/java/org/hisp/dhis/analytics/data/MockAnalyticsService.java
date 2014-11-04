@@ -49,9 +49,9 @@ import org.hisp.dhis.i18n.I18nFormat;
 public class MockAnalyticsService
     implements AnalyticsService
 {
-    private Map<String, Double> valueMap;
+    private Map<String, Object> valueMap;
 
-    public MockAnalyticsService( Map<String, Double> valueMap )
+    public MockAnalyticsService( Map<String, Object> valueMap )
     {
         this.valueMap = valueMap;
     }
@@ -69,13 +69,13 @@ public class MockAnalyticsService
     }
 
     @Override
-    public Map<String, Double> getAggregatedDataValueMapping( DataQueryParams params )
+    public Map<String, Object> getAggregatedDataValueMapping( DataQueryParams params )
     {
         return valueMap;
     }
 
     @Override
-    public Map<String, Double> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format )
+    public Map<String, Object> getAggregatedDataValueMapping( AnalyticalObject object, I18nFormat format )
     {
         return valueMap;
     }
@@ -92,6 +92,12 @@ public class MockAnalyticsService
     public DataQueryParams getFromAnalyticalObject( AnalyticalObject object, I18nFormat format )
     {
         throw new NotImplementedException();
+    }
+    
+    @Override
+    public List<DimensionalObject> getDimensionalObjects( Set<String> dimensionParams, I18nFormat format )
+    {
+        throw new NotImplementedException();        
     }
 
     @Override

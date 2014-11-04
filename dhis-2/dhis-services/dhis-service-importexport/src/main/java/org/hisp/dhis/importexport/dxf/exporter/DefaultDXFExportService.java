@@ -47,9 +47,7 @@ import org.amplecode.staxwax.factory.XMLFactory;
 import org.amplecode.staxwax.writer.XMLWriter;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.chart.ChartService;
-import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.datadictionary.DataDictionaryService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSetService;
@@ -59,11 +57,7 @@ import org.hisp.dhis.importexport.ExportService;
 import org.hisp.dhis.importexport.dxf.converter.CategoryCategoryOptionAssociationConverter;
 import org.hisp.dhis.importexport.dxf.converter.CategoryComboCategoryAssociationConverter;
 import org.hisp.dhis.importexport.dxf.converter.ChartConverter;
-import org.hisp.dhis.importexport.dxf.converter.ConceptConverter;
 import org.hisp.dhis.importexport.dxf.converter.ConstantConverter;
-import org.hisp.dhis.importexport.dxf.converter.DataDictionaryConverter;
-import org.hisp.dhis.importexport.dxf.converter.DataDictionaryDataElementConverter;
-import org.hisp.dhis.importexport.dxf.converter.DataDictionaryIndicatorConverter;
 import org.hisp.dhis.importexport.dxf.converter.DataElementCategoryComboConverter;
 import org.hisp.dhis.importexport.dxf.converter.DataElementCategoryConverter;
 import org.hisp.dhis.importexport.dxf.converter.DataElementCategoryOptionComboConverter;
@@ -122,13 +116,6 @@ public class DefaultDXFExportService
         this.sessionFactory = sessionFactory;
     }
 
-    private ConceptService conceptService;
-
-    public void setConceptService( ConceptService conceptService )
-    {
-        this.conceptService = conceptService;
-    }
-
     private ConstantService constantService;
 
     public void setConstantService( ConstantService constantService )
@@ -155,13 +142,6 @@ public class DefaultDXFExportService
     public void setIndicatorService( IndicatorService indicatorService )
     {
         this.indicatorService = indicatorService;
-    }
-
-    private DataDictionaryService dataDictionaryService;
-
-    public void setDataDictionaryService( DataDictionaryService dataDictionaryService )
-    {
-        this.dataDictionaryService = dataDictionaryService;
     }
 
     private DataSetService dataSetService;
@@ -224,6 +204,7 @@ public class DefaultDXFExportService
     // ExportService implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public InputStream exportData( ExportParams params )
     {
         try
@@ -258,7 +239,6 @@ public class DefaultDXFExportService
             thread.setRootName( DXFROOT );
             thread.setRootProperties( rootProperties );
 
-            thread.registerXMLConverter( new ConceptConverter( conceptService ) );
             thread.registerXMLConverter( new DataElementCategoryOptionConverter( categoryService ) );
             thread.registerXMLConverter( new DataElementCategoryConverter( categoryService ) );
             thread.registerXMLConverter( new DataElementCategoryComboConverter( categoryService ) );
@@ -281,10 +261,6 @@ public class DefaultDXFExportService
             thread.registerXMLConverter( new IndicatorGroupMemberConverter( indicatorService ) );
             thread.registerXMLConverter( new IndicatorGroupSetConverter( indicatorService ) );
             thread.registerXMLConverter( new IndicatorGroupSetMemberConverter( indicatorService ) );
-
-            thread.registerXMLConverter( new DataDictionaryConverter( dataDictionaryService ) );
-            thread.registerXMLConverter( new DataDictionaryDataElementConverter( dataDictionaryService ) );
-            thread.registerXMLConverter( new DataDictionaryIndicatorConverter( dataDictionaryService ) );
 
             thread.registerXMLConverter( new DataSetConverter( dataSetService ) );
             thread.registerXMLConverter( new DataSetMemberConverter( dataSetService, dataElementService ) );

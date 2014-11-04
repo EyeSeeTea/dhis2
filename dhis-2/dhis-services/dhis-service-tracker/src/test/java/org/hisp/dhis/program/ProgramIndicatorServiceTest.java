@@ -33,21 +33,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -102,35 +101,37 @@ public class ProgramIndicatorServiceTest
         OrganisationUnit organisationUnit = createOrganisationUnit( 'A' );
         organisationUnitService.addOrganisationUnit( organisationUnit );
 
-        programA = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnit );
+        programA = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
         programService.addProgram( programA );
 
         ProgramStage stageA = new ProgramStage( "StageA", programA );
+        stageA.setSortOrder( 1 );
         programStageService.saveProgramStage( stageA );
 
         ProgramStage stageB = new ProgramStage( "StageB", programA );
+        stageB.setSortOrder( 2 );
         programStageService.saveProgramStage( stageB );
 
-        List<ProgramStage> programStages = new ArrayList<>();
+        Set<ProgramStage> programStages = new HashSet<>();
         programStages.add( stageA );
         programStages.add( stageB );
         programA.setProgramStages( programStages );
         programService.updateProgram( programA );
 
-        programB = createProgram( 'B', new ArrayList<ProgramStage>(), organisationUnit );
+        programB = createProgram( 'B', new HashSet<ProgramStage>(), organisationUnit );
         programService.addProgram( programB );
 
         TrackedEntityInstance entityInstance = createTrackedEntityInstance( 'A', organisationUnit );
         entityInstanceService.addTrackedEntityInstance( entityInstance );
 
-        Calendar calIncident = Calendar.getInstance();
-        PeriodType.clearTimeOfDay( calIncident );
-        calIncident.add( Calendar.DATE, -70 );
-        incidenDate = calIncident.getTime();
-
-        Calendar calEnrollment = Calendar.getInstance();
-        PeriodType.clearTimeOfDay( calEnrollment );
-        enrollmentDate = calEnrollment.getTime();
+        DateTime testDate1 = DateTime.now();
+        testDate1.withTimeAtStartOfDay();
+        testDate1 = testDate1.minusDays( 70 );
+        incidenDate = testDate1.toDate();
+        
+        DateTime testDate2 = DateTime.now();
+        testDate2.withTimeAtStartOfDay();
+        enrollmentDate = testDate2.toDate();
 
         programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, programA, enrollmentDate, incidenDate,
             organisationUnit );

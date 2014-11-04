@@ -28,8 +28,16 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
+
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
@@ -45,28 +53,21 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
+import org.hisp.dhis.user.Users;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -77,6 +78,8 @@ public class UserController
     extends AbstractCrudController<User>
 {
     public static final String INVITE_PATH = "/invite";
+
+    public static final String BULK_INVITE_PATH = "/invites";
 
     @Autowired
     private UserService userService;
@@ -186,12 +189,34 @@ public class UserController
         inviteUser( user, request, response );
     }
 
+    @RequestMapping( value = BULK_INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
+    public void postXmlInvites( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        Users users = renderService.fromXml( request.getInputStream(), Users.class );
+
+        for ( User user : users.getUsers() )
+        {
+            inviteUser( user, request, response );
+        }
+    }
+
+    @RequestMapping( value = BULK_INVITE_PATH, method = RequestMethod.POST, consumes = "application/json" )
+    public void postJsonInvites( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    {
+        Users users = renderService.fromJson( request.getInputStream(), Users.class );
+
+        for ( User user : users.getUsers() )
+        {
+            inviteUser( user, request, response );
+        }
+    }
+
     //--------------------------------------------------------------------------
     // PUT
     //--------------------------------------------------------------------------
 
+    @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
@@ -211,18 +236,13 @@ public class UserController
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
 
-        if ( parsed.getUserCredentials().getPassword() != null )
-        {
-            String encodedPassword = passwordManager.encodePassword( parsed.getUserCredentials().getPassword() );
-            parsed.getUserCredentials().setPassword( encodedPassword );
-        }
-
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
+            ImportStrategy.UPDATE );
         renderService.toXml( response.getOutputStream(), summary );
     }
 
+    @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
         input ) throws Exception
     {
@@ -242,13 +262,8 @@ public class UserController
         User parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
 
-        if ( parsed.getUserCredentials().getPassword() != null )
-        {
-            String encodedPassword = passwordManager.encodePassword( parsed.getUserCredentials().getPassword() );
-            parsed.getUserCredentials().setPassword( encodedPassword );
-        }
-
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
+            ImportStrategy.UPDATE );
         renderService.toJson( response.getOutputStream(), summary );
     }
 

@@ -82,6 +82,7 @@ public class SetSelectedOrganisationUnitAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
@@ -93,16 +94,14 @@ public class SetSelectedOrganisationUnitAction
 
         OrganisationUnit unit = organisationUnitService.getOrganisationUnit( id );
 
-        if ( unit == null )
+        if ( unit != null )
         {
-            throw new RuntimeException( "OrganisationUnit with id " + id + " doesn't exist" );
+            selectedUnits = new HashSet<>( 1 );
+            selectedUnits.add( unit );
+    
+            selectionManager.setSelectedOrganisationUnits( selectedUnits );
         }
-
-        selectedUnits = new HashSet<>( 1 );
-        selectedUnits.add( unit );
-
-        selectionManager.setSelectedOrganisationUnits( selectedUnits );
-
+        
         return SUCCESS;
     }
 }

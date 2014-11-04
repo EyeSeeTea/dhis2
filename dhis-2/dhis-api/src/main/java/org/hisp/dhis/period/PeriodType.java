@@ -61,7 +61,8 @@ import java.util.concurrent.TimeUnit;
 public abstract class PeriodType
     implements Serializable
 {
-    // cache for speeding up period lookup, uses calendar.name() + periodType.getName() + date.getTime() as key
+    // Cache for period lookup, uses calendar.name() + periodType.getName() + date.getTime() as key
+    
     private static Cache<String, Period> periodCache = CacheBuilder.newBuilder()
         .expireAfterAccess( 5, TimeUnit.MINUTES )
         .initialCapacity( 10000 )
@@ -246,7 +247,6 @@ public abstract class PeriodType
         {
             return periodCache.get( getCacheKey( date ), new Callable<Period>()
             {
-                @Override
                 public Period call() throws Exception
                 {
                     return createPeriod( createCalendarInstance( date ) );
@@ -283,7 +283,6 @@ public abstract class PeriodType
         {
             return periodCache.get( getCacheKey( calendar, date ), new Callable<Period>()
             {
-                @Override
                 public Period call() throws Exception
                 {
                     return createPeriod( calendar.fromIso( DateTimeUnit.fromJdkDate( date ) ), calendar );
@@ -419,8 +418,8 @@ public abstract class PeriodType
     }
 
     /**
-     * Returns a period type based on the given date string in ISO format. Returns
-     * null if the date string cannot be parsed to a date.
+     * Returns a period based on the given date string in ISO format. Returns
+     * null if the date string cannot be parsed to a period.
      *
      * @param isoPeriod the date string in ISO format.
      * @return a period.
@@ -442,6 +441,29 @@ public abstract class PeriodType
         }
 
         return null;
+    }
+
+    /**
+     * Returns a list of periods based on the given date string in ISO format.
+     *
+     * @param isoPeriod the date string in ISO format.
+     * @return a period.
+     */
+    public static List<Period> getPeriodsFromIsoStrings( List<String> isoPeriods )
+    {
+        List<Period> periods = new ArrayList<>();
+        
+        for ( String isoPeriod : isoPeriods )
+        {
+            Period period = getPeriodFromIsoString( isoPeriod );
+            
+            if ( period != null )
+            {
+                periods.add( period );
+            }
+        }
+        
+        return periods;
     }
 
     /**

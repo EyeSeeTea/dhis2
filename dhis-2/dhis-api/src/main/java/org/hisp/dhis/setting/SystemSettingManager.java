@@ -28,6 +28,7 @@ package org.hisp.dhis.setting;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
@@ -51,8 +52,6 @@ public interface SystemSettingManager
     final String KEY_APPLICATION_INTRO = "keyApplicationIntro";
     final String KEY_APPLICATION_NOTIFICATION = "keyApplicationNotification";
     final String KEY_APPLICATION_FOOTER = "keyApplicationFooter";
-    final String KEY_CALENDAR = "keyCalendar";
-    final String KEY_DATE_FORMAT = "keyDateFormat";
     final String KEY_FLAG = "keyFlag";
     final String KEY_FLAG_IMAGE = "keyFlagImage";
     final String KEY_START_MODULE = "startModule";
@@ -103,11 +102,10 @@ public interface SystemSettingManager
     final String KEY_LAST_SUCCESSFUL_ANALYTICS_TABLES_UPDATE = "keyLastSuccessfulAnalyticsTablesUpdate";
     final String KEY_LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE = "keyLastSuccessfulResourceTablesUpdate";
     final String KEY_HELP_PAGE_LINK = "helpPageLink";
+    final String KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL = "keyAcceptanceRequiredForApproval";
 
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
     final String DEFAULT_FLAG = "dhis2";
-    final String DEFAULT_CALENDAR = "iso8601";
-    final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd"; // ISO 8601
     final int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
     final int DEFAULT_TIMEFRAME_MINUTES = 1;
     final double DEFAULT_FACTOR_OF_DEVIATION = 2.0;
@@ -128,8 +126,8 @@ public interface SystemSettingManager
         {
             put( KEY_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY, DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY );
             put( KEY_FLAG, DEFAULT_FLAG );
-            put( KEY_CALENDAR, DEFAULT_CALENDAR );
-            put( KEY_DATE_FORMAT, DEFAULT_DATE_FORMAT );
+            put( CalendarService.KEY_CALENDAR, CalendarService.DEFAULT_CALENDAR );
+            put( CalendarService.KEY_DATE_FORMAT, CalendarService.DEFAULT_DATE_FORMAT );
             put( KEY_FACTOR_OF_DEVIATION, DEFAULT_FACTOR_OF_DEVIATION );
             put( KEY_ORGUNITGROUPSET_AGG_LEVEL, DEFAULT_ORGUNITGROUPSET_AGG_LEVEL );
             put( KEY_START_MODULE, DEFAULT_START_MODULE );

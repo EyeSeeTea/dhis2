@@ -84,6 +84,7 @@ public class TableAlteror
     // Action Implementation
     // -------------------------------------------------------------------------
 
+    @Override
     @Transactional
     public void execute()
         throws Exception
@@ -295,7 +296,8 @@ public class TableAlteror
         updateProgramAttributeList();
         
         updateFixedAttributeInCaseAggregate( "DEDATEDIFF", CaseAggregationCondition.MINUS_OPERATOR );
-        
+        executeSql( "update userroleauthorities set authority='F_ADD_TRACKED_ENTITY_FORM' where authority='F_TRACKED_ENTITY_FORM_ADD'" );
+
     }
 
     // -------------------------------------------------------------------------

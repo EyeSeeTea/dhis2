@@ -95,6 +95,7 @@ public class JdbcEventAnalyticsTableManager
         return tables;
     }
 
+    @Override
     public String validState()
     {
         boolean hasData = jdbcTemplate.queryForRowSet( "select dataelementid from trackedentitydatavalue limit 1" ).next();
@@ -107,11 +108,13 @@ public class JdbcEventAnalyticsTableManager
         return null;
     }
 
+    @Override
     public String getTableName()
     {
         return "analytics_event";
     }
 
+    @Override
     public void createTable( AnalyticsTable table )
     {
         final String tableName = table.getTempTableName();
@@ -122,7 +125,11 @@ public class JdbcEventAnalyticsTableManager
 
         String sqlCreate = "create table " + tableName + " (";
 
-        for ( String[] col : getDimensionColumns( table ) )
+        List<String[]> columns = getDimensionColumns( table );
+        
+        validateDimensionColumns( columns );
+        
+        for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
         }
@@ -131,8 +138,10 @@ public class JdbcEventAnalyticsTableManager
 
         sqlCreate += statementBuilder.getTableOptions( false );
 
-        log.info( "Create SQL: " + sqlCreate );
-
+        log.info( "Creating table: " + tableName );
+        
+        log.debug( "Create SQL: " + sqlCreate );
+        
         executeSilently( sqlCreate );
     }
 
@@ -151,6 +160,7 @@ public class JdbcEventAnalyticsTableManager
 
             final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
             final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
+            final String tableName = table.getTempTableName();
 
             String sql = "insert into " + table.getTempTableName() + " (";
 
@@ -183,14 +193,13 @@ public class JdbcEventAnalyticsTableManager
                 "and psi.organisationunitid is not null " +
                 "and psi.executiondate is not null";
 
-            log.info( "Populate SQL: " + sql );
-
-            jdbcTemplate.execute( sql );
+            populateAndLog( sql, tableName );
         }
 
         return null;
     }
 
+    @Override
     public List<String[]> getDimensionColumns( AnalyticsTable table )
     {
         final String dbl = statementBuilder.getDoubleColumnType();
@@ -276,6 +285,7 @@ public class JdbcEventAnalyticsTableManager
         return columns;
     }
 
+    @Override
     public Date getEarliestData()
     {
         final String sql = "select min(psi.executiondate) from programstageinstance psi "
@@ -284,6 +294,7 @@ public class JdbcEventAnalyticsTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
+    @Override
     public Date getLatestData()
     {
         final String sql = "select max(psi.executiondate) from programstageinstance psi "
@@ -292,10 +303,18 @@ public class JdbcEventAnalyticsTableManager
         return jdbcTemplate.queryForObject( sql, Date.class );
     }
 
+    @Override
     @Async
     public Future<?> applyAggregationLevels( ConcurrentLinkedQueue<AnalyticsTable> tables,
         Collection<String> dataElements, int aggregationLevel )
     {
         return null; // Not relevant
+    }
+
+    @Override
+    @Async
+    public Future<?> vacuumTablesAsync( ConcurrentLinkedQueue<AnalyticsTable> tables )
+    {
+        return null; // Not needed
     }
 }

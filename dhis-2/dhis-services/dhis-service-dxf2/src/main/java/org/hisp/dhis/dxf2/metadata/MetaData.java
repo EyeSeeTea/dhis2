@@ -28,23 +28,19 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.hisp.dhis.attribute.Attribute;
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.concept.Concept;
 import org.hisp.dhis.constant.Constant;
 import org.hisp.dhis.dashboard.Dashboard;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
-import org.hisp.dhis.datadictionary.DataDictionary;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElement;
@@ -98,9 +94,11 @@ import org.hisp.dhis.validation.ValidationCriteria;
 import org.hisp.dhis.validation.ValidationRule;
 import org.hisp.dhis.validation.ValidationRuleGroup;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Lists;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -119,8 +117,6 @@ public class MetaData
     private List<Document> documents = new ArrayList<>();
 
     private List<Constant> constants = new ArrayList<>();
-
-    private List<Concept> concepts = new ArrayList<>();
 
     private List<User> users = new ArrayList<>();
 
@@ -201,8 +197,6 @@ public class MetaData
     private List<MapLegendSet> mapLegendSets = new ArrayList<>();
 
     private List<MapLayer> mapLayers = new ArrayList<>();
-
-    private List<DataDictionary> dataDictionaries = new ArrayList<>();
 
     private List<Section> sections = new ArrayList<>();
 
@@ -417,19 +411,6 @@ public class MetaData
     public void setDataElementGroupSets( List<DataElementGroupSet> dataElementGroupSets )
     {
         this.dataElementGroupSets = dataElementGroupSets;
-    }
-
-    @JsonProperty
-    @JacksonXmlElementWrapper( localName = "concepts", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "concept", namespace = DxfNamespaces.DXF_2_0 )
-    public List<Concept> getConcepts()
-    {
-        return concepts;
-    }
-
-    public void setConcepts( List<Concept> concepts )
-    {
-        this.concepts = concepts;
     }
 
     @JsonProperty
@@ -862,19 +843,6 @@ public class MetaData
     }
 
     @JsonProperty
-    @JacksonXmlElementWrapper( localName = "dataDictionaries", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "dataDictionary", namespace = DxfNamespaces.DXF_2_0 )
-    public List<DataDictionary> getDataDictionaries()
-    {
-        return dataDictionaries;
-    }
-
-    public void setDataDictionaries( List<DataDictionary> dataDictionaries )
-    {
-        this.dataDictionaries = dataDictionaries;
-    }
-
-    @JsonProperty
     @JacksonXmlElementWrapper( localName = "programs", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "program", namespace = DxfNamespaces.DXF_2_0 )
     public List<Program> getPrograms()
@@ -1065,7 +1033,6 @@ public class MetaData
             ", attributes=" + attributes +
             ", documents=" + documents +
             ", constants=" + constants +
-            ", concepts=" + concepts +
             ", users=" + users +
             ", userRoles=" + userRoles +
             ", userGroups=" + userGroups +
@@ -1104,7 +1071,6 @@ public class MetaData
             ", mapLegends=" + mapLegends +
             ", mapLegendSets=" + mapLegendSets +
             ", mapLayers=" + mapLayers +
-            ", dataDictionaries=" + dataDictionaries +
             ", sections=" + sections +
             ", dataSets=" + dataSets +
             ", programs=" + programs +

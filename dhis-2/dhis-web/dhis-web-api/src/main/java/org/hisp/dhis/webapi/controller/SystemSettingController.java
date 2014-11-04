@@ -28,15 +28,11 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.Serializable;
-import java.util.Map;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletResponse;
-
+import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -45,6 +41,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Lars Helge Overland
@@ -55,6 +57,9 @@ public class SystemSettingController
 {
     @Autowired
     private SystemSettingManager systemSettingManager;
+
+    @Autowired
+    private RenderService renderService;
 
     @RequestMapping( value = "/{key}", method = RequestMethod.POST, consumes = { ContextUtils.CONTENT_TYPE_TEXT, ContextUtils.CONTENT_TYPE_HTML } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_SYSTEM_SETTING')" )
@@ -76,7 +81,7 @@ public class SystemSettingController
         }
 
         value = value != null ? value : valuePayload;
-        
+
         key = key != null ? key : keyParam;
 
         systemSettingManager.saveSystemSetting( key, value );
@@ -103,18 +108,38 @@ public class SystemSettingController
 
         return setting != null ? String.valueOf( setting ) : null;
     }
-    
-    @RequestMapping( method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
-    public @ResponseBody Map<String, Serializable> getSystemSettings( @RequestParam( value = "key", required = false ) Set<String> key )
+
+    @RequestMapping( method = RequestMethod.GET, produces = { ContextUtils.CONTENT_TYPE_JSON, ContextUtils.CONTENT_TYPE_HTML } )
+    public void getSystemSettingsJson( @RequestParam( value = "key", required = false ) Set<String> key, HttpServletResponse response ) throws IOException
     {
+        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
+        renderService.toJson( response.getOutputStream(), getSystemSettings( key ) );
+    }
+
+    @RequestMapping( method = RequestMethod.GET, produces = "application/javascript" )
+    public void getSystemSettingsJsonP(
+        @RequestParam( value = "key", required = false ) Set<String> key,
+        @RequestParam( defaultValue = "callback" ) String callback,
+        HttpServletResponse response ) throws IOException
+    {
+        response.setContentType( "application/javascript" );
+        renderService.toJsonP( response.getOutputStream(), getSystemSettings( key ), callback );
+    }
+
+    private Map<String, Serializable> getSystemSettings( Set<String> key )
+    {
+        Map<String, Serializable> value;
+
         if ( key != null && !key.isEmpty() )
         {
-            return systemSettingManager.getSystemSettings( key );
+            value = systemSettingManager.getSystemSettings( key );
         }
         else
         {
-            return systemSettingManager.getSystemSettingsAsMap();
+            value = systemSettingManager.getSystemSettingsAsMap();
         }
+
+        return value;
     }
 
     @RequestMapping( value = "/{key}", method = RequestMethod.DELETE )

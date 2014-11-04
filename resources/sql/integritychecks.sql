@@ -137,6 +137,10 @@ select * from categorycombo where categorycomboid not in (select distinct catego
 
 select categoryid, categoryoptionid, count(*) from categories_categoryoptions group by categoryid, categoryoptionid having count(*) > 1;
 
+-- Get categories with more than one membership for a category combination
+
+select categorycomboid, categoryid, count(*) from categorycombos_categories group by categorycomboid, categoryid having count(*) > 1;
+
 -- Get category options with count of memberships in categories
 
 select cc.categoryoptionid, co.name, (
@@ -154,7 +158,7 @@ join categorycombos_optioncombos co on (n.categoryoptioncomboid=co.categoryoptio
 join categorycombo c on (co.categorycomboid=c.categorycomboid)
 order by c.name, n.categoryoptioncomboname;
 
--- Get category combinations without data elements
+-- Get category combinations without data elements or data sets
 
 select * from categorycombo where categorycomboid not in (select distinct categorycomboid from dataelement);
 

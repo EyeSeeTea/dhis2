@@ -38,6 +38,8 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.events.event.ImportEventTask;
+import org.hisp.dhis.dxf2.events.event.ImportEventsTask;
+import org.hisp.dhis.dxf2.events.event.csv.CsvEventService;
 import org.hisp.dhis.dxf2.events.report.EventRowService;
 import org.hisp.dhis.dxf2.events.report.EventRows;
 import org.hisp.dhis.dxf2.events.trackedentity.TrackedEntityInstance;
@@ -62,7 +64,6 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -70,7 +71,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -110,6 +110,9 @@ public class EventController
     private EventService eventService;
 
     @Autowired
+    private CsvEventService csvEventService;
+
+    @Autowired
     private EventRowService eventRowService;
 
     @Autowired
@@ -124,6 +127,83 @@ public class EventController
     // -------------------------------------------------------------------------
     // READ
     // -------------------------------------------------------------------------
+
+    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/csv", "text/csv" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
+    public void getCsvEvents(
+        @RequestParam( required = false ) String program,
+        @RequestParam( required = false ) String programStage,
+        @RequestParam( required = false ) ProgramStatus programStatus,
+        @RequestParam( required = false ) Boolean followUp,
+        @RequestParam( required = false ) String trackedEntityInstance,
+        @RequestParam( required = false ) String orgUnit,
+        @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam( required = false ) EventStatus status,
+        @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
+        @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
+    {
+        WebOptions options = new WebOptions( parameters );
+
+        Program pr = manager.get( Program.class, program );
+        ProgramStage prs = manager.get( ProgramStage.class, programStage );
+        List<OrganisationUnit> organisationUnits = new ArrayList<>();
+        TrackedEntityInstance tei = null;
+        OrganisationUnit rootOrganisationUnit = null;
+
+        if ( trackedEntityInstance != null )
+        {
+            tei = trackedEntityInstanceService.getTrackedEntityInstance( trackedEntityInstance );
+
+            if ( tei == null )
+            {
+                ContextUtils.conflictResponse( response, "Invalid trackedEntityInstance ID." );
+                return;
+            }
+        }
+
+        if ( orgUnit != null )
+        {
+            rootOrganisationUnit = manager.get( OrganisationUnit.class, orgUnit );
+
+            if ( rootOrganisationUnit == null )
+            {
+                ContextUtils.conflictResponse( response, "Invalid orgUnit ID." );
+                return;
+            }
+        }
+
+        if ( rootOrganisationUnit != null )
+        {
+            if ( OrganisationUnitSelectionMode.DESCENDANTS.equals( ouMode ) )
+            {
+                organisationUnits.addAll( organisationUnitService.getOrganisationUnitWithChildren( rootOrganisationUnit.getUid() ) );
+            }
+            else if ( OrganisationUnitSelectionMode.CHILDREN.equals( ouMode ) )
+            {
+                organisationUnits.add( rootOrganisationUnit );
+                organisationUnits.addAll( rootOrganisationUnit.getChildren() );
+            }
+            else // SELECTED
+            {
+                organisationUnits.add( rootOrganisationUnit );
+            }
+        }
+
+        Events events = eventService.getEvents( pr, prs, programStatus, followUp, organisationUnits, tei, startDate, endDate, status );
+
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), events.getEvents().size(), options.getPageSize() );
+            events.setPager( pager );
+            events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );
+        }
+
+        csvEventService.writeEvents( response.getOutputStream(), events, !skipHeader );
+        response.getOutputStream().flush();
+        response.getOutputStream().close();
+    }
 
     @RequestMapping( value = "", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
@@ -216,9 +296,9 @@ public class EventController
         return "events";
     }
 
-    @RequestMapping( value = "/overdue", method = RequestMethod.GET )
+    @RequestMapping( value = "/eventRows", method = RequestMethod.GET )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
-    public String getOverdueEvents(
+    public String getEventRows(
         @RequestParam( required = false ) String program,
         @RequestParam( required = false ) String orgUnit,
         @RequestParam( required = false ) OrganisationUnitSelectionMode ouMode,
@@ -409,6 +489,29 @@ public class EventController
         }
     }
 
+
+    @RequestMapping( method = RequestMethod.POST, consumes = { "application/csv", "text/csv" } )
+    @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
+    public void postCsvEvents(
+        @RequestParam( required = false, defaultValue = "false" ) boolean skipFirst,
+        HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws IOException
+    {
+        Events events = csvEventService.readEvents( request.getInputStream(), skipFirst );
+
+        if ( !importOptions.isAsync() )
+        {
+            ImportSummaries importSummaries = eventService.addEvents( events.getEvents(), importOptions, null );
+            JacksonUtils.toJson( response.getOutputStream(), importSummaries );
+        }
+        else
+        {
+            TaskId taskId = new TaskId( TaskCategory.EVENT_IMPORT, currentUserService.getCurrentUser() );
+            scheduler.executeTask( new ImportEventsTask( events.getEvents(), eventService, importOptions, taskId ) );
+            response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.EVENT_IMPORT );
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
+        }
+    }
+
     // -------------------------------------------------------------------------
     // UPDATE
     // -------------------------------------------------------------------------
@@ -522,7 +625,6 @@ public class EventController
     // -------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    @ResponseStatus( value = HttpStatus.NO_CONTENT )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_DELETE')" )
     public void deleteEvent( HttpServletResponse response, @PathVariable( "uid" ) String uid )
     {
@@ -534,6 +636,7 @@ public class EventController
             return;
         }
 
+        response.setStatus( HttpServletResponse.SC_NO_CONTENT );
         eventService.deleteEvent( event );
     }
 }

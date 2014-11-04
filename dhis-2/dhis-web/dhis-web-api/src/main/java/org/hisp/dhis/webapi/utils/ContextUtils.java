@@ -124,12 +124,7 @@ public class ContextUtils
 
         if ( cacheStrategy == null || cacheStrategy.equals( CacheStrategy.NO_CACHE ) )
         {
-            // -----------------------------------------------------------------
-            // Cache set to expire after 1 second as IE 8 will not save cached
-            // responses to disk over SSL, was "no-cache".
-            // -----------------------------------------------------------------
-
-            response.setHeader( HEADER_CACHE_CONTROL, "max-age=1" );
+            response.setHeader( HEADER_CACHE_CONTROL, "no-cache, no-store" );
             response.setHeader( HEADER_EXPIRES, DateUtils.getExpiredHttpDateString() );
         }
         else if ( cacheStrategy.equals( CacheStrategy.CACHE_1_HOUR ) )
@@ -295,6 +290,8 @@ public class ContextUtils
      * Returns a mapping of dimension identifiers and dimension option identifiers
      * based on the given set of dimension strings. Splits the strings using : as
      * separator. Returns null of dimensions are null or empty.
+     * 
+     * TODO remove
      * 
      * @param dimensions the set of strings on format dimension:dimension-option.
      * @return a map of dimensions and dimension options.

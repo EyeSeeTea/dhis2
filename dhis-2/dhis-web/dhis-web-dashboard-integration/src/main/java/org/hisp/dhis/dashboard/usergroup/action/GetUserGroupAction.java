@@ -81,11 +81,12 @@ public class GetUserGroupAction
     // Action implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
     {
-        group = userGroupService.getUserGroup(userGroupId );
+        group = userGroupService.getUserGroup( userGroupId );
 
-        memberCount =group.getMembers().size();
+        memberCount = group.getMembers().size();
 
         return SUCCESS;
     }    

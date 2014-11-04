@@ -38,6 +38,7 @@ import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
@@ -71,7 +72,7 @@ public class DataApprovalLevel
     /**
      * The name of the organisation unit level (derived through the service.)
      */
-    private String orgUnitLevelName;
+    private transient String orgUnitLevelName;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -89,7 +90,7 @@ public class DataApprovalLevel
     }
 
     public DataApprovalLevel( String name, int level, int orgUnitLevel, CategoryOptionGroupSet categoryOptionGroupSet,
-        Date created, Date lastUpdated )
+                              Date created, Date lastUpdated )
     {
         this.name = name;
         this.level = level;
@@ -97,6 +98,16 @@ public class DataApprovalLevel
         this.categoryOptionGroupSet = categoryOptionGroupSet;
         this.created = created;
         this.lastUpdated = lastUpdated;
+    }
+
+    public DataApprovalLevel( DataApprovalLevel d )
+    {
+        this.name = d.name;
+        this.level = d.level;
+        this.orgUnitLevel = d.orgUnitLevel;
+        this.categoryOptionGroupSet = d.categoryOptionGroupSet;
+        this.created = d.created;
+        this.lastUpdated = d.lastUpdated;
     }
 
     // -------------------------------------------------------------------------
@@ -146,7 +157,24 @@ public class DataApprovalLevel
         
         return true;
     }
-    
+
+    // -------------------------------------------------------------------------
+    // toString
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String toString()
+    {
+        return "DataApprovalLevel{" +
+                "name=" + name +
+                ", level=" + level +
+                ", orgUnitLevel=" + orgUnitLevel +
+                ", categoryOptionGroupSet='" + ( categoryOptionGroupSet == null ? "(null)" : categoryOptionGroupSet.getName() ) + "'" +
+                ", created=" + created +
+                ", lastUpdated=" + lastUpdated +
+                '}';
+    }
+
     // -------------------------------------------------------------------------
     // Getters and Setters
     // -------------------------------------------------------------------------
@@ -178,6 +206,7 @@ public class DataApprovalLevel
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public CategoryOptionGroupSet getCategoryOptionGroupSet()
@@ -190,6 +219,9 @@ public class DataApprovalLevel
         this.categoryOptionGroupSet = categoryOptionGroupSet;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOrgUnitLevelName()
     {
         return orgUnitLevelName;

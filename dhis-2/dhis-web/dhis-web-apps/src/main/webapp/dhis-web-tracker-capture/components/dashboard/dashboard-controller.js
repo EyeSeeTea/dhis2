@@ -8,6 +8,7 @@ trackerCapture.controller('DashboardController',
                 storage,
                 TEIService, 
                 TEService,
+                OptionSetService,
                 ProgramFactory,
                 CurrentSelection,
                 TranslationService) {
@@ -38,6 +39,7 @@ trackerCapture.controller('DashboardController',
     $scope.selectedTeiId = ($location.search()).tei; 
     $scope.selectedProgramId = ($location.search()).program; 
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+
     $scope.selectedProgram;    
     $scope.selectedTei;    
     
@@ -65,14 +67,26 @@ trackerCapture.controller('DashboardController',
                         }
                     });
                     
-                    //broadcast selected items for dashboard controllers
-                    CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null});
-                    $scope.broadCastSelections();                                    
+                    $scope.optionSets = {optionSets: [], optionNamesByCode: new Object(), optionCodesByName: new Object()};
+                    OptionSetService.getAll().then(function(optionSets){
+                        angular.forEach(optionSets, function(optionSet){
+                            angular.forEach(optionSet.options, function(option){
+                                if(option.name && option.code){
+                                    $scope.optionSets.optionNamesByCode[ '"' + option.code + '"'] = option.name;
+                                    $scope.optionSets.optionCodesByName[ '"' + option.name + '"'] = option.code;
+                                }                       
+                            });
+                            $scope.optionSets.optionSets[optionSet.id] = optionSet;
+                        });
+                        
+                        //broadcast selected items for dashboard controllers
+                        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null, optionSets: $scope.optionSets});
+                        $scope.broadCastSelections();  
+                    });
                 });
             });            
         });      
-    }
-    
+    }    
     
     //listen for any change to program selection
     //it is possible that such could happen during enrollment.
@@ -92,7 +106,9 @@ trackerCapture.controller('DashboardController',
         var selections = CurrentSelection.get();
         $scope.selectedTei = selections.tei;
         $scope.trackedEntity = selections.te;
-        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null});
+        $scope.optionSets = selections.optionSets;
+        
+        CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, pr: $scope.selectedProgram, enrollment: null, optionSets: $scope.optionSets});
         $timeout(function() { 
             $rootScope.$broadcast('selectedItems', {programExists: $scope.programs.length > 0});            
         }, 100); 
@@ -123,6 +139,5 @@ trackerCapture.controller('DashboardController',
 
         modalInstance.result.then(function () {
         });
-    };   
-
+    };
 });

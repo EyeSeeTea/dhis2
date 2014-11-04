@@ -165,12 +165,14 @@ on (cc.categoryoptioncomboid=cn.categoryoptioncomboid);
 
 -- Display overview of category option combo
 
-select coc.categoryoptioncomboid as coc_id, coc.uid as coc_uid, co.categoryoptionid as co_id, co.name as co_name, cc.categorycomboid as cc_id, cc.name as cc_name
+select coc.categoryoptioncomboid as coc_id, coc.uid as coc_uid, co.categoryoptionid as co_id, co.name as co_name, ca.categoryid as ca_id, ca.name as ca_name, cc.categorycomboid as cc_id, cc.name as cc_name
 from categoryoptioncombo coc 
 inner join categoryoptioncombos_categoryoptions coo on coc.categoryoptioncomboid=coo.categoryoptioncomboid
 inner join dataelementcategoryoption co on coo.categoryoptionid=co.categoryoptionid
-inner join categorycombos_optioncombos cco on coc.categoryoptioncomboid=cco.categoryoptioncomboid
-inner join categorycombo cc on cco.categorycomboid=cc.categorycomboid
+inner join categories_categoryoptions cco on co.categoryoptionid=cco.categoryoptionid
+inner join dataelementcategory ca on cco.categoryid=ca.categoryid
+inner join categorycombos_optioncombos ccoc on coc.categoryoptioncomboid=ccoc.categoryoptioncomboid
+inner join categorycombo cc on ccoc.categorycomboid=cc.categorycomboid
 where coc.categoryoptioncomboid=2118430;
 
 -- Display data out of reasonable time range
@@ -204,9 +206,13 @@ join categorycombos_optioncombos co
 on (cc.categoryoptioncomboid=co.categoryoptioncomboid)
 where categorycomboid=12414 );
 
--- (Write) Reset password to "district" for account with given username
+-- (Write) MD5 set password to "district" for admin user
 
 update users set password='48e8f1207baef1ef7fe478a57d19f2e5' where username='admin';
+
+-- (Write) Bcrypt set password to "district" for admin user
+
+update users set password='$2a$10$wjLPViry3bkYEcjwGRqnYO1bT2Kl.ZY0kO.fwFDfMX53hitfx5.3C' where username='admin';
 
 -- (Write) Generate random coordinates based on org unit location for events
 

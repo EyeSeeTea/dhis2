@@ -38,6 +38,7 @@ import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.i18n.locale.LocaleManager;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.period.Cal;
+import org.hisp.dhis.security.migration.MigrationPasswordManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
@@ -47,6 +48,7 @@ import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.UserSettingService;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
@@ -67,7 +69,6 @@ public class DefaultSecurityService
 
     private static final String RESTORE_PATH = "/dhis-web-commons/security/";
 
-    private static final int INVITED_USERNAME_UNIQUE_LENGTH = 15;
     private static final int INVITED_USER_PASSWORD_LENGTH = 40;
 
     private static final int RESTORE_TOKEN_LENGTH = 50;
@@ -77,9 +78,9 @@ public class DefaultSecurityService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private PasswordManager passwordManager;
+    private MigrationPasswordManager passwordManager;
 
-    public void setPasswordManager( PasswordManager passwordManager )
+    public void setPasswordManager( MigrationPasswordManager passwordManager )
     {
         this.passwordManager = passwordManager;
     }
@@ -122,6 +123,7 @@ public class DefaultSecurityService
     // SecurityService implementation
     // -------------------------------------------------------------------------
 
+    @Override
     public boolean prepareUserForInvite( User user )
     {
         if ( user == null || user.getUserCredentials() == null )
@@ -131,7 +133,7 @@ public class DefaultSecurityService
 
         if ( user.getUsername() == null || user.getUsername().isEmpty() )
         {
-            String username = "user_invitation_" + CodeGenerator.generateCode( INVITED_USERNAME_UNIQUE_LENGTH );
+            String username = "invite-" + user.getEmail() + "-" + CodeGenerator.generateCode();
 
             user.getUserCredentials().setUsername( username );
         }
@@ -145,38 +147,50 @@ public class DefaultSecurityService
         return true;
     }
 
-    public boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreOptions restoreOptions )
+    @Override
+    public String validateRestore( UserCredentials credentials )
     {
-        if ( credentials == null || rootPath == null )
-        {
-            return false;
-        }
-
-        RestoreType restoreType = restoreOptions.getRestoreType();
-
-        if ( credentials.getUser() == null || credentials.getUser().getEmail() == null )
-        {
-            log.info( "Could not send " + restoreType.name() + " message as user does not exist or has no email: " + credentials );
-            return false;
-        }
-
-        if ( !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
-        {
-            log.info( "Could not send " + restoreType.name() + " message as email is invalid" );
-            return false;
-        }
-
         if ( !systemSettingManager.emailEnabled() )
         {
-            log.info( "Could not send " + restoreType.name() + " message as email is not configured" );
-            return false;
+            log.info( "Could not send restore/invite message as email is not configured" );
+            return "email_not_configured_for_system";
+        }
+
+        if ( credentials == null || credentials.getUser() == null )
+        {
+            log.info( "Could not send restore/invite message as user does not exist: " + credentials );
+            return "no_user_credentials";
+        }
+
+        if ( credentials.getUser().getEmail() == null || !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
+        {
+            log.info( "Could not send restore/invite message as user has no email or email is invalid" );
+            return "user_does_not_have_valid_email";
         }
 
         if ( credentials.hasAnyAuthority( Arrays.asList( UserAuthorityGroup.CRITICAL_AUTHS ) ) )
         {
-            log.info( "Not allowed to  " + restoreType.name() + " users with critical authorities" );
+            log.info( "Not allowed to restore/invite users with critical authorities" );
+            return "user_has_critical_authorities";
+        }
+
+        return null;
+    }
+
+    @Override
+    public boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreOptions restoreOptions )
+    {
+        if ( credentials == null || restoreOptions == null )
+        {
             return false;
         }
+
+        if ( validateRestore( credentials ) != null )
+        {
+            return false;
+        }
+        
+        RestoreType restoreType = restoreOptions.getRestoreType();
 
         String[] result = initRestore( credentials, restoreOptions );
 
@@ -218,6 +232,7 @@ public class DefaultSecurityService
         return true;
     }
 
+    @Override
     public String[] initRestore( UserCredentials credentials, RestoreOptions restoreOptions )
     {
         String token = restoreOptions.getTokenPrefix() + CodeGenerator.generateCode( RESTORE_TOKEN_LENGTH );
@@ -239,11 +254,13 @@ public class DefaultSecurityService
         return new String[] { token, code };
     }
 
+    @Override
     public RestoreOptions getRestoreOptions( String token )
     {
         return RestoreOptions.getRestoreOptions( token );
     }
 
+    @Override
     public boolean restore( UserCredentials credentials, String token, String code, String newPassword, RestoreType restoreType )
     {
         if ( credentials == null || token == null || code == null || newPassword == null
@@ -265,6 +282,7 @@ public class DefaultSecurityService
         return true;
     }
 
+    @Override
     public boolean canRestore( UserCredentials credentials, String token, String code, RestoreType restoreType )
     {
         String logPrefix = "Restore user: " + credentials.getUid() + ", username: " + credentials.getUsername() + " ";
@@ -314,12 +332,12 @@ public class DefaultSecurityService
             return errorMessage;
         }
 
-        Date currentTime = new Cal().now().time();
+        Date currentTime = new DateTime().toDate();
         Date restoreExpiry = credentials.getRestoreExpiry();
 
         if ( currentTime.after( restoreExpiry ) )
         {
-            return "date_is_after_expiry - date: " + currentTime.toString() + " expiry: " + restoreExpiry.toString();
+            return "date_is_after_expiry";
         }
 
         return null; // Success;
@@ -343,10 +361,10 @@ public class DefaultSecurityService
 
         if ( restoreCode == null )
         {
-            return "account_restoreCode_is_null";
+            return "account_restore_code_is_null";
         }
 
-        boolean validCode = passwordManager.matches( code, restoreCode );
+        boolean validCode = passwordManager.tokenMatches( code, restoreCode, credentials.getUsername() );
 
         return validCode ? null : "code_does_not_match_restoreCode - code: '"+ code + "' restoreCode: '" + restoreCode + "'" ;
     }
@@ -360,10 +378,10 @@ public class DefaultSecurityService
      *     <li>credentials_parameter_is_null</li>
      *     <li>token_parameter_is_null</li>
      *     <li>restore_type_parameter_is_null</li>
-     *     <li>cannot_parse_restore_options ...</li>
-     *     <li>wrong_prefix_for_restore_type ...</li>
-     *     <li>could_not_verify_token ...</li>
-     *     <li>restore_token_does_not_match_supplied_token ...</li>
+     *     <li>cannot_parse_restore_options</li>
+     *     <li>wrong_prefix_for_restore_type</li>
+     *     <li>could_not_verify_token</li>
+     *     <li>restore_token_does_not_match_supplied_token</li>
      * </ul>
      *
      * @param credentials the user credentials.
@@ -371,6 +389,7 @@ public class DefaultSecurityService
      * @param restoreType type of restore operation.
      * @return null if success, otherwise error string.
      */
+    @Override
     public String verifyToken( UserCredentials credentials, String token, RestoreType restoreType )
     {
         if ( credentials == null )
@@ -392,24 +411,24 @@ public class DefaultSecurityService
 
         if ( restoreOptions == null )
         {
-            return "cannot_parse_restore_options for " + restoreType.name() + " from token " + token;
+            return "cannot_parse_restore_options";
         }
 
         if ( restoreType != restoreOptions.getRestoreType() )
         {
-            return "wrong_prefix_for_restore_type " + restoreType.name() + " on token " + token;
+            return "wrong_prefix_for_restore_type";
         }
 
         String restoreToken = credentials.getRestoreToken();
 
         if ( restoreToken == null )
         {
-            return "could_not_verify_token for " + restoreType.name() + " because user has no token";
+            return "could_not_verify_token";
         }
 
-        boolean validToken = passwordManager.matches( token, restoreToken );
+        boolean validToken = passwordManager.tokenMatches( token, restoreToken, credentials.getUsername() );
 
-        return validToken ? null : "restore_token_does_not_match_supplied_token " + token;
+        return validToken ? null : "restore_token_does_not_match_supplied_token";
     }
 
     @Override

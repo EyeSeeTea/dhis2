@@ -200,6 +200,14 @@ public interface OrganisationUnitService
     Collection<OrganisationUnit> getOrganisationUnitByNameIgnoreCase( String name );
 
     /**
+     * Returns all OrganisationUnits exactly matching the given names.
+     *
+     * @param names names of OrganisationUnits to return.
+     * @return the OrganisationUnits matching the given names.
+     */
+    Collection<OrganisationUnit> getOrganisationUnitsByNames( Collection<String> names );
+
+    /**
      * Returns all root OrganisationUnits. A root OrganisationUnit is an
      * OrganisationUnit with no parent/the parent set to null.
      *
@@ -214,6 +222,13 @@ public interface OrganisationUnitService
      * @return the level of the organisation unit with the given identifier.
      */
     int getLevelOfOrganisationUnit( int id );
+
+    /**
+     * Returns the level of the organisation unit (whether loaded or not.)
+     *
+     * @return the level of the organisation unit with the given identifier.
+     */
+    int getLevelOfOrganisationUnit( OrganisationUnit unit );
 
     /**
      * Returns the intersection of the members of the given OrganisationUnitGroups

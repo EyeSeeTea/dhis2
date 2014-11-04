@@ -59,11 +59,13 @@ import java.util.Map;
  *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class Jackson2PropertyIntrospectorService extends AbstractPropertyIntrospectorService
+public class Jackson2PropertyIntrospectorService 
+    extends AbstractPropertyIntrospectorService
 {
     @Autowired
     private SessionFactory sessionFactory;
 
+    @Override
     protected Map<String, Property> scanClass( Class<?> clazz )
     {
         Map<String, Property> propertyMap = Maps.newHashMap();

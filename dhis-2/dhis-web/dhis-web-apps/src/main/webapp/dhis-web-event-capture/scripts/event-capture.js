@@ -21,11 +21,10 @@ var PROGRAMS_METADATA = 'EVENT_PROGRAMS';
 
 var EVENT_VALUES = 'EVENT_VALUES';
 
-dhis2.ec.store = new dhis2.storage.Store({
-    name: EC_STORE_NAME,
-    adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['eventCapturePrograms', 'programStages', 'optionSets']
-});
+//var ecDAO = {};
+
+dhis2.ec.store = null;
+dhis2.ec.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
 
 (function($) {
     $.safeEach = function(arr, fn)
@@ -54,25 +53,11 @@ $(document).ready(function()
     $('#loaderSpan').show();
 
     $('#orgUnitTree').one('ouwtLoaded', function()
-    {        
-        var def = $.Deferred();
-        var promise = def.promise();
-        
-        promise = promise.then( dhis2.ec.store.open );
-        promise = promise.then( getUserProfile );
-        promise = promise.then( getLoginDetails );
-        promise = promise.then( getMetaPrograms );     
-        promise = promise.then( getPrograms );     
-        promise = promise.then( getProgramStages );
-        promise = promise.then( getOptionSets );    
-        promise.done( function() {           
-            selection.responseReceived();            
-        });           
-        
-        def.resolve();
+    { 
+        downloadMetaData();
         
     });
-
+    
     $(document).bind('dhis2.online', function(event, loggedIn)
     {        
         if (loggedIn)
@@ -150,6 +135,56 @@ function ajax_login()
     });
 }
 
+function downloadMetaData(){
+    var adapters = [];    
+    if( dhis2.ec.memoryOnly ) {
+        adapters = [ dhis2.storage.InMemoryAdapter ];
+    } else {
+        adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomLocalStorageAdapter, dhis2.storage.InMemoryAdapter ];
+    }
+    
+    
+    dhis2.ec.store = new dhis2.storage.Store({
+        name: EC_STORE_NAME,
+        objectStores: [
+            {
+                name: 'ecPrograms',
+                adapters: adapters
+            },
+            {
+                name: 'programStages',
+                adapters: adapters
+            },
+            {
+                name: 'geoJsons',
+                adapters: adapters
+            },
+            {
+                name: 'optionSets',
+                adapters: adapters
+            }            
+        ]        
+    });
+    
+    var def = $.Deferred();
+    var promise = def.promise();
+    
+    promise = promise.then( dhis2.ec.store.open );
+    promise = promise.then( getUserProfile );
+    promise = promise.then( getCalendarSetting );
+    promise = promise.then( getLoginDetails );
+    promise = promise.then( getOrgUnitLevels );
+    promise = promise.then( getGeoJsonsByLevel );
+    promise = promise.then( getMetaPrograms );     
+    promise = promise.then( getPrograms );     
+    promise = promise.then( getProgramStages );
+    promise = promise.then( getOptionSets );
+    promise.done( function() {           
+        selection.responseReceived();            
+    });           
+
+    def.resolve();
+}
 
 function getUserProfile()
 {
@@ -164,6 +199,21 @@ function getUserProfile()
     });
     
     return def.promise(); 
+}
+
+function getCalendarSetting()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/systemSettings?key=keyCalendar&key=keyDateFormat',
+        type: 'GET'
+    }).done(function(response) {
+        localStorage['CALENDAR_SETTING'] = JSON.stringify(response);
+        def.resolve();
+    });
+
+    return def.promise();
 }
 
 function getLoginDetails()
@@ -181,6 +231,89 @@ function getLoginDetails()
     return def.promise(); 
 }
 
+function getOrgUnitLevels()
+{
+    var def = $.Deferred();
+
+    $.ajax({
+        url: '../api/organisationUnitLevels.json',
+        type: 'GET',
+        data:'filter=level:gt:1&fields=id,name,level&paging=false'
+    }).done( function(response) {      
+        var ouLevels = [];
+        if(response.organisationUnitLevels){
+            ouLevels = _.sortBy(response.organisationUnitLevels, function(ouLevel){
+                return ouLevel.level;
+            });
+        }
+        def.resolve( ouLevels );
+    });
+    
+    return def.promise();    
+}
+
+function getGeoJsonsByLevel( ouLevels )
+{
+    if( !ouLevels ){
+        return;
+    }
+    
+    var mainDef = $.Deferred();
+    var mainPromise = mainDef.promise();
+
+    var def = $.Deferred();
+    var promise = def.promise();
+
+    var builder = $.Deferred();
+    var build = builder.promise();
+
+    _.each( _.values( ouLevels ), function ( ouLevel ) {
+        if(ouLevel.level){
+            build = build.then(function() {
+                var d = $.Deferred();
+                var p = d.promise();
+                dhis2.ec.store.get('geoJsons', ouLevel.level).done(function(obj) {
+                    if(!obj) {
+                        promise = promise.then( getGeoJson( ouLevel.level ) );
+                    }
+                    d.resolve();
+                });
+
+                return p;
+            });
+        }        
+    });
+
+    build.done(function() {
+        def.resolve();
+
+        promise = promise.done( function () {
+            mainDef.resolve();
+        } );
+    });
+
+    builder.resolve();
+
+    return mainPromise;
+}
+
+function getGeoJson( level )
+{
+    return function() {
+        return $.ajax( {
+            url: '../api/organisationUnits.geojson',
+            type: 'GET',
+            data: 'level=' + level
+        }).done( function( response ){
+            
+            var geojson = {};
+            geojson = response;
+            geojson.id = level;            
+            dhis2.ec.store.set( 'geoJsons', geojson );
+        });
+    };
+}
+
 function getMetaPrograms()
 {
     var def = $.Deferred();
@@ -192,15 +325,7 @@ function getMetaPrograms()
     }).done( function(response) {          
         var programs = [];
         _.each( _.values( response.programs ), function ( program ) { 
-            programs.push(program);
-            /*if( program.programStages &&
-                program.programStages.length &&
-                program.programStages[0].programStageDataElements &&
-                program.programStages[0].programStageDataElements.length ) {
-            
-                programs.push(program);
-            } */ 
-            
+            programs.push(program);            
         });
         
         def.resolve( programs );
@@ -228,7 +353,7 @@ function getPrograms( programs )
         build = build.then(function() {
             var d = $.Deferred();
             var p = d.promise();
-            dhis2.ec.store.get('eventCapturePrograms', program.id).done(function(obj) {
+            dhis2.ec.store.get('ecPrograms', program.id).done(function(obj) {
                 if(!obj || obj.version !== program.version) {
                     promise = promise.then( getProgram( program.id ) );
                 }
@@ -277,7 +402,7 @@ function getProgram( id )
 
                 program.userRoles = ur;
 
-                dhis2.ec.store.set( 'eventCapturePrograms', program );
+                dhis2.ec.store.set( 'ecPrograms', program );
 
             });         
         });
@@ -334,7 +459,7 @@ function getProgramStage( id )
 {
     return function() {
         return $.ajax( {
-            url: '../api/programStages.json?filter=id:eq:' + id +'&fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,allowProvidedElsewhere,allowDateInFuture,compulsory,dataElement[id,name,type,formName,optionSet[id]]]',
+            url: '../api/programStages.json?filter=id:eq:' + id +'&fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,sortOrder,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,name,type,formName,optionSet[id]]]',
             type: 'GET'
         }).done( function( response ){            
             _.each( _.values( response.programStages ), function( programStage ) {                

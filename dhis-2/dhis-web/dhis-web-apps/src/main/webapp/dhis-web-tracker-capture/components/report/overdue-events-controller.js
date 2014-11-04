@@ -15,7 +15,7 @@ trackerCapture.controller('OverdueEventsController',
 
     TranslationService.translate();
     
-    $scope.today = DateUtils.format(moment());
+    $scope.today = DateUtils.getToday();
     
     $scope.selectedOuMode = 'SELECTED';
     $scope.report = {};
@@ -92,6 +92,7 @@ trackerCapture.controller('OverdueEventsController',
             $scope.reportFinished = false;
             $scope.reportStarted = true;            
             $scope.overdueEvents = [];
+            
             EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.selectedProgram.id, null, null, 'ACTIVE','OVERDUE', $scope.pager).then(function(data){                     
                 
                 if( data.pager ){
@@ -110,15 +111,16 @@ trackerCapture.controller('OverdueEventsController',
                         overdueEvent[att.attribute] = att.value;
                     });
                     
-                    overdueEvent.dueDate = DateUtils.format(row.dueDate);
+                    overdueEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
                     overdueEvent.event = row.event;
-                    overdueEvent.eventName = row.eventName;
+                    overdueEvent.eventName = $scope.programStages[row.programStage].name;
+                    overdueEvent.eventOrgUnitName = row.eventOrgUnitName;                    
                     overdueEvent.followup = row.followup;
                     overdueEvent.program = row.program;
                     overdueEvent.programStage = row.programStage;
                     overdueEvent.trackedEntityInstance = row.trackedEntityInstance;
                     overdueEvent.orgUnitName = row.registrationOrgUnit;
-                    overdueEvent.created = DateUtils.format(row.registrationDate);;
+                    overdueEvent.created = DateUtils.formatFromApiToUser(row.registrationDate);;
                     $scope.overdueEvents.push(overdueEvent);
                     
                 });
@@ -148,6 +150,8 @@ trackerCapture.controller('OverdueEventsController',
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
                 $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
 
+                $scope.gridColumns.push({name: $translate('event_orgunit_name'), id: 'eventOrgUnitName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
+                $scope.filterTypes['eventOrgUnitName'] = 'string';
                 $scope.gridColumns.push({name: $translate('event_name'), id: 'eventName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
                 $scope.filterTypes['eventName'] = 'string';
                 $scope.gridColumns.push({name: $translate('due_date'), id: 'dueDate', type: 'date', displayInListNoProgram: false, showFilter: false, show: true});

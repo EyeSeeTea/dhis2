@@ -28,39 +28,35 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Current status of data approval for a given selection of data from a
- * data set. Also shows what approval-type actions (if any) the current user
- * is permitted to perform on this data selection.
- *
- * @author Jim Grace
- */
+import org.hisp.dhis.common.DxfNamespaces;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
+@JacksonXmlRootElement( localName = "dataApprovalPermissions", namespace = DxfNamespaces.DXF_2_0 )
 public class DataApprovalPermissions
-{
-    private DataApprovalStatus dataApprovalStatus;
-
+{   
     private boolean mayApprove;
-
+    
     private boolean mayUnapprove;
-
+    
     private boolean mayAccept;
 
     private boolean mayUnaccept;
+
+    private boolean mayReadData;
+    
+    private transient String state;
+    
+    public DataApprovalPermissions()
+    {
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    public DataApprovalStatus getDataApprovalStatus()
-    {
-        return dataApprovalStatus;
-    }
-
-    public void setDataApprovalStatus( DataApprovalStatus dataApprovalStatus )
-    {
-        this.dataApprovalStatus = dataApprovalStatus;
-    }
-
+    @JsonProperty
     public boolean isMayApprove()
     {
         return mayApprove;
@@ -71,6 +67,7 @@ public class DataApprovalPermissions
         this.mayApprove = mayApprove;
     }
 
+    @JsonProperty
     public boolean isMayUnapprove()
     {
         return mayUnapprove;
@@ -81,6 +78,7 @@ public class DataApprovalPermissions
         this.mayUnapprove = mayUnapprove;
     }
 
+    @JsonProperty
     public boolean isMayAccept()
     {
         return mayAccept;
@@ -91,6 +89,7 @@ public class DataApprovalPermissions
         this.mayAccept = mayAccept;
     }
 
+    @JsonProperty
     public boolean isMayUnaccept()
     {
         return mayUnaccept;
@@ -99,5 +98,43 @@ public class DataApprovalPermissions
     public void setMayUnaccept( boolean mayUnaccept )
     {
         this.mayUnaccept = mayUnaccept;
+    }
+
+    @JsonProperty
+    public boolean isMayReadData()
+    {
+        return mayReadData;
+    }
+
+    public void setMayReadData( boolean mayReadData )
+    {
+        this.mayReadData = mayReadData;
+    }
+
+    @JsonProperty
+    public String getState()
+    {
+        return state;
+    }
+
+    public void setState( String state )
+    {
+        this.state = state;
+    }
+
+    // ----------------------------------------------------------------------
+    // toString
+    // ----------------------------------------------------------------------
+
+    @Override
+    public String toString()
+    {
+        return "DataApprovalPermissions{" +
+                "mayApprove=" + mayApprove +
+                ", mayUnapprove=" + mayUnapprove +
+                ", mayAccept=" + mayAccept +
+                ", mayUnaccept=" + mayUnaccept +
+                ", mayReadData=" + mayReadData +
+                '}';
     }
 }

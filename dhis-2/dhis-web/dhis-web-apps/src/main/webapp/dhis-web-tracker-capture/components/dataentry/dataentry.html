@@ -31,11 +31,9 @@
             <table class="table-borderless">
                 <tbody>
                     <tr>
-                        <td class="inline-block" ng-repeat="dhis2Event in dhis2Events| orderBy:'sortingDate':reverse">
-                            <span class="block align-center">{{dhis2Event.eventOrgUnitName}}</span>                                              
-                            <span class="stage-container"                                                     
-                                  ng-class="{'current-stage': currentEvent && currentEvent.event == dhis2Event.event, '{{dhis2Event.statusColor}}': true}"                                                      
-                                  ng-click="showDataEntry(dhis2Event)">
+                        <td class="inline-block" ng-repeat="dhis2Event in dhis2Events | orderBy:'sortingDate':reverse">
+                            <!--<span class="block align-center">{{dhis2Event.eventOrgUnitName}}</span> -->
+                            <span class="stage-container" ng-class='getEventStyle(dhis2Event, false)' ng-click="showDataEntry(dhis2Event, false)">
                                 {{dhis2Event.name}}<br/>
                                 {{dhis2Event.sortingDate}}         
                             </span>
@@ -53,28 +51,26 @@
                 <tbody>
                     <tr>
                         <td class="inline-block" ng-repeat="dummyEvent in dummyEvents| orderBy:'sortingDate':reverse">
-                            <span class="block align-center">{{dhis2Event.eventOrgUnitName}}</span>                                              
-                            <span class="stage-container"                                                     
-                                  ng-class="{'current-stage': currentDummyEvent && currentDummyEvent.programStage == dummyEvent.programStage, '{{dummyEvent.statusColor}}': true}"                                                      
-                                  ng-click="showDummyEventCreation(dummyEvent)">
+                            <!--<span class="block align-center">{{dhis2Event.eventOrgUnitName}}</span>-->                                              
+                            <span class="stage-container" ng-class='getEventStyle(dummyEvent, true)' ng-click="showDummyEventCreation(dummyEvent)">
                                 {{dummyEvent.name}}<br/>
                                 {{dummyEvent.dueDate}}         
                             </span>
                             <i class="fa fa-arrow-right" ng-if="$index < dummyEvents.length - 1"></i>
-                        </td>                        
-                    </tr>                        
-                </tbody>                
+                        </td>
+                    </tr>
+                </tbody>
             </table>
             <form name="eventCreationForm" novalidate ng-show="currentDummyEvent">
                 <div class="row">
                     <div class="col-md-6">
                         {{currentDummyEvent.reportDateDescription}}
-                        <input type="text" placeholder="yyyy-mm-dd" name="eventDate" class="form-control" ng-date ng-model="currentDummyEvent.eventDate" ng-required="false"/>
+                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" name="eventDate" class="form-control" d2-date ng-model="currentDummyEvent.eventDate" ng-required="false"/>
                         <span ng-if="eventCreationForm.submitted && eventCreationForm.eventDate.$invalid" class="error">{{'required'| translate}}</span>
                     </div>
                     <div class="col-md-6">
                         {{'due_date'| translate}}
-                        <input type="text" placeholder="yyyy-mm-dd" name="dueDate" class="form-control" ng-date ng-model="currentDummyEvent.dueDate" ng-required="true"/>
+                        <input type="text" placeholder="{{dhis2CalendarFormat.keyDateFormat}}" name="dueDate" class="form-control" d2-date ng-model="currentDummyEvent.dueDate" ng-required="true"/>
                         <span ng-if="eventCreationForm.submitted && eventCreationForm.dueDate.$invalid" class="error">{{'required'| translate}}</span>
                     </div>                        
                 </div>
@@ -84,7 +80,7 @@
                         <button type="button" class="btn btn-default small-horizonal-spacing" ng-click="closeEventCreation()">{{'cancel'| translate}}</button>
                     </div>                        
                 </div>
-            </form>            
+            </form>
         </div>        
 
         <div ng-if="currentEvent && !showEventCreationDiv">
@@ -92,14 +88,13 @@
                 <div class="col-md-6">
                     {{currentEvent.reportDateDescription}}
                     <input type="text"
-                           name="eventDate" 
-                           placeholder="yyyy-mm-dd"
+                           placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                            class="form-control" 
                            ng-class="{'input-success': eventDateSaved}"
-                           ng-date 
+                           d2-date 
                            ng-model="currentEvent.eventDate"
                            ng-disabled="currentEvent.status === 'SKIPPED'"    
-                           ng-required="true" 
+                           ng-required="true"
                            blur-or-change="saveEventDate()"/>
                     <span ng-if="invalidDate" class="error">{{'date_required'| translate}}</span>
                 </div>
@@ -111,12 +106,11 @@
                         <a href ng-click="enableRescheduling()" title="{{ schedulingEnabled ? 'disable_rescheduling' : 'enable_rescheduling' | translate}}"><span class="text-primary bold">{{'due_date'| translate}}</span></a>                        
                     </span>                    
                     <input type="text" 
-                           name="dueDate" 
-                           placeholder="yyyy-mm-dd"
+                           placeholder="{{dhis2CalendarFormat.keyDateFormat}}"
                            class="form-control"
                            ng-class="{'input-success': dueDateSaved}"
-                           ng-date 
-                           ng-model="currentEvent.dueDate" 
+                           d2-date 
+                           ng-model="currentEvent.dueDate"
                            blur-or-change="saveDueDate()" 
                            ng-disabled="currentEvent.eventDate || !schedulingEnabled"/>
                     <span ng-if="invalidDate" class="error">{{'date_required'| translate}}</span>
@@ -132,7 +126,7 @@
 
             <div class="form-group">
                 <div class='row'><hr></div>
-                <a href ng-click="completeIncompleteEvent()" class="btn btn-warning" ng-if="currentEvent.eventDate && (currentEvent.status === 'ACTIVE' || currentEvent.status === 'VISITED')">{{'complete'| translate}}</a>
+                <a href ng-click="completeIncompleteEvent()" class="btn btn-warning" ng-if="currentEvent.eventDate && ( currentEvent.status === 'SCHEDULE' || currentEvent.status === 'ACTIVE' || currentEvent.status === 'VISITED')">{{'complete'| translate}}</a>
                 <a href ng-click="completeIncompleteEvent()" class="btn btn-warning" ng-if="currentEvent.eventDate && currentEvent.status === 'COMPLETED'">{{'incomplete'| translate}}</a>                       
                 <a href ng-click="validateEvent()" class="btn btn-info" ng-disabled="true" ng-if="currentEvent.eventDate">{{'validate'| translate}}</a>                        
                 <a href ng-click="skipUnskipEvent()" class="btn btn-warning" ng-if="!currentEvent.eventDate">{{currentEvent.status === 'SKIPPED' ? 'unskip' : 'skip'| translate}}</a>

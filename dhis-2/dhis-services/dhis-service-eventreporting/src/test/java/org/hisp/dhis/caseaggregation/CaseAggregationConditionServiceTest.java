@@ -33,15 +33,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
-import org.hisp.dhis.concept.ConceptService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryCombo;
@@ -64,13 +60,14 @@ import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.program.ProgramStageInstanceService;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
+import org.joda.time.DateTime;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -103,9 +100,6 @@ public class CaseAggregationConditionServiceTest
 
     @Autowired
     private DataElementCategoryService categoryService;
-
-    @Autowired
-    private ConceptService conceptService;
 
     @Autowired
     private DataElementCategoryService dataElementCategoryService;
@@ -236,7 +230,7 @@ public class CaseAggregationConditionServiceTest
         // Program && Program stages
         // ---------------------------------------------------------------------
 
-        program = createProgram( 'A', new ArrayList<ProgramStage>(), organisationUnit );
+        program = createProgram( 'A', new HashSet<ProgramStage>(), organisationUnit );
         int programId = programService.addProgram( program );
 
         ProgramStage stageA = new ProgramStage( "Stage-A", program );
@@ -245,7 +239,7 @@ public class CaseAggregationConditionServiceTest
         ProgramStage stageB = new ProgramStage( "Stage-B", program );
         stageBId = programStageService.saveProgramStage( stageB );
 
-        List<ProgramStage> programStages = new ArrayList<>();
+        Set<ProgramStage> programStages = new HashSet<>();
         programStages.add( stageA );
         programStages.add( stageB );
         program.setProgramStages( programStages );
@@ -255,10 +249,9 @@ public class CaseAggregationConditionServiceTest
         // Program Instance && data values
         // ---------------------------------------------------------------------
 
-        Calendar today = Calendar.getInstance();
-        PeriodType.clearTimeOfDay( today );
+        DateTime today = DateTime.now();
         ProgramInstance programInstance = programInstanceService.enrollTrackedEntityInstance( entityInstance, program,
-            today.getTime(), today.getTime(), organisationUnit );
+            today.toDate(), today.toDate(), organisationUnit );
 
         ProgramStageInstance stageInstanceA = programStageInstanceService.getProgramStageInstance( programInstance,
             stageA );
@@ -282,8 +275,8 @@ public class CaseAggregationConditionServiceTest
         PeriodType periodType = periodService.getPeriodTypeByName( DailyPeriodType.NAME );
         period = new Period();
         period.setPeriodType( periodType );
-        period.setStartDate( today.getTime() );
-        period.setEndDate( today.getTime() );
+        period.setStartDate( today.toDate() );
+        period.setEndDate( today.toDate() );
         periodService.addPeriod( period );
 
         // ---------------------------------------------------------------------

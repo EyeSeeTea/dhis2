@@ -15,6 +15,7 @@ var trackerCapture = angular.module('trackerCapture',
          'ui.select2',
          'd2Menu',
          'ngCsv',
+         'nvd3ChartDirectives',
          'pascalprecht.translate'])
               
 .value('DHIS2URL', '..')
@@ -36,6 +37,9 @@ var trackerCapture = angular.module('trackerCapture',
     }).when('/program-summary',{
         templateUrl:'components/report/program-summary.html',
         controller: 'ProgramSummaryController'
+    }).when('/program-statistics',{
+        templateUrl:'components/report/program-statistics.html',
+        controller: 'ProgramStatisticsController'
     }).when('/overdue-events',{
         templateUrl:'components/report/overdue-events.html',
         controller: 'OverdueEventsController'
@@ -51,6 +55,11 @@ var trackerCapture = angular.module('trackerCapture',
         suffix: '.json'
     });
     
-    $translateProvider.preferredLanguage('en');	
-    
+    $translateProvider.preferredLanguage('en');
+})
+
+.run(function($rootScope){    
+    setTimeout(function () {
+        $rootScope.$apply(function () {});
+    }, 1000);
 });

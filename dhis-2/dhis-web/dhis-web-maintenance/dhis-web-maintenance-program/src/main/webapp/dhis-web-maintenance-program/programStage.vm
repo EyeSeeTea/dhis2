@@ -1,6 +1,6 @@
 <h3>$i18n.getString( "program_stage_management" ) #openHelp( "program_stage" )</h3>
 
-<h4>$program.displayName</h4>
+<h4>$encoder.htmlEncode($program.displayName)</h4>
 
 <div id="contextMenu" class="contextMenu" style="width: 230px;">
   <ul id="contextMenuItems" class="contextMenuItems">
@@ -22,6 +22,7 @@
 			#if( $program.type=='1' )
 				<input type="button" value="$i18n.getString( 'add_new' )" onclick="javascript:addProgramStage()" style="width:150px"><br>
 			#end
+			<input type="button" value="$i18n.getString( 'sort_order' )" onclick="window.location.href='sortProgramStagesForm.action?id=$program.id'" style="width:150px"><br>
 			<input type="button" value="$i18n.getString( 'back' )" onclick="window.location.href='program.action'" style="width:150px">
 		</td>
 	</tr>

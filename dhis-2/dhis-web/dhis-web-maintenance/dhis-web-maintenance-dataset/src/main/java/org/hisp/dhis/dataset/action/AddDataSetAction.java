@@ -287,11 +287,19 @@ public class AddDataSetAction
     {
         this.jsonAttributeValues = jsonAttributeValues;
     }
-
+    
+    private boolean mobile;
+    
+    public void setMobile( boolean mobile )
+    {
+        this.mobile = mobile;
+    }
+    
     // -------------------------------------------------------------------------
     // Action
     // -------------------------------------------------------------------------
 
+    @Override
     public String execute()
         throws Exception
     {
@@ -341,6 +349,7 @@ public class AddDataSetAction
         dataSet.setNoValueRequiresComment( noValueRequiresComment );
         dataSet.setNotifyCompletingUser( notifyCompletingUser );
         dataSet.setApproveData( approveData );
+        dataSet.setMobile( mobile );
         dataSet.setSkipOffline( skipOffline );
         dataSet.setDataElementDecoration( dataElementDecoration );
         dataSet.setRenderAsTabs( renderAsTabs );

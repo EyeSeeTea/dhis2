@@ -34,8 +34,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.common.AnalyticalObjectStore;
 import org.hisp.dhis.common.Grid;
@@ -61,8 +59,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class DefaultReportTableService
     implements ReportTableService
 {
-    private static final Log log = LogFactory.getLog( DefaultReportTableService.class );
-
     // ---------------------------------------------------------------------
     // Dependencies
     // ---------------------------------------------------------------------
@@ -109,8 +105,6 @@ public class DefaultReportTableService
     @Override
     public Grid getReportTableGrid( String uid, I18nFormat format, Date reportingPeriod, String organisationUnitUid )
     {
-        log.info( "Generating report table grid: " + uid + ", date: " + reportingPeriod + ", ou: " + organisationUnitUid );
-        
         ReportTable reportTable = getReportTable( uid );
                 
         OrganisationUnit organisationUnit = organisationUnitService.getOrganisationUnit( organisationUnitUid );
@@ -130,7 +124,7 @@ public class DefaultReportTableService
         
         reportTable.init( currentUserService.getCurrentUser(), reportingPeriod, organisationUnit, atLevels, inGroups, format );
 
-        Map<String, Double> valueMap = analyticsService.getAggregatedDataValueMapping( reportTable, format );
+        Map<String, Object> valueMap = analyticsService.getAggregatedDataValueMapping( reportTable, format );
 
         return reportTable.getGrid( new ListGrid(), valueMap, true );
     }
@@ -154,42 +148,50 @@ public class DefaultReportTableService
     // Persistence
     // -------------------------------------------------------------------------
 
+    @Override
     public int saveReportTable( ReportTable reportTable )
     {
         return reportTableStore.save( reportTable );
     }
 
+    @Override
     public void updateReportTable( ReportTable reportTable )
     {
         reportTableStore.update( reportTable );
     }
 
+    @Override
     public void deleteReportTable( ReportTable reportTable )
     {
         reportTableStore.delete( reportTable );
     }
 
+    @Override
     public ReportTable getReportTable( int id )
     {
         return reportTableStore.get( id );
     }
 
+    @Override
     public ReportTable getReportTable( String uid )
     {
         return reportTableStore.getByUid( uid );
     }
 
+    @Override
     public ReportTable getReportTableNoAcl( String uid )
     {
         return reportTableStore.getByUidNoAcl( uid );
     }
 
+    @Override
     public Collection<ReportTable> getReportTables( final Collection<Integer> identifiers )
     {
         Collection<ReportTable> objects = getAllReportTables();
 
         return identifiers == null ? objects : FilterUtils.filter( objects, new Filter<ReportTable>()
         {
+            @Override
             public boolean retain( ReportTable object )
             {
                 return identifiers.contains( object.getId() );
@@ -197,56 +199,67 @@ public class DefaultReportTableService
         } );
     }
     
+    @Override
     public List<ReportTable> getReportTablesByUid( List<String> uids )
     {
         return reportTableStore.getByUid( uids );
     }
 
+    @Override
     public List<ReportTable> getAllReportTables()
     {
         return reportTableStore.getAll();
     }
 
+    @Override
     public List<ReportTable> getReportTableByName( String name )
     {
         return reportTableStore.getAllEqName( name );
     }
 
+    @Override
     public List<ReportTable> getReportTablesBetweenByName( String name, int first, int max )
     {
         return reportTableStore.getAllLikeName( name, first, max );
     }
 
+    @Override
     public int getReportTableCount()
     {
         return reportTableStore.getCount();
     }
 
+    @Override
     public int getReportTableCountByName( String name )
     {
         return reportTableStore.getCountLikeName( name );
     }
 
+    @Override
     public List<ReportTable> getReportTablesBetween( int first, int max )
     {
         return reportTableStore.getAllOrderedName( first, max );
     }
     
+    @Override
     public int countDataSetReportTables( DataSet dataSet )
     {
         return reportTableStore.countDataSetAnalyticalObject( dataSet );
     }
     
+    @Override
     public int countIndicatorReportTables( Indicator indicator )
     {
         return reportTableStore.countIndicatorAnalyticalObject( indicator );
     }
     
+    @Override
     public int countDataElementReportTables( DataElement dataElement )
     {
         return reportTableStore.countDataElementAnalyticalObject( dataElement );
     }
     
+    @Override
     public int countOrganisationUnitReportTables( OrganisationUnit organisationUnit )
     {
         return reportTableStore.countOrganisationUnitAnalyticalObject( organisationUnit );

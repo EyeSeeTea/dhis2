@@ -15,7 +15,7 @@ trackerCapture.controller('UpcomingEventsController',
 
     TranslationService.translate();
     
-    $scope.today = DateUtils.format(moment());
+    $scope.today = DateUtils.getToday();
     
     $scope.selectedOuMode = 'SELECTED';
     $scope.report = {};
@@ -85,7 +85,14 @@ trackerCapture.controller('UpcomingEventsController',
         $scope.reportStarted = true;        
         
         $scope.upcomingEvents = [];
-        EventReportService.getEventReport($scope.selectedOrgUnit.id, $scope.selectedOuMode, $scope.selectedProgram.id, $scope.report.startDate, $scope.report.endDate, 'ACTIVE','SCHEDULE', $scope.pager).then(function(data){                     
+        EventReportService.getEventReport($scope.selectedOrgUnit.id, 
+                                        $scope.selectedOuMode, 
+                                        $scope.selectedProgram.id, 
+                                        DateUtils.formatFromUserToApi($scope.report.startDate), 
+                                        DateUtils.formatFromUserToApi($scope.report.endDate), 
+                                        'ACTIVE',
+                                        'SCHEDULE', 
+                                        $scope.pager).then(function(data){                     
                 
             if( data.pager ){
                 $scope.pager = data.pager;
@@ -102,16 +109,17 @@ trackerCapture.controller('UpcomingEventsController',
                 angular.forEach(row.attributes, function(att){
                     upcomingEvent[att.attribute] = att.value;
                 });
-
-                upcomingEvent.dueDate = DateUtils.format(row.dueDate);
+                    
+                upcomingEvent.dueDate = DateUtils.formatFromApiToUser(row.dueDate);
                 upcomingEvent.event = row.event;
-                upcomingEvent.eventName = row.eventName;
+                upcomingEvent.eventName = $scope.programStages[row.programStage].name;
+                upcomingEvent.eventOrgUnitName = row.eventOrgUnitName;
                 upcomingEvent.followup = row.followup;
                 upcomingEvent.program = row.program;
                 upcomingEvent.programStage = row.programStage;
                 upcomingEvent.trackedEntityInstance = row.trackedEntityInstance;
                 upcomingEvent.orgUnitName = row.registrationOrgUnit;
-                upcomingEvent.created = DateUtils.format(row.registrationDate);;
+                upcomingEvent.created = DateUtils.formatFromApiToUser(row.registrationDate);;
                 $scope.upcomingEvents.push(upcomingEvent);
 
             });
@@ -137,9 +145,12 @@ trackerCapture.controller('UpcomingEventsController',
                 $scope.programStages[stage.id] = stage;
             });
 
+            
             AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){            
                 $scope.gridColumns = TEIGridService.generateGridColumns(atts, $scope.selectedOuMode);
-
+                
+                $scope.gridColumns.push({name: $translate('event_orgunit_name'), id: 'eventOrgUnitName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
+                $scope.filterTypes['eventOrgUnitName'] = 'string';
                 $scope.gridColumns.push({name: $translate('event_name'), id: 'eventName', type: 'string', displayInListNoProgram: false, showFilter: false, show: true});
                 $scope.filterTypes['eventName'] = 'string';
                 $scope.gridColumns.push({name: $translate('due_date'), id: 'dueDate', type: 'date', displayInListNoProgram: false, showFilter: false, show: true});

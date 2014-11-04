@@ -37,6 +37,9 @@ import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 
+/**
+ * @author Lars Helge Overland
+ */
 @JacksonXmlRootElement( localName = "dataValue", namespace = DxfNamespaces.DXF_2_0)
 public class DataValue
 {
@@ -74,6 +77,21 @@ public class DataValue
     {
     }
 
+    //--------------------------------------------------------------------------
+    // Logic
+    //--------------------------------------------------------------------------
+
+    public boolean hasLastUpdated()
+    {
+        String updated = getLastUpdated();
+        return updated != null && !updated.isEmpty();
+    }
+    
+    public boolean hasCreated()
+    {
+        String creat = getCreated();
+        return creat != null && !creat.isEmpty();
+    }
 
     //--------------------------------------------------------------------------
     // Getters and setters
