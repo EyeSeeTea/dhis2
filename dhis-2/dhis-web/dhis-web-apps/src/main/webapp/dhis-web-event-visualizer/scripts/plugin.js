@@ -3292,46 +3292,18 @@ Ext.onReady( function() {
 
 	// PLUGIN
 
-		// css
-	//css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
-	//css += '.td-nobreak { \n white-space: nowrap; \n } \n';
-	//css += '.td-hidden { \n display: none; \n } \n';
-	//css += '.td-collapsed { \n display: none; \n } \n';
-	//css += 'table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n';
-	//css += '.pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n';
-	//css += '.pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n';
-	//css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
-	//css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
-	//css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
-	//css += '.pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n';
-	//css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
-	//css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
-	//css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
-	//css += '.pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n';
-	//css += '.pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n';
-	//css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
-	//css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
-    //css += '.pivot-dim-label { \n background-color: #cddaed; \n white-space: nowrap; \n text-align: center; \n } \n';
-    //css += '.pivot-empty { \n background-color: #cddaed; \n } \n';
-    //css += '.pivot-transparent-column { \n background-color: #fff; \n border-top-color: #fff !important; \n border-right-color: #fff !important; \n } \n';
-    //css += '.pivot-transparent-row { \n background-color: #fff; \n border-bottom-color: #fff !important; \n border-left-color: #fff !important; \n } \n';
+	// chart tips css
+	var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
+	css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
+	css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
 
-    //css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
-	//css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
-	//css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';
-    //css += '.x-mask { opacity: 0 } \n';
+	// load mask css
+	css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
+	css += '.x-mask-msg div { background-position: 11px center; } \n';
+	css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+    css += '.x-mask { opacity: 0; } \n';
 
-	//css += '.pivot td.legend { \n padding: 0; \n } \n';
-	//css += '.pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n';
-	//css += '.pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n';
-	//css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
-	//css += '.pivot div.number { \n display: table-cell; \n } \n',
-	//css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
-
-	//css += '.pointer { \n cursor: pointer; \n } \n';
-	//css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v217/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
-
-	//Ext.util.CSS.createStyleSheet(css);
+	Ext.util.CSS.createStyleSheet(css);
 
 	EV.plugin = {};
 
@@ -3407,9 +3379,9 @@ Ext.onReady( function() {
                                                 init.namePropertyUrl = namePropertyUrl;
 
                                                 // dhis2
-                                                dhis2.util.namespace('dhis2.er');
+                                                dhis2.util.namespace('dhis2.ev');
 
-                                                dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
+                                                dhis2.ev.store = dhis2.ev.store || new dhis2.storage.Store({
                                                     name: 'dhis2',
                                                     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
                                                     objectStores: ['optionSets']
@@ -3420,7 +3392,7 @@ Ext.onReady( function() {
                                                     url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
                                                     success: function(r) {
                                                         var optionSets = r.optionSets || [],
-                                                            store = dhis2.er.store,
+                                                            store = dhis2.ev.store,
                                                             ids = [],
                                                             url = '',
                                                             callbacks = 0,
@@ -3517,9 +3489,6 @@ Ext.onReady( function() {
 			}
 		});
 
-        // option sets
-        requests.push();
-
 		for (var i = 0; i < requests.length; i++) {
 			Ext.data.JsonP.request(requests[i]);
 		}
@@ -3551,7 +3520,7 @@ Ext.onReady( function() {
 			return true;
 		};
 
-        extendInstance = function(pt) {
+        extendInstance = function(ns) {
             var init = ns.core.init,
                 conf = ns.core.conf,
 				api = ns.core.api,
@@ -3559,6 +3528,9 @@ Ext.onReady( function() {
 				service = ns.core.service,
 				web = ns.core.web,
                 dimConf = conf.finals.dimension;
+
+			init.el = config.el;
+            Ext.get(init.el).setStyle('opacity', 0);
 
 			// report
 			web.report = web.report || {};
@@ -3684,12 +3656,17 @@ Ext.onReady( function() {
                         return;
                     }
 
-                    web.mask.show(ns.app.centerRegion, 'Error while rendering chart..');
-
                     chart = web.report.aggregate.createChart(layout, xLayout, xResponse, ns.app.centerRegion);
 
-                    ns.app.centerRegion.update();
-                    ns.app.centerRegion.removeAll(true);
+                    chart.on('afterrender', function() {
+                        Ext.defer( function() {
+                            Ext.get(ns.core.init.el).fadeIn({
+                                duration: 400
+                            });
+                        }, 300 );
+                    });
+
+                    ns.app.centerRegion.removeAll();
                     ns.app.centerRegion.add(chart);
 
                     // after render
@@ -3698,12 +3675,6 @@ Ext.onReady( function() {
                     ns.app.response = response;
                     ns.app.xResponse = xResponse;
                     ns.app.chart = chart;
-
-                    if (EV.isSessionStorage) {
-                        web.storage.session.set(layout, 'eventchart');
-                    }
-
-                    ns.app.accordion.setGui(layout, xLayout, response, isUpdateGui); //table);
 
                     web.mask.hide(ns.app.centerRegion);
 
@@ -3738,10 +3709,27 @@ Ext.onReady( function() {
         };
 
 		createViewport = function() {
+			var el = Ext.get(ns.core.init.el),
+				centerRegion,
+				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
+				elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
+				elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
+				elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom')),
+				width = el.getWidth() - elBorderW - elPaddingW,
+				height = el.getHeight() - elBorderH - elPaddingH;
+
+			centerRegion = Ext.create('Ext.panel.Panel', {
+				renderTo: el,
+				bodyStyle: 'border: 0 none',
+				width: config.width || width,
+				height: config.height || height,
+				layout: 'fit'
+			});
+
 			return {
-				centerRegion: Ext.get(config.el)
+				centerRegion: centerRegion
 			};
-		};
+        };
 
 		initialize = function() {
 			if (!validateConfig(config)) {
