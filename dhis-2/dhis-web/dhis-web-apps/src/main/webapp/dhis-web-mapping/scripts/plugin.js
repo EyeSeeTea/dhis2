@@ -5065,7 +5065,8 @@ Ext.onReady( function() {
 
 	// GIS PLUGIN (plugin.js)
 	var init = {
-			user: {}
+			user: {},
+            systemInfo: {}
 		},
 		configs = [],
 		isInitStarted = false,
@@ -5085,11 +5086,13 @@ Ext.onReady( function() {
 
 	GIS.plugin = {};
 
-	getInit = function(url) {
+	getInit = function(contextPath) {
 		var isInit = false,
 			requests = [],
 			callbacks = 0,
 			fn;
+
+        init.contextPath = contextPath;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
@@ -5103,84 +5106,120 @@ Ext.onReady( function() {
 			}
 		};
 
-		requests.push({
-			url: url + '/api/system/info.jsonp',
-			success: function(r) {
-				init.contextPath = r.contextPath;
-				fn();
-			}
-		});
-
-        // date, calendar
+        // dhis2
         requests.push({
-            url: url + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            url: contextPath + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
             success: function(r) {
-                var systemSettings = Ext.decode(r.responseText);
+                var systemSettings = r;
                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                 init.systemInfo.calendar = systemSettings.keyCalendar;
 
                 // user-account
-                Ext.Ajax.request({
-                    url: init.contextPath + '/api/me/user-account.json',
+                Ext.data.JsonP.request({
+                    url: contextPath + '/api/me/user-account.jsonp',
                     success: function(r) {
-                        init.userAccount = Ext.decode(r.responseText);
+                        init.userAccount = r;
 
-                        // init
-                        var defaultKeyUiLocale = 'en',
-                            defaultKeyAnalysisDisplayProperty = 'name',
-                            namePropertyUrl,
-                            contextPath,
-                            keyUiLocale,
-                            dateFormat;
+                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
 
-                        init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
-                        init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+                                                // init
+                                                var defaultKeyUiLocale = 'en',
+                                                    defaultKeyAnalysisDisplayProperty = 'name',
+                                                    namePropertyUrl,
+                                                    contextPath,
+                                                    keyUiLocale,
+                                                    dateFormat;
 
-                        // local vars
-                        contextPath = init.contextPath;
-                        keyUiLocale = init.userAccount.settings.keyUiLocale;
-                        keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
-                        namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
-                        dateFormat = init.systemInfo.dateFormat;
+                                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
 
-                        init.namePropertyUrl = namePropertyUrl;
+                                                // local vars
+                                                contextPath = init.contextPath;
+                                                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                                dateFormat = init.systemInfo.dateFormat;
 
-                        // calendar
-                        (function() {
-                            var dhis2PeriodUrl = '../dhis-web-commons/javascripts/dhis2/dhis2.period.js',
-                                defaultCalendarId = 'gregorian',
-                                calendarIdMap = {'iso8601': defaultCalendarId},
-                                calendarId = calendarIdMap[init.systemInfo.calendar] || init.systemInfo.calendar || defaultCalendarId,
-                                calendarIds = ['coptic', 'ethiopian', 'islamic', 'julian', 'nepali', 'thai'],
-                                calendarScriptUrl,
-                                createGenerator;
+                                                init.namePropertyUrl = namePropertyUrl;
 
-                            // calendar
-                            createGenerator = function() {
-                                init.calendar = $.calendars.instance(calendarId);
-                                init.periodGenerator = new dhis2.period.PeriodGenerator(init.calendar, init.systemInfo.dateFormat);
-                            };
+                                                // dhis2
+                                                dhis2.util.namespace('dhis2.er');
 
-                            if (Ext.Array.contains(calendarIds, calendarId)) {
-                                calendarScriptUrl = '../dhis-web-commons/javascripts/jQuery/calendars/jquery.calendars.' + calendarId + '.min.js';
+                                                dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
+                                                    name: 'dhis2',
+                                                    adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                                    objectStores: ['optionSets']
+                                                });
 
-                                Ext.Loader.injectScriptElement(calendarScriptUrl, function() {
-                                    Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
+                                                // option sets
+                                                Ext.data.JsonP.request({
+                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
+                                                    success: function(r) {
+                                                        var optionSets = r.optionSets || [],
+                                                            store = dhis2.er.store,
+                                                            ids = [],
+                                                            url = '',
+                                                            callbacks = 0,
+                                                            checkOptionSet,
+                                                            updateStore;
+
+                                                        updateStore = function() {
+                                                            if (++callbacks === optionSets.length) {
+                                                                if (!ids.length) {
+                                                                    fn();
+                                                                    return;
+                                                                }
+
+                                                                for (var i = 0; i < ids.length; i++) {
+                                                                    url += '&filter=id:eq:' + ids[i];
+                                                                }
+
+                                                                Ext.data.JsonP.request({
+                                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                                    success: function(r) {
+                                                                        var sets = r.optionSets;
+
+                                                                        store.setAll('optionSets', sets).done(fn);
+                                                                    }
+                                                                });
+                                                            }
+                                                        };
+
+                                                        registerOptionSet = function(optionSet) {
+                                                            store.get('optionSets', optionSet.id).done( function(obj) {
+                                                                if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                                    ids.push(optionSet.id);
+                                                                }
+
+                                                                updateStore();
+                                                            });
+                                                        };
+
+                                                        store.open().done( function() {
+                                                            for (var i = 0; i < optionSets.length; i++) {
+                                                                registerOptionSet(optionSets[i]);
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    });
                                 });
-                            }
-                            else {
-                                Ext.Loader.injectScriptElement(dhis2PeriodUrl, createGenerator);
-                            }
-                        }());
-
-                        fn();
+                            });
+                        });
                     }
                 });
             }
         });
 
 		requests.push({
-			url: url + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			url: contextPath + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
 			success: function(r) {
 				var organisationUnits = r.organisationUnits || [],
                     ou = [],
@@ -5210,7 +5249,7 @@ Ext.onReady( function() {
 		});
 
 		requests.push({
-			url: url + '/api/dimensions.jsonp?links=false&paging=false',
+			url: contextPath + '/api/dimensions.jsonp?links=false&paging=false',
 			success: function(r) {
 				init.dimensions = r.dimensions;
 				fn();
