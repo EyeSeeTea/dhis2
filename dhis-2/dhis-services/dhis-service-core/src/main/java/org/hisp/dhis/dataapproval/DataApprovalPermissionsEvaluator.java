@@ -28,16 +28,12 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
+
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
 
 /**
  * This package private class holds the context for deciding on data approval permissions.
@@ -50,10 +46,10 @@ import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DAT
  * @author Jim Grace
  */
 class DataApprovalPermissionsEvaluator
-{
-    DataApprovalLevelService dataApprovalLevelService;
+{    
+    private DataApprovalLevelService dataApprovalLevelService;
 
-    User user;
+    private User user;
 
     private boolean acceptanceRequiredForApproval;
     private boolean hideUnapprovedData;
@@ -63,7 +59,7 @@ class DataApprovalPermissionsEvaluator
     private boolean authorizedToAcceptAtLowerLevels;
     private boolean authorizedToViewUnapprovedData;
 
-    int maxApprovalLevel;
+    private int maxApprovalLevel;
 
     private DataApprovalPermissionsEvaluator()
     {
@@ -129,12 +125,11 @@ class DataApprovalPermissionsEvaluator
             return permissions; // No permissions are set.
         }
 
-        DataApprovalLevel userApprovalLevel = dataApprovalLevelService.getUserApprovalLevel( user, da.getOrganisationUnit(), false );
+        DataApprovalLevel userApprovalLevel = dataApprovalLevelService.getUserApprovalLevel( user, da.getOrganisationUnit() );
 
         if ( userApprovalLevel == null )
         {
-            tracePrint( "getPermissions userApprovalLevel is null for user " + ( user == null ? "(null)" : user.getUsername() )
-                    + " orgUnit " +  da.getOrganisationUnit().getName() );
+            tracePrint( "getPermissions userApprovalLevel null for user " + ( user == null ? "(null)" : user.getUsername() ) + " orgUnit " +  da.getOrganisationUnit().getName() );
 
             return permissions; // Can't find user approval level, so no permissions are set.
         }
@@ -160,6 +155,7 @@ class DataApprovalPermissionsEvaluator
         boolean mayReadData = authorizedToViewUnapprovedData || !hideUnapprovedData || mayApprove
                 || userLevel >= dataLevel;
 
+        /*
         tracePrint( "getPermissions orgUnit " + ( da.getOrganisationUnit() == null ? "(null)" : da.getOrganisationUnit().getName() )
                 + " combo " + da.getAttributeOptionCombo().getName() + " state " + s.name()
                 + " isApproved " + s.isApproved()+ " isApprovable " + s.isApprovable()+ " isUnapprovable " + s.isUnapprovable()
@@ -169,6 +165,7 @@ class DataApprovalPermissionsEvaluator
                 + " mayApprove " + mayApprove + " mayUnapprove " + mayUnapprove
                 + " mayAccept " + mayAccept + " mayUnaccept " + mayUnaccept
                 + " mayReadData " + mayReadData );
+        */
 
         permissions.setMayApprove( mayApprove );
         permissions.setMayUnapprove( mayUnapprove );
@@ -181,6 +178,6 @@ class DataApprovalPermissionsEvaluator
 
     private static void tracePrint( String s )
     {
-        System.out.println( s );
+        //System.out.println( s );
     }
 }

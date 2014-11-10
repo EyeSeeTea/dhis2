@@ -178,10 +178,10 @@ public interface DataApprovalLevelService
      * position possible (to facilitate the use case where users add the
      * approval levels from low to high.)
      *
-     * @param newLevel the new level to add.
+     * @param level the new level to add.
      * @return the identifier of the added level, or -1 if not well formed or duplicate.
      */
-    int addDataApprovalLevel( DataApprovalLevel newLevel );
+    int addDataApprovalLevel( DataApprovalLevel level );
     
     /**
      * Adds a new data approval level. Sets the level epxlicitl.
@@ -204,21 +204,19 @@ public interface DataApprovalLevelService
      * (if the user is authorized for any) on this organisation unit.
      *
      * @param orgUnit org unit to test
-     * @param includeDataViewOrgUnits include data view org units in test?
      * @return approval level
      */
-    DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits );
+    DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit );
 
     /**
      * Gets the approval level at which this user may make approval actions
      * (if the user is authorized for any) on this organisation unit.
      *
      * @param orgUnit org unit to test
-     * @param includeDataViewOrgUnits include data view org units in test?
      * @param user user to get approval level from.
      * @return approval level
      */
-    DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit, boolean includeDataViewOrgUnits );
+    DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit );
 
     /**
      * By organisation unit subhierarchy, returns the lowest data approval
