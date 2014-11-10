@@ -3281,12 +3281,12 @@ Ext.onReady( function() {
 		});
 
 		dataElementsByStageStore = Ext.create('Ext.data.Store', {
-			fields: [''],
+			fields: ['id', 'name', 'isAttribute'],
 			data: [],
 			sorters: [
                 {
                     property: 'isAttribute',
-                    direction: 'ASC'
+                    direction: 'DESC'
                 },
                 {
                     property: 'name',
