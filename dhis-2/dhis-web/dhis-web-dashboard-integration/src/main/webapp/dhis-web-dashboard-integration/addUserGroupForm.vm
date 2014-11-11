@@ -1,9 +1,9 @@
 <script type="text/javascript">
     $( document ).ready( function() {
-        $( '$usersAvailable' ).selected( {
+        $( '#usersAvailable' ).selected( {
             url: '../api/users.json',
             target: $( '#usersSelected' ),
-            search: $( '#usersAvailableSearch' )
+            search: $( '#usersAvailableSearch' ),
             iterator: 'users'
         });
 

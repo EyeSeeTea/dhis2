@@ -11,7 +11,7 @@
             form.submit();
         }, {
             'beforeValidateHandler': function() {
-                $( '#usSelected' ).find( 'option' ).attr( 'selected', 'selected' );
+                $( '#usersSelected' ).find( 'option' ).attr( 'selected', 'selected' );
                 #tblDynamicAttributesJavascript();
             },
             'rules': getValidationRules( 'userGroup' )

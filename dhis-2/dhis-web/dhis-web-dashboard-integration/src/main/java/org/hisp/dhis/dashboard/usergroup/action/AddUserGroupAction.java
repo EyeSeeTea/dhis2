@@ -30,6 +30,7 @@ package org.hisp.dhis.dashboard.usergroup.action;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hisp.dhis.attribute.AttributeService;
@@ -82,7 +83,7 @@ public class AddUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<String> usersSelected;
+    private List<String> usersSelected = new ArrayList<>();
 
     public void setUsersSelected( List<String> usersSelected )
     {
@@ -113,8 +114,13 @@ public class AddUserGroupAction
     {
         boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
 
+        if( usersSelected == null )
+        {
+            usersSelected = new ArrayList<>();
+        }
+
         UserGroup userGroup = new UserGroup( name );
-        
+
         for ( String userUid : usersSelected )
         {
             User user = userService.getUser( userUid );

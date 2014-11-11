@@ -39,6 +39,7 @@ import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -124,6 +125,11 @@ public class UpdateUserGroupAction
         throws Exception
     {
         boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
+
+        if( usersSelected == null )
+        {
+            usersSelected = new ArrayList<>();
+        }
 
         UserGroup userGroup = userGroupService.getUserGroup( userGroupId );
 
