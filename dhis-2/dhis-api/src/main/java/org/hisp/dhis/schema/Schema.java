@@ -332,6 +332,17 @@ public class Schema implements Ordered
         this.propertyMap = propertyMap;
     }
 
+    @JsonIgnore
+    public Property getProperty( String name )
+    {
+        if ( propertyMap.containsKey( name ) )
+        {
+            return propertyMap.get( name );
+        }
+
+        return null;
+    }
+
     private Map<AuthorityType, List<String>> authorityMap = Maps.newHashMap();
 
     public List<String> getAuthorityByType( AuthorityType type )

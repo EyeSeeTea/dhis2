@@ -45,6 +45,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -67,6 +68,7 @@ import org.hisp.dhis.common.BaseAnalyticalObject;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.NameableObject;
+import org.hisp.dhis.common.NumericSortWrapper;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -816,8 +818,13 @@ public class DefaultChartService
 
         BaseAnalyticalObject.sortKeys( valueMap );
         
-        List<NameableObject> seriez = chart.series();
-        List<NameableObject> categories = chart.category();
+        List<NameableObject> seriez = new ArrayList<>( chart.series() );
+        List<NameableObject> categories = new ArrayList<>( chart.category() );
+        
+        if ( chart.hasSortOrder() )
+        {
+            categories = getSortedCategories( categories, chart, valueMap );
+        }
         
         for ( NameableObject series : seriez )
         {
@@ -827,18 +834,8 @@ public class DefaultChartService
             {
                 categoryIndex++;
 
-                String key = series.getUid() + DIMENSION_SEP + category.getUid();
-
-                // Replace potential operand separator with dimension separator
-
-                key = chart.isAnalyticsType( AnalyticsType.AGGREGATE ) ? key.replace( DataElementOperand.SEPARATOR, DIMENSION_SEP ) : key; 
+                String key = getKey( series, category, chart.getAnalyticsType() );
                 
-                // TODO fix issue with keys including -
-                
-                // Sort key on components to remove significance of column order
-                
-                key = BaseAnalyticalObject.sortKey( key );
-
                 Object object = valueMap.get( key );
                 
                 Number value = object != null && object instanceof Number ? (Number) object : null;
@@ -871,7 +868,53 @@ public class DefaultChartService
 
         return new CategoryDataset[]{ regularDataSet, regressionDataSet };
     }
+    
+    /**
+     * Creates a key based on the given input. Sorts the key on its components
+     * to remove significance of column order.
+     */
+    private String getKey( NameableObject series, NameableObject category, AnalyticsType analyticsType )
+    {
+        String key = series.getUid() + DIMENSION_SEP + category.getUid();
 
+        // Replace potential operand separator with dimension separator
+
+        key = AnalyticsType.AGGREGATE.equals( analyticsType ) ? key.replace( DataElementOperand.SEPARATOR, DIMENSION_SEP ) : key; 
+        
+        // TODO fix issue with keys including -.
+        
+        return BaseAnalyticalObject.sortKey( key );
+    }
+
+    /**
+     * Returns a list of sorted nameable objects. Sorting is defined per the
+     * corresponding value in the given value map.
+     */
+    private List<NameableObject> getSortedCategories( List<NameableObject> categories, BaseChart chart, Map<String, Object> valueMap )
+    {
+        NameableObject series = chart.series().get( 0 );
+        
+        int sortOrder = chart.getSortOrder() * -1;
+        
+        List<NumericSortWrapper<NameableObject>> list = new ArrayList<>();
+        
+        for ( NameableObject category : categories )
+        {
+            String key = getKey( series, category, chart.getAnalyticsType() );
+            
+            Object value = valueMap.get( key );
+            
+            if ( value != null && value instanceof Number )
+            {
+                list.add( new NumericSortWrapper<NameableObject>( category, (Double ) value, sortOrder ) );
+            }
+        }
+        
+        Collections.sort( list );
+        
+        return NumericSortWrapper.getObjectList( list );
+    }
+    
     // -------------------------------------------------------------------------
     // CRUD operations
     // -------------------------------------------------------------------------
