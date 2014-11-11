@@ -1054,18 +1054,79 @@ Ext.onReady( function() {
                     rows = [],
                     lonIndex,
                     latIndex,
-                    map = Ext.clone(r.metaData.names);
+                    optionSetIndex,
+                    optionSetHeader,
+                    map = Ext.clone(r.metaData.names),
+                    updateFeatures;
 
-                // name-column map, lonIndex, latIndex
-                for (var i = 0; i < r.headers.length; i++) {
-                    map[r.headers[i].name] = r.headers[i].column;
+                updateFeatures = function() {
+                    for (var i = 0, header; i < r.headers.length; i++) {
+                        header = r.headers[i];
+                        map[header.name] = header.column;
+                    }
 
-                    if (r.headers[i].name === 'longitude') {
+                    // events
+                    for (var i = 0, row, obj; i < rows.length; i++) {
+                        row = rows[i];
+                        obj = {};
+
+                        for (var j = 0; j < row.length; j++) {
+                            obj[r.headers[j].name] = j === optionSetIndex ? r.metaData.optionNames[row[j]] || map[row[j]] : row[j];
+                        }
+
+                        obj[gis.conf.finals.widget.value] = 0;
+                        obj.label = obj.ouname;
+                        obj.popupText = obj.ouname;
+                        obj.nameColumnMap = map;
+
+                        events.push(obj);
+                    }
+
+                    // features
+                    for (var i = 0, event, point; i < events.length; i++) {
+                        event = events[i];
+
+                        point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
+
+                        features.push(new OpenLayers.Feature.Vector(point, event));
+                    }
+
+                    layer.removeFeatures(layer.features);
+                    layer.addFeatures(features);
+
+                    loadLegend(view);
+                };
+
+                getOptionSets = function() {
+                    if (!optionSetHeader) {
+                        updateFeatures();
+                    }
+
+                    dhis2.gis.store.get('optionSets', optionSetHeader.optionSet).done( function(obj) {
+                        Ext.apply(r.metaData.optionNames, gis.util.array.getObjectMap(obj.options, 'code', 'name'));
+                        updateFeatures();
+                    });
+                };
+
+                r.metaData.optionNames = {};
+
+                // name-column map, lonIndex, latIndex, optionSet
+                for (var i = 0, header; i < r.headers.length; i++) {
+                    header = r.headers[i];
+
+                    map[header.name] = header.column;
+
+                    if (header.name === 'longitude') {
                         lonIndex = i;
                     }
 
-                    if (r.headers[i].name === 'latitude') {
+                    if (header.name === 'latitude') {
                         latIndex = i;
+                    }
+
+                    if (Ext.isString(header.optionSet) && header.optionSet.length) {
+                        optionSetIndex = i;
+                        optionSetHeader = header;
                     }
                 }
 
@@ -1086,43 +1147,8 @@ Ext.onReady( function() {
                     return;
                 }
 
-                // name-column map
-                map = r.metaData.names;
-
-                for (var i = 0; i < r.headers.length; i++) {
-                    map[r.headers[i].name] = r.headers[i].column;
-                }
-
-                // events
-                for (var i = 0, row, obj; i < rows.length; i++) {
-                    row = rows[i];
-                    obj = {};
-
-                    for (var j = 0; j < row.length; j++) {
-                        obj[r.headers[j].name] = row[j];
-                    }
-
-                    obj[gis.conf.finals.widget.value] = 0;
-                    obj.label = obj.ouname;
-                    obj.popupText = obj.ouname;
-                    obj.nameColumnMap = map;
-
-                    events.push(obj);
-                }
-
-                // features
-                for (var i = 0, event, point; i < events.length; i++) {
-                    event = events[i];
-
-                    point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
-
-                    features.push(new OpenLayers.Feature.Vector(point, event));
-                }
-
-                layer.removeFeatures(layer.features);
-                layer.addFeatures(features);
-
-                loadLegend(view);
+                // option set
+                getOptionSets();
             };
 
 			if (Ext.isObject(GIS.app)) {
@@ -2720,6 +2746,25 @@ Ext.onReady( function() {
 
 				return array;
 			};
+
+            util.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return {};
+                }
+
+                var o = {};
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+                namePrefix = namePrefix || '';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    o[namePrefix + obj[idProperty]] = obj[nameProperty];
+                }
+
+                return o;
+            };
 
             util.layout = {};
 

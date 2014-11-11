@@ -82,11 +82,11 @@ public class AddUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<Integer> groupMembersList;
+    private List<String> usersSelected;
 
-    public void setGroupMembersList( List<Integer> groupMembersList )
+    public void setUsersSelected( List<String> usersSelected )
     {
-        this.groupMembersList = groupMembersList;
+        this.usersSelected = usersSelected;
     }
 
     private String name;
@@ -115,9 +115,15 @@ public class AddUserGroupAction
 
         UserGroup userGroup = new UserGroup( name );
         
-        for ( Integer groupMember : groupMembersList )
+        for ( String userUid : usersSelected )
         {
-            User user = userService.getUser( groupMember );
+            User user = userService.getUser( userUid );
+
+            if( user == null )
+            {
+                continue;
+            }
+
             userGroup.addUser( user );
 
             if ( writeGroupRequired && !userGroup.getMembers().contains( user) && !userService.canUpdate( user.getUserCredentials() ) )
@@ -128,8 +134,7 @@ public class AddUserGroupAction
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues,
-                attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
         userGroupService.addUserGroup( userGroup );

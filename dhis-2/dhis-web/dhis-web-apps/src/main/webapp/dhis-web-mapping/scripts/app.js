@@ -2318,6 +2318,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
+                    style: 'margin-bottom:2px',
 					fieldLabel: isPublicAccess ? GIS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'gis-combo',
@@ -2482,7 +2483,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: 'Sharing settings',
-			bodyStyle: 'padding:6px 6px 0; background-color:#fff',
+			bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -2490,7 +2491,7 @@ Ext.onReady( function() {
 				{
 					html: sharing.object.name,
 					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
-					style: 'margin-bottom:8px'
+					style: 'margin-bottom:7px'
 				},
 				{
 					xtype: 'container',
@@ -2500,6 +2501,11 @@ Ext.onReady( function() {
 						userGroupField,
 						userGroupButton
 					]
+				},
+				{
+					html: GIS.i18n.created_by + ' ' + sharing.object.user.name,
+					bodyStyle: 'border:0 none; color:#777',
+					style: 'margin-top:2px;margin-bottom:7px'
 				},
 				userGroupRowContainer
 			],
@@ -4179,12 +4185,18 @@ Ext.onReady( function() {
 		});
 
 		dataElementsByStageStore = Ext.create('Ext.data.Store', {
-			fields: [''],
+			fields: ['id', 'name', 'isAttribute'],
 			data: [],
-			sorters: [{
-				property: 'name',
-				direction: 'ASC'
-			}]
+			sorters: [
+                {
+                    property: 'isAttribute',
+                    direction: 'DESC'
+                },
+                {
+                    property: 'name',
+                    direction: 'ASC'
+                }
+            ]
 		});
 
 		// components
@@ -4264,6 +4276,11 @@ Ext.onReady( function() {
 
                         stages = program.programStages;
                         attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute');
+
+                        // mark as attribute
+                        for (var i = 0; i < attributes.length; i++) {
+                            attributes[i].isAttribute = true;
+                        }
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -4606,7 +4623,6 @@ Ext.onReady( function() {
                 var greg = $.calendars.instance('gregorian'),
                     date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
 
-                date = gis.init.calendar.fromJD(date.toJD());
                 return gis.init.calendar.formatDate(gis.init.systemInfo.dateFormat, date);
             }(),
             listeners: {
@@ -4624,7 +4640,7 @@ Ext.onReady( function() {
             columnWidth: 0.5,
             height: 41,
             style: 'margin-left: 1px',
-            value: gis.init.calendar.today().toString(),
+            value: gis.init.calendar.formatDate(gis.init.systemInfo.dateFormat, gis.init.calendar.today()),
             listeners: {
                 render: function(c) {
                     onDateFieldRender(c);
@@ -9059,9 +9075,6 @@ Ext.onReady( function() {
 		});
 
 		onRender = function(vp) {
-            var initEl = document.getElementById('init');
-            initEl.parentNode.removeChild(initEl);
-
 			gis.olmap.mask = Ext.create('Ext.LoadMask', vp.getEl(), {
 				msg: 'Loading'
 			});
@@ -9162,6 +9175,19 @@ Ext.onReady( function() {
 					}
 				}
 			}
+
+            var initEl = document.getElementById('init');
+            initEl.parentNode.removeChild(initEl);
+
+            Ext.getBody().setStyle('background', '#fff');
+            Ext.getBody().setStyle('opacity', 0);
+
+            // fade in
+            Ext.defer( function() {
+                Ext.getBody().fadeIn({
+                    duration: 600
+                });
+            }, 300 );
 		};
 
 		viewport = Ext.create('Ext.container.Viewport', {
@@ -9297,46 +9323,42 @@ Ext.onReady( function() {
 
                                         // i18n
                                         requests.push({
-                                            url: 'i18n/' + keyUiLocale + '.properties',
+                                            url: 'i18n/i18n_app.properties',
                                             success: function(r) {
                                                 GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                Ext.get('init').update(GIS.i18n.initializing + '..');
 
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                        success: function(r) {
-                                                            Ext.applyIf(GIS.i18n, dhis2.util.parseJavaProperties(r.responseText));
-                                                        },
-                                                        callback: fn
-                                                    })
+                                                if (keyUiLocale === defaultKeyUiLocale) {
+                                                    Ext.get('init').update(GIS.i18n.initializing + '..');
+                                                    fn();
                                                 }
                                                 else {
-                                                    fn();
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.apply(GIS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                        },
+                                                        failure: function() {
+                                                            console.log('No translations found for system locale (' + keyUiLocale + ')');
+                                                        },
+                                                        callback: function() {
+                                                            Ext.get('init').update(GIS.i18n.initializing + '..');
+                                                            fn();
+                                                        }
+                                                    });
                                                 }
                                             },
                                             failure: function() {
-                                                var onFailure = function() {
-                                                    alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                                };
-
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                        success: function(r) {
-                                                            console.log('No translations found for system locale (' + keyUiLocale + ').');
-                                                            GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        },
-                                                        failure: function() {
-                                                            onFailure();
-                                                        },
-                                                        callback: fn
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                    onFailure();
-                                                }
+                                                Ext.Ajax.request({
+                                                    url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                    success: function(r) {
+                                                        GIS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                        Ext.get('init').update(GIS.i18n.initializing + '..');
+                                                    },
+                                                    failure: function() {
+                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                    },
+                                                    callback: fn
+                                                });
                                             }
                                         });
 
@@ -9487,11 +9509,16 @@ Ext.onReady( function() {
                                                     });
                                                 };
 
-                                                store.open().done( function() {
-                                                    for (var i = 0; i < optionSets.length; i++) {
-                                                        registerOptionSet(optionSets[i]);
-                                                    }
-                                                });
+                                                if (optionSets.length) {
+                                                    store.open().done( function() {
+                                                        for (var i = 0; i < optionSets.length; i++) {
+                                                            registerOptionSet(optionSets[i]);
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
+                                                }
                                             }
                                         });
 

@@ -32,20 +32,12 @@ import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_CSV;
 import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_JSON;
 import static org.hisp.dhis.webapi.utils.ContextUtils.CONTENT_TYPE_XML;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringWriter;
 import java.util.Date;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -56,9 +48,7 @@ import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
-import org.hisp.dhis.webapi.view.ClassPathUriResolver;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -154,18 +144,33 @@ public class DataValueSetController
     @RequestMapping( method = RequestMethod.GET, produces = CONTENT_TYPE_CSV )
     public void getDataValueSetCsv(
         @RequestParam Set<String> dataSet,
-        @RequestParam @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
-        @RequestParam @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
+        @RequestParam( required = false ) String period,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
+        @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam Set<String> orgUnit,
         @RequestParam( required = false ) boolean children,
         ExportOptions exportOptions,
         HttpServletResponse response ) throws IOException
     {
-        log.info( "Get CSV bulk data value set for start date: " + startDate + ", end date: " + endDate );
-
         response.setContentType( CONTENT_TYPE_CSV );
         
-        dataValueSetService.writeDataValueSetCsv( dataSet, startDate, endDate, orgUnit, children, response.getWriter(), exportOptions );
+        boolean isSingleDataValueSet = dataSet.size() == 1 && period != null && orgUnit.size() == 1;
+
+        if ( isSingleDataValueSet )
+        {
+            String ds = dataSet.iterator().next();
+            String ou = orgUnit.iterator().next();
+
+            log.info( "Get CSV data value set for data set: " + ds + ", period: " + period + ", org unit: " + ou );
+
+            dataValueSetService.writeDataValueSetCsv( ds, period, ou, response.getWriter(), exportOptions );
+        }
+        else
+        {
+            log.info( "Get CSV bulk data value set for start date: " + startDate + ", end date: " + endDate );
+            
+            dataValueSetService.writeDataValueSetCsv( dataSet, startDate, endDate, orgUnit, children, response.getWriter(), exportOptions );
+        }        
     }
 
     // -------------------------------------------------------------------------
@@ -198,25 +203,17 @@ public class DataValueSetController
         JacksonUtils.toJson( response.getOutputStream(), summary );
     }
 
-    @RequestMapping( method = RequestMethod.POST, consumes = "application/sdmx+xml" )
+    @RequestMapping( method = RequestMethod.POST, consumes = "application/csv" )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
-    public void postSDMXDataValueSet( ImportOptions importOptions,
-        HttpServletResponse response, InputStream in, Model model ) throws
-        IOException, TransformerConfigurationException, TransformerException
+    public void postCsvDataValueSet( ImportOptions importOptions,
+        HttpServletResponse response, InputStream in, Model model ) throws IOException
     {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        tf.setURIResolver( new ClassPathUriResolver() );
+        ImportSummary summary = dataValueSetService.saveDataValueSetCsv( in, importOptions );
 
-        Transformer transformer = tf.newTransformer( new StreamSource( new ClassPathResource( SDMXCROSS2DXF2_TRANSFORM ).getInputStream() ) );
+        log.info( "Data values set saved " + importOptions );
 
-        StringWriter dxf2 = new StringWriter();
-        transformer.transform( new StreamSource( in ), new StreamResult( dxf2 ) );
-
-        importOptions.setOrgUnitIdScheme( "CODE" ); // Override id scheme
-        importOptions.setDataElementIdScheme( "CODE" );
-
-        dataValueSetService.saveDataValueSetJson(
-            new ByteArrayInputStream( dxf2.toString().getBytes( "UTF-8" ) ), importOptions );
+        response.setContentType( CONTENT_TYPE_XML );
+        JacksonUtils.toXml( response.getOutputStream(), summary );
     }
 
     // -------------------------------------------------------------------------

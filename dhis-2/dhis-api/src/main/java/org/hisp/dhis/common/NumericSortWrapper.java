@@ -1,4 +1,4 @@
-package org.hisp.dhis.about.action;
+package org.hisp.dhis.common;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,65 +28,73 @@ package org.hisp.dhis.about.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.appmanager.App;
-import org.hisp.dhis.appmanager.AppManager;
-import org.hisp.dhis.setting.SystemSettingManager;
-import org.springframework.beans.factory.annotation.Autowired;
-
+import java.util.ArrayList;
 import java.util.List;
 
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_START_MODULE;
-
 /**
+ * Class which wraps an object to make it easy to sort. This class provides a
+ * numeric for sorting and implements the Comparable interface.
+ * 
  * @author Lars Helge Overland
  */
-public class RedirectAction
-    implements Action
+public class NumericSortWrapper<T>
+    implements Comparable<NumericSortWrapper<T>>
 {
-    @Autowired
-    private SystemSettingManager systemSettingManager;
+    private T object;
 
-    @Autowired
-    private AppManager appManager;
-
-    private String redirectUrl;
-
-    public String getRedirectUrl()
+    private Double number;
+    
+    private int sortOrder;
+    
+    /**
+     * @param object the object to wrap.
+     * @param number the number to use as basis for sorting.
+     * @param sortOrder the sort order, negative
+     */
+    public NumericSortWrapper( T object, Double number, int sortOrder )
     {
-        return redirectUrl;
+        this.object = object;
+        this.number = number;
+        this.sortOrder = sortOrder;
     }
-
+    
     @Override
-    public String execute()
-        throws Exception
+    public int compareTo( NumericSortWrapper<T> other )
     {
-        String startModule = (String) systemSettingManager.getSystemSetting( KEY_START_MODULE );
-
-        if ( startModule != null && !startModule.trim().isEmpty() )
+        if ( sortOrder < 0 )
         {
-            if ( startModule.startsWith( "app:" ) )
-            {
-                List<App> apps = appManager.getApps();
-
-                for ( App app : apps )
-                {
-                    if ( app.getName().equals( startModule.substring( "app:".length() ) ) )
-                    {
-                        redirectUrl = app.getLaunchUrl();
-                        return SUCCESS;
-                    }
-                }
-            }
-            else
-            {
-                redirectUrl = "../" + startModule + "/index.action";
-                return SUCCESS;
-            }
+            return number != null ? other != null ? number.compareTo( other.getNumber() ) : 1 : -1;
         }
-
-        redirectUrl = "../dhis-web-dashboard-integration/index.action";
-
-        return SUCCESS;
+        else
+        {
+            return other != null && other.getNumber() != null ? number != null ? other.getNumber().compareTo( number ) : 1 : -1;
+        }
+    }
+    
+    public T getObject()
+    {
+        return object;
+    }
+    
+    public Double getNumber()
+    {
+        return number;
+    }
+    
+    public static <T> List<T> getObjectList( List<NumericSortWrapper<T>> wrapperList )
+    {
+        List<T> list = new ArrayList<>();
+        
+        for ( NumericSortWrapper<T> wrapper : wrapperList )
+        {
+            list.add( wrapper.getObject() );
+        }
+        
+        return list;
+    }
+    
+    public String toString()
+    {
+        return "[Number: " + number + ", object: " + object + "]"; 
     }
 }

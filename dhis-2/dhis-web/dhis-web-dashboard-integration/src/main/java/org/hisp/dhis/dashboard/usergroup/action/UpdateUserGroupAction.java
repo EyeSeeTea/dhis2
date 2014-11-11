@@ -87,27 +87,13 @@ public class UpdateUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<String> usSelected;
+    private List<String> usersSelected;
 
-    public void setUsSelected( List<String> usSelected )
+    public void setUsersSelected( List<String> usersSelected )
     {
-        this.usSelected = usSelected;
-    }
-/*
-    private List<User> users;
-
-    public void setUsers( List<User> users )
-    {
-        this.users = users;
+        this.usersSelected = usersSelected;
     }
 
-    private List<Integer> groupMembersList;
-
-    public void setGroupMembersList( List<Integer> groupMembersList )
-    {
-        this.groupMembersList = groupMembersList;
-    }
-*/
     private String name;
 
     public void setName( String name )
@@ -141,9 +127,9 @@ public class UpdateUserGroupAction
 
         UserGroup userGroup = userGroupService.getUserGroup( userGroupId );
 
-        Set<User> userList = new HashSet<>();
+        Set<User> users = new HashSet<>();
 
-        for ( String userUid : usSelected )
+        for ( String userUid : usersSelected )
         {
             User user = userService.getUser( userUid );
 
@@ -152,7 +138,7 @@ public class UpdateUserGroupAction
                 continue;
             }
 
-            userList.add( user );
+            users.add( user );
 
             if ( writeGroupRequired && !userGroup.getMembers().contains( user ) && !userService.canUpdate( user.getUserCredentials() ) )
             {
@@ -164,7 +150,7 @@ public class UpdateUserGroupAction
         {
             for ( User member : userGroup.getMembers() )
             {
-                if ( !userList.contains( member ) ) // Trying to remove member user from group.
+                if ( !users.contains( member ) ) // Trying to remove member user from group.
                 {
                     boolean otherGroupFound = false;
 
@@ -186,12 +172,11 @@ public class UpdateUserGroupAction
         }
 
         userGroup.setName( name );
-        userGroup.updateUsers( userList );
+        userGroup.updateUsers( users );
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), 
-                jsonAttributeValues, attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
         userGroupService.updateUserGroup( userGroup );

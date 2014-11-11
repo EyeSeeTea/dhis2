@@ -90,6 +90,12 @@ public interface MessageService
 
     long getUnreadMessageConversationCount( User user );
 
+    /**
+     * Get all MessageConversations for the current user.
+     * @return a list of all message conversations for the current user.
+     */
+    List<MessageConversation> getMessageConversations();
+
     List<MessageConversation> getMessageConversations( int first, int max );
 
     List<MessageConversation> getMessageConversations( boolean followUpOnly, boolean unreadOnly, int first, int max );
@@ -99,8 +105,6 @@ public interface MessageService
     int getMessageConversationCount();
 
     int getMessageConversationCount( boolean followUpOnly, boolean unreadOnly );
-
-    List<MessageConversation> getAllMessageConversations();
 
     void deleteMessages( User sender );
 

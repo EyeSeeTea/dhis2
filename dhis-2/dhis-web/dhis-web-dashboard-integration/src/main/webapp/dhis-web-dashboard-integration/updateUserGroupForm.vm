@@ -1,14 +1,12 @@
 <script type="text/javascript">
     $( document ).ready( function() {
-        $( '#usAvailable' ).selected( {
+        $( '#usersAvailable' ).selected( {
             url: '../api/users.json',
-            target: '#usSelected',
-            search: '#usAvailableSearch',
+            target: $( '#usersSelected' ),
+            search: $( '#usersAvailableSearch' ),
             iterator: 'users'
         });
-    });
 
-    $( function() {
         validation2( 'editUserGroupForm', function( form ) {
             form.submit();
         }, {
@@ -18,7 +16,7 @@
             },
             'rules': getValidationRules( 'userGroup' )
         } );
-    } );
+    });
 </script>
 
 <h3>$i18n.getString( "edit_user_group" )</h3>
@@ -44,7 +42,7 @@
 #tblDynamicAttributes( { "attributes": $attributes, "attributeValues": $attributeValues } )
 
 #jqSelected({
-    "prefix": "us",
+    "prefix": "users",
     "i18n_available": "available_users",
     "i18n_selected": "group_members",
     "objects": $groupMembers

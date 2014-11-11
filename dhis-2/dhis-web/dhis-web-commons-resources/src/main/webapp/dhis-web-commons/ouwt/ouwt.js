@@ -401,14 +401,6 @@ function Selection()
                 subtree.reloadTree();
             } );
         } else {
-            selection.busy( true );
-
-            if( selection.getSelected() && selection.getSelected().length === 0 ) {
-                setTimeout(doSync, 1000);
-            } else {
-                doSync();
-            }
-
             function doSync() {
                 $.ajax( {
                     url: organisationUnitTreePath + "clearselected.action",
@@ -448,6 +440,14 @@ function Selection()
                     selection.busy( false );
                 });
             }
+            
+          selection.busy( true );
+
+          if( selection.getSelected() && selection.getSelected().length === 0 ) {
+              setTimeout(doSync, 1000);
+          } else {
+              doSync();
+          }
         }
     };
 
