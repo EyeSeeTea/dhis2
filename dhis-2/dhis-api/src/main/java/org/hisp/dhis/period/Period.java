@@ -119,6 +119,12 @@ public class Period
     // Logic
     // -------------------------------------------------------------------------
 
+
+    @Override
+    public void setAutoFields()
+    {
+    }
+
     @Override
     public String getUid()
     {
