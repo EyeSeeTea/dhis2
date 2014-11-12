@@ -14,7 +14,7 @@
                 $( '#usersSelected' ).find( 'option' ).attr( 'selected', 'selected' );
                 #tblDynamicAttributesJavascript()
             },
-            'rules': getValidationRules( "userGroup" )
+            'rules': getValidationRules( 'userGroup' )
         } );
     });
 </script>
