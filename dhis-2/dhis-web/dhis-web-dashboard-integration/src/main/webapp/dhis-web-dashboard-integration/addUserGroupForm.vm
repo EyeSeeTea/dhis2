@@ -47,8 +47,8 @@
 })
 
 <p>
-	<input type="submit" value="$i18n.getString( 'add' )" style="width:10em"/>
-	<input type="button" value="$i18n.getString( 'cancel' )" onclick="dhis2.commons.redirectCurrentPage( 'getAllUserGroups.action' )" style="width:10em"/>
+    <input type="submit" value="$i18n.getString( 'add' )" style="width:10em"/>
+    <input type="button" value="$i18n.getString( 'cancel' )" onclick="dhis2.commons.redirectCurrentPage( 'getAllUserGroups.action' )" style="width:10em"/>
 </p>
 
 </form>

@@ -83,7 +83,7 @@ public class AddUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<String> usersSelected = new ArrayList<>();
+    private List<String> usersSelected;
 
     public void setUsersSelected( List<String> usersSelected )
     {
@@ -112,12 +112,12 @@ public class AddUserGroupAction
     public String execute()
         throws Exception
     {
-        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
-
-        if( usersSelected == null )
+        if ( usersSelected == null )
         {
             usersSelected = new ArrayList<>();
         }
+
+        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
 
         UserGroup userGroup = new UserGroup( name );
 

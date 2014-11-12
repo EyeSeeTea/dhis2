@@ -12,7 +12,7 @@
         }, {
             'beforeValidateHandler': function() {
                 $( '#usersSelected' ).find( 'option' ).attr( 'selected', 'selected' );
-                #tblDynamicAttributesJavascript();
+                #tblDynamicAttributesJavascript()
             },
             'rules': getValidationRules( 'userGroup' )
         } );

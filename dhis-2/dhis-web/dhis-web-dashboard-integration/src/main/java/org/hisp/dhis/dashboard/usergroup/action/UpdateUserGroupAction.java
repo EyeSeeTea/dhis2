@@ -124,12 +124,12 @@ public class UpdateUserGroupAction
     public String execute()
         throws Exception
     {
-        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
-
-        if( usersSelected == null )
+        if ( usersSelected == null )
         {
             usersSelected = new ArrayList<>();
         }
+
+        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
 
         UserGroup userGroup = userGroupService.getUserGroup( userGroupId );
 
