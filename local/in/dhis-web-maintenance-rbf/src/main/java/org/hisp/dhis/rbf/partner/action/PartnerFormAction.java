@@ -37,16 +37,37 @@ public class PartnerFormAction implements Action
     // -------------------------------------------------------------------------
     // Input & Output
     // -------------------------------------------------------------------------
- 
+
+    private Integer dataSetId;
+
+    public void setDataSetId( Integer dataSetId )
+    {
+        this.dataSetId = dataSetId;
+    }
+
+    private Integer optionSetId;
+
+    public void setOptionSetId( Integer optionSetId )
+    {
+        this.optionSetId = optionSetId;
+    }
+
+    private Integer dataElementId;
+
+    public void setDataElementId( Integer dataElementId )
+    {
+        this.dataElementId = dataElementId;
+    }
+
     private List<DataSet> dataSets = new ArrayList<DataSet>();
 
     public List<DataSet> getDataSets()
     {
         return dataSets;
     }
-    
+
     private List<Option> options = new ArrayList<Option>();
-    
+
     public List<Option> getOptions()
     {
         return options;

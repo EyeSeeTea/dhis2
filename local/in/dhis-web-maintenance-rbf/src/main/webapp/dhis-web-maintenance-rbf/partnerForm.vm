@@ -81,7 +81,7 @@
                     <option value="$dataSet.id">$encoder.htmlEncode( $dataSet.name )</option>
                 #end
             </select> -->
-            <input type="text" name="dataset" value="$dataSetName" readonly>
+            <input type="text" id="dataSetId" name="dataSetId" value="$dataSetName" readonly>
             </td>
         </tr>
 
@@ -94,7 +94,7 @@
                     <option value="$option.id">$encoder.htmlEncode( $option.name )</option>
                 #end
             </select> -->
-                <input type="text" name="partner" value="$partenrName" readonly>
+                <input type="text" id="optionSetId" name="optionSetId" value="$partnerName" readonly>
             </td>
         </tr>
 
@@ -104,7 +104,7 @@
               <!--  <select id="dataElementId" name = "dataElementId" style="width:220px" >
                     <option value="-1">[$i18n.getString( "select" )]</option>
                 </select> -->
-                <input type="text" name="dataElement" value="$dataElementName" readonly>
+                <input type="text"  id="dataElementId" name="dataElementId" value="$dataElementName" readonly>
             </td>
         </tr>
         <!--
@@ -135,9 +135,7 @@
             </td>
         </tr>
 
-
     </table>
-
 
     <table id="selectionTable">
         <tr>

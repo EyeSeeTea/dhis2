@@ -9,24 +9,28 @@
     {
         jQuery('#addPeriod').dialog('destroy').remove();
 
-        var dataSetId = document.getElementById('dataSetId');
+		var dataSetId = $( "#dataSetId" ).val();
+       	var partnerId = $( "#optionSetId" ).val();
+ 		var dataElementId = $( "#dataElementId" ).val();
+ 		
+       /* var dataSetId = document.getElementById('dataSetId');
         var dataSetName =  dataSetId.options[ dataSetId.selectedIndex ].text;
 
         var partnerId = document.getElementById('optionSetId');
         var partnerName =  partnerId.options[ partnerId.selectedIndex ].text;
 
         var dataElementId = document.getElementById('dataElementId');
-        var dataElementName = dataElementId.options[ dataElementId.selectedIndex ].text;
+        var dataElementName = dataElementId.options[ dataElementId.selectedIndex ].text;*/
 
 
-        jQuery('<div id="addPeriod">' ).load( 'partnerForm.action').dialog({
+        jQuery('<div id="addPeriod">' ).load( 'partnerForm.action?dataSetId='+ dataSetId + "&partnerId=" + partnerId + "&dataElementId=" + dataElementId).dialog({
             title: 'Add New Period',
             maximize: true,
             closable: true,
             modal:true,
             overlay:{background:'#000000', opacity:0.1},
             width: 600,
-            height: 450
+            height: 600
         });
 
         //validateAddTariff();
