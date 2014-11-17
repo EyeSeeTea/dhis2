@@ -134,7 +134,7 @@ dhis2.de.getCurrentOrganisationUnit = function()
     }
 
     return dhis2.de.currentOrganisationUnitId;
-}
+};
 
 DAO.store = new dhis2.storage.Store( {
     name: 'dhis2',
@@ -285,7 +285,14 @@ dhis2.de.loadMetaData = function()
 	        updateForms();
 	    }
 	} );
-}
+};
+
+dhis2.de.discardLocalData = function() {
+    if( confirm( i18n_remove_local_data ) ) {
+        dhis2.de.storageManager.clearAllDataValues();
+        hideHeaderMessage();
+    }
+};
 
 dhis2.de.uploadLocalData = function()
 {
@@ -340,10 +347,13 @@ dhis2.de.uploadLocalData = function()
             	else // Connection lost during upload
         		{
                     var message = i18n_sync_failed
-                        + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
+                        + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>'
+                        + ' <button id="discard_button" type="button">' + i18n_discard + '</button>';
 
                     setHeaderMessage( message );
+
                     $( '#sync_button' ).bind( 'click', dhis2.de.uploadLocalData );
+                    $( '#discard_button' ).bind( 'click', dhis2.de.discardLocalData );
         		}
             }
         } );
@@ -401,10 +411,13 @@ dhis2.de.uploadLocalData = function()
             	else // Connection lost during upload
             	{
 	                var message = i18n_sync_failed
-	                    + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
-	
+                    + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>'
+                    + ' <button id="discard_button" type="button">' + i18n_discard + '</button>';
+
 	                setHeaderMessage( message );
+
 	                $( '#sync_button' ).bind( 'click', dhis2.de.uploadLocalData );
+                  $( '#discard_button' ).bind( 'click', dhis2.de.discardLocalData );
             	}
             }
         } );
@@ -2544,7 +2557,12 @@ function StorageManager()
     {
         return localStorage[KEY_DATAVALUES] != null ? JSON.parse( localStorage[KEY_DATAVALUES] ) : null;
     };
-    
+
+    this.clearAllDataValues = function()
+    {
+        localStorage[KEY_DATAVALUES] = "";
+    };
+
     /**
      * Returns all data value objects in an array. Returns an empty array if no
      * data values exist. Items in array are guaranteed not to be undefined.
