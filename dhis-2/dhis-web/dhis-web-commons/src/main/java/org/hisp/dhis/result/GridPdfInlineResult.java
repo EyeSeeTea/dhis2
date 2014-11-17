@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement;
+package org.hisp.dhis.result;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,15 +28,15 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.common.GenericNameableObjectStore;
-
 /**
- * @author Lars Helge Overland
- */
-public interface CategoryOptionStore
-    extends GenericNameableObjectStore<DataElementCategoryOption>
+* @author Lars Helge Overland
+*/
+public class GridPdfInlineResult
+    extends GridPdfResult
 {
-    List<DataElementCategoryOption> getCategoryOptions( DataElementCategory category );
+    @Override    
+    protected boolean isAttachment()
+    {
+        return false;
+    }
 }

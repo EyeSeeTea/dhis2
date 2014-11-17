@@ -10,10 +10,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.rbf.api.Partner;
 import org.hisp.dhis.rbf.api.PartnerService;
 import org.hisp.dhis.rbf.api.PartnerStore;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Mithilesh Kumar Thakur
  */
+@Transactional
 public class DefaultPartnerService implements PartnerService
 {
     // -------------------------------------------------------------------------
@@ -68,15 +70,16 @@ public class DefaultPartnerService implements PartnerService
         return partnerStore.getPartner( organisationUnit, dataSet );
     }
 
-    @Override
-    public Collection<Partner> getPartner( OrganisationUnit organisationUnit, DataElement dataElement )
+
+    public Map<String, Integer> getOrgUnitCountFromPartner( Integer dataSetId, Integer dataElementId, Integer optionId, String startDate, String endDate )
     {
-        return partnerStore.getPartner( organisationUnit, dataElement );
+        return partnerStore.getOrgUnitCountFromPartner( dataSetId, dataElementId, optionId, startDate, endDate );
     }    
     
-    public Map<String, Integer> getOrgUnitCountFromPartner( Integer organisationUnitId, Integer dataSetId, Integer dataElementId, Integer optionId, String startDate, String endDate )
+    public Collection<String> getStartAndEndDate( Integer dataSetId, Integer dataElementId, Integer optionId )
     {
-        return partnerStore.getOrgUnitCountFromPartner( organisationUnitId, dataSetId, dataElementId, optionId, startDate, endDate );
-    }    
+        return partnerStore.getStartAndEndDate( dataSetId, dataElementId, optionId );
+    }
+    
     
 }

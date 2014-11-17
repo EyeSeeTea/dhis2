@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.option.Option;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
@@ -27,8 +28,8 @@ public interface PartnerStore
     
     Collection<Partner> getPartner( OrganisationUnit organisationUnit, DataSet dataSet );
     
-    Collection<Partner> getPartner( OrganisationUnit organisationUnit, DataElement dataElement );
+    Collection<String> getStartAndEndDate( Integer dataSetId, Integer dataElementId, Integer optionId );
     
-    Map<String, Integer> getOrgUnitCountFromPartner( Integer organisationUnitId, Integer dataSetId, Integer dataElementId, Integer optionId, String startDate, String endDate );
+    Map<String, Integer> getOrgUnitCountFromPartner( Integer dataSetId, Integer dataElementId, Integer optionId, String startDate, String endDate );
     
 }
