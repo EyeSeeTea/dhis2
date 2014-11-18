@@ -40,24 +40,6 @@
 "validCompleteOnly":${dataSet.validCompleteOnly},"skipOffline":${dataSet.skipOffline}, "renderAsTabs":${dataSet.renderAsTabs}, "renderHorizontally":${dataSet.renderHorizontally}}#if( $velocityCount < $size ),#end
 #end },
 
-"dataSetAssociationSets": {
-#set( $size1 = $dataSetAssociationSets.size() )
-#set( $index = 0 )
-#foreach( $associationSet in $dataSetAssociationSets )
-"${index}": [
-#set( $index = $index + 1 )
-#set( $size2 = $associationSet.size() )
-#foreach( $id in $associationSet )
-"$encoder.jsonEncode( $id )"#if( $velocityCount < $size2 ),#end
-#end ]#if( $velocityCount < $size1 ),#end
-#end },
-
-"organisationUnitAssociationSetMap": {
-#set( $size = $organisationUnitAssociationSetMap.size() )
-#foreach( $orgUnit in $organisationUnitAssociationSetMap.keySet() )
-"${orgUnit}":"$organisationUnitAssociationSetMap.get( ${orgUnit} )"#if( $velocityCount < $size ),#end
-#end },
-
 "defaultCategoryCombo":"${defaultCategoryCombo.uid}",
 
 "categoryCombos": {
@@ -78,8 +60,8 @@
 #set( $categoryOptions = $categoryOptionMap.get( $category.uid ) )
 #set( $size2 = $categoryOptions.size() )
 #foreach( $option in $categoryOptions )
-{"id":"${option.uid}","name":"$encoder.jsonEncode( ${option.displayName} )"#if( ${option.startDate} ),"startDate":"${option.startDate}"#end
-#if( ${option.endDate} ),"endDate":"${option.endDate}"#end}#if( $velocityCount < $size2 ),#end
+{"id":"${option.uid}","name":"$encoder.jsonEncode( ${option.displayName} )"#if( ${option.startDate} ),"start":"${option.startDate}"#end
+#if( ${option.endDate} ),"end":"${option.endDate}"#end}#if( $velocityCount < $size2 ),#end
 #end ] }#if( $velocityCount < $size1 ),#end
 #end }
 } }
