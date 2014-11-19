@@ -193,20 +193,6 @@ Ext.onReady( function() {
             isBoundary = layer.id === 'boundary',
             isEvent = layer.id === 'event';
 
-        layer.onMouseDown = function(e) {
-            if (OpenLayers.Event.isRightClick(e)) {
-                defaultClickSelect(layer.getFeatureFromEvent(e));
-            }
-        };            
-
-        layer.registerMouseDownEvent = function() {
-            layer.events.register('mousedown', null, layer.onMouseDown);
-        };
-
-        layer.unregisterMouseDownEvent = function() {
-            layer.events.unregister('mousedown', null, layer.onMouseDown);
-        };
-
 		defaultHoverSelect = function fn(feature) {
             if (isBoundary) {
                 var style = layer.core.getDefaultFeatureStyle();
@@ -244,14 +230,10 @@ Ext.onReady( function() {
 				centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
 
 			defaultHoverWindow.setPosition(centerRegionCenterX - (defaultHoverWindow.getWidth() / 2), centerRegionY);
-
-            layer.registerMouseDownEvent();
 		};
 
 		defaultHoverUnselect = function fn(feature) {
 			defaultHoverWindow.destroy();
-            
-            layer.unregisterMouseDownEvent();
 		};
 
 		defaultClickSelect = function fn(feature) {
@@ -655,11 +637,12 @@ Ext.onReady( function() {
 
 		options = {
             onHoverSelect: defaultHoverSelect,
-            onHoverUnselect: defaultHoverUnselect
+            onHoverUnselect: defaultHoverUnselect,
+            onClickSelect: defaultClickSelect
         };
 
 		if (isEvent) {
-			defaultClickSelect = function fn(feature) {
+			options.onClickSelect = function fn(feature) {
                 var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname', 'popupText'],
                     attributes = feature.attributes,
                     map = attributes.nameColumnMap,
@@ -716,12 +699,6 @@ Ext.onReady( function() {
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
-
-        //layer.events.register('mousedown', null, function(e) {
-            //if (OpenLayers.Event.isRightClick(e)) {
-                //defaultClickSelect(layer.getFeatureFromEvent(e));
-            //}
-        //});
 	};
 
 	GIS.core.StyleMap = function(labelConfig) {
@@ -1807,12 +1784,6 @@ Ext.onReady( function() {
                     gis.viewport.shareButton.enable();
 				}
 			}
-
-            // mouse events
-console.log(layer.unregisterMouseDownEvent);            
-            if (layer.unregisterMouseDownEvent) {
-                layer.unregisterMouseDownEvent();
-            }
 		};
 
 		loader = {
