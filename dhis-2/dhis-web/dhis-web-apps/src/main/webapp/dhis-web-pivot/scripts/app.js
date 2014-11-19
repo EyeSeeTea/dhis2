@@ -3021,9 +3021,10 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataSetSearch.hideFilter();
             },
-            loadPage: function(filter, append) {
+            loadPage: function(filter, append, noPaging, fn) {
                 var store = this,
-                    path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+					params = {},
+                    path;
 
                 filter = filter || dataSetFilter.getValue() || null;
 
@@ -3036,21 +3037,28 @@ Ext.onReady( function() {
                     return;
                 }
 
+                path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
+				}
+
                 store.isPending = true;
                 ns.core.web.mask.show(dataSetAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataSets || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -3058,7 +3066,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+				
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -3069,7 +3079,13 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+
+                if (fn) {
+					fn();
+				}
+				else {
+					ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+				}
             },
 			storage: {},
 			parent: null,
@@ -3801,7 +3817,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						dataSetAvailableStore.loadPage(null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						});
 					}
 				}
 			],
