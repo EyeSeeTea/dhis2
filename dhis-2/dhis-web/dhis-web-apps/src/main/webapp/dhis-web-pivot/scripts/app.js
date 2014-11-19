@@ -4911,9 +4911,9 @@ Ext.onReady( function() {
 					this.isPending = false;
 					//indicatorSearch.hideFilter();
 				},
-				loadPage: function(filter, append) {
+				loadPage: function(filter, append, noPaging, fn) {
 					var store = this,
-						filterPath = filter ? '/query/' + filter : '',
+						params = {},
 						path;
 
 					filter = filter || indicatorFilter.getValue() || null;
@@ -4927,23 +4927,28 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
+					path = '/dimensions/' + dimension.id + '/items' + (filter ? '/query/' + filter : '') + '.json';
+
+					if (noPaging) {
+						params.paging = false;
+					}
+					else {
+						params.page = store.nextPage;
+						params.pageSize = 50;
+					}
 
 					store.isPending = true;
                     ns.core.web.mask.show(available.boundList);
 
 					Ext.Ajax.request({
 						url: ns.core.init.contextPath + '/api' + path,
-						params: {
-							page: store.nextPage,
-							pageSize: 50
-						},
+						params: params,
 						success: function(r) {
 							var response = Ext.decode(r.responseText),
 								data = response.items || [],
 								pager = response.pager;
 
-							store.loadStore(data, pager, append);
+							store.loadStore(data, pager, append, fn);
 						},
 						callback: function() {
 							store.isPending = false;
@@ -4951,7 +4956,9 @@ Ext.onReady( function() {
 						}
 					});
 				},
-				loadStore: function(data, pager, append) {
+				loadStore: function(data, pager, append, fn) {
+					pager = pager || {};
+					
 					this.loadData(data, append);
 					this.lastPage = this.nextPage;
 
@@ -4960,7 +4967,13 @@ Ext.onReady( function() {
 					}
 
 					this.isPending = false;
-					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+
+					if (fn) {
+						fn();
+					}
+					else {
+						ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+					}
 				},
 				sortStore: function() {
 					this.sort('name', 'ASC');
@@ -5072,8 +5085,10 @@ Ext.onReady( function() {
 						xtype: 'button',
 						icon: 'images/arrowrightdouble.png',
 						width: 22,
-						handler: function() {
-							ns.core.web.multiSelect.selectAll(available, selected);
+						handler: function() {							
+							availableStore.loadPage(null, null, true, function() {
+								ns.core.web.multiSelect.selectAll(available, selected);
+							});
 						}
 					}
 				],
