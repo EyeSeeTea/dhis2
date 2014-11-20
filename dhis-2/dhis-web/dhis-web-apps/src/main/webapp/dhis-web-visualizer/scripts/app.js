@@ -5748,6 +5748,18 @@ Ext.onReady( function() {
 			region: 'center',
 			bodyStyle: 'padding:1px',
 			autoScroll: true,
+			fullSize: true,
+			cmp: [defaultButton],
+			toggleCmp: function(show) {
+				for (var i = 0; i < this.cmp.length; i++) {
+					if (show) {
+						this.cmp[i].show();
+					}
+					else {
+						this.cmp[i].hide();
+					}
+				}
+			},
 			tbar: {
 				defaults: {
 					height: 26
@@ -5834,6 +5846,11 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					defaultButton,
@@ -5891,12 +5908,22 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					{
 						xtype: 'tbseparator',
 						height: 18,
 						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
+						}
 					},
 					{
 						xtype: 'button',
@@ -5932,6 +5959,18 @@ Ext.onReady( function() {
 					html += '</div>';
 
 					p.update(html);
+				},
+				resize: function() {
+					var width = this.getWidth();
+
+					if (width < 768 && this.fullSize) {
+						this.toggleCmp(false);
+						this.fullSize = false;
+					}
+					else if (width >= 768 && !this.fullSize) {
+						this.toggleCmp(true);
+						this.fullSize = true;
+					}
 				}
 			}
 		});
