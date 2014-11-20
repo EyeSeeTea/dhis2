@@ -5942,6 +5942,18 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
+
+                    // toolbar
+					var width = this.getWidth();
+
+					if (width < 768 && this.fullSize) {
+						this.toggleCmp(false);
+						this.fullSize = false;
+					}
+					else if (width >= 768 && !this.fullSize) {
+						this.toggleCmp(true);
+						this.fullSize = true;
+					}
                 },
 				afterrender: function(p) {
 					var liStyle = 'padding:3px 10px; color:#333',
@@ -5959,18 +5971,6 @@ Ext.onReady( function() {
 					html += '</div>';
 
 					p.update(html);
-				},
-				resize: function() {
-					var width = this.getWidth();
-
-					if (width < 768 && this.fullSize) {
-						this.toggleCmp(false);
-						this.fullSize = false;
-					}
-					else if (width >= 768 && !this.fullSize) {
-						this.toggleCmp(true);
-						this.fullSize = true;
-					}
 				}
 			}
 		});
