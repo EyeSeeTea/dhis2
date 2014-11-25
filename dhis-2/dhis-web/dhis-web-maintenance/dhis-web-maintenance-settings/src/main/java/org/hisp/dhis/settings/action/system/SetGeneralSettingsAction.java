@@ -242,8 +242,7 @@ public class SetGeneralSettingsAction
 
     @Override
     public String execute()
-    {
-System.out.println("analysisRelativePeriod: " + analysisRelativePeriod); 
+    { 
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAX_LIMIT, analyticsMaxLimit );
         systemSettingManager.saveSystemSetting( KEY_DATABASE_SERVER_CPUS, databaseServerCpus );
