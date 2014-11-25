@@ -61,8 +61,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
-
 /**
  * @author Torgeir Lorange Ostby
  */
@@ -258,6 +256,8 @@ public class UpdateUserAction
     public String execute()
         throws Exception
     {
+        //TODO: Allow user with F_USER_ADD_WITHIN_MANAGED_GROUP to update a user within managed groups.
+
         if ( email != null && email.trim().length() == 0 )
         {
             email = null;
@@ -269,36 +269,6 @@ public class UpdateUserAction
         }
 
         User currentUser = currentUserService.getCurrentUser();
-
-        // ---------------------------------------------------------------------
-        // Check if user group is required, before we start updating the user
-        // ---------------------------------------------------------------------
-
-        Boolean canManageGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
-
-        if ( canManageGroups && !currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
-        {
-            boolean groupFound = false;
-
-            for ( String ug : ugSelected )
-            {
-                UserGroup group = userGroupService.getUserGroup( ug );
-
-                if ( group != null && securityService.canWrite( group ) )
-                {
-                    groupFound = true;
-
-                    break;
-                }
-            }
-
-            if ( !groupFound )
-            {
-                message = i18n.getString( "users_must_belong_to_a_group_controlled_by_the_user_manager" );
-
-                return ERROR;
-            }
-        }
 
         // ---------------------------------------------------------------------
         // User credentials and user
@@ -323,7 +293,7 @@ public class UpdateUserAction
 
         if ( rawPassword != null )
         {
-            userCredentials.setPassword( passwordManager.encodePassword( rawPassword ) );
+            userCredentials.setPassword( passwordManager.encode( rawPassword ) );
         }
 
         if ( jsonAttributeValues != null )

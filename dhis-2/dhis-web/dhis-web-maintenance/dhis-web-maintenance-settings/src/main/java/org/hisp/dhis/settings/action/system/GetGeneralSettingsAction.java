@@ -48,8 +48,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.HashSet;
 
 /**
  * @author Lars Helge Overland
@@ -162,9 +160,9 @@ public class GetGeneralSettingsAction
         return configuration;
     }
     
-    private Set<String> relativePeriods;
+    private List<String> relativePeriods;
     
-    public Set<String> getRelativePeriods()
+    public List<String> getRelativePeriods()
     {
         return relativePeriods;
     }
@@ -203,7 +201,7 @@ public class GetGeneralSettingsAction
 
         Collections.sort( organisationUnitLevels, OrganisationUnitLevelComparator.INSTANCE );
         
-        relativePeriods = new HashSet<>( RelativePeriodEnum.OPTIONS );
+        relativePeriods = new ArrayList<>( RelativePeriodEnum.OPTIONS );
         
         return SUCCESS;
     }

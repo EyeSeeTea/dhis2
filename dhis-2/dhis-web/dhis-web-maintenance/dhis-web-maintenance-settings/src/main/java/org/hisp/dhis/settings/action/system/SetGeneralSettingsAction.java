@@ -147,7 +147,7 @@ public class SetGeneralSettingsAction
     
     private String analysisRelativePeriod;
     
-    public void setAnalysisRelativePeriod()
+    public void setAnalysisRelativePeriod( String analysisRelativePeriod )
     {
         this.analysisRelativePeriod = analysisRelativePeriod;
     }

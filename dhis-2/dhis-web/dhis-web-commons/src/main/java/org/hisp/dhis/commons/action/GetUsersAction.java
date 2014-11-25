@@ -41,8 +41,6 @@ import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.comparator.UserComparator;
 import org.hisp.dhis.util.ContextUtils;
 
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
-
 /**
  * @author mortenoh
  */
@@ -93,6 +91,8 @@ public class GetUsersAction
     public String execute()
         throws Exception
     {
+        //TODO: Allow user with F_USER_VIEW_WITHIN_MANAGED_GROUP and restrict viewing to within managed groups.
+
         users = new ArrayList<>( userService.getAllUsers() );
 
         ContextUtils.clearIfNotModified( ServletActionContext.getRequest(), ServletActionContext.getResponse(), users );
@@ -109,13 +109,6 @@ public class GetUsersAction
             this.paging = createPaging( users.size() );
 
             users = users.subList( paging.getStartPos(), paging.getEndPos() );
-        }
-
-        boolean writeGroupRequired = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
-
-        if ( writeGroupRequired )
-        {
-            userService.canUpdateUsersFilter( users );
         }
 
         return SUCCESS;

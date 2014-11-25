@@ -90,12 +90,10 @@
 
 <div class="settingLabel">$i18n.getString( "default_analysis_relative_period" )</div>
 
-<div class="settingLabel">$relativePeriods</div>
-
 <div class="setting">
 <select id="analysisRelativePeriod" name="analysisRelativePeriod">
     #foreach ( $period in $relativePeriods )
-    <option value="$period" #if( $period == $analysisRelativePeriod )selected="selected"#end>$period</option>
+    <option value="$period" #if( $period == $keyAnalysisRelativePeriod )selected="selected"#end>$i18n.getString( $period )</option>
     #end
 </select>
 </div>
