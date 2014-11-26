@@ -9,7 +9,8 @@ trackerCapture.controller('DataEntryController',
                 ModalService,
                 DialogService,
                 CurrentSelection,
-                TranslationService) {
+                TranslationService,
+                TrackerRulesExecutionService) {
 
     TranslationService.translate();
     
@@ -336,7 +337,7 @@ trackerCapture.controller('DataEntryController',
     };
     
     $scope.saveDatavalue = function(prStDe){
-        
+
         $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
         
         //check for input validity
@@ -376,8 +377,14 @@ trackerCapture.controller('DataEntryController',
                          };
                 DHIS2EventFactory.updateForSingleValue(ev).then(function(response){
                     $scope.currentElement.saved = true;
+                    //Call rules engine after a new value is saved. All changes can affect rules outcomes.
+                    
+                    TrackerRulesExecutionService.executeRules("hei","hå");
                 });
+                
             }
+            
+            
         }
     };
     

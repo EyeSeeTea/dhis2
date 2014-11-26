@@ -37,28 +37,29 @@ trackerCapture.controller('DashboardController',
             
             EnrollmentService.getByEntityAndProgram($scope.selectedEntity.trackedEntityInstance, $scope.selectedProgram.id, 'ACTIVE').then(function(data){
                 if(data.enrollments.length === 1){        
-                    $scope.selectedEnrollment = data.enrollments[0].enrollment;                    
-                    if(!angular.isUndefined($scope.selectedEntity.relationships)){
-                        TEIService.get($scope.selectedEntity.relationships[0].trackedEntityInstanceB).then(function(contact){
-                            CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
+                    
+
+                    //Fetch available events for the selected person
+                    DHIS2EventFactory.getByEntity($scope.selectedEntity, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {
+                            
+                        $scope.dhis2Events = data;        
+                        $scope.selectedEnrollment = data.enrollments[0].enrollment;                    
+                        if(!angular.isUndefined($scope.selectedEntity.relationships)){
+                            TEIService.get($scope.selectedEntity.relationships[0].trackedEntityInstanceB).then(function(contact){
+                                CurrentSelection.set({tei: tei, contact: contact, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment, event: $scope.dhis2Events});
+                                $timeout(function() { 
+                                    $rootScope.$broadcast('selectedEntity', {});
+                                    $rootScope.$broadcast('noteController', {});
+                                }, 100);
+                            });
+                        }
+                        else{
+                            CurrentSelection.set({tei: tei, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
                             $timeout(function() { 
                                 $rootScope.$broadcast('selectedEntity', {});
                                 $rootScope.$broadcast('noteController', {});
                             }, 100);
-                        });
-                    }
-                    else{
-                        CurrentSelection.set({tei: tei, pr: $scope.selectedProgram, enrollment: $scope.selectedEnrollment});
-                        $timeout(function() { 
-                            $rootScope.$broadcast('selectedEntity', {});
-                            $rootScope.$broadcast('noteController', {});
-                        }, 100);
-                    }
-
-                    //Fetch available events for the selected person
-                    DHIS2EventFactory.getByEntity($scope.selectedEntity, $scope.selectedOrgUnit, $scope.selectedProgram).then(function(data) {
-
-                        $scope.dhis2Events = data;        
+                        }
                         if(angular.isUndefined($scope.dhis2Events)){
                             $scope.isFirstEvent = true;
                         }

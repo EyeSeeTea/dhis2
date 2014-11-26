@@ -74,9 +74,11 @@ dhis2.util.namespace( 'dhis2.storage' );
             value: function() {
                 var self = this;
                 var deferred = $.Deferred();
+                
+             
 
-                var request = window.indexedDB.open( self.name, self.version );
-
+                var request = window.indexedDB.open( self.name, 100);//self.version );
+                
                 request.onupgradeneeded = function( e ) {
                     self._db = e.target.result;
 
@@ -93,6 +95,7 @@ dhis2.util.namespace( 'dhis2.storage' );
 
                 request.onsuccess = function( e ) {
                     self._db = e.target.result;
+                    
                     deferred.resolveWith( self );
                 };
 

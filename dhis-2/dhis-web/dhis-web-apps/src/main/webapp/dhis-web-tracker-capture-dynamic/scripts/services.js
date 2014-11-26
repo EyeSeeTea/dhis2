@@ -558,7 +558,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* factory for handling events */
-.factory('DHIS2EventFactory', function($http, $q) {   
+.factory('DHIS2EventFactory', function($http, $q,CurrentSelection,storage) {   
     
     return {     
         
@@ -628,6 +628,34 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return response.data;         
             });
             return promise;
+        },
+        getAllEventDataValues: function(orgUnit,program) {
+           
+            //Fetch available events for the selected person(tracked entity instance)
+            var promise = $http.get( '../api/events.json?' + 'trackedEntityInstance=' + CurrentSelection.currentSelection.tei + '&orgUnit=' + orgUnit.id + '&program=' + program.id + '&paging=false').then(function(response){
+                
+                angular.forEach(response.data.events, function(event){
+                    angular.forEach(program.programStages, function(stage){
+                        if(event.programStage === stage.id){
+                            event.name = stage.name;
+                        }
+                    });
+                });
+               
+                $scope.orderedEvents = orderByFilter(response.data.events, '-eventDate');
+                //reversing makes the first item in the list most significant
+                $scope.orderedEvents.reverse();
+                
+//                var orderedDataValueList = null;
+//                angular.forEach(orderedEvents, function(orderedEvent){
+//                    angular.forEach(orderedEvent.dataValues,function(dataValue) {
+//                        var i = dataValue;
+//                    });
+//                });
+            });            
+          
+           
+                       
         }
     };    
 })
@@ -659,6 +687,23 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         defaultOperators: defaultOperators,
         boolOperators: boolOperators
     };  
+})
+
+.factory('TrackerRulesFactory', function(){
+    return{
+        getProgramRules : function(){
+            return [{rulename:"rule1",ruleContent:"This is the RULES"},
+                    {rulename:"rule2",ruleContent:"This is the second rule"},
+                    {rulename:"rule3",ruleContent:"The last rule to rule them all"},];
+        }
+    };  
+})
+
+/* Factory for getting data values */
+.factory('OrderedDataElementValueFactory', function(storage, CurrentSelection ){
+    return {
+        
+    };
 })
 
 .service('EntityQueryFactory', function(OperatorFactory, DateUtils){  
@@ -1467,4 +1512,44 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return dhis2CalendarFormat;
         }
     };
+})
+
+
+
+/* service for executing tracker rules and broadcasting results */
+.service('TrackerRulesExecutionService', function(TrackerRulesFactory,DHIS2EventFactory,storage){
+    return {
+        executeRules: function(orgUnit, program) {
+            //Get all rules that has the trigger "TrackerDataChanged"
+            var rules = TrackerRulesFactory.getProgramRules();
+            if(angular.isObject(rules) && angular.isArray(rules)){
+                
+                //Build a dictionary of values for each dataelement, with values sorted chronologically
+                //Chronological sorting based on Report date for the events
+                var dictionary = DHIS2EventFactory.getAllEventDataValues(orgUnit, program);
+                //Possible enhancement: All historical values could be cached...
+                //pick selected orgUnit and program
+                
+                angular.forEach(rules, function(rule) {
+                        
+                    //compile rule conditions into expression
+                    //if expression is true, run actions
+                    //
+                    //Foreach Action:
+                    //  broadcast action to the rest of the application
+                    
+                    
+                    
+//                    $rootScope.$broadcast("rule",
+//                                {rule:rule}
+//                            );
+                });
+            }
+            
+            return true;
+        }
+    };
 });
+
+ 
+ 
