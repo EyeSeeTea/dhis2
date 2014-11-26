@@ -185,7 +185,8 @@ Ext.onReady( function() {
 			infrastructuralPeriod,
 			defaultHoverSelect,
 			defaultHoverUnselect,
-			defaultClickSelect,
+            defaultLeftClickSelect,
+			defaultRightClickSelect,
             selectHandlers,
 			dimConf = gis.conf.finals.dimension,
             defaultHoverWindow,
@@ -195,9 +196,9 @@ Ext.onReady( function() {
 
         layer.onMouseDown = function(e) {
             if (OpenLayers.Event.isRightClick(e)) {
-                defaultClickSelect(layer.getFeatureFromEvent(e));
+                defaultRightClickSelect(layer.getFeatureFromEvent(e));
             }
-        };            
+        };
 
         layer.registerMouseDownEvent = function() {
             layer.events.register('mousedown', null, layer.onMouseDown);
@@ -250,11 +251,37 @@ Ext.onReady( function() {
 
 		defaultHoverUnselect = function fn(feature) {
 			defaultHoverWindow.destroy();
-            
+
             layer.unregisterMouseDownEvent();
 		};
 
-		defaultClickSelect = function fn(feature) {
+        defaultLeftClickSelect = function fn(feature) {
+            var generator = gis.init.periodGenerator,
+                periodType = gis.init.systemSettings.infrastructuralPeriodType.name,
+                attr = feature.attributes,
+
+                indicators = gis.init.systemSettings.infrastructuralIndicatorGroup.indicators || [],
+                dataElements = gis.init.systemSettings.infrastructuralDataElementGroup.dataElements || [],
+                period = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType))[0],
+                paramString = '';
+
+            // data
+            paramString += '?dimension=dx:';
+
+            for (var i = 0, data = [].concat(indicators, dataElements); i < data.length; i++) {
+                paramString += data[i].id + (i < data.length - 1 ? ';' : '');
+            }
+
+            // period
+            paramString += '&filter=pe:' + period.iso;
+
+            // orgunit
+            paramString += '&filter=ou:' + attr.id;
+
+            console.log(paramString);
+        };
+
+		defaultRightClickSelect = function fn(feature) {
 			var showInfo,
 				showRelocate,
 				drill,
@@ -311,7 +338,7 @@ Ext.onReady( function() {
 			// Infrastructural data
 			showInfo = function() {
 				Ext.Ajax.request({
-					url: gis.init.contextPath + '/api/organisationUnits/' + att.id + '.json?links=false',
+					url: gis.init.contextPath + '/api/organisationUnits/' + att.id + '.json?fields=id,name,code,address,email,phoneNumber,coordinates,parent[id,name],organisationUnitGroups[id,name]',
 					success: function(r) {
 						var ou = Ext.decode(r.responseText);
 
@@ -361,7 +388,7 @@ Ext.onReady( function() {
 
                                         if (Ext.isString(ou.coordinates)) {
                                             var co = ou.coordinates.replace("[","").replace("]","").replace(",",", ");
-											a.push({html: GIS.i18n.coordinate, cls: 'gis-panel-html-title'}, {html: co, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+											a.push({html: GIS.i18n.coordinates, cls: 'gis-panel-html-title'}, {html: co, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
                                         }
 
                                         if (Ext.isArray(ou.organisationUnitGroups) && ou.organisationUnitGroups.length) {
@@ -653,13 +680,8 @@ Ext.onReady( function() {
 			menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
 		};
 
-		options = {
-            onHoverSelect: defaultHoverSelect,
-            onHoverUnselect: defaultHoverUnselect
-        };
-
 		if (isEvent) {
-			defaultClickSelect = function fn(feature) {
+			defaultLeftClickSelect = function fn(feature) {
                 var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname', 'popupText'],
                     attributes = feature.attributes,
                     map = attributes.nameColumnMap,
@@ -690,6 +712,7 @@ Ext.onReady( function() {
 
                 eventWindow = Ext.create('Ext.window.Window', {
                     title: 'Event',
+                    title: 'Event',
                     layout: 'fit',
                     resizable: false,
                     bodyStyle: 'background-color:#fff; padding:5px',
@@ -712,16 +735,16 @@ Ext.onReady( function() {
             };
 		}
 
+		options = {
+            onHoverSelect: defaultHoverSelect,
+            onHoverUnselect: defaultHoverUnselect,
+            onClickSelect: defaultLeftClickSelect
+        };
+
 		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
-
-        //layer.events.register('mousedown', null, function(e) {
-            //if (OpenLayers.Event.isRightClick(e)) {
-                //defaultClickSelect(layer.getFeatureFromEvent(e));
-            //}
-        //});
 	};
 
 	GIS.core.StyleMap = function(labelConfig) {
@@ -1809,7 +1832,7 @@ Ext.onReady( function() {
 			}
 
             // mouse events
-console.log(layer.unregisterMouseDownEvent);            
+console.log(layer.unregisterMouseDownEvent);
             if (layer.unregisterMouseDownEvent) {
                 layer.unregisterMouseDownEvent();
             }
