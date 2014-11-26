@@ -9500,6 +9500,17 @@ Ext.onReady( function() {
                                             }
                                         });
 
+                                        // infrastructural indicator group
+                                        requests.push({
+                                            url: init.contextPath + '/api/configuration/infrastructuralIndicators.json',
+                                            success: function(r) {
+                                                var obj = Ext.decode(r.responseText);
+
+                                                init.systemSettings.infrastructuralIndicatorGroup = Ext.isObject(obj) ? obj : null;
+                                                fn();
+                                            }
+                                        });
+
                                         // infrastructural data element group
                                         requests.push({
                                             url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
