@@ -181,8 +181,8 @@ Ext.onReady( function() {
 
 	GIS.core.createSelectHandlers = function(gis, layer) {
 		var isRelocate = !!GIS.app ? !!gis.init.user.isAdmin : false,
-			options = {},
 			infrastructuralPeriod,
+            destroyDataPopups,
 			defaultHoverSelect,
 			defaultHoverUnselect,
             defaultLeftClickSelect,
@@ -194,9 +194,30 @@ Ext.onReady( function() {
             isBoundary = layer.id === 'boundary',
             isEvent = layer.id === 'event';
 
+        layer.dataPopups = [];
+
+        destroyDataPopups = function() {
+            if (layer.dataPopups) {
+                for (var i = 0, popup; i < layer.dataPopups.length; i++) {
+                    popup = layer.dataPopups[i];
+
+                    if (popup && popup.destroy) {
+                        popup.destroy();
+                        popup = null;
+                        layer.dataPopups[i] = null;
+                    }
+                }
+
+                layer.dataPopups = Ext.clean(layer.dataPopups);
+            }
+        };
+
         layer.onMouseDown = function(e) {
             if (OpenLayers.Event.isRightClick(e)) {
-                defaultRightClickSelect(layer.getFeatureFromEvent(e));
+                defaultRightClickSelect(layer.getFeatureFromEvent(e), e);
+            }
+            else {
+                defaultLeftClickSelect(layer.getFeatureFromEvent(e), e);
             }
         };
 
@@ -252,23 +273,104 @@ Ext.onReady( function() {
 		defaultHoverUnselect = function fn(feature) {
 			defaultHoverWindow.destroy();
 
+            // remove mouse click event
             layer.unregisterMouseDownEvent();
+
+            // destroy popups
+            //destroyDataPopups();
 		};
 
-        defaultLeftClickSelect = function fn(feature) {
+        defaultLeftClickSelect = function fn(feature, e) {
             var generator = gis.init.periodGenerator,
                 periodType = gis.init.systemSettings.infrastructuralPeriodType.name,
                 attr = feature.attributes,
+                iig = gis.init.systemSettings.infrastructuralIndicatorGroup || {},
+                ideg = gis.init.systemSettings.infrastructuralDataElementGroup || {},
 
-                indicators = gis.init.systemSettings.infrastructuralIndicatorGroup.indicators || [],
-                dataElements = gis.init.systemSettings.infrastructuralDataElementGroup.dataElements || [],
+                indicators = iig.indicators || [],
+                dataElements = ideg.dataElements || [],
+                data = [].concat(indicators, dataElements),
                 period = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType))[0],
-                paramString = '';
+                paramString = '?',
+                success,
+                failure;
+
+            if (!data.length) {
+                console.log('No infrastructural indicators or data elements selected');
+                return;
+            }
+
+            destroyDataPopups();
+
+            success = function(r) {
+                var html = '',
+                    records = [],
+                    dxIndex,
+                    valueIndex,
+                    win;
+
+                if (!r.rows && r.rows.length) {
+                    html = 'No values found';
+                }
+                else {
+                    // index
+                    for (var i = 0; i < r.headers.length; i++) {
+                        if (r.headers[i].name === 'dx') {
+                            dxIndex = i;
+                        }
+
+                        if (r.headers[i].name === 'value') {
+                            valueIndex = i;
+                        }
+                    }
+
+                    // records
+                    for (var i = 0; i < r.rows.length; i++) {
+                        records.push({
+                            name: r.metaData.names[r.rows[i][dxIndex]],
+                            value: r.rows[i][valueIndex]
+                        });
+                    }
+
+                    gis.util.array.sort(records);
+
+                    for (var i = 0; i < records.length; i++) {
+                        html += records[i].name + ': ' + '<span style="color:#333">' + records[i].value + '</span>' + (i < records.length - 1 ? '<br/>' : '');
+                    }
+                }
+
+                win = Ext.create('Ext.window.Window', {
+                    bodyStyle: 'background-color: #fff; padding: 5px; line-height: 13px',
+                    autoScroll: true,
+                    closeAction: 'destroy',
+                    title: attr.name + ' (' + r.metaData.names[period.iso] + ')',
+                    html: html,
+                    listeners: {
+                        show: function() {
+                            var winHeight = this.getHeight(),
+                                viewportHeight = gis.viewport.getHeight(),
+                                diff = (winHeight + e.y) - viewportHeight;
+
+                            if (diff > 0) {
+                                this.setHeight(winHeight - diff - 5);
+                            }
+                        }
+                    }
+                });
+
+                win.showAt(e.x + 20, e.y);
+
+                layer.dataPopups.push(win);
+            };
+
+            failure = function(r) {
+                console.log(r);
+            };
 
             // data
-            paramString += '?dimension=dx:';
+            paramString += 'dimension=dx:';
 
-            for (var i = 0, data = [].concat(indicators, dataElements); i < data.length; i++) {
+            for (var i = 0; i < data.length; i++) {
                 paramString += data[i].id + (i < data.length - 1 ? ';' : '');
             }
 
@@ -276,9 +378,25 @@ Ext.onReady( function() {
             paramString += '&filter=pe:' + period.iso;
 
             // orgunit
-            paramString += '&filter=ou:' + attr.id;
+            paramString += '&dimension=ou:' + attr.id;
 
-            console.log(paramString);
+            if (GIS.plugin && !GIS.app) {
+                Ext.data.JsonP.request({
+                    url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+                    success: success,
+                    failure: failure
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: gis.init.contextPath + '/api/analytics.json' + paramString,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: failure
+                });
+            }
         };
 
 		defaultRightClickSelect = function fn(feature) {
@@ -735,13 +853,10 @@ Ext.onReady( function() {
             };
 		}
 
-		options = {
+		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, {
             onHoverSelect: defaultHoverSelect,
-            onHoverUnselect: defaultHoverUnselect,
-            onClickSelect: defaultLeftClickSelect
-        };
-
-		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
+            onHoverUnselect: defaultHoverUnselect
+        });
 
 		gis.olmap.addControl(selectHandlers);
 		selectHandlers.activate();
@@ -1832,7 +1947,6 @@ Ext.onReady( function() {
 			}
 
             // mouse events
-console.log(layer.unregisterMouseDownEvent);
             if (layer.unregisterMouseDownEvent) {
                 layer.unregisterMouseDownEvent();
             }
@@ -2767,6 +2881,7 @@ console.log(layer.unregisterMouseDownEvent);
 				}
 
 				key = key || 'name';
+                direction = direction || 'ASC';
 
 				array.sort( function(a, b) {
 
