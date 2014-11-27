@@ -616,7 +616,7 @@ Ext.onReady( function() {
                                                                 for (var i = 0; i < r.rows.length; i++) {
                                                                     records.push({
                                                                         name: r.metaData.names[r.rows[i][dxIndex]],
-                                                                        value: r.rows[i][valueIndex]
+                                                                        value: parseFloat(r.rows[i][valueIndex])
                                                                     });
                                                                 }
 
@@ -629,8 +629,8 @@ Ext.onReady( function() {
 										},
 										{
 											xtype: 'grid',
-											cls: 'gis-grid',
-											height: 300, //todo
+											cls: 'gis-grid plain',
+											height: 313, //todo
 											width: 258,
 											scroll: 'vertical',
 											columns: [
