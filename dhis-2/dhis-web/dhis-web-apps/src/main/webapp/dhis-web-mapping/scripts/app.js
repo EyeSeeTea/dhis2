@@ -5331,7 +5331,11 @@ Ext.onReady( function() {
 		// Stores
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['name', 'value']
+			fields: ['name', 'value'],
+            sorters: [{
+                property: 'name',
+                direction: 'ASC'
+            }]
 		});
 
 		// Components
@@ -6114,7 +6118,11 @@ Ext.onReady( function() {
 		// Stores
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['name', 'value']
+			fields: ['name', 'value'],
+            sorters: [{
+                property: 'name',
+                direction: 'ASC'
+            }]
 		});
 
 		// Components
@@ -7021,7 +7029,11 @@ Ext.onReady( function() {
 		});
 
 		infrastructuralDataElementValuesStore = Ext.create('Ext.data.Store', {
-			fields: ['name', 'value']
+			fields: ['name', 'value'],
+            sorters: [{
+                property: 'name',
+                direction: 'ASC'
+            }]
 		});
 
 		legendsByLegendSetStore = Ext.create('Ext.data.Store', {
@@ -9020,7 +9032,7 @@ Ext.onReady( function() {
             listeners: {
                 resize: function() {
                     var width = this.getWidth();
-                    
+
                     if (width < 800 && this.fullSize) {
                         this.toggleCmp(false);
                         this.fullSize = false;

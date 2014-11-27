@@ -569,45 +569,61 @@ Ext.onReady( function() {
 												select: function(cmp) {
 													var period = cmp.getValue(),
 														url = gis.init.contextPath + '/api/analytics.json?',
-														group = gis.init.systemSettings.infrastructuralDataElementGroup;
+                                                        iig = gis.init.systemSettings.infrastructuralIndicatorGroup || {},
+                                                        ideg = gis.init.systemSettings.infrastructuralDataElementGroup || {},
 
-													if (group && group.dataElements) {
-														url += 'dimension=dx:';
+                                                        indicators = iig.indicators || [],
+                                                        dataElements = ideg.dataElements || [],
+                                                        data = [].concat(indicators, dataElements),
+                                                        paramString = '';
 
-														for (var i = 0; i < group.dataElements.length; i++) {
-															url += group.dataElements[i].id;
-															url += i < group.dataElements.length - 1 ? ';' : '';
-														}
-													}
+                                                    // data
+                                                    paramString += 'dimension=dx:';
 
-													url += '&filter=pe:' + period;
-													url += '&filter=ou:' + att.id;
+                                                    for (var i = 0; i < data.length; i++) {
+                                                        paramString += data[i].id + (i < data.length - 1 ? ';' : '');
+                                                    }
+
+                                                    // period
+                                                    paramString += '&filter=pe:' + period;
+
+                                                    // orgunit
+                                                    paramString += '&dimension=ou:' + att.id;
 
 													Ext.Ajax.request({
-														url: url,
+														url: url + paramString,
 														success: function(r) {
-															var response = Ext.decode(r.responseText),
-																data = [];
+                                                            var records = [];
 
-															if (Ext.isArray(response.rows)) {
-																for (var i = 0; i < response.rows.length; i++) {
-																	data.push({
-																		name: response.metaData.names[response.rows[i][0]],
-																		value: response.rows[i][1]
-																	});
-																}
-															}
+                                                            r = Ext.decode(r.responseText);
 
-															layer.widget.infrastructuralDataElementValuesStore.loadData(data);
+                                                            if (!r.rows && r.rows.length) {
+                                                                return;
+                                                            }
+                                                            else {
+                                                                // index
+                                                                for (var i = 0; i < r.headers.length; i++) {
+                                                                    if (r.headers[i].name === 'dx') {
+                                                                        dxIndex = i;
+                                                                    }
+
+                                                                    if (r.headers[i].name === 'value') {
+                                                                        valueIndex = i;
+                                                                    }
+                                                                }
+
+                                                                // records
+                                                                for (var i = 0; i < r.rows.length; i++) {
+                                                                    records.push({
+                                                                        name: r.metaData.names[r.rows[i][dxIndex]],
+                                                                        value: r.rows[i][valueIndex]
+                                                                    });
+                                                                }
+
+                                                                layer.widget.infrastructuralDataElementValuesStore.loadData(records);
+                                                            }
 														}
 													});
-
-													//layer.widget.infrastructuralDataElementValuesStore.load({
-														//params: {
-															//periodId: infrastructuralPeriod,
-															//organisationUnitId: att.internalId
-														//}
-													//});
 												}
 											}
 										},
