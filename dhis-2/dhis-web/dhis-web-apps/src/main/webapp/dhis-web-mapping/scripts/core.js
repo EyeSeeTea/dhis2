@@ -334,6 +334,10 @@ Ext.onReady( function() {
 
                     gis.util.array.sort(records);
 
+                    // html
+                    html += '<span style="font-weight: bold; color: #333">' + attr.name + '</span><br/>';
+                    html += '<span style="font-weight: bold; color: #333">' + r.metaData.names[period.iso] + '</span><br/><br/>';
+
                     for (var i = 0; i < records.length; i++) {
                         html += records[i].name + ': ' + '<span style="color:#333">' + records[i].value + '</span>' + (i < records.length - 1 ? '<br/>' : '');
                     }
@@ -343,7 +347,7 @@ Ext.onReady( function() {
                     bodyStyle: 'background-color: #fff; padding: 5px; line-height: 13px',
                     autoScroll: true,
                     closeAction: 'destroy',
-                    title: attr.name + ' (' + r.metaData.names[period.iso] + ')',
+                    title: 'Infrastructural data',
                     html: html,
                     listeners: {
                         show: function() {
@@ -353,6 +357,7 @@ Ext.onReady( function() {
 
                             if (diff > 0) {
                                 this.setHeight(winHeight - diff - 5);
+                                this.setWidth(this.getWidth() + 18);
                             }
                         }
                     }
