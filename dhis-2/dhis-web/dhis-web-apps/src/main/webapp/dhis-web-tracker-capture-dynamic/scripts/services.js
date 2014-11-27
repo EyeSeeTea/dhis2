@@ -724,7 +724,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     hematocrit: {
                         type: "dataelement_newest_event_program_stage",
                         dataelement_uID: "X8HbdaoS9LN",
-                        programstage_uID: "",
+                        programstage_uID: "WZbXY0S00lP",
                         program_uID: ""
                     },
                     treatmentForSevereAnemia: {
@@ -1559,19 +1559,80 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
+/* service for getting calendar setting */
+.service('UserDefinedVariableService', function(TrackerFieldCodeFactory){
+    return {
+        getVariablesHash: function($scope) {
+            
+            var userDefinedFields = TrackerFieldCodeFactory.getUserDefinedProgramFieldCodes($scope.currentEvent.program);
+            var variablesHash;
+            
+            angular.forEach(userDefinedFields, function(fieldCode) {
+                if(fieldCode.type === "dataelement_newest_event_program_stage"){
+                    var valueFound = false;
+                    angular.forEach($scope.dhis2Events, function(event) {
+                        if(!valueFound) {
+                            if(event.programStage === fieldCode.programstage_uID) {
+                                if(angular.isObject(event[fieldCode.dataelement_uID])){
+                                    //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                                    variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
+                                    valueFound = true;
+                                }
+                            }
+                        }
+                    });
+                }
+                else if(fieldCode.type === "dataelement_newest_event_program"){
+                    var valueFound = false;
+                    angular.forEach($scope.dhis2Events, function(event) {
+                        if(!valueFound) {
+                           if(angular.isObject(event[fieldCode.dataelement_uID])){
+                                //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                                variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
+                                valueFound = true;
+                            }
+                        }
+                    });
+                }
+                else if(fieldCode.type === "dataelement_current_event"){
+                    var valueFound = false;
+                    angular.forEach($scope.dhis2Events, function(event) {
+                        if(!valueFound) {
+                            if(event.programStage === $scope.currentEvent.programStage) {
+                                if(angular.isObject(event[fieldCode.dataelement_uID])){
+                                    //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                                    variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
+                                    valueFound = true;
+                                }
+                            }
+                        }
+                    });
+                }
+                else{
+                    //Missing handing of ruletype
+                    warn("Unknown fieldCode type:" + fieldCode.type);
+                }
+                
+            });
+            
+            return variablesHash;
+        }
+    };
+})
+       
 
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function(TrackerRulesFactory,DHIS2EventFactory,storage){
+.service('TrackerRulesExecutionService', function(TrackerRulesFactory,UserDefinedVariableService){
     return {
-        executeRules: function(orgUnit, program) {
+        executeRules: function($scope) {
+            //Get all fieldCodes and resolve values
+            var variables = UserDefinedVariableService.getVariablesHash($scope);
+            
             //Get all rules that has the trigger "TrackerDataChanged"
             var rules = TrackerRulesFactory.getProgramRules();
+            
             if(angular.isObject(rules) && angular.isArray(rules)){
-                
-                //Build a dictionary of values for each dataelement, with values sorted chronologically
-                //Chronological sorting based on Report date for the events
-                var dictionary = DHIS2EventFactory.getAllEventDataValues(orgUnit, program);
                 //Possible enhancement: All historical values could be cached...
                 //pick selected orgUnit and program
                 
@@ -1582,8 +1643,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //
                     //Foreach Action:
                     //  broadcast action to the rest of the application
-                    
-                    
                     
 //                    $rootScope.$broadcast("rule",
 //                                {rule:rule}

@@ -308,32 +308,35 @@ trackerCapture.controller('DataEntryController',
         $scope.customForm = $scope.currentStage.dataEntryForm ? $scope.currentStage.dataEntryForm.htmlCode : null; 
         $scope.displayCustomForm = $scope.customForm ? true:false;
 
+        $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
+        $scope.dhis2Events.reverse();
+
+        angular.forEach($scope.dhis2Events, function(iteratedEvent) {
+            angular.forEach(iteratedEvent.dataValues, function(dataValue){
+                var val = dataValue.value;
+                //TODO: Fix the type casting below - getting the types of the dataelements is not working in the below strategy
+                if(false){                
+                    if( dataValue.dataElement && dataValue.dataElement.type === 'int'){
+                        val = parseInt(val);
+                    }
+                    if(dataValue.dataElement.type === 'date'){
+                        val = DateUtils.formatFromApiToUser(val);
+                    }
+                    iteratedEvent[dataValue.dataElement] = val;
+                }    
+            });
+        });
+        
         $scope.allowProvidedElsewhereExists = false;
         angular.forEach($scope.currentStage.programStageDataElements, function(prStDe){
             $scope.currentStage.programStageDataElements[prStDe.dataElement.id] = prStDe.dataElement;
             if(prStDe.allowProvidedElsewhere){
                 $scope.allowProvidedElsewhereExists = true;                
-            }
-        });
-        
-        angular.forEach($scope.currentEvent.dataValues, function(dataValue){
-            var val = dataValue.value;
-            var de = $scope.currentStage.programStageDataElements[dataValue.dataElement];
-            if(val){                
-                if( de && de.type === 'int'){
-                    val = parseInt(val);
-                }
-                if(de.type === 'date'){
-                    val = DateUtils.formatFromApiToUser(val);
-                }
-            }    
-            $scope.currentEvent[dataValue.dataElement] = val;
-            if(dataValue.providedElsewhere){
-                $scope.currentEvent.providedElsewhere[dataValue.dataElement] = dataValue.providedElsewhere;
+                $scope.currentEvent.providedElsewhere[prStDe] = prStDe.dataValue.providedElsewhere;
             }
         });
 
-        $scope.currentEventOriginal = angular.copy($scope.currentEvent);        
+        $scope.currentEventOriginal = angular.copy($scope.currentEvent);   
     };
     
     $scope.saveDatavalue = function(prStDe){
@@ -379,7 +382,7 @@ trackerCapture.controller('DataEntryController',
                     $scope.currentElement.saved = true;
                     //Call rules engine after a new value is saved. All changes can affect rules outcomes.
                     
-                    TrackerRulesExecutionService.executeRules("hei","hå");
+                    TrackerRulesExecutionService.executeRules($scope);
                 });
                 
             }
