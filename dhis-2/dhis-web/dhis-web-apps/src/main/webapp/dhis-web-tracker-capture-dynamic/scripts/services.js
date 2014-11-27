@@ -689,15 +689,54 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };  
 })
 
+    /* Returns a function for getting rules for a specific program */
 .factory('TrackerRulesFactory', function(){
     return{
-        getProgramRules : function(){
-            return [{rulename:"rule1",ruleContent:"This is the RULES"},
-                    {rulename:"rule2",ruleContent:"This is the second rule"},
-                    {rulename:"rule3",ruleContent:"The last rule to rule them all"},];
+        getProgramRules : function(programUid){
+            return [
+                {
+                    ruleName:"rule1",
+                    ruleContent: {
+                        condition: "(hematocrit < 100)",
+                        actions: [],
+                        triggers: [] } },
+                {
+                    ruleName:"rule2",
+                    ruleContent: {
+                        condition: "(treatmentForSevereAnemia = false)",
+                        actions: [],
+                        triggers: [] } },
+                {
+                    ruleName:"rule3",
+                    ruleContent: {
+                        condition: "(extremePallor = true)",
+                        actions: [],
+                        triggers: [] } }];
         }
     };  
 })
+
+    /* Returns user defined variable names and their corresponding UIDs and types for a specific program */
+    .factory('TrackerFieldCodeFactory', function(){
+        return{
+            getUserDefinedProgramFieldCodes : function(programUid){
+                return {
+                    hematocrit: {
+                        uID: "X8HbdaoS9LN",
+                        type: "dataelement_newest_event_program_stage"
+                    },
+                    treatmentForSevereAnemia: {
+                        uID: "nB4Ui3ckmUi",
+                        type: "dataelement_newest_event_program"
+                    },
+                    extremePallor: {
+                        uID: "EyfTU3ibMmJ",
+                        type: "dataelement_current_event"
+                    }
+                }
+            }
+        };
+    })
 
 /* Factory for getting data values */
 .factory('OrderedDataElementValueFactory', function(storage, CurrentSelection ){
