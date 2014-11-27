@@ -723,19 +723,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return {
                     hematocrit: {
                         type: "dataelement_newest_event_program_stage",
-                        dataelement_uID: "X8HbdaoS9LN",
+                        dataelement_uID: "AAaJGnWR5js",
                         programstage_uID: "WZbXY0S00lP",
                         program_uID: ""
                     },
                     treatmentForSevereAnemia: {
                         type: "dataelement_newest_event_program",
-                        dataelement_uID: "nB4Ui3ckmUi",
+                        dataelement_uID: "WpQmKfbYqvt",
                         programstage_uID: "",
                         program_uID: ""
                     },
                     extremePallor: {
                         type: "dataelement_current_event",
-                        dataelement_uID: "EyfTU3ibMmJ",
+                        dataelement_uID: "Mh7nK8UKoZP",
                         programstage_uID: "",
                         program_uID: ""
                     }
@@ -1565,7 +1565,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getVariablesHash: function($scope) {
             
             var userDefinedFields = TrackerFieldCodeFactory.getUserDefinedProgramFieldCodes($scope.currentEvent.program);
-            var variablesHash;
+            var variablesHash = [];
             
             angular.forEach(userDefinedFields, function(fieldCode) {
                 if(fieldCode.type === "dataelement_newest_event_program_stage"){
@@ -1573,8 +1573,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === fieldCode.programstage_uID) {
-                                if(angular.isObject(event[fieldCode.dataelement_uID])){
-                                    //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                                if(angular.isDefined(event[fieldCode.dataelement_uID])){
                                     variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
                                     valueFound = true;
                                 }
@@ -1586,8 +1585,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     var valueFound = false;
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
-                           if(angular.isObject(event[fieldCode.dataelement_uID])){
-                                //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                           if(angular.isDefined(event[fieldCode.dataelement_uID])){
                                 variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
                                 valueFound = true;
                             }
@@ -1599,8 +1597,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === $scope.currentEvent.programStage) {
-                                if(angular.isObject(event[fieldCode.dataelement_uID])){
-                                    //TODO: CHECK wether the isObject is true for "", and wether "" is a common value
+                                if(angular.isDefined(event[fieldCode.dataelement_uID])){
                                     variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
                                     valueFound = true;
                                 }
