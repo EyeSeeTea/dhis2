@@ -722,16 +722,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             getUserDefinedProgramFieldCodes : function(programUid){
                 return {
                     hematocrit: {
-                        uID: "X8HbdaoS9LN",
-                        type: "dataelement_newest_event_program_stage"
+                        type: "dataelement_newest_event_program_stage",
+                        dataelement_uID: "X8HbdaoS9LN",
+                        programstage_uID: "",
+                        program_uID: ""
                     },
                     treatmentForSevereAnemia: {
-                        uID: "nB4Ui3ckmUi",
-                        type: "dataelement_newest_event_program"
+                        type: "dataelement_newest_event_program",
+                        dataelement_uID: "nB4Ui3ckmUi",
+                        programstage_uID: "",
+                        program_uID: ""
                     },
                     extremePallor: {
-                        uID: "EyfTU3ibMmJ",
-                        type: "dataelement_current_event"
+                        type: "dataelement_current_event",
+                        dataelement_uID: "EyfTU3ibMmJ",
+                        programstage_uID: "",
+                        program_uID: ""
                     }
                 }
             }
