@@ -292,15 +292,37 @@ Ext.onReady( function() {
                 data = [].concat(indicators, dataElements),
                 period = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType))[0],
                 paramString = '?',
+                showWindow,
                 success,
                 failure;
 
-            if (!data.length) {
-                console.log('No infrastructural indicators or data elements selected');
-                return;
-            }
+            showWindow = function(html) {
+                destroyDataPopups();
 
-            destroyDataPopups();
+                win = Ext.create('Ext.window.Window', {
+                    bodyStyle: 'background-color: #fff; padding: 5px; line-height: 13px',
+                    autoScroll: true,
+                    closeAction: 'destroy',
+                    title: 'Infrastructural data',
+                    html: html,
+                    listeners: {
+                        show: function() {
+                            var winHeight = this.getHeight(),
+                                viewportHeight = gis.viewport.getHeight(),
+                                diff = (winHeight + e.y) - viewportHeight;
+
+                            if (diff > 0) {
+                                this.setHeight(winHeight - diff - 5);
+                                this.setWidth(this.getWidth() + 18);
+                            }
+                        }
+                    }
+                });
+
+                win.showAt(e.x + 20, e.y);
+
+                layer.dataPopups.push(win);
+            };
 
             success = function(r) {
                 var html = '',
@@ -343,34 +365,18 @@ Ext.onReady( function() {
                     }
                 }
 
-                win = Ext.create('Ext.window.Window', {
-                    bodyStyle: 'background-color: #fff; padding: 5px; line-height: 13px',
-                    autoScroll: true,
-                    closeAction: 'destroy',
-                    title: 'Infrastructural data',
-                    html: html,
-                    listeners: {
-                        show: function() {
-                            var winHeight = this.getHeight(),
-                                viewportHeight = gis.viewport.getHeight(),
-                                diff = (winHeight + e.y) - viewportHeight;
-
-                            if (diff > 0) {
-                                this.setHeight(winHeight - diff - 5);
-                                this.setWidth(this.getWidth() + 18);
-                            }
-                        }
-                    }
-                });
-
-                win.showAt(e.x + 20, e.y);
-
-                layer.dataPopups.push(win);
+                showWindow(html);
             };
 
             failure = function(r) {
                 console.log(r);
             };
+
+            // init
+            if (!data.length) {
+                showWindow('Please go to general settings and select infrastructural<br/>indicator and data element groups.');
+                return;
+            }
 
             // data
             paramString += 'dimension=dx:';
