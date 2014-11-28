@@ -284,7 +284,7 @@ Ext.onReady( function() {
             var generator = gis.init.periodGenerator,
                 periodType = gis.init.systemSettings.infrastructuralPeriodType.name,
                 attr = feature.attributes,
-                iig = gis.init.systemSettings.infrastructuralIndicatorGroup || {},
+                iig = gis.init.systemSettings.infrastructuralIndicatorGroup || gis.init.systemSettings.indicatorGroups[0] || {},
                 ideg = gis.init.systemSettings.infrastructuralDataElementGroup || {},
 
                 indicators = iig.indicators || [],
@@ -294,7 +294,9 @@ Ext.onReady( function() {
                 paramString = '?',
                 showWindow,
                 success,
-                failure;
+                failure,
+                getData,
+                getParamString;
 
             showWindow = function(html) {
                 destroyDataPopups();
@@ -372,42 +374,52 @@ Ext.onReady( function() {
                 console.log(r);
             };
 
+            getData = function(paramString) {
+                if (GIS.plugin && !GIS.app) {
+                    Ext.data.JsonP.request({
+                        url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+                        success: success,
+                        failure: failure
+                    });
+                }
+                else {
+                    Ext.Ajax.request({
+                        url: gis.init.contextPath + '/api/analytics.json' + paramString,
+                        disableCaching: false,
+                        success: function(r) {
+                            success(Ext.decode(r.responseText));
+                        },
+                        failure: failure
+                    });
+                }
+            };
+
+            getParamString = function(data) {
+
+                // data
+                paramString += 'dimension=dx:';
+
+                for (var i = 0; i < data.length; i++) {
+                    paramString += data[i].id + (i < data.length - 1 ? ';' : '');
+                }
+
+                // period
+                paramString += '&filter=pe:' + period.iso;
+
+                // orgunit
+                paramString += '&dimension=ou:' + attr.id;
+
+                getData(paramString);
+            };
+
             // init
             if (!data.length) {
-                showWindow('Please go to general settings and select infrastructural<br/>indicator and data element groups.');
+                showWindow('No indicator or data element groups found.');
                 return;
             }
 
-            // data
-            paramString += 'dimension=dx:';
+            getParamString(data);
 
-            for (var i = 0; i < data.length; i++) {
-                paramString += data[i].id + (i < data.length - 1 ? ';' : '');
-            }
-
-            // period
-            paramString += '&filter=pe:' + period.iso;
-
-            // orgunit
-            paramString += '&dimension=ou:' + attr.id;
-
-            if (GIS.plugin && !GIS.app) {
-                Ext.data.JsonP.request({
-                    url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
-                    success: success,
-                    failure: failure
-                });
-            }
-            else {
-                Ext.Ajax.request({
-                    url: gis.init.contextPath + '/api/analytics.json' + paramString,
-                    disableCaching: false,
-                    success: function(r) {
-                        success(Ext.decode(r.responseText));
-                    },
-                    failure: failure
-                });
-            }
         };
 
 		defaultRightClickSelect = function fn(feature) {

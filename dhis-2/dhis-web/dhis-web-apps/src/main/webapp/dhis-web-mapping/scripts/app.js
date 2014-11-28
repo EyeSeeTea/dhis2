@@ -9517,9 +9517,21 @@ Ext.onReady( function() {
                                             url: init.contextPath + '/api/configuration/infrastructuralIndicators.json',
                                             success: function(r) {
                                                 var obj = Ext.decode(r.responseText);
-
                                                 init.systemSettings.infrastructuralIndicatorGroup = Ext.isObject(obj) ? obj : null;
-                                                fn();
+
+                                                if (!Ext.isObject(obj)) {
+                                                    Ext.Ajax.request({
+                                                        url: init.contextPath + '/api/indicatorGroups.json?fields=id,name,indicators[id,name]&pageSize=1',
+                                                        success: function(r) {
+                                                            r = Ext.decode(r.responseText);
+                                                            init.systemSettings.infrastructuralIndicatorGroup = r.indicatorGroups ? r.indicatorGroups[0] : null;
+                                                        },
+                                                        callback: fn
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
+                                                }
                                             }
                                         });
 
@@ -9528,9 +9540,21 @@ Ext.onReady( function() {
                                             url: init.contextPath + '/api/configuration/infrastructuralDataElements.json',
                                             success: function(r) {
                                                 var obj = Ext.decode(r.responseText);
-
                                                 init.systemSettings.infrastructuralDataElementGroup = Ext.isObject(obj) ? obj : null;
-                                                fn();
+
+                                                if (!Ext.isObject(obj)) {
+                                                    Ext.Ajax.request({
+                                                        url: init.contextPath + '/api/dataElementGroups.json?fields=id,name,dataElements[id,name]&pageSize=1',
+                                                        success: function(r) {
+                                                            r = Ext.decode(r.responseText);
+                                                            init.systemSettings.infrastructuralDataElementGroup = r.dataElementGroups ? r.dataElementGroups[0] : null;
+                                                        },
+                                                        callback: fn
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
+                                                }
                                             }
                                         });
 
@@ -9540,7 +9564,7 @@ Ext.onReady( function() {
                                             success: function(r) {
                                                 var obj = Ext.decode(r.responseText);
 
-                                                init.systemSettings.infrastructuralPeriodType = Ext.isObject(obj) ? obj : null;
+                                                init.systemSettings.infrastructuralPeriodType = Ext.isObject(obj) ? obj : {id: 'Yearly', code: 'Yearly', name: 'Yearly'};
                                                 fn();
                                             }
                                         });
