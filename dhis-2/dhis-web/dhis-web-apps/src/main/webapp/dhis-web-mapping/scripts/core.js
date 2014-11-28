@@ -359,8 +359,8 @@ Ext.onReady( function() {
                     gis.util.array.sort(records);
 
                     // html
-                    html += '<span style="font-weight: bold; color: #333">' + attr.name + '</span><br/>';
-                    html += '<span style="font-weight: bold; color: #333">' + r.metaData.names[period.iso] + '</span><br/><br/>';
+                    html += '<div style="font-weight: bold; color: #333">' + attr.name + '</div>';
+                    html += '<div style="font-weight: bold; color: #333; padding-bottom: 5px">' + r.metaData.names[period.iso] + '</div>';
 
                     for (var i = 0; i < records.length; i++) {
                         html += records[i].name + ': ' + '<span style="color:#333">' + records[i].value + '</span>' + (i < records.length - 1 ? '<br/>' : '');
