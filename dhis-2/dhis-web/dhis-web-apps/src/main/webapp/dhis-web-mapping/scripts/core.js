@@ -306,6 +306,7 @@ Ext.onReady( function() {
                     autoScroll: true,
                     closeAction: 'destroy',
                     title: 'Infrastructural data',
+                    resizable: false,
                     html: html,
                     listeners: {
                         show: function() {
@@ -333,10 +334,8 @@ Ext.onReady( function() {
                     valueIndex,
                     win;
 
-                if (!r.rows && r.rows.length) {
-                    html = 'No values found';
-                }
-                else {
+                if (r.rows && r.rows.length) {
+
                     // index
                     for (var i = 0; i < r.headers.length; i++) {
                         if (r.headers[i].name === 'dx') {
@@ -365,6 +364,12 @@ Ext.onReady( function() {
                     for (var i = 0; i < records.length; i++) {
                         html += records[i].name + ': ' + '<span style="color:#333">' + records[i].value + '</span>' + (i < records.length - 1 ? '<br/>' : '');
                     }
+                }
+                else {
+                    html = 'No data found for<br/><br/>Indicators in group: <span style="color:#333">' + iig.name + '</span>' +
+                           '<br/>Data elements in group: <span style="color:#333">' + ideg.name + '</span>' +
+                           '<br/>Period: <span style="color:#333">' + period.name + '</span>' +
+                           '<br/><br/>To change groups, please go to general settings.';
                 }
 
                 showWindow(html);
