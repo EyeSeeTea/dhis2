@@ -2363,7 +2363,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: NS.i18n.manage_favorites,
+			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
 			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
