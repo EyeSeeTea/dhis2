@@ -379,6 +379,7 @@ Ext.onReady( function() {
 
             failure = function(r) {
                 console.log(r);
+                gis.olmap.mask.hide();
             };
 
             getData = function(paramString) {
