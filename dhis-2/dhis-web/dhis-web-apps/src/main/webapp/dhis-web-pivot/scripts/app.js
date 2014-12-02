@@ -1464,7 +1464,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
+			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
 			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -1828,7 +1828,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: 'Write interpretation' + '&nbsp;&nbsp;|&nbsp;&nbsp;<span style="font-weight:normal">' + ns.app.layout.name + '</span>',
+				title: 'Write interpretation' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 				layout: 'fit',
 				width: 550,
 				bodyStyle: 'padding:1px; background-color:#fff',
@@ -5597,7 +5597,7 @@ Ext.onReady( function() {
 				});
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Embed in web page' + '&nbsp;&nbsp;|&nbsp;&nbsp;<span style="font-weight:normal">' + ns.app.layout.name + '</span>',
+                    title: 'Embed in web page' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5654,7 +5654,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Favorite link' + '&nbsp;&nbsp;|&nbsp;&nbsp;<span style="font-weight:normal">' + ns.app.layout.name + '</span>',
+                    title: 'Favorite link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5703,7 +5703,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'API link' + '&nbsp;&nbsp;|&nbsp;&nbsp;<span style="font-weight:normal">' + ns.app.layout.name + '</span>',
+                    title: 'API link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
