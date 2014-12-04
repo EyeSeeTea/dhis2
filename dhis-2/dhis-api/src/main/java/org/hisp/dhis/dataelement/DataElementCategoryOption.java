@@ -71,7 +71,6 @@ public class DataElementCategoryOption
 
     private Set<DataElementCategory> categories = new HashSet<>();
 
-    @Scanned
     private Set<DataElementCategoryOptionCombo> categoryOptionCombos = new HashSet<>();
 
     private Set<CategoryOptionGroup> groups = new HashSet<>();
@@ -175,7 +174,7 @@ public class DataElementCategoryOption
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Date getStartDate()
     {
@@ -188,7 +187,7 @@ public class DataElementCategoryOption
     }
 
     @JsonProperty
-    @JsonView( { DetailedView.class } )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Date getEndDate()
     {

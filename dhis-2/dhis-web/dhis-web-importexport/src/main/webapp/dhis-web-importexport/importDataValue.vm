@@ -57,6 +57,14 @@
     </select></td>
 </tr>
 <tr class="moreOptions" style="display:none">
+	<td>$i18n.getString( "id_scheme" ) ($i18n.getString( "all_objects" ))</td>	
+	<td><select id="idScheme" name="idScheme" style="width:190px">
+		<option>[ $i18n.getString( "select" ) ]</option>
+		<option value="UID">$i18n.getString( "uid" )</option>
+		<option value="CODE">$i18n.getString( "code" )</option>
+    </select></td>
+</tr>
+<tr class="moreOptions" style="display:none">
 	<td>$i18n.getString( "existing_record_check" )</td>	
 	<td><select id="skipExistingCheck" name="skipExistingCheck" style="width:190px">
 		<option value="false">$i18n.getString( "check_safe_recommended" )</option>
