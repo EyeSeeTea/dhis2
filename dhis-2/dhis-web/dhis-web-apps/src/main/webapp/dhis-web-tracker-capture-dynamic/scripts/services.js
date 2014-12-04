@@ -693,56 +693,72 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TrackerRulesFactory', function(){
     return{
         getProgramRules : function(programUid){
-            return [
+            //Will be fetched from server
+            var rules = [
                 {
                     ruleName:"rule1",
                     ruleContent: {
-                        condition: "(hematocrit < 100)",
+                        condition: "($var1 < 100)",
                         actions: [],
                         triggers: [] } },
                 {
                     ruleName:"rule2",
                     ruleContent: {
-                        condition: "(treatmentForSevereAnemia = false)",
+                        condition: "($var2 = false)",
                         actions: [],
                         triggers: [] } },
                 {
                     ruleName:"rule3",
                     ruleContent: {
-                        condition: "(extremePallor = true)",
+                        condition: "($var3 = true)",
                         actions: [],
                         triggers: [] } }];
+            
+            //Go through all rules and replace operators for javascript:
+            angular.forEach(rules,function(rule){
+               rule.ruleContent.condition = 
+                    rule.ruleContent.condition.replace("=", "==="); 
+            });
+
+            return rules;
         }
+
     };  
 })
 
-    /* Returns user defined variable names and their corresponding UIDs and types for a specific program */
-    .factory('TrackerFieldCodeFactory', function(){
-        return{
-            getUserDefinedProgramFieldCodes : function(programUid){
-                return {
-                    hematocrit: {
-                        type: "dataelement_newest_event_program_stage",
-                        dataelement_uID: "AAaJGnWR5js",
-                        programstage_uID: "WZbXY0S00lP",
-                        program_uID: ""
-                    },
-                    treatmentForSevereAnemia: {
-                        type: "dataelement_newest_event_program",
-                        dataelement_uID: "WpQmKfbYqvt",
-                        programstage_uID: "",
-                        program_uID: ""
-                    },
-                    extremePallor: {
-                        type: "dataelement_current_event",
-                        dataelement_uID: "Mh7nK8UKoZP",
-                        programstage_uID: "",
-                        program_uID: ""
-                    }
+/* Returns user defined variable names and their corresponding UIDs and types for a specific program */
+.factory('TrackerFieldCodeFactory', function(){
+    return{
+        getUserDefinedProgramFieldCodes : function(programUid){
+            return {
+                var1: {
+                    variablename: "$var1",
+                    defaultvalue:0,
+                    type: "dataelement_newest_event_program_stage",
+                    dataelement_uID: "AAaJGnWR5js",
+                    programstage_uID: "WZbXY0S00lP",
+                    program_uID: ""
+                },
+                var2: {
+                    variablename: "$var2",
+                    defaultvalue:false,
+                    type: "dataelement_newest_event_program",
+                    dataelement_uID: "WpQmKfbYqvt",
+                    programstage_uID: "",
+                    program_uID: ""
+                },
+                var3: {
+                    variablename: "$var3",
+                    defaultvalue:false,
+                    type: "dataelement_current_event",
+                    dataelement_uID: "Mh7nK8UKoZP",
+                    programstage_uID: "",
+                    program_uID: ""
                 }
             }
-        };
-    })
+        }
+    };
+})
 
 /* Factory for getting data values */
 .factory('OrderedDataElementValueFactory', function(storage, CurrentSelection ){
@@ -1559,22 +1575,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-/* service for getting calendar setting */
-.service('UserDefinedVariableService', function(TrackerFieldCodeFactory){
+/* service for building variables based on the data in users fields */
+.service('VariableService', function(TrackerFieldCodeFactory){
     return {
-        getVariablesHash: function($scope) {
+        getVariables: function($scope) {
             
             var userDefinedFields = TrackerFieldCodeFactory.getUserDefinedProgramFieldCodes($scope.currentEvent.program);
-            var variablesHash = [];
+            var variables = [];
             
             angular.forEach(userDefinedFields, function(fieldCode) {
+                var valueFound = false;
                 if(fieldCode.type === "dataelement_newest_event_program_stage"){
-                    var valueFound = false;
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === fieldCode.programstage_uID) {
                                 if(angular.isDefined(event[fieldCode.dataelement_uID])){
-                                    variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
+                                    variables.push({
+                                            variablename:fieldCode.variablename,
+                                            variablevalue:event[fieldCode.dataelement_uID]
+                                        });
                                     valueFound = true;
                                 }
                             }
@@ -1582,23 +1601,27 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     });
                 }
                 else if(fieldCode.type === "dataelement_newest_event_program"){
-                    var valueFound = false;
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                            if(angular.isDefined(event[fieldCode.dataelement_uID])){
-                                variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
-                                valueFound = true;
+                                variables.push({
+                                            variablename:fieldCode.variablename,
+                                            variablevalue:event[fieldCode.dataelement_uID]
+                                        });
+                                 valueFound = true;
                             }
                         }
                     });
                 }
                 else if(fieldCode.type === "dataelement_current_event"){
-                    var valueFound = false;
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === $scope.currentEvent.programStage) {
                                 if(angular.isDefined(event[fieldCode.dataelement_uID])){
-                                    variablesHash[fieldCode.dataelement_uID] = event[fieldCode.dataelement_uID];
+                                    variables.push({
+                                            variablename:fieldCode.variablename,
+                                            variablevalue:event[fieldCode.dataelement_uID]
+                                        });
                                     valueFound = true;
                                 }
                             }
@@ -1609,10 +1632,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //Missing handing of ruletype
                     warn("Unknown fieldCode type:" + fieldCode.type);
                 }
-                
+
+                if(!valueFound){
+                    //If there is still no value found, assign default value:
+                    variables.push({
+                            variablename:fieldCode.variablename,
+                            variablevalue:fieldCode.defaultvalue
+                    });
+                }
             });
             
-            return variablesHash;
+            //Start iterating the context variables - and add these to the variables hash
+            
+            return variables;
         }
     };
 })
@@ -1620,30 +1652,55 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function(TrackerRulesFactory,UserDefinedVariableService){
+.service('TrackerRulesExecutionService', function(TrackerRulesFactory,VariableService, $rootScope){
     return {
         executeRules: function($scope) {
             //Get all fieldCodes and resolve values
-            var variables = UserDefinedVariableService.getVariablesHash($scope);
+            var variables = VariableService.getVariables($scope);
             
             //Get all rules that has the trigger "TrackerDataChanged"
             var rules = TrackerRulesFactory.getProgramRules();
             
             if(angular.isObject(rules) && angular.isArray(rules)){
-                //Possible enhancement: All historical values could be cached...
-                //pick selected orgUnit and program
                 
                 angular.forEach(rules, function(rule) {
-                        
-                    //compile rule conditions into expression
+                    var expression = rule.ruleContent.condition;
+                    angular.forEach(variables, function(variable) {
+                        expression = expression.replace(variable.variablename,
+                            variable.variablevalue);
+                        //[$][a-zA-Z0-9_]+
+                    });
+                    
+
+                    if(eval(expression)){
                     //if expression is true, run actions
                     //
                     //Foreach Action:
                     //  broadcast action to the rest of the application
-                    
-//                    $rootScope.$broadcast("rule",
-//                                {rule:rule}
-//                            );
+                        //TODO: define action
+                        $rootScope.$broadcast("rule",
+                            {rule:rule}
+                        );
+                    }
+                   //Foreach action, broadcast result
+//                    
+/*              ruleName:"rule1",
+                    ruleContent: {
+                        condition: "(hematocrit < 100)",
+                        actions: [],
+                        triggers: [] } },
+                {
+                    ruleName:"rule2",
+                    ruleContent: {
+                        condition: "(treatmentForSevereAnemia = false)",
+                        actions: [],
+                        triggers: [] } },
+                {
+                    ruleName:"rule3",
+                    ruleContent: {
+                        condition: "(extremePallor = true)",
+                        actions: [],
+                        triggers: [] } }];*/
                 });
             }
             
