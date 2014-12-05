@@ -697,18 +697,31 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var rules = [
                 {
                     ruleName:"rule1",
+                    
                     ruleContent: {
                         condition: "($var1 < 100)",
-                        actions: [],
+                        actions: [{ id:"LOQmKfnYqvf",
+                                    action:"displaytext",
+                                    location:"condcomp",
+                                    content:"Rule1 says there is a lot of var1"}],
                         triggers: [] } },
                 {
                     ruleName:"rule2",
+                    ruleId:"TtQmKftYqrt",
                     ruleContent: {
                         condition: "($var2 = false)",
-                        actions: [],
+                        actions: [{id:"LAQmKfnYqvf",
+                                action:"displaytext",
+                                location:"condcomp",
+                            content:"Rule2 says that var2 is false."},
+                        {   id:"PLTmKfnYqvf",
+                            action:"displaytext",
+                            location:"summary",
+                            content:"in summary, Rule2 says that var2 is false."}],
                         triggers: [] } },
                 {
                     ruleName:"rule3",
+                    ruleId:"LpQmKklYqxx",
                     ruleContent: {
                         condition: "($var3 = true)",
                         actions: [],
@@ -757,13 +770,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }
             }
         }
-    };
-})
-
-/* Factory for getting data values */
-.factory('OrderedDataElementValueFactory', function(storage, CurrentSelection ){
-    return {
-        
     };
 })
 
@@ -1662,46 +1668,52 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var rules = TrackerRulesFactory.getProgramRules();
             
             if(angular.isObject(rules) && angular.isArray(rules)){
+                //The program has rules, and we want to run them.
+                //Prepare repository unless it is already prepared:
+                if(angular.isUndefined( $scope.ruleeffects )){
+                    $scope.ruleeffects = {};
+                }
+                
+                var updatedEffectsExits = false;
                 
                 angular.forEach(rules, function(rule) {
                     var expression = rule.ruleContent.condition;
+                    //Go through and populate variables with actual values
                     angular.forEach(variables, function(variable) {
                         expression = expression.replace(variable.variablename,
                             variable.variablevalue);
                         //[$][a-zA-Z0-9_]+
                     });
                     
+                    //determine if expression is true, and actions should be effectuated
+                    var ruleEffective = eval(expression);
+                    
+                    angular.forEach(rule.ruleContent.actions, function(action){
+                        //In case the effect-hash is not populated, add entries
+                        if(angular.isUndefined( $scope.ruleeffects[action.id] )){
+                            $scope.ruleeffects[action.id] =  {
+                                location:action.location, 
+                                action:action.action,
+                                content:action.content,
+                                ineffect:false
+                            };
+                        }
+                        
+                        if($scope.ruleeffects[action.id].ineffect != ruleEffective)
+                        {
+                            //There is a change in the rule outcome, we need to update the effect object.
+                            updatedEffectsExits = true;
+                            $scope.ruleeffects[action.id].ineffect = ruleEffective;
+                        }
+                    });
 
-                    if(eval(expression)){
-                    //if expression is true, run actions
-                    //
-                    //Foreach Action:
-                    //  broadcast action to the rest of the application
-                        //TODO: define action
-                        $rootScope.$broadcast("rule",
-                            {rule:rule}
-                        );
-                    }
-                   //Foreach action, broadcast result
-//                    
-/*              ruleName:"rule1",
-                    ruleContent: {
-                        condition: "(hematocrit < 100)",
-                        actions: [],
-                        triggers: [] } },
-                {
-                    ruleName:"rule2",
-                    ruleContent: {
-                        condition: "(treatmentForSevereAnemia = false)",
-                        actions: [],
-                        triggers: [] } },
-                {
-                    ruleName:"rule3",
-                    ruleContent: {
-                        condition: "(extremePallor = true)",
-                        actions: [],
-                        triggers: [] } }];*/
+                    
                 });
+                
+                //Broadcast rules finished if there was any actual changes.
+                if(updatedEffectsExits){
+                    $rootScope.$broadcast("ruleeffectsupdated");
+                }
             }
             
             return true;
@@ -1711,3 +1723,36 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
  
  
+/* var rules = [
+                {
+                    ruleName:"rule1",
+                    
+                    ruleContent: {
+                        condition: "($var1 < 100)",
+                        actions: [{ id:"PpQmKfnYqvf",
+                                    action:"displaytext",
+                                    location:"condcomp",
+                                    content:"Rule1 says there is a lot of var1"}],
+                        triggers: [] } },
+                {
+                    ruleName:"rule2",
+                    ruleId:"TtQmKftYqrt",
+                    ruleContent: {
+                        condition: "($var2 = false)",
+                        actions: [{id:"PpQmKfnYqvf",
+                                action:"displaytext",
+                                location:"condcomp",
+                            content:"Rule2 says that var2 is false."},
+                        {   id:"PpQmKfnYqvf",
+                            action:"displaytext",
+                            location:"summary",
+                            content:"in summary, Rule2 says that var2 is false."}],
+                        triggers: [] } },
+                {
+                    ruleName:"rule3",
+                    ruleId:"LpQmKklYqxx",
+                    ruleContent: {
+                        condition: "($var3 = true)",
+                        actions: [],
+                        triggers: [] } }];
+             */
