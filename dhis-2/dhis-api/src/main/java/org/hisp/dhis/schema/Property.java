@@ -90,7 +90,7 @@ public class Property implements Ordered
     /**
      * If this Property is a collection, should it be wrapped with collectionName?
      */
-    private boolean collectionWrapping;
+    private Boolean collectionWrapping;
 
     /**
      * Description if provided, will be fetched from @Description annotation.
@@ -160,9 +160,24 @@ public class Property implements Ordered
     private boolean unique;
 
     /**
-     * Are the values for this property required to be not-null?
+     * Nullability of this property.
      */
-    private boolean notNull;
+    private boolean nullable;
+
+    /**
+     * Maximum length of this property.
+     */
+    private Integer maxLength;
+
+    /**
+     * Minimum length of this property.
+     */
+    private Integer minLength;
+
+    /**
+     * Cascading used when doing CRUD operations.
+     */
+    private String cascade;
 
     public Property()
     {
@@ -266,7 +281,7 @@ public class Property implements Ordered
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getCollectionName()
     {
-        return collectionName == null ? name : collectionName;
+        return collectionName != null ? collectionName : (isCollection() ? name : null);
     }
 
     public void setCollectionName( String collectionName )
@@ -276,12 +291,12 @@ public class Property implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isCollectionWrapping()
+    public Boolean isCollectionWrapping()
     {
         return collectionWrapping;
     }
 
-    public void setCollectionWrapping( boolean collectionWrapping )
+    public void setCollectionWrapping( Boolean collectionWrapping )
     {
         this.collectionWrapping = collectionWrapping;
     }
@@ -420,14 +435,50 @@ public class Property implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isNotNull()
+    public boolean isNullable()
     {
-        return notNull;
+        return nullable;
     }
 
-    public void setNotNull( boolean notNull )
+    public void setNullable( boolean nullable )
     {
-        this.notNull = notNull;
+        this.nullable = nullable;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getMaxLength()
+    {
+        return maxLength;
+    }
+
+    public void setMaxLength( Integer maxLength )
+    {
+        this.maxLength = maxLength;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getMinLength()
+    {
+        return minLength;
+    }
+
+    public void setMinLength( Integer minLength )
+    {
+        this.minLength = minLength;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getCascade()
+    {
+        return cascade;
+    }
+
+    public void setCascade( String cascade )
+    {
+        this.cascade = cascade;
     }
 
     public String key()
