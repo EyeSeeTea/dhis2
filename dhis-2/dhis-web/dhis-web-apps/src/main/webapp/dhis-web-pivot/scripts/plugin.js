@@ -183,14 +183,18 @@ Ext.onReady( function() {
 					'space': ' '
 				},
 				displayDensity: {
-					'compact': '3px',
+                    'xcompact': '2px',
+					'compact': '4px',
 					'normal': '6px',
-					'comfortable': '10px',
+					'comfortable': '8px',
+                    'xcomfortable': '10px'
 				},
 				fontSize: {
+					'xsmall': '9px',
 					'small': '10px',
 					'normal': '11px',
-					'large': '13px'
+					'large': '12px',
+					'xlarge': '14px'
 				}
 			};
 
@@ -300,7 +304,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
+			api.layout.Layout = function(config, applyConfig) {
 				var layout = {},
 					getValidatedDimensionArray,
 					validateSpecialCases;
@@ -516,7 +520,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+                    return Ext.apply(layout, applyConfig);
 				}();
 			};
 
@@ -3135,19 +3139,19 @@ Ext.onReady( function() {
 			// pivot
 			web.pivot = web.pivot || {};
 
-            web.pivot.loadTable = function(id) {
-				if (!Ext.isString(id)) {
-					alert('Invalid report table id');
-					return;
-				}
+            web.pivot.loadTable = function(obj) {
+                if (!(obj && obj.id)) {
+                    console.log('Error, no report table id');
+                    return;
+                }
 
 				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/reportTables/' + id + '.jsonp?fields=' + ns.core.conf.url.analysisFields.join(','),
+					url: init.contextPath + '/api/reportTables/' + obj.id + '.jsonp?fields=' + ns.core.conf.url.analysisFields.join(','),
 					failure: function(r) {
-						window.open(init.contextPath + '/api/reportTables/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','), '_blank');
+						//window.open(init.contextPath + '/api/reportTables/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','), '_blank');
 					},
 					success: function(r) {
-						var layout = api.layout.Layout(r);
+						var layout = api.layout.Layout(r, obj);
 
 						if (layout) {
 							web.pivot.getData(layout, true);
@@ -3332,8 +3336,8 @@ Ext.onReady( function() {
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
-			if (config.id) {
-				ns.core.web.pivot.loadTable(config.id);
+			if (config && config.id) {
+				ns.core.web.pivot.loadTable(config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);
