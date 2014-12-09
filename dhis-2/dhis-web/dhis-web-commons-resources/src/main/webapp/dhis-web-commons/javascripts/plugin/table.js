@@ -1,1 +1,3374 @@
-Ext.onReady(function(){Ext.Ajax.method="GET";Ext.isIE=function(){return/trident/.test(Ext.userAgent)}();PT={};PT.instances=[];PT.i18n={};PT.isDebug=false;PT.isSessionStorage=("sessionStorage" in window&&window.sessionStorage!==null);PT.getCore=function(m){var i={},k={},j={},g={},h={},l;(function(){i.finals={url:{path_module:"/dhis-web-pivot/",organisationunitchildren_get:"getOrganisationUnitChildren.action"},dimension:{data:{value:"data",name:PT.i18n.data||"Data",dimensionName:"dx",objectName:"dx",warning:{filter:"..."}},category:{name:PT.i18n.assigned_categories||"Assigned categories",dimensionName:"co",objectName:"co"},indicator:{value:"indicators",name:PT.i18n.indicators||"Indicators",dimensionName:"dx",objectName:"in"},dataElement:{value:"dataElements",name:PT.i18n.data_elements||"Data elements",dimensionName:"dx",objectName:"de"},operand:{value:"operand",name:"Operand",dimensionName:"dx",objectName:"dc"},dataSet:{value:"dataSets",name:PT.i18n.data_sets||"Data sets",dimensionName:"dx",objectName:"ds"},period:{value:"period",name:PT.i18n.periods||"Periods",dimensionName:"pe",objectName:"pe"},fixedPeriod:{value:"periods"},relativePeriod:{value:"relativePeriods"},organisationUnit:{value:"organisationUnits",name:PT.i18n.organisation_units||"Organisation units",dimensionName:"ou",objectName:"ou"},dimension:{value:"dimension"},value:{value:"value"}},root:{id:"root"}};l=i.finals.dimension;l.objectNameMap={};l.objectNameMap[l.data.objectName]=l.data;l.objectNameMap[l.indicator.objectName]=l.indicator;l.objectNameMap[l.dataElement.objectName]=l.dataElement;l.objectNameMap[l.operand.objectName]=l.operand;l.objectNameMap[l.dataSet.objectName]=l.dataSet;l.objectNameMap[l.category.objectName]=l.category;l.objectNameMap[l.period.objectName]=l.period;l.objectNameMap[l.organisationUnit.objectName]=l.organisationUnit;l.objectNameMap[l.dimension.objectName]=l.dimension;l.objectNameMap.ou1=l.organisationUnit;l.objectNameMap.ou2=l.organisationUnit;l.objectNameMap.ou3=l.organisationUnit;i.period={periodTypes:[{id:"Daily",name:PT.i18n.daily},{id:"Weekly",name:PT.i18n.weekly},{id:"Monthly",name:PT.i18n.monthly},{id:"BiMonthly",name:PT.i18n.bimonthly},{id:"Quarterly",name:PT.i18n.quarterly},{id:"SixMonthly",name:PT.i18n.sixmonthly},{id:"SixMonthlyApril",name:PT.i18n.sixmonthly_april},{id:"Yearly",name:PT.i18n.yearly},{id:"FinancialOct",name:PT.i18n.financial_oct},{id:"FinancialJuly",name:PT.i18n.financial_july},{id:"FinancialApril",name:PT.i18n.financial_april}]};i.layout={west_width:424,west_fieldset_width:418,west_width_padding:2,west_fill:2,west_fill_accordion_indicator:56,west_fill_accordion_dataelement:59,west_fill_accordion_dataset:31,west_fill_accordion_period:284,west_fill_accordion_organisationunit:58,west_maxheight_accordion_indicator:400,west_maxheight_accordion_dataelement:400,west_maxheight_accordion_dataset:400,west_maxheight_accordion_period:513,west_maxheight_accordion_organisationunit:900,west_maxheight_accordion_group:340,west_maxheight_accordion_options:449,west_scrollbarheight_accordion_indicator:300,west_scrollbarheight_accordion_dataelement:300,west_scrollbarheight_accordion_dataset:300,west_scrollbarheight_accordion_period:450,west_scrollbarheight_accordion_organisationunit:450,west_scrollbarheight_accordion_group:300,east_tbar_height:31,east_gridcolumn_height:30,form_label_width:55,window_favorite_ypos:100,window_confirm_width:250,window_share_width:500,grid_favorite_width:420,grid_row_height:27,treepanel_minheight:135,treepanel_maxheight:400,treepanel_fill_default:310,treepanel_toolbar_menu_width_group:140,treepanel_toolbar_menu_width_level:120,multiselect_minheight:100,multiselect_maxheight:250,multiselect_fill_default:345,multiselect_fill_reportingrates:315};i.pivot={digitGroupSeparator:{comma:",",space:" "},displayDensity:{compact:"3px",normal:"6px",comfortable:"10px"},fontSize:{small:"10px",normal:"11px",large:"13px"}};i.url={analysisFields:["*","program[id,name]","programStage[id,name]","columns[dimension,filter,items[id,"+m.namePropertyUrl+"]]","rows[dimension,filter,items[id,"+m.namePropertyUrl+"]]","filters[dimension,filter,items[id,"+m.namePropertyUrl+"]]","!lastUpdated","!href","!created","!publicAccess","!rewindRelativePeriods","!userOrganisationUnit","!userOrganisationUnitChildren","!userOrganisationUnitGrandChildren","!externalAccess","!access","!relativePeriods","!columnDimensions","!rowDimensions","!filterDimensions","!user","!organisationUnitGroups","!itemOrganisationUnitGroups","!userGroupAccesses","!indicators","!dataElements","!dataElementOperands","!dataElementGroups","!dataSets","!periods","!organisationUnitLevels","!organisationUnits"]}}());(function(){k.layout={};k.layout.Record=function(n){var n=Ext.clone(n);return function(){if(!Ext.isObject(n)){console.log("Record: config is not an object: "+n);return}if(!Ext.isString(n.id)){alert("Record: id is not text: "+n);return}n.id=n.id.replace(".","#");return n}()};k.layout.Dimension=function(n){var n=Ext.clone(n);return function(){if(!Ext.isObject(n)){console.log("Dimension: config is not an object: "+n);return}if(!Ext.isString(n.dimension)){console.log("Dimension: name is not a string: "+n);return}if(n.dimension!==i.finals.dimension.category.objectName){var o=[];if(!Ext.isArray(n.items)){console.log("Dimension: items is not an array: "+n);return}for(var p=0;p<n.items.length;p++){o.push(k.layout.Record(n.items[p]))}n.items=Ext.Array.clean(o);if(!n.items.length){console.log("Dimension: has no valid items: "+n);return}}return n}()};k.layout.Layout=function(o){var p={},n,q;n=function(s){var s=Ext.clone(s);if(!(s&&Ext.isArray(s)&&s.length)){return}for(var r=0;r<s.length;r++){s[r]=k.layout.Dimension(s[r])}s=Ext.Array.clean(s);return s.length?s:null};q=function(){var t=i.finals.dimension,s,u={};if(!p){return}s=Ext.Array.clean([].concat(p.columns||[],p.rows||[],p.filters||[]));for(var r=0;r<s.length;r++){u[s[r].dimension]=s[r]}if(p.filters&&p.filters.length){for(var r=0;r<p.filters.length;r++){if(p.filters[r].dimension===t.indicator.objectName){h.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter||"Indicators cannot be specified as filter");return}if(p.filters[r].dimension===t.category.objectName){h.message.alert(PT.i18n.categories_cannot_be_specified_as_filter||"Categories cannot be specified as filter");return}if(p.filters[r].dimension===t.dataSet.objectName){h.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter||"Data sets cannot be specified as filter");return}}}if(u[t.operand.objectName]&&u[t.indicator.objectName]){h.message.alert("Indicators and detailed data elements cannot be specified together");return}if(u[t.operand.objectName]&&u[t.dataElement.objectName]){h.message.alert("Detailed data elements and totals cannot be specified together");return}if(u[t.operand.objectName]&&u[t.dataSet.objectName]){h.message.alert("Data sets and detailed data elements cannot be specified together");return}if(u[t.operand.objectName]&&u[t.category.objectName]){h.message.alert("Assigned categories and detailed data elements cannot be specified together");return}return true};return function(){var r=[],t=i.finals.dimension;if(!(o&&Ext.isObject(o))){alert("Layout: config is not an object ("+m.el+")");return}o.columns=n(o.columns);o.rows=n(o.rows);o.filters=n(o.filters);if(!(o.columns||o.rows)){alert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);return}for(var s=0,u=Ext.Array.clean([].concat(o.columns||[],o.rows||[],o.filters||[]));s<u.length;s++){if(k.layout.Dimension(u[s])){r.push(u[s].dimension)}}if(!Ext.Array.contains(r,t.period.objectName)){alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);return}if(o.id){p.id=o.id}if(o.name){p.name=o.name}p.columns=o.columns;p.rows=o.rows;p.filters=o.filters;p.showColTotals=Ext.isBoolean(o.colTotals)?o.colTotals:(Ext.isBoolean(o.showColTotals)?o.showColTotals:true);p.showRowTotals=Ext.isBoolean(o.rowTotals)?o.rowTotals:(Ext.isBoolean(o.showRowTotals)?o.showRowTotals:true);p.showColSubTotals=Ext.isBoolean(o.colSubTotals)?o.colSubTotals:(Ext.isBoolean(o.showColSubTotals)?o.showColSubTotals:true);p.showRowSubTotals=Ext.isBoolean(o.rowSubTotals)?o.rowSubTotals:(Ext.isBoolean(o.showRowSubTotals)?o.showRowSubTotals:true);p.showDimensionLabels=Ext.isBoolean(o.showDimensionLabels)?o.showDimensionLabels:(Ext.isBoolean(o.showDimensionLabels)?o.showDimensionLabels:true);p.hideEmptyRows=Ext.isBoolean(o.hideEmptyRows)?o.hideEmptyRows:false;p.aggregationType=Ext.isString(o.aggregationType)?o.aggregationType:"default";p.showHierarchy=Ext.isBoolean(o.showHierarchy)?o.showHierarchy:false;p.displayDensity=Ext.isString(o.displayDensity)&&!Ext.isEmpty(o.displayDensity)?o.displayDensity:"normal";p.fontSize=Ext.isString(o.fontSize)&&!Ext.isEmpty(o.fontSize)?o.fontSize:"normal";p.digitGroupSeparator=Ext.isString(o.digitGroupSeparator)&&!Ext.isEmpty(o.digitGroupSeparator)?o.digitGroupSeparator:"space";p.legendSet=Ext.isObject(o.legendSet)&&Ext.isString(o.legendSet.id)?o.legendSet:null;p.parentGraphMap=Ext.isObject(o.parentGraphMap)?o.parentGraphMap:null;p.sorting=Ext.isObject(o.sorting)&&Ext.isDefined(o.sorting.id)&&Ext.isString(o.sorting.direction)?o.sorting:null;p.reportingPeriod=Ext.isObject(o.reportParams)&&Ext.isBoolean(o.reportParams.paramReportingPeriod)?o.reportParams.paramReportingPeriod:(Ext.isBoolean(o.reportingPeriod)?o.reportingPeriod:false);p.organisationUnit=Ext.isObject(o.reportParams)&&Ext.isBoolean(o.reportParams.paramOrganisationUnit)?o.reportParams.paramOrganisationUnit:(Ext.isBoolean(o.organisationUnit)?o.organisationUnit:false);p.parentOrganisationUnit=Ext.isObject(o.reportParams)&&Ext.isBoolean(o.reportParams.paramParentOrganisationUnit)?o.reportParams.paramParentOrganisationUnit:(Ext.isBoolean(o.parentOrganisationUnit)?o.parentOrganisationUnit:false);p.regression=Ext.isBoolean(o.regression)?o.regression:false;p.cumulative=Ext.isBoolean(o.cumulative)?o.cumulative:false;p.sortOrder=Ext.isNumber(o.sortOrder)?o.sortOrder:0;p.topLimit=Ext.isNumber(o.topLimit)?o.topLimit:0;if(!q()){return}return p}()};k.response={};k.response.Header=function(n){var n=Ext.clone(n);return function(){if(!Ext.isObject(n)){console.log("Header: config is not an object: "+n);return}if(!Ext.isString(n.name)){console.log("Header: name is not a string: "+n);return}if(!Ext.isBoolean(n.meta)){console.log("Header: meta is not boolean: "+n);return}return n}()};k.response.Response=function(n){var n=Ext.clone(n);return function(){if(!(n&&Ext.isObject(n))){console.log("Response: config is not an object");return}if(!(n.headers&&Ext.isArray(n.headers))){console.log("Response: headers is not an array");return}for(var o=0,p;o<n.headers.length;o++){n.headers[o]=k.response.Header(n.headers[o])}n.headers=Ext.Array.clean(n.headers);if(!n.headers.length){console.log("Response: no valid headers");return}if(!(Ext.isArray(n.rows)&&n.rows.length>0)){alert("No values found");return}if(n.headers.length!==n.rows[0].length){console.log("Response: headers.length !== rows[0].length")}return n}()}}());(function(){j.prototype={};j.prototype.array={};j.prototype.array.getLength=function(o,n){if(!Ext.isArray(o)){if(!n){console.log("support.prototype.array.getLength: not an array")}return null}return o.length};j.prototype.array.sort=function(p,o,n){if(!j.prototype.array.getLength(p)){return}n=n||"name";p.sort(function(r,q){if(Ext.isObject(r)&&Ext.isObject(q)&&n){r=r[n];q=q[n]}if(Ext.isString(r)&&Ext.isString(q)){r=r.toLowerCase();q=q.toLowerCase();if(o==="DESC"){return r<q?1:(r>q?-1:0)}else{return r<q?-1:(r>q?1:0)}}else{if(Ext.isNumber(r)&&Ext.isNumber(q)){return o==="DESC"?q-r:r-q}}return -1});return p};j.prototype.object={};j.prototype.object.getLength=function(n,q){if(!Ext.isObject(n)){if(!q){console.log("support.prototype.object.getLength: not an object")}return null}var p=0;for(var o in n){if(n.hasOwnProperty(o)){p++}}return p};j.prototype.object.hasObject=function(o,r,q){if(!j.prototype.object.getLength(o)){return null}for(var p in o){var n=o[p];if(o.hasOwnProperty(p)&&n[r]===q){return true}}return null};j.prototype.str={};j.prototype.str.replaceAll=function(p,o,n){return p.replace(new RegExp(o,"g"),n)};j.prototype.str.toggleDirection=function(n){return n==="DESC"?"ASC":"DESC"};j.prototype.number={};j.prototype.number.getNumberOfDecimals=function(n){var o=new String(n);return(o.indexOf(".")>-1)?(o.length-o.indexOf(".")-1):0};j.prototype.number.roundIf=function(p,n){p=parseFloat(p);n=parseFloat(n);if(Ext.isNumber(p)&&Ext.isNumber(n)){var o=j.prototype.number.getNumberOfDecimals(p);return o>n?Ext.Number.toFixed(p,n):p}return p};j.prototype.number.prettyPrint=function(n,o){o=o||"space";if(o==="none"){return n}return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,i.pivot.digitGroupSeparator[o])};j.color={};j.color.hexToRgb=function(p){var o=/^#?([a-f\d])([a-f\d])([a-f\d])$/i,n;p=p.replace(o,function(s,u,t,q){return u+u+t+t+q+q});n=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(p);return n?{r:parseInt(n[1],16),g:parseInt(n[2],16),b:parseInt(n[3],16)}:null}}());(function(){g.layout={};g.layout.cleanDimensionArray=function(o){if(!j.prototype.array.getLength(o)){return null}var p=[];for(var n=0;n<o.length;n++){p.push(k.layout.Dimension(o[n]))}p=Ext.Array.clean(p);return p.length?p:null};g.layout.sortDimensionArray=function(q,p){if(!j.prototype.array.getLength(q,true)){return null}q=g.layout.cleanDimensionArray(q);if(!q){console.log("service.layout.sortDimensionArray: no valid dimensions");return null}p=p||"dimensionName";Ext.Array.sort(q,function(s,r){if(s[p]<r[p]){return -1}if(s[p]>r[p]){return 1}return 0});for(var o=0,n;o<q.length;o++){j.prototype.array.sort(q[o].items,"ASC","id");if(j.prototype.array.getLength(q[o].ids)){j.prototype.array.sort(q[o].ids)}}return q};g.layout.getObjectNameDimensionMapFromDimensionArray=function(q){var p={};if(!j.prototype.array.getLength(q)){return null}for(var n=0,o;n<q.length;n++){o=k.layout.Dimension(q[n]);if(o){p[o.dimension]=o}}return j.prototype.object.getLength(p)?p:null};g.layout.getObjectNameDimensionItemsMapFromDimensionArray=function(q){var p={};if(!j.prototype.array.getLength(q)){return null}for(var n=0,o;n<q.length;n++){o=k.layout.Dimension(q[n]);if(o){p[o.dimension]=o.items}}return j.prototype.object.getLength(p)?p:null};g.layout.getItemName=function(t,p,u,s){var o=p.metaData,q="";if(g.layout.isHierarchy(t,p,u)){var n=Ext.Array.clean(o.ouHierarchy[u].split("/"));n.shift();for(var r=0;r<n.length;r++){q+=(s?'<span class="text-weak">':"")+o.names[n[r]]+(s?"</span>":"")+" / "}}q+=o.names[u];return q};g.layout.getExtendedLayout=function(s){var s=Ext.clone(s),u;u={columns:[],rows:[],filters:[],columnObjectNames:[],columnDimensionNames:[],rowObjectNames:[],rowDimensionNames:[],axisDimensions:[],axisObjectNames:[],axisDimensionNames:[],sortedAxisDimensionNames:[],filterDimensions:[],filterObjectNames:[],filterDimensionNames:[],sortedFilterDimensions:[],dimensions:[],objectNames:[],dimensionNames:[],objectNameDimensionsMap:{},objectNameItemsMap:{},objectNameIdsMap:{},dimensionNameDimensionsMap:{},dimensionNameItemsMap:{},dimensionNameIdsMap:{},dimensionNameSortedIdsMap:{},dimensionNameAxisMap:{}};Ext.applyIf(u,s);if(s.columns){for(var q=0,r,t,n;q<s.columns.length;q++){r=s.columns[q];t=r.items;n={};n.dimension=r.dimension;n.objectName=r.dimension;n.dimensionName=l.objectNameMap[r.dimension].dimensionName;if(t){n.items=t;n.ids=[];for(var p=0;p<t.length;p++){n.ids.push(t[p].id)}}u.columns.push(n);u.columnObjectNames.push(n.objectName);u.columnDimensionNames.push(n.dimensionName);u.axisDimensions.push(n);u.axisObjectNames.push(n.objectName);u.axisDimensionNames.push(l.objectNameMap[n.objectName].dimensionName);u.objectNameDimensionsMap[n.objectName]=n;u.objectNameItemsMap[n.objectName]=n.items;u.objectNameIdsMap[n.objectName]=n.ids;u.dimensionNameAxisMap[n.dimensionName]=u.columns}}if(s.rows){for(var q=0,r,t,n;q<s.rows.length;q++){r=Ext.clone(s.rows[q]);t=r.items;n={};n.dimension=r.dimension;n.objectName=r.dimension;n.dimensionName=l.objectNameMap[r.dimension].dimensionName;if(t){n.items=t;n.ids=[];for(var p=0;p<t.length;p++){n.ids.push(t[p].id)}}u.rows.push(n);u.rowObjectNames.push(n.objectName);u.rowDimensionNames.push(n.dimensionName);u.axisDimensions.push(n);u.axisObjectNames.push(n.objectName);u.axisDimensionNames.push(l.objectNameMap[n.objectName].dimensionName);u.objectNameDimensionsMap[n.objectName]=n;u.objectNameItemsMap[n.objectName]=n.items;u.objectNameIdsMap[n.objectName]=n.ids;u.dimensionNameAxisMap[n.dimensionName]=u.rows}}if(s.filters){for(var q=0,r,t,n;q<s.filters.length;q++){r=s.filters[q];t=r.items;n={};n.dimension=r.dimension;n.objectName=r.dimension;n.dimensionName=l.objectNameMap[r.dimension].dimensionName;if(t){n.items=t;n.ids=[];for(var p=0;p<t.length;p++){n.ids.push(t[p].id)}}u.filters.push(n);u.filterDimensions.push(n);u.filterObjectNames.push(n.objectName);u.filterDimensionNames.push(l.objectNameMap[n.objectName].dimensionName);u.objectNameDimensionsMap[n.objectName]=n;u.objectNameItemsMap[n.objectName]=n.items;u.objectNameIdsMap[n.objectName]=n.ids;u.dimensionNameAxisMap[n.dimensionName]=u.filters}}u.legendSet=s.legendSet?m.idLegendSetMap[s.legendSet.id]:null;if(s.legendSet){u.legendSet=m.idLegendSetMap[s.legendSet.id];j.prototype.array.sort(u.legendSet.mapLegends,"ASC","startValue")}u.axisDimensionNames=Ext.Array.unique(u.axisDimensionNames);u.filterDimensionNames=Ext.Array.unique(u.filterDimensionNames);u.columnDimensionNames=Ext.Array.unique(u.columnDimensionNames);u.rowDimensionNames=Ext.Array.unique(u.rowDimensionNames);u.filterDimensionNames=Ext.Array.unique(u.filterDimensionNames);u.sortedAxisDimensionNames=Ext.clone(u.axisDimensionNames).sort();u.sortedFilterDimensions=g.layout.sortDimensionArray(Ext.clone(u.filterDimensions));u.dimensions=[].concat(u.axisDimensions,u.filterDimensions);u.objectNames=[].concat(u.axisObjectNames,u.filterObjectNames);u.dimensionNames=[].concat(u.axisDimensionNames,u.filterDimensionNames);for(var q=0,o;q<u.dimensionNames.length;q++){o=u.dimensionNames[q];u.dimensionNameDimensionsMap[o]=[];u.dimensionNameItemsMap[o]=[];u.dimensionNameIdsMap[o]=[]}for(var q=0,n;q<u.dimensions.length;q++){n=u.dimensions[q];u.dimensionNameDimensionsMap[n.dimensionName].push(n);u.dimensionNameItemsMap[n.dimensionName]=u.dimensionNameItemsMap[n.dimensionName].concat(n.items);u.dimensionNameIdsMap[n.dimensionName]=u.dimensionNameIdsMap[n.dimensionName].concat(n.ids)}for(var v in u.dimensionNameIdsMap){if(u.dimensionNameIdsMap.hasOwnProperty(v)){u.dimensionNameSortedIdsMap[v]=Ext.clone(u.dimensionNameIdsMap[v]).sort()}}u.tableUuid=m.el+"_"+Ext.data.IdGenerator.get("uuid").generate();return u};g.layout.getSyncronizedXLayout=function(z,n){var E,s=Ext.Array.clean([].concat(z.columns||[],z.rows||[],z.filters||[])),N=z.objectNameDimensionsMap[l.organisationUnit.objectName],w=N&&Ext.Array.contains(N.ids,"USER_ORGUNIT"),P=N&&Ext.Array.contains(N.ids,"USER_ORGUNIT_CHILDREN"),M=N&&Ext.Array.contains(N.ids,"USER_ORGUNIT_GRANDCHILDREN"),o=function(){if(N&&Ext.isArray(N.ids)){for(var R=0;R<N.ids.length;R++){if(N.ids[R].substr(0,5)==="LEVEL"){return true}}}return false}(),y=function(){if(N&&Ext.isArray(N.ids)){for(var R=0;R<N.ids.length;R++){if(N.ids[R].substr(0,8)==="OU_GROUP"){return true}}}return false}(),v=l.category.objectName,r=l.organisationUnit.objectName,p=function(){var S=[];for(var R=0;R<n.headers.length;R++){S.push(n.headers[R].name)}return S}(),Q;E=function(S){var R;R=function(U){var V;U=Ext.clone(U);for(var T=0;T<U.length;T++){if(U[T].dimension===S){V=U[T]}}if(V){Ext.Array.remove(U,V)}return U};if(z.columns){z.columns=R(z.columns)}if(z.rows){z.rows=R(z.rows)}if(z.filters){z.filters=R(z.filters)}};for(var I=0,G,x,A;I<s.length;I++){G=s[I];G.items=[];x=n.metaData[G.objectName];if(G.dimensionName===r){if(w||P||M){var L,u,C;if(m.user&&w){L=[];for(var F=0;F<m.user.ou.length;F++){L.push({id:m.user.ou[F],name:g.layout.getItemName(z,n,m.user.ou[F],false)})}}if(m.user&&m.user.ouc&&P){u=[];for(var F=0;F<m.user.ouc.length;F++){u.push({id:m.user.ouc[F],name:g.layout.getItemName(z,n,m.user.ouc[F],false)})}j.prototype.array.sort(u)}if(m.user&&m.user.ouc&&M){var q=[].concat(m.user.ou,m.user.ouc),t=n.metaData[r];C=[];for(var F=0,B;F<t.length;F++){B=t[F];if(!Ext.Array.contains(q,B)){C.push({id:B,name:g.layout.getItemName(z,n,B,false)})}}j.prototype.array.sort(C)}G.items=[].concat(L||[],u||[],C||[])}else{if(o||y){for(var F=0,t=n.metaData[r],B;F<t.length;F++){B=t[F];G.items.push({id:B,name:g.layout.getItemName(z,n,B,false)})}j.prototype.array.sort(G.items)}else{G.items=Ext.clone(z.dimensionNameItemsMap[G.dimensionName])}}}else{if(Ext.isArray(x)&&x.length){var D=Ext.clone(n.metaData[G.dimensionName]);for(var F=0;F<D.length;F++){G.items.push({id:D[F],name:n.metaData.names[D[F]]})}}else{G.items=Ext.clone(z.objectNameItemsMap[G.objectName])}}}s=Ext.Array.clean([].concat(z.columns||[],z.rows||[],z.filters||[]));for(var I=0,H=n.metaData.names,K;I<s.length;I++){K=s[I].items;if(Ext.isArray(K)&&K.length){for(var F=0,O;F<K.length;F++){O=K[F];if(Ext.isObject(O)&&Ext.isString(H[O.id])&&!Ext.isString(O.name)){O.name=H[O.id]||""}}}}for(var I=0,J;I<z.axisDimensionNames.length;I++){J=z.axisDimensionNames[I];if(!Ext.Array.contains(p,J)){E(J)}}Q=k.layout.Layout(z);if(Q){return g.layout.getExtendedLayout(Q)}return null};g.layout.getExtendedAxis=function(B,ad){var t,r,D=[],z=1,N,q,H=[],ac=[],s=[],G=[],x=[],y=[],Q=[],u={};if(ad==="col"){t=Ext.clone(B.columnDimensionNames);r="colSpan"}else{if(ad==="row"){t=Ext.clone(B.rowDimensionNames);r="rowSpan"}}if(!(Ext.isArray(t)&&t.length)){return}for(var X=0;X<t.length;X++){D.push({dimensionName:t[X]})}q=function(){var n=[];for(var ae=0;ae<D.length;ae++){n.push(B.dimensionNameIdsMap[D[ae].dimensionName])}return n}();N=q.length;for(var X=0,O;X<N;X++){O=q[X].length;H.push(O);z=z*O;ac.push(z)}for(var X=0;X<N;X++){if(H[X]===1){if(X===0){s.push(z)}else{if(B.hideEmptyRows&&ad==="row"){s.push(z/ac[X])}else{s.push(s[0])}}}else{s.push(z/ac[X])}}G.push(q[0]);if(N.length>1){for(var X=1,aa,R;X<N;X++){aa=[];R=H[X]===1?H[0]:ac[X-1];for(var V=0;V<R;V++){aa=aa.concat(q[X])}G.push(aa)}}for(var X=0,w,S,E,W;X<N;X++){w=[];S=q[X];E=s[X];W=z/(E*S.length);for(var V=0;V<W;V++){for(var U=0;U<S.length;U++){for(var T=0;T<E;T++){w.push(S[U])}}}x.push(w)}for(var X=0,M;X<z;X++){M="";for(var V=0;V<N;V++){M+=x[V][X]}if(M){y.push(M)}}for(var X=0,J;X<x.length;X++){J=[];for(var V=0,p;V<x[X].length;V++){p={id:x[X][V],uuid:Ext.data.IdGenerator.get("uuid").generate(),dim:X,axis:ad};if(X===x.length-1){p.leaf=true}J.push(p)}Q.push(J)}for(var X=0,I,L,Z;X<Q.length;X++){L=[];for(var V=0,p,ab=0,o;V<Q[X].length;V++){p=Q[X][V];L.push(p.id);if(ab===0){p[r]=s[X];if(p.leaf){p.children=0}p.oldest=true;if(X===0){p.root=true}o=p}p.oldestSibling=o;if(++ab===s[X]){ab=0}}if(X>0){I=Q[X-1];Z=Ext.Array.unique(L);for(var V=0;V<I.length;V++){I[V].children=Z.length}}}if(N>1){for(var X=1,A;X<N;X++){A=Q[X];for(var V=0,ab=0,E=s[X-1];V<A.length;V++){A[V].parent=Q[X-1][V]}}}if(Q.length){var v=N>1?j.prototype.array.sort(Ext.clone(s))[1]:z,C=Q[Q.length-1];for(var X=0,Y,F,p,K=[];X<C.length;X++){Y=C[X];K.push(Y.uuid);F=[];p=Y;while(p.parent){p=p.parent;F.push(p.oldestSibling.uuid)}Y.uuids=Ext.clone(F);if(K.length===v){for(var V=(X-v)+1,Y;V<=X;V++){Y=C[V];Y.uuids=Y.uuids.concat(K)}K=[]}}}for(var X=0;X<Q.length;X++){for(var V=0,P;V<Q[X].length;V++){P=Q[X][V];u[P.uuid]=P}}return{type:ad,items:D,xItems:{unique:q,gui:G,all:x},objects:{all:Q},ids:y,span:s,dims:N,size:z,uuidObjectMap:u}};g.layout.isHierarchy=function(o,n,p){return o.showHierarchy&&Ext.isObject(n.metaData.ouHierarchy)&&n.metaData.ouHierarchy.hasOwnProperty(p)};g.layout.layout2plugin=function(s,p){var s=Ext.clone(s),r=Ext.Array.clean([].concat(s.columns||[],s.rows||[],s.filters||[]));s.url=m.contextPath;if(p){s.el=p}if(Ext.isString(s.id)){return{id:s.id}}for(var o=0,t,q;o<r.length;o++){t=r[o];delete t.id;delete t.ids;delete t.type;delete t.dimensionName;delete t.objectName;for(var n=0,q;n<t.items.length;n++){q=t.items[n];delete q.name;delete q.code;delete q.created;delete q.lastUpdated;delete q.value}}if(s.showRowTotals){delete s.showRowTotals}if(s.showColTotals){delete s.showColTotals}if(s.showColSubTotals){delete s.showColSubTotals}if(s.showRowSubTotals){delete s.showRowSubTotals}if(!s.hideEmptyRows){delete s.hideEmptyRows}if(!s.showHierarchy){delete s.showHierarchy}if(s.displayDensity==="normal"){delete s.displayDensity}if(s.fontSize==="normal"){delete s.fontSize}if(s.digitGroupSeparator==="space"){delete s.digitGroupSeparator}if(!s.legendSet){delete s.legendSet}if(!s.sorting){delete s.sorting}delete s.parentGraphMap;delete s.reportingPeriod;delete s.organisationUnit;delete s.parentOrganisationUnit;delete s.regression;delete s.cumulative;delete s.sortOrder;delete s.topLimit;delete s.aggregationType;return s};g.response={};g.response.getExtendedResponse=function(o,n){var p=[];n=Ext.clone(n);n.nameHeaderMap={};n.idValueMap={};(function(){for(var q=0,r;q<n.headers.length;q++){r=n.headers[q];r.index=q;if(r.meta){r.ids=Ext.clone(o.dimensionNameIdsMap[r.name])||[];r.size=r.ids.length;p=p.concat(r.ids)}}for(var q=0,r;q<n.headers.length;q++){r=n.headers[q];n.nameHeaderMap[r.name]=r}}());(function(){for(var q=0,s,r;q<p.length;q++){s=p[q];if(s.indexOf("#")!==-1){r=s.split("#");n.metaData.names[s]=n.metaData.names[r[0]]+" "+n.metaData.names[r[1]]}}}());(function(){var w=n.nameHeaderMap[i.finals.dimension.value.value].index,r=n.nameHeaderMap[i.finals.dimension.category.dimensionName],A=l.data.dimensionName,x=l.category.dimensionName,t=o.axisDimensionNames,y=[];for(var u=0;u<t.length;u++){y.push(n.nameHeaderMap[t[u]].index);if(r&&!Ext.Array.contains(t,x)&&t[u]===A){y.push(r.index)}}for(var u=0,z,q;u<n.rows.length;u++){z=n.rows[u];q="";for(var s=0,v;s<y.length;s++){v=y[s];q+=z[v]}n.idValueMap[q]=z[w]}}());return n};g.response.addOuHierarchyDimensions=function(q){var o=q.headers,n=q.metaData.ouHierarchy,y=q.rows,s,w=0,u=[],p=[],v;if(!n){return}for(var r=0;r<o.length;r++){if(o[r].name==="ou"){s=r;break}}for(var r=0;r<y.length;r++){w=Math.max(w,Ext.Array.clean(n[y[r][s]].split("/")).length)}for(var r=0;r<w;r++){u.push("")}for(var r=0,x,t;r<y.length;r++){x=y[r];t=Ext.applyIf(Ext.Array.clean(n[x[s]].split("/")),Ext.clone(u));Ext.Array.insert(x,s,t)}for(var r=0;r<w;r++){p.push({column:"Organisation unit",hidden:false,meta:true,name:"ou",type:"java.lang.String"})}Ext.Array.insert(o,s,p);return q};g.response.getValue=function(o){var p=parseFloat(o);if(Ext.isBoolean(o)){return 1}if(!Ext.isNumber(p)||p!=o){return 0}return p}}());(function(){h.mask={};h.mask.show=function(n,o){if(!Ext.isObject(n)){console.log("support.gui.mask.show: component not an object");return null}o=o||"Loading..";if(n.mask&&n.mask.destroy){n.mask.destroy();n.mask=null}n.mask=new Ext.create("Ext.LoadMask",n,{shadow:false,msg:o,style:"box-shadow:0",bodyStyle:"box-shadow:0"});n.mask.show()};h.mask.hide=function(n){if(!Ext.isObject(n)){console.log("support.gui.mask.hide: component not an object");return null}if(n.mask){n.mask.destroy();n.mask=null}};h.message={};h.message.alert=function(n){console.log(n)};h.analytics={};h.analytics.getParamString=function(B,q){var v=q?B.sortedAxisDimensionNames:B.axisDimensionNames,C=q?B.sortedFilterDimensions:B.filterDimensions,n=q?B.dimensionNameSortedIdsMap:B.dimensionNameIdsMap,r="?",p=false,o=B.dimensionNameItemsMap,D=l.indicator.dimensionName,A=l.category.dimensionName,t={count:"COUNT",sum:"SUM",stddev:"STDDEV",variance:"VARIANCE",min:"MIN",max:"MAX"};for(var w=0,s,z;w<v.length;w++){s=v[w];r+="dimension="+s;z=Ext.clone(n[s]);if(s===D){for(var u=0,y;u<z.length;u++){y=z[u].indexOf("#");if(y>0){p=true;z[u]=z[u].substr(0,y)}}z=Ext.Array.unique(z)}if(s!==A){r+=":"+z.join(";")}if(w<(v.length-1)){r+="&"}}if(p){r+="&dimension="+i.finals.dimension.category.dimensionName}if(Ext.isArray(C)&&C.length){for(var w=0,x;w<C.length;w++){x=C[w];r+="&filter="+x.dimensionName+":"+x.ids.join(";")}}if(B.showHierarchy){r+="&hierarchyMeta=true"}if(t.hasOwnProperty(B.aggregationType)){r+="&aggregationType="+t[B.aggregationType]}r+="&displayProperty="+m.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();return r};h.analytics.validateUrl=function(o){var p;if(Ext.isIE){p="Too many items selected (url has "+o.length+" characters). Internet Explorer accepts maximum 2048 characters."}else{var n=o.length>8000?"8000":(o.length>4000?"4000":"2000");p="Too many items selected (url has "+o.length+" characters). Please reduce to less than "+n+" characters."}p+="\n\nHint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.";alert(p)};h.pivot={};h.pivot.sort=function(t,y,n){var y=Ext.clone(y),o=t.sorting.id,r=t.rows[0],p=y.idValueMap,u=t.sorting?t.sorting.direction:"DESC",s;r.ids=[];if(Ext.isString(o)){o=o.toLowerCase()==="total"?"total_":o}else{if(Ext.isNumber(o)){if(o===0){o="total_"}else{o=n.ids[parseInt(o)-1]}}else{return t}}for(var q=0,x,w,v;q<r.items.length;q++){x=r.items[q];w=o+x.id;v=parseFloat(p[w]);x.value=Ext.isNumber(v)?v:(Number.MAX_VALUE*-1)}j.prototype.array.sort(r.items,u,"value");for(var q=0;q<r.items.length;q++){r.ids.push(r.items[q].id)}if(o!==t.sorting.id){t.sorting.id=o}return t};h.pivot.getHtml=function(F,o,L,E){var y,G,n,r,s,w,I,u,q,x,C,H,N,v=function(O){var P;if(!O){return null}P=O.xItems.unique;if(P){return P.length<2?1:(O.size/P[0].length)}return null},K=v(L),D=v(E),B=[],M=[],t=[],A={},z=Ext.isObject(F.legendSet)&&Ext.isArray(F.legendSet.mapLegends)&&F.legendSet.mapLegends.length,p=0,J;o.sortableIdObjects=[];y=function(O,P){P=P||2;return parseFloat(j.prototype.number.roundIf(O,2)).toString()};G=function(R,ab){var Y,Z,U,W,P,Q,ad,O=Ext.isObject(R)&&Ext.isString(R.type)&&R.type.substr(0,5)==="value"&&!R.empty,X=O&&R.type==="value",ac="",T="",V;V=function(ae){var af=ae.htmlValue,ag=parseFloat(ae.htmlValue);if(ae.collapsed){return""}if(X){if(Ext.isBoolean(af)){return af}if(!Ext.isNumber(ag)||ag!=af){return af}return ag}return af||""};if(!Ext.isObject(R)){return""}if(R.hidden||R.collapsed){return""}p=p+1;if(X&&F.legendSet){var aa=parseFloat(R.value);Z=F.legendSet.mapLegends;for(var S=0;S<Z.length;S++){if(Ext.Number.constrain(aa,Z[S].startValue,Z[S].endValue)===aa){Y=Z[S].color}}}U=R.colSpan?'colspan="'+R.colSpan+'" ':"";W=R.rowSpan?'rowspan="'+R.rowSpan+'" ':"";P=V(R);P=R.type!=="dimension"?j.prototype.number.prettyPrint(P,F.digitGroupSeparator):P;Q=i.pivot.displayDensity[R.displayDensity]||i.pivot.displayDensity[F.displayDensity];ad=i.pivot.fontSize[R.fontSize]||i.pivot.fontSize[F.fontSize];ac+=R.hidden?" td-hidden":"";ac+=R.collapsed?" td-collapsed":"";ac+=X?" pointer":"";ac+=R.cls?" "+R.cls:"";if(Ext.isString(ab)){ac+=" td-sortable";o.sortableIdObjects.push({id:ab,uuid:R.uuid})}T+="<td "+(R.uuid?('id="'+R.uuid+'" '):"");T+=' class="'+ac+'" '+U+W;T+='style="'+(Y&&X?"color:"+Y+"; ":"")+"padding:"+Q+"; font-size:"+ad+';">'+P+"</td>";return T};s=function(){return !!F.showColTotals};r=function(){return !!F.showRowTotals};doColSubTotals=function(){return !!F.showColSubTotals&&E&&E.dims>1};doRowSubTotals=function(){return !!F.showRowSubTotals&&L&&L.dims>1};w=function(){return(E&&E.dims===1)};I=function(){var X=[],O;getEmptyNameTdConfig=function(Y){Y=Y||{};return G({cls:Y.cls?" "+Y.cls:"pivot-empty",colSpan:Y.colSpan?Y.colSpan:1,rowSpan:Y.rowSpan?Y.rowSpan:1,htmlValue:Y.htmlValue?Y.htmlValue:"&nbsp;"})};O=function(aa){var Y=[];if(aa<L.dims-1){if(E&&E.dims){for(var Z=0;Z<E.dims-1;Z++){Y.push(getEmptyNameTdConfig({cls:"pivot-dim-label"}))}}Y.push(getEmptyNameTdConfig({cls:"pivot-dim-label",htmlValue:l.objectNameMap[F.columnObjectNames[aa]].name}))}else{if(E&&E.dims){for(var Z=0;Z<E.dims-1;Z++){Y.push(getEmptyNameTdConfig({cls:"pivot-dim-label",htmlValue:l.objectNameMap[F.rowObjectNames[Z]].name}))}}Y.push(getEmptyNameTdConfig({cls:"pivot-dim-label",htmlValue:(E?l.objectNameMap[F.rowObjectNames[Z]].name:"")+(L&&E?"&nbsp;/&nbsp;":"")+(L?l.objectNameMap[F.columnObjectNames[aa]].name:"")}))}return Y};if(!L){if(E&&F.showDimensionLabels){var W=[];for(var T=0;T<F.rowObjectNames.length;T++){W.push(getEmptyNameTdConfig({cls:"pivot-dim-label",htmlValue:l.objectNameMap[F.rowObjectNames[T]].name}))}X.push(W)}return X}for(var T=0,V;T<L.dims;T++){V=[];if(F.showDimensionLabels){V=V.concat(O(T))}else{if(T===0){V.push(L&&E?getEmptyNameTdConfig({colSpan:E.dims,rowSpan:L.dims}):"")}}for(var R=0,S,P=0,U,Q;R<L.size;R++){P++;U=null;Q=null;S=L.objects.all[T][R];S.type="dimension";S.cls="pivot-dim";S.noBreak=false;S.hidden=!(S.rowSpan||S.colSpan);S.htmlValue=g.layout.getItemName(F,o,S.id,true);if(T===L.dims-1&&w()){U=L.ids[R]}V.push(G(S,U));if(T===0&&P===L.span[T]&&doRowSubTotals()){V.push(G({type:"dimensionSubtotal",cls:"pivot-dim-subtotal cursor-default",rowSpan:L.dims,htmlValue:"&nbsp;"}));P=0}if(T===0&&(R===L.size-1)&&r()){Q=w()?"total_":null;V.push(G({uuid:Ext.data.IdGenerator.get("uuid").generate(),type:"dimensionTotal",cls:"pivot-dim-total",rowSpan:L.dims,htmlValue:"Total"},Q))}}X.push(V)}return X};u=function(){var aE=[],aa=[],ap,U=[],ai=[],ae,ag=L?L.size:1,ar=E?E.size:1,ah;ah=function(aF){if(!aF.children){aF.collapsed=true;if(aF.parent){aF.parent.oldestSibling.children--}}if(aF.parent){ah(aF.parent.oldestSibling)}};if(E){for(var aA=0,ac;aA<E.size;aA++){ac=[];for(var az=0,S,au;az<E.dims;az++){S=E.objects.all[az][aA];S.type="dimension";S.cls="pivot-dim td-nobreak"+(g.layout.isHierarchy(F,o,S.id)?" align-left":"");S.noBreak=true;S.hidden=!(S.rowSpan||S.colSpan);S.htmlValue=g.layout.getItemName(F,o,S.id,true);ac.push(S)}aa.push(ac)}}else{if(F.showDimensionLabels){aa.push([{type:"transparent",cls:"pivot-transparent-row"}])}}for(var aA=0,Q,T,ax=o.idValueMap;aA<ar;aA++){Q=[];T=[];for(var az=0,ao,av,am,aC,O,V,P;az<ag;az++){O=false;P=[];ao=((L?L.ids[az]:"")+(E?E.ids[aA]:"")).replace("#","");V=Ext.data.IdGenerator.get("uuid").generate();if(L){P=P.concat(L.objects.all[L.dims-1][az].uuids)}if(E){P=P.concat(E.objects.all[E.dims-1][aA].uuids)}am=ax[ao];if(Ext.isDefined(am)){av=g.response.getValue(am);aC=am}else{av=0;aC="&nbsp;";O=true}Q.push(av);T.push({uuid:V,type:"value",cls:"pivot-value"+(O?" cursor-default":""),value:av,htmlValue:aC,empty:O,uuids:P});A[V]=P}B.push(Q);M.push(T)}if(L&&r()){for(var aA=0,O=[],al=0;aA<M.length;aA++){for(az=0,S;az<M[aA].length;az++){S=M[aA][az];O.push(S.empty);al+=S.value}U.push({type:"valueTotal",cls:"pivot-value-total",value:al,htmlValue:Ext.Array.contains(O,false)?y(al):"",empty:!Ext.Array.contains(O,false)});if(w()){var Z="total_"+E.ids[aA],ad=!Ext.Array.contains(O,false);o.idValueMap[Z]=ad?null:al}O=[];al=0}}if(L&&E){if(F.hideEmptyRows){for(var aA=0,aq,R,af;aA<M.length;aA++){aq=M[aA];R=!Ext.Array.contains(Ext.Array.pluck(aq,"empty"),false);if(R){for(var az=0;az<aq.length;az++){aq[az].collapsed=true}if(r()){U[aA].collapsed=true}af=aa[aA][E.dims-1];ah(af)}}}}ap=M;if(doRowSubTotals()){var aj=[];for(var aA=0,ac,Y,ab;aA<ap.length;aA++){ac=[];Y=0;ab=0;for(var az=0,ak,aD=[],O=[];az<ap[aA].length;az++){ak=ap[aA][az];Y+=ak.value;O.push(!!ak.empty);aD.push(!!ak.collapsed);ab++;ac.push(ak);if(ab===K){var ad=!Ext.Array.contains(O,false);ac.push({type:"valueSubtotal",cls:"pivot-value-subtotal"+(ad?" cursor-default":""),value:Y,htmlValue:ad?"&nbsp;":y(Y),empty:ad,collapsed:!Ext.Array.contains(aD,false)});ab=0;Y=0;O=[];aD=[]}}aj.push(ac)}ap=aj}if(doColSubTotals()){var an=[],aj=[],aB=[],ay;ay=function(aI){var aH=[];for(var aF=0,aG;aF<E.dims;aF++){aG={};aG.type="dimensionSubtotal";aG.cls="pivot-dim-subtotal cursor-default";aG.collapsed=Ext.Array.contains(aI,true);if(aF===0){aG.htmlValue="&nbsp;";aG.colSpan=E.dims}else{aG.hidden=true}aH.push(aG)}return aH};for(var aA=0,ac,aD=[];aA<aa.length;aA++){an.push(aa[aA]);aD.push(!!aa[aA][0].collapsed);if(!Ext.isArray(aa[aA+1])||!!aa[aA+1][0].root){an.push(ay(aD));aD=[]}}for(var aA=0;aA<an.length;aA++){aj.push([])}for(var aA=0;aA<ap[0].length;aA++){for(var az=0,W=0,at=0,X=0,O=[],aD,ak;az<ap.length;az++){ak=ap[az][aA];aj[at++].push(ak);X+=ak.value;O.push(!!ak.empty);W++;if(aa[az][0].root){aD=!!aa[az][0].collapsed}if(!Ext.isArray(aa[az+1])||aa[az+1][0].root){var ad=!Ext.Array.contains(O,false);aj[at++].push({type:ak.type==="value"?"valueSubtotal":"valueSubtotalTotal",value:X,htmlValue:ad?"&nbsp;":y(X),collapsed:aD,cls:(ak.type==="value"?"pivot-value-subtotal":"pivot-value-subtotal-total")+(ad?" cursor-default":"")});W=0;X=0;O=[]}}}for(var aA=0,S,aD=[],O=[],X=0,aw=0;aA<U.length;aA++){S=U[aA];aB.push(S);aD.push(!!S.collapsed);O.push(!!S.empty);X+=S.value;aw++;if(aw===E.span[0]){var ad=!Ext.Array.contains(O,false);aB.push({type:"valueTotalSubgrandtotal",cls:"pivot-value-total-subgrandtotal"+(ad?" cursor-default":""),value:X,htmlValue:ad?"&nbsp;":y(X),empty:ad,collapsed:!Ext.Array.contains(aD,false)});aD=[];O=[];X=0;aw=0}}aa=an;ap=aj;U=aB}for(var aA=0,ac;aA<ap.length;aA++){ac=[];ac=ac.concat(aa[aA]);ac=ac.concat(ap[aA]);if(L){ac=ac.concat(U[aA])}ai.push(ac)}for(var aA=0,ac;aA<ai.length;aA++){ac=[];for(var az=0;az<ai[aA].length;az++){ac.push(G(ai[aA][az]))}aE.push(ac)}return aE};x=function(){var V=[];if(E&&s()){var Y;for(var Q=0,U=0,T=[];Q<M[0].length;Q++){for(var O=0,P;O<M.length;O++){P=M[O][Q];U+=P.value;T.push(!!P.empty)}t.push({type:"valueTotal",value:U,htmlValue:Ext.Array.contains(T,false)?y(U):"",empty:!Ext.Array.contains(T,false),cls:"pivot-value-total"});U=0;T=[]}Y=t;if(L&&doRowSubTotals()){var R=[];for(var Q=0,X,S=0,T=[],W=0;Q<Y.length;Q++){X=Y[Q];R.push(X);S+=X.value;T.push(!!X.empty);W++;if(W===K){R.push({type:"valueTotalSubgrandtotal",value:S,htmlValue:Ext.Array.contains(T,false)?y(S):"",empty:!Ext.Array.contains(T,false),cls:"pivot-value-total-subgrandtotal"});S=0;W=0}}Y=R}for(var Q=0;Q<Y.length;Q++){V.push(G(Y[Q]))}}return V};C=function(){var Q=0,R=[],O=[];if(r()&&s()){for(var P=0,S;P<t.length;P++){S=t[P];Q+=S.value;R.push(S.empty)}if(L&&E){O.push(G({type:"valueGrandTotal",cls:"pivot-value-grandtotal",value:Q,htmlValue:Ext.Array.contains(R,false)?y(Q):"",empty:!Ext.Array.contains(R,false)}))}}return O};H=function(){var Q,P=x(),R=C(),S,O=[];if(s()){if(E){Q=[G({type:"dimensionSubtotal",cls:"pivot-dim-total",colSpan:E.dims,htmlValue:"Total"})]}S=[].concat(Q||[],P||[],R||[]);O.push(S)}return O};N=function(){var P='<table id="'+F.tableUuid+'" class="pivot">';for(var O=0;O<J.length;O++){P+="<tr>"+J[O].join("")+"</tr>"}return P+="</table>"};return function(){J=Ext.Array.clean([].concat(I()||[],u()||[],H()||[]));return{html:N(J),uuidDimUuidsMap:A,xColAxis:L,xRowAxis:E,tdCount:p}}()}}());(function(){if(Ext.isArray(m.dimensions)){j.prototype.array.sort(m.dimensions);for(var n=0,o;n<m.dimensions.length;n++){o=m.dimensions[n];o.dimensionName=o.id;o.objectName=i.finals.dimension.dimension.objectName;i.finals.dimension.objectNameMap[o.id]=o}}if(m.user&&m.user.ouc){j.prototype.array.sort(m.user.ouc)}m.idLegendSetMap={};for(var n=0,p;n<m.legendSets.length;n++){p=m.legendSets[n];m.idLegendSetMap[p.id]=p}}());return{conf:i,api:k,support:j,service:g,web:h,init:m}};css="table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n";css+=".td-nobreak { \n white-space: nowrap; \n } \n";css+=".td-hidden { \n display: none; \n } \n";css+=".td-collapsed { \n display: none; \n } \n";css+="table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n";css+=".pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n";css+=".pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n";css+=".pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n";css+=".pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n";css+=".pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n";css+=".pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n";css+=".pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n";css+=".pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n";css+=".pivot-dim-label { \n background-color: #cddaed; \n white-space: nowrap; \n text-align: center; \n } \n";css+=".pivot-empty { \n background-color: #cddaed; \n } \n";css+=".pivot-transparent-column { \n background-color: #fff; \n border-top-color: #fff !important; \n border-right-color: #fff !important; \n } \n";css+=".pivot-transparent-row { \n background-color: #fff; \n border-bottom-color: #fff !important; \n border-left-color: #fff !important; \n } \n";css+=".x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n";css+=".x-mask-msg div { \n background-position: 11px center; \n } \n";css+=".x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n";css+=".x-mask { opacity: 0 } \n";css+=".pivot td.legend { \n padding: 0; \n } \n";css+=".pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n";css+=".pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n";css+=".pivot div.arrow { \n width: 0; \n height: 0; \n } \n";css+=".pivot div.number { \n display: table-cell; \n } \n",css+=".pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n";css+=".pointer { \n cursor: pointer; \n } \n";css+='.td-sortable { \n background-image: url("http://dhis2-cdn.org/v214/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';Ext.util.CSS.createStyleSheet(css);PT.plugin={};var e={user:{}},d=[],f=false,b=false,a,c;a=function(g){var m=false,l=[],k=0,j;e.contextPath=g;j=function(){if(++k===l.length){b=true;for(var n=0;n<d.length;n++){c(d[n])}d=[]}};l.push({url:e.contextPath+"/api/me/user-account.jsonp",success:function(s){e.userAccount=s;var q="en",o="name",n,p,i;e.userAccount.settings.keyUiLocale=e.userAccount.settings.keyUiLocale||q;e.userAccount.settings.keyAnalysisDisplayProperty=e.userAccount.settings.keyAnalysisDisplayProperty||o;p=e.contextPath;i=e.userAccount.settings.keyUiLocale;keyAnalysisDisplayProperty=e.userAccount.settings.keyAnalysisDisplayProperty;n=keyAnalysisDisplayProperty===o?keyAnalysisDisplayProperty:keyAnalysisDisplayProperty+"|rename("+o+")";e.namePropertyUrl=n;j()}});l.push({url:g+"/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false",success:function(q){var p=q.organisationUnits||[],o=[],s=[];if(p.length){for(var n=0,t;n<p.length;n++){t=p[n];o.push(t.id);if(t.children){s=Ext.Array.clean(s.concat(Ext.Array.pluck(t.children,"id")||[]))}}e.user=e.user||{};e.user.ou=o;e.user.ouc=s}else{alert("User is not assigned to any organisation units")}j()}});e.legendSets=[];l.push({url:g+"/api/dimensions.jsonp?links=false&paging=false",success:function(i){e.dimensions=i.dimensions;j()}});for(var h=0;h<l.length;h++){Ext.data.JsonP.request(l[h])}};c=function(j){var l,i,h,g,k={core:{},app:{}};l=function(m){if(!Ext.isObject(m)){console.log("Report table configuration is not an object");return}if(!Ext.isString(m.el)){console.log("No valid element id provided");return}m.id=m.id||m.uid;return true};i=function(q){var r=k.core.init,p=k.core.api,o=k.core.support,m=k.core.service,n=k.core.web;n.events=n.events||{};n.events.setColumnHeaderMouseHandlers=function(w,t,s,y){if(Ext.isArray(y.sortableIdObjects)){for(var u=0,x,v;u<y.sortableIdObjects.length;u++){x=y.sortableIdObjects[u];v=Ext.get(x.uuid);v.dom.layout=w;v.dom.xLayout=t;v.dom.response=s;v.dom.xResponse=y;v.dom.metaDataId=x.id;v.dom.onColumnHeaderMouseClick=n.events.onColumnHeaderMouseClick;v.dom.onColumnHeaderMouseOver=n.events.onColumnHeaderMouseOver;v.dom.onColumnHeaderMouseOut=n.events.onColumnHeaderMouseOut;v.dom.setAttribute("onclick","this.onColumnHeaderMouseClick(this.layout, this.xLayout, this.response, this.xResponse, this.metaDataId)");v.dom.setAttribute("onmouseover","this.onColumnHeaderMouseOver(this)");v.dom.setAttribute("onmouseout","this.onColumnHeaderMouseOut(this)")}}};n.events.onColumnHeaderMouseClick=function(u,t,s,v,w){if(u.sorting&&u.sorting.id===w){u.sorting.direction=o.prototype.str.toggleDirection(u.sorting.direction)}else{u.sorting={id:w,direction:"DESC"}}n.mask.show(k.app.centerRegion,"Sorting...");Ext.defer(function(){n.pivot.createTable(u,s,null,false)},10)};n.events.onColumnHeaderMouseOver=function(s){Ext.get(s).addCls("pointer highlighted")};n.events.onColumnHeaderMouseOut=function(s){Ext.get(s).removeCls("pointer highlighted")};n.pivot=n.pivot||{};n.pivot.loadTable=function(s){if(!Ext.isString(s)){alert("Invalid report table id");return}Ext.data.JsonP.request({url:r.contextPath+"/api/reportTables/"+s+".jsonp?fields="+k.core.conf.url.analysisFields.join(","),failure:function(t){window.open(r.contextPath+"/api/reportTables/"+s+".json?fields="+k.core.conf.url.analysisFields.join(","),"_blank")},success:function(u){var t=p.layout.Layout(u);if(t){n.pivot.getData(t,true)}}})};n.pivot.getData=function(t,u){var s,v;if(!t){return}s=m.layout.getExtendedLayout(t);v=n.analytics.getParamString(s,true);n.mask.show(k.app.centerRegion);Ext.data.JsonP.request({url:r.contextPath+"/api/analytics.jsonp"+v,timeout:60000,headers:{"Content-Type":"application/json",Accepts:"application/json"},disableCaching:false,failure:function(w){n.mask.hide(k.app.centerRegion);window.open(r.contextPath+"/api/analytics.json"+v,"_blank")},success:function(x){var w=p.response.Response(x);if(!w){n.mask.hide(k.app.centerRegion);return}k.app.paramString=v;n.pivot.createTable(t,w,null,u)}})};n.pivot.createTable=function(y,w,E,t){var C,s,v,D,x,A=m.layout.getExtendedLayout,u=m.layout.getSyncronizedXLayout,z=m.response.getExtendedResponse,B=m.layout.getExtendedAxis;x=function(F,G){s=B(F,"col");v=B(F,"row");return n.pivot.getHtml(F,G,s,v)};C=u(A(y),E||w);k.app.dateSorting=new Date();if(y.sorting){if(!E){E=z(C,w);x(C,E)}n.pivot.sort(C,E,s||k.app.xColAxis);C=A(p.layout.Layout(C))}else{E=m.response.getExtendedResponse(C,w)}D=x(C,E);k.app.dateRender=new Date();k.app.centerRegion.update(D.html);Ext.defer(function(){Ext.get(k.core.init.el).fadeIn({duration:400})},300);k.app.layout=y;k.app.xLayout=C;k.app.response=w;k.app.xResponse=E;k.app.uuidDimUuidsMap=j.uuidDimUuidsMap;k.app.uuidObjectMap=Ext.applyIf((s?s.uuidObjectMap:{}),(v?v.uuidObjectMap:{}));n.events.setColumnHeaderMouseHandlers(y,C,w,E);n.mask.hide(k.app.centerRegion);if(PT.isDebug){console.log("layout",y);console.log("response",w);console.log("xResponse",E);console.log("xLayout",C);console.log("core",k.core);console.log("app",k.app)}}};h=function(){return{centerRegion:Ext.get(j.el)}};g=function(){if(!l(j)){return}k.core=PT.getCore(Ext.clone(e));k.core.init.el=j.el;Ext.get(k.core.init.el).setStyle("opacity",0);i(k);k.app.viewport=h();k.app.centerRegion=k.app.viewport.centerRegion;if(j.id){k.core.web.pivot.loadTable(j.id)}else{layout=k.core.api.layout.Layout(j);if(!layout){return}k.core.web.pivot.getData(layout)}}()};PT.plugin.getTable=function(g){if(Ext.isString(g.url)&&g.url.split("").pop()==="/"){g.url=g.url.substr(0,g.url.length-1)}if(b){c(g)}else{d.push(g);if(!f){f=true;a(g.url)}}};DHIS=Ext.isObject(window.DHIS)?DHIS:{};DHIS.getTable=PT.plugin.getTable});
+Ext.onReady( function() {
+
+	// CORE
+
+	// ext config
+	Ext.Ajax.method = 'GET';
+
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
+	// namespace
+	PT = {};
+
+	PT.instances = [];
+	PT.i18n = {};
+	PT.isDebug = false;
+	PT.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
+
+	PT.getCore = function(init) {
+        var conf = {},
+            api = {},
+            support = {},
+            service = {},
+            web = {},
+            dimConf;
+
+		// conf
+		(function() {
+			conf.finals = {
+				url: {
+					path_module: '/dhis-web-pivot/',
+					organisationunitchildren_get: 'getOrganisationUnitChildren.action'
+				},
+				dimension: {
+					data: {
+						value: 'data',
+						name: PT.i18n.data || 'Data',
+						dimensionName: 'dx',
+						objectName: 'dx',
+						warning: {
+							filter: '...'//PT.i18n.wm_multiple_filter_ind_de
+						}
+					},
+					category: {
+						name: PT.i18n.assigned_categories || 'Assigned categories',
+						dimensionName: 'co',
+						objectName: 'co',
+					},
+					indicator: {
+						value: 'indicators',
+						name: PT.i18n.indicators || 'Indicators',
+						dimensionName: 'dx',
+						objectName: 'in'
+					},
+					dataElement: {
+						value: 'dataElements',
+						name: PT.i18n.data_elements || 'Data elements',
+						dimensionName: 'dx',
+						objectName: 'de'
+					},
+					operand: {
+						value: 'operand',
+						name: 'Operand',
+						dimensionName: 'dx',
+						objectName: 'dc'
+					},
+					dataSet: {
+						value: 'dataSets',
+						name: PT.i18n.data_sets || 'Data sets',
+						dimensionName: 'dx',
+						objectName: 'ds'
+					},
+					period: {
+						value: 'period',
+						name: PT.i18n.periods || 'Periods',
+						dimensionName: 'pe',
+						objectName: 'pe'
+					},
+					fixedPeriod: {
+						value: 'periods'
+					},
+					relativePeriod: {
+						value: 'relativePeriods'
+					},
+					organisationUnit: {
+						value: 'organisationUnits',
+						name: PT.i18n.organisation_units || 'Organisation units',
+						dimensionName: 'ou',
+						objectName: 'ou'
+					},
+					dimension: {
+						value: 'dimension'
+						//objectName: 'di'
+					},
+					value: {
+						value: 'value'
+					}
+				},
+				root: {
+					id: 'root'
+				}
+			};
+
+			dimConf = conf.finals.dimension;
+
+			dimConf.objectNameMap = {};
+			dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+			dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+			dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+			dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+			dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+			dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+			dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+			dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
+
+			dimConf.objectNameMap['ou1'] = dimConf.organisationUnit;
+			dimConf.objectNameMap['ou2'] = dimConf.organisationUnit;
+			dimConf.objectNameMap['ou3'] = dimConf.organisationUnit;
+
+			conf.period = {
+				periodTypes: [
+					{id: 'Daily', name: PT.i18n.daily},
+					{id: 'Weekly', name: PT.i18n.weekly},
+					{id: 'Monthly', name: PT.i18n.monthly},
+					{id: 'BiMonthly', name: PT.i18n.bimonthly},
+					{id: 'Quarterly', name: PT.i18n.quarterly},
+					{id: 'SixMonthly', name: PT.i18n.sixmonthly},
+					{id: 'SixMonthlyApril', name: PT.i18n.sixmonthly_april},
+					{id: 'Yearly', name: PT.i18n.yearly},
+					{id: 'FinancialOct', name: PT.i18n.financial_oct},
+					{id: 'FinancialJuly', name: PT.i18n.financial_july},
+					{id: 'FinancialApril', name: PT.i18n.financial_april}
+				]
+			};
+
+			conf.layout = {
+				west_width: 424,
+				west_fieldset_width: 418,
+				west_width_padding: 2,
+				west_fill: 2,
+				west_fill_accordion_indicator: 56,
+				west_fill_accordion_dataelement: 59,
+				west_fill_accordion_dataset: 31,
+				west_fill_accordion_period: 284,
+				west_fill_accordion_organisationunit: 58,
+				west_maxheight_accordion_indicator: 400,
+				west_maxheight_accordion_dataelement: 400,
+				west_maxheight_accordion_dataset: 400,
+				west_maxheight_accordion_period: 513,
+				west_maxheight_accordion_organisationunit: 900,
+				west_maxheight_accordion_group: 340,
+				west_maxheight_accordion_options: 449,
+				west_scrollbarheight_accordion_indicator: 300,
+				west_scrollbarheight_accordion_dataelement: 300,
+				west_scrollbarheight_accordion_dataset: 300,
+				west_scrollbarheight_accordion_period: 450,
+				west_scrollbarheight_accordion_organisationunit: 450,
+				west_scrollbarheight_accordion_group: 300,
+				east_tbar_height: 31,
+				east_gridcolumn_height: 30,
+				form_label_width: 55,
+				window_favorite_ypos: 100,
+				window_confirm_width: 250,
+				window_share_width: 500,
+				grid_favorite_width: 420,
+				grid_row_height: 27,
+				treepanel_minheight: 135,
+				treepanel_maxheight: 400,
+				treepanel_fill_default: 310,
+				treepanel_toolbar_menu_width_group: 140,
+				treepanel_toolbar_menu_width_level: 120,
+				multiselect_minheight: 100,
+				multiselect_maxheight: 250,
+				multiselect_fill_default: 345,
+				multiselect_fill_reportingrates: 315
+			};
+
+			conf.pivot = {
+				digitGroupSeparator: {
+					'comma': ',',
+					'space': ' '
+				},
+				displayDensity: {
+                    'xcompact': '2px',
+					'compact': '4px',
+					'normal': '6px',
+					'comfortable': '8px',
+                    'xcomfortable': '10px'
+				},
+				fontSize: {
+					'xsmall': '9px',
+					'small': '10px',
+					'normal': '11px',
+					'large': '12px',
+					'xlarge': '14px'
+				}
+			};
+
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
+            };
+		}());
+
+		// api
+		(function() {
+			api.layout = {};
+
+			api.layout.Record = function(config) {
+				var config = Ext.clone(config);
+
+				// id: string
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Record: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.id)) {
+						alert('Record: id is not text: ' + config);
+						return;
+					}
+
+					config.id = config.id.replace('.', '#');
+
+					return config;
+				}();
+			};
+
+			api.layout.Dimension = function(config) {
+				var config = Ext.clone(config);
+
+				// dimension: string
+
+				// items: [Record]
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Dimension: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.dimension)) {
+						console.log('Dimension: name is not a string: ' + config);
+						return;
+					}
+
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
+						var records = [];
+
+						if (!Ext.isArray(config.items)) {
+							console.log('Dimension: items is not an array: ' + config);
+							return;
+						}
+
+						for (var i = 0; i < config.items.length; i++) {
+							records.push(api.layout.Record(config.items[i]));
+						}
+
+						config.items = Ext.Array.clean(records);
+
+						if (!config.items.length) {
+							console.log('Dimension: has no valid items: ' + config);
+							return;
+						}
+					}
+
+					return config;
+				}();
+			};
+
+			api.layout.Layout = function(config, applyConfig) {
+				var layout = {},
+					getValidatedDimensionArray,
+					validateSpecialCases;
+
+				// columns: [Dimension]
+
+				// rows: [Dimension]
+
+				// filters: [Dimension]
+
+				// showRowTotals: boolean (true)
+
+				// showColTotals: boolean (true)
+
+				// showColSubTotals: boolean (true)
+
+				// showRowSubTotals: boolean (true)
+
+                // showDimensionLabels: boolean (false)
+
+				// hideEmptyRows: boolean (false)
+
+                // aggregationType: string ('default') - 'default', 'count', 'sum'
+
+				// showHierarchy: boolean (false)
+
+				// displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
+
+				// fontSize: string ('normal') - 'small', 'normal', 'large'
+
+				// digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
+
+				// legendSet: object
+
+				// parentGraphMap: object
+
+				// sorting: transient object
+
+				// reportingPeriod: boolean (false) //report tables only
+
+				// organisationUnit: boolean (false) //report tables only
+
+				// parentOrganisationUnit: boolean (false) //report tables only
+
+				// regression: boolean (false)
+
+				// cumulative: boolean (false)
+
+				// sortOrder: integer (0) //-1, 0, 1
+
+				// topLimit: integer (100) //5, 10, 20, 50, 100
+
+				getValidatedDimensionArray = function(dimensionArray) {
+					var dimensionArray = Ext.clone(dimensionArray);
+
+					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+						return;
+					}
+
+					for (var i = 0; i < dimensionArray.length; i++) {
+						dimensionArray[i] = api.layout.Dimension(dimensionArray[i]);
+					}
+
+					dimensionArray = Ext.Array.clean(dimensionArray);
+
+					return dimensionArray.length ? dimensionArray : null;
+				};
+
+				validateSpecialCases = function() {
+					var dimConf = conf.finals.dimension,
+						dimensions,
+						objectNameDimensionMap = {};
+
+					if (!layout) {
+						return;
+					}
+
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+
+					for (var i = 0; i < dimensions.length; i++) {
+						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+					}
+
+					if (layout.filters && layout.filters.length) {
+						for (var i = 0; i < layout.filters.length; i++) {
+
+							// Indicators as filter
+							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+								web.message.alert(PT.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								return;
+							}
+
+							// Categories as filter
+							if (layout.filters[i].dimension === dimConf.category.objectName) {
+								web.message.alert(PT.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								return;
+							}
+
+							// Data sets as filter
+							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
+								web.message.alert(PT.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								return;
+							}
+						}
+					}
+
+					// dc and in
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+						web.message.alert('Indicators and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and de
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+						web.message.alert('Detailed data elements and totals cannot be specified together');
+						return;
+					}
+
+					// dc and ds
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+						web.message.alert('Data sets and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and co
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
+						web.message.alert('Assigned categories and detailed data elements cannot be specified together');
+						return;
+					}
+
+					return true;
+				};
+
+				return function() {
+					var objectNames = [],
+						dimConf = conf.finals.dimension;
+
+					// config must be an object
+					if (!(config && Ext.isObject(config))) {
+						alert('Layout: config is not an object (' + init.el + ')');
+						return;
+					}
+
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					// at least one dimension specified as column or row
+					if (!(config.columns || config.rows)) {
+						alert(PT.i18n.at_least_one_dimension_must_be_specified_as_row_or_column);
+						return;
+					}
+
+					// get object names
+					for (var i = 0, dims = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])); i < dims.length; i++) {
+
+						// Object names
+						if (api.layout.Dimension(dims[i])) {
+							objectNames.push(dims[i].dimension);
+						}
+					}
+
+					// at least one period
+					if (!Ext.Array.contains(objectNames, dimConf.period.objectName)) {
+						alert(PT.i18n.at_least_one_period_must_be_specified_as_column_row_or_filter);
+						return;
+					}
+
+					// favorite
+					if (config.id) {
+						layout.id = config.id;
+					}
+
+					if (config.name) {
+						layout.name = config.name;
+					}
+
+					// layout
+					layout.columns = config.columns;
+					layout.rows = config.rows;
+					layout.filters = config.filters;
+
+					// properties
+					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
+					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
+					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
+					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
+					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
+					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
+                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
+
+					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
+
+					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
+					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
+					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
+					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
+
+					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+					layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
+
+					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
+					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
+					layout.parentOrganisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramParentOrganisationUnit) ? config.reportParams.paramParentOrganisationUnit : (Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false);
+
+					layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
+					layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
+					layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+
+					if (!validateSpecialCases()) {
+						return;
+					}
+
+                    return Ext.apply(layout, applyConfig);
+				}();
+			};
+
+			api.response = {};
+
+			api.response.Header = function(config) {
+				var config = Ext.clone(config);
+
+				// name: string
+
+				// meta: boolean
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Header: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.name)) {
+						console.log('Header: name is not a string: ' + config);
+						return;
+					}
+
+					if (!Ext.isBoolean(config.meta)) {
+						console.log('Header: meta is not boolean: ' + config);
+						return;
+					}
+
+					return config;
+				}();
+			};
+
+			api.response.Response = function(config) {
+				var config = Ext.clone(config);
+
+				// headers: [Header]
+
+				return function() {
+					if (!(config && Ext.isObject(config))) {
+						console.log('Response: config is not an object');
+						return;
+					}
+
+					if (!(config.headers && Ext.isArray(config.headers))) {
+						console.log('Response: headers is not an array');
+						return;
+					}
+
+					for (var i = 0, header; i < config.headers.length; i++) {
+						config.headers[i] = api.response.Header(config.headers[i]);
+					}
+
+					config.headers = Ext.Array.clean(config.headers);
+
+					if (!config.headers.length) {
+						console.log('Response: no valid headers');
+						return;
+					}
+
+					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+						alert('No values found');
+						return;
+					}
+
+					if (config.headers.length !== config.rows[0].length) {
+						console.log('Response: headers.length !== rows[0].length');
+					}
+
+					return config;
+				}();
+			};
+		}());
+
+		// support
+		(function() {
+
+			// prototype
+			support.prototype = {};
+
+				// array
+			support.prototype.array = {};
+
+			support.prototype.array.getLength = function(array, suppressWarning) {
+				if (!Ext.isArray(array)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.array.getLength: not an array');
+					}
+
+					return null;
+				}
+
+				return array.length;
+			};
+
+			support.prototype.array.sort = function(array, direction, key) {
+				// accepts [number], [string], [{key: number}], [{key: string}]
+
+				if (!support.prototype.array.getLength(array)) {
+					return;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return -1;
+				});
+
+				return array;
+			};
+
+				// object
+			support.prototype.object = {};
+
+			support.prototype.object.getLength = function(object, suppressWarning) {
+				if (!Ext.isObject(object)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.object.getLength: not an object');
+					}
+
+					return null;
+				}
+
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
+
+			support.prototype.object.hasObject = function(object, property, value) {
+				if (!support.prototype.object.getLength(object)) {
+					return null;
+				}
+
+				for (var key in object) {
+					var record = object[key];
+
+					if (object.hasOwnProperty(key) && record[property] === value) {
+						return true;
+					}
+				}
+
+				return null;
+			};
+
+				// str
+			support.prototype.str = {};
+
+			support.prototype.str.replaceAll = function(str, find, replace) {
+				return str.replace(new RegExp(find, 'g'), replace);
+			};
+
+			support.prototype.str.toggleDirection = function(direction) {
+				return direction === 'DESC' ? 'ASC' : 'DESC';
+			};
+
+				// number
+			support.prototype.number = {};
+
+			support.prototype.number.getNumberOfDecimals = function(number) {
+				var str = new String(number);
+				return (str.indexOf('.') > -1) ? (str.length - str.indexOf('.') - 1) : 0;
+			};
+
+			support.prototype.number.roundIf = function(number, precision) {
+				number = parseFloat(number);
+				precision = parseFloat(precision);
+
+				if (Ext.isNumber(number) && Ext.isNumber(precision)) {
+					var numberOfDecimals = support.prototype.number.getNumberOfDecimals(number);
+					return numberOfDecimals > precision ? Ext.Number.toFixed(number, precision) : number;
+				}
+
+				return number;
+			};
+
+			support.prototype.number.prettyPrint = function(number, separator) {
+				separator = separator || 'space';
+
+				if (separator === 'none') {
+					return number;
+				}
+
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.pivot.digitGroupSeparator[separator]);
+			};
+
+			// color
+			support.color = {};
+
+			support.color.hexToRgb = function(hex) {
+				var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+					result;
+
+				hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+					return r + r + g + g + b + b;
+				});
+
+				result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+				return result ? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16)
+				} : null;
+			};
+
+		}());
+
+		// service
+		(function() {
+
+			// layout
+			service.layout = {};
+
+			service.layout.cleanDimensionArray = function(dimensionArray) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				var array = [];
+
+				for (var i = 0; i < dimensionArray.length; i++) {
+					array.push(api.layout.Dimension(dimensionArray[i]));
+				}
+
+				array = Ext.Array.clean(array);
+
+				return array.length ? array : null;
+			};
+
+			service.layout.sortDimensionArray = function(dimensionArray, key) {
+				if (!support.prototype.array.getLength(dimensionArray, true)) {
+					return null;
+				}
+
+				// Clean dimension array
+				dimensionArray = service.layout.cleanDimensionArray(dimensionArray);
+
+				if (!dimensionArray) {
+					console.log('service.layout.sortDimensionArray: no valid dimensions');
+					return null;
+				}
+
+				key = key || 'dimensionName';
+
+				// Dimension order
+				Ext.Array.sort(dimensionArray, function(a,b) {
+					if (a[key] < b[key]) {
+						return -1;
+					}
+					if (a[key] > b[key]) {
+						return 1;
+					}
+					return 0;
+				});
+
+				// Sort object items, ids
+				for (var i = 0, items; i < dimensionArray.length; i++) {
+					support.prototype.array.sort(dimensionArray[i].items, 'ASC', 'id');
+
+					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
+						support.prototype.array.sort(dimensionArray[i].ids);
+					}
+				}
+
+				return dimensionArray;
+			};
+
+			service.layout.getObjectNameDimensionMapFromDimensionArray = function(dimensionArray) {
+				var map = {};
+
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension;
+					}
+				}
+
+				return support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.getObjectNameDimensionItemsMapFromDimensionArray = function(dimensionArray) {
+				var map = {};
+
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension.items;
+					}
+				}
+
+				return support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.getItemName = function(layout, response, id, isHtml) {
+				var metaData = response.metaData,
+					name = '';
+
+				if (service.layout.isHierarchy(layout, response, id)) {
+					var a = Ext.Array.clean(metaData.ouHierarchy[id].split('/'));
+					a.shift();
+
+					for (var i = 0; i < a.length; i++) {
+						name += (isHtml ? '<span class="text-weak">' : '') + metaData.names[a[i]] + (isHtml ? '</span>' : '') + ' / ';
+					}
+				}
+
+				name += metaData.names[id];
+
+				return name;
+			};
+
+			service.layout.getExtendedLayout = function(layout) {
+				var layout = Ext.clone(layout),
+					xLayout;
+
+				xLayout = {
+					columns: [],
+					rows: [],
+					filters: [],
+
+					columnObjectNames: [],
+					columnDimensionNames: [],
+					rowObjectNames: [],
+					rowDimensionNames: [],
+
+					// axis
+					axisDimensions: [],
+					axisObjectNames: [],
+					axisDimensionNames: [],
+
+						// for param string
+					sortedAxisDimensionNames: [],
+
+					// Filter
+					filterDimensions: [],
+					filterObjectNames: [],
+					filterDimensionNames: [],
+
+						// for param string
+					sortedFilterDimensions: [],
+
+					// all
+					dimensions: [],
+					objectNames: [],
+					dimensionNames: [],
+
+					// oject name maps
+					objectNameDimensionsMap: {},
+					objectNameItemsMap: {},
+					objectNameIdsMap: {},
+
+					// dimension name maps
+					dimensionNameDimensionsMap: {},
+					dimensionNameItemsMap: {},
+					dimensionNameIdsMap: {},
+
+						// for param string
+					dimensionNameSortedIdsMap: {},
+
+					// sort table by column
+					//sortableIdObjects: []
+
+                    dimensionNameAxisMap: {}
+				};
+
+				Ext.applyIf(xLayout, layout);
+
+				// columns, rows, filters
+				if (layout.columns) {
+					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
+						dim = layout.columns[i];
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+						if (items) {
+							xDim.items = items;
+							xDim.ids = [];
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.columns.push(xDim);
+
+						xLayout.columnObjectNames.push(xDim.objectName);
+						xLayout.columnDimensionNames.push(xDim.dimensionName);
+
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.columns;
+					}
+				}
+
+				if (layout.rows) {
+					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
+						dim = Ext.clone(layout.rows[i]);
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+						if (items) {
+							xDim.items = items;
+							xDim.ids = [];
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.rows.push(xDim);
+
+						xLayout.rowObjectNames.push(xDim.objectName);
+						xLayout.rowDimensionNames.push(xDim.dimensionName);
+
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.rows;
+					}
+				}
+
+				if (layout.filters) {
+					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap[dim.dimension].dimensionName;
+
+						if (items) {
+							xDim.items = items;
+							xDim.ids = [];
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.filters.push(xDim);
+
+						xLayout.filterDimensions.push(xDim);
+						xLayout.filterObjectNames.push(xDim.objectName);
+						xLayout.filterDimensionNames.push(dimConf.objectNameMap[xDim.objectName].dimensionName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+
+                        xLayout.dimensionNameAxisMap[xDim.dimensionName] = xLayout.filters;
+					}
+				}
+
+				// legend set
+				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
+
+				if (layout.legendSet) {
+					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
+					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
+				}
+
+				// unique dimension names
+				xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+				xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+				xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+					// for param string
+				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
+				xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
+
+				// all
+				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
+				xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
+				xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
+
+				// dimension name maps
+				for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
+					dimName = xLayout.dimensionNames[i];
+
+					xLayout.dimensionNameDimensionsMap[dimName] = [];
+					xLayout.dimensionNameItemsMap[dimName] = [];
+					xLayout.dimensionNameIdsMap[dimName] = [];
+				}
+
+				for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
+					xDim = xLayout.dimensions[i];
+
+					xLayout.dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
+					xLayout.dimensionNameItemsMap[xDim.dimensionName] = xLayout.dimensionNameItemsMap[xDim.dimensionName].concat(xDim.items);
+					xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
+				}
+
+					// for param string
+				for (var key in xLayout.dimensionNameIdsMap) {
+					if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
+						xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
+					}
+				}
+
+				// Uuid
+				xLayout.tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
+
+				return xLayout;
+			};
+
+			service.layout.getSyncronizedXLayout = function(xLayout, response) {
+				var removeDimensionFromXLayout,
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
+                    xOuDimension = xLayout.objectNameDimensionsMap[dimConf.organisationUnit.objectName],
+                    isUserOrgunit = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT'),
+                    isUserOrgunitChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_CHILDREN'),
+                    isUserOrgunitGrandChildren = xOuDimension && Ext.Array.contains(xOuDimension.ids, 'USER_ORGUNIT_GRANDCHILDREN'),
+                    isLevel = function() {
+                        if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+                            for (var i = 0; i < xOuDimension.ids.length; i++) {
+                                if (xOuDimension.ids[i].substr(0,5) === 'LEVEL') {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    }(),
+                    isGroup = function() {
+                        if (xOuDimension && Ext.isArray(xOuDimension.ids)) {
+                            for (var i = 0; i < xOuDimension.ids.length; i++) {
+                                if (xOuDimension.ids[i].substr(0,8) === 'OU_GROUP') {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    }(),
+                    co = dimConf.category.objectName,
+                    ou = dimConf.organisationUnit.objectName,
+                    headerNames = function() {
+                        var headerNames = [];
+
+                        for (var i = 0; i < response.headers.length; i++) {
+                            headerNames.push(response.headers[i].name);
+                        }
+
+                        return headerNames;
+                    }(),
+                    layout;
+
+				removeDimensionFromXLayout = function(objectName) {
+					var getUpdatedAxis;
+
+					getUpdatedAxis = function(axis) {
+						var dimension;
+						axis = Ext.clone(axis);
+
+						for (var i = 0; i < axis.length; i++) {
+							if (axis[i].dimension === objectName) {
+								dimension = axis[i];
+							}
+						}
+
+						if (dimension) {
+							Ext.Array.remove(axis, dimension);
+						}
+
+						return axis;
+					};
+
+					if (xLayout.columns) {
+						xLayout.columns = getUpdatedAxis(xLayout.columns);
+					}
+					if (xLayout.rows) {
+						xLayout.rows = getUpdatedAxis(xLayout.rows);
+					}
+					if (xLayout.filters) {
+						xLayout.filters = getUpdatedAxis(xLayout.filters);
+					}
+				};
+
+                // Set items from init/metaData/xLayout
+                for (var i = 0, dim, metaDataDim, items; i < dimensions.length; i++) {
+                    dim = dimensions[i];
+                    dim.items = [];
+                    metaDataDim = response.metaData[dim.objectName];
+
+                    // If ou and children
+                    if (dim.dimensionName === ou) {
+                        if (isUserOrgunit || isUserOrgunitChildren || isUserOrgunitGrandChildren) {
+                            var userOu,
+                                userOuc,
+                                userOugc;
+
+                            if (init.user && isUserOrgunit) {
+                                userOu = [];
+
+                                for (var j = 0; j < init.user.ou.length; j++) {
+                                    userOu.push({
+                                        id: init.user.ou[j],
+                                        name: service.layout.getItemName(xLayout, response, init.user.ou[j], false)
+                                    });
+                                }
+                            }
+                            if (init.user && init.user.ouc && isUserOrgunitChildren) {
+                                userOuc = [];
+
+                                for (var j = 0; j < init.user.ouc.length; j++) {
+                                    userOuc.push({
+                                        id: init.user.ouc[j],
+                                        name: service.layout.getItemName(xLayout, response, init.user.ouc[j], false)
+                                    });
+                                }
+
+                                support.prototype.array.sort(userOuc);
+                            }
+                            if (init.user && init.user.ouc && isUserOrgunitGrandChildren) {
+                                var userOuOuc = [].concat(init.user.ou, init.user.ouc),
+                                    responseOu = response.metaData[ou];
+
+                                userOugc = [];
+
+                                for (var j = 0, id; j < responseOu.length; j++) {
+                                    id = responseOu[j];
+
+                                    if (!Ext.Array.contains(userOuOuc, id)) {
+                                        userOugc.push({
+                                            id: id,
+                                            name: service.layout.getItemName(xLayout, response, id, false)
+                                        });
+                                    }
+                                }
+
+                                support.prototype.array.sort(userOugc);
+                            }
+
+                            dim.items = [].concat(userOu || [], userOuc || [], userOugc || []);
+                        }
+                        else if (isLevel || isGroup) {
+                            for (var j = 0, responseOu = response.metaData[ou], id; j < responseOu.length; j++) {
+                                id = responseOu[j];
+
+                                dim.items.push({
+                                    id: id,
+                                    name: service.layout.getItemName(xLayout, response, id, false)
+                                });
+                            }
+
+                            support.prototype.array.sort(dim.items);
+                        }
+                        else {
+                            dim.items = Ext.clone(xLayout.dimensionNameItemsMap[dim.dimensionName]);
+                        }
+                    }
+                    else {
+                        // Items: get ids from metadata -> items
+                        if (Ext.isArray(metaDataDim) && metaDataDim.length) {
+                            var ids = Ext.clone(response.metaData[dim.dimensionName]);
+                            for (var j = 0; j < ids.length; j++) {
+                                dim.items.push({
+                                    id: ids[j],
+                                    name: response.metaData.names[ids[j]]
+                                });
+                            }
+                        }
+                        // Items: get items from xLayout
+                        else {
+                            dim.items = Ext.clone(xLayout.objectNameItemsMap[dim.objectName]);
+                        }
+                    }
+                }
+
+                // Add missing names
+                dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || []));
+
+                for (var i = 0, idNameMap = response.metaData.names, dimItems; i < dimensions.length; i++) {
+                    dimItems = dimensions[i].items;
+
+                    if (Ext.isArray(dimItems) && dimItems.length) {
+                        for (var j = 0, item; j < dimItems.length; j++) {
+                            item = dimItems[j];
+
+                            if (Ext.isObject(item) && Ext.isString(idNameMap[item.id]) && !Ext.isString(item.name)) {
+                                item.name = idNameMap[item.id] || '';
+                            }
+                        }
+                    }
+                }
+
+                // Remove dimensions from layout that do not exist in response
+                for (var i = 0, dimensionName; i < xLayout.axisDimensionNames.length; i++) {
+                    dimensionName = xLayout.axisDimensionNames[i];
+                    if (!Ext.Array.contains(headerNames, dimensionName)) {
+                        removeDimensionFromXLayout(dimensionName);
+                    }
+                }
+
+                // Add ou hierarchy dimensions
+                //if (xOuDimension && xLayout.showHierarchy) {
+                    //addOuHierarchyDimensions();
+                //}
+
+                // Re-layout
+                layout = api.layout.Layout(xLayout);
+
+                if (layout) {
+                    return service.layout.getExtendedLayout(layout);
+                }
+
+                return null;
+			};
+
+			service.layout.getExtendedAxis = function(xLayout, type) {
+				var dimensionNames,
+					spanType,
+					aDimensions = [],
+					nAxisWidth = 1,
+					nAxisHeight,
+					aaUniqueFloorIds,
+					aUniqueFloorWidth = [],
+					aAccFloorWidth = [],
+					aFloorSpan = [],
+					aaGuiFloorIds = [],
+					aaAllFloorIds = [],
+					aCondoId = [],
+					aaAllFloorObjects = [],
+					uuidObjectMap = {};
+
+				if (type === 'col') {
+					dimensionNames = Ext.clone(xLayout.columnDimensionNames);
+					spanType = 'colSpan';
+				}
+				else if (type === 'row') {
+					dimensionNames = Ext.clone(xLayout.rowDimensionNames);
+					spanType = 'rowSpan';
+				}
+
+				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
+					return;
+				}
+	//dimensionNames = ['pe', 'ou'];
+
+				// aDimensions: array of dimension objects with dimensionName property
+				for (var i = 0; i < dimensionNames.length; i++) {
+					aDimensions.push({
+						dimensionName: dimensionNames[i]
+					});
+				}
+	//aDimensions = [{
+		//dimensionName: 'pe'
+	//}]
+
+				// aaUniqueFloorIds: array of arrays with unique ids for each dimension floor
+				aaUniqueFloorIds = function() {
+					var a = [];
+
+					for (var i = 0; i < aDimensions.length; i++) {
+						a.push(xLayout.dimensionNameIdsMap[aDimensions[i].dimensionName]);
+					}
+
+					return a;
+				}();
+	//aaUniqueFloorIds	= [ [de-id1, de-id2, de-id3],
+	//					    [pe-id1],
+	//					    [ou-id1, ou-id2, ou-id3, ou-id4] ]
+
+				// nAxisHeight
+				nAxisHeight = aaUniqueFloorIds.length;
+	//nAxisHeight = 3
+
+
+				// aUniqueFloorWidth, nAxisWidth, aAccFloorWidth
+				for (var i = 0, nUniqueFloorWidth; i < nAxisHeight; i++) {
+					nUniqueFloorWidth = aaUniqueFloorIds[i].length;
+
+					aUniqueFloorWidth.push(nUniqueFloorWidth);
+					nAxisWidth = nAxisWidth * nUniqueFloorWidth;
+					aAccFloorWidth.push(nAxisWidth);
+				}
+	//aUniqueFloorWidth	= [3, 1, 4]
+	//nAxisWidth		= 12 (3 * 1 * 4)
+	//aAccFloorWidth	= [3, 3, 12]
+
+				// aFloorSpan
+				for (var i = 0; i < nAxisHeight; i++) {
+					if (aUniqueFloorWidth[i] === 1) {
+						if (i === 0) { // if top floor, set maximum span
+							aFloorSpan.push(nAxisWidth);
+						}
+						else {
+							if (xLayout.hideEmptyRows && type === 'row') {
+								aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
+							}
+							else { //if just one item and not top level, use same span as top level
+								aFloorSpan.push(aFloorSpan[0]);
+							}
+						}
+					}
+					else {
+						aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
+					}
+				}
+	//aFloorSpan = [4, 12, 1]
+
+
+				// aaGuiFloorIds
+				aaGuiFloorIds.push(aaUniqueFloorIds[0]);
+
+				if (nAxisHeight.length > 1) {
+					for (var i = 1, a, n; i < nAxisHeight; i++) {
+						a = [];
+						n = aUniqueFloorWidth[i] === 1 ? aUniqueFloorWidth[0] : aAccFloorWidth[i-1];
+
+						for (var j = 0; j < n; j++) {
+							a = a.concat(aaUniqueFloorIds[i]);
+						}
+
+						aaGuiFloorIds.push(a);
+					}
+				}
+	//aaGuiFloorIds	= [ [d1, d2, d3], (3)
+	//					[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
+	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
+	//		  	  	  ]
+
+				// aaAllFloorIds
+				for (var i = 0, aAllFloorIds, aUniqueFloorIds, span, factor; i < nAxisHeight; i++) {
+					aAllFloorIds = [];
+					aUniqueFloorIds = aaUniqueFloorIds[i];
+					span = aFloorSpan[i];
+					factor = nAxisWidth / (span * aUniqueFloorIds.length);
+
+					for (var j = 0; j < factor; j++) {
+						for (var k = 0; k < aUniqueFloorIds.length; k++) {
+							for (var l = 0; l < span; l++) {
+								aAllFloorIds.push(aUniqueFloorIds[k]);
+							}
+						}
+					}
+
+					aaAllFloorIds.push(aAllFloorIds);
+				}
+	//aaAllFloorIds	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
+	//					[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
+	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
+	//		  	  	  ]
+
+				// aCondoId
+				for (var i = 0, id; i < nAxisWidth; i++) {
+					id = '';
+
+					for (var j = 0; j < nAxisHeight; j++) {
+						id += aaAllFloorIds[j][i];
+					}
+
+					if (id) {
+						aCondoId.push(id);
+					}
+				}
+	//aCondoId = [ id11+id21+id31, id12+id22+id32, ... ]
+
+
+				// allObjects
+				for (var i = 0, allFloor; i < aaAllFloorIds.length; i++) {
+					allFloor = [];
+
+					for (var j = 0, obj; j < aaAllFloorIds[i].length; j++) {
+						obj = {
+							id: aaAllFloorIds[i][j],
+							uuid: Ext.data.IdGenerator.get('uuid').generate(),
+							dim: i,
+							axis: type
+						};
+
+						// leaf?
+						if (i === aaAllFloorIds.length - 1) {
+							obj.leaf = true;
+						}
+
+						allFloor.push(obj);
+					}
+
+					aaAllFloorObjects.push(allFloor);
+				}
+
+				// add span and children
+				for (var i = 0, aAboveFloorObjects, doorIds, uniqueDoorIds; i < aaAllFloorObjects.length; i++) {
+                    doorIds = [];
+
+					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j++) {
+
+						obj = aaAllFloorObjects[i][j];
+                        doorIds.push(obj.id);
+
+						if (doorCount === 0) {
+
+							// span
+							obj[spanType] = aFloorSpan[i];
+
+							// children
+                            if (obj.leaf) {
+                                obj.children = 0;
+                            }
+
+							// first sibling
+							obj.oldest = true;
+
+							// root?
+							if (i === 0) {
+								obj.root = true;
+							}
+
+							// tmp oldest uuid
+							oldestObj = obj;
+						}
+
+						obj.oldestSibling = oldestObj;
+
+						if (++doorCount === aFloorSpan[i]) {
+							doorCount = 0;
+						}
+					}
+
+                    // set above floor door children to number of unique door ids on this floor
+                    if (i > 0) {
+                        aAboveFloorObjects = aaAllFloorObjects[i-1];
+                        uniqueDoorIds = Ext.Array.unique(doorIds);
+
+                        for (var j = 0; j < aAboveFloorObjects.length; j++) {
+                            aAboveFloorObjects[j].children = uniqueDoorIds.length;
+                        }
+                    }
+				}
+
+				// add parents if more than 1 floor
+				if (nAxisHeight > 1) {
+					for (var i = 1, aAllFloor; i < nAxisHeight; i++) {
+						aAllFloor = aaAllFloorObjects[i];
+
+						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aaAllFloorObjects[i - 1][0]; j < aAllFloor.length; j++) {
+						for (var j = 0, doorCount = 0, span = aFloorSpan[i - 1]; j < aAllFloor.length; j++) {
+							aAllFloor[j].parent = aaAllFloorObjects[i - 1][j];
+
+							//doorCount++;
+
+							//if (doorCount === span) {
+								//parentObj = aaAllFloorObjects[i - 1][j + 1];
+								//doorCount = 0;
+							//}
+						}
+					}
+				}
+
+				// add uuids array to leaves
+				if (aaAllFloorObjects.length) {
+
+					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
+					var nSpan = nAxisHeight > 1 ? support.prototype.array.sort(Ext.clone(aFloorSpan))[1] : nAxisWidth,
+						aAllFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
+
+					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < aAllFloorObjectsLast.length; i++) {
+						leaf = aAllFloorObjectsLast[i];
+						leafUuids.push(leaf.uuid);
+						parentUuids = [];
+						obj = leaf;
+
+						// get the uuid of the oldest sibling
+						while (obj.parent) {
+							obj = obj.parent;
+							parentUuids.push(obj.oldestSibling.uuid);
+						}
+
+						// add parent uuids to leaf
+						leaf.uuids = Ext.clone(parentUuids);
+
+						// add uuid for all leaves
+						if (leafUuids.length === nSpan) {
+							for (var j = (i - nSpan) + 1, leaf; j <= i; j++) {
+								leaf = aAllFloorObjectsLast[j];
+								leaf.uuids = leaf.uuids.concat(leafUuids);
+							}
+
+							leafUuids = [];
+						}
+					}
+				}
+
+				// populate uuidObject map
+				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+					for (var j = 0, object; j < aaAllFloorObjects[i].length; j++) {
+						object = aaAllFloorObjects[i][j];
+
+						uuidObjectMap[object.uuid] = object;
+					}
+				}
+
+				return {
+					type: type,
+					items: aDimensions,
+					xItems: {
+						unique: aaUniqueFloorIds,
+						gui: aaGuiFloorIds,
+						all: aaAllFloorIds
+					},
+					objects: {
+						all: aaAllFloorObjects
+					},
+					ids: aCondoId,
+					span: aFloorSpan,
+					dims: nAxisHeight,
+					size: nAxisWidth,
+					uuidObjectMap: uuidObjectMap
+				};
+			};
+
+			service.layout.isHierarchy = function(layout, response, id) {
+				return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
+			};
+
+			service.layout.layout2plugin = function(layout, el) {
+				var layout = Ext.clone(layout),
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+
+				layout.url = init.contextPath;
+
+				if (el) {
+					layout.el = el;
+				}
+
+				if (Ext.isString(layout.id)) {
+					return {id: layout.id};
+				}
+
+				for (var i = 0, dimension, item; i < dimensions.length; i++) {
+					dimension = dimensions[i];
+
+					delete dimension.id;
+					delete dimension.ids;
+					delete dimension.type;
+					delete dimension.dimensionName;
+					delete dimension.objectName;
+
+					for (var j = 0, item; j < dimension.items.length; j++) {
+						item = dimension.items[j];
+
+						delete item.name;
+						delete item.code;
+						delete item.created;
+						delete item.lastUpdated;
+						delete item.value;
+					}
+				}
+
+				if (layout.showRowTotals) {
+					delete layout.showRowTotals;
+				}
+
+                if (layout.showColTotals) {
+					delete layout.showColTotals;
+				}
+
+				if (layout.showColSubTotals) {
+					delete layout.showColSubTotals;
+				}
+
+				if (layout.showRowSubTotals) {
+					delete layout.showRowSubTotals;
+				}
+
+				if (!layout.hideEmptyRows) {
+					delete layout.hideEmptyRows;
+				}
+
+				if (!layout.showHierarchy) {
+					delete layout.showHierarchy;
+				}
+
+				if (layout.displayDensity === 'normal') {
+					delete layout.displayDensity;
+				}
+
+				if (layout.fontSize === 'normal') {
+					delete layout.fontSize;
+				}
+
+				if (layout.digitGroupSeparator === 'space') {
+					delete layout.digitGroupSeparator;
+				}
+
+				if (!layout.legendSet) {
+					delete layout.legendSet;
+				}
+
+				if (!layout.sorting) {
+					delete layout.sorting;
+				}
+
+				delete layout.parentGraphMap;
+				delete layout.reportingPeriod;
+				delete layout.organisationUnit;
+				delete layout.parentOrganisationUnit;
+				delete layout.regression;
+				delete layout.cumulative;
+				delete layout.sortOrder;
+				delete layout.topLimit;
+                delete layout.aggregationType;
+
+				return layout;
+			};
+
+			// response
+			service.response = {};
+
+			service.response.getExtendedResponse = function(xLayout, response) {
+				var ids = [];
+
+				response = Ext.clone(response);
+
+				response.nameHeaderMap = {};
+				response.idValueMap = {};
+
+				// extend headers
+				(function() {
+
+					// extend headers: index, ids, size
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+
+						// index
+						header.index = i;
+
+						if (header.meta) {
+
+							// ids
+							header.ids = Ext.clone(xLayout.dimensionNameIdsMap[header.name]) || [];
+
+							// size
+							header.size = header.ids.length;
+
+							// collect ids, used by extendMetaData
+							ids = ids.concat(header.ids);
+						}
+					}
+
+					// nameHeaderMap (headerName: header)
+					for (var i = 0, header; i < response.headers.length; i++) {
+						header = response.headers[i];
+
+						response.nameHeaderMap[header.name] = header;
+					}
+				}());
+
+				// extend metadata
+				(function() {
+					for (var i = 0, id, splitId ; i < ids.length; i++) {
+						id = ids[i];
+
+						if (id.indexOf('#') !== -1) {
+							splitId = id.split('#');
+							response.metaData.names[id] = response.metaData.names[splitId[0]] + ' ' + response.metaData.names[splitId[1]];
+						}
+					}
+				}());
+
+				// create value id map
+				(function() {
+					var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+						coHeader = response.nameHeaderMap[conf.finals.dimension.category.dimensionName],
+						dx = dimConf.data.dimensionName,
+						co = dimConf.category.dimensionName,
+						axisDimensionNames = xLayout.axisDimensionNames,
+						idIndexOrder = [];
+
+					// idIndexOrder
+					for (var i = 0; i < axisDimensionNames.length; i++) {
+						idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+
+						// If co exists in response and is not added in layout, add co after dx
+						if (coHeader && !Ext.Array.contains(axisDimensionNames, co) && axisDimensionNames[i] === dx) {
+							idIndexOrder.push(coHeader.index);
+						}
+					}
+
+					// idValueMap
+					for (var i = 0, row, id; i < response.rows.length; i++) {
+						row = response.rows[i];
+						id = '';
+
+						for (var j = 0, index; j < idIndexOrder.length; j++) {
+							index = idIndexOrder[j];
+
+							//id += response.headers[index].name === co ? '.' : '';
+							id += row[index];
+						}
+
+						response.idValueMap[id] = row[valueHeaderIndex];
+					}
+				}());
+
+				return response;
+			};
+
+            service.response.addOuHierarchyDimensions = function(response) {
+                var headers = response.headers,
+                    ouHierarchy = response.metaData.ouHierarchy,
+                    rows = response.rows,
+                    ouIndex,
+                    numLevels = 0,
+                    initArray = [],
+                    newHeaders = [],
+                    a;
+
+                if (!ouHierarchy) {
+                    return;
+                }
+
+                // get ou index
+                for (var i = 0; i < headers.length; i++) {
+                    if (headers[i].name === 'ou') {
+                        ouIndex = i;
+                        break;
+                    }
+                }
+
+                // get numLevels
+                for (var i = 0; i < rows.length; i++) {
+                    numLevels = Math.max(numLevels, Ext.Array.clean(ouHierarchy[rows[i][ouIndex]].split('/')).length);
+                }
+
+                // init array
+                for (var i = 0; i < numLevels; i++) {
+                    initArray.push('');
+                }
+
+                // extend rows
+                for (var i = 0, row, ouArray; i < rows.length; i++) {
+                    row = rows[i];
+                    ouArray = Ext.applyIf(Ext.Array.clean(ouHierarchy[row[ouIndex]].split('/')), Ext.clone(initArray));
+
+                    Ext.Array.insert(row, ouIndex, ouArray);
+                }
+
+                // create new headers
+                for (var i = 0; i < numLevels; i++) {
+                    newHeaders.push({
+                        column: 'Organisation unit',
+                        hidden: false,
+                        meta: true,
+                        name: 'ou',
+                        type: 'java.lang.String'
+                    });
+                }
+
+                Ext.Array.insert(headers, ouIndex, newHeaders);
+
+                return response;
+            };
+
+            service.response.getValue = function(str) {
+				var n = parseFloat(str);
+
+                if (Ext.isBoolean(str)) {
+                    return 1;
+                }
+
+                // return string if
+                // - parsefloat(string) is not a number
+                // - string is just starting with a number
+                // - string is a valid date
+				//if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+				if (!Ext.isNumber(n) || n != str) {
+					return 0;
+				}
+
+                return n;
+			};
+        }());
+
+		// web
+		(function() {
+
+			// mask
+			web.mask = {};
+
+			web.mask.show = function(component, message) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.show: component not an object');
+					return null;
+				}
+
+				message = message || 'Loading..';
+
+				if (component.mask && component.mask.destroy) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+
+				component.mask = new Ext.create('Ext.LoadMask', component, {
+					shadow: false,
+					msg: message,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+
+				component.mask.show();
+			};
+
+			web.mask.hide = function(component) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.hide: component not an object');
+					return null;
+				}
+
+				if (component.mask) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+			};
+
+			// message
+			web.message = {};
+
+			web.message.alert = function(message) {
+				console.log(message);
+			};
+
+			// analytics
+			web.analytics = {};
+
+			web.analytics.getParamString = function(xLayout, isSorted) {
+				var axisDimensionNames = isSorted ? xLayout.sortedAxisDimensionNames : xLayout.axisDimensionNames,
+					filterDimensions = isSorted ? xLayout.sortedFilterDimensions : xLayout.filterDimensions,
+					dimensionNameIdsMap = isSorted ? xLayout.dimensionNameSortedIdsMap : xLayout.dimensionNameIdsMap,
+					paramString = '?',
+					addCategoryDimension = false,
+					map = xLayout.dimensionNameItemsMap,
+					dx = dimConf.indicator.dimensionName,
+					co = dimConf.category.dimensionName,
+                    aggTypes = {
+                        'count': 'COUNT',
+                        'sum': 'SUM',
+                        'stddev': 'STDDEV',
+                        'variance': 'VARIANCE',
+                        'min': 'MIN',
+                        'max': 'MAX'
+                    };
+
+				for (var i = 0, dimName, items; i < axisDimensionNames.length; i++) {
+					dimName = axisDimensionNames[i];
+
+					paramString += 'dimension=' + dimName;
+
+					items = Ext.clone(dimensionNameIdsMap[dimName]);
+
+					if (dimName === dx) {
+						for (var j = 0, index; j < items.length; j++) {
+							index = items[j].indexOf('#');
+
+							if (index > 0) {
+								addCategoryDimension = true;
+								items[j] = items[j].substr(0, index);
+							}
+						}
+
+						items = Ext.Array.unique(items);
+					}
+
+					if (dimName !== co) {
+						paramString += ':' + items.join(';');
+					}
+
+					if (i < (axisDimensionNames.length - 1)) {
+						paramString += '&';
+					}
+				}
+
+				if (addCategoryDimension) {
+					paramString += '&dimension=' + conf.finals.dimension.category.dimensionName;
+				}
+
+				if (Ext.isArray(filterDimensions) && filterDimensions.length) {
+					for (var i = 0, dim; i < filterDimensions.length; i++) {
+						dim = filterDimensions[i];
+
+						paramString += '&filter=' + dim.dimensionName + ':' + dim.ids.join(';');
+					}
+				}
+
+				if (xLayout.showHierarchy) {
+					paramString += '&hierarchyMeta=true';
+				}
+
+                if (aggTypes.hasOwnProperty(xLayout.aggregationType)) {
+                    paramString += '&aggregationType=' + aggTypes[xLayout.aggregationType];
+                }
+
+                // display property
+                paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+				return paramString;
+			};
+
+			web.analytics.validateUrl = function(url) {
+				var msg;
+
+                if (Ext.isIE) {
+                    msg = 'Too many items selected (url has ' + url.length + ' characters). Internet Explorer accepts maximum 2048 characters.';
+                }
+                else {
+					var len = url.length > 8000 ? '8000' : (url.length > 4000 ? '4000' : '2000');
+					msg = 'Too many items selected (url has ' + url.length + ' characters). Please reduce to less than ' + len + ' characters.';
+                }
+
+                msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
+
+                alert(msg);
+			};
+
+			// pivot
+			web.pivot = {};
+
+			web.pivot.sort = function(xLayout, xResponse, xColAxis) {
+				var xResponse = Ext.clone(xResponse),
+					id = xLayout.sorting.id,
+					dim = xLayout.rows[0],
+					valueMap = xResponse.idValueMap,
+					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					layout;
+
+				dim.ids = [];
+
+				// relative id?
+				if (Ext.isString(id)) {
+					id = id.toLowerCase() === 'total' ? 'total_' : id;
+				}
+				else if (Ext.isNumber(id)) {
+					if (id === 0) {
+						id = 'total_';
+					}
+					else {
+						id = xColAxis.ids[parseInt(id) - 1];
+					}
+				}
+				else {
+					return xLayout;
+				}
+
+				// collect values
+				for (var i = 0, item, key, value; i < dim.items.length; i++) {
+					item = dim.items[i];
+					key = id + item.id;
+					value = parseFloat(valueMap[key]);
+
+					item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				}
+
+				// sort
+				support.prototype.array.sort(dim.items, direction, 'value');
+
+				// new id order
+				for (var i = 0; i < dim.items.length; i++) {
+					dim.ids.push(dim.items[i].id);
+				}
+
+				// update id
+				if (id !== xLayout.sorting.id) {
+					xLayout.sorting.id = id;
+				}
+
+				return xLayout;
+			};
+
+			web.pivot.getHtml = function(xLayout, xResponse, xColAxis, xRowAxis) {
+				var getRoundedHtmlValue,
+					getTdHtml,
+					doSubTotals,
+					doRowTotals,
+                    doColTotals,
+                    doSortableColumnHeaders,
+					getColAxisHtmlArray,
+					getRowHtmlArray,
+					rowAxisHtmlArray,
+					getColTotalHtmlArray,
+					getGrandTotalHtmlArray,
+					getTotalHtmlArray,
+					getHtml,
+					getUniqueFactor = function(xAxis) {
+                        var unique;
+
+						if (!xAxis) {
+							return null;
+						}
+
+						unique = xAxis.xItems.unique;
+
+						if (unique) {
+							return unique.length < 2 ? 1 : (xAxis.size / unique[0].length);
+						}
+
+						return null;
+					},
+					colUniqueFactor = getUniqueFactor(xColAxis),
+					rowUniqueFactor = getUniqueFactor(xRowAxis),
+					valueItems = [],
+					valueObjects = [],
+					totalColObjects = [],
+					uuidDimUuidsMap = {},
+					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
+                    tdCount = 0,
+                    htmlArray;
+
+				xResponse.sortableIdObjects = [];
+
+				getRoundedHtmlValue = function(value, dec) {
+					dec = dec || 2;
+					return parseFloat(support.prototype.number.roundIf(value, 2)).toString();
+				};
+
+				getTdHtml = function(config, metaDataId) {
+					var bgColor,
+						mapLegends,
+						colSpan,
+						rowSpan,
+						htmlValue,
+						displayDensity,
+						fontSize,
+						isNumeric = Ext.isObject(config) && Ext.isString(config.type) && config.type.substr(0,5) === 'value' && !config.empty,
+						isValue = isNumeric && config.type === 'value',
+						cls = '',
+						html = '',
+                        getHtmlValue;
+
+                    getHtmlValue = function(config) {
+                        var str = config.htmlValue,
+                            n = parseFloat(config.htmlValue);
+
+                        if (config.collapsed) {
+                            return '';
+                        }
+
+                        if (isValue) {
+                            if (Ext.isBoolean(str)) {
+                                return str;
+                            }
+
+                            //if (!Ext.isNumber(n) || n != str || new Date(str).toString() !== 'Invalid Date') {
+                            if (!Ext.isNumber(n) || n != str) {
+                                return str;
+                            }
+
+                            return n;
+                        }
+
+                        return str || '';
+                    }
+
+					if (!Ext.isObject(config)) {
+						return '';
+					}
+
+                    if (config.hidden || config.collapsed) {
+                        return '';
+                    }
+
+                    // number of cells
+                    tdCount = tdCount + 1;
+
+					// background color from legend set
+					if (isValue && xLayout.legendSet) {
+						var value = parseFloat(config.value);
+						mapLegends = xLayout.legendSet.mapLegends;
+
+						for (var i = 0; i < mapLegends.length; i++) {
+							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
+								bgColor = mapLegends[i].color;
+							}
+						}
+					}
+
+					colSpan = config.colSpan ? 'colspan="' + config.colSpan + '" ' : '';
+					rowSpan = config.rowSpan ? 'rowspan="' + config.rowSpan + '" ' : '';
+                    htmlValue = getHtmlValue(config);
+					htmlValue = config.type !== 'dimension' ? support.prototype.number.prettyPrint(htmlValue, xLayout.digitGroupSeparator) : htmlValue;
+					displayDensity = conf.pivot.displayDensity[config.displayDensity] || conf.pivot.displayDensity[xLayout.displayDensity];
+					fontSize = conf.pivot.fontSize[config.fontSize] || conf.pivot.fontSize[xLayout.fontSize];
+
+					cls += config.hidden ? ' td-hidden' : '';
+					cls += config.collapsed ? ' td-collapsed' : '';
+					cls += isValue ? ' pointer' : '';
+					//cls += bgColor ? ' legend' : (config.cls ? ' ' + config.cls : '');
+                    cls += config.cls ? ' ' + config.cls : '';
+
+					// if sorting
+					if (Ext.isString(metaDataId)) {
+						cls += ' td-sortable';
+
+						xResponse.sortableIdObjects.push({
+							id: metaDataId,
+							uuid: config.uuid
+						});
+					}
+
+					html += '<td ' + (config.uuid ? ('id="' + config.uuid + '" ') : '');
+					html += ' class="' + cls + '" ' + colSpan + rowSpan;
+
+					//if (bgColor && isValue) {
+                        //html += 'style="color:' + bgColor + ';padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
+						//html += '>';
+						//html += '<div class="legendCt">';
+						//html += '<div class="number ' + config.cls + '" style="padding:' + displayDensity + '; padding-right:3px; font-size:' + fontSize + '">' + htmlValue + '</div>';
+						//html += '<div class="arrowCt ' + config.cls + '">';
+						//html += '<div class="arrow" style="border-bottom:8px solid transparent; border-right:8px solid ' + bgColor + '">&nbsp;</div>';
+						//html += '</div></div></div></td>';
+					//}
+					//else {
+						html += 'style="' + (bgColor && isValue ? 'color:' + bgColor + '; ' : '') + 'padding:' + displayDensity + '; font-size:' + fontSize + ';"' + '>' + htmlValue + '</td>';
+					//}
+
+					return html;
+				};
+
+                doColTotals = function() {
+					return !!xLayout.showColTotals;
+				};
+
+				doRowTotals = function() {
+					return !!xLayout.showRowTotals;
+				};
+
+				doColSubTotals = function() {
+					return !!xLayout.showColSubTotals && xRowAxis && xRowAxis.dims > 1;
+				};
+
+				doRowSubTotals = function() {
+					return !!xLayout.showRowSubTotals && xColAxis && xColAxis.dims > 1;
+				};
+
+				doSortableColumnHeaders = function() {
+					return (xRowAxis && xRowAxis.dims === 1);
+				};
+
+				getColAxisHtmlArray = function() {
+					var a = [],
+						getEmptyHtmlArray;
+
+                    getEmptyNameTdConfig = function(config) {
+                        config = config || {};
+
+                        return getTdHtml({
+                            cls: config.cls ? ' ' + config.cls : 'pivot-empty',
+                            colSpan: config.colSpan ? config.colSpan : 1,
+                            rowSpan: config.rowSpan ? config.rowSpan : 1,
+                            htmlValue: config.htmlValue ? config.htmlValue : '&nbsp;'
+                        });
+                    };
+
+                    getEmptyHtmlArray = function(i) {
+                        var a = [];
+
+                        // if not the intersection cell
+                        if (i < xColAxis.dims - 1) {
+                            if (xRowAxis && xRowAxis.dims) {
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'pivot-dim-label'
+                                    }));
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                cls: 'pivot-dim-label',
+                                htmlValue: dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                            }));
+                        }
+                        else {
+                            if (xRowAxis && xRowAxis.dims) {
+                                for (var j = 0; j < xRowAxis.dims - 1; j++) {
+                                    a.push(getEmptyNameTdConfig({
+                                        cls: 'pivot-dim-label',
+                                        htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name
+                                    }));
+                                }
+                            }
+
+                            a.push(getEmptyNameTdConfig({
+                                cls: 'pivot-dim-label',
+                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;/&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
+                            }));
+                        }
+
+                        return a;
+                    };
+
+					if (!xColAxis) {
+
+                        // show row dimension labels
+                        if (xRowAxis && xLayout.showDimensionLabels) {
+                            var dimLabelHtml = [];
+
+                            // labels from row object names
+                            for (var i = 0; i < xLayout.rowObjectNames.length; i++) {
+                                dimLabelHtml.push(getEmptyNameTdConfig({
+                                    cls: 'pivot-dim-label',
+                                    htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[i]].name
+                                }));
+                            }
+
+                            // pivot-transparent-column unnecessary
+
+                            a.push(dimLabelHtml);
+                        }
+
+						return a;
+					}
+
+					// for each col dimension
+					for (var i = 0, dimHtml; i < xColAxis.dims; i++) {
+						dimHtml = [];
+
+                        if (xLayout.showDimensionLabels) {
+                            dimHtml = dimHtml.concat(getEmptyHtmlArray(i));
+                        }
+                        else if (i === 0) {
+							dimHtml.push(xColAxis && xRowAxis ? getEmptyNameTdConfig({
+                                colSpan: xRowAxis.dims,
+                                rowSpan: xColAxis.dims
+                            }) : '');
+						}
+
+						for (var j = 0, obj, spanCount = 0, condoId, totalId; j < xColAxis.size; j++) {
+							spanCount++;
+							condoId = null;
+							totalId = null;
+
+							obj = xColAxis.objects.all[i][j];
+							obj.type = 'dimension';
+							obj.cls = 'pivot-dim';
+							obj.noBreak = false;
+							obj.hidden = !(obj.rowSpan || obj.colSpan);
+							obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
+
+							// sortable column headers. last dim only.
+							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
+
+								//condoId = xColAxis.ids[j].split('-').join('');
+								condoId = xColAxis.ids[j];
+							}
+
+							dimHtml.push(getTdHtml(obj, condoId));
+
+							if (i === 0 && spanCount === xColAxis.span[i] && doRowSubTotals() ) {
+								dimHtml.push(getTdHtml({
+									type: 'dimensionSubtotal',
+									cls: 'pivot-dim-subtotal cursor-default',
+									rowSpan: xColAxis.dims,
+									htmlValue: '&nbsp;'
+								}));
+
+								spanCount = 0;
+							}
+
+							if (i === 0 && (j === xColAxis.size - 1) && doRowTotals()) {
+								totalId = doSortableColumnHeaders() ? 'total_' : null;
+
+								dimHtml.push(getTdHtml({
+									uuid: Ext.data.IdGenerator.get('uuid').generate(),
+									type: 'dimensionTotal',
+									cls: 'pivot-dim-total',
+									rowSpan: xColAxis.dims,
+									htmlValue: 'Total'
+								}, totalId));
+							}
+						}
+
+						a.push(dimHtml);
+					}
+
+					return a;
+				};
+
+				getRowHtmlArray = function() {
+					var a = [],
+						axisAllObjects = [],
+						xValueObjects,
+						totalValueObjects = [],
+						mergedObjects = [],
+						valueItemsCopy,
+						colAxisSize = xColAxis ? xColAxis.size : 1,
+						rowAxisSize = xRowAxis ? xRowAxis.size : 1,
+						recursiveReduce;
+
+					recursiveReduce = function(obj) {
+						if (!obj.children) {
+							obj.collapsed = true;
+
+							if (obj.parent) {
+								obj.parent.oldestSibling.children--;
+							}
+						}
+
+						if (obj.parent) {
+							recursiveReduce(obj.parent.oldestSibling);
+						}
+					};
+
+					// dimension
+					if (xRowAxis) {
+						for (var i = 0, row; i < xRowAxis.size; i++) {
+							row = [];
+
+							for (var j = 0, obj, newObj; j < xRowAxis.dims; j++) {
+								obj = xRowAxis.objects.all[j][i];
+								obj.type = 'dimension';
+								obj.cls = 'pivot-dim td-nobreak' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
+								obj.noBreak = true;
+								obj.hidden = !(obj.rowSpan || obj.colSpan);
+								obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
+
+								row.push(obj);
+							}
+
+							axisAllObjects.push(row);
+						}
+					}
+                    else {
+                        if (xLayout.showDimensionLabels) {
+                            axisAllObjects.push([{
+                                type: 'transparent',
+                                cls: 'pivot-transparent-row'
+                            }]);
+                        }
+                    }
+
+
+	//axisAllObjects = [ [ dim, dim ]
+	//				     [ dim, dim ]
+	//				     [ dim, dim ]
+	//				     [ dim, dim ] ];
+
+					// value
+					for (var i = 0, valueItemsRow, valueObjectsRow, idValueMap = xResponse.idValueMap; i < rowAxisSize; i++) {
+						valueItemsRow = [];
+						valueObjectsRow = [];
+
+						for (var j = 0, id, value, responseValue, htmlValue, empty, uuid, uuids; j < colAxisSize; j++) {
+							empty = false;
+							uuids = [];
+
+							// meta data uid
+							id = ((xColAxis ? xColAxis.ids[j] : '') + (xRowAxis ? xRowAxis.ids[i] : '')).replace('#', '');
+
+                            // value html element id
+							uuid = Ext.data.IdGenerator.get('uuid').generate();
+
+							// get uuids array from colaxis/rowaxis leaf
+							if (xColAxis) {
+								uuids = uuids.concat(xColAxis.objects.all[xColAxis.dims - 1][j].uuids);
+							}
+							if (xRowAxis) {
+								uuids = uuids.concat(xRowAxis.objects.all[xRowAxis.dims - 1][i].uuids);
+							}
+
+                            // value, htmlValue
+                            responseValue = idValueMap[id];
+
+							if (Ext.isDefined(responseValue)) {
+                                value = service.response.getValue(responseValue);
+                                htmlValue = responseValue;
+							}
+							else {
+								value = 0;
+								htmlValue = '&nbsp;';
+								empty = true;
+							}
+
+							valueItemsRow.push(value);
+							valueObjectsRow.push({
+								uuid: uuid,
+								type: 'value',
+								cls: 'pivot-value' + (empty ? ' cursor-default' : ''),
+								value: value,
+								htmlValue: htmlValue,
+								empty: empty,
+								uuids: uuids
+							});
+
+							// map element id to dim element ids
+							uuidDimUuidsMap[uuid] = uuids;
+						}
+
+						valueItems.push(valueItemsRow);
+						valueObjects.push(valueObjectsRow);
+					}
+
+					// totals
+					if (xColAxis && doRowTotals()) {
+						for (var i = 0, empty = [], total = 0; i < valueObjects.length; i++) {
+							for (j = 0, obj; j < valueObjects[i].length; j++) {
+								obj = valueObjects[i][j];
+
+								empty.push(obj.empty);
+								total += obj.value;
+							}
+
+							// row totals
+							totalValueObjects.push({
+								type: 'valueTotal',
+								cls: 'pivot-value-total',
+								value: total,
+								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+								empty: !Ext.Array.contains(empty, false)
+							});
+
+							// add row totals to idValueMap to make sorting on totals possible
+							if (doSortableColumnHeaders()) {
+								var totalId = 'total_' + xRowAxis.ids[i],
+									isEmpty = !Ext.Array.contains(empty, false);
+
+								xResponse.idValueMap[totalId] = isEmpty ? null : total;
+							}
+
+							empty = [];
+							total = 0;
+						}
+					}
+
+					// hide empty rows (dims/values/totals)
+					if (xColAxis && xRowAxis) {
+						if (xLayout.hideEmptyRows) {
+							for (var i = 0, valueRow, isValueRowEmpty, dimLeaf; i < valueObjects.length; i++) {
+								valueRow = valueObjects[i];
+								isValueRowEmpty = !Ext.Array.contains(Ext.Array.pluck(valueRow, 'empty'), false);
+
+								// if value row is empty
+								if (isValueRowEmpty) {
+
+									// hide values by adding collapsed = true to all items
+									for (var j = 0; j < valueRow.length; j++) {
+										valueRow[j].collapsed = true;
+									}
+
+									// hide totals by adding collapsed = true to all items
+									if (doRowTotals()) {
+										totalValueObjects[i].collapsed = true;
+									}
+
+									// hide/reduce parent dim span
+									dimLeaf = axisAllObjects[i][xRowAxis.dims-1];
+									recursiveReduce(dimLeaf);
+								}
+							}
+						}
+					}
+
+                    xValueObjects = valueObjects;
+
+					// col subtotals
+					if (doRowSubTotals()) {
+						var tmpValueObjects = [];
+
+						for (var i = 0, row, rowSubTotal, colCount; i < xValueObjects.length; i++) {
+							row = [];
+							rowSubTotal = 0;
+							colCount = 0;
+
+							for (var j = 0, item, collapsed = [], empty = []; j < xValueObjects[i].length; j++) {
+								item = xValueObjects[i][j];
+								rowSubTotal += item.value;
+								empty.push(!!item.empty);
+								collapsed.push(!!item.collapsed);
+								colCount++;
+
+								row.push(item);
+
+								if (colCount === colUniqueFactor) {
+									var isEmpty = !Ext.Array.contains(empty, false);
+									row.push({
+										type: 'valueSubtotal',
+										cls: 'pivot-value-subtotal' + (isEmpty ? ' cursor-default' : ''),
+										value: rowSubTotal,
+										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(rowSubTotal),
+										empty: isEmpty,
+										collapsed: !Ext.Array.contains(collapsed, false)
+									});
+
+									colCount = 0;
+									rowSubTotal = 0;
+									empty = [];
+									collapsed = [];
+								}
+							}
+
+							tmpValueObjects.push(row);
+						}
+
+						xValueObjects = tmpValueObjects;
+					}
+
+					// row subtotals
+					if (doColSubTotals()) {
+						var tmpAxisAllObjects = [],
+							tmpValueObjects = [],
+							tmpTotalValueObjects = [],
+							getAxisSubTotalRow;
+
+						getAxisSubTotalRow = function(collapsed) {
+							var row = [];
+
+							for (var i = 0, obj; i < xRowAxis.dims; i++) {
+								obj = {};
+								obj.type = 'dimensionSubtotal';
+								obj.cls = 'pivot-dim-subtotal cursor-default';
+								obj.collapsed = Ext.Array.contains(collapsed, true);
+
+								if (i === 0) {
+									obj.htmlValue = '&nbsp;';
+									obj.colSpan = xRowAxis.dims;
+								}
+								else {
+									obj.hidden = true;
+								}
+
+								row.push(obj);
+							}
+
+							return row;
+						};
+
+						// tmpAxisAllObjects
+						for (var i = 0, row, collapsed = []; i < axisAllObjects.length; i++) {
+							tmpAxisAllObjects.push(axisAllObjects[i]);
+							collapsed.push(!!axisAllObjects[i][0].collapsed);
+
+							// insert subtotal after last objects
+							if (!Ext.isArray(axisAllObjects[i+1]) || !!axisAllObjects[i+1][0].root) {
+								tmpAxisAllObjects.push(getAxisSubTotalRow(collapsed));
+
+								collapsed = [];
+							}
+						}
+
+						// tmpValueObjects
+						for (var i = 0; i < tmpAxisAllObjects.length; i++) {
+							tmpValueObjects.push([]);
+						}
+
+						for (var i = 0; i < xValueObjects[0].length; i++) {
+							for (var j = 0, rowCount = 0, tmpCount = 0, subTotal = 0, empty = [], collapsed, item; j < xValueObjects.length; j++) {
+								item = xValueObjects[j][i];
+								tmpValueObjects[tmpCount++].push(item);
+								subTotal += item.value;
+								empty.push(!!item.empty);
+								rowCount++;
+
+								if (axisAllObjects[j][0].root) {
+									collapsed = !!axisAllObjects[j][0].collapsed;
+								}
+
+								if (!Ext.isArray(axisAllObjects[j+1]) || axisAllObjects[j+1][0].root) {
+									var isEmpty = !Ext.Array.contains(empty, false);
+
+									tmpValueObjects[tmpCount++].push({
+										type: item.type === 'value' ? 'valueSubtotal' : 'valueSubtotalTotal',
+										value: subTotal,
+										htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
+										collapsed: collapsed,
+										cls: (item.type === 'value' ? 'pivot-value-subtotal' : 'pivot-value-subtotal-total') + (isEmpty ? ' cursor-default' : '')
+									});
+									rowCount = 0;
+									subTotal = 0;
+									empty = [];
+								}
+							}
+						}
+
+						// tmpTotalValueObjects
+						for (var i = 0, obj, collapsed = [], empty = [], subTotal = 0, count = 0; i < totalValueObjects.length; i++) {
+							obj = totalValueObjects[i];
+							tmpTotalValueObjects.push(obj);
+
+							collapsed.push(!!obj.collapsed);
+							empty.push(!!obj.empty);
+							subTotal += obj.value;
+							count++;
+
+							if (count === xRowAxis.span[0]) {
+								var isEmpty = !Ext.Array.contains(empty, false);
+
+								tmpTotalValueObjects.push({
+									type: 'valueTotalSubgrandtotal',
+									cls: 'pivot-value-total-subgrandtotal' + (isEmpty ? ' cursor-default' : ''),
+									value: subTotal,
+									htmlValue: isEmpty ? '&nbsp;' : getRoundedHtmlValue(subTotal),
+									empty: isEmpty,
+									collapsed: !Ext.Array.contains(collapsed, false)
+								});
+
+								collapsed = [];
+								empty = [];
+								subTotal = 0;
+								count = 0;
+							}
+						}
+
+						axisAllObjects = tmpAxisAllObjects;
+						xValueObjects = tmpValueObjects;
+						totalValueObjects = tmpTotalValueObjects;
+					}
+
+					// merge dim, value, total
+					for (var i = 0, row; i < xValueObjects.length; i++) {
+						row = [];
+
+						//if (xRowAxis) {
+							row = row.concat(axisAllObjects[i]);
+						//}
+
+						row = row.concat(xValueObjects[i]);
+
+						if (xColAxis) {
+							row = row.concat(totalValueObjects[i]);
+						}
+
+						mergedObjects.push(row);
+					}
+
+					// create html items
+					for (var i = 0, row; i < mergedObjects.length; i++) {
+						row = [];
+
+						for (var j = 0; j < mergedObjects[i].length; j++) {
+							row.push(getTdHtml(mergedObjects[i][j]));
+						}
+
+						a.push(row);
+					}
+
+					return a;
+				};
+
+				getColTotalHtmlArray = function() {
+					var a = [];
+
+					if (xRowAxis && doColTotals()) {
+						var xTotalColObjects;
+
+						// total col items
+						for (var i = 0, total = 0, empty = []; i < valueObjects[0].length; i++) {
+							for (var j = 0, obj; j < valueObjects.length; j++) {
+								obj = valueObjects[j][i];
+
+								total += obj.value;
+								empty.push(!!obj.empty);
+							}
+
+							// col total
+							totalColObjects.push({
+								type: 'valueTotal',
+								value: total,
+								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+								empty: !Ext.Array.contains(empty, false),
+								cls: 'pivot-value-total'
+							});
+
+							total = 0;
+							empty = [];
+						}
+
+						xTotalColObjects = totalColObjects;
+
+						if (xColAxis && doRowSubTotals()) {
+							var tmp = [];
+
+							for (var i = 0, item, subTotal = 0, empty = [], colCount = 0; i < xTotalColObjects.length; i++) {
+								item = xTotalColObjects[i];
+								tmp.push(item);
+								subTotal += item.value;
+								empty.push(!!item.empty);
+								colCount++;
+
+								if (colCount === colUniqueFactor) {
+									tmp.push({
+										type: 'valueTotalSubgrandtotal',
+										value: subTotal,
+										htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(subTotal) : '',
+										empty: !Ext.Array.contains(empty, false),
+										cls: 'pivot-value-total-subgrandtotal'
+									});
+
+									subTotal = 0;
+									colCount = 0;
+								}
+							}
+
+							xTotalColObjects = tmp;
+						}
+
+						// total col html items
+						for (var i = 0; i < xTotalColObjects.length; i++) {
+							a.push(getTdHtml(xTotalColObjects[i]));
+						}
+					}
+
+					return a;
+				};
+
+				getGrandTotalHtmlArray = function() {
+					var total = 0,
+						empty = [],
+						a = [];
+
+					if (doRowTotals() && doColTotals()) {
+						for (var i = 0, obj; i < totalColObjects.length; i++) {
+							obj = totalColObjects[i];
+
+							total += obj.value;
+							empty.push(obj.empty);
+						}
+
+						if (xColAxis && xRowAxis) {
+							a.push(getTdHtml({
+								type: 'valueGrandTotal',
+								cls: 'pivot-value-grandtotal',
+								value: total,
+								htmlValue: Ext.Array.contains(empty, false) ? getRoundedHtmlValue(total) : '',
+								empty: !Ext.Array.contains(empty, false)
+							}));
+						}
+					}
+
+					return a;
+				};
+
+				getTotalHtmlArray = function() {
+					var dimTotalArray,
+						colTotal = getColTotalHtmlArray(),
+						grandTotal = getGrandTotalHtmlArray(),
+						row,
+						a = [];
+
+					if (doColTotals()) {
+						if (xRowAxis) {
+							dimTotalArray = [getTdHtml({
+								type: 'dimensionSubtotal',
+								cls: 'pivot-dim-total',
+								colSpan: xRowAxis.dims,
+								htmlValue: 'Total'
+							})];
+						}
+
+						row = [].concat(dimTotalArray || [], colTotal || [], grandTotal || []);
+
+						a.push(row);
+					}
+
+					return a;
+				};
+
+				getHtml = function() {
+					var s = '<table id="' + xLayout.tableUuid + '" class="pivot">';
+
+					for (var i = 0; i < htmlArray.length; i++) {
+						s += '<tr>' + htmlArray[i].join('') + '</tr>';
+					}
+
+					return s += '</table>';
+				};
+
+				// get html
+				return function() {
+					htmlArray = Ext.Array.clean([].concat(getColAxisHtmlArray() || [], getRowHtmlArray() || [], getTotalHtmlArray() || []));
+
+					return {
+						html: getHtml(htmlArray),
+						uuidDimUuidsMap: uuidDimUuidsMap,
+						xColAxis: xColAxis,
+						xRowAxis: xRowAxis,
+                        tdCount: tdCount
+					};
+				}();
+			};
+
+		}());
+
+		// extend init
+		(function() {
+
+			// sort and extend dynamic dimensions
+			if (Ext.isArray(init.dimensions)) {
+				support.prototype.array.sort(init.dimensions);
+
+				for (var i = 0, dim; i < init.dimensions.length; i++) {
+					dim = init.dimensions[i];
+					dim.dimensionName = dim.id;
+					dim.objectName = conf.finals.dimension.dimension.objectName;
+					conf.finals.dimension.objectNameMap[dim.id] = dim;
+				}
+			}
+
+			// sort ouc
+			if (init.user && init.user.ouc) {
+				support.prototype.array.sort(init.user.ouc);
+			}
+
+			// legend set map
+			init.idLegendSetMap = {};
+
+			for (var i = 0, set; i < init.legendSets.length; i++) {
+				set = init.legendSets[i];
+				init.idLegendSetMap[set.id] = set;
+			}
+		}());
+
+		// instance
+		return {
+			conf: conf,
+			api: api,
+			support: support,
+			service: service,
+			web: web,
+			init: init
+		};
+	};
+
+	// PLUGIN
+
+		// css
+	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
+	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
+	css += '.td-hidden { \n display: none; \n } \n';
+	css += '.td-collapsed { \n display: none; \n } \n';
+	css += 'table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n';
+	css += '.pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n';
+	css += '.pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+	css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
+	css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
+	css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
+	css += '.pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n';
+	css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+	css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
+	css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
+    css += '.pivot-dim-label { \n background-color: #cddaed; \n white-space: nowrap; \n text-align: center; \n } \n';
+    css += '.pivot-empty { \n background-color: #cddaed; \n } \n';
+    css += '.pivot-transparent-column { \n background-color: #fff; \n border-top-color: #fff !important; \n border-right-color: #fff !important; \n } \n';
+    css += '.pivot-transparent-row { \n background-color: #fff; \n border-bottom-color: #fff !important; \n border-left-color: #fff !important; \n } \n';
+
+    css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
+	css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
+	css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';
+    css += '.x-mask { opacity: 0 } \n';
+
+	css += '.pivot td.legend { \n padding: 0; \n } \n';
+	css += '.pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n';
+	css += '.pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n';
+	css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
+	css += '.pivot div.number { \n display: table-cell; \n } \n',
+	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
+
+	css += '.pointer { \n cursor: pointer; \n } \n';
+	css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v214/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
+
+	Ext.util.CSS.createStyleSheet(css);
+
+	PT.plugin = {};
+
+	var init = {
+			user: {}
+		},
+		configs = [],
+		isInitStarted = false,
+		isInitComplete = false,
+		getInit,
+		execute;
+
+	getInit = function(url) {
+		var isInit = false,
+			requests = [],
+			callbacks = 0,
+			fn;
+
+        init.contextPath = url;
+
+		fn = function() {
+			if (++callbacks === requests.length) {
+				isInitComplete = true;
+
+				for (var i = 0; i < configs.length; i++) {
+					execute(configs[i]);
+				}
+
+				configs = [];
+			}
+		};
+
+        // user-account
+        requests.push({
+            url: init.contextPath + '/api/me/user-account.jsonp',
+            success: function(r) {
+                init.userAccount = r;
+
+                // init
+                var defaultKeyUiLocale = 'en',
+                    defaultKeyAnalysisDisplayProperty = 'name',
+                    namePropertyUrl,
+                    contextPath,
+                    keyUiLocale;
+
+                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+
+                // local vars
+                contextPath = init.contextPath;
+                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+
+                init.namePropertyUrl = namePropertyUrl;
+
+                fn();
+            }
+        });
+
+		requests.push({
+			url: url + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			success: function(r) {
+				var organisationUnits = r.organisationUnits || [],
+                    ou = [],
+                    ouc = [];
+
+                if (organisationUnits.length) {
+                    for (var i = 0, org; i < organisationUnits.length; i++) {
+                        org = organisationUnits[i];
+
+                        ou.push(org.id);
+
+                        if (org.children) {
+                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                        }
+                    }
+
+                    init.user = init.user || {};
+                    init.user.ou = ou;
+                    init.user.ouc = ouc;
+                }
+                else {
+                    alert('User is not assigned to any organisation units');
+                }
+
+                fn();
+			}
+		});
+
+        init.legendSets = [];
+
+		requests.push({
+			url: url + '/api/dimensions.jsonp?links=false&paging=false',
+			success: function(r) {
+				init.dimensions = r.dimensions;
+				fn();
+			}
+		});
+
+		for (var i = 0; i < requests.length; i++) {
+			Ext.data.JsonP.request(requests[i]);
+		}
+	};
+
+	execute = function(config) {
+		var validateConfig,
+            extendInstance,
+			createViewport,
+			initialize,
+			ns = {
+				core: {},
+				app: {}
+			};
+
+		validateConfig = function(config) {
+			if (!Ext.isObject(config)) {
+				console.log('Report table configuration is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.el)) {
+				console.log('No valid element id provided');
+				return;
+			}
+
+			config.id = config.id || config.uid;
+
+			return true;
+		};
+
+        extendInstance = function(pt) {
+            var init = ns.core.init,
+				api = ns.core.api,
+				support = ns.core.support,
+				service = ns.core.service,
+				web = ns.core.web;
+
+			// mouse events
+			web.events = web.events || {};
+
+			web.events.setColumnHeaderMouseHandlers = function(layout, xLayout, response, xResponse) {
+				if (Ext.isArray(xResponse.sortableIdObjects)) {
+					for (var i = 0, obj, el; i < xResponse.sortableIdObjects.length; i++) {
+						obj = xResponse.sortableIdObjects[i];
+						el = Ext.get(obj.uuid);
+
+						el.dom.layout = layout;
+						el.dom.xLayout = xLayout;
+						el.dom.response = response;
+						el.dom.xResponse = xResponse;
+						el.dom.metaDataId = obj.id;
+						el.dom.onColumnHeaderMouseClick = web.events.onColumnHeaderMouseClick;
+						el.dom.onColumnHeaderMouseOver = web.events.onColumnHeaderMouseOver;
+						el.dom.onColumnHeaderMouseOut = web.events.onColumnHeaderMouseOut;
+
+						el.dom.setAttribute('onclick', 'this.onColumnHeaderMouseClick(this.layout, this.xLayout, this.response, this.xResponse, this.metaDataId)');
+						el.dom.setAttribute('onmouseover', 'this.onColumnHeaderMouseOver(this)');
+						el.dom.setAttribute('onmouseout', 'this.onColumnHeaderMouseOut(this)');
+					}
+				}
+			};
+
+			web.events.onColumnHeaderMouseClick = function(layout, xLayout, response, xResponse, id) {
+				if (layout.sorting && layout.sorting.id === id) {
+					layout.sorting.direction = support.prototype.str.toggleDirection(layout.sorting.direction);
+				}
+				else {
+					layout.sorting = {
+						id: id,
+						direction: 'DESC'
+					};
+				}
+
+                web.mask.show(ns.app.centerRegion, 'Sorting...');
+
+                Ext.defer(function() {
+                    web.pivot.createTable(layout, response, null, false);
+                }, 10);
+			};
+
+			web.events.onColumnHeaderMouseOver = function(el) {
+				Ext.get(el).addCls('pointer highlighted');
+			};
+
+			web.events.onColumnHeaderMouseOut = function(el) {
+				Ext.get(el).removeCls('pointer highlighted');
+			};
+
+			// pivot
+			web.pivot = web.pivot || {};
+
+            web.pivot.loadTable = function(obj) {
+                if (!(obj && obj.id)) {
+                    console.log('Error, no report table id');
+                    return;
+                }
+
+				Ext.data.JsonP.request({
+					url: init.contextPath + '/api/reportTables/' + obj.id + '.jsonp?fields=' + ns.core.conf.url.analysisFields.join(','),
+					failure: function(r) {
+						//window.open(init.contextPath + '/api/reportTables/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','), '_blank');
+					},
+					success: function(r) {
+						var layout = api.layout.Layout(r, obj);
+
+						if (layout) {
+							web.pivot.getData(layout, true);
+						}
+					}
+				});
+			};
+
+			web.pivot.getData = function(layout, isUpdateGui) {
+				var xLayout,
+					paramString;
+
+				if (!layout) {
+					return;
+				}
+
+				xLayout = service.layout.getExtendedLayout(layout);
+				paramString = web.analytics.getParamString(xLayout, true);
+
+				// show mask
+				web.mask.show(ns.app.centerRegion);
+
+				Ext.data.JsonP.request({
+					url: init.contextPath + '/api/analytics.jsonp' + paramString,
+					timeout: 60000,
+					headers: {
+						'Content-Type': 'application/json',
+						'Accepts': 'application/json'
+					},
+					disableCaching: false,
+					failure: function(r) {
+						web.mask.hide(ns.app.centerRegion);
+
+						window.open(init.contextPath + '/api/analytics.json' + paramString, '_blank');
+					},
+					success: function(r) {
+						var response = api.response.Response(r);
+
+						if (!response) {
+							web.mask.hide(ns.app.centerRegion);
+							return;
+						}
+
+						// sync xLayout with response
+						//xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+
+						//if (!xLayout) {
+							//web.mask.hide(ns.app.centerRegion);
+							//return;
+						//}
+
+						ns.app.paramString = paramString;
+
+						web.pivot.createTable(layout, response, null, isUpdateGui);
+					}
+				});
+			};
+
+			web.pivot.createTable = function(layout, response, xResponse, isUpdateGui) {
+				var xLayout,
+					xColAxis,
+					xRowAxis,
+					table,
+					getHtml,
+					getXLayout = service.layout.getExtendedLayout,
+					getSXLayout = service.layout.getSyncronizedXLayout,
+					getXResponse = service.response.getExtendedResponse,
+					getXAxis = service.layout.getExtendedAxis;
+
+				getHtml = function(xLayout, xResponse) {
+					xColAxis = getXAxis(xLayout, 'col');
+					xRowAxis = getXAxis(xLayout, 'row');
+
+					return web.pivot.getHtml(xLayout, xResponse, xColAxis, xRowAxis);
+				};
+
+				xLayout = getSXLayout(getXLayout(layout), xResponse || response);
+
+                ns.app.dateSorting = new Date();
+
+				if (layout.sorting) {
+					if (!xResponse) {
+						xResponse = getXResponse(xLayout, response);
+						getHtml(xLayout, xResponse);
+					}
+
+					web.pivot.sort(xLayout, xResponse, xColAxis || ns.app.xColAxis);
+					xLayout = getXLayout(api.layout.Layout(xLayout));
+				}
+				else {
+					xResponse = service.response.getExtendedResponse(xLayout, response);
+				}
+
+				table = getHtml(xLayout, xResponse);
+
+                // timing
+                ns.app.dateRender = new Date();
+
+				//ns.app.centerRegion.removeAll(true);
+				ns.app.centerRegion.update(table.html);
+
+                Ext.defer( function() {
+                    Ext.get(ns.core.init.el).fadeIn({
+                        duration: 400
+                    });
+                }, 300 );
+
+				// after render
+				ns.app.layout = layout;
+				ns.app.xLayout = xLayout;
+				ns.app.response = response;
+				ns.app.xResponse = xResponse;
+				ns.app.uuidDimUuidsMap = config.uuidDimUuidsMap;
+				ns.app.uuidObjectMap = Ext.applyIf((xColAxis ? xColAxis.uuidObjectMap : {}), (xRowAxis ? xRowAxis.uuidObjectMap : {}));
+
+				// sorting
+				web.events.setColumnHeaderMouseHandlers(layout, xLayout, response, xResponse);
+
+				web.mask.hide(ns.app.centerRegion);
+
+                if (PT.isDebug) {
+                    console.log("layout", layout);
+                    console.log("response", response);
+                    console.log("xResponse", xResponse);
+                    console.log("xLayout", xLayout);
+                    console.log("core", ns.core);
+                    console.log("app", ns.app);
+                }
+			};
+
+			//web.pivot.sort = function(xLayout, response, id) {
+				//var xLayout = Ext.clone(xLayout),
+					//response = Ext.clone(response),
+					//dim = xLayout.rows[0],
+					//valueMap = response.idValueMap,
+					//direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					//layout;
+
+				//dim.ids = [];
+
+				//// collect values
+				//for (var i = 0, item, key, value; i < dim.items.length; i++) {
+					//item = dim.items[i];
+					//key = id + item.id;
+					//value = parseFloat(valueMap[key]);
+
+					//item.value = Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1);
+				//}
+
+				//// sort
+				//support.prototype.array.sort(dim.items, direction, 'value');
+
+				//// new id order
+				//for (var i = 0; i < dim.items.length; i++) {
+					//dim.ids.push(dim.items[i].id);
+				//}
+
+				//// re-layout
+				//layout = api.layout.Layout(xLayout);
+
+				//// re-create table
+				//web.pivot.createTable(layout, null, response, false);
+			//};
+		};
+
+		createViewport = function() {
+			return {
+				centerRegion: Ext.get(config.el)
+			};
+		};
+
+		initialize = function() {
+			if (!validateConfig(config)) {
+				return;
+			}
+
+			ns.core = PT.getCore(Ext.clone(init));
+            ns.core.init.el = config.el;
+            Ext.get(ns.core.init.el).setStyle('opacity', 0);
+			extendInstance(ns);
+
+			ns.app.viewport = createViewport();
+			ns.app.centerRegion = ns.app.viewport.centerRegion;
+
+			if (config && config.id) {
+				ns.core.web.pivot.loadTable(config);
+			}
+			else {
+				layout = ns.core.api.layout.Layout(config);
+
+				if (!layout) {
+					return;
+				}
+
+				ns.core.web.pivot.getData(layout);
+			}
+		}();
+	};
+
+	PT.plugin.getTable = function(config) {
+		if (Ext.isString(config.url) && config.url.split('').pop() === '/') {
+			config.url = config.url.substr(0, config.url.length - 1);
+		}
+
+		if (isInitComplete) {
+			execute(config);
+		}
+		else {
+			configs.push(config);
+
+			if (!isInitStarted) {
+				isInitStarted = true;
+				getInit(config.url);
+			}
+		}
+	};
+
+	DHIS = Ext.isObject(window['DHIS']) ? DHIS : {};
+	DHIS.getTable = PT.plugin.getTable;
+});

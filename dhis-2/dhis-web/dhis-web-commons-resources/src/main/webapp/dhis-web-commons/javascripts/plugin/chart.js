@@ -383,7 +383,7 @@ Ext.onReady(function() {
 				}();
 			};
 
-            api.layout.Layout = function(config) {
+            api.layout.Layout = function(config, applyConfig) {
 				var config = Ext.clone(config),
 					layout = {},
 					getValidatedDimensionArray,
@@ -586,7 +586,7 @@ Ext.onReady(function() {
 				};
 
                 return function() {
-                    var objectNames = [],
+                    var objectNames = [],
 						dimConf = conf.finals.dimension;
 
 					// config must be an object
@@ -677,7 +677,7 @@ Ext.onReady(function() {
 						return;
 					}
 
-					return layout;
+					return Ext.apply(layout, applyConfig);
                 }();
             };
 
@@ -818,7 +818,7 @@ Ext.onReady(function() {
 				// object
 			support.prototype.object = {};
 
-			support.prototype.object.getLength = function(object, suppressWarning) {
+			support.prototype.object.getLength = function(object, suppressWarning) {
 				if (!Ext.isObject(object)) {
 					if (!suppressWarning) {
 						console.log('support.prototype.object.getLength: not an object');
@@ -1677,7 +1677,7 @@ Ext.onReady(function() {
 			// message
 			web.message = {};
 
-			web.message.alert = function(message) {
+			web.message.alert = function(message) {
 				console.log(message);
 			};
 
@@ -2120,7 +2120,7 @@ Ext.onReady(function() {
                         fields: store.domainFields,
                         label: {
                             rotate: {
-                                degrees: 300
+                                degrees: 320
                             },
                             style: {
                                 fontSize: '11px'
@@ -2361,7 +2361,7 @@ Ext.onReady(function() {
                         isPie = xLayout.type === conf.finals.chart.pie,
                         isGauge = xLayout.type === conf.finals.chart.gauge;
 
-                    if (isPie) {
+                    if (isPie) {
                         ids = Ext.Array.clean(ids.concat(columnIds || []));
                     }
                     else if (isGauge) {
@@ -2958,7 +2958,7 @@ Ext.onReady(function() {
         }());
 
 		// extend init
-		(function() {
+		(function() {
 
 			// sort and extend dynamic dimensions
 			if (Ext.isArray(init.dimensions)) {
@@ -3151,21 +3151,19 @@ Ext.onReady(function() {
 
 			web.chart = web.chart || {};
 
-            web.chart.loadChart = function(id, config) {
-				if (!Ext.isString(id)) {
-					alert('Invalid chart id');
-					return;
-				}
+            web.chart.loadChart = function(obj) {
+                if (!(obj && obj.id)) {
+                    console.log('Error, no chart id');
+                    return;
+                }
 
 				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/charts/' + id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
+					url: init.contextPath + '/api/charts/' + obj.id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
 					failure: function(r) {
-						window.open(init.contextPath + '/api/charts/' + id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
+						window.open(init.contextPath + '/api/charts/' + obj.id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
 					},
 					success: function(r) {
-                        Ext.apply(r, config);
-
-						var layout = api.layout.Layout(r);
+						var layout = api.layout.Layout(r, obj);
 
 						if (layout) {
 							web.chart.getData(layout, true);
@@ -3304,8 +3302,8 @@ Ext.onReady(function() {
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
-			if (config.id) {
-				ns.core.web.chart.loadChart(config.id, config);
+			if (config && config.id) {
+				ns.core.web.chart.loadChart(config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);
