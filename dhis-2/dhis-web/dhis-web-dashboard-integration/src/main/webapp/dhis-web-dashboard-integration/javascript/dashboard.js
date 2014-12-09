@@ -103,7 +103,7 @@ dhis2.db.tmpl = {
                "<a href='javascript:dhis2.db.viewShareForm( \"${id}\", \"reportTable\", \"${name}\" )'>${i18n_share}</a></div>" +
                //"<div id='pivot-${itemId}' onclick='dhis2.db.exploreReportTable( \"${id}\" )' title='${i18n_click}'></div>" +
                //"<script type='text/javascript'>dhis2.db.renderReportTable( '${id}', '${itemId}' );</script></div></li>"
-               "<div id='plugin-${itemId}' style='width:405px;height:294px'></div>" +
+               "<div id='plugin-${itemId}'></div>" +
                "</div></li>",
 };
 
@@ -421,7 +421,7 @@ console.log(scrollbarWidth);
                         url: '..',
                         el: 'plugin-' + dashboardItem.id,
                         id: dashboardItem.chart.id,
-                        width: contentWidth - scrollbarWidth,
+                        width: contentWidth,
                         height: 290
                     });                        
 				}
@@ -434,7 +434,7 @@ console.log(scrollbarWidth);
                         url: '..',
                         el: 'plugin-' + dashboardItem.id,
                         id: dashboardItem.eventChart.id,
-                        width: contentWidth - scrollbarWidth,
+                        width: contentWidth,
                         height: 290
                     }); 
 				}
@@ -462,7 +462,6 @@ console.log(scrollbarWidth);
                         id: dashboardItem.reportTable.id,
                         width: contentWidth - scrollbarWidth,
                         height: 290,
-                        fontSize: 'small',
                         displayDensity: 'compact'
                     });
 				}
