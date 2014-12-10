@@ -677,6 +677,9 @@ Ext.onReady(function() {
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
                     }
+                    if (Ext.isObject(config.rangeAxisStyle)) {
+                        layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
 
 					if (!validateSpecialCases()) {
 						return;
@@ -2072,10 +2075,11 @@ Ext.onReady(function() {
                         fields: store.numericFields,
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
-                            renderer: Ext.util.Format.numberRenderer(renderer)
+                            renderer: Ext.util.Format.numberRenderer(renderer),
+                            style: {}
                         },
                         labelTitle: {
-                            font: 'bold 13px ' + conf.chart.style.fontFamily
+                            font: 'bold 12px ' + conf.chart.style.fontFamily
                         },
                         grid: {
                             odd: {
@@ -2113,6 +2117,55 @@ Ext.onReady(function() {
 
                     if (xLayout.rangeAxisTitle) {
                         axis.title = xLayout.rangeAxisTitle;
+                    }                    
+
+                    // style config
+                    if (Ext.isObject(xLayout.rangeAxisStyle)) {
+                        var style = xLayout.rangeAxisStyle;
+
+                        // label                        
+                        if (Ext.isString(style.labelFont)) {
+                            axis.label.style.font = style.labelFont;
+                        }
+                        else {
+                            delete axis.label.style.font;
+                            
+                            if (style.labelFontSize) {
+                                axis.label.style.fontSize = parseFloat(style.labelFontSize) + 'px';
+                            }
+                            if (Ext.isString(style.labelFontFamily)) {
+                                axis.label.style.fontFamily = style.labelFontFamily;
+                            }
+                            if (style.labelFontWeight) {
+                                axis.label.style.fontWeight = style.labelFontWeight;
+                            }
+                        }
+
+                        if (Ext.isNumber(parseFloat(style.labelRotation))) {
+                            axis.label.rotate.degrees = 360 - parseFloat(style.labelRotation);
+                        }
+
+                        // title
+                        if (xLayout.rangeAxisTitle) {
+                            axis.labelTitle = axis.labelTitle || {};
+                            
+                            if (Ext.isString(style.titleFont)) {
+                                axis.labelTitle.font = style.titleFont;
+                            }
+                            else {
+                                delete axis.labelTitle.font;
+                                
+                                if (style.titleFontSize) {
+                                    axis.labelTitle.fontSize = parseFloat(style.titleFontSize) + 'px';
+                                }
+                                if (Ext.isString(style.titleFontFamily)) {
+                                    axis.labelTitle.fontFamily = style.titleFontFamily;
+                                }
+                                if (style.titleFontWeight) {
+                                    axis.labelTitle.fontWeight = style.titleFontWeight;
+                                }
+                            }
+                        }
                     }
 
                     return axis;
@@ -2136,11 +2189,11 @@ Ext.onReady(function() {
                     if (xLayout.domainAxisTitle) {
                         axis.title = xLayout.domainAxisTitle;
                         axis.labelTitle = {
-                            font: 'bold 13px ' + conf.chart.style.fontFamily
+                            font: 'bold 12px ' + conf.chart.style.fontFamily
                         };
                     }
 
-                    // config
+                    // style config
                     if (Ext.isObject(xLayout.domainAxisStyle)) {
                         var style = xLayout.domainAxisStyle;
 
