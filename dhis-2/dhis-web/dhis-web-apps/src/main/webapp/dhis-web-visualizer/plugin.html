@@ -21,7 +21,16 @@
 				url: url,
 				el: 'chart1',
 				uid: 'LW0O27b7TdD',
-                baseLineValue: 10
+                baseLineValue: 10,
+                domainAxisStyle: {
+                    labelFont: '10px arial',
+                    labelRotation: 270,
+                    titleFont: 'bold 12px arial'
+                },
+                rangeAxisStyle: {
+                    labelFont: '10px arial',
+                    titleFont: 'bold 12px arial'
+                }
 			});
 
 			DHIS.getChart({
@@ -40,7 +49,6 @@
                 //targetLineValue: 70
                 //baseLineValue: 20,
                 showTrendLine: true,
-                hideLegend: true,
                 //title: 'My chart title',
                 domainAxisTitle: 'Periods',
                 rangeAxisTitle: 'Percent',
@@ -52,7 +60,10 @@
                 },
                 rangeAxisStyle: {
                     labelFont: '10px arial',
-                    titleFont: 'bold 19px arial'
+                    titleFont: 'bold 12px arial'
+                },
+                legendStyle: {
+                    nameMaxLength: 10
                 }
 			});
 		});

@@ -671,14 +671,17 @@ Ext.onReady(function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
-
                     // style
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
                     }
+                    
                     if (Ext.isObject(config.rangeAxisStyle)) {
                         layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
+                    
+                    if (Ext.isObject(config.legendStyle)) {
+                        layout.legendStyle = config.legendStyle;
                     }
 
 					if (!validateSpecialCases()) {
@@ -2076,7 +2079,8 @@ Ext.onReady(function() {
                         minimum: minimum < 0 ? minimum : 0,
                         label: {
                             renderer: Ext.util.Format.numberRenderer(renderer),
-                            style: {}
+                            style: {},
+                            rotate: {}
                         },
                         labelTitle: {
                             font: 'bold 12px ' + conf.chart.style.fontFamily
@@ -2248,16 +2252,16 @@ Ext.onReady(function() {
                 getDefaultSeriesTitle = function(store) {
                     var a = [];
 
-                    if (Ext.isObject(xLayout.legend) && Ext.isArray(xLayout.legend.seriesNames)) {
-                        return xLayout.legend.seriesNames;
+                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.names)) {
+                        return xLayout.legendStyle.names;
                     }
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
-                            if (Ext.isObject(xLayout.legend) && xLayout.legend.maxLength) {
-                                var mxl = parseInt(xLayout.legend.maxLength);
+                            if (Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.nameMaxLength)) {
+                                var mxl = parseInt(xLayout.legendStyle.nameMaxLength);
 
                                 if (Ext.isNumber(mxl)) {
                                     name = name.substr(0, mxl) + '..';
@@ -2326,7 +2330,11 @@ Ext.onReady(function() {
                                 radius: 0,
                                 fill: strokeColor
                             },
-                            title: xResponse.metaData.names[store.trendLineFields[i]]
+                            title: function() {
+                                var title = xResponse.metaData.names[store.trendLineFields[i]],
+                                    ls = xLayout.legendStyle;
+                                return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                            }()
                         });
                     }
 
@@ -2401,6 +2409,7 @@ Ext.onReady(function() {
                         str = '',
                         width,
                         isVertical = false,
+                        labelFont,
                         position = 'top',
                         fontSize = 12,
                         padding = 0,
@@ -2442,12 +2451,12 @@ Ext.onReady(function() {
                     }
 
                     // legend
-                    if (xLayout.legend) {
-                        if (Ext.Array.contains(positions, xLayout.legend.position)) {
-                            position = xLayout.legend.position;
+                    if (xLayout.legendStyle) {
+                        if (Ext.Array.contains(positions, xLayout.legendStyle.position)) {
+                            position = xLayout.legendStyle.position;
                         }
 
-                        fontSize = parseInt(xLayout.legend.fontSize) || fontSize;
+                        fontSize = parseInt(xLayout.legendStyle.fontSize) || fontSize;
                         fontSize = fontSize + 'px';
                     }
 
