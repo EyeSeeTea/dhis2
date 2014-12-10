@@ -2045,8 +2045,10 @@ Ext.onReady(function() {
 
                 getDefaultNumericAxis = function(store) {
                     var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
+                        labelColor = 'black',
                         labelRotation = 0,
                         titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
+                        titleColor = 'black',
                         
                         typeConf = conf.finals.chart,
                         minimum = store.getMinimum(),
@@ -2130,6 +2132,8 @@ Ext.onReady(function() {
                         var style = xLayout.rangeAxisStyle;
 
                         // label
+                        labelColor = style.labelColor || labelColor;
+                        
                         if (style.labelFont) {
                             labelFont = style.labelFont;
                         }
@@ -2145,6 +2149,8 @@ Ext.onReady(function() {
                         }
 
                         // title
+                        titleColor = style.titleColor || titleColor;
+                        
                         if (style.titleFont) {
                             titleFont = style.titleFont;
                         }
@@ -2155,31 +2161,33 @@ Ext.onReady(function() {
                         }
                     }
 
+                    axis.label.style.fill = labelColor;
                     axis.label.style.font = labelFont;
                     axis.label.rotate.degrees = labelRotation;
-                    
-                    axis.labelTitle = {
-                        font: titleFont
-                    };
+
+                    axis.labelTitle.fill = titleColor;
+                    axis.labelTitle.font = titleFont;
 
                     return axis;
                 };
 
                 getDefaultCategoryAxis = function(store) {
                     var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
-                        labelRotation = 320,
-                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily;
+                        labelColor = 'black',
+                        labelRotation = 30,
+                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
+                        titleColor = 'black',
                     
-                    var axis = {
-                        type: 'Category',
-                        position: 'bottom',
-                        fields: store.domainFields,
-                        label: {
-                            rotate: {},
-                            style: {}
-                        },
-                        labelTitle: {}
-                    };
+                        axis = {
+                            type: 'Category',
+                            position: 'bottom',
+                            fields: store.domainFields,
+                            label: {
+                                rotate: {},
+                                style: {}
+                            },
+                            labelTitle: {}
+                        };
                     
                     if (xLayout.domainAxisTitle) {
                         axis.title = xLayout.domainAxisTitle;
@@ -2190,6 +2198,8 @@ Ext.onReady(function() {
                         var style = xLayout.domainAxisStyle;
 
                         // label
+                        labelColor = style.labelColor || labelColor;
+                        
                         if (style.labelFont) {
                             labelFont = style.labelFont;
                         }
@@ -2205,6 +2215,8 @@ Ext.onReady(function() {
                         }
 
                         // title
+                        titleColor = style.titleColor || titleColor;
+                        
                         if (style.titleFont) {
                             titleFont = style.titleFont;
                         }
@@ -2215,12 +2227,12 @@ Ext.onReady(function() {
                         }
                     }
 
+                    axis.label.style.fill = labelColor;
                     axis.label.style.font = labelFont;
                     axis.label.rotate.degrees = labelRotation;
-                    
-                    axis.labelTitle = {
-                        font: titleFont
-                    };
+
+                    axis.labelTitle.fill = titleColor;
+                    axis.labelTitle.font = titleFont;
 
                     return axis;
                 };
