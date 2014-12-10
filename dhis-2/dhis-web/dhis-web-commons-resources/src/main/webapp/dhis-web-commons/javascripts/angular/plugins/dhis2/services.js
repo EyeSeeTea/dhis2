@@ -34,7 +34,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
     };
 })
 
-/* Factory to fetch optioSets */
+/* Factory to fetch optionSets */
 .factory('OptionSetService', function($q, $rootScope, StorageService) { 
     return {
         getAll: function(){
@@ -63,23 +63,97 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                 });
             });                        
             return def.promise;            
-        },
-        getNameOrCode: function(options, key){
-            var val = key;            
-
+        },        
+        getCode: function(options, key){
             if(options){
                 for(var i=0; i<options.length; i++){
                     if( key === options[i].name){
-                        val = options[i].code;
-                        break;
-                    }
-                    if( key === options[i].code){
-                        val = options[i].name;
-                        break;
+                        return options[i].code;
                     }
                 }
             }            
-            return val;
+            return key;
+        },        
+        getName: function(options, key){
+            if(options){
+                for(var i=0; i<options.length; i++){                    
+                    if( key === options[i].code){
+                        return options[i].name;
+                    }
+                }
+            }            
+            return key;
+        }
+    };
+})
+
+/* Factory for loading translation strings */
+.factory('i18nLoader', function ($q, $http, storage, DialogService) {
+ 
+    var getTranslationStrings = function(locale){
+        var defaultUrl = 'i18n/i18n_app.properties';
+        var url = '';
+        if(locale === 'en' || !locale){
+            url = defaultUrl;
+        }
+        else{
+            url = 'i18n/i18n_app_' + locale + '.properties';
+        }
+
+        var tx = {locale: locale};
+
+        var promise = $http.get(url).then(function(response){
+            tx= {locale: locale, keys: dhis2.util.parseJavaProperties(response.data)};
+            return tx;
+        }, function(){
+            var dialogOptions = {
+                headerText: 'missing_translation_file',
+                bodyText: 'missing_translation_using_default'
+            };
+
+            DialogService.showDialog({}, dialogOptions);
+            var p = $http.get(defaultUrl).then(function(response){
+                tx= {locale: locale, keys: dhis2.util.parseJavaProperties(response.data)};
+                return tx;
+            });
+            return p;
+        });
+        return promise;
+    };
+
+    var getLocale = function(){
+        var locale = 'en';
+
+        var promise = $http.get('../api/me/profile.json').then(function(response){
+            storage.set('USER_PROFILE', response.data);
+            if(response.data && response.data.settings && response.data.settings.keyUiLocale){
+                locale = response.data.settings.keyUiLocale;
+            }
+            return locale;
+        }, function(){
+            return locale;
+        });
+
+        return promise;
+    };
+    return function () {
+        var deferred = $q.defer(), translations;    
+        var userProfile = storage.get('USER_PROFILE');
+        if(userProfile && userProfile.settings && userProfile.settings.keyUiLocale){                
+            getTranslationStrings(userProfile.settings.keyUiLocale).then(function(response){
+                translations = response.keys;
+                deferred.resolve(translations);
+            });
+            return deferred.promise;
+        }
+        else{
+            getLocale().then(function(locale){
+                getTranslationStrings(locale).then(function(response){
+                    translations = response.keys;
+                    deferred.resolve(translations);
+                });
+            });
+            return deferred.promise;
         }
     };
 })
@@ -96,7 +170,6 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         }
     };
 })
-
 
 /* service for getting calendar setting */
 .service('CalendarService', function(storage, $rootScope){    
@@ -139,8 +212,13 @@ var d2Services = angular.module('d2Services', ['ngResource'])
         format: function(dateValue) {            
             if(!dateValue){
                 return;
-            }            
-            var calendarSetting = CalendarService.getSetting();
+            }
+            
+            if( isNaN( Date.parse(dateValue) ) ){
+                return;
+            }
+            var calendarSetting = CalendarService.getSetting();            
+            dateValue = moment(dateValue, calendarSetting.momentFormat)._d;
             dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat);            
             return dateValue;
         },
@@ -231,15 +309,19 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(programStageDataElements[deId].dataElement.type == "int"){
                             newInputField = '<input type="number" ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
+                                            ' d2-number-validation ' +
+                                            ' number-type="' + programStageDataElements[deId].dataElement.numberType + '" ' +
                                             ' ng-model="currentEvent.' + deId + '"' +
                                             ' ng-required="prStDes.' + deId + '.compulsory"> ' + 
-                                            '<span ng-show="outerForm.submitted && outerForm.'+ deId +'.$invalid" class="required">{{\'int_required\'| translate}}</span>';                                     
+                                            '<span ng-show="outerForm.submitted && outerForm.'+ deId +'.$invalid" class="required">{{\'value_must_be\'| translate}} - {{ "' + programStageDataElements[deId].dataElement.numberType + '" | translate}}</span>';                                     
                         }
                         if(programStageDataElements[deId].dataElement.type == "string"){
                             if(programStageDataElements[deId].dataElement.optionSet){
                                 var optionSetId = programStageDataElements[deId].dataElement.optionSet.id;
                         		newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
                                             ' ng-required="prStDes.' + deId + '.compulsory"' +
@@ -254,6 +336,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         	else{
                         		newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-disabled="currentEvent[uid] == \'uid\'" ' +
                                             ' ng-required="prStDes.' + deId + '.compulsory"> ' +
@@ -263,6 +346,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(programStageDataElements[deId].dataElement.type == "bool"){
                             newInputField = '<select ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
                                             ' ng-model="currentEvent.' + deId + '" ' +
                                             ' ng-required="prStDes.' + deId + '.compulsory">' + 
                                             '<option value="">{{\'please_select\'| translate}}</option>' +
@@ -274,6 +358,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(programStageDataElements[deId].dataElement.type == "date"){
                             newInputField = '<input type="text" ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
                                             ' ng-model="currentEvent.' + deId + '"' +
                                             ' d2-date ' +
                                             ' max-date="' + maxDate + '"' + '\'' +
@@ -283,6 +368,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
                         if(programStageDataElements[deId].dataElement.type == "trueOnly"){
                             newInputField = '<input type="checkbox" ' +
                                             this.getAttributesAsString(attributes) +
+                                            ' d2-validation ' +
                                             ' ng-model="currentEvent.' + deId + '"' +
                                             ' ng-required="prStDes.' + deId + '.compulsory"> ' +
                                             '<span ng-show="outerForm.submitted && outerForm.'+ deId +'.$invalid" class="required">{{\'required\'| translate}}</span>';

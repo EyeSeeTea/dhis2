@@ -2105,6 +2105,15 @@ Ext.onReady( function() {
                         };
                     }
 
+                    // config
+                    //if (Ext.isObject(xLayout.domainAxisStyle)) {
+
+
+
+                        //labelRotation
+                        //labelFontSize
+                        //labelFont
+
                     return axis;
                 };
 

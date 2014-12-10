@@ -673,6 +673,11 @@ Ext.onReady(function() {
 
                     layout.legend = Ext.isObject(config.legend) ? config.legend : null;
 
+                    // style
+                    if (Ext.isObject(config.domainAxisStyle)) {
+                        layout.domainAxisStyle = config.domainAxisStyle;
+                    }
+
 					if (!validateSpecialCases()) {
 						return;
 					}
@@ -2133,6 +2138,55 @@ Ext.onReady(function() {
                         axis.labelTitle = {
                             font: 'bold 13px ' + conf.chart.style.fontFamily
                         };
+                    }
+
+                    // config
+                    if (Ext.isObject(xLayout.domainAxisStyle)) {
+                        var style = xLayout.domainAxisStyle;
+
+                        // label
+                        if (Ext.isString(style.labelFont)) {
+                            axis.label.style.font = style.labelFont;
+                        }
+                        else {
+                            delete axis.label.style.font;
+                            
+                            if (style.labelFontSize) {
+                                axis.label.style.fontSize = parseFloat(style.labelFontSize) + 'px';
+                            }
+                            if (Ext.isString(style.labelFontFamily)) {
+                                axis.label.style.fontFamily = style.labelFontFamily;
+                            }
+                            if (style.labelFontWeight) {
+                                axis.label.style.fontWeight = style.labelFontWeight;
+                            }
+                        }
+
+                        if (Ext.isNumber(parseFloat(style.labelRotation))) {
+                            axis.label.rotate.degrees = 360 - parseFloat(style.labelRotation);
+                        }
+
+                        // title
+                        if (xLayout.domainAxisTitle) {
+                            axis.labelTitle = axis.labelTitle || {};
+                            
+                            if (Ext.isString(style.titleFont)) {
+                                axis.labelTitle.font = style.titleFont;
+                            }
+                            else {
+                                delete axis.labelTitle.font;
+                                
+                                if (style.titleFontSize) {
+                                    axis.labelTitle.fontSize = parseFloat(style.titleFontSize) + 'px';
+                                }
+                                if (Ext.isString(style.titleFontFamily)) {
+                                    axis.labelTitle.fontFamily = style.titleFontFamily;
+                                }
+                                if (style.titleFontWeight) {
+                                    axis.labelTitle.fontWeight = style.titleFontWeight;
+                                }
+                            }
+                        }
                     }
 
                     return axis;
