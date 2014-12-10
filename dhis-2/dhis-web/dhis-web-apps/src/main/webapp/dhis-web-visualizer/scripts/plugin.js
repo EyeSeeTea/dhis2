@@ -2469,9 +2469,9 @@ Ext.onReady(function() {
                             labelFont = style.labelFont;
                         }
                         else {
-                            labelFont += + style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
-                            labelFont += + style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
-                            labelFont += + style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
                     }
 
