@@ -10,7 +10,7 @@
 
 		h1 {font-size: 20px; margin: 20px 0;}
 
-		#chart1, #chart2 {width: 90%; margin-bottom: 50px; height: 300px}
+		#chart1, #chart2 {width: 590px; margin-bottom: 50px; height: 300px}
     </style>
 
 	<script>
@@ -43,37 +43,27 @@
 				url: url,
 				el: 'chart2',
                 type: 'column',
-				columns: [
-					{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}
-				],
-				rows: [
-					{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}
-				],
-                filters: [
-                    {dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}
-                ],
-                //targetLineValue: 70
-                //baseLineValue: 20,
-                //title: 'My chart title',
+				columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}],
+				rows: [{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}],
+                filters: [{dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}],
                 domainAxisTitle: 'PERIODS',
                 rangeAxisTitle: 'PERCENT',
-                legendPosition: 'right',
                 domainAxisStyle: {
-                    labelFont: '10px arial',
+                    labelFont: '10px sans-serif',
                     labelRotation: 0,
-                    titleFont: 'bold 10px arial'
+                    titleFont: 'bold 10px sans-serif'
                 },
                 rangeAxisStyle: {
                     labelFont: '10px arial',
-                    titleFont: 'bold 10px arial'
+                    titleFont: 'bold 10px sans-serif'
                 },
                 legendStyle: {
                     labelMaxLength: 9,
                     labelFontSize: 10,
-                    titleFont: 'normal 18px arial'
+                    titleFont: '18px sans-serif'
                 },
                 seriesStyle: {
-                    labelFont: '10px arial'
+                    labelFont: '10px sans-serif'
                 }
 			});
 		});
