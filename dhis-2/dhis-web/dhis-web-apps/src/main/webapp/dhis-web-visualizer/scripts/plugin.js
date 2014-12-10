@@ -2244,16 +2244,16 @@ Ext.onReady(function() {
                 getDefaultSeriesTitle = function(store) {
                     var a = [];
 
-                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.names)) {
-                        return xLayout.legendStyle.names;
+                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.labelNames)) {
+                        return xLayout.legendStyle.labelNames;
                     }
                     else {
                         for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
-                            if (Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.nameMaxLength)) {
-                                var mxl = parseInt(xLayout.legendStyle.nameMaxLength);
+                            if (Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
+                                var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
 
                                 if (Ext.isNumber(mxl)) {
                                     name = name.substr(0, mxl) + '..';
@@ -2345,7 +2345,7 @@ Ext.onReady(function() {
                             title: function() {
                                 var title = xResponse.metaData.names[store.trendLineFields[i]],
                                     ls = xLayout.legendStyle;
-                                return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                                return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
                             }()
                         });
                     }
@@ -2369,7 +2369,7 @@ Ext.onReady(function() {
                         title: function() {
                             var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')',
                                 ls = xLayout.legendStyle;
-                            return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                            return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
                         }()                                
                     };
                 };
@@ -2390,7 +2390,7 @@ Ext.onReady(function() {
                         title: function() {
                             var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')',
                                 ls = xLayout.legendStyle;
-                            return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                            return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
                         }()                                
                     };
                 };
