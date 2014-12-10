@@ -2477,6 +2477,7 @@ Ext.onReady(function() {
                     var ids = [],
                         text = '',
                         titleFont,
+                        titleColor,
                         isPie = xLayout.type === conf.finals.chart.pie,
                         isGauge = xLayout.type === conf.finals.chart.gauge;
 
@@ -2502,10 +2503,13 @@ Ext.onReady(function() {
 
                     fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
                     titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
+                    titleColor = 'black';
 
                     // legend
                     if (Ext.isObject(xLayout.legendStyle)) {
                         var style = xLayout.legendStyle;
+
+                        titleColor = style.titleColor || titleColor;
 
                         if (style.titleFont) {
                             titleFont = style.titleFont;
@@ -2521,7 +2525,7 @@ Ext.onReady(function() {
                         type: 'text',
                         text: text,
                         font: titleFont,
-                        fill: '#000',
+                        fill: titleColor,
                         height: 20,
                         y: 	20
                     });
