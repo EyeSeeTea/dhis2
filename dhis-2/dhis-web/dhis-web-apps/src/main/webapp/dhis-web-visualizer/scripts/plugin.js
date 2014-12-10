@@ -2144,7 +2144,7 @@ Ext.onReady(function() {
                     if (Ext.isObject(xLayout.domainAxisStyle)) {
                         var style = xLayout.domainAxisStyle;
 
-                        // label
+                        // label                        
                         if (Ext.isString(style.labelFont)) {
                             axis.label.style.font = style.labelFont;
                         }
