@@ -2178,7 +2178,7 @@ Ext.onReady(function() {
                 getDefaultCategoryAxis = function(store) {
                     var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
                         labelColor = 'black',
-                        labelRotation = 30,
+                        labelRotation = 315,
                         titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
                         titleColor = 'black',
                     
