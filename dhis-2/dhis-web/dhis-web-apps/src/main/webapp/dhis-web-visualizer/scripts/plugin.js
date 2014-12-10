@@ -2488,7 +2488,7 @@ Ext.onReady(function() {
                 getDefaultChartTitle = function(store) {
                     var ids = [],
                         text = '',
-                        fontSize,
+                        titleFont,
                         isPie = xLayout.type === conf.finals.chart.pie,
                         isGauge = xLayout.type === conf.finals.chart.gauge;
 
@@ -2512,13 +2512,28 @@ Ext.onReady(function() {
                         text = xLayout.title;
                     }
 
-                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 13 : 18;
+                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
+                    titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
+
+                    // legend
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'normal ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : (fontSize + 'px ');
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
 
                     return Ext.create('Ext.draw.Sprite', {
                         type: 'text',
                         text: text,
-                        font: 'bold ' + fontSize + 'px ' + conf.chart.style.fontFamily,
-                        fill: '#111',
+                        font: titleFont,
+                        fill: '#000',
                         height: 20,
                         y: 	20
                     });
