@@ -2354,7 +2354,11 @@ Ext.onReady(function() {
                             stroke: '#000'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')'
+                        title: function() {
+                            var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')',
+                                ls = xLayout.legendStyle;
+                            return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                        }()                                
                     };
                 };
 
@@ -2371,7 +2375,11 @@ Ext.onReady(function() {
                             stroke: '#000'
                         },
                         showMarkers: false,
-                        title: (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')'
+                        title: function() {
+                            var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')',
+                                ls = xLayout.legendStyle;
+                            return ls && Ext.isNumber(ls.nameMaxLength) ? title.substr(0, ls.nameMaxLength) + '..' : title;
+                        }()                                
                     };
                 };
 
