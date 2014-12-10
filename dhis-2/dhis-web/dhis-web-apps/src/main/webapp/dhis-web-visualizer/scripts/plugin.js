@@ -2044,7 +2044,11 @@ Ext.onReady(function() {
                 };
 
                 getDefaultNumericAxis = function(store) {
-                    var typeConf = conf.finals.chart,
+                    var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
+                        labelRotation = 0,
+                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
+                        
+                        typeConf = conf.finals.chart,
                         minimum = store.getMinimum(),
                         maximum,
                         numberOfDecimals,
@@ -2082,9 +2086,7 @@ Ext.onReady(function() {
                             style: {},
                             rotate: {}
                         },
-                        labelTitle: {
-                            font: 'bold 12px ' + conf.chart.style.fontFamily
-                        },
+                        labelTitle: {},
                         grid: {
                             odd: {
                                 opacity: 1,
@@ -2121,130 +2123,104 @@ Ext.onReady(function() {
 
                     if (xLayout.rangeAxisTitle) {
                         axis.title = xLayout.rangeAxisTitle;
-                    }                    
+                    }
 
-                    // style config
+                    // style
                     if (Ext.isObject(xLayout.rangeAxisStyle)) {
                         var style = xLayout.rangeAxisStyle;
 
-                        // label                        
-                        if (Ext.isString(style.labelFont)) {
-                            axis.label.style.font = style.labelFont;
+                        // label
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
                         }
                         else {
-                            delete axis.label.style.font;
-                            
-                            if (style.labelFontSize) {
-                                axis.label.style.fontSize = parseFloat(style.labelFontSize) + 'px';
-                            }
-                            if (Ext.isString(style.labelFontFamily)) {
-                                axis.label.style.fontFamily = style.labelFontFamily;
-                            }
-                            if (style.labelFontWeight) {
-                                axis.label.style.fontWeight = style.labelFontWeight;
-                            }
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
 
+                        // rotation
                         if (Ext.isNumber(parseFloat(style.labelRotation))) {
-                            axis.label.rotate.degrees = 360 - parseFloat(style.labelRotation);
+                            labelRotation = 360 - parseFloat(style.labelRotation);
                         }
 
                         // title
-                        if (xLayout.rangeAxisTitle) {
-                            axis.labelTitle = axis.labelTitle || {};
-                            
-                            if (Ext.isString(style.titleFont)) {
-                                axis.labelTitle.font = style.titleFont;
-                            }
-                            else {
-                                delete axis.labelTitle.font;
-                                
-                                if (style.titleFontSize) {
-                                    axis.labelTitle.fontSize = parseFloat(style.titleFontSize) + 'px';
-                                }
-                                if (Ext.isString(style.titleFontFamily)) {
-                                    axis.labelTitle.fontFamily = style.titleFontFamily;
-                                }
-                                if (style.titleFontWeight) {
-                                    axis.labelTitle.fontWeight = style.titleFontWeight;
-                                }
-                            }
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'bold ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : '12px ';
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
                         }
                     }
+
+                    axis.label.style.font = labelFont;
+                    axis.label.rotate.degrees = labelRotation;
+                    
+                    axis.labelTitle = {
+                        font: titleFont
+                    };
 
                     return axis;
                 };
 
                 getDefaultCategoryAxis = function(store) {
+                    var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
+                        labelRotation = 320,
+                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily;
+                    
                     var axis = {
                         type: 'Category',
                         position: 'bottom',
                         fields: store.domainFields,
                         label: {
-                            rotate: {
-                                degrees: 320
-                            },
-                            style: {
-                                fontSize: '11px'
-                            }
-                        }
+                            rotate: {},
+                            style: {}
+                        },
+                        labelTitle: {}
                     };
-
+                    
                     if (xLayout.domainAxisTitle) {
                         axis.title = xLayout.domainAxisTitle;
-                        axis.labelTitle = {
-                            font: 'bold 12px ' + conf.chart.style.fontFamily
-                        };
                     }
 
-                    // style config
+                    // style
                     if (Ext.isObject(xLayout.domainAxisStyle)) {
                         var style = xLayout.domainAxisStyle;
 
-                        // label                        
-                        if (Ext.isString(style.labelFont)) {
-                            axis.label.style.font = style.labelFont;
+                        // label
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
                         }
                         else {
-                            delete axis.label.style.font;
-                            
-                            if (style.labelFontSize) {
-                                axis.label.style.fontSize = parseFloat(style.labelFontSize) + 'px';
-                            }
-                            if (Ext.isString(style.labelFontFamily)) {
-                                axis.label.style.fontFamily = style.labelFontFamily;
-                            }
-                            if (style.labelFontWeight) {
-                                axis.label.style.fontWeight = style.labelFontWeight;
-                            }
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
 
+                        // rotation
                         if (Ext.isNumber(parseFloat(style.labelRotation))) {
-                            axis.label.rotate.degrees = 360 - parseFloat(style.labelRotation);
+                            labelRotation = 360 - parseFloat(style.labelRotation);
                         }
 
                         // title
-                        if (xLayout.domainAxisTitle) {
-                            axis.labelTitle = axis.labelTitle || {};
-                            
-                            if (Ext.isString(style.titleFont)) {
-                                axis.labelTitle.font = style.titleFont;
-                            }
-                            else {
-                                delete axis.labelTitle.font;
-                                
-                                if (style.titleFontSize) {
-                                    axis.labelTitle.fontSize = parseFloat(style.titleFontSize) + 'px';
-                                }
-                                if (Ext.isString(style.titleFontFamily)) {
-                                    axis.labelTitle.fontFamily = style.titleFontFamily;
-                                }
-                                if (style.titleFontWeight) {
-                                    axis.labelTitle.fontWeight = style.titleFontWeight;
-                                }
-                            }
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'bold ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : '12px ';
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
                         }
                     }
+
+                    axis.label.style.font = labelFont;
+                    axis.label.rotate.degrees = labelRotation;
+                    
+                    axis.labelTitle = {
+                        font: titleFont
+                    };
 
                     return axis;
                 };
