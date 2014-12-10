@@ -2417,9 +2417,8 @@ Ext.onReady(function() {
                         str = '',
                         width,
                         isVertical = false,
-                        labelFont,
+                        labelFont = '11px ' + conf.chart.style.fontFamily,
                         position = 'top',
-                        fontSize = 12,
                         padding = 0,
                         positions = ['top', 'right', 'bottom', 'left'];
 
@@ -2459,19 +2458,27 @@ Ext.onReady(function() {
                     }
 
                     // legend
-                    if (xLayout.legendStyle) {
-                        if (Ext.Array.contains(positions, xLayout.legendStyle.position)) {
-                            position = xLayout.legendStyle.position;
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+                        
+                        if (Ext.Array.contains(positions, style.position)) {
+                            position = style.position;
                         }
 
-                        fontSize = parseInt(xLayout.legendStyle.fontSize) || fontSize;
-                        fontSize = fontSize + 'px';
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
+                        }
+                        else {
+                            labelFont += + style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += + style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont += + style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                        }
                     }
 
                     return Ext.create('Ext.chart.Legend', {
                         position: position,
                         isVertical: isVertical,
-                        labelFont: fontSize + ' ' + conf.chart.style.fontFamily,
+                        labelFont: labelFont,
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding
