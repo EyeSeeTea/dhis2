@@ -683,6 +683,10 @@ Ext.onReady(function() {
                     if (Ext.isObject(config.legendStyle)) {
                         layout.legendStyle = config.legendStyle;
                     }
+                    
+                    if (Ext.isObject(config.seriesStyle)) {
+                        layout.seriesStyle = config.seriesStyle;
+                    }
 
 					if (!validateSpecialCases()) {
 						return;
@@ -2282,11 +2286,31 @@ Ext.onReady(function() {
                     };
 
                     if (xLayout.showValues) {
+                        var labelFont = conf.chart.style.fontFamily,
+                            labelColor = 'black';
+
+                        if (Ext.isObject(xLayout.seriesStyle)) {
+                            var style = xLayout.seriesStyle;
+
+                            // label
+                            labelColor = style.labelColor || labelColor;
+                            
+                            if (style.labelFont) {
+                                labelFont = style.labelFont;
+                            }
+                            else {
+                                labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                                labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                                labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            }
+                        }                            
+                            
                         main.label = {
                             display: 'outside',
                             'text-anchor': 'middle',
                             field: store.rangeFields,
-                            font: conf.chart.style.fontFamily,
+                            font: labelFont,
+                            fill: labelColor,
                             renderer: function(n) {
                                 return n === '0.0' ? '' : n;
                             }

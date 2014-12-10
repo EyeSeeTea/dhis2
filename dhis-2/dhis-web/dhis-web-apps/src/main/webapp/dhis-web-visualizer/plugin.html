@@ -34,8 +34,7 @@
                 rangeAxisStyle: {
                     labelColor: 'green',
                     labelFont: '10px arial',
-                    titleFont: 'bold 12px arial',
-                    
+                    titleFont: 'bold 12px arial',                    
                     titleColor: 'green'
                 }
 			});
@@ -45,7 +44,7 @@
 				el: 'chart2',
                 type: 'column',
 				columns: [
-					{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'sB79w2hiLp8'}]}
+					{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}
 				],
 				rows: [
 					{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}
@@ -55,24 +54,27 @@
                 ],
                 //targetLineValue: 70
                 //baseLineValue: 20,
-                showTrendLine: true,
                 //title: 'My chart title',
-                domainAxisTitle: 'Periods',
-                rangeAxisTitle: 'Percent',
+                domainAxisTitle: 'PERIODS',
+                rangeAxisTitle: 'PERCENT',
                 legendPosition: 'right',
                 domainAxisStyle: {
                     labelFont: '10px arial',
+                    labelColor: '#222',
                     labelRotation: 0,
-                    titleFont: 'bold 12px arial'
+                    titleFont: '11px arial'
                 },
                 rangeAxisStyle: {
                     labelFont: '10px arial',
-                    titleFont: 'bold 12px arial'
+                    titleFont: '11px arial'
                 },
                 legendStyle: {
-                    nameMaxLength: 10,
+                    nameMaxLength: 9,
                     labelFontSize: 10,
                     titleFont: 'normal 18px arial'
+                },
+                seriesStyle: {
+                    labelFont: '10px arial'
                 }
 			});
 		});
