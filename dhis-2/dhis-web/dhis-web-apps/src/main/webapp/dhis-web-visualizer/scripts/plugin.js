@@ -2505,7 +2505,7 @@ Ext.onReady(function() {
                         isGauge = xLayout.type === conf.finals.chart.gauge;
 
                     if (isPie) {
-                        ids = Ext.Array.clean(ids.concat(columnIds || []));
+                        ids.push(columnIds[0]);
                     }
                     else if (isGauge) {
                         ids.push(columnIds[0], rowIds[0]);
