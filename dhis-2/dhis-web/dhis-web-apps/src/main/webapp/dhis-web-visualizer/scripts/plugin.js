@@ -2423,7 +2423,7 @@ Ext.onReady(function() {
 
                 getDefaultLegend = function(store, chartConfig) {
                     var itemLength = 30,
-                        charLength = 7,
+                        charLength = 6,
                         numberOfItems = 0,
                         numberOfChars = 0,
                         str = '',
@@ -2457,7 +2457,7 @@ Ext.onReady(function() {
                     }
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-console.log(width, ns.app.centerRegion.getWidth());
+                    
                     if (width > ns.app.centerRegion.getWidth() - 10) {
                         isVertical = true;
                         position = 'right';
