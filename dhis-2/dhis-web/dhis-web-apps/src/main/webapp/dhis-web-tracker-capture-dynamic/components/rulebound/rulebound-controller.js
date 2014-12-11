@@ -2,8 +2,6 @@ trackerCapture.controller('RuleBoundController',
         function(
                 $rootScope,
                 $scope,                
-                storage,
-                CurrentSelection,
                 TranslationService) {
 
     TranslationService.translate();

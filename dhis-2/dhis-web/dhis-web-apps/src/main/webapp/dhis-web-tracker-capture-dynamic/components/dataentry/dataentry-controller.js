@@ -1,5 +1,6 @@
 trackerCapture.controller('DataEntryController',
-        function($scope,
+        function($rootScope,
+                $scope,
                 DateUtils,
                 EventUtils,
                 orderByFilter,
@@ -18,6 +19,7 @@ trackerCapture.controller('DataEntryController',
     $scope.dataEntryOuterForm = {};
     $scope.displayCustomForm = false;
     $scope.currentElement = {};
+    
     $scope.schedulingEnabled = false;
     
     var loginDetails = storage.get('LOGIN_DETAILS');
@@ -53,6 +55,7 @@ trackerCapture.controller('DataEntryController',
         $scope.allowEventCreation = false;
         $scope.repeatableStages = [];        
         $scope.dhis2Events = null;
+        $rootScope.ruleeffects = {};
         
         var selections = CurrentSelection.get();          
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
@@ -336,7 +339,11 @@ trackerCapture.controller('DataEntryController',
             }
         });
 
-        $scope.currentEventOriginal = angular.copy($scope.currentEvent);   
+        $scope.currentEventOriginal = angular.copy($scope.currentEvent);  
+        
+        //Execute rules for the first time, to make the initial page appear correctly.
+        //Subsequent calls will be made from the "saveDataValue" function.
+        TrackerRulesExecutionService.executeRules($scope);
     };
     
     $scope.saveDatavalue = function(prStDe){

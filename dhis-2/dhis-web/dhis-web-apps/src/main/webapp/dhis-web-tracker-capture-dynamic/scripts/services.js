@@ -1608,7 +1608,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === fieldCode.programstage_uID) {
-                                if(angular.isDefined(event[fieldCode.dataelement_uID])){
+                                if(angular.isDefined(event[fieldCode.dataelement_uID])
+                                        && event[fieldCode.dataelement_uID] != null ){
                                     variables.push({
                                             variablename:fieldCode.variablename,
                                             variablevalue:event[fieldCode.dataelement_uID]
@@ -1622,7 +1623,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 else if(fieldCode.type === "dataelement_newest_event_program"){
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
-                           if(angular.isDefined(event[fieldCode.dataelement_uID])){
+                           if(angular.isDefined(event[fieldCode.dataelement_uID])
+                                   && event[fieldCode.dataelement_uID] != null ){
                                 variables.push({
                                             variablename:fieldCode.variablename,
                                             variablevalue:event[fieldCode.dataelement_uID]
@@ -1636,7 +1638,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                             if(event.programStage === $scope.currentEvent.programStage) {
-                                if(angular.isDefined(event[fieldCode.dataelement_uID])){
+                                if(angular.isDefined(event[fieldCode.dataelement_uID])
+                                        && event[fieldCode.dataelement_uID] != null ){
                                     variables.push({
                                             variablename:fieldCode.variablename,
                                             variablevalue:event[fieldCode.dataelement_uID]
