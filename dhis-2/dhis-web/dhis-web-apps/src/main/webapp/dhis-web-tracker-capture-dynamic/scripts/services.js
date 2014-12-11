@@ -702,7 +702,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         condition: "($var1 < 100)",
                         actions: [{ id:"LOQmKfnYqvf",
                                     action:"displaytext",
-                                    location:"condcomp",
+                                    location:"con",
                                     content:"Rule1 says there is a lot of var1"}],
                         triggers: [] } },
                 {
@@ -712,11 +712,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         condition: "($var2 = false)",
                         actions: [{id:"LAQmKfnYqvf",
                                 action:"displaytext",
-                                location:"condcomp",
+                                location:"rem",
                             content:"Rule2 says that var2 is false."},
                         {   id:"PLTmKfnYqvf",
                             action:"displaytext",
-                            location:"summary",
+                            location:"con",
                             content:"in summary, Rule2 says that var2 is false."}],
                         triggers: [] } },
                 {
@@ -769,6 +769,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     program_uID: ""
                 }
             }
+        }
+    };
+})
+
+/* Returns user defined variable names and their corresponding UIDs and types for a specific program */
+.factory('TrackerWidgetsConfigurationFactory', function(){
+    return{
+        getWidgetConfiguration : function(programUid){
+            return [
+                   {title: 'Conditions/Complications', code:"con", horizontalplacement:"right"},
+                   {title: 'Reminders', code:"rem", horizontalplacement:"right"},
+                   {title: 'Dependencies', code:"dep",horizontalplacement:"left"},
+            ]
         }
     };
 })
@@ -1670,8 +1683,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             if(angular.isObject(rules) && angular.isArray(rules)){
                 //The program has rules, and we want to run them.
                 //Prepare repository unless it is already prepared:
-                if(angular.isUndefined( $scope.ruleeffects )){
-                    $scope.ruleeffects = {};
+                if(angular.isUndefined( $rootScope.ruleeffects )){
+                    $rootScope.ruleeffects = {};
                 }
                 
                 var updatedEffectsExits = false;
@@ -1690,8 +1703,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     
                     angular.forEach(rule.ruleContent.actions, function(action){
                         //In case the effect-hash is not populated, add entries
-                        if(angular.isUndefined( $scope.ruleeffects[action.id] )){
-                            $scope.ruleeffects[action.id] =  {
+                        if(angular.isUndefined( $rootScope.ruleeffects[action.id] )){
+                            $rootScope.ruleeffects[action.id] =  {
+                                id:action.id,
                                 location:action.location, 
                                 action:action.action,
                                 content:action.content,
@@ -1699,11 +1713,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             };
                         }
                         
-                        if($scope.ruleeffects[action.id].ineffect != ruleEffective)
+                        if($rootScope.ruleeffects[action.id].ineffect != ruleEffective)
                         {
                             //There is a change in the rule outcome, we need to update the effect object.
                             updatedEffectsExits = true;
-                            $scope.ruleeffects[action.id].ineffect = ruleEffective;
+                            $rootScope.ruleeffects[action.id].ineffect = ruleEffective;
                         }
                     });
 

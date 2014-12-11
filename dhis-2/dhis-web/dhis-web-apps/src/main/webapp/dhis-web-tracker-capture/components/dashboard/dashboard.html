@@ -37,7 +37,7 @@
             <div class="col-sm-6 col-md-4">
                 <div sortable class="row connectedSortable empty-dashboard-container">                   
                     <div class="col-sm-12" ng-repeat="smallerWidget in smallerDashboardWidgets">                        
-                        <div ng-show="smallerWidget.show" ng-include="smallerWidget.view" ng-class="{true: 'not-printable'} [smallerWidget.title != 'report']"></div>
+                        <div ng-show="smallerWidget.show" ng-include="smallerWidget.view" ng-init="widgetconfig=smallerWidget" ng-class="{true: 'not-printable'} [smallerWidget.title != 'report']" ></div>
                     </div>                   
                 </div>
             </div>

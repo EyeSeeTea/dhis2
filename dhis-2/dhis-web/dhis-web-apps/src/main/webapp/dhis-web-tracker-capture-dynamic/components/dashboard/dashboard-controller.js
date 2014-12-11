@@ -11,14 +11,40 @@ trackerCapture.controller('DashboardController',
                 OptionSetService,
                 ProgramFactory,
                 CurrentSelection,
-                TranslationService) {
+                TranslationService,
+                TrackerWidgetsConfigurationFactory) {
 
     //do translation of the dashboard page
     TranslationService.translate();    
  
+     //selections  
+    $scope.selectedTeiId = ($location.search()).tei; 
+    $scope.selectedProgramId = ($location.search()).program; 
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
+
+    $scope.selectedProgram;    
+    $scope.selectedTei;  
+ 
     //dashboard items   
     $rootScope.biggerDashboardWidgets = [];
     $rootScope.smallerDashboardWidgets = [];
+    
+    //TODO: build dashboard based on dashboard configuration fow the whole dashboard
+    var ruleboundWidgetConfigs = TrackerWidgetsConfigurationFactory.getWidgetConfiguration($scope.selectedProgramId);
+    angular.forEach(ruleboundWidgetConfigs,function(widgetConfig){
+        var ruleboundWidget = {title:widgetConfig.title, 
+                    view:"components/rulebound/rulebound.html",
+                    show:true,
+                    expanded:true,
+                    code:widgetConfig.code};
+        if(widgetConfig.horizontalplacement==="left"){
+            $rootScope.biggerDashboardWidgets.push(ruleboundWidget);
+        } else {
+            $rootScope.smallerDashboardWidgets.push(ruleboundWidget);
+        }
+    });
+    
+
     $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true};
     $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true};
     $rootScope.reportWidget = {title: 'report', view: "components/report/tei-report.html", show: true, expand: true};
@@ -26,7 +52,7 @@ trackerCapture.controller('DashboardController',
     $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true};
     $rootScope.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true};
     $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true};    
-   
+    
     $rootScope.biggerDashboardWidgets.push($rootScope.enrollmentWidget);
     $rootScope.biggerDashboardWidgets.push($rootScope.dataentryWidget);
     $rootScope.biggerDashboardWidgets.push($rootScope.reportWidget);
@@ -35,13 +61,7 @@ trackerCapture.controller('DashboardController',
     $rootScope.smallerDashboardWidgets.push($rootScope.relationshipWidget);
     $rootScope.smallerDashboardWidgets.push($rootScope.notesWidget);
     
-    //selections  
-    $scope.selectedTeiId = ($location.search()).tei; 
-    $scope.selectedProgramId = ($location.search()).program; 
-    $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-
-    $scope.selectedProgram;    
-    $scope.selectedTei;    
+  
     
     if($scope.selectedTeiId){
         //Fetch the selected entity

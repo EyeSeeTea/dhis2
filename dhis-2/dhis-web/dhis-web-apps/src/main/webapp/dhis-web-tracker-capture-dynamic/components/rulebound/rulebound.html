@@ -1,6 +1,6 @@
 <div class="panel panel-info" ng-controller="RuleBoundController">
     <div class="panel-heading handle bold">
-        {{ruleboundWidget.title| translate}}
+        {{widgetTitle | translate}}
         <span class="pull-right">
             <a class="small-horizonal-spacing" href ng-click="expandCollapse(selectedWidget)">
                 <span ng-show="selectedWidget.expand"><i class="fa fa-chevron-up" title="{{'collapse'| translate}}"></i></span>
@@ -10,12 +10,9 @@
         </span>        
     </div>    
     <div ng-show="selectedWidget.expand" class="panel-body dashboard-element-container">
-        <div class="row" ng-repeat="selection in selections">
-            <div class="col-sm-6">
-                {{selection.title| translate}}
-            </div>
-            <div class="col-sm-6">
-                <input type="text" class="form-control" value="{{selection.value| translate}}" ng-disabled="true"/>                
+        <div class="row" ng-repeat="(key,item) in displayTextEffects">
+            <div class="col-sm-6" ng-show="item.ineffect">
+                {{item.content| translate}}
             </div>
         </div>        
     </div>

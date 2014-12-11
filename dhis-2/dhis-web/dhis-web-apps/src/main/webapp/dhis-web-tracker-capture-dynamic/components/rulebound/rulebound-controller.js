@@ -8,20 +8,30 @@ trackerCapture.controller('RuleBoundController',
 
     TranslationService.translate();
     
+    var widget = $scope.$parent.$parent.biggerWidget ? $scope.$parent.$parent.biggerWidget
+    : $scope.$parent.$parent.smallerWidget ? $scope.$parent.$parent.smallerWidget : null;
+    $scope.widgetTitle = widget.title;
+    $scope.widgetCode = widget.code;
+    
+    
+    $scope.displayTextEffects = {};
+    
     //listen for the selected items
     $scope.$on('ruleeffectsupdated', function(event, args) {
         
-        var selections = CurrentSelection.get();
-        $scope.selectedEntity = selections.tei; 
-        $scope.selectedProgram = selections.pr; 
-        
-        $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-        $scope.selections = [];
-        
-        $scope.selections.push({title: 'registering_unit', value: $scope.selectedOrgUnit ? $scope.selectedOrgUnit.name : 'not_selected'});
-        $scope.selections.push({title: 'program', value: $scope.selectedProgram ? $scope.selectedProgram.name : 'not_selected'});               
-        
-        //Show this widget if any rules is in effect:
-        $rootScope.ruleboundWidget.show = true;
+        //Bind non-bound rule effects, if any.
+        angular.forEach($rootScope.ruleeffects, function(effect) {
+            if(effect.location == $scope.widgetCode){
+                //This effect is affecting the local widget
+                
+                if(effect.action = "displaytext") {
+                    //this action is display text. Make sure the displaytext is
+                    //added to the local list of displayed texts
+                    if(!angular.isObject($scope.displayTextEffects[effect.id])){
+                        $scope.displayTextEffects[effect.id] = effect;
+                    }
+                }
+            }
+        });
     });     
 });
