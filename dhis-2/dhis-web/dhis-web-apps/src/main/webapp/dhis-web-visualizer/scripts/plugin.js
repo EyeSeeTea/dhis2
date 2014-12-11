@@ -2421,10 +2421,10 @@ Ext.onReady(function() {
                     });
                 };
 
-                getDefaultLegend = function(store) {
+                getDefaultLegend = function(store, chartConfig) {
                     var itemLength = 30,
                         charLength = 7,
-                        numberOfItems,
+                        numberOfItems = 0,
                         numberOfChars = 0,
                         str = '',
                         width,
@@ -2432,7 +2432,8 @@ Ext.onReady(function() {
                         labelFont = '11px ' + conf.chart.style.fontFamily,
                         position = 'top',
                         padding = 0,
-                        positions = ['top', 'right', 'bottom', 'left'];
+                        positions = ['top', 'right', 'bottom', 'left'],
+                        series = chartConfig.series;
 
                     if (xLayout.type === conf.finals.chart.pie) {
                         numberOfItems = store.getCount();
@@ -2441,35 +2442,28 @@ Ext.onReady(function() {
                         });
                     }
                     else {
-                        numberOfItems = store.rangeFields.length;
+                        for (var i = 0, title; i < series.length; i++) {
+                            title = series[i].title;
 
-                        for (var i = 0, name, ids; i < store.rangeFields.length; i++) {
-                            if (store.rangeFields[i].indexOf('#') !== -1) {
-                                ids = store.rangeFields[i].split('#');
-                                name = xResponse.metaData.names[ids[0]] + ' ' + xResponse.metaData.names[ids[1]];
+                            if (Ext.isString(title)) {
+                                numberOfItems += 1;
+                                numberOfChars += title.length;
                             }
-                            else {
-                                name = xResponse.metaData.names[store.rangeFields[i]];
+                            else if (Ext.isArray(title)) {
+                                numberOfItems += title.length;
+                                numberOfChars += title.toString().split(',').join('').length;
                             }
-
-                            str += name;
                         }
                     }
 
-                    numberOfChars = str.length;
-
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-
-                    if (width > ns.app.centerRegion.getWidth() - 50) {
+console.log(width, ns.app.centerRegion.getWidth());
+                    if (width > ns.app.centerRegion.getWidth() - 10) {
                         isVertical = true;
                         position = 'right';
                     }
 
-                    if (position === 'right') {
-                        padding = 5;
-                    }
-
-                    // legend
+                    // style
                     if (Ext.isObject(xLayout.legendStyle)) {
                         var style = xLayout.legendStyle;
                         
@@ -2485,6 +2479,11 @@ Ext.onReady(function() {
                             labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
                             labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
+                    }
+
+                    // padding
+                    if (position === 'right') {
+                        padding = 5;
                     }
 
                     return Ext.create('Ext.chart.Legend', {
@@ -2604,7 +2603,7 @@ Ext.onReady(function() {
 
                     // legend
                     if (!xLayout.hideLegend) {
-                        defaultConfig.legend = getDefaultLegend(store);
+                        defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
                             defaultConfig.insetPadding = 40;

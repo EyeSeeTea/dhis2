@@ -10,39 +10,39 @@
 
 		h1 {font-size: 20px; margin: 20px 0;}
 
-		#chart1, #chart2 {width: 590px; margin-bottom: 50px; height: 300px}
+		#chart1, #chart2 {width: 450px; margin-bottom: 50px; height: 300px}
     </style>
 
 	<script>
 		Ext.onReady(function() {
 			var url = 'http://localhost:8080';
 
-			DHIS.getChart({
-				url: url,
-				el: 'chart1',
-				uid: 'LW0O27b7TdD',
-                baseLineValue: 10,
-                domainAxisTitle: 'test',
-                domainAxisStyle: {
-                    labelColor: 'blue',
-                    labelFont: '10px arial',
-                    //labelRotation: 30,
+			//DHIS.getChart({
+				//url: url,
+				//el: 'chart1',
+				//uid: 'LW0O27b7TdD',
+                //baseLineValue: 10,
+                //domainAxisTitle: 'test',
+                //domainAxisStyle: {
+                    //labelColor: 'blue',
+                    //labelFont: '10px arial',
+                    //labelRotation: 90,
                     
-                    titleFont: 'bold 12px arial',
-                    titleColor: 'blue'
-                },
-                rangeAxisStyle: {
-                    labelColor: 'green',
-                    labelFont: '10px arial',
-                    titleFont: 'bold 12px arial',                    
-                    titleColor: 'green'
-                }
-			});
+                    //titleFont: 'bold 12px arial',
+                    //titleColor: 'blue'
+                //},
+                //rangeAxisStyle: {
+                    //labelColor: 'green',
+                    //labelFont: '10px arial',
+                    //titleFont: 'bold 12px arial',                    
+                    //titleColor: 'green'
+                //}
+			//});
 
 			DHIS.getChart({
 				url: url,
 				el: 'chart2',
-                type: 'column',
+                type: 'pie',
 				columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}],
 				rows: [{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}],
                 filters: [{dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}],
