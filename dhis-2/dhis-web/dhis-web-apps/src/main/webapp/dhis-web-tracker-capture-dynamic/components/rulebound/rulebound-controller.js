@@ -1,5 +1,7 @@
 trackerCapture.controller('RuleBoundController',
-        function($scope,                
+        function(
+                $rootScope,
+                $scope,                
                 storage,
                 CurrentSelection,
                 TranslationService) {
@@ -7,7 +9,7 @@ trackerCapture.controller('RuleBoundController',
     TranslationService.translate();
     
     //listen for the selected items
-    $scope.$on('selectedItems', function(event, args) {
+    $scope.$on('ruleeffectsupdated', function(event, args) {
         
         var selections = CurrentSelection.get();
         $scope.selectedEntity = selections.tei; 
@@ -19,5 +21,7 @@ trackerCapture.controller('RuleBoundController',
         $scope.selections.push({title: 'registering_unit', value: $scope.selectedOrgUnit ? $scope.selectedOrgUnit.name : 'not_selected'});
         $scope.selections.push({title: 'program', value: $scope.selectedProgram ? $scope.selectedProgram.name : 'not_selected'});               
         
+        //Show this widget if any rules is in effect:
+        $rootScope.ruleboundWidget.show = true;
     });     
 });
