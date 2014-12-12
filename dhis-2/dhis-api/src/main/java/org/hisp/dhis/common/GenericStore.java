@@ -69,7 +69,7 @@ public interface GenericStore<T>
      *
      * @param id the object identifier.
      * @return the object identified by the given identifier or a generated
-     *         proxy.
+     * proxy.
      */
     T load( int id );
 
@@ -79,6 +79,13 @@ public interface GenericStore<T>
      * @return a List of all objects.
      */
     List<T> getAll();
+
+    /**
+     * Retrieves a List of all objects.
+     *
+     * @return a List of all objects.
+     */
+    List<T> getAll( int first, int max );
 
     /**
      * Removes the given object instance.
