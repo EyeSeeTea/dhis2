@@ -2421,10 +2421,10 @@ Ext.onReady(function() {
                     });
                 };
 
-                getDefaultLegend = function(store) {
+                getDefaultLegend = function(store, chartConfig) {
                     var itemLength = 30,
-                        charLength = 7,
-                        numberOfItems,
+                        charLength = 6,
+                        numberOfItems = 0,
                         numberOfChars = 0,
                         str = '',
                         width,
@@ -2432,7 +2432,8 @@ Ext.onReady(function() {
                         labelFont = '11px ' + conf.chart.style.fontFamily,
                         position = 'top',
                         padding = 0,
-                        positions = ['top', 'right', 'bottom', 'left'];
+                        positions = ['top', 'right', 'bottom', 'left'],
+                        series = chartConfig.series;
 
                     if (xLayout.type === conf.finals.chart.pie) {
                         numberOfItems = store.getCount();
@@ -2441,35 +2442,28 @@ Ext.onReady(function() {
                         });
                     }
                     else {
-                        numberOfItems = store.rangeFields.length;
+                        for (var i = 0, title; i < series.length; i++) {
+                            title = series[i].title;
 
-                        for (var i = 0, name, ids; i < store.rangeFields.length; i++) {
-                            if (store.rangeFields[i].indexOf('#') !== -1) {
-                                ids = store.rangeFields[i].split('#');
-                                name = xResponse.metaData.names[ids[0]] + ' ' + xResponse.metaData.names[ids[1]];
+                            if (Ext.isString(title)) {
+                                numberOfItems += 1;
+                                numberOfChars += title.length;
                             }
-                            else {
-                                name = xResponse.metaData.names[store.rangeFields[i]];
+                            else if (Ext.isArray(title)) {
+                                numberOfItems += title.length;
+                                numberOfChars += title.toString().split(',').join('').length;
                             }
-
-                            str += name;
                         }
                     }
 
-                    numberOfChars = str.length;
-
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-
-                    if (width > ns.app.centerRegion.getWidth() - 50) {
+                    
+                    if (width > ns.app.centerRegion.getWidth() - 10) {
                         isVertical = true;
                         position = 'right';
                     }
 
-                    if (position === 'right') {
-                        padding = 5;
-                    }
-
-                    // legend
+                    // style
                     if (Ext.isObject(xLayout.legendStyle)) {
                         var style = xLayout.legendStyle;
                         
@@ -2485,6 +2479,11 @@ Ext.onReady(function() {
                             labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
                             labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
+                    }
+
+                    // padding
+                    if (position === 'right') {
+                        padding = 5;
                     }
 
                     return Ext.create('Ext.chart.Legend', {
@@ -2506,7 +2505,7 @@ Ext.onReady(function() {
                         isGauge = xLayout.type === conf.finals.chart.gauge;
 
                     if (isPie) {
-                        ids = Ext.Array.clean(ids.concat(columnIds || []));
+                        ids.push(columnIds[0]);
                     }
                     else if (isGauge) {
                         ids.push(columnIds[0], rowIds[0]);
@@ -2604,7 +2603,7 @@ Ext.onReady(function() {
 
                     // legend
                     if (!xLayout.hideLegend) {
-                        defaultConfig.legend = getDefaultLegend(store);
+                        defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
                             defaultConfig.insetPadding = 40;
@@ -2895,9 +2894,29 @@ Ext.onReady(function() {
 
                     // Label
                     if (xLayout.showValues) {
+                        var labelFont = conf.chart.style.fontFamily,
+                            labelColor;
+
+                        if (Ext.isObject(xLayout.seriesStyle)) {
+                            var style = xLayout.seriesStyle;
+
+                            // color
+                            labelColor = style.labelColor || labelColor;
+                            
+                            if (style.labelFont) {
+                                labelFont = style.labelFont;
+                            }
+                            else {
+                                labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                                labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                                labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            }
+                        }
+                        
                         label.display = 'middle';
-                        label.contrast = true;
-                        label.font = '14px ' + conf.chart.style.fontFamily;
+                        label.contrast = !labelColor;
+                        label.font = labelFont;
+                        label.fill = labelColor;
                         label.renderer = function(value) {
                             var record = store.getAt(store.findExact(conf.finals.data.domain, value));
                             return record.data[store.rangeFields[0]];
@@ -2908,7 +2927,7 @@ Ext.onReady(function() {
                     series = [{
                         type: 'pie',
                         field: store.rangeFields[0],
-                        donut: 7,
+                        donut: 5,
                         showInLegend: true,
                         highlight: {
                             segment: {
@@ -2926,7 +2945,8 @@ Ext.onReady(function() {
                             renderer: function(item) {
                                 this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
                             }
-                        }
+                        },
+                        shadowAttributes: false
                     }];
 
                     // Theme
@@ -2950,7 +2970,6 @@ Ext.onReady(function() {
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
-                    chart.shadow = true;
 
                     return chart;
                 };

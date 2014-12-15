@@ -1,1 +1,5609 @@
-Ext.onReady(function(){Ext.define("Ext.ux.button.ColorButton",{extend:"Ext.button.Button",alias:"widget.colorbutton",width:109,height:22,defaultValue:null,value:"f1f1f1",getValue:function(){return this.value},setValue:function(h){this.value=h;if(Ext.isDefined(this.getEl())){this.getEl().dom.style.background="#"+h}},reset:function(){this.setValue(this.defaultValue)},menu:{},menuHandler:function(){},initComponent:function(){var h=this;this.defaultValue=this.value;this.menu=Ext.create("Ext.menu.Menu",{showSeparator:false,items:{xtype:"colorpicker",closeAction:"hide",listeners:{select:function(j,i){h.setValue(i);h.menu.hide();h.menuHandler(j,i)}}}});this.callParent()},listeners:{render:function(){this.setValue(this.value)}}});Ext.define("Ext.ux.layout.component.form.MultiSelect",{extend:"Ext.layout.component.field.Field",alias:["layout.multiselectfield"],type:"multiselectfield",defaultHeight:200,sizeBodyContents:function(i,h){var j=this;if(!Ext.isNumber(h)){h=j.defaultHeight}j.owner.panel.setSize(i,h)}});Ext.define("Ext.ux.form.MultiSelect",{extend:"Ext.form.field.Base",alternateClassName:"Ext.ux.Multiselect",alias:["widget.multiselect","widget.multiselectfield"],uses:["Ext.view.BoundList","Ext.form.FieldSet","Ext.ux.layout.component.form.MultiSelect","Ext.view.DragZone","Ext.view.DropZone"],ddReorder:false,appendOnly:false,displayField:"text",allowBlank:true,minSelections:0,maxSelections:Number.MAX_VALUE,blankText:"This field is required",minSelectionsText:"Minimum {0} item(s) required",maxSelectionsText:"Maximum {0} item(s) allowed",delimiter:",",componentLayout:"multiselectfield",fieldBodyCls:Ext.baseCSSPrefix+"form-multiselect-body",initComponent:function(){var h=this;h.bindStore(h.store,true);if(h.store.autoCreated){h.valueField=h.displayField="field1";if(!h.store.expanded){h.displayField="field2"}}if(!Ext.isDefined(h.valueField)){h.valueField=h.displayField}h.callParent()},bindStore:function(h,j){var k=this,l=k.store,i=k.boundList;if(l&&!j&&l!==h&&l.autoDestroy){l.destroy()}k.store=h?Ext.data.StoreManager.lookup(h):null;if(i){i.bindStore(h||null)}},onRender:function(l,h){var m=this,i,k,j;m.callParent(arguments);k=m.boundList=Ext.create("Ext.view.BoundList",{multiSelect:true,store:m.store,displayField:m.displayField,border:false});j=k.getSelectionModel();m.mon(j,{selectionChange:m.onSelectionChange,scope:m});i=m.panel=Ext.create("Ext.panel.Panel",{title:m.listTitle,tbar:m.tbar,items:[k],renderTo:m.bodyEl,layout:"fit"});i.ownerCt=m;m.setRawValue(m.rawValue)},getSubTplMarkup:function(){return""},afterRender:function(){var h=this;h.callParent();if(h.ddReorder&&!h.dragGroup&&!h.dropGroup){h.dragGroup=h.dropGroup="MultiselectDD-"+Ext.id()}if(h.draggable||h.dragGroup){h.dragZone=Ext.create("Ext.view.DragZone",{view:h.boundList,ddGroup:h.dragGroup,dragText:"{0} Item{1}"})}if(h.droppable||h.dropGroup){h.dropZone=Ext.create("Ext.view.DropZone",{view:h.boundList,ddGroup:h.dropGroup,handleNodeDrop:function(o,n,i){var j=this.view,l=j.getStore(),k=o.records,m;o.view.store.remove(k);m=l.indexOf(n);if(i==="after"){m++}l.insert(m,k);j.getSelectionModel().select(k)}})}},onSelectionChange:function(){this.checkChange()},clearValue:function(){this.setValue([])},getSubmitValue:function(){var i=this,h=i.delimiter,j=i.getValue();return Ext.isString(h)?j.join(h):j},getRawValue:function(){var i=this,h=i.boundList;if(h){i.rawValue=Ext.Array.map(h.getSelectionModel().getSelection(),function(j){return j.get(i.valueField)})}return i.rawValue},setRawValue:function(j){var i=this,h=i.boundList,k;j=Ext.Array.from(j);i.rawValue=j;if(h){k=[];Ext.Array.forEach(j,function(n){var m,l=i.store.findRecord(i.valueField,n,m,m,true,true);if(l){k.push(l)}});h.getSelectionModel().select(k,false,true)}return j},valueToRaw:function(h){return h},isEqual:function(m,l){var j=Ext.Array.from,k,h;m=j(m);l=j(l);h=m.length;if(h!==l.length){return false}for(k=0;k<h;k++){if(l[k]!==m[k]){return false}}return true},getErrors:function(i){var h=this,j=Ext.String.format,l=h.callParent(arguments),k;i=Ext.Array.from(i||h.getValue());k=i.length;if(!h.allowBlank&&k<1){l.push(h.blankText)}if(k<this.minSelections){l.push(j(h.minSelectionsText,h.minSelections))}if(k>this.maxSelections){l.push(j(h.maxSelectionsText,h.maxSelections))}return l},onDisable:function(){this.callParent();this.disabled=true;this.updateReadOnly()},onEnable:function(){this.callParent();this.disabled=false;this.updateReadOnly()},setReadOnly:function(h){this.readOnly=h;this.updateReadOnly()},updateReadOnly:function(){var i=this,h=i.boundList,j=i.readOnly||i.disabled;if(h){h.getSelectionModel().setLocked(j)}},onDestroy:function(){Ext.destroyMembers(this,"panel","boundList","dragZone","dropZone");this.callParent()}});OpenLayers.Util.OSM={};OpenLayers.Util.OSM.MISSING_TILE_URL="http://www.openstreetmap.org/openlayers/img/404.png";OpenLayers.Util.OSM.originalOnImageLoadError=OpenLayers.Util.onImageLoadError;OpenLayers.Util.onImageLoadError=function(){if(this.src.match(/^http:\/\/[abc]\.[a-z]+\.openstreetmap\.org\//)){this.src=OpenLayers.Util.OSM.MISSING_TILE_URL}else{if(this.src.match(/^http:\/\/[def]\.tah\.openstreetmap\.org\//)){}else{OpenLayers.Util.OSM.originalOnImageLoadError}}};OpenLayers.Layer.OSM.Mapnik=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(j,k){var h=["http://a.tile.openstreetmap.org/${z}/${x}/${y}.png","http://b.tile.openstreetmap.org/${z}/${x}/${y}.png","http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"];k=OpenLayers.Util.extend({numZoomLevels:19,buffer:0,transitionEffect:"resize"},k);var i=[j,h,k];OpenLayers.Layer.OSM.prototype.initialize.apply(this,i)},CLASS_NAME:"OpenLayers.Layer.OSM.Mapnik"});OpenLayers.Layer.OSM.Osmarender=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(j,k){var h=["http://a.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png","http://b.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png","http://c.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png"];k=OpenLayers.Util.extend({numZoomLevels:18,buffer:0,transitionEffect:"resize"},k);var i=[j,h,k];OpenLayers.Layer.OSM.prototype.initialize.apply(this,i)},CLASS_NAME:"OpenLayers.Layer.OSM.Osmarender"});OpenLayers.Layer.OSM.CycleMap=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(j,k){var h=["http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png","http://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png","http://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png"];k=OpenLayers.Util.extend({numZoomLevels:19,buffer:0,transitionEffect:"resize"},k);var i=[j,h,k];OpenLayers.Layer.OSM.prototype.initialize.apply(this,i)},CLASS_NAME:"OpenLayers.Layer.OSM.CycleMap"});OpenLayers.Control.Circle=OpenLayers.Class(OpenLayers.Control,{feature:null,layer:null,radius:5,origin:null,sides:40,angle:null,snapAngle:null,dragControl:null,initialize:function(h){OpenLayers.Control.prototype.initialize.apply(this,arguments)},activate:function(){var i=OpenLayers.Control.prototype.activate.call(this);if(i){var h={displayInLayerSwitcher:false,calculateInRange:function(){return true}};this.map.addLayer(this.layer)}return i},deactivate:function(){var h=OpenLayers.Control.prototype.deactivate.call(this);if(h){if(this.layer.map!=null){this.layer.destroy(false);if(this.feature){this.feature.destroy()}}this.layer=null;this.feature=null}return h},createGeometry:function(){this.angle=Math.PI*((1/this.sides)-(1/2));if(this.snapAngle){this.angle+=this.snapAngle*(Math.PI/180)}this.feature.geometry=OpenLayers.Geometry.Polygon.createRegularPolygon(this.origin,this.radius,this.sides,this.snapAngle)},modifyGeometry:function(){var j,m,h,i;var l=this.feature.geometry.components[0];if(l.components.length!=(this.sides+1)){this.createGeometry();l=this.feature.geometry.components[0]}for(var k=0;k<this.sides;++k){i=l.components[k];j=this.angle+(k*2*Math.PI/this.sides);i.x=this.origin.x+(this.radius*Math.cos(j));i.y=this.origin.y+(this.radius*Math.sin(j));i.clearBounds()}},updateCircle:function(h,i){this.origin=new OpenLayers.Geometry.Point(h.lon,h.lat);this.radius=i*1;if(!this.feature){this.feature=new OpenLayers.Feature.Vector();this.createGeometry();this.layer.addFeatures([this.feature],{silent:true})}else{this.modifyGeometry()}this.layer.drawFeature(this.feature,this.style)},CLASS_NAME:"Meteorage.Circle"});OpenLayers.Control.newSelectFeature=OpenLayers.Class(OpenLayers.Control,{multipleKey:null,toggleKey:null,multiple:false,clickout:true,toggle:false,hover:false,onSelect:function(){},onUnselect:function(){},onHoverSelect:function(){},onHoverUnselect:function(){},onClickSelect:function(){},onClickUnselect:function(){},geometryTypes:null,layer:null,callbacks:null,selectStyle:null,renderIntent:"select",handler:null,initialize:function(j,i){OpenLayers.Control.prototype.initialize.apply(this,[i]);this.layer=j;this.callbacks=OpenLayers.Util.extend({click:this.clickFeature,clickout:this.clickoutFeature,over:this.overFeature,out:this.outFeature},this.callbacks);var h={geometryTypes:this.geometryTypes};this.handler=new OpenLayers.Handler.Feature(this,j,this.callbacks,h)},unselectAll:function(h){var k;for(var j=this.layer.selectedFeatures.length-1;j>=0;--j){k=this.layer.selectedFeatures[j];if(!h||h.except!=k){this.unselect(k,"click")}}},clickFeature:function(h){if((this.onSelect.name!=""||this.onClickSelect.name!="")&&!this.hover){var i=(OpenLayers.Util.indexOf(this.layer.selectedFeatures,h)>-1);if(i){if(this.toggleSelect()){this.unselect(h)}else{if(!this.multipleSelect()){this.unselectAll({except:h})}}}else{if(!this.multipleSelect()){this.unselectAll({except:h})}}this.select(h,"click")}},multipleSelect:function(){return this.multiple||this.handler.evt[this.multipleKey]},toggleSelect:function(){return this.toggle||this.handler.evt[this.toggleKey]},clickoutFeature:function(h){if(((this.onClickUnselect.name!=""||this.onHoverSelect.name=="")&&!this.hover)&&this.clickout){this.unselectAll()}},overFeature:function(h){if((this.onHoverSelect.name!=""||this.hover)&&(OpenLayers.Util.indexOf(this.layer.selectedFeatures,h)==-1)){this.select(h,"hover")}},outFeature:function(h){if(this.onHoverUnselect.name!=""||this.hover){this.unselect(h,"hover")}},select:function(j,h){this.layer.selectedFeatures.push(j);var i=this.selectStyle||this.renderIntent;this.layer.drawFeature(j,i);this.layer.events.triggerEvent("featureselected",{feature:j});switch(h){case"hover":this.onHoverSelect(j);break;case"click":if(this.onClickSelect.name!=""){this.onClickSelect(j)}else{if(this.onSelect.name!=""){this.onSelect(j)}}break;default:this.onSelect(j);break}},unselect:function(i,h){this.layer.drawFeature(i,"default");OpenLayers.Util.removeItem(this.layer.selectedFeatures,i);this.layer.events.triggerEvent("featureunselected",{feature:i});switch(h){case"hover":this.onHoverUnselect(i);break;case"click":if(this.onClickUnselect.name!=""){this.onClickUnselect(i)}else{if(this.onUnselect.name!=""){this.onUnselect(i)}}break;default:this.onUnselect(i);break}},setMap:function(h){this.handler.setMap(h);OpenLayers.Control.prototype.setMap.apply(this,arguments)},CLASS_NAME:"OpenLayers.Control.newSelectFeature"});Ext.define("GeoExt.data.LayerModel",{alternateClassName:"GeoExt.data.LayerRecord",extend:"Ext.data.Model",requires:["Ext.data.proxy.Memory","Ext.data.reader.Json"],alias:"model.gx_layer",statics:{createFromLayer:function(h){return this.proxy.reader.readRecords([h]).records[0]}},fields:["id",{name:"title",type:"string",mapping:"name"},{name:"legendURL",type:"string",mapping:"metadata.legendURL"},{name:"hideTitle",type:"bool",mapping:"metadata.hideTitle"},{name:"hideInLegend",type:"bool",mapping:"metadata.hideInLegend"}],proxy:{type:"memory",reader:{type:"json"}},getLayer:function(){return this.raw}});Ext.define("GeoExt.data.LayerStore",{requires:["GeoExt.data.LayerModel"],extend:"Ext.data.Store",model:"GeoExt.data.LayerModel",statics:{MAP_TO_STORE:1,STORE_TO_MAP:2},map:null,constructor:function(h){var k=this;h=Ext.apply({},h);var j=(GeoExt.MapPanel&&h.map instanceof GeoExt.MapPanel)?h.map.map:h.map;delete h.map;if(h.layers){h.data=h.layers}delete h.layers;var i={initDir:h.initDir};delete h.initDir;k.callParent([h]);if(j){this.bind(j,i)}},bind:function(j,i){var h=this;if(h.map){return}h.map=j;i=Ext.apply({},i);var l=i.initDir;if(i.initDir==undefined){l=GeoExt.data.LayerStore.MAP_TO_STORE|GeoExt.data.LayerStore.STORE_TO_MAP}var k=j.layers.slice(0);if(l&GeoExt.data.LayerStore.STORE_TO_MAP){h.each(function(m){h.map.addLayer(m.getLayer())},h)}if(l&GeoExt.data.LayerStore.MAP_TO_STORE){h.loadRawData(k,true)}j.events.on({changelayer:h.onChangeLayer,addlayer:h.onAddLayer,removelayer:h.onRemoveLayer,scope:h});h.on({load:h.onLoad,clear:h.onClear,add:h.onAdd,remove:h.onRemove,update:h.onUpdate,scope:h});h.data.on({replace:h.onReplace,scope:h});h.fireEvent("bind",h,j)},unbind:function(){var h=this;if(h.map){h.map.events.un({changelayer:h.onChangeLayer,addlayer:h.onAddLayer,removelayer:h.onRemoveLayer,scope:h});h.un("load",h.onLoad,h);h.un("clear",h.onClear,h);h.un("add",h.onAdd,h);h.un("remove",h.onRemove,h);h.data.un("replace",h.onReplace,h);h.map=null}},onChangeLayer:function(h){var j=h.layer;var l=this.findBy(function(n,m){return n.getLayer()===j});if(l>-1){var i=this.getAt(l);if(h.property==="order"){if(!this._adding&&!this._removing){var k=this.map.getLayerIndex(j);if(k!==l){this._removing=true;this.remove(i);delete this._removing;this._adding=true;this.insert(k,[i]);delete this._adding}}}else{if(h.property==="name"){i.set("title",j.name)}else{this.fireEvent("update",this,i,Ext.data.Record.EDIT)}}}},onAddLayer:function(h){var j=this;if(!j._adding){j._adding=true;var i=j.proxy.reader.read(h.layer);j.add(i.records);delete j._adding}},onRemoveLayer:function(i){if(this.map.unloadDestroy){if(!this._removing){var h=i.layer;this._removing=true;this.remove(this.getByLayer(h));delete this._removing}}else{this.unbind()}},onLoad:function(n,h,j){if(j){if(!Ext.isArray(h)){h=[h]}if(!this._addRecords){this._removing=true;for(var l=this.map.layers.length-1;l>=0;l--){this.map.removeLayer(this.map.layers[l])}delete this._removing}var i=h.length;if(i>0){var k=new Array(i);for(var m=0;m<i;m++){k[m]=h[m].getLayer()}this._adding=true;this.map.addLayers(k);delete this._adding}}delete this._addRecords},onClear:function(i){this._removing=true;for(var h=this.map.layers.length-1;h>=0;h--){this.map.removeLayer(this.map.layers[h])}delete this._removing},onAdd:function(h,i,l){if(!this._adding){this._adding=true;var j;for(var k=i.length-1;k>=0;--k){j=i[k].getLayer();this.map.addLayer(j);if(l!==this.map.layers.length-1){this.map.setLayerIndex(j,l)}}delete this._adding}},onRemove:function(h,i,k){if(!this._removing){var j=i.getLayer();if(this.map.getLayer(j.id)!=null){this._removing=true;this.removeMapLayer(i);delete this._removing}}},onUpdate:function(l,i,h){if(h===Ext.data.Record.EDIT){if(i.modified&&i.modified.title){var k=i.getLayer();var j=i.get("title");if(j!==k.name){k.setName(j)}}}},removeMapLayer:function(h){this.map.removeLayer(h.getLayer())},onReplace:function(j,i,h){this.removeMapLayer(i)},getByLayer:function(h){var i=this.findBy(function(j){return j.getLayer()===h});if(i>-1){return this.getAt(i)}},destroy:function(){var h=this;h.unbind();h.callParent()},loadRecords:function(i,h){if(h&&h.addRecords){this._addRecords=true}this.callParent(arguments)}});Ext.define("GeoExt.panel.Map",{extend:"Ext.panel.Panel",requires:["GeoExt.data.LayerStore"],alias:"widget.gx_mappanel",alternateClassName:"GeoExt.MapPanel",statics:{guess:function(){var h=Ext.ComponentQuery.query("gx_mappanel");return((h&&h.length>0)?h[0]:null)}},center:null,zoom:null,extent:null,prettyStateKeys:false,map:null,layers:null,stateEvents:["aftermapmove","afterlayervisibilitychange","afterlayeropacitychange","afterlayerorderchange","afterlayernamechange","afterlayeradd","afterlayerremove"],initComponent:function(){if(!(this.map instanceof OpenLayers.Map)){this.map=new OpenLayers.Map(Ext.applyIf(this.map||{},{allOverlays:true}))}var h=this.layers;if(!h||h instanceof Array){this.layers=Ext.create("GeoExt.data.LayerStore",{layers:h,map:this.map.layers.length>0?this.map:null})}if(Ext.isString(this.center)){this.center=OpenLayers.LonLat.fromString(this.center)}else{if(Ext.isArray(this.center)){this.center=new OpenLayers.LonLat(this.center[0],this.center[1])}}if(Ext.isString(this.extent)){this.extent=OpenLayers.Bounds.fromString(this.extent)}else{if(Ext.isArray(this.extent)){this.extent=OpenLayers.Bounds.fromArray(this.extent)}}this.callParent(arguments);this.on("resize",this.onResize,this);this.on("afterlayout",function(){if(typeof this.map.getViewport==="function"){this.items.each(function(i){if(typeof i.addToMapPanel==="function"){i.getEl().appendTo(this.map.getViewport())}},this)}},this);this.map.events.on({moveend:this.onMoveend,changelayer:this.onChangelayer,addlayer:this.onAddlayer,removelayer:this.onRemovelayer,scope:this})},onMoveend:function(h){this.fireEvent("aftermapmove",this,this.map,h)},onChangelayer:function(h){var i=this.map;if(h.property){if(h.property==="visibility"){this.fireEvent("afterlayervisibilitychange",this,i,h)}else{if(h.property==="order"){this.fireEvent("afterlayerorderchange",this,i,h)}else{if(h.property==="nathis"){this.fireEvent("afterlayernathischange",this,i,h)}else{if(h.property==="opacity"){this.fireEvent("afterlayeropacitychange",this,i,h)}}}}}},onAddlayer:function(){this.fireEvent("afterlayeradd")},onRemovelayer:function(){this.fireEvent("afterlayerremove")},onResize:function(){var h=this.map;if(this.body.dom!==h.div){h.render(this.body.dom);this.layers.bind(h);if(h.layers.length>0){this.setInitialExtent()}else{this.layers.on("add",this.setInitialExtent,this,{single:true})}}else{h.updateSize()}},setInitialExtent:function(){var h=this.map;if(!h.getCenter()){if(this.center||this.zoom){h.setCenter(this.center,this.zoom)}else{if(this.extent instanceof OpenLayers.Bounds){h.zoomToExtent(this.extent,true)}else{h.zoomToMaxExtent()}}}},getState:function(){var l=this,j=l.map,k=l.callParent(arguments)||{},h;if(!j){return}var i=j.getCenter();i&&Ext.applyIf(k,{x:i.lon,y:i.lat,zoom:j.getZoom()});l.layers.each(function(m){h=m.getLayer();layerId=this.prettyStateKeys?m.get("title"):m.get("id");k=l.addPropertyToState(k,"visibility_"+layerId,h.getVisibility());k=l.addPropertyToState(k,"opacity_"+layerId,(h.opacity===null)?1:h.opacity)},l);return k},applyState:function(r){var i=this;map=i.map;i.center=new OpenLayers.LonLat(r.x,r.y);i.zoom=r.zoom;var m,p,l,o,q,k;var n=map.layers;for(m=0,p=n.length;m<p;m++){l=n[m];o=i.prettyStateKeys?l.name:l.id;q=r["visibility_"+o];if(q!==undefined){q=(/^true$/i).test(q);if(l.isBaseLayer){if(q){map.setBaseLayer(l)}}else{l.setVisibility(q)}}k=r["opacity_"+o];if(k!==undefined){l.setOpacity(k)}}},onBeforeAdd:function(h){if(Ext.isFunction(h.addToMapPanel)){h.addToMapPanel(this)}this.callParent(arguments)},beforeDestroy:function(){if(this.map&&this.map.events){this.map.events.un({moveend:this.onMoveend,changelayer:this.onChangelayer,scope:this})}if(!this.initialConfig.map||!(this.initialConfig.map instanceof OpenLayers.Map)){if(this.map&&this.map.destroy){this.map.destroy()}}delete this.map;this.callParent(arguments)}});Ext.define("GeoExt.tree.Column",{extend:"Ext.tree.Column",alias:"widget.gx_treecolumn",initComponent:function(){var h=this;h.callParent();var i=h.renderer;this.renderer=function(l,p,q,m,k,o,r){var n=[i(l,p,q,m,k,o,r)];if(q.get("checkedGroup")){n[0]=n[0].replace(/class="([^-]+)-tree-checkbox([^"]+)?"/,'class="$1-tree-checkbox$2 gx-tree-radio"')}n.push('<div class="gx-tree-component gx-tree-component-off" id="tree-record-'+q.id+'"></div>');if(q.uiProvider&&q.uiProvider instanceof "string"){}return n.join("")}},defaultRenderer:function(h){return h}});Ext.define("GeoExt.tree.View",{extend:"Ext.tree.View",alias:"widget.gx_treeview",initComponent:function(){var h=this;h.on("itemupdate",this.onItem,this);h.on("itemadd",this.onItem,this);h.on("createchild",this.createChild,this);return h.callParent(arguments)},onItem:function(i,m,j,h){var k=this;if(!(i instanceof Array)){i=[i]}for(var l=0;l<i.length;l++){this.onNodeRendered(i[l])}},onNodeRendered:function(j){var h=this;var i=Ext.get("tree-record-"+j.id);if(!i){return}if(j.get("layer")){h.fireEvent("createchild",i,j)}if(j.hasChildNodes()){j.eachChild(function(k){h.onNodeRendered(k)},h)}},createChild:function(h,j){var i=j.get("component");if(i){cmpObj=Ext.ComponentManager.create(i);cmpObj.render(h);h.removeCls("gx-tree-component-off")}}});Ext.define("GeoExt.tree.LayerNode",{extend:"Ext.AbstractPlugin",alias:"plugin.gx_layer",init:function(h){this.target=h;var i=h.get("layer");h.set("checked",i.getVisibility());if(!h.get("checkedGroup")&&i.isBaseLayer){h.set("checkedGroup","gx_baselayer")}h.set("fixedText",!!h.text);h.set("leaf",true);if(!h.get("iconCls")){h.set("iconCls","gx-tree-layer-icon")}h.on("afteredit",this.onAfterEdit,this);i.events.on({visibilitychanged:this.onLayerVisibilityChanged,scope:this})},onAfterEdit:function(j,i){var h=this;if(~Ext.Array.indexOf(i,"checked")){h.onCheckChange()}},onLayerVisibilityChanged:function(){if(!this._visibilityChanging){this.target.set("checked",this.target.get("layer").getVisibility())}},onCheckChange:function(){var j=this.target,h=this.target.get("checked");if(h!=j.get("layer").getVisibility()){j._visibilityChanging=true;var i=j.get("layer");if(h&&i.isBaseLayer&&i.map){i.map.setBaseLayer(i)}else{i.setVisibility(h)}delete j._visibilityChanging}}});Ext.define("GeoExt.tree.LayerLoader",{extend:"Ext.util.Observable",requires:["GeoExt.tree.LayerNode"],store:null,filter:function(h){return h.getLayer().displayInLayerSwitcher===true},baseAttrs:null,load:function(h){if(this.fireEvent("beforeload",this,h)){this.removeStoreHandlers();while(h.firstChild){h.removeChild(h.firstChild)}if(!this.store){this.store=GeoExt.MapPanel.guess().layers}this.store.each(function(i){this.addLayerNode(h,i)},this);this.addStoreHandlers(h);this.fireEvent("load",this,h)}},onStoreAdd:function(h,i,n,k){if(!this._reordering){var j=k.get("container").recordIndexToNodeIndex(n+i.length-1,k);for(var m=0,l=i.length;m<l;++m){this.addLayerNode(k,i[m],j)}}},onStoreRemove:function(i,h){if(!this._reordering){this.removeLayerNode(h,i)}},addLayerNode:function(k,i,h){h=h||0;if(this.filter(i)===true){var l=i.getLayer();var j=this.createNode({plugins:[{ptype:"gx_layer"}],layer:l,text:l.name,listeners:{move:this.onChildMove,scope:this}});if(h!==undefined){k.insertChild(h,j)}else{k.appendChild(j)}k.getChildAt(h).on("move",this.onChildMove,this)}},removeLayerNode:function(h,i){if(this.filter(i)===true){var j=h.findChildBy(function(k){return k.get("layer")==i.getLayer()});if(j){j.un("move",this.onChildMove,this);j.remove()}}},onChildMove:function(v,n,m,q){var p=this,r=p.store.getByLayer(v.get("layer")),w=m.get("container"),s=w.loader;p._reordering=true;if(s instanceof p.self&&p.store===s.store){s._reordering=true;p.store.remove(r);var x;if(m.childNodes.length>1){var o=(q===0)?q+1:q-1;x=p.store.findBy(function(h){return m.childNodes[o].get("layer")===h.getLayer()});if(q===0){x++}}else{if(n.parentNode===m.parentNode){var u=m;do{u=u.previousSibling}while(u&&!(u.get("container") instanceof w.self&&u.lastChild));if(u){x=p.store.findBy(function(h){return u.lastChild.get("layer")===h.getLayer()})}else{var t=m;do{t=t.nextSibling}while(t&&!(t.get("container") instanceof w.self&&t.firstChild));if(t){x=p.store.findBy(function(h){return t.firstChild.get("layer")===h.getLayer()})}x++}}}if(x!==undefined){p.store.insert(x,[r])}else{p.store.insert(oldRecordIndex,[r])}delete s._reordering}delete p._reordering},addStoreHandlers:function(h){if(!this._storeHandlers){this._storeHandlers={add:function(l,j,k){this.onStoreAdd(l,j,k,h)},remove:function(k,j){this.onStoreRemove(j,h)}};for(var i in this._storeHandlers){this.store.on(i,this._storeHandlers[i],this)}}},removeStoreHandlers:function(){if(this._storeHandlers){for(var h in this._storeHandlers){this.store.un(h,this._storeHandlers[h],this)}delete this._storeHandlers}},createNode:function(h){if(this.baseAttrs){Ext.apply(h,this.baseAttrs)}return h},destroy:function(){this.removeStoreHandlers()}});Ext.define("GeoExt.tree.LayerContainer",{extend:"Ext.AbstractPlugin",requires:["GeoExt.tree.LayerLoader"],alias:"plugin.gx_layercontainer",defaultText:"Layers",init:function(j){var h=this;var i=h.loader;h.loader=(i&&i instanceof GeoExt.tree.LayerLoader)?i:new GeoExt.tree.LayerLoader(i);j.set("container",h);if(!j.get("text")){j.set("text",h.defaultText);j.commit()}h.loader.load(j)},recordIndexToNodeIndex:function(p,l){var m=this;var i=m.loader.store;var n=i.getCount();var j=l.childNodes.length;var k=-1;for(var o=n-1;o>=0;--o){if(m.loader.filter(i.getAt(o))===true){++k;if(p===o||k>j-1){break}}}return k}});Ext.define("GeoExt.tree.BaseLayerContainer",{extend:"GeoExt.tree.LayerContainer",alias:"plugin.gx_baselayercontainer",defaultText:"Base Layers",init:function(j){var h=this;var i=h.loader;h.loader=Ext.applyIf(i||{},{baseAttrs:Ext.applyIf((i&&i.baseAttrs)||{},{iconCls:"gx-tree-baselayer-icon",checkedGroup:"baselayer"}),filter:function(l){var k=l.getLayer();return k.displayInLayerSwitcher===true&&k.isBaseLayer===true}});h.callParent(arguments)}});Ext.define("GeoExt.tree.Panel",{extend:"Ext.tree.Panel",alias:"widget.gx_treepanel",requires:["GeoExt.tree.Column","GeoExt.tree.View"],viewType:"gx_treeview",initComponent:function(){var h=this;if(!h.columns){if(h.initialConfig.hideHeaders===undefined){h.hideHeaders=true}h.addCls(Ext.baseCSSPrefix+"autowidth-table");h.columns=[{xtype:"gx_treecolumn",text:"Name",width:Ext.isIE6?null:10000,dataIndex:h.displayField}]}h.callParent()}});Ext.Ajax.method="GET";Ext.isIE=function(){return/trident/.test(Ext.userAgent)}();GIS={core:{instances:[]},i18n:{},isDebug:false,isSessionStorage:"sessionStorage" in window&&window.sessionStorage!==null,logg:[]};GIS.core.getOLMap=function(i){var j,h;h=function(l,n){var m,k;m=new OpenLayers.Control.Button({displayClass:"olControlButton",trigger:function(){n.call(i.olmap)}});k=new OpenLayers.Control.Panel({defaultControl:m});k.addControls([m]);j.addControl(k);k.div.className+=" "+l;k.div.childNodes[0].className+=" "+l+"Button"};j=new OpenLayers.Map({controls:[new OpenLayers.Control.Navigation({zoomWheelEnabled:true,documentDrag:true}),new OpenLayers.Control.MousePosition({prefix:'<span id="mouseposition" class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',separator:'<span class="text-mouseposition-lonlat">,&nbsp;LAT </span>',suffix:'<div id="google-logo" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'}),new OpenLayers.Control.Permalink(),new OpenLayers.Control.ScaleLine({geodesic:true,maxWidth:170,minWidth:100})],displayProjection:new OpenLayers.Projection("EPSG:4326"),mouseMove:{},relocate:{}});j.events.register("mousemove",null,function(k){i.olmap.mouseMove.x=k.clientX;i.olmap.mouseMove.y=k.clientY});j.zoomToVisibleExtent=function(){i.util.map.zoomToVisibleExtent(this)};j.closeAllLayers=function(){i.layer.event.core.reset();i.layer.facility.core.reset();i.layer.boundary.core.reset();i.layer.thematic1.core.reset();i.layer.thematic2.core.reset();i.layer.thematic3.core.reset();i.layer.thematic4.core.reset()};h("zoomIn",j.zoomIn);h("zoomOut",j.zoomOut);h("zoomVisible",j.zoomToVisibleExtent);h("measure",function(){GIS.core.MeasureWindow(i).show()});return j};GIS.core.getLayers=function(h){var n={},j,l=["1","2","3","4"];if(window.google){n.googleStreets=new OpenLayers.Layer.Google("Google Streets",{numZoomLevels:20,animationEnabled:true,layerType:h.conf.finals.layer.type_base,layerOpacity:1,setLayerOpacity:function(i){if(i){this.layerOpacity=parseFloat(i)}this.setOpacity(this.layerOpacity)}});n.googleStreets.id="googleStreets";n.googleHybrid=new OpenLayers.Layer.Google("Google Hybrid",{type:google.maps.MapTypeId.HYBRID,numZoomLevels:20,animationEnabled:true,layerType:h.conf.finals.layer.type_base,layerOpacity:1,setLayerOpacity:function(i){if(i){this.layerOpacity=parseFloat(i)}this.setOpacity(this.layerOpacity)}});n.googleHybrid.id="googleHybrid"}n.openStreetMap=new OpenLayers.Layer.OSM.Mapnik("OpenStreetMap",{layerType:h.conf.finals.layer.type_base,layerOpacity:1,setLayerOpacity:function(i){if(i){this.layerOpacity=parseFloat(i)}this.setOpacity(this.layerOpacity)}});n.openStreetMap.id="openStreetMap";n.event=GIS.core.VectorLayer(h,"event",GIS.i18n.event_layer,{opacity:h.conf.layout.layer.opacity});n.event.core=new mapfish.GeoStat.Event(h.olmap,{layer:n.event,gis:h});n.facility=GIS.core.VectorLayer(h,"facility",GIS.i18n.facility_layer,{opacity:1});n.facility.core=new mapfish.GeoStat.Facility(h.olmap,{layer:n.facility,gis:h});n.boundary=GIS.core.VectorLayer(h,"boundary",GIS.i18n.boundary_layer,{opacity:h.conf.layout.layer.opacity});n.boundary.core=new mapfish.GeoStat.Boundary(h.olmap,{layer:n.boundary,gis:h});for(var k=0,m;k<l.length;k++){m=l[k];n["thematic"+m]=GIS.core.VectorLayer(h,"thematic"+m,GIS.i18n.thematic_layer+" "+m,{opacity:h.conf.layout.layer.opacity});n["thematic"+m].layerCategory=h.conf.finals.layer.category_thematic,n["thematic"+m].core=new mapfish.GeoStat["Thematic"+m](h.olmap,{layer:n["thematic"+m],gis:h})}return n};GIS.core.createSelectHandlers=function(r,k){var u=!!GIS.app?!!r.init.user.isAdmin:false,v={},n,h,j,i,l,q=r.conf.finals.dimension,s,p,m=k.id==="boundary",t=k.id==="event";h=function o(x){if(m){var y=k.core.getDefaultFeatureStyle();y.fillOpacity=0.15;y.strokeColor=x.style.strokeColor;y.strokeWidth=x.style.strokeWidth;y.label=x.style.label;y.fontFamily=x.style.fontFamily;y.fontWeight=x.style.strokeWidth>1?"bold":"normal";y.labelAlign=x.style.labelAlign;y.labelYOffset=x.style.labelYOffset;k.drawFeature(x,y)}if(s){s.destroy()}s=Ext.create("Ext.window.Window",{cls:"gis-window-widget-feature gis-plugin",preventHeader:true,shadow:false,resizable:false,items:{html:x.attributes.popupText}});s.show();var B=r.viewport.eastRegion.getPosition()[0],A=r.viewport.centerRegion.getPosition()[0],z=A+((B-A)/2),w=r.viewport.centerRegion.getPosition()[1]+(GIS.app?32:0);s.setPosition(z-(s.getWidth()/2),w)};j=function o(w){s.destroy()};i=function o(E){var D,C,x,y,z,B=E.geometry.CLASS_NAME===r.conf.finals.openLayers.point_classname,A=E.attributes;C=function(){if(r.olmap.relocate.window){r.olmap.relocate.window.destroy()}r.olmap.relocate.window=Ext.create("Ext.window.Window",{title:"Relocate facility",layout:"fit",iconCls:"gis-window-title-icon-relocate",cls:"gis-container-default",setMinWidth:function(F){this.setWidth(this.getWidth()<F?F:this.getWidth())},items:{html:A.name,cls:"gis-container-inner"},bbar:["->",{xtype:"button",hideLabel:true,text:GIS.i18n.cancel,handler:function(){r.olmap.relocate.active=false;r.olmap.relocate.window.destroy();r.olmap.getViewport().style.cursor="auto"}}],listeners:{close:function(){r.olmap.relocate.active=false;r.olmap.getViewport().style.cursor="auto"}}});r.olmap.relocate.window.show();r.olmap.relocate.window.setMinWidth(220);r.util.gui.window.setPositionTopRight(r.olmap.relocate.window)};D=function(){Ext.Ajax.request({url:r.init.contextPath+"/api/organisationUnits/"+A.id+".json?links=false",success:function(G){var F=Ext.decode(G.responseText);if(k.infrastructuralWindow){k.infrastructuralWindow.destroy()}k.infrastructuralWindow=Ext.create("Ext.window.Window",{title:GIS.i18n.information,layout:"column",iconCls:"gis-window-title-icon-information",cls:"gis-container-default",width:460,height:400,period:null,items:[{cls:"gis-container-inner",columnWidth:0.4,bodyStyle:"padding-right:4px",items:function(){var H=[];if(A.name){H.push({html:GIS.i18n.name,cls:"gis-panel-html-title"},{html:A.name,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(F.parent){H.push({html:GIS.i18n.parent_unit,cls:"gis-panel-html-title"},{html:F.parent.name,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(F.code){H.push({html:GIS.i18n.code,cls:"gis-panel-html-title"},{html:F.code,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(F.address){H.push({html:GIS.i18n.address,cls:"gis-panel-html-title"},{html:F.address,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(F.email){H.push({html:GIS.i18n.email,cls:"gis-panel-html-title"},{html:F.email,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(F.phoneNumber){H.push({html:GIS.i18n.phone_number,cls:"gis-panel-html-title"},{html:F.phoneNumber,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(Ext.isString(F.coordinates)){var K=F.coordinates.replace("[","").replace("]","").replace(",",", ");H.push({html:GIS.i18n.coordinate,cls:"gis-panel-html-title"},{html:K,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}if(Ext.isArray(F.organisationUnitGroups)&&F.organisationUnitGroups.length){var J="";for(var I=0;I<F.organisationUnitGroups.length;I++){J+=F.organisationUnitGroups[I].name;J+=I<F.organisationUnitGroups.length-1?"<br/>":""}H.push({html:GIS.i18n.groups,cls:"gis-panel-html-title"},{html:J,cls:"gis-panel-html"},{cls:"gis-panel-html-separator"})}return H}()},{xtype:"form",cls:"gis-container-inner gis-form-widget",columnWidth:0.6,bodyStyle:"padding-left:4px",items:[{html:GIS.i18n.infrastructural_data,cls:"gis-panel-html-title"},{cls:"gis-panel-html-separator"},{xtype:"combo",fieldLabel:GIS.i18n.period,editable:false,valueField:"id",displayField:"name",emptyText:"Select period",forceSelection:true,width:258,labelWidth:70,store:{fields:["id","name"],data:function(){var H=r.init.systemSettings.infrastructuralPeriodType.id,K=r.init.periodGenerator,J=K.filterFuturePeriodsExceptCurrent(K.generateReversedPeriods(H,this.periodOffset))||[];if(Ext.isArray(J)&&J.length){for(var I=0;I<J.length;I++){J[I].id=J[I].iso}J=J.slice(0,5)}return J}()},lockPosition:false,listeners:{select:function(J){var L=J.getValue(),H=r.init.contextPath+"/api/analytics.json?",K=r.init.systemSettings.infrastructuralDataElementGroup;if(K&&K.dataElements){H+="dimension=dx:";for(var I=0;I<K.dataElements.length;I++){H+=K.dataElements[I].id;H+=I<K.dataElements.length-1?";":""}}H+="&filter=pe:"+L;H+="&filter=ou:"+A.id;Ext.Ajax.request({url:H,success:function(O){var M=Ext.decode(O.responseText),P=[];if(Ext.isArray(M.rows)){for(var N=0;N<M.rows.length;N++){P.push({name:M.metaData.names[M.rows[N][0]],value:M.rows[N][1]})}}k.widget.infrastructuralDataElementValuesStore.loadData(P)}})}}},{xtype:"grid",cls:"gis-grid",height:300,width:258,scroll:"vertical",columns:[{id:"name",text:"Data element",dataIndex:"name",sortable:true,width:195},{id:"value",header:"Value",dataIndex:"value",sortable:true,width:63}],disableSelection:true,store:k.widget.infrastructuralDataElementValuesStore}]}],listeners:{show:function(){if(n){this.down("combo").setValue(n);infrastructuralDataElementValuesStore.load({params:{periodId:n,organisationUnitId:A.internalId}})}}}});k.infrastructuralWindow.show();r.util.gui.window.setPositionTopRight(k.infrastructuralWindow)}})};x=function(J,H,I){var G=Ext.clone(k.core.view),F;G.parentGraphMap={};G.parentGraphMap[J]=H;G.rows=[{dimension:q.organisationUnit.objectName,items:[{id:J},{id:"LEVEL-"+I}]}];if(G){F=k.core.getLoader();F.updateGui=true;F.zoomToVisibleExtent=true;F.hideMask=true;F.load(G)}};var w=[];if(k.id!=="facility"){w.push(Ext.create("Ext.menu.Item",{text:"Float up",iconCls:"gis-menu-item-icon-float",cls:"gis-plugin",disabled:!A.hasCoordinatesUp,handler:function(){x(A.grandParentId,A.grandParentParentGraph,parseInt(A.level)-1)}}));w.push(Ext.create("Ext.menu.Item",{text:"Drill down",iconCls:"gis-menu-item-icon-drill",cls:"gis-menu-item-first gis-plugin",disabled:!A.hasCoordinatesDown,handler:function(){x(A.id,A.parentGraph,parseInt(A.level)+1)}}))}if(u&&B){if(k.id!=="facility"){w.push({xtype:"menuseparator"})}w.push(Ext.create("Ext.menu.Item",{text:GIS.i18n.relocate,iconCls:"gis-menu-item-icon-relocate",disabled:!r.init.user.isAdmin,handler:function(F){r.olmap.relocate.active=true;r.olmap.relocate.feature=E;r.olmap.getViewport().style.cursor="crosshair";C()}}));w.push(Ext.create("Ext.menu.Item",{text:"Swap lon/lat",iconCls:"gis-menu-item-icon-relocate",disabled:!r.init.user.isAdmin,handler:function(F){var H=E.attributes.id,G=Ext.clone(E.geometry).transform("EPSG:900913","EPSG:4326");if(Ext.isNumber(G.x)&&Ext.isNumber(G.y)&&r.init.user.isAdmin){Ext.Ajax.request({url:r.init.contextPath+"/api/organisationUnits/"+H+".json?links=false",success:function(I){var J=Ext.decode(I.responseText);J.coordinates="["+G.y.toFixed(5)+","+G.x.toFixed(5)+"]";Ext.Ajax.request({url:r.init.contextPath+"/api/metaData?preheatCache=false",method:"POST",headers:{"Content-Type":"application/json"},params:Ext.encode({organisationUnits:[J]}),success:function(L){var K=E.geometry.x,M=E.geometry.y;delete E.geometry.bounds;E.geometry.x=M;E.geometry.y=K;k.redraw();console.log(E.attributes.name+" relocated to "+J.coordinates)}})}})}}}));w.push(Ext.create("Ext.menu.Item",{text:GIS.i18n.show_information_sheet,iconCls:"gis-menu-item-icon-information",handler:function(F){D()}}))}if(w.length){w[w.length-1].addCls("gis-menu-item-last")}y=new Ext.menu.Menu({baseCls:"gis-plugin gis-popupmenu",shadow:false,showSeparator:false,defaults:{bodyStyle:"padding-right:6px"},items:w});y.showAt([r.olmap.mouseMove.x,r.olmap.mouseMove.y])};v={onHoverSelect:h,onHoverUnselect:j,onClickSelect:i};if(t){v.onClickSelect=function o(E){var A=["label","value","nameColumnMap","psi","ps","longitude","latitude","eventdate","ou","oucode","ouname","popupText"],y=E.attributes,w=y.nameColumnMap,z='<table class="padding1">',C=' style="font-weight:bold; padding-right:10px; vertical-align:top"',x=' style="max-width:170px"',B;z+="<tr><td"+C+">"+w.ou+"</td><td"+x+">"+y.ouname+"</td></tr>";z+="<tr><td"+C+">"+w.eventdate+"</td><td"+x+">"+y.eventdate+"</td></tr>";z+="<tr><td"+C+">"+w.longitude+"</td><td"+x+">"+y.longitude+"</td></tr>";z+="<tr><td"+C+">"+w.latitude+"</td><td"+x+">"+y.latitude+"</td></tr>";for(var D in y){if(y.hasOwnProperty(D)&&!Ext.Array.contains(A,D)){z+="<tr><td"+C+">"+w[D]+"</td><td>"+y[D]+"</td></tr>"}}z+="</table>";if(Ext.isObject(p)&&p.destroy){B=p.getPosition();p.destroy();p=null}p=Ext.create("Ext.window.Window",{title:"Event",layout:"fit",resizable:false,bodyStyle:"background-color:#fff; padding:5px",html:z,autoShow:true,listeners:{show:function(F){if(B){F.setPosition(B)}else{r.util.gui.window.setPositionTopRight(F)}},destroy:function(){p=null}}})}}l=new OpenLayers.Control.newSelectFeature(k,v);r.olmap.addControl(l);l.activate()};GIS.core.StyleMap=function(i){var j={fillOpacity:1,strokeColor:"#fff",strokeWidth:1,pointRadius:8,labelAlign:"cr",labelYOffset:13,fontFamily:'"Arial","Sans-serif","Roboto","Helvetica","Consolas"'},h={fillOpacity:0.9,strokeColor:"#fff",strokeWidth:1,pointRadius:8,cursor:"pointer",labelAlign:"cr",labelYOffset:13};if(Ext.isObject(i)&&i.labels){j.label="${label}";j.fontSize=i.labelFontSize;j.fontWeight=i.labelFontWeight;j.fontStyle=i.labelFontStyle;j.fontColor=i.labelFontColor}return new OpenLayers.StyleMap({"default":j,select:h})};GIS.core.VectorLayer=function(h,l,j,i){var k=new OpenLayers.Layer.Vector(j,{strategies:[new OpenLayers.Strategy.Refresh({force:true})],styleMap:GIS.core.StyleMap(),visibility:false,displayInLayerSwitcher:false,layerType:h.conf.finals.layer.type_vector,layerOpacity:i?i.opacity||1:1,setLayerOpacity:function(m){if(m){this.layerOpacity=parseFloat(m)}this.setOpacity(this.layerOpacity)},hasLabels:false});k.id=l;return k};GIS.core.MeasureWindow=function(h){var j,i,k,m,l;l=new OpenLayers.StyleMap({"default":new OpenLayers.Style()});m=new OpenLayers.Control.Measure(OpenLayers.Handler.Path,{persist:true,immediate:true,handlerOption:{layerOptions:{styleMap:l}}});k=function(n){if(n.measure){i.setText(n.measure.toFixed(2)+" "+n.units)}};h.olmap.addControl(m);m.events.on({measurepartial:k,measure:k});m.geodesic=true;m.activate();i=Ext.create("Ext.form.Label",{style:"height: 20px",text:"0 km"});j=Ext.create("Ext.window.Window",{title:GIS.i18n.measure_distance,layout:"fit",cls:"gis-container-default gis-plugin",bodyStyle:"text-align: center",width:130,minWidth:130,resizable:false,items:i,listeners:{show:function(){var n=h.viewport.eastRegion.getPosition()[0]-this.getWidth()-3,o=h.viewport.centerRegion.getPosition()[1]+26;this.setPosition(n,o)},destroy:function(){m.deactivate();h.olmap.removeControl(m)}}});return j};GIS.core.MapLoader=function(i){var m,k,n,l,j=[],h;m=function(){var q=GIS.plugin&&!GIS.app,r=q?"jsonp":"json",p=i.init.contextPath+"/api/maps/"+i.map.id+"."+r+"?fields="+i.conf.url.mapFields.join(","),s,o;s=function(y){if(Ext.isArray(y.mapViews)){for(var w=0,t;w<y.mapViews.length;w++){t=y.mapViews[w];if(t){if(Ext.isArray(t.columns)&&t.columns.length){for(var v=0,z;v<t.columns.length;v++){z=t.columns[v];if(Ext.isArray(z.items)&&z.items.length){for(var u=0,x;u<z.items.length;u++){x=z.items[u];x.id=x.id.replace("#",".")}}}}}}}i.map=y;k()};o=function(t){i.olmap.mask.hide();if(Ext.Array.contains([403],t.status)){alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite)}else{alert(t.status+"\n"+t.statusText+"\n"+t.responseText)}};if(q){Ext.data.JsonP.request({url:p,success:function(t){s(t)}})}else{Ext.Ajax.request({url:p,success:function(t){s(Ext.decode(t.responseText))}})}};k=function(){var p=i.map.mapViews,o;if(!(Ext.isArray(p)&&p.length)){i.olmap.mask.hide();alert(GIS.i18n.favorite_outdated_create_new);return}for(var q=0;q<p.length;q++){p[q]=i.api.layout.Layout(p[q])}p=Ext.Array.clean(p);if(!p.length){return}if(i.viewport&&i.viewport.favoriteWindow&&i.viewport.favoriteWindow.isVisible()){i.viewport.favoriteWindow.destroy()}i.olmap.closeAllLayers();for(var q=0,r;q<p.length;q++){r=p[q];o=i.layer[r.layer].core.getLoader();o.updateGui=!i.el;o.callBack=l;o.load(r)}};l=function(o){j.push(o);if(j.length===i.map.mapViews.length){n()}};n=function(){j=[];if(i.el){i.olmap.zoomToVisibleExtent()}else{if(i.map.longitude&&i.map.latitude&&i.map.zoom){i.olmap.setCenter(new OpenLayers.LonLat(i.map.longitude,i.map.latitude),i.map.zoom)}else{i.olmap.zoomToVisibleExtent()}}if(i.viewport.shareButton){i.viewport.shareButton.enable()}if(GIS.isSessionStorage){i.util.layout.setSessionStorage("map",i.util.layout.getAnalytical())}i.olmap.mask.hide()};h={load:function(o){i.olmap.mask.show();if(i.map&&i.map.id){m()}else{if(o){i.map={mapViews:o}}k()}}};return h};GIS.core.LayerLoaderEvent=function(q,j){var i=j.map,k,m,l,h,p,n,o=q.conf.finals.dimension;m=function(r){l(r)};l=function(r){var w="?",u=[],v;r=r||j.core.view;w+="stage="+r.stage.id;w+="&startDate="+r.startDate;w+="&endDate="+r.endDate;if(Ext.isArray(r.organisationUnits)){w+="&dimension=ou:";for(var t=0;t<r.organisationUnits.length;t++){w+=r.organisationUnits[t].id;w+=t<r.organisationUnits.length-1?";":""}}for(var t=0,s;t<r.dataElements.length;t++){s=r.dataElements[t];w+="&dimension="+s.dimension+(s.filter?":"+s.filter:"")}v=function(y){var H=[],B=[],J=[],x,C,A=Ext.clone(y.metaData.names);for(var F=0;F<y.headers.length;F++){A[y.headers[F].name]=y.headers[F].column;if(y.headers[F].name==="longitude"){x=F}if(y.headers[F].name==="latitude"){C=F}}if(Ext.isArray(y.rows)&&y.rows.length){for(var F=0,I;F<y.rows.length;F++){I=y.rows[F];if(I[x]&&I[C]){J.push(I)}}}if(!J.length){alert("No event coordinates found");i.mask.hide();return}A=y.metaData.names;for(var F=0;F<y.headers.length;F++){A[y.headers[F].name]=y.headers[F].column}for(var F=0,I,E;F<J.length;F++){I=J[F];E={};for(var D=0;D<I.length;D++){E[y.headers[D].name]=I[D]}E[q.conf.finals.widget.value]=0;E.label=E.ouname;E.popupText=E.ouname;E.nameColumnMap=A;H.push(E)}for(var F=0,z,G;F<H.length;F++){z=H[F];G=q.util.map.getTransformedPointByXY(z.longitude,z.latitude);B.push(new OpenLayers.Feature.Vector(G,z))}j.removeFeatures(j.features);j.addFeatures(B);h(r)};if(Ext.isObject(GIS.app)){Ext.Ajax.request({url:q.init.contextPath+"/api/analytics/events/query/"+r.program.id+".json"+w,disableCaching:false,failure:function(x){alert(x.status+"\n"+x.statusText+"\n"+x.responseText)},success:function(x){v(Ext.decode(x.responseText))}})}else{if(Ext.isObject(GIS.plugin)){Ext.data.JsonP.request({url:q.init.contextPath+"/api/analytics/events/query/"+r.program.id+".jsonp"+w,disableCaching:false,scope:this,success:function(x){v(x)}})}}};h=function(r){r=r||j.core.view;var s={indicator:q.conf.finals.widget.value,method:2,numClasses:5,colors:j.core.getColors("000000","222222"),minSize:5,maxSize:5};j.core.view=r;j.core.applyClassification(s);p(r)};p=function(r){if(j.item){j.item.setValue(true,r.opacity)}else{j.setLayerOpacity(r.opacity)}if(n.updateGui&&Ext.isObject(j.widget)){j.widget.setGui(r)}if(n.zoomToVisibleExtent){i.zoomToVisibleExtent()}if(n.hideMask){i.mask.hide()}if(n.callBack){n.callBack(j)}else{q.map=null}};n={compare:false,updateGui:false,zoomToVisibleExtent:false,hideMask:false,callBack:null,load:function(r){q.olmap.mask.show();m(r)},loadData:l,loadLegend:h};return n};GIS.core.LayerLoaderFacility=function(q,k){var i=k.map,l,n,m,h,j,p,o;l=function(t,w){var y=k.core.view,x,s,r,u;o.zoomToVisibleExtent=true;if(!y){if(w){n(t)}return q.conf.finals.widget.loadtype_organisationunit}x=[];s=t.rows[0];r=[];u=y.rows[0];if(s.items.length===u.items.length){for(var v=0;v<s.items.length;v++){x.push(s.items[v].id)}for(var v=0;v<u.items.length;v++){r.push(u.items[v].id)}if(Ext.Array.difference(x,r).length!==0){if(w){n(t)}return q.conf.finals.widget.loadtype_organisationunit}}else{if(w){n(t)}return q.conf.finals.widget.loadtype_organisationunit}o.zoomToVisibleExtent=false;if(t.organisationUnitGroupSet.id!==y.organisationUnitGroupSet.id){if(w){n(t)}return q.conf.finals.widget.loadtype_organisationunit}if(w){h(t);return q.conf.finals.widget.loadtype_legend}};n=function(r){var s=r.rows[0].items,v=GIS.plugin&&!GIS.app,u=function(){var y="?ou=ou:";for(var x=0;x<s.length;x++){y+=s[x].id;y+=x!==s.length-1?";":""}y+="&displayProperty="+q.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();return q.init.contextPath+"/api/geoFeatures."+(v?"jsonp":"json")+y+"&viewClass=detailed"}(),w,t;w=function(z){var x=k.core.decode(z),A=new OpenLayers.Format.GeoJSON(),y=q.util.map.getTransformedFeatureArray(A.read(x));if(!Ext.isArray(y)){i.mask.hide();alert(GIS.i18n.invalid_coordinates);return}if(!y.length){i.mask.hide();alert(GIS.i18n.no_valid_coordinates_found);return}k.core.featureStore.loadFeatures(y.slice(0));m(r,y)};t=function(){i.mask.hide();alert(GIS.i18n.coordinates_could_not_be_loaded)};if(GIS.plugin&&!GIS.app){Ext.data.JsonP.request({url:u,disableCaching:false,success:function(x){w(x)}})}else{Ext.Ajax.request({url:u,disableCaching:false,success:function(x){w(Ext.decode(x.responseText))}})}};m=function(r,t){r=r||k.core.view;t=t||k.core.featureStore.features;for(var s=0;s<t.length;s++){t[s].attributes.popupText=t[s].attributes.name+" ("+t[s].attributes[r.organisationUnitGroupSet.id]+")"}k.removeFeatures(k.features);k.addFeatures(t);h(r)};h=function(s){var u=GIS.plugin&&!GIS.app,w=u?"jsonp":"json",t=q.init.contextPath+"/api/organisationUnitGroupSets/"+s.organisationUnitGroupSet.id+"."+w+"?fields=organisationUnitGroups[id,name,symbol]",x;s=s||k.core.view;for(var v=0,r;v<k.features.length;v++){r=k.features[v].attributes;r.label=s.labels?r.name:""}k.styleMap=GIS.core.StyleMap(s);x=function(z){var A=z.organisationUnitGroups,y={indicator:s.organisationUnitGroupSet.id};q.store.groupsByGroupSet.loadData(A);k.core.view=s;k.core.applyClassification({indicator:s.organisationUnitGroupSet.id});j(s);p(s)};if(u){Ext.data.JsonP.request({url:t,success:function(y){x(y)}})}else{Ext.Ajax.request({url:t,success:function(y){x(Ext.decode(y.responseText))}})}};j=function(s){var r=s.areaRadius;if(k.circleLayer){k.circleLayer.deactivateControls();k.circleLayer=null}if(Ext.isDefined(r)&&r){k.circleLayer=GIS.app.CircleLayer(k.features,r);nissa=k.circleLayer}};p=function(r){q.viewport.eastRegion.doLayout();k.legendPanel.expand();if(k.item){k.item.setValue(true,r.opacity)}else{k.setLayerOpacity(r.opacity)}if(o.updateGui&&Ext.isObject(k.widget)){k.widget.setGui(r)}if(o.zoomToVisibleExtent){i.zoomToVisibleExtent()}if(o.hideMask){i.mask.hide()}if(o.callBack){o.callBack(k)}else{q.map=null;if(q.viewport.shareButton){q.viewport.shareButton.enable()}}};o={compare:false,updateGui:false,zoomToVisibleExtent:false,hideMask:false,callBack:null,load:function(r){q.olmap.mask.show();if(this.compare){l(r,true)}else{n(r)}},loadData:m,loadLegend:h};return o};GIS.core.LayerLoaderBoundary=function(p,j){var i=j.map,k,m,l,h,o,n;k=function(s,v){var x=j.core.view,w,r,q,t;if(!x){if(v){m(s)}return p.conf.finals.widget.loadtype_organisationunit}w=[];r=s.rows[0];q=[];t=x.rows[0];if(r.items.length===t.items.length){for(var u=0;u<r.items.length;u++){w.push(r.items[u].id)}for(var u=0;u<t.items.length;u++){q.push(t.items[u].id)}if(Ext.Array.difference(w,q).length!==0){if(v){m(s)}return p.conf.finals.widget.loadtype_organisationunit}if(v){n.zoomToVisibleExtent=false;h(s)}return p.conf.finals.widget.loadtype_legend}else{if(v){m(s)}return p.conf.finals.widget.loadtype_organisationunit}p.olmap.mask.hide()};m=function(q){var r=q.rows[0].items,u=GIS.plugin&&!GIS.app,t=function(){var x="?ou=ou:";for(var w=0;w<r.length;w++){x+=r[w].id;x+=w!==r.length-1?";":""}x+="&displayProperty="+p.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();return p.init.contextPath+"/api/geoFeatures."+(u?"jsonp":"json")+x}(),v,s;v=function(w){var x=p.util.geojson.decode(w,"DESC"),E=new OpenLayers.Format.GeoJSON(),z=p.util.map.getTransformedFeatureArray(E.read(x)),y=["black","blue","red","green","yellow"],F=[],A={};if(!Ext.isArray(z)){i.mask.hide();alert(GIS.i18n.invalid_coordinates);return}if(!z.length){i.mask.hide();alert(GIS.i18n.no_valid_coordinates_found);return}for(var C=0;C<z.length;C++){F.push(parseFloat(z[C].attributes.level))}F=Ext.Array.unique(F).sort();for(var C=0;C<F.length;C++){A[F[C]]={strokeColor:y[C]}}for(var C=0,G,B,D;C<z.length;C++){G=z[C];B=A[G.attributes.level];D=F.length===1?1:G.attributes.level==2?2:1;G.style={strokeColor:B.strokeColor||"black",strokeWidth:D,fillOpacity:0,pointRadius:5,labelAlign:"cr",labelYOffset:13}}j.core.featureStore.loadFeatures(z.slice(0));l(q,z)};s=function(){i.mask.hide();alert(GIS.i18n.coordinates_could_not_be_loaded)};if(u){Ext.data.JsonP.request({url:t,disableCaching:false,success:function(w){v(w)}})}else{Ext.Ajax.request({url:t,disableCaching:false,success:function(w){v(Ext.decode(w.responseText))},failure:function(){s()}})}};l=function(q,s){q=q||j.core.view;s=s||j.core.featureStore.features;for(var r=0;r<s.length;r++){s[r].attributes.value=0;s[r].attributes.popupText=s[r].attributes.name}j.removeFeatures(j.features);j.addFeatures(s);h(q)};h=function(q){q=q||j.core.view;for(var t=0,s;t<j.features.length;t++){attr=j.features[t].attributes;attr.label=q.labels?attr.name:""}var r={indicator:p.conf.finals.widget.value,method:2,numClasses:5,colors:j.core.getColors("000000","000000"),minSize:6,maxSize:6};j.core.view=q;j.core.applyClassification(r);p.util.layer.setFeatureLabelStyle(j,q.labels,false,q);o(q)};o=function(q){if(j.item){j.item.setValue(true,q.opacity)}else{j.setLayerOpacity(q.opacity)}if(n.updateGui&&Ext.isObject(j.widget)){j.widget.setGui(q)}if(n.zoomToVisibleExtent){i.zoomToVisibleExtent()}if(n.hideMask){i.mask.hide()}if(n.callBack){n.callBack(j)}else{p.map=null;if(p.viewport.shareButton){p.viewport.shareButton.enable()}}};n={compare:false,updateGui:false,zoomToVisibleExtent:false,hideMask:false,callBack:null,load:function(q){p.olmap.mask.show();if(this.compare){k(q,true)}else{m(q)}},loadData:l,loadLegend:h};return n};GIS.core.LayerLoaderThematic=function(q,j){var i=j.map,k,m,l,h,p,n,o=q.conf.finals.dimension;k=function(t,w){var y=j.core.view,x,s,r,u;n.zoomToVisibleExtent=true;if(!y){if(w){m(t)}return q.conf.finals.widget.loadtype_organisationunit}x=[];s=t.rows[0];r=[];u=y.rows[0];if(s.items.length===u.items.length){for(var v=0;v<s.items.length;v++){x.push(s.items[v].id)}for(var v=0;v<u.items.length;v++){r.push(u.items[v].id)}if(Ext.Array.difference(x,r).length!==0){if(w){m(t)}return q.conf.finals.widget.loadtype_organisationunit}}else{if(w){m(t)}return q.conf.finals.widget.loadtype_organisationunit}n.zoomToVisibleExtent=false;x=[];s=t.columns[0];r=[];u=y.columns[0];if(s.items.length===u.items.length){for(var v=0;v<s.items.length;v++){x.push(s.items[v].id)}for(var v=0;v<u.items.length;v++){r.push(u.items[v].id)}if(Ext.Array.difference(x,r).length!==0){if(w){l(t)}return q.conf.finals.widget.loadtype_organisationunit}}else{if(w){l(t)}return q.conf.finals.widget.loadtype_organisationunit}x=[];s=t.filters[0];r=[];u=y.filters[0];if(s.items.length===u.items.length){for(var v=0;v<s.items.length;v++){x.push(s.items[v].id)}for(var v=0;v<u.items.length;v++){r.push(u.items[v].id)}if(Ext.Array.difference(x,r).length!==0){if(w){l(t)}return q.conf.finals.widget.loadtype_organisationunit}}else{if(w){l(t)}return q.conf.finals.widget.loadtype_organisationunit}if(w){n.zoomToVisibleExtent=false;h(t);return q.conf.finals.widget.loadtype_legend}};m=function(r){var s=r.rows[0].items,v=GIS.plugin&&!GIS.app,u=function(){var y="?ou=ou:";for(var x=0;x<s.length;x++){y+=s[x].id;y+=x!==s.length-1?";":""}y+="&displayProperty="+q.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();return q.init.contextPath+"/api/geoFeatures."+(v?"jsonp":"json")+y}(),w,t;w=function(z){var x=q.util.geojson.decode(z),A=new OpenLayers.Format.GeoJSON(),y=q.util.map.getTransformedFeatureArray(A.read(x));if(!Ext.isArray(y)){i.mask.hide();alert(GIS.i18n.invalid_coordinates);return}if(!y.length){i.mask.hide();alert(GIS.i18n.no_valid_coordinates_found);return}j.core.featureStore.loadFeatures(y.slice(0));l(r,y)};t=function(){i.mask.hide();alert(GIS.i18n.coordinates_could_not_be_loaded)};if(v){Ext.data.JsonP.request({url:u,disableCaching:false,success:function(x){w(x)}})}else{Ext.Ajax.request({url:u,disableCaching:false,success:function(x){w(Ext.decode(x.responseText))},failure:function(){t()}})}};l=function(y,t){var A;y=y||j.core.view;t=t||j.core.featureStore.features;var z=q.conf.finals.dimension,u="?",v=y.columns[0].items,r=y.columns[0].dimension===z.operand.objectName,s=y.filters[0].items,x=y.rows[0].items;u+="dimension=ou:";for(var w=0;w<x.length;w++){u+=x[w].id;u+=w<x.length-1?";":""}u+="&dimension=dx:";for(var w=0;w<v.length;w++){u+=r?v[w].id.split(".")[0]:v[w].id;u+=w<v.length-1?";":""}u+=r?"&dimension=co":"";u+="&filter=pe:";for(var w=0;w<s.length;w++){u+=s[w].id;u+=w<s.length-1?";":""}u+="&displayProperty="+q.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();A=function(N){var G=q.api.response.Response(N),L={},D={},I,F,K,E=[],B,J=[];if(!G){i.mask.hide();return}for(var H=0;H<G.headers.length;H++){if(G.headers[H].name===z.organisationUnit.dimensionName){I=H}else{if(G.headers[H].name===z.value.dimensionName){K=H}}}for(var H=0,C;H<t.length;H++){var C=t[H].attributes.id;L[C]=true}for(var H=0;H<G.rows.length;H++){var C=G.rows[H][I],M=parseFloat(G.rows[H][K]);D[C]=M}for(var H=0;H<t.length;H++){var O=t[H],C=O.attributes.id;if(L.hasOwnProperty(C)&&D.hasOwnProperty(C)){O.attributes.value=D[C];O.attributes.popupText=O.attributes.name+" ("+O.attributes.value+")";E.push(O)}}j.removeFeatures(j.features);j.addFeatures(E);q.response=G;h(y)};if(Ext.isObject(GIS.app)){Ext.Ajax.request({url:q.init.contextPath+"/api/analytics.json"+u,disableCaching:false,failure:function(B){alert(B.status+"\n"+B.statusText+"\n"+B.responseText)},success:function(B){A(Ext.decode(B.responseText))}})}else{if(Ext.isObject(GIS.plugin)){Ext.data.JsonP.request({url:q.init.contextPath+"/api/analytics.jsonp"+u,disableCaching:false,scope:this,success:function(B){A(B)}})}}};h=function(x){var r,y,w;x=x||j.core.view;for(var t=0,z;t<j.features.length;t++){attr=j.features[t].attributes;attr.label=x.labels?attr.name+" ("+attr.value+")":""}j.styleMap=GIS.core.StyleMap(x);y=function(D){var B=Ext.Array.clean([].concat(x.columns||[],x.rows||[],x.filters||[])),C=D.metaData,I=C[o.period.objectName];for(var G=0,E;G<B.length;G++){E=B[G];for(var F=0,H;F<E.items.length;F++){H=E.items[F];if(H.id.indexOf(".")!==-1){var A=H.id.split(".");H.name=C.names[A[0]]+" "+C.names[A[1]]}else{H.name=C.names[H.id]}}}x.filters[0].items[0].name=C.names[I[I.length-1]]};w=function(){y(q.response);var A={indicator:q.conf.finals.widget.value,method:x.legendSet?mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS:x.method,numClasses:x.classes,bounds:r,colors:j.core.getColors(x.colorLow,x.colorHigh),minSize:x.radiusLow,maxSize:x.radiusHigh};j.core.view=x;j.core.colorInterpolation=s;j.core.applyClassification(A);p(x)};if(x.legendSet){var r=[],s=[],v=[],u=[];Ext.Ajax.request({url:q.init.contextPath+"/api/mapLegendSets/"+x.legendSet.id+".json?fields="+q.conf.url.mapLegendSetFields.join(","),scope:this,success:function(B){u=Ext.decode(B.responseText).mapLegends;Ext.Array.sort(u,function(D,C){return D.startValue-C.startValue});for(var A=0;A<u.length;A++){if(r[r.length-1]!==u[A].startValue){if(r.length!==0){s.push(new mapfish.ColorRgb(240,240,240));v.push("")}r.push(u[A].startValue)}s.push(new mapfish.ColorRgb());s[s.length-1].setFromHex(u[A].color);v.push(u[A].name);r.push(u[A].endValue)}x.legendSet.names=v;x.legendSet.bounds=r;x.legendSet.colors=s;w()}})}else{w()}};p=function(r){q.viewport.eastRegion.doLayout();j.legendPanel.expand();j.setLayerOpacity(r.opacity);if(j.item){j.item.setValue(true)}if(j.filterWindow&&j.filterWindow.isVisible()){j.filterWindow.filter()}if(n.updateGui&&Ext.isObject(j.widget)){j.widget.setGui(r)}if(n.zoomToVisibleExtent){i.zoomToVisibleExtent()}if(n.hideMask){i.mask.hide()}if(n.callBack){n.callBack(j)}else{q.map=null;if(q.viewport.shareButton){q.viewport.shareButton.enable()}}if(GIS.isSessionStorage){q.util.layout.setSessionStorage("map",q.util.layout.getAnalytical())}};n={compare:false,updateGui:false,zoomToVisibleExtent:false,hideMask:false,callBack:null,load:function(r){q.olmap.mask.show();if(this.compare){k(r,true)}else{m(r)}},loadData:l,loadLegend:h};return n};GIS.core.getInstance=function(n){var k={},i={},l={},j={},m=[],h={};(function(){k.finals={url:{path_commons:"/dhis-web-commons-ajax-json/"},layer:{type_base:"base",type_vector:"vector",category_thematic:"thematic"},dimension:{data:{id:"data",value:"data",param:"dx",dimensionName:"dx",objectName:"dx"},category:{name:GIS.i18n.categories,dimensionName:"co",objectName:"co"},indicator:{id:"indicator",value:"indicators",param:"in",dimensionName:"dx",objectName:"in"},dataElement:{id:"dataElement",value:"dataElement",param:"de",dimensionName:"dx",objectName:"de"},operand:{id:"operand",value:"operand",param:"dc",dimensionName:"dx",objectName:"dc"},dataSet:{value:"dataSets",dimensionName:"dx",objectName:"ds"},period:{id:"period",value:"period",param:"pe",dimensionName:"pe",objectName:"pe"},organisationUnit:{id:"organisationUnit",value:"organisationUnit",param:"ou",dimensionName:"ou",objectName:"ou"},value:{id:"value",value:"value",param:"value",dimensionName:"value",objectName:"value"}},widget:{value:"value",legendtype_automatic:"automatic",legendtype_predefined:"predefined",symbolizer_color:"color",symbolizer_image:"image",loadtype_organisationunit:"organisationUnit",loadtype_data:"data",loadtype_legend:"legend"},openLayers:{point_classname:"OpenLayers.Geometry.Point"},mapfish:{classify_with_bounds:1,classify_by_equal_intervals:2,classify_by_quantils:3},root:{id:"root"}};k.layout={widget:{item_width:288,itemlabel_width:95,window_width:306},tool:{item_width:228,itemlabel_width:95,window_width:250},grid:{row_height:27},layer:{opacity:0.8}};k.period={periodTypes:[{id:"relativePeriods",name:GIS.i18n.relative},{id:"Daily",name:GIS.i18n.daily},{id:"Weekly",name:GIS.i18n.weekly},{id:"Monthly",name:GIS.i18n.monthly},{id:"BiMonthly",name:GIS.i18n.bimonthly},{id:"Quarterly",name:GIS.i18n.quarterly},{id:"SixMonthly",name:GIS.i18n.sixmonthly},{id:"SixMonthlyApril",name:GIS.i18n.sixmonthly_april},{id:"Yearly",name:GIS.i18n.yearly},{id:"FinancialOct",name:GIS.i18n.financial_oct},{id:"FinancialJuly",name:GIS.i18n.financial_july},{id:"FinancialApril",name:GIS.i18n.financial_april}],relativePeriods:[{id:"LAST_WEEK",name:GIS.i18n.last_week},{id:"LAST_MONTH",name:GIS.i18n.last_month},{id:"LAST_BIMONTH",name:GIS.i18n.last_bimonth},{id:"LAST_QUARTER",name:GIS.i18n.last_quarter},{id:"LAST_SIX_MONTH",name:GIS.i18n.last_sixmonth},{id:"LAST_FINANCIAL_YEAR",name:GIS.i18n.last_financial_year},{id:"THIS_YEAR",name:GIS.i18n.this_year},{id:"LAST_YEAR",name:GIS.i18n.last_year}],relativePeriodsMap:{LAST_WEEK:{id:"LAST_WEEK",name:GIS.i18n.last_week},LAST_MONTH:{id:"LAST_MONTH",name:GIS.i18n.last_month},LAST_BIMONTH:{id:"LAST_BIMONTH",name:GIS.i18n.last_bimonth},LAST_QUARTER:{id:"LAST_QUARTER",name:GIS.i18n.last_quarter},LAST_SIX_MONTH:{id:"LAST_SIX_MONTH",name:GIS.i18n.last_sixmonth},LAST_FINANCIAL_YEAR:{id:"LAST_FINANCIAL_YEAR",name:GIS.i18n.last_financial_year},THIS_YEAR:{id:"THIS_YEAR",name:GIS.i18n.this_year},LAST_YEAR:{id:"LAST_YEAR",name:GIS.i18n.last_year}},integratedRelativePeriodsMap:{LAST_WEEK:"LAST_WEEK",LAST_4_WEEKS:"LAST_WEEK",LAST_12_WEEKS:"LAST_WEEK",LAST_MONTH:"LAST_MONTH",LAST_3_MONTHS:"LAST_MONTH",LAST_12_MONTHS:"LAST_MONTH",LAST_BIMONTH:"LAST_BIMONTH",LAST_6_BIMONTHS:"LAST_BIMONTH",LAST_QUARTER:"LAST_QUARTER",LAST_4_QUARTERS:"LAST_QUARTER",LAST_SIX_MONTH:"LAST_SIX_MONTH",LAST_2_SIXMONTHS:"LAST_SIX_MONTH",LAST_FINANCIAL_YEAR:"LAST_FINANCIAL_YEAR",LAST_5_FINANCIAL_YEARS:"LAST_FINANCIAL_YEAR",THIS_YEAR:"THIS_YEAR",LAST_YEAR:"LAST_YEAR",LAST_5_YEARS:"LAST_YEAR"}};k.url={};k.url.analysisFields=["*","columns[dimension,filter,items[id,"+n.namePropertyUrl+"]]","rows[dimension,filter,items[id,"+n.namePropertyUrl+"]]","filters[dimension,filter,items[id,"+n.namePropertyUrl+"]]","!lastUpdated","!href","!created","!publicAccess","!rewindRelativePeriods","!userOrganisationUnit","!userOrganisationUnitChildren","!userOrganisationUnitGrandChildren","!externalAccess","!access","!relativePeriods","!columnDimensions","!rowDimensions","!filterDimensions","!user","!organisationUnitGroups","!itemOrganisationUnitGroups","!userGroupAccesses","!indicators","!dataElements","!dataElementOperands","!dataElementGroups","!dataSets","!periods","!organisationUnitLevels","!organisationUnits","!sortOrder","!topLimit"];k.url.mapFields=[k.url.analysisFields.join(","),"mapViews["+k.url.analysisFields.join(",")+"]"];k.url.mapLegendFields=["*","!created","!lastUpdated","!displayName","!externalAccess","!access","!userGroupAccesses"];k.url.mapLegendSetFields=["id,name,mapLegends["+k.url.mapLegendFields.join(",")+"]"]}());(function(){i.map={};i.map.getVisibleVectorLayers=function(){var q=[];for(var p=0,o;p<h.olmap.layers.length;p++){o=h.olmap.layers[p];if(o.layerType===k.finals.layer.type_vector&&o.visibility&&o.features.length){q.push(o)}}return q};i.map.getRenderedVectorLayers=function(){var q=[];for(var p=0,o;p<h.olmap.layers.length;p++){o=h.olmap.layers[p];if(o.layerType===k.finals.layer.type_vector&&o.features.length){q.push(o)}}return q};i.map.getExtendedBounds=function(q){var p=null;if(q.length){p=q[0].getDataExtent();if(q.length>1){for(var o=1;o<q.length;o++){p.extend(q[o].getDataExtent())}}}return p};i.map.zoomToVisibleExtent=function(p){var o=i.map.getExtendedBounds(i.map.getVisibleVectorLayers(p));if(o){p.zoomToExtent(o)}};i.map.getTransformedFeatureArray=function(r){var o=new OpenLayers.Projection("EPSG:4326"),p=new OpenLayers.Projection("EPSG:900913");for(var q=0;q<r.length;q++){r[q].geometry.transform(o,p)}return r};i.geojson={};i.geojson.decode=function(u,v){var q={type:"FeatureCollection",crs:{type:"EPSG",properties:{code:"4326"}},features:[]};v=v||"ASC";u=i.array.sort(u,v,"le");for(var r=0,t,p="",o="";r<u.length;r++){t=u[r];if(Ext.isString(t.pg)&&t.pg.length){var s=Ext.Array.clean(t.pg.split("/"));if(s.length>=2){p=s[s.length-2]}if(s.length>2){o="/"+s.slice(0,s.length-2).join("/")}}q.features.push({type:"Feature",geometry:{type:parseInt(t.ty)===1?"Point":"MultiPolygon",coordinates:JSON.parse(t.co)},properties:{id:t.id,name:t.na,hasCoordinatesDown:t.hcd,hasCoordinatesUp:t.hcu,level:t.le,grandParentParentGraph:o,grandParentId:p,parentGraph:t.pg,parentId:t.pi,parentName:t.pn}})}return q};i.gui={};i.gui.combo={};i.gui.combo.setQueryMode=function(o,q){for(var p=0;p<o.length;p++){o[p].queryMode=q}};i.object={};i.object.getLength=function(o){var q=0;for(var p in o){if(o.hasOwnProperty(p)){q++}}return q};i.array={};i.array.sort=function(q,p,o){if(!i.object.getLength(q)){return q}o=o||"name";q.sort(function(s,r){if(Ext.isObject(s)&&Ext.isObject(r)&&o){s=s[o];r=r[o]}if(Ext.isString(s)&&Ext.isString(r)){s=s.toLowerCase();r=r.toLowerCase();if(p==="DESC"){return s<r?1:(s>r?-1:0)}else{return s<r?-1:(s>r?1:0)}}else{if(Ext.isNumber(s)&&Ext.isNumber(r)){return p==="DESC"?r-s:s-r}}return 0});return q};i.layout={};i.layout.getAnalytical=function(t){var s,r;if(Ext.isObject(t)&&Ext.isArray(t.mapViews)&&t.mapViews.length){for(var q=0,o,u;q<t.mapViews.length;q++){o=t.mapViews[q];u=o.layer;if(h.layer.hasOwnProperty(u)&&h.layer[u].layerCategory===h.conf.finals.layer.category_thematic){s=h.api.layout.Layout(o);if(s){return s}}}}else{for(var p in h.layer){if(h.layer.hasOwnProperty(p)&&h.layer[p].layerCategory===h.conf.finals.layer.category_thematic&&h.layer[p].core.view){r=h.layer[p];s=h.api.layout.Layout(r.core.view);if(s){if(!s.parentGraphMap&&r.widget){s.parentGraphMap=r.widget.getParentGraphMap()}return s}}}}return};i.layout.getPluginConfig=function(){var r=h.util.map.getVisibleVectorLayers(),q={};if(h.map){return h.map}q.mapViews=[];for(var p=0,o;p<r.length;p++){o=r[p];if(o.core.view){o.core.view.layer=o.id;q.mapViews.push(o.core.view)}}return q};i.layout.setSessionStorage=function(r,q,p){if(GIS.isSessionStorage){var o=JSON.parse(sessionStorage.getItem("dhis2"))||{};o[r]=q;sessionStorage.setItem("dhis2",JSON.stringify(o));if(Ext.isString(p)){window.location.href=p}}};i.layout.getDataDimensionsFromLayout=function(s){var r=Ext.Array.clean([].concat(s.columns||[],s.rows||[],s.filters||[])),q=["pe","ou"],o=[];for(var p=0;p<r.length;p++){if(!Ext.Array.contains(q,r[p].dimension)){o.push(r[p])}}return o};i.layer={};i.layer.setFeatureLabelStyle=function(s,u,v,o){for(var r=0,q,t,p;r<s.features.length;r++){q=s.features[r];t=q.style;if(u){t.label=q.attributes.label;t.fontColor=t.strokeColor;t.fontWeight=t.strokeWidth>1?"bold":"normal";t.labelAlign="cr";t.labelYOffset=13;if(o.labelFontSize){t.fontSize=o.labelFontSize}if(o.labelFontStyle){t.fontStyle=o.labelFontStyle}}else{t.label=null}}if(!v){s.redraw()}}}());h.init=n;h.conf=k;h.util=i;(function(){var o=h.conf.finals.dimension;l.layout={};l.response={};l.layout.Record=function(q){var p={};return function(){if(!Ext.isObject(q)){console.log("Record config is not an object",q);return}if(!Ext.isString(q.id)){console.log("Record id is not text",q);return}p.id=q.id.replace("#",".");if(Ext.isString(q.name)){p.name=q.name}return Ext.clone(p)}()};l.layout.Dimension=function(p){var q={};return function(){if(!Ext.isObject(p)){return}if(!Ext.isString(p.dimension)){console.log("Dimension name is not text",p);return}if(p.dimension!==k.finals.dimension.category.objectName){var r=[];if(!Ext.isArray(p.items)){console.log("Dimension items is not an array",p);return}for(var s=0;s<p.items.length;s++){record=l.layout.Record(p.items[s]);if(record){r.push(record)}}p.items=r;if(!p.items.length){console.log("Dimension has no valid items",p);return}}q.dimension=p.dimension;q.items=p.items;return Ext.clone(q)}()};l.layout.Layout=function(q){var q=Ext.clone(q),r={},p,s;p=function(w){var u=[];if(!(w&&Ext.isArray(w)&&w.length)){return}for(var t=0,v;t<w.length;t++){v=l.layout.Dimension(w[t]);if(v){u.push(v)}}w=u;return w.length?w:null};s=function(v){var x=Ext.Array.clean([].concat(v.columns||[],v.rows||[],v.filters||[])),z=k.period.integratedRelativePeriodsMap,u,A,t;for(var w=0,y;w<x.length;w++){y=x[w];if(y.dimension===o.indicator.objectName||y.dimension===o.dataElement.objectName||y.dimension===o.operand.objectName||y.dimension===o.dataSet.objectName){u=y}else{if(y.dimension===o.period.objectName){A=y}else{if(y.dimension===o.organisationUnit.objectName){t=y}}}}if(!t){alert("No organisation units specified");return}if(u){u.items=[u.items[0]]}if(A){A.items=[A.items[0]];A.items[0].id=z[A.items[0].id]?z[A.items[0].id]:A.items[0].id}v.columns=[u];v.rows=[t];v.filters=[A];return v};return function(){var z=[],y=[],B=k.finals.dimension,u=isOu=false,t=false,C=false;q=s(q);if(!q){return}q.columns=p(q.columns);q.rows=p(q.rows);q.filters=p(q.filters);if(!q.rows){console.log("Organisation unit dimension is invalid",q.rows);return}if(Ext.Array.contains([h.layer.thematic1.id,h.layer.thematic2.id,h.layer.thematic3.id,h.layer.thematic4.id],q.layer)){if(!q.columns){return}}for(var w=0,x,A=Ext.Array.clean([].concat(q.columns,q.rows,q.filters));w<A.length;w++){x=A[w];if(x){if(Ext.isString(x.dimension)){y.push(x.dimension)}if(x.dimension===B.organisationUnit.objectName&&Ext.isArray(x.items)){for(var v=0;v<x.items.length;v++){if(x.items[v].id==="USER_ORGUNIT"){isOu=true}else{if(x.items[v].id==="USER_ORGUNIT_CHILDREN"){t=true}else{if(x.items[v].id==="USER_ORGUNIT_GRANDCHILDREN"){C=true}}}}}}}r.columns=q.columns;r.rows=q.rows;r.filters=q.filters;r.layer=Ext.isString(q.layer)&&!Ext.isEmpty(q.layer)?q.layer:"thematic1";r.classes=Ext.isNumber(q.classes)&&!Ext.isEmpty(q.classes)?q.classes:5;r.method=Ext.isNumber(q.method)&&!Ext.isEmpty(q.method)?q.method:2;r.colorLow=Ext.isString(q.colorLow)&&!Ext.isEmpty(q.colorLow)?q.colorLow:"ff0000";r.colorHigh=Ext.isString(q.colorHigh)&&!Ext.isEmpty(q.colorHigh)?q.colorHigh:"00ff00";r.radiusLow=Ext.isNumber(q.radiusLow)&&!Ext.isEmpty(q.radiusLow)?q.radiusLow:5;r.radiusHigh=Ext.isNumber(q.radiusHigh)&&!Ext.isEmpty(q.radiusHigh)?q.radiusHigh:15;r.opacity=Ext.isNumber(q.opacity)&&!Ext.isEmpty(q.opacity)?q.opacity:h.conf.layout.layer.opacity;r.areaRadius=q.areaRadius;r.labels=!!q.labels;r.labelFontSize=q.labelFontSize||"11px";r.labelFontSize=parseInt(r.labelFontSize)+"px";r.labelFontWeight=Ext.isString(q.labelFontWeight)||Ext.isNumber(q.labelFontWeight)?q.labelFontWeight:"normal";r.labelFontWeight=Ext.Array.contains(["normal","bold","bolder","lighter"],r.labelFontWeight)?r.labelFontWeight:"normal";r.labelFontWeight=Ext.isNumber(parseInt(r.labelFontWeight))&&parseInt(r.labelFontWeight)<=1000?r.labelFontWeight.toString():r.labelFontWeight;r.labelFontStyle=Ext.Array.contains(["normal","italic","oblique"],q.labelFontStyle)?q.labelFontStyle:"normal";r.labelFontColor=Ext.isString(q.labelFontColor)||Ext.isNumber(q.labelFontColor)?q.labelFontColor:"normal";r.labelFontColor=Ext.isNumber(r.labelFontColor)?r.labelFontColor.toString():r.labelFontColor;r.labelFontColor=r.labelFontColor.charAt(0)!=="#"?"#"+r.labelFontColor:r.labelFontColor;r.hidden=!!q.hidden;r.userOrganisationUnit=isOu;r.userOrganisationUnitChildren=t;r.userOrganisationUnitGrandChildren=C;r.parentGraphMap=Ext.isObject(q.parentGraphMap)?q.parentGraphMap:null;r.legendSet=q.legendSet;r.organisationUnitGroupSet=q.organisationUnitGroupSet;return r}()};l.response.Header=function(p){var q={};return function(){if(!Ext.isObject(p)){console.log("Header is not an object",p);return}if(!Ext.isString(p.name)){console.log("Header name is not text",p);return}if(!Ext.isBoolean(p.meta)){console.log("Header meta is not boolean",p);return}q.name=p.name;q.meta=p.meta;return Ext.clone(q)}()};l.response.Response=function(q){var p={};return function(){var s=[];if(!(q&&Ext.isObject(q))){alert("Data response invalid",q);return false}if(!(q.headers&&Ext.isArray(q.headers))){alert("Data response invalid",q);return false}for(var r=0,t;r<q.headers.length;r++){t=l.response.Header(q.headers[r]);if(t){s.push(t)}}q.headers=s;if(!q.headers.length){alert("No valid response headers",q);return}if(!(Ext.isArray(q.rows)&&q.rows.length>0)){alert("No values found",q);return false}if(q.headers.length!==q.rows[0].length){alert("Data invalid",q);return false}p.headers=q.headers;p.metaData=q.metaData;p.width=q.width;p.height=q.height;p.rows=q.rows;return p}()}}());h.api=l;h.store=j;h.olmap=GIS.core.getOLMap(h);h.layer=GIS.core.getLayers(h);h.thematicLayers=[h.layer.thematic1,h.layer.thematic2,h.layer.thematic3,h.layer.thematic4];if(window.google){m.push(h.layer.googleStreets,h.layer.googleHybrid)}m.push(h.layer.openStreetMap,h.layer.thematic4,h.layer.thematic3,h.layer.thematic2,h.layer.thematic1,h.layer.boundary,h.layer.facility,h.layer.event);h.olmap.addLayers(m);GIS.core.instances.push(h);return h};(function(){window.mapfish={_scriptName:"MapFish.js",_getScriptLocation:function(){if(window.gMfLocation){return window.gMfLocation}var s="";var t=mapfish._scriptName;var h=document.getElementsByTagName("script");for(var r=0;r<h.length;r++){var u=h[r].getAttribute("src");if(u){var q=u.lastIndexOf(t);if((q>-1)&&(q+t.length==u.length)){s=u.slice(0,-t.length);break}}}return s}};var o=new Array("core/Color.js","core/GeoStat.js","core/GeoStat/Boundary.js","core/GeoStat/Thematic1.js","core/GeoStat/Thematic2.js","core/GeoStat/Facility.js","core/GeoStat/Symbol.js","core/Util.js");var p="";var n=mapfish._getScriptLocation();for(var j=0;j<o.length;j++){if(/MSIE/.test(navigator.userAgent)||/Safari/.test(navigator.userAgent)){var m="<script src='"+n+o[j]+"'><\/script>";p+=m}else{var l=document.createElement("script");l.src=n+o[j];var k=document.getElementsByTagName("head").length?document.getElementsByTagName("head")[0]:document.body;k.appendChild(l)}}if(p){}mapfish.Color=OpenLayers.Class({getColorRgb:function(){}});mapfish.ColorRgb=OpenLayers.Class(mapfish.Color,{redLevel:null,greenLevel:null,blueLevel:null,initialize:function(q,i,h){this.redLevel=q;this.greenLevel=i;this.blueLevel=h},equals:function(h){return h.redLevel==this.redLevel&&h.greenLevel==this.greenLevel&&h.blueLevel==this.blueLevel},getColorRgb:function(){return this},getRgbArray:function(){return[this.redLevel,this.greenLevel,this.blueLevel]},hex2rgbArray:function(h){if(h.charAt(0)=="#"){h=h.substr(1)}var q=[parseInt(h.substring(0,2),16),parseInt(h.substring(2,4),16),parseInt(h.substring(4,6),16)];for(var r=0;r<q.length;r++){if(q[r]<0||q[r]>255){OpenLayers.Console.error("Invalid rgb hex color string: rgbHexString")}}return q},setFromHex:function(h){var i=this.hex2rgbArray(h);this.redLevel=i[0];this.greenLevel=i[1];this.blueLevel=i[2]},setFromRgb:function(i){var h=dojo.colorFromString(i);this.redLevel=h.r;this.greenLevel=h.g;this.blueLevel=h.b},toHexString:function(){var q=this.toHex(this.redLevel);var i=this.toHex(this.greenLevel);var h=this.toHex(this.blueLevel);return"#"+q+i+h},toHex:function(t){var q="0123456789ABCDEF";if(t<0||t>255){var s="Invalid decimal value for color level";OpenLayers.Console.error(s)}var r=Math.floor(t/16);var h=t%16;return q.charAt(r)+q.charAt(h)},CLASS_NAME:"mapfish.ColorRgb"});mapfish.ColorRgb.getColorsArrayByRgbInterpolation=function(x,s,u){var y=[];var q=x.getColorRgb();var h=s.getColorRgb();var w=q.getRgbArray();var v=h.getRgbArray();if(u==1){return[q]}for(var t=0;t<u;t++){var r=[];r[0]=w[0]+t*(v[0]-w[0])/(u-1);r[1]=w[1]+t*(v[1]-w[1])/(u-1);r[2]=w[2]+t*(v[2]-w[2])/(u-1);y[t]=new mapfish.ColorRgb(parseInt(r[0]),parseInt(r[1]),parseInt(r[2]))}return y};mapfish.Util={};mapfish.Util.sum=function(r){for(var h=0,q=0;h<r.length;q+=r[h++]){}return q};mapfish.Util.max=function(h){return Math.max.apply({},h)};mapfish.Util.min=function(h){return Math.min.apply({},h)};mapfish.Util.getIconUrl=function(i,h){if(!h.layer){OpenLayers.Console.warn("Missing required layer option in mapfish.Util.getIconUrl");return""}if(!h.rule){h.rule=h.layer}if(i.indexOf("?")<0){i+="?"}else{if(i.lastIndexOf("&")!=(i.length-1)){if(i.indexOf("?")!=(i.length-1)){i+="&"}}}var h=OpenLayers.Util.extend({layer:"",rule:"",service:"WMS",version:"1.1.1",request:"GetLegendGraphic",format:"image/png",width:16,height:16},h);h=OpenLayers.Util.upperCaseObject(h);return i+OpenLayers.Util.getParameterString(h)};mapfish.Util.arrayEqual=function(q,h){if(q==null||h==null){return false}if(typeof(q)!="object"||typeof(h)!="object"){return false}if(q.length!=h.length){return false}for(var r=0;r<q.length;r++){if(typeof(q[r])!=typeof(h[r])){return false}if(q[r]!=h[r]){return false}}return true};mapfish.Util.isIE7=function(){var h=navigator.userAgent.toLowerCase();return h.indexOf("msie 7")>-1};mapfish.Util.relativeToAbsoluteURL=function(q){if(/^\w+:/.test(q)||!q){return q}var i=location.protocol+"//"+location.host;if(q.indexOf("/")==0){return i+q}var r=location.pathname.replace(/\/[^\/]*$/,"");return i+r+"/"+q};mapfish.Util.fixArray=function(h){if(h==""||h==null){return[]}else{if(h instanceof Array){return h}else{return h.split(",")}}};mapfish.GeoStat=OpenLayers.Class({layer:null,format:null,url:null,requestSuccess:function(h){},requestFailure:function(h){},indicator:null,defaultSymbolizer:{},legendDiv:null,initialize:function(q,h){this.map=q;this.addOptions(h);if(!this.layer){var i=new OpenLayers.Layer.Vector("geostat",{displayInLayerSwitcher:false,visibility:false});q.addLayer(i);this.layer=i}this.setUrl(this.url);this.legendDiv=Ext.get(h.legendDiv)},setUrl:function(h){this.url=h;if(this.url){OpenLayers.Request.GET({url:this.url,scope:this,success:this.requestSuccess,failure:this.requestFailure})}},getColors:function(h,q){var r=new mapfish.ColorRgb(),i=new mapfish.ColorRgb();r.setFromHex(h);i.setFromHex(q);return[r,i]},addOptions:function(h){if(h){if(!this.options){this.options={}}OpenLayers.Util.extend(this.options,h);OpenLayers.Util.extend(this,h)}},extendStyle:function(r,q,h){var i=this.layer.styleMap.styles["default"];if(r){i.rules=r}if(q){i.setDefaultStyle(OpenLayers.Util.applyDefaults(q,i.defaultStyle))}if(h){if(!i.context){i.context={}}OpenLayers.Util.extend(i.context,h)}},applyClassification:function(h){this.layer.renderer.clear();this.layer.redraw();this.updateLegend();this.layer.setVisibility(true)},showDetails:function(h){},hideDetails:function(h){},CLASS_NAME:"mapfish.GeoStat"});mapfish.GeoStat.Distribution=OpenLayers.Class({labelGenerator:function(i,r,s){var h=parseFloat(i.lowerBound).toFixed(1),q=parseFloat(i.upperBound).toFixed(1);return h+" - "+q+"&nbsp;&nbsp;("+i.nbVal+")"},values:null,nbVal:null,minVal:null,maxVal:null,initialize:function(h,i){OpenLayers.Util.extend(this,i);this.values=h;this.nbVal=h.length;this.minVal=this.nbVal?mapfish.Util.min(this.values):0;this.maxVal=this.nbVal?mapfish.Util.max(this.values):0},classifyWithBounds:function(h){var y=[];var v=[];var x=[];for(var u=0;u<this.values.length;u++){x.push(this.values[u])}x.sort(function(z,i){return z-i});var w=h.length-1;for(var t=0;t<w;t++){v[t]=0}for(var s=0;s<w-1;s){if(x[0]<h[s+1]){v[s]=v[s]+1;x.shift()}else{s++}}v[w-1]=this.nbVal-mapfish.Util.sum(v);for(var r=0;r<w;r++){y[r]=new mapfish.GeoStat.Bin(v[r],h[r],h[r+1],r==(w-1));var q=this.labelGenerator||this.defaultLabelGenerator;y[r].label=q(y[r],r,w)}return new mapfish.GeoStat.Classification(y)},classifyByEqIntervals:function(r){var q=[];for(var h=0;h<=r;h++){q[h]=this.minVal+h*(this.maxVal-this.minVal)/r}return this.classifyWithBounds(q)},classifyByQuantils:function(t){var h=this.values;h.sort(function(v,u){return v-u});var s=Math.round(this.values.length/t);var r=[];var q=(s===0)?0:s;if(h.length>0){r[0]=h[0];for(j=1;j<t;j++){r[j]=h[q];q+=s}r.push(h[h.length-1])}for(var i=0;i<r.length;i++){r[i]=parseFloat(r[i])}return this.classifyWithBounds(r)},sturgesRule:function(){return Math.floor(1+3.3*Math.log(this.nbVal,10))},classify:function(r,q,h){var i=null;if(!q){q=this.sturgesRule()}switch(parseFloat(r)){case mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS:i=this.classifyWithBounds(h);break;case mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS:i=this.classifyByEqIntervals(q);break;case mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS:i=this.classifyByQuantils(q);break;default:OpenLayers.Console.error("Unsupported or invalid classification method")}return i},CLASS_NAME:"mapfish.GeoStat.Distribution"});mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS=1;mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS=2;mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS=3;mapfish.GeoStat.Bin=OpenLayers.Class({label:null,nbVal:null,lowerBound:null,upperBound:null,isLast:false,initialize:function(q,r,i,h){this.nbVal=q;this.lowerBound=r;this.upperBound=i;this.isLast=h},CLASS_NAME:"mapfish.GeoStat.Bin"});mapfish.GeoStat.Classification=OpenLayers.Class({bins:[],initialize:function(h){this.bins=h},getBoundsArray:function(){var q=[];for(var h=0;h<this.bins.length;h++){q.push(this.bins[h].lowerBound)}if(this.bins.length>0){q.push(this.bins[this.bins.length-1].upperBound)}return q},CLASS_NAME:"mapfish.GeoStat.Classification"});mapfish.GeoStat.Facility=OpenLayers.Class(mapfish.GeoStat,{classification:null,gis:null,view:null,featureStore:Ext.create("Ext.data.Store",{fields:["id","name"],features:[],loadFeatures:function(q){if(q&&q.length){var r=[];for(var h=0;h<q.length;h++){r.push([q[h].attributes.id,q[h].attributes.name])}this.loadData(r);this.sortStore();this.features=q}else{this.removeAll()}},sortStore:function(){this.sort("name","ASC")}}),initialize:function(i,h){mapfish.GeoStat.prototype.initialize.apply(this,arguments)},getLoader:function(){return GIS.core.LayerLoaderFacility(this.gis,this.layer)},decode:function(t){var s,u,h,q={type:"FeatureCollection",crs:{type:"EPSG",properties:{code:"4326"}},features:[]};for(var r=0;r<t.length;r++){h=t[r];s={type:"Feature",geometry:{type:parseInt(h.ty)===1?"Point":"MultiPolygon",coordinates:JSON.parse(h.co)},properties:{id:h.id,name:h.na}};s.properties=Ext.Object.merge(s.properties,h.dimensions);q.features.push(s)}return q},reset:function(){this.layer.destroyFeatures();this.layer.legendPanel.update("");this.layer.legendPanel.collapse();if(this.layer.widget){this.layer.widget.reset()}},extendView:function(h,i){h=h||this.view;h.organisationUnitGroupSet=i.organisationUnitGroupSet||h.organisationUnitGroupSet;h.organisationUnitLevel=i.organisationUnitLevel||h.organisationUnitLevel;h.parentOrganisationUnit=i.parentOrganisationUnit||h.parentOrganisationUnit;h.parentLevel=i.parentLevel||h.parentLevel;h.parentGraph=i.parentGraph||h.parentGraph;h.opacity=i.opacity||h.opacity;return h},updateOptions:function(h){this.addOptions(h)},applyClassification:function(q){this.updateOptions(q);var h=this.gis.store.groupsByGroupSet.data.items;var t=new Array(h.length);for(var r=0;r<h.length;r++){var s=new OpenLayers.Rule({symbolizer:{pointRadius:8,externalGraphic:"../images/orgunitgroup/"+h[r].data.symbol},filter:new OpenLayers.Filter.Comparison({type:OpenLayers.Filter.Comparison.EQUAL_TO,property:this.indicator,value:h[r].data.name})});t[r]=s}this.extendStyle(t);mapfish.GeoStat.prototype.applyClassification.apply(this,arguments)},updateLegend:function(){var r=document.createElement("div"),s=document.createElement("div"),h=this.gis.store.groupsByGroupSet.data.items;for(var q=0;q<h.length;q++){s=document.createElement("div");s.style.backgroundImage="url(../images/orgunitgroup/"+h[q].data.symbol+")";s.style.backgroundRepeat="no-repeat";s.style.width="21px";s.style.height="16px";s.style.marginBottom="2px";s.style.cssFloat="left";r.appendChild(s);s=document.createElement("div");s.innerHTML=h[q].data.name;s.style.height="16px";s.style.lineHeight="17px";r.appendChild(s);s=document.createElement("div");s.style.clear="left";r.appendChild(s)}this.layer.legendPanel.update(r.outerHTML)},CLASS_NAME:"mapfish.GeoStat.Facility"});mapfish.GeoStat.Event=OpenLayers.Class(mapfish.GeoStat,{colors:[new mapfish.ColorRgb(120,120,0),new mapfish.ColorRgb(255,0,0)],method:mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,numClasses:5,minSize:4,maxSize:4,minVal:null,maxVal:null,defaultSymbolizer:{fillOpacity:1},classification:null,colorInterpolation:null,gis:null,view:null,featureStore:Ext.create("Ext.data.Store",{fields:["id","name"],features:[],loadFeatures:function(q){if(q&&q.length){var r=[];for(var h=0;h<q.length;h++){r.push([q[h].attributes.id,q[h].attributes.name])}this.loadData(r);this.sortStore();this.features=q}else{this.removeAll()}},sortStore:function(){this.sort("name","ASC")}}),initialize:function(i,h){mapfish.GeoStat.prototype.initialize.apply(this,arguments)},getLoader:function(){return GIS.core.LayerLoaderEvent(this.gis,this.layer)},reset:function(){this.layer.destroyFeatures();if(this.layer.widget){this.layer.widget.reset()}},extendView:function(h,i){h=h||this.view;h.organisationUnitLevel=i.organisationUnitLevel||h.organisationUnitLevel;h.parentOrganisationUnit=i.parentOrganisationUnit||h.parentOrganisationUnit;h.parentLevel=i.parentLevel||h.parentLevel;h.parentGraph=i.parentGraph||h.parentGraph;h.opacity=i.opacity||h.opacity;return h},getLegendConfig:function(){return},getImageLegendConfig:function(){return},updateOptions:function(i){var h=OpenLayers.Util.extend({},this.options);this.addOptions(i);if(i){this.setClassification()}},createColorInterpolation:function(){var h=this.classification.bins.length;this.colorInterpolation=mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0],this.colors[1],h)},setClassification:function(){var q=[];for(var r=0;r<this.layer.features.length;r++){q.push(this.layer.features[r].attributes[this.indicator])}var h={labelGenerator:this.options.labelGenerator};var s=new mapfish.GeoStat.Distribution(q,h);this.minVal=s.minVal;this.maxVal=s.maxVal;this.classification=s.classify(this.method,this.numClasses,null);this.createColorInterpolation()},applyClassification:function(h){this.updateOptions(h);var u=OpenLayers.Function.bind(function(v){var w=v.attributes[this.indicator];var i=(w-this.minVal)/(this.maxVal-this.minVal)*(this.maxSize-this.minSize)+this.minSize;return i||this.minSize},this);this.extendStyle(null,{pointRadius:"${calculateRadius}"},{calculateRadius:u});var s=this.classification.getBoundsArray();var t=new Array(s.length-1);for(var q=0;q<s.length-1;q++){var r=new OpenLayers.Rule({symbolizer:{fillColor:this.colorInterpolation[q].toHexString()},filter:new OpenLayers.Filter.Comparison({type:OpenLayers.Filter.Comparison.BETWEEN,property:this.indicator,lowerBoundary:s[q],upperBoundary:s[q+1]})});t[q]=r}this.extendStyle(t);mapfish.GeoStat.prototype.applyClassification.apply(this,arguments)},updateLegend:function(){},CLASS_NAME:"mapfish.GeoStat.Event"});mapfish.GeoStat.Boundary=OpenLayers.Class(mapfish.GeoStat,{colors:[new mapfish.ColorRgb(120,120,0),new mapfish.ColorRgb(255,0,0)],method:mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,numClasses:5,minSize:3,maxSize:20,minVal:null,maxVal:null,defaultSymbolizer:{fillOpacity:1},classification:null,colorInterpolation:null,gis:null,view:null,featureStore:Ext.create("Ext.data.Store",{fields:["id","name"],features:[],loadFeatures:function(q){if(q&&q.length){var r=[];for(var h=0;h<q.length;h++){r.push([q[h].attributes.id,q[h].attributes.name])}this.loadData(r);this.sortStore();this.features=q}else{this.removeAll()}},sortStore:function(){this.sort("name","ASC")}}),initialize:function(i,h){mapfish.GeoStat.prototype.initialize.apply(this,arguments)},getLoader:function(){return GIS.core.LayerLoaderBoundary(this.gis,this.layer)},reset:function(){this.layer.destroyFeatures();if(this.layer.widget){this.layer.widget.reset()}},extendView:function(h,i){h=h||this.view;h.organisationUnitLevel=i.organisationUnitLevel||h.organisationUnitLevel;h.parentOrganisationUnit=i.parentOrganisationUnit||h.parentOrganisationUnit;h.parentLevel=i.parentLevel||h.parentLevel;h.parentGraph=i.parentGraph||h.parentGraph;h.opacity=i.opacity||h.opacity;return h},getLegendConfig:function(){return},getImageLegendConfig:function(){return},getDefaultFeatureStyle:function(){return{fillOpacity:0,fillColor:"#000",strokeColor:"#000",strokeWidth:1,pointRadius:5,cursor:"pointer"}},setFeatureStyle:function(q){for(var h=0;h<this.layer.features.length;h++){this.layer.features[h].style=q}this.layer.redraw()},setFeatureLabelStyle:function(u,v,h){for(var s=0,r,t,q;s<this.layer.features.length;s++){r=this.layer.features[s];t=r.style;if(u){t.label=r.attributes.label;t.fontColor=t.strokeColor;t.fontWeight=t.strokeWidth>1?"bold":"normal";t.labelAlign="cr";t.labelYOffset=13;if(h.labelFontSize){t.fontSize=h.labelFontSize}if(h.labelFontStyle){t.fontStyle=h.labelFontStyle}}else{t.label=null}}if(!v){this.layer.redraw()}},updateOptions:function(i){var h=OpenLayers.Util.extend({},this.options);this.addOptions(i);if(i){this.setClassification()}},createColorInterpolation:function(){var h=this.classification.bins.length;this.colorInterpolation=mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0],this.colors[1],h)},setClassification:function(){var q=[];for(var r=0;r<this.layer.features.length;r++){q.push(this.layer.features[r].attributes[this.indicator])}var h={labelGenerator:this.options.labelGenerator};var s=new mapfish.GeoStat.Distribution(q,h);this.minVal=s.minVal;this.maxVal=s.maxVal;this.classification=s.classify(this.method,this.numClasses,null);this.createColorInterpolation()},applyClassification:function(h){this.updateOptions(h);var u=OpenLayers.Function.bind(function(v){var w=v.attributes[this.indicator];var i=(w-this.minVal)/(this.maxVal-this.minVal)*(this.maxSize-this.minSize)+this.minSize;return i||this.minSize},this);this.extendStyle(null,{pointRadius:"${calculateRadius}"},{calculateRadius:u});var s=this.classification.getBoundsArray();var t=new Array(s.length-1);for(var q=0;q<s.length-1;q++){var r=new OpenLayers.Rule({symbolizer:{fillColor:this.colorInterpolation[q].toHexString()},filter:new OpenLayers.Filter.Comparison({type:OpenLayers.Filter.Comparison.BETWEEN,property:this.indicator,lowerBoundary:s[q],upperBoundary:s[q+1]})});t[q]=r}this.extendStyle(t);mapfish.GeoStat.prototype.applyClassification.apply(this,arguments)},updateLegend:function(){},CLASS_NAME:"mapfish.GeoStat.Boundary"});mapfish.GeoStat.createThematic=function(h){mapfish.GeoStat[h]=OpenLayers.Class(mapfish.GeoStat,{colors:[new mapfish.ColorRgb(120,120,0),new mapfish.ColorRgb(255,0,0)],method:mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,numClasses:5,bounds:null,minSize:3,maxSize:20,minVal:null,maxVal:null,defaultSymbolizer:{fillOpacity:1},classification:null,colorInterpolation:null,gis:null,view:null,featureStore:Ext.create("Ext.data.Store",{fields:["id","name"],features:[],loadFeatures:function(r){if(r&&r.length){var s=[];this.features=r;for(var q=0;q<r.length;q++){s.push([r[q].attributes.id,r[q].attributes.name])}this.loadData(s);this.sortStore()}else{this.removeAll()}},sortStore:function(){this.sort("name","ASC")}}),initialize:function(q,i){mapfish.GeoStat.prototype.initialize.apply(this,arguments)},getLoader:function(){return GIS.core.LayerLoaderThematic(this.gis,this.layer)},reset:function(){this.layer.destroyFeatures();this.featureStore.loadFeatures(this.layer.features.slice(0));this.layer.legendPanel.update("");this.layer.legendPanel.collapse();if(this.layer.widget){this.layer.widget.reset()}},extendView:function(i,q){i=i||this.view;i.valueType=q.valueType||i.valueType;i.indicatorGroup=q.indicatorGroup||i.indicatorGroup;i.indicator=q.indicator||i.indicator;i.dataElementGroup=q.dataElementGroup||i.dataElementGroup;i.dataElement=q.dataElement||i.dataElement;i.periodType=q.periodType||i.periodType;i.period=q.period||i.period;i.legendType=q.legendType||i.legendType;i.legendSet=q.legendSet||i.legendSet;i.classes=q.classes||i.classes;i.method=q.method||i.method;i.colorLow=q.colorLow||i.colorLow;i.colorHigh=q.colorHigh||i.colorHigh;i.radiusLow=q.radiusLow||i.radiusLow;i.radiusHigh=q.radiusHigh||i.radiusHigh;i.organisationUnitLevel=q.organisationUnitLevel||i.organisationUnitLevel;i.parentOrganisationUnit=q.parentOrganisationUnit||i.parentOrganisationUnit;i.parentLevel=q.parentLevel||i.parentLevel;i.parentGraph=q.parentGraph||i.parentGraph;i.opacity=q.opacity||i.opacity;return i},getImageLegendConfig:function(){var t=this.classification.bins,r=this.colorInterpolation,q=[];for(var s=0;s<t.length;s++){q.push({color:r[s].toHexString(),label:t[s].lowerBound.toFixed(1)+" - "+t[s].upperBound.toFixed(1)+" ("+t[s].nbVal+")"})}return q},updateOptions:function(q){var i=OpenLayers.Util.extend({},this.options);this.addOptions(q);if(q){this.setClassification()}},createColorInterpolation:function(){var i=this.classification.bins.length;if(!this.view.legendSet){this.colorInterpolation=mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0],this.colors[1],i)}},setClassification:function(){var r=[];for(var s=0;s<this.layer.features.length;s++){r.push(this.layer.features[s].attributes[this.indicator])}var q={labelGenerator:this.options.labelGenerator};var t=new mapfish.GeoStat.Distribution(r,q);this.minVal=t.minVal;this.maxVal=t.maxVal;if(this.view.legendType===this.gis.conf.finals.widget.legendtype_predefined){if(this.bounds[0]>this.minVal){this.bounds.unshift(this.minVal);this.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240))}if(this.bounds[this.bounds.length-1]<this.maxVal){this.bounds.push(this.maxVal);this.colorInterpolation.push(new mapfish.ColorRgb(240,240,240))}}this.classification=t.classify(this.method,this.numClasses,this.bounds);this.createColorInterpolation()},applyClassification:function(q,s){this.updateOptions(q,s);var w=OpenLayers.Function.bind(function(x){var y=x.attributes[this.indicator];var i=(y-this.minVal)/(this.maxVal-this.minVal)*(this.maxSize-this.minSize)+this.minSize;return i||this.minSize},this);this.extendStyle(null,{pointRadius:"${calculateRadius}"},{calculateRadius:w});var u=this.classification.getBoundsArray();var v=new Array(u.length-1);for(var r=0;r<u.length-1;r++){var t=new OpenLayers.Rule({symbolizer:{fillColor:this.colorInterpolation[r].toHexString()},filter:new OpenLayers.Filter.Comparison({type:OpenLayers.Filter.Comparison.BETWEEN,property:this.indicator,lowerBoundary:u[r],upperBoundary:u[r+1]})});v[r]=t}this.extendStyle(v);mapfish.GeoStat.prototype.applyClassification.apply(this,arguments)},updateLegend:function(){var r=document.createElement("div"),t,s;t=document.createElement("div");t.style.height="14px";t.style.overflow="hidden";t.title=this.view.columns[0].items[0].name;t.innerHTML=this.view.columns[0].items[0].name;r.appendChild(t);t=document.createElement("div");t.style.clear="left";r.appendChild(t);t=document.createElement("div");t.style.height="14px";t.style.overflow="hidden";t.title=this.view.filters[0].items[0].name;t.innerHTML=this.view.filters[0].items[0].name;r.appendChild(t);t=document.createElement("div");t.style.clear="left";r.appendChild(t);t=document.createElement("div");t.style.width="1px";t.style.height="5px";r.appendChild(t);if(this.view.legendSet){for(var q=0;q<this.classification.bins.length;q++){t=document.createElement("div");t.style.backgroundColor=this.colorInterpolation[q].toHexString();t.style.width="30px";t.style.height=this.view.legendSet.names[q]?"25px":"20px";t.style.cssFloat="left";t.style.marginRight="8px";r.appendChild(t);t=document.createElement("div");t.style.lineHeight=this.view.legendSet.names[q]?"12px":"7px";t.innerHTML='<b style="color:#222; font-size:10px !important">'+(this.view.legendSet.names[q]||"")+"</b><br/>"+this.classification.bins[q].label;r.appendChild(t);t=document.createElement("div");t.style.clear="left";r.appendChild(t)}}else{for(var q=0;q<this.classification.bins.length;q++){t=document.createElement("div");t.style.backgroundColor=this.colorInterpolation[q].toHexString();t.style.width="30px";t.style.height="15px";t.style.cssFloat="left";t.style.marginRight="8px";r.appendChild(t);t=document.createElement("div");t.innerHTML=this.classification.bins[q].label;r.appendChild(t);t=document.createElement("div");t.style.clear="left";r.appendChild(t)}}this.layer.legendPanel.update(r.outerHTML)},CLASS_NAME:"mapfish.GeoStat."+h})};mapfish.GeoStat.createThematic("Thematic1");mapfish.GeoStat.createThematic("Thematic2");mapfish.GeoStat.createThematic("Thematic3");mapfish.GeoStat.createThematic("Thematic4")}());var f={user:{},systemInfo:{}},e=[],g=false,b=false,a,c,d;GIS.i18n={facility_layer_legend:"Facility layer legend",thematic_layer_1_legend:"Thematic layer 1 legend",thematic_layer_2_legend:"Thematic layer 2 legend",thematic_layer_3_legend:"Thematic layer 3 legend",thematic_layer_4_legend:"Thematic layer 4 legend",measure_distance:"Measure distance"};GIS.plugin={};a=function(h){var n=false,m=[],l=0,k;f.contextPath=h;k=function(){if(++l===m.length){b=true;for(var o=0;o<e.length;o++){d(e[o])}e=[]}};m.push({url:h+"/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat",success:function(o){var i=o;f.systemInfo.dateFormat=Ext.isString(i.keyDateFormat)?i.keyDateFormat.toLowerCase():"yyyy-mm-dd";f.systemInfo.calendar=i.keyCalendar;Ext.data.JsonP.request({url:h+"/api/me/user-account.jsonp",success:function(p){f.userAccount=p;Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/jQuery/jquery.min.js",function(){Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/dhis2/dhis2.util.js",function(){Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.js",function(){Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js",function(){Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js",function(){Ext.Loader.injectScriptElement(h+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js",function(){var v="en",t="name",s,u,r,q;f.userAccount.settings.keyUiLocale=f.userAccount.settings.keyUiLocale||v;f.userAccount.settings.keyAnalysisDisplayProperty=f.userAccount.settings.keyAnalysisDisplayProperty||t;u=f.contextPath;r=f.userAccount.settings.keyUiLocale;keyAnalysisDisplayProperty=f.userAccount.settings.keyAnalysisDisplayProperty;s=keyAnalysisDisplayProperty===t?keyAnalysisDisplayProperty:keyAnalysisDisplayProperty+"|rename("+t+")";q=f.systemInfo.dateFormat;f.namePropertyUrl=s;dhis2.util.namespace("dhis2.er");dhis2.er.store=dhis2.er.store||new dhis2.storage.Store({name:"dhis2",adapters:[dhis2.storage.IndexedDBAdapter,dhis2.storage.DomSessionStorageAdapter,dhis2.storage.InMemoryAdapter],objectStores:["optionSets"]});Ext.data.JsonP.request({url:u+"/api/optionSets.jsonp?fields=id,version&paging=false",success:function(B){var A=B.optionSets||[],w=dhis2.er.store,y=[],x="",z=0,D,C;C=function(){if(++z===A.length){if(!y.length){k();return}for(var E=0;E<y.length;E++){x+="&filter=id:eq:"+y[E]}Ext.data.JsonP.request({url:u+"/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false"+x,success:function(G){var F=G.optionSets;w.setAll("optionSets",F).done(k)}})}};registerOptionSet=function(E){w.get("optionSets",E.id).done(function(F){if(!Ext.isObject(F)||F.version!==E.version){y.push(E.id)}C()})};w.open().done(function(){for(var E=0;E<A.length;E++){registerOptionSet(A[E])}})}})})})})})})})}})}});m.push({url:h+"/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false",success:function(s){var q=s.organisationUnits||[],p=[],t=[];if(q.length){for(var o=0,u;o<q.length;o++){u=q[o];p.push(u.id);if(u.children){t=Ext.Array.clean(t.concat(Ext.Array.pluck(u.children,"id")||[]))}}f.user=f.user||{};f.user.ou=p;f.user.ouc=t}else{alert("User is not assigned to any organisation units")}k()}});m.push({url:h+"/api/dimensions.jsonp?links=false&paging=false",success:function(i){f.dimensions=i.dimensions;k()}});for(var j=0;j<m.length;j++){Ext.data.JsonP.request(m[j])}};c=function(){var h=".gis-plugin, .gis-plugin * { font-family: arial, sans-serif, liberation sans, consolas; } \n";h+=".x-panel-body, .x-window-body * { font-size: 11px; } \n";h+=".x-panel-header { height: 30px; padding: 7px 4px 4px 7px; border: 0 none; } \n";h+=".gis-container-default .x-window-body { padding: 5px; background: #fff; } \n";h+=".olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n";h+='.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';h+=".olControlPanel.zoomIn { right: 72px; } \n";h+=".olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n";h+=".olControlPanel.zoomOut { right: 48px; } \n";h+=".olControlPanel.zoomVisible { right: 24px; } \n";h+=".olControlPermalink { display: none !important; } \n";h+='.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 2px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';h+=".olControlMousePosition * { font-size: 10px !important; } \n";h+=".text-mouseposition-lonlat { color: #555; } \n";h+=".olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n";h+='#google-logo { background: url("'+f.contextPath+'/dhis-web-mapping/images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';h+=".olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n";h+=".olControlScaleLineBottom { display: none; } \n";h+=".olControlScaleLineTop { font-weight: bold; } \n";h+=".x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n";h+=".x-mask-msg div { background-position: 11px center; } \n";h+=".x-mask-msg .x-mask-loading { border: 0 none; background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n";h+=".gis-window-widget-feature { padding: 0; border: 0 none; border-radius: 0; background: transparent; box-shadow: none; } \n";h+=".gis-window-widget-feature .x-window-body-default { border: 0 none; background: transparent; } \n";h+='.gis-window-widget-feature .x-window-body-default .x-panel-body-default { border: 0 none; background: #556; opacity: 0.92; filter: alpha(opacity=92); -ms-filter: "alpha(opacity=92)"; padding: 5px 8px 5px 8px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; color: #fff; font-weight: bold; letter-spacing: 1px; } \n';h+=".x-menu-body { border:1px solid #bbb; border-radius: 2px; padding: 0; background-color: #fff !important; } \n";h+=".x-menu-item-active .x-menu-item-link {	border-radius: 0; border-color: #e1e1e1; background-color: #e1e1e1; background-image: none; } \n";h+=".x-menu-item-link { padding: 4px 5px 4px 26px; } \n";h+=".x-menu-item-text { color: #111; } \n";h+=".disabled { opacity: 0.4; cursor: default !important; } \n";h+=".el-opacity-1 { opacity: 1 !important; } \n";h+=".el-border-0, .el-border-0 .x-panel-body { border: 0 none !important; } \n";h+=".el-fontsize-10 { font-size: 10px !important; } \n";h+=".gis-grid-row-icon-disabled * { cursor: default !important; } \n";h+=".gis-toolbar-btn-menu { margin-top: 4px; } \n";h+=".gis-toolbar-btn-menu .x-panel-body-default { border-radius: 2px; border-color: #999; } \n";h+=".gis-grid .link, .gis-grid .link * { cursor: pointer; cursor: hand; color: blue; text-decoration: underline; } \n";h+=".gis-menu-item-icon-drill, .gis-menu-item-icon-float { left: 6px; } \n";h+=".gis-menu-item-first.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-top-left-radius: 2px; border-top-right-radius: 2px; } \n";h+=".gis-menu-item-last.x-menu-item-active .x-menu-item-link { border-radius: 0; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; } \n";h+='.gis-menu-item-icon-drill { \n background: url("'+f.contextPath+'/dhis-web-mapping/images/drill_16.png") no-repeat; } \n';h+='.gis-menu-item-icon-float { background: url("'+f.contextPath+'/dhis-web-mapping/images/float_16.png") no-repeat; } \n';h+=".x-color-picker a { padding: 0; } \n";h+=".x-color-picker em span { width: 14px; height: 14px; } \n";Ext.util.CSS.createStyleSheet(h)};d=function(k){var m,i,l,h,j;m=function(){if(!Ext.isString(k.url)){alert("Invalid url ("+k.el+")");return}if(k.url.split("").pop()==="/"){k.url=k.url.substr(0,k.url.length-1)}if(!Ext.isString(k.el)){alert("Invalid html element id ("+k.el+")");return}k.id=k.id||k.uid;if(k.id&&!Ext.isString(k.id)){alert("Invalid map id ("+k.el+")");return}return true};i=function(){var n,q,p,o=Ext.get(j.el);n=Ext.create("Ext.panel.Panel",{renderTo:o,width:o.getWidth(),height:o.getHeight(),cls:"gis-plugin",layout:{type:"hbox",align:"stretch"},items:[{xtype:"gx_mappanel",map:j.olmap,bodyStyle:"border:0 none",width:o.getWidth()-(j.map.hideLegend?0:200),height:o.getHeight(),listeners:{added:function(){p=this}}},{xtype:"panel",layout:"anchor",bodyStyle:"border-top:0 none; border-bottom:0 none",width:j.map.hideLegend?0:200,preventHeader:true,defaults:{bodyStyle:"padding: 6px; border: 0 none",collapsible:true,collapsed:true,animCollapse:false},items:[{title:GIS.i18n.thematic_layer_1_legend,bodyStyle:"padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;",listeners:{added:function(){j.layer.thematic1.legendPanel=this}}},{title:GIS.i18n.thematic_layer_2_legend,bodyStyle:"padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;",listeners:{added:function(){j.layer.thematic2.legendPanel=this}}},{title:GIS.i18n.thematic_layer_3_legend,bodyStyle:"padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;",listeners:{added:function(){j.layer.thematic3.legendPanel=this}}},{title:GIS.i18n.thematic_layer_4_legend,bodyStyle:"padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;",listeners:{added:function(){j.layer.thematic4.legendPanel=this}}},{title:GIS.i18n.facility_layer_legend,bodyStyle:"padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;",listeners:{added:function(){j.layer.facility.legendPanel=this}}}],listeners:{added:function(){q=this}}}],listeners:{afterrender:function(){l()}}});n.centerRegion=p;n.eastRegion=q;return n};l=function(o){var n=Ext.query(".zoomInButton").length;for(var p=0;p<n;p++){Ext.query(".zoomInButton")[p].innerHTML='<img src="'+j.init.contextPath+'/dhis-web-mapping/images/zoomin_24.png" />';Ext.query(".zoomOutButton")[p].innerHTML='<img src="'+j.init.contextPath+'/dhis-web-mapping/images/zoomout_24.png" />';Ext.query(".zoomVisibleButton")[p].innerHTML='<img src="'+j.init.contextPath+'/dhis-web-mapping/images/zoomvisible_24.png" />';Ext.query(".measureButton")[p].innerHTML='<img src="'+j.init.contextPath+'/dhis-web-mapping/images/measure_24.png" />'}if(Ext.isDefined(j.map.baseLayer)){var q=Ext.isString(j.map.baseLayer)?j.map.baseLayer.split(" ").join("").toLowerCase():j.map.baseLayer;if(!q||q==="none"||q==="off"){j.layer.googleStreets.setVisibility(false)}else{if(q==="gh"||q==="googlehybrid"){j.olmap.setBaseLayer(j.layer.googleHybrid)}else{if(q==="osm"||q==="openstreetmap"){j.olmap.setBaseLayer(j.layer.openStreetMap)}}}}};h=function(){if(!m()){return}c();j=GIS.core.getInstance(f);j.el=k.el;GIS.core.createSelectHandlers(j,j.layer.boundary);GIS.core.createSelectHandlers(j,j.layer.thematic1);GIS.core.createSelectHandlers(j,j.layer.thematic2);GIS.core.createSelectHandlers(j,j.layer.thematic3);GIS.core.createSelectHandlers(j,j.layer.thematic4);GIS.core.createSelectHandlers(j,j.layer.facility);j.map=k;j.viewport=i();j.olmap.mask=Ext.create("Ext.LoadMask",j.viewport.centerRegion.getEl(),{msg:"Loading"});GIS.core.MapLoader(j).load()}()};GIS.plugin.getMap=function(h){if(Ext.isString(h.url)&&h.url.split("").pop()==="/"){h.url=h.url.substr(0,h.url.length-1)}if(b){d(h)}else{e.push(h);if(!g){g=true;a(h.url)}}};DHIS=Ext.isObject(window.DHIS)?DHIS:{};DHIS.getMap=GIS.plugin.getMap});
+Ext.onReady( function() {
+
+	// CUSTOM
+
+	/*----------------------------------------------------------------------------
+	 * EXTJS UX custom
+	 *--------------------------------------------------------------------------*/
+
+	/* ColorButton */
+	Ext.define('Ext.ux.button.ColorButton', {
+		extend: 'Ext.button.Button',
+		alias: 'widget.colorbutton',
+		width: 109,
+		height: 22,
+		defaultValue: null,
+		value: 'f1f1f1',
+		getValue: function() {
+			return this.value;
+		},
+		setValue: function(color) {
+			this.value = color;
+			if (Ext.isDefined(this.getEl())) {
+				this.getEl().dom.style.background = '#' + color;
+			}
+		},
+		reset: function() {
+			this.setValue(this.defaultValue);
+		},
+		menu: {},
+		menuHandler: function() {},
+		initComponent: function() {
+			var that = this;
+			this.defaultValue = this.value;
+			this.menu = Ext.create('Ext.menu.Menu', {
+				showSeparator: false,
+				items: {
+					xtype: 'colorpicker',
+					closeAction: 'hide',
+					listeners: {
+						select: function(cp, color) {
+							that.setValue(color);
+							that.menu.hide();
+							that.menuHandler(cp, color);
+						}
+					}
+				}
+			});
+			this.callParent();
+		},
+		listeners: {
+			render: function() {
+				this.setValue(this.value);
+			}
+		}
+	});
+
+	/* MultiSelect */
+	Ext.define("Ext.ux.layout.component.form.MultiSelect",{extend:"Ext.layout.component.field.Field",alias:["layout.multiselectfield"],type:"multiselectfield",defaultHeight:200,sizeBodyContents:function(a,b){var c=this;if(!Ext.isNumber(b)){b=c.defaultHeight}c.owner.panel.setSize(a,b)}});
+
+	Ext.define('Ext.ux.form.MultiSelect', {
+		extend: 'Ext.form.field.Base',
+		alternateClassName: 'Ext.ux.Multiselect',
+		alias: ['widget.multiselect', 'widget.multiselectfield'],
+		uses: ['Ext.view.BoundList', 'Ext.form.FieldSet', 'Ext.ux.layout.component.form.MultiSelect', 'Ext.view.DragZone', 'Ext.view.DropZone'],
+		/**
+		 * @cfg {String} listTitle An optional title to be displayed at the top of the selection list.
+		 */
+		/**
+		 * @cfg {String/Array} dragGroup The ddgroup name(s) for the MultiSelect DragZone (defaults to undefined).
+		 */
+		/**
+		 * @cfg {String/Array} dropGroup The ddgroup name(s) for the MultiSelect DropZone (defaults to undefined).
+		 */
+		/**
+		 * @cfg {Boolean} ddReorder Whether the items in the MultiSelect list are drag/drop reorderable (defaults to false).
+		 */
+		ddReorder: false,
+		/**
+		 * @cfg {Object/Array} tbar An optional toolbar to be inserted at the top of the control's selection list.
+		 * This can be a {@link Ext.toolbar.Toolbar} object, a toolbar config, or an array of buttons/button configs
+		 * to be added to the toolbar. See {@link Ext.panel.Panel#tbar}.
+		 */
+		/**
+		 * @cfg {String} appendOnly True if the list should only allow append drops when drag/drop is enabled
+		 * (use for lists which are sorted, defaults to false).
+		 */
+		appendOnly: false,
+		/**
+		 * @cfg {String} displayField Name of the desired display field in the dataset (defaults to 'text').
+		 */
+		displayField: 'text',
+		/**
+		 * @cfg {String} valueField Name of the desired value field in the dataset (defaults to the
+		 * value of {@link #displayField}).
+		 */
+		/**
+		 * @cfg {Boolean} allowBlank False to require at least one item in the list to be selected, true to allow no
+		 * selection (defaults to true).
+		 */
+		allowBlank: true,
+		/**
+		 * @cfg {Number} minSelections Minimum number of selections allowed (defaults to 0).
+		 */
+		minSelections: 0,
+		/**
+		 * @cfg {Number} maxSelections Maximum number of selections allowed (defaults to Number.MAX_VALUE).
+		 */
+		maxSelections: Number.MAX_VALUE,
+		/**
+		 * @cfg {String} blankText Default text displayed when the control contains no items (defaults to 'This field is required')
+		 */
+		blankText: 'This field is required',
+		/**
+		 * @cfg {String} minSelectionsText Validation message displayed when {@link #minSelections} is not met (defaults to 'Minimum {0}
+		 * item(s) required'). The {0} token will be replaced by the value of {@link #minSelections}.
+		 */
+		minSelectionsText: 'Minimum {0} item(s) required',
+		/**
+		 * @cfg {String} maxSelectionsText Validation message displayed when {@link #maxSelections} is not met (defaults to 'Maximum {0}
+		 * item(s) allowed'). The {0} token will be replaced by the value of {@link #maxSelections}.
+		 */
+		maxSelectionsText: 'Maximum {0} item(s) allowed',
+		/**
+		 * @cfg {String} delimiter The string used to delimit the selected values when {@link #getSubmitValue submitting}
+		 * the field as part of a form. Defaults to ','. If you wish to have the selected values submitted as separate
+		 * parameters rather than a single delimited parameter, set this to <tt>null</tt>.
+		 */
+		delimiter: ',',
+		/**
+		 * @cfg {Ext.data.Store/Array} store The data source to which this MultiSelect is bound (defaults to <tt>undefined</tt>).
+		 * Acceptable values for this property are:
+		 * <div class="mdetail-params"><ul>
+		 * <li><b>any {@link Ext.data.Store Store} subclass</b></li>
+		 * <li><b>an Array</b> : Arrays will be converted to a {@link Ext.data.ArrayStore} internally.
+		 * <div class="mdetail-params"><ul>
+		 * <li><b>1-dimensional array</b> : (e.g., <tt>['Foo','Bar']</tt>)<div class="sub-desc">
+		 * A 1-dimensional array will automatically be expanded (each array item will be the combo
+		 * {@link #valueField value} and {@link #displayField text})</div></li>
+		 * <li><b>2-dimensional array</b> : (e.g., <tt>[['f','Foo'],['b','Bar']]</tt>)<div class="sub-desc">
+		 * For a multi-dimensional array, the value in index 0 of each item will be assumed to be the combo
+		 * {@link #valueField value}, while the value at index 1 is assumed to be the combo {@link #displayField text}.
+		 * </div></li></ul></div></li></ul></div>
+		 */
+		componentLayout: 'multiselectfield',
+		fieldBodyCls: Ext.baseCSSPrefix + 'form-multiselect-body',
+		// private
+		initComponent: function () {
+			var me = this;
+			me.bindStore(me.store, true);
+			if (me.store.autoCreated) {
+				me.valueField = me.displayField = 'field1';
+				if (!me.store.expanded) {
+					me.displayField = 'field2';
+				}
+			}
+			if (!Ext.isDefined(me.valueField)) {
+				me.valueField = me.displayField;
+			}
+			me.callParent();
+		},
+		bindStore: function (store, initial) {
+			var me = this,
+				oldStore = me.store,
+				boundList = me.boundList;
+			if (oldStore && !initial && oldStore !== store && oldStore.autoDestroy) {
+				oldStore.destroy();
+			}
+			me.store = store ? Ext.data.StoreManager.lookup(store) : null;
+			if (boundList) {
+				boundList.bindStore(store || null);
+			}
+		},
+		// private
+		onRender: function (ct, position) {
+			var me = this,
+				panel, boundList, selModel;
+			me.callParent(arguments);
+			boundList = me.boundList = Ext.create('Ext.view.BoundList', {
+				multiSelect: true,
+				store: me.store,
+				displayField: me.displayField,
+				border: false
+			});
+			selModel = boundList.getSelectionModel();
+			me.mon(selModel, {
+				selectionChange: me.onSelectionChange,
+				scope: me
+			});
+			panel = me.panel = Ext.create('Ext.panel.Panel', {
+				title: me.listTitle,
+				tbar: me.tbar,
+				items: [boundList],
+				renderTo: me.bodyEl,
+				layout: 'fit'
+			});
+			// Must set upward link after first render
+			panel.ownerCt = me;
+			// Set selection to current value
+			me.setRawValue(me.rawValue);
+		},
+		// No content generated via template, it's all added components
+		getSubTplMarkup: function () {
+			return '';
+		},
+		// private
+		afterRender: function () {
+			var me = this;
+			me.callParent();
+			if (me.ddReorder && !me.dragGroup && !me.dropGroup) {
+				me.dragGroup = me.dropGroup = 'MultiselectDD-' + Ext.id();
+			}
+			if (me.draggable || me.dragGroup) {
+				me.dragZone = Ext.create('Ext.view.DragZone', {
+					view: me.boundList,
+					ddGroup: me.dragGroup,
+					dragText: '{0} Item{1}'
+				});
+			}
+			if (me.droppable || me.dropGroup) {
+				me.dropZone = Ext.create('Ext.view.DropZone', {
+					view: me.boundList,
+					ddGroup: me.dropGroup,
+					handleNodeDrop: function (data, dropRecord, position) {
+						var view = this.view,
+							store = view.getStore(),
+							records = data.records,
+							index;
+						// remove the Models from the source Store
+						data.view.store.remove(records);
+						index = store.indexOf(dropRecord);
+						if (position === 'after') {
+							index++;
+						}
+						store.insert(index, records);
+						view.getSelectionModel().select(records);
+					}
+				});
+			}
+		},
+		onSelectionChange: function () {
+			this.checkChange();
+		},
+		/**
+		 * Clears any values currently selected.
+		 */
+		clearValue: function () {
+			this.setValue([]);
+		},
+		/**
+		 * Return the value(s) to be submitted for this field. The returned value depends on the {@link #delimiter}
+		 * config: If it is set to a String value (like the default ',') then this will return the selected values
+		 * joined by the delimiter. If it is set to <tt>null</tt> then the values will be returned as an Array.
+		 */
+		getSubmitValue: function () {
+			var me = this,
+				delimiter = me.delimiter,
+				val = me.getValue();
+			return Ext.isString(delimiter) ? val.join(delimiter) : val;
+		},
+		// inherit docs
+		getRawValue: function () {
+			var me = this,
+				boundList = me.boundList;
+			if (boundList) {
+				me.rawValue = Ext.Array.map(boundList.getSelectionModel().getSelection(), function (model) {
+					return model.get(me.valueField);
+				});
+			}
+			return me.rawValue;
+		},
+		// inherit docs
+		setRawValue: function (value) {
+			var me = this,
+				boundList = me.boundList,
+				models;
+			value = Ext.Array.from(value);
+			me.rawValue = value;
+			if (boundList) {
+				models = [];
+				Ext.Array.forEach(value, function (val) {
+					var undef, model = me.store.findRecord(me.valueField, val, undef, undef, true, true);
+					if (model) {
+						models.push(model);
+					}
+				});
+				boundList.getSelectionModel().select(models, false, true);
+			}
+			return value;
+		},
+		// no conversion
+		valueToRaw: function (value) {
+			return value;
+		},
+		// compare array values
+		isEqual: function (v1, v2) {
+			var fromArray = Ext.Array.from,
+				i, len;
+			v1 = fromArray(v1);
+			v2 = fromArray(v2);
+			len = v1.length;
+			if (len !== v2.length) {
+				return false;
+			}
+			for (i = 0; i < len; i++) {
+				if (v2[i] !== v1[i]) {
+					return false;
+				}
+			}
+			return true;
+		},
+		getErrors: function (value) {
+			var me = this,
+				format = Ext.String.format,
+				errors = me.callParent(arguments),
+				numSelected;
+			value = Ext.Array.from(value || me.getValue());
+			numSelected = value.length;
+			if (!me.allowBlank && numSelected < 1) {
+				errors.push(me.blankText);
+			}
+			if (numSelected < this.minSelections) {
+				errors.push(format(me.minSelectionsText, me.minSelections));
+			}
+			if (numSelected > this.maxSelections) {
+				errors.push(format(me.maxSelectionsText, me.maxSelections));
+			}
+			return errors;
+		},
+		onDisable: function () {
+			this.callParent();
+			this.disabled = true;
+			this.updateReadOnly();
+		},
+		onEnable: function () {
+			this.callParent();
+			this.disabled = false;
+			this.updateReadOnly();
+		},
+		setReadOnly: function (readOnly) {
+			this.readOnly = readOnly;
+			this.updateReadOnly();
+		},
+		/**
+		 * @private Lock or unlock the BoundList's selection model to match the current disabled/readonly state
+		 */
+		updateReadOnly: function () {
+			var me = this,
+				boundList = me.boundList,
+				readOnly = me.readOnly || me.disabled;
+			if (boundList) {
+				boundList.getSelectionModel().setLocked(readOnly);
+			}
+		},
+		onDestroy: function () {
+			Ext.destroyMembers(this, 'panel', 'boundList', 'dragZone', 'dropZone');
+			this.callParent();
+		}
+	});
+
+
+	/*----------------------------------------------------------------------------
+	 * OpenStreetMap
+	 *--------------------------------------------------------------------------*/
+
+	OpenLayers.Util.OSM={};OpenLayers.Util.OSM.MISSING_TILE_URL="http://www.openstreetmap.org/openlayers/img/404.png";OpenLayers.Util.OSM.originalOnImageLoadError=OpenLayers.Util.onImageLoadError;OpenLayers.Util.onImageLoadError=function(){if(this.src.match(/^http:\/\/[abc]\.[a-z]+\.openstreetmap\.org\//)){this.src=OpenLayers.Util.OSM.MISSING_TILE_URL}else{if(this.src.match(/^http:\/\/[def]\.tah\.openstreetmap\.org\//)){}else{OpenLayers.Util.OSM.originalOnImageLoadError}}};OpenLayers.Layer.OSM.Mapnik=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(d,c){var b=["http://a.tile.openstreetmap.org/${z}/${x}/${y}.png","http://b.tile.openstreetmap.org/${z}/${x}/${y}.png","http://c.tile.openstreetmap.org/${z}/${x}/${y}.png"];c=OpenLayers.Util.extend({numZoomLevels:19,buffer:0,transitionEffect:"resize"},c);var a=[d,b,c];OpenLayers.Layer.OSM.prototype.initialize.apply(this,a)},CLASS_NAME:"OpenLayers.Layer.OSM.Mapnik"});OpenLayers.Layer.OSM.Osmarender=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(d,c){var b=["http://a.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png","http://b.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png","http://c.tah.openstreetmap.org/Tiles/tile/${z}/${x}/${y}.png"];c=OpenLayers.Util.extend({numZoomLevels:18,buffer:0,transitionEffect:"resize"},c);var a=[d,b,c];OpenLayers.Layer.OSM.prototype.initialize.apply(this,a)},CLASS_NAME:"OpenLayers.Layer.OSM.Osmarender"});OpenLayers.Layer.OSM.CycleMap=OpenLayers.Class(OpenLayers.Layer.OSM,{initialize:function(d,c){var b=["http://a.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png","http://b.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png","http://c.tile.opencyclemap.org/cycle/${z}/${x}/${y}.png"];c=OpenLayers.Util.extend({numZoomLevels:19,buffer:0,transitionEffect:"resize"},c);var a=[d,b,c];OpenLayers.Layer.OSM.prototype.initialize.apply(this,a)},CLASS_NAME:"OpenLayers.Layer.OSM.CycleMap"});
+
+
+	/*----------------------------------------------------------------------------
+	 * OpenLayers - Cirle
+	 *--------------------------------------------------------------------------*/
+
+	OpenLayers.Control.Circle=OpenLayers.Class(OpenLayers.Control,{feature:null,layer:null,radius:5,origin:null,sides:40,angle:null,snapAngle:null,dragControl:null,initialize:function(a){OpenLayers.Control.prototype.initialize.apply(this,arguments)},activate:function(){var a=OpenLayers.Control.prototype.activate.call(this);if(a){var b={displayInLayerSwitcher:false,calculateInRange:function(){return true}};this.map.addLayer(this.layer)}return a},deactivate:function(){var a=OpenLayers.Control.prototype.deactivate.call(this);if(a){if(this.layer.map!=null){this.layer.destroy(false);if(this.feature){this.feature.destroy()}}this.layer=null;this.feature=null}return a},createGeometry:function(){this.angle=Math.PI*((1/this.sides)-(1/2));if(this.snapAngle){this.angle+=this.snapAngle*(Math.PI/180)}this.feature.geometry=OpenLayers.Geometry.Polygon.createRegularPolygon(this.origin,this.radius,this.sides,this.snapAngle)},modifyGeometry:function(){var f,c,b,a;var d=this.feature.geometry.components[0];if(d.components.length!=(this.sides+1)){this.createGeometry();d=this.feature.geometry.components[0]}for(var e=0;e<this.sides;++e){a=d.components[e];f=this.angle+(e*2*Math.PI/this.sides);a.x=this.origin.x+(this.radius*Math.cos(f));a.y=this.origin.y+(this.radius*Math.sin(f));a.clearBounds()}},updateCircle:function(b,a){this.origin=new OpenLayers.Geometry.Point(b.lon,b.lat);this.radius=a*1;if(!this.feature){this.feature=new OpenLayers.Feature.Vector();this.createGeometry();this.layer.addFeatures([this.feature],{silent:true})}else{this.modifyGeometry()}this.layer.drawFeature(this.feature,this.style)},CLASS_NAME:"Meteorage.Circle"});
+
+
+	/*----------------------------------------------------------------------------
+	 * OpenLayers - newSelectFeature
+	 *--------------------------------------------------------------------------*/
+
+	OpenLayers.Control.newSelectFeature=OpenLayers.Class(OpenLayers.Control,{multipleKey:null,toggleKey:null,multiple:false,clickout:true,toggle:false,hover:false,onSelect:function(){},onUnselect:function(){},onHoverSelect:function(){},onHoverUnselect:function(){},onClickSelect:function(){},onClickUnselect:function(){},geometryTypes:null,layer:null,callbacks:null,selectStyle:null,renderIntent:"select",handler:null,initialize:function(layer,options){OpenLayers.Control.prototype.initialize.apply(this,[options]);this.layer=layer;this.callbacks=OpenLayers.Util.extend({click:this.clickFeature,clickout:this.clickoutFeature,over:this.overFeature,out:this.outFeature},this.callbacks);var handlerOptions={geometryTypes:this.geometryTypes};this.handler=new OpenLayers.Handler.Feature(this,layer,this.callbacks,handlerOptions);},unselectAll:function(options){var feature;for(var i=this.layer.selectedFeatures.length-1;i>=0;--i){feature=this.layer.selectedFeatures[i];if(!options||options.except!=feature){this.unselect(feature,"click");}}},clickFeature:function(feature){if((this.onSelect.name!=""||this.onClickSelect.name!="")&&!this.hover){var selected=(OpenLayers.Util.indexOf(this.layer.selectedFeatures,feature)>-1);if(selected){if(this.toggleSelect()){this.unselect(feature);}else if(!this.multipleSelect()){this.unselectAll({except:feature});}}else{if(!this.multipleSelect()){this.unselectAll({except:feature});}}
+	this.select(feature,"click");}},multipleSelect:function(){return this.multiple||this.handler.evt[this.multipleKey];},toggleSelect:function(){return this.toggle||this.handler.evt[this.toggleKey];},clickoutFeature:function(feature){if(((this.onClickUnselect.name!=""||this.onHoverSelect.name=="")&&!this.hover)&&this.clickout){this.unselectAll();}},overFeature:function(feature){if((this.onHoverSelect.name!=""||this.hover)&&(OpenLayers.Util.indexOf(this.layer.selectedFeatures,feature)==-1)){this.select(feature,"hover");}},outFeature:function(feature){if(this.onHoverUnselect.name!=""||this.hover){this.unselect(feature,"hover");}},select:function(feature,evt){this.layer.selectedFeatures.push(feature);var selectStyle=this.selectStyle||this.renderIntent;this.layer.drawFeature(feature,selectStyle);this.layer.events.triggerEvent("featureselected",{feature:feature});switch(evt){case"hover":this.onHoverSelect(feature);break;case"click":if(this.onClickSelect.name!=""){this.onClickSelect(feature);}else if(this.onSelect.name!=""){this.onSelect(feature);}
+	break;default:this.onSelect(feature);break;}},unselect:function(feature,evt){this.layer.drawFeature(feature,"default");OpenLayers.Util.removeItem(this.layer.selectedFeatures,feature);this.layer.events.triggerEvent("featureunselected",{feature:feature});switch(evt){case"hover":this.onHoverUnselect(feature);break;case"click":if(this.onClickUnselect.name!=""){this.onClickUnselect(feature);}else if(this.onUnselect.name!=""){this.onUnselect(feature);}
+	break;default:this.onUnselect(feature);break;}},setMap:function(map){this.handler.setMap(map);OpenLayers.Control.prototype.setMap.apply(this,arguments);},CLASS_NAME:"OpenLayers.Control.newSelectFeature"});
+
+
+	/*----------------------------------------------------------------------------
+	 * GeoExt - custom
+	 *--------------------------------------------------------------------------*/
+
+	Ext.define("GeoExt.data.LayerModel",{alternateClassName:"GeoExt.data.LayerRecord",extend:"Ext.data.Model",requires:["Ext.data.proxy.Memory","Ext.data.reader.Json"],alias:"model.gx_layer",statics:{createFromLayer:function(a){return this.proxy.reader.readRecords([a]).records[0]}},fields:["id",{name:"title",type:"string",mapping:"name"},{name:"legendURL",type:"string",mapping:"metadata.legendURL"},{name:"hideTitle",type:"bool",mapping:"metadata.hideTitle"},{name:"hideInLegend",type:"bool",mapping:"metadata.hideInLegend"}],proxy:{type:"memory",reader:{type:"json"}},getLayer:function(){return this.raw}});Ext.define("GeoExt.data.LayerStore",{requires:["GeoExt.data.LayerModel"],extend:"Ext.data.Store",model:"GeoExt.data.LayerModel",statics:{MAP_TO_STORE:1,STORE_TO_MAP:2},map:null,constructor:function(b){var c=this;b=Ext.apply({},b);var d=(GeoExt.MapPanel&&b.map instanceof GeoExt.MapPanel)?b.map.map:b.map;delete b.map;if(b.layers){b.data=b.layers}delete b.layers;var a={initDir:b.initDir};delete b.initDir;c.callParent([b]);if(d){this.bind(d,a)}},bind:function(e,a){var b=this;if(b.map){return}b.map=e;a=Ext.apply({},a);var c=a.initDir;if(a.initDir==undefined){c=GeoExt.data.LayerStore.MAP_TO_STORE|GeoExt.data.LayerStore.STORE_TO_MAP}var d=e.layers.slice(0);if(c&GeoExt.data.LayerStore.STORE_TO_MAP){b.each(function(f){b.map.addLayer(f.getLayer())},b)}if(c&GeoExt.data.LayerStore.MAP_TO_STORE){b.loadRawData(d,true)}e.events.on({changelayer:b.onChangeLayer,addlayer:b.onAddLayer,removelayer:b.onRemoveLayer,scope:b});b.on({load:b.onLoad,clear:b.onClear,add:b.onAdd,remove:b.onRemove,update:b.onUpdate,scope:b});b.data.on({replace:b.onReplace,scope:b});b.fireEvent("bind",b,e)},unbind:function(){var a=this;if(a.map){a.map.events.un({changelayer:a.onChangeLayer,addlayer:a.onAddLayer,removelayer:a.onRemoveLayer,scope:a});a.un("load",a.onLoad,a);a.un("clear",a.onClear,a);a.un("add",a.onAdd,a);a.un("remove",a.onRemove,a);a.data.un("replace",a.onReplace,a);a.map=null}},onChangeLayer:function(b){var e=b.layer;var c=this.findBy(function(f,g){return f.getLayer()===e});if(c>-1){var a=this.getAt(c);if(b.property==="order"){if(!this._adding&&!this._removing){var d=this.map.getLayerIndex(e);if(d!==c){this._removing=true;this.remove(a);delete this._removing;this._adding=true;this.insert(d,[a]);delete this._adding}}}else{if(b.property==="name"){a.set("title",e.name)}else{this.fireEvent("update",this,a,Ext.data.Record.EDIT)}}}},onAddLayer:function(b){var c=this;if(!c._adding){c._adding=true;var a=c.proxy.reader.read(b.layer);c.add(a.records);delete c._adding}},onRemoveLayer:function(a){if(this.map.unloadDestroy){if(!this._removing){var b=a.layer;this._removing=true;this.remove(this.getByLayer(b));delete this._removing}}else{this.unbind()}},onLoad:function(c,b,g){if(g){if(!Ext.isArray(b)){b=[b]}if(!this._addRecords){this._removing=true;for(var e=this.map.layers.length-1;e>=0;e--){this.map.removeLayer(this.map.layers[e])}delete this._removing}var a=b.length;if(a>0){var f=new Array(a);for(var d=0;d<a;d++){f[d]=b[d].getLayer()}this._adding=true;this.map.addLayers(f);delete this._adding}}delete this._addRecords},onClear:function(a){this._removing=true;for(var b=this.map.layers.length-1;b>=0;b--){this.map.removeLayer(this.map.layers[b])}delete this._removing},onAdd:function(b,a,c){if(!this._adding){this._adding=true;var e;for(var d=a.length-1;d>=0;--d){e=a[d].getLayer();this.map.addLayer(e);if(c!==this.map.layers.length-1){this.map.setLayerIndex(e,c)}}delete this._adding}},onRemove:function(b,a,c){if(!this._removing){var d=a.getLayer();if(this.map.getLayer(d.id)!=null){this._removing=true;this.removeMapLayer(a);delete this._removing}}},onUpdate:function(c,a,b){if(b===Ext.data.Record.EDIT){if(a.modified&&a.modified.title){var d=a.getLayer();var e=a.get("title");if(e!==d.name){d.setName(e)}}}},removeMapLayer:function(a){this.map.removeLayer(a.getLayer())},onReplace:function(c,a,b){this.removeMapLayer(a)},getByLayer:function(b){var a=this.findBy(function(c){return c.getLayer()===b});if(a>-1){return this.getAt(a)}},destroy:function(){var a=this;a.unbind();a.callParent()},loadRecords:function(a,b){if(b&&b.addRecords){this._addRecords=true}this.callParent(arguments)}});Ext.define("GeoExt.panel.Map",{extend:"Ext.panel.Panel",requires:["GeoExt.data.LayerStore"],alias:"widget.gx_mappanel",alternateClassName:"GeoExt.MapPanel",statics:{guess:function(){var a=Ext.ComponentQuery.query("gx_mappanel");return((a&&a.length>0)?a[0]:null)}},center:null,zoom:null,extent:null,prettyStateKeys:false,map:null,layers:null,stateEvents:["aftermapmove","afterlayervisibilitychange","afterlayeropacitychange","afterlayerorderchange","afterlayernamechange","afterlayeradd","afterlayerremove"],initComponent:function(){if(!(this.map instanceof OpenLayers.Map)){this.map=new OpenLayers.Map(Ext.applyIf(this.map||{},{allOverlays:true}))}var a=this.layers;if(!a||a instanceof Array){this.layers=Ext.create("GeoExt.data.LayerStore",{layers:a,map:this.map.layers.length>0?this.map:null})}if(Ext.isString(this.center)){this.center=OpenLayers.LonLat.fromString(this.center)}else{if(Ext.isArray(this.center)){this.center=new OpenLayers.LonLat(this.center[0],this.center[1])}}if(Ext.isString(this.extent)){this.extent=OpenLayers.Bounds.fromString(this.extent)}else{if(Ext.isArray(this.extent)){this.extent=OpenLayers.Bounds.fromArray(this.extent)}}this.callParent(arguments);this.on("resize",this.onResize,this);this.on("afterlayout",function(){if(typeof this.map.getViewport==="function"){this.items.each(function(b){if(typeof b.addToMapPanel==="function"){b.getEl().appendTo(this.map.getViewport())}},this)}},this);this.map.events.on({moveend:this.onMoveend,changelayer:this.onChangelayer,addlayer:this.onAddlayer,removelayer:this.onRemovelayer,scope:this})},onMoveend:function(a){this.fireEvent("aftermapmove",this,this.map,a)},onChangelayer:function(b){var a=this.map;if(b.property){if(b.property==="visibility"){this.fireEvent("afterlayervisibilitychange",this,a,b)}else{if(b.property==="order"){this.fireEvent("afterlayerorderchange",this,a,b)}else{if(b.property==="nathis"){this.fireEvent("afterlayernathischange",this,a,b)}else{if(b.property==="opacity"){this.fireEvent("afterlayeropacitychange",this,a,b)}}}}}},onAddlayer:function(){this.fireEvent("afterlayeradd")},onRemovelayer:function(){this.fireEvent("afterlayerremove")},onResize:function(){var a=this.map;if(this.body.dom!==a.div){a.render(this.body.dom);this.layers.bind(a);if(a.layers.length>0){this.setInitialExtent()}else{this.layers.on("add",this.setInitialExtent,this,{single:true})}}else{a.updateSize()}},setInitialExtent:function(){var a=this.map;if(!a.getCenter()){if(this.center||this.zoom){a.setCenter(this.center,this.zoom)}else{if(this.extent instanceof OpenLayers.Bounds){a.zoomToExtent(this.extent,true)}else{a.zoomToMaxExtent()}}}},getState:function(){var c=this,e=c.map,d=c.callParent(arguments)||{},b;if(!e){return}var a=e.getCenter();a&&Ext.applyIf(d,{x:a.lon,y:a.lat,zoom:e.getZoom()});c.layers.each(function(f){b=f.getLayer();layerId=this.prettyStateKeys?f.get("title"):f.get("id");d=c.addPropertyToState(d,"visibility_"+layerId,b.getVisibility());d=c.addPropertyToState(d,"opacity_"+layerId,(b.opacity===null)?1:b.opacity)},c);return d},applyState:function(a){var j=this;map=j.map;j.center=new OpenLayers.LonLat(a.x,a.y);j.zoom=a.zoom;var f,c,g,d,b,h;var e=map.layers;for(f=0,c=e.length;f<c;f++){g=e[f];d=j.prettyStateKeys?g.name:g.id;b=a["visibility_"+d];if(b!==undefined){b=(/^true$/i).test(b);if(g.isBaseLayer){if(b){map.setBaseLayer(g)}}else{g.setVisibility(b)}}h=a["opacity_"+d];if(h!==undefined){g.setOpacity(h)}}},onBeforeAdd:function(a){if(Ext.isFunction(a.addToMapPanel)){a.addToMapPanel(this)}this.callParent(arguments)},beforeDestroy:function(){if(this.map&&this.map.events){this.map.events.un({moveend:this.onMoveend,changelayer:this.onChangelayer,scope:this})}if(!this.initialConfig.map||!(this.initialConfig.map instanceof OpenLayers.Map)){if(this.map&&this.map.destroy){this.map.destroy()}}delete this.map;this.callParent(arguments)}});Ext.define("GeoExt.tree.Column",{extend:"Ext.tree.Column",alias:"widget.gx_treecolumn",initComponent:function(){var b=this;b.callParent();var a=b.renderer;this.renderer=function(i,e,d,h,j,f,c){var g=[a(i,e,d,h,j,f,c)];if(d.get("checkedGroup")){g[0]=g[0].replace(/class="([^-]+)-tree-checkbox([^"]+)?"/,'class="$1-tree-checkbox$2 gx-tree-radio"')}g.push('<div class="gx-tree-component gx-tree-component-off" id="tree-record-'+d.id+'"></div>');if(d.uiProvider&&d.uiProvider instanceof "string"){}return g.join("")}},defaultRenderer:function(a){return a}});Ext.define("GeoExt.tree.View",{extend:"Ext.tree.View",alias:"widget.gx_treeview",initComponent:function(){var a=this;a.on("itemupdate",this.onItem,this);a.on("itemadd",this.onItem,this);a.on("createchild",this.createChild,this);return a.callParent(arguments)},onItem:function(a,c,f,b){var e=this;if(!(a instanceof Array)){a=[a]}for(var d=0;d<a.length;d++){this.onNodeRendered(a[d])}},onNodeRendered:function(c){var b=this;var a=Ext.get("tree-record-"+c.id);if(!a){return}if(c.get("layer")){b.fireEvent("createchild",a,c)}if(c.hasChildNodes()){c.eachChild(function(d){b.onNodeRendered(d)},b)}},createChild:function(b,c){var a=c.get("component");if(a){cmpObj=Ext.ComponentManager.create(a);cmpObj.render(b);b.removeCls("gx-tree-component-off")}}});Ext.define("GeoExt.tree.LayerNode",{extend:"Ext.AbstractPlugin",alias:"plugin.gx_layer",init:function(b){this.target=b;var a=b.get("layer");b.set("checked",a.getVisibility());if(!b.get("checkedGroup")&&a.isBaseLayer){b.set("checkedGroup","gx_baselayer")}b.set("fixedText",!!b.text);b.set("leaf",true);if(!b.get("iconCls")){b.set("iconCls","gx-tree-layer-icon")}b.on("afteredit",this.onAfterEdit,this);a.events.on({visibilitychanged:this.onLayerVisibilityChanged,scope:this})},onAfterEdit:function(c,a){var b=this;if(~Ext.Array.indexOf(a,"checked")){b.onCheckChange()}},onLayerVisibilityChanged:function(){if(!this._visibilityChanging){this.target.set("checked",this.target.get("layer").getVisibility())}},onCheckChange:function(){var c=this.target,b=this.target.get("checked");if(b!=c.get("layer").getVisibility()){c._visibilityChanging=true;var a=c.get("layer");if(b&&a.isBaseLayer&&a.map){a.map.setBaseLayer(a)}else{a.setVisibility(b)}delete c._visibilityChanging}}});Ext.define("GeoExt.tree.LayerLoader",{extend:"Ext.util.Observable",requires:["GeoExt.tree.LayerNode"],store:null,filter:function(a){return a.getLayer().displayInLayerSwitcher===true},baseAttrs:null,load:function(a){if(this.fireEvent("beforeload",this,a)){this.removeStoreHandlers();while(a.firstChild){a.removeChild(a.firstChild)}if(!this.store){this.store=GeoExt.MapPanel.guess().layers}this.store.each(function(b){this.addLayerNode(a,b)},this);this.addStoreHandlers(a);this.fireEvent("load",this,a)}},onStoreAdd:function(b,a,c,f){if(!this._reordering){var g=f.get("container").recordIndexToNodeIndex(c+a.length-1,f);for(var d=0,e=a.length;d<e;++d){this.addLayerNode(f,a[d],g)}}},onStoreRemove:function(a,b){if(!this._reordering){this.removeLayerNode(b,a)}},addLayerNode:function(d,a,b){b=b||0;if(this.filter(a)===true){var c=a.getLayer();var e=this.createNode({plugins:[{ptype:"gx_layer"}],layer:c,text:c.name,listeners:{move:this.onChildMove,scope:this}});if(b!==undefined){d.insertChild(b,e)}else{d.appendChild(e)}d.getChildAt(b).on("move",this.onChildMove,this)}},removeLayerNode:function(b,a){if(this.filter(a)===true){var c=b.findChildBy(function(d){return d.get("layer")==a.getLayer()});if(c){c.un("move",this.onChildMove,this);c.remove()}}},onChildMove:function(c,k,l,h){var i=this,g=i.store.getByLayer(c.get("layer")),b=l.get("container"),f=b.loader;i._reordering=true;if(f instanceof i.self&&i.store===f.store){f._reordering=true;i.store.remove(g);var a;if(l.childNodes.length>1){var j=(h===0)?h+1:h-1;a=i.store.findBy(function(m){return l.childNodes[j].get("layer")===m.getLayer()});if(h===0){a++}}else{if(k.parentNode===l.parentNode){var d=l;do{d=d.previousSibling}while(d&&!(d.get("container") instanceof b.self&&d.lastChild));if(d){a=i.store.findBy(function(m){return d.lastChild.get("layer")===m.getLayer()})}else{var e=l;do{e=e.nextSibling}while(e&&!(e.get("container") instanceof b.self&&e.firstChild));if(e){a=i.store.findBy(function(m){return e.firstChild.get("layer")===m.getLayer()})}a++}}}if(a!==undefined){i.store.insert(a,[g])}else{i.store.insert(oldRecordIndex,[g])}delete f._reordering}delete i._reordering},addStoreHandlers:function(b){if(!this._storeHandlers){this._storeHandlers={add:function(c,e,d){this.onStoreAdd(c,e,d,b)},remove:function(c,d){this.onStoreRemove(d,b)}};for(var a in this._storeHandlers){this.store.on(a,this._storeHandlers[a],this)}}},removeStoreHandlers:function(){if(this._storeHandlers){for(var a in this._storeHandlers){this.store.un(a,this._storeHandlers[a],this)}delete this._storeHandlers}},createNode:function(a){if(this.baseAttrs){Ext.apply(a,this.baseAttrs)}return a},destroy:function(){this.removeStoreHandlers()}});Ext.define("GeoExt.tree.LayerContainer",{extend:"Ext.AbstractPlugin",requires:["GeoExt.tree.LayerLoader"],alias:"plugin.gx_layercontainer",defaultText:"Layers",init:function(c){var b=this;var a=b.loader;b.loader=(a&&a instanceof GeoExt.tree.LayerLoader)?a:new GeoExt.tree.LayerLoader(a);c.set("container",b);if(!c.get("text")){c.set("text",b.defaultText);c.commit()}b.loader.load(c)},recordIndexToNodeIndex:function(c,g){var f=this;var b=f.loader.store;var e=b.getCount();var a=g.childNodes.length;var h=-1;for(var d=e-1;d>=0;--d){if(f.loader.filter(b.getAt(d))===true){++h;if(c===d||h>a-1){break}}}return h}});Ext.define("GeoExt.tree.BaseLayerContainer",{extend:"GeoExt.tree.LayerContainer",alias:"plugin.gx_baselayercontainer",defaultText:"Base Layers",init:function(c){var b=this;var a=b.loader;b.loader=Ext.applyIf(a||{},{baseAttrs:Ext.applyIf((a&&a.baseAttrs)||{},{iconCls:"gx-tree-baselayer-icon",checkedGroup:"baselayer"}),filter:function(d){var e=d.getLayer();return e.displayInLayerSwitcher===true&&e.isBaseLayer===true}});b.callParent(arguments)}});Ext.define("GeoExt.tree.Panel",{extend:"Ext.tree.Panel",alias:"widget.gx_treepanel",requires:["GeoExt.tree.Column","GeoExt.tree.View"],viewType:"gx_treeview",initComponent:function(){var a=this;if(!a.columns){if(a.initialConfig.hideHeaders===undefined){a.hideHeaders=true}a.addCls(Ext.baseCSSPrefix+"autowidth-table");a.columns=[{xtype:"gx_treecolumn",text:"Name",width:Ext.isIE6?null:10000,dataIndex:a.displayField}]}a.callParent()}});
+
+
+	// GIS CORE
+
+	// ext config
+	Ext.Ajax.method = 'GET';
+
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
+	// gis
+	GIS = {
+		core: {
+			instances: []
+		},
+		i18n: {},
+		isDebug: false,
+		isSessionStorage: 'sessionStorage' in window && window['sessionStorage'] !== null,
+		logg: []
+	};
+
+	GIS.core.getOLMap = function(gis) {
+		var olmap,
+			addControl;
+
+		addControl = function(name, fn) {
+			var button,
+				panel;
+
+			button = new OpenLayers.Control.Button({
+				displayClass: 'olControlButton',
+				trigger: function() {
+					fn.call(gis.olmap);
+				}
+			});
+
+			panel = new OpenLayers.Control.Panel({
+				defaultControl: button
+			});
+
+			panel.addControls([button]);
+
+			olmap.addControl(panel);
+
+			panel.div.className += ' ' + name;
+			//panel.div.childNodes[0].className += ' ' + name + 'Button';
+			panel.div.childNodes[0].className += ' fa fa-camera-retro fa-lg';
+		};
+
+		olmap = new OpenLayers.Map({
+			controls: [
+				new OpenLayers.Control.Navigation({
+					zoomWheelEnabled: true,
+					documentDrag: true
+				}),
+				new OpenLayers.Control.MousePosition({
+					prefix: '<span id="mouseposition" class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
+					separator: '<span class="text-mouseposition-lonlat">,&nbsp;LAT </span>',
+					suffix: '<div id="google-logo" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'
+				}),
+				new OpenLayers.Control.Permalink(),
+				new OpenLayers.Control.ScaleLine({
+					geodesic: true,
+					maxWidth: 170,
+					minWidth: 100
+				})
+			],
+			displayProjection: new OpenLayers.Projection('EPSG:4326'),
+			//maxExtent: new OpenLayers.Bounds(-1160037508, -1160037508, 1160037508, 1160037508),
+			mouseMove: {}, // Track all mouse moves
+			relocate: {} // Relocate organisation units
+		});
+
+		// Map events
+		olmap.events.register('mousemove', null, function(e) {
+			gis.olmap.mouseMove.x = e.clientX;
+			gis.olmap.mouseMove.y = e.clientY;
+		});
+
+		olmap.zoomToVisibleExtent = function() {
+			gis.util.map.zoomToVisibleExtent(this);
+		};
+
+		olmap.closeAllLayers = function() {
+			gis.layer.event.core.reset();
+			gis.layer.facility.core.reset();
+			gis.layer.boundary.core.reset();
+			gis.layer.thematic1.core.reset();
+			gis.layer.thematic2.core.reset();
+			gis.layer.thematic3.core.reset();
+			gis.layer.thematic4.core.reset();
+		};
+
+		addControl('zoomIn', olmap.zoomIn);
+		addControl('zoomOut', olmap.zoomOut);
+		addControl('zoomVisible', olmap.zoomToVisibleExtent);
+		addControl('measure', function() {
+			GIS.core.MeasureWindow(gis).show();
+		});
+
+		return olmap;
+	};
+
+	GIS.core.getLayers = function(gis) {
+		var layers = {},
+			createSelectionHandlers,
+			layerNumbers = ['1', '2', '3', '4'];
+
+		if (window.google) {
+			layers.googleStreets = new OpenLayers.Layer.Google('Google Streets', {
+				numZoomLevels: 20,
+				animationEnabled: true,
+				layerType: gis.conf.finals.layer.type_base,
+				layerOpacity: 1,
+				setLayerOpacity: function(number) {
+					if (number) {
+						this.layerOpacity = parseFloat(number);
+					}
+					this.setOpacity(this.layerOpacity);
+				}
+			});
+			layers.googleStreets.id = 'googleStreets';
+
+			layers.googleHybrid = new OpenLayers.Layer.Google('Google Hybrid', {
+				type: google.maps.MapTypeId.HYBRID,
+				numZoomLevels: 20,
+				animationEnabled: true,
+				layerType: gis.conf.finals.layer.type_base,
+				layerOpacity: 1,
+				setLayerOpacity: function(number) {
+					if (number) {
+						this.layerOpacity = parseFloat(number);
+					}
+					this.setOpacity(this.layerOpacity);
+				}
+			});
+			layers.googleHybrid.id = 'googleHybrid';
+		}
+
+		layers.openStreetMap = new OpenLayers.Layer.OSM.Mapnik('OpenStreetMap', {
+			layerType: gis.conf.finals.layer.type_base,
+			layerOpacity: 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			}
+		});
+		layers.openStreetMap.id = 'openStreetMap';
+
+		layers.event = GIS.core.VectorLayer(gis, 'event', GIS.i18n.event_layer, {opacity: gis.conf.layout.layer.opacity});
+		layers.event.core = new mapfish.GeoStat.Event(gis.olmap, {
+			layer: layers.event,
+			gis: gis
+		});
+
+		layers.facility = GIS.core.VectorLayer(gis, 'facility', GIS.i18n.facility_layer, {opacity: 1});
+		layers.facility.core = new mapfish.GeoStat.Facility(gis.olmap, {
+			layer: layers.facility,
+			gis: gis
+		});
+
+		layers.boundary = GIS.core.VectorLayer(gis, 'boundary', GIS.i18n.boundary_layer, {opacity: gis.conf.layout.layer.opacity});
+		layers.boundary.core = new mapfish.GeoStat.Boundary(gis.olmap, {
+			layer: layers.boundary,
+			gis: gis
+		});
+
+		for (var i = 0, number; i < layerNumbers.length; i++) {
+			number = layerNumbers[i];
+
+			layers['thematic' + number] = GIS.core.VectorLayer(gis, 'thematic' + number, GIS.i18n.thematic_layer + ' ' + number, {opacity: gis.conf.layout.layer.opacity});
+			layers['thematic' + number].layerCategory = gis.conf.finals.layer.category_thematic,
+			layers['thematic' + number].core = new mapfish.GeoStat['Thematic' + number](gis.olmap, {
+				layer: layers['thematic' + number],
+				gis: gis
+			});
+		}
+
+		return layers;
+	};
+
+	GIS.core.createSelectHandlers = function(gis, layer) {
+		var isRelocate = !!GIS.app ? !!gis.init.user.isAdmin : false,
+			options = {},
+			infrastructuralPeriod,
+			defaultHoverSelect,
+			defaultHoverUnselect,
+			defaultClickSelect,
+            selectHandlers,
+			dimConf = gis.conf.finals.dimension,
+            defaultHoverWindow,
+            eventWindow,
+            isBoundary = layer.id === 'boundary',
+            isEvent = layer.id === 'event';
+
+		defaultHoverSelect = function fn(feature) {
+            if (isBoundary) {
+                var style = layer.core.getDefaultFeatureStyle();
+
+                style.fillOpacity = 0.15;
+                style.strokeColor = feature.style.strokeColor;
+                style.strokeWidth = feature.style.strokeWidth;
+                style.label = feature.style.label;
+                style.fontFamily = feature.style.fontFamily;
+                style.fontWeight = feature.style.strokeWidth > 1 ? 'bold' : 'normal';
+                style.labelAlign = feature.style.labelAlign;
+                style.labelYOffset = feature.style.labelYOffset;
+
+                layer.drawFeature(feature, style);
+            }
+
+			if (defaultHoverWindow) {
+				defaultHoverWindow.destroy();
+			}
+			defaultHoverWindow = Ext.create('Ext.window.Window', {
+				cls: 'gis-window-widget-feature gis-plugin',
+				preventHeader: true,
+				shadow: false,
+				resizable: false,
+				items: {
+					html: feature.attributes.popupText
+				}
+			});
+
+			defaultHoverWindow.show();
+
+			var eastX = gis.viewport.eastRegion.getPosition()[0],
+				centerX = gis.viewport.centerRegion.getPosition()[0],
+				centerRegionCenterX = centerX + ((eastX - centerX) / 2),
+				centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
+
+			defaultHoverWindow.setPosition(centerRegionCenterX - (defaultHoverWindow.getWidth() / 2), centerRegionY);
+		};
+
+		defaultHoverUnselect = function fn(feature) {
+			defaultHoverWindow.destroy();
+		};
+
+		defaultClickSelect = function fn(feature) {
+			var showInfo,
+				showRelocate,
+				drill,
+				menu,
+				selectHandlers,
+				isPoint = feature.geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname,
+				att = feature.attributes;
+
+			// Relocate
+			showRelocate = function() {
+				if (gis.olmap.relocate.window) {
+					gis.olmap.relocate.window.destroy();
+				}
+
+				gis.olmap.relocate.window = Ext.create('Ext.window.Window', {
+					title: 'Relocate facility',
+					layout: 'fit',
+					iconCls: 'gis-window-title-icon-relocate',
+					cls: 'gis-container-default',
+					setMinWidth: function(minWidth) {
+						this.setWidth(this.getWidth() < minWidth ? minWidth : this.getWidth());
+					},
+					items: {
+						html: att.name,
+						cls: 'gis-container-inner'
+					},
+					bbar: [
+						'->',
+						{
+							xtype: 'button',
+							hideLabel: true,
+							text: GIS.i18n.cancel,
+							handler: function() {
+								gis.olmap.relocate.active = false;
+								gis.olmap.relocate.window.destroy();
+								gis.olmap.getViewport().style.cursor = 'auto';
+							}
+						}
+					],
+					listeners: {
+						close: function() {
+							gis.olmap.relocate.active = false;
+							gis.olmap.getViewport().style.cursor = 'auto';
+						}
+					}
+				});
+
+				gis.olmap.relocate.window.show();
+				gis.olmap.relocate.window.setMinWidth(220);
+
+				gis.util.gui.window.setPositionTopRight(gis.olmap.relocate.window);
+			};
+
+			// Infrastructural data
+			showInfo = function() {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/organisationUnits/' + att.id + '.json?links=false',
+					success: function(r) {
+						var ou = Ext.decode(r.responseText);
+
+						if (layer.infrastructuralWindow) {
+							layer.infrastructuralWindow.destroy();
+						}
+
+						layer.infrastructuralWindow = Ext.create('Ext.window.Window', {
+							title: GIS.i18n.information,
+							layout: 'column',
+							iconCls: 'gis-window-title-icon-information',
+							cls: 'gis-container-default',
+							width: 460,
+							height: 400, //todo
+							period: null,
+							items: [
+								{
+									cls: 'gis-container-inner',
+									columnWidth: 0.4,
+									bodyStyle: 'padding-right:4px',
+									items: function() {
+										var a = [];
+
+										if (att.name) {
+											a.push({html: GIS.i18n.name, cls: 'gis-panel-html-title'}, {html: att.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+										if (ou.parent) {
+											a.push({html: GIS.i18n.parent_unit, cls: 'gis-panel-html-title'}, {html: ou.parent.name, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+										if (ou.code) {
+											a.push({html: GIS.i18n.code, cls: 'gis-panel-html-title'}, {html: ou.code, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+										if (ou.address) {
+											a.push({html: GIS.i18n.address, cls: 'gis-panel-html-title'}, {html: ou.address, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+										if (ou.email) {
+											a.push({html: GIS.i18n.email, cls: 'gis-panel-html-title'}, {html: ou.email, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+										if (ou.phoneNumber) {
+											a.push({html: GIS.i18n.phone_number, cls: 'gis-panel-html-title'}, {html: ou.phoneNumber, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+										}
+
+                                        if (Ext.isString(ou.coordinates)) {
+                                            var co = ou.coordinates.replace("[","").replace("]","").replace(",",", ");
+											a.push({html: GIS.i18n.coordinate, cls: 'gis-panel-html-title'}, {html: co, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+                                        }
+
+                                        if (Ext.isArray(ou.organisationUnitGroups) && ou.organisationUnitGroups.length) {
+                                            var html = '';
+
+                                            for (var i = 0; i < ou.organisationUnitGroups.length; i++) {
+                                                html += ou.organisationUnitGroups[i].name;
+                                                html += i < ou.organisationUnitGroups.length - 1 ? '<br/>' : '';
+                                            }
+
+											a.push({html: GIS.i18n.groups, cls: 'gis-panel-html-title'}, {html: html, cls: 'gis-panel-html'}, {cls: 'gis-panel-html-separator'});
+                                        }
+
+										return a;
+									}()
+								},
+								{
+									xtype: 'form',
+									cls: 'gis-container-inner gis-form-widget',
+									columnWidth: 0.6,
+									bodyStyle: 'padding-left:4px',
+									items: [
+										{
+											html: GIS.i18n.infrastructural_data,
+											cls: 'gis-panel-html-title'
+										},
+										{
+											cls: 'gis-panel-html-separator'
+										},
+										{
+											xtype: 'combo',
+											fieldLabel: GIS.i18n.period,
+											editable: false,
+											valueField: 'id',
+											displayField: 'name',
+											emptyText: 'Select period',
+											forceSelection: true,
+											width: 258, //todo
+											labelWidth: 70,
+											store: {
+												fields: ['id', 'name'],
+												data: function() {
+                                                    var periodType = gis.init.systemSettings.infrastructuralPeriodType.id,
+                                                        generator = gis.init.periodGenerator,
+														periods = generator.filterFuturePeriodsExceptCurrent(generator.generateReversedPeriods(periodType, this.periodOffset)) || [];
+
+													if (Ext.isArray(periods) && periods.length) {
+                                                        for (var i = 0; i < periods.length; i++) {
+                                                            periods[i].id = periods[i].iso;
+                                                        }
+
+														periods = periods.slice(0,5);
+													}
+
+													return periods;
+												}()
+											},
+											lockPosition: false,
+											listeners: {
+												select: function(cmp) {
+													var period = cmp.getValue(),
+														url = gis.init.contextPath + '/api/analytics.json?',
+														group = gis.init.systemSettings.infrastructuralDataElementGroup;
+
+													if (group && group.dataElements) {
+														url += 'dimension=dx:';
+
+														for (var i = 0; i < group.dataElements.length; i++) {
+															url += group.dataElements[i].id;
+															url += i < group.dataElements.length - 1 ? ';' : '';
+														}
+													}
+
+													url += '&filter=pe:' + period;
+													url += '&filter=ou:' + att.id;
+
+													Ext.Ajax.request({
+														url: url,
+														success: function(r) {
+															var response = Ext.decode(r.responseText),
+																data = [];
+
+															if (Ext.isArray(response.rows)) {
+																for (var i = 0; i < response.rows.length; i++) {
+																	data.push({
+																		name: response.metaData.names[response.rows[i][0]],
+																		value: response.rows[i][1]
+																	});
+																}
+															}
+
+															layer.widget.infrastructuralDataElementValuesStore.loadData(data);
+														}
+													});
+
+													//layer.widget.infrastructuralDataElementValuesStore.load({
+														//params: {
+															//periodId: infrastructuralPeriod,
+															//organisationUnitId: att.internalId
+														//}
+													//});
+												}
+											}
+										},
+										{
+											xtype: 'grid',
+											cls: 'gis-grid',
+											height: 300, //todo
+											width: 258,
+											scroll: 'vertical',
+											columns: [
+												{
+													id: 'name',
+													text: 'Data element',
+													dataIndex: 'name',
+													sortable: true,
+													width: 195
+												},
+												{
+													id: 'value',
+													header: 'Value',
+													dataIndex: 'value',
+													sortable: true,
+													width: 63
+												}
+											],
+											disableSelection: true,
+											store: layer.widget.infrastructuralDataElementValuesStore
+										}
+									]
+								}
+							],
+							listeners: {
+								show: function() {
+									if (infrastructuralPeriod) {
+										this.down('combo').setValue(infrastructuralPeriod);
+										infrastructuralDataElementValuesStore.load({
+											params: {
+												periodId: infrastructuralPeriod,
+												organisationUnitId: att.internalId
+											}
+										});
+									}
+								}
+							}
+						});
+
+						layer.infrastructuralWindow.show();
+						gis.util.gui.window.setPositionTopRight(layer.infrastructuralWindow);
+					}
+				});
+			};
+
+			// Drill or float
+			drill = function(parentId, parentGraph, level) {
+				var view = Ext.clone(layer.core.view),
+					loader;
+
+				// parent graph map
+				view.parentGraphMap = {};
+				view.parentGraphMap[parentId] = parentGraph;
+
+				// dimension
+				view.rows = [{
+					dimension: dimConf.organisationUnit.objectName,
+					items: [
+						{id: parentId},
+						{id: 'LEVEL-' + level}
+					]
+				}];
+
+				if (view) {
+					loader = layer.core.getLoader();
+					loader.updateGui = true;
+					loader.zoomToVisibleExtent = true;
+					loader.hideMask = true;
+					loader.load(view);
+				}
+			};
+
+			// Menu
+			var menuItems = [];
+
+            if (layer.id !== 'facility') {
+				menuItems.push(Ext.create('Ext.menu.Item', {
+					text: 'Float up',
+					iconCls: 'gis-menu-item-icon-float',
+					cls: 'gis-plugin',
+					disabled: !att.hasCoordinatesUp,
+					handler: function() {
+						drill(att.grandParentId, att.grandParentParentGraph, parseInt(att.level) - 1);
+					}
+				}));
+
+                menuItems.push(Ext.create('Ext.menu.Item', {
+					text: 'Drill down',
+					iconCls: 'gis-menu-item-icon-drill',
+					cls: 'gis-menu-item-first gis-plugin',
+					disabled: !att.hasCoordinatesDown,
+					handler: function() {
+						drill(att.id, att.parentGraph, parseInt(att.level) + 1);
+					}
+				}));
+			}
+
+			if (isRelocate && isPoint) {
+
+                if (layer.id !== 'facility') {
+                    menuItems.push({
+                        xtype: 'menuseparator'
+                    });
+                }
+
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.relocate,
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !gis.init.user.isAdmin,
+					handler: function(item) {
+						gis.olmap.relocate.active = true;
+						gis.olmap.relocate.feature = feature;
+						gis.olmap.getViewport().style.cursor = 'crosshair';
+						showRelocate();
+					}
+				}));
+
+				menuItems.push( Ext.create('Ext.menu.Item', {
+                    text: 'Swap lon/lat',
+					iconCls: 'gis-menu-item-icon-relocate',
+					disabled: !gis.init.user.isAdmin,
+					handler: function(item) {
+                        var id = feature.attributes.id,
+                            geo = Ext.clone(feature.geometry).transform('EPSG:900913', 'EPSG:4326');
+
+                        if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y) && gis.init.user.isAdmin) {
+                            Ext.Ajax.request({
+                                url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
+                                success: function(r) {
+                                    var orgUnit = Ext.decode(r.responseText);
+
+                                    orgUnit.coordinates = '[' + geo.y.toFixed(5) + ',' + geo.x.toFixed(5) + ']';
+
+                                    Ext.Ajax.request({
+                                        url: gis.init.contextPath + '/api/metaData?preheatCache=false',
+                                        method: 'POST',
+                                        headers: {'Content-Type': 'application/json'},
+                                        params: Ext.encode({organisationUnits: [orgUnit]}),
+                                        success: function(r) {
+                                            var x = feature.geometry.x,
+                                                y = feature.geometry.y;
+
+                                            delete feature.geometry.bounds;
+                                            feature.geometry.x = y;
+                                            feature.geometry.y = x;
+
+                                            layer.redraw();
+
+                                            console.log(feature.attributes.name + ' relocated to ' + orgUnit.coordinates);
+                                        }
+                                    });
+                                }
+                            });
+                        }
+					}
+				}));
+
+				menuItems.push( Ext.create('Ext.menu.Item', {
+					text: GIS.i18n.show_information_sheet,
+					iconCls: 'gis-menu-item-icon-information',
+					handler: function(item) {
+                        showInfo();
+                    }
+                }));
+			}
+
+			if (menuItems.length) {
+                menuItems[menuItems.length - 1].addCls('gis-menu-item-last');
+            }
+
+			menu = new Ext.menu.Menu({
+				baseCls: 'gis-plugin gis-popupmenu',
+				shadow: false,
+				showSeparator: false,
+				defaults: {
+					bodyStyle: 'padding-right:6px'
+				},
+				items: menuItems
+			});
+
+			menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
+		};
+
+		options = {
+            onHoverSelect: defaultHoverSelect,
+            onHoverUnselect: defaultHoverUnselect,
+            onClickSelect: defaultClickSelect
+        };
+
+		if (isEvent) {
+			options.onClickSelect = function fn(feature) {
+                var ignoreKeys = ['label', 'value', 'nameColumnMap', 'psi', 'ps', 'longitude', 'latitude', 'eventdate', 'ou', 'oucode', 'ouname', 'popupText'],
+                    attributes = feature.attributes,
+                    map = attributes.nameColumnMap,
+                    html = '<table class="padding1">',
+                    titleStyle = ' style="font-weight:bold; padding-right:10px; vertical-align:top"',
+                    valueStyle = ' style="max-width:170px"',
+                    windowPosition;
+
+                // default properties
+                html += '<tr><td' + titleStyle + '>' + map['ou'] + '</td><td' + valueStyle + '>' + attributes['ouname'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['eventdate'] + '</td><td' + valueStyle + '>' + attributes['eventdate'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['longitude'] + '</td><td' + valueStyle + '>' + attributes['longitude'] + '</td></tr>';
+                html += '<tr><td' + titleStyle + '>' + map['latitude'] + '</td><td' + valueStyle + '>' + attributes['latitude'] + '</td></tr>';
+
+                for (var key in attributes) {
+                    if (attributes.hasOwnProperty(key) && !Ext.Array.contains(ignoreKeys, key)) {
+                        html += '<tr><td' + titleStyle + '>' + map[key] + '</td><td>' + attributes[key] + '</td></tr>';
+                    }
+                }
+
+                html += '</table>';
+
+                if (Ext.isObject(eventWindow) && eventWindow.destroy) {
+                    windowPosition = eventWindow.getPosition();
+                    eventWindow.destroy();
+                    eventWindow = null;
+                }
+
+                eventWindow = Ext.create('Ext.window.Window', {
+                    title: 'Event',
+                    layout: 'fit',
+                    resizable: false,
+                    bodyStyle: 'background-color:#fff; padding:5px',
+                    html: html,
+                    autoShow: true,
+                    listeners: {
+                        show: function(w) {
+                            if (windowPosition) {
+                                w.setPosition(windowPosition);
+                            }
+                            else {
+                                gis.util.gui.window.setPositionTopRight(w);
+                            }
+                        },
+                        destroy: function() {
+                            eventWindow = null;
+                        }
+                    }
+                });
+            };
+		}
+
+		selectHandlers = new OpenLayers.Control.newSelectFeature(layer, options);
+
+		gis.olmap.addControl(selectHandlers);
+		selectHandlers.activate();
+	};
+
+	GIS.core.StyleMap = function(labelConfig) {
+		var defaults = {
+				fillOpacity: 1,
+				strokeColor: '#fff',
+				strokeWidth: 1,
+                pointRadius: 8,
+                labelAlign: 'cr',
+                labelYOffset: 13,
+                fontFamily: '"Arial","Sans-serif","Roboto","Helvetica","Consolas"'
+			},
+			select = {
+				fillOpacity: 0.9,
+				strokeColor: '#fff',
+				strokeWidth: 1,
+                pointRadius: 8,
+				cursor: 'pointer',
+                labelAlign: 'cr',
+                labelYOffset: 13
+			};
+
+        if (Ext.isObject(labelConfig) && labelConfig.labels) {
+            defaults.label = '\${label}';
+            defaults.fontSize = labelConfig.labelFontSize;
+            defaults.fontWeight = labelConfig.labelFontWeight;
+            defaults.fontStyle = labelConfig.labelFontStyle;
+            defaults.fontColor = labelConfig.labelFontColor;
+        }
+
+		return new OpenLayers.StyleMap({
+			'default': defaults,
+			select: select
+		});
+	};
+
+	GIS.core.VectorLayer = function(gis, id, name, config) {
+		var layer = new OpenLayers.Layer.Vector(name, {
+			strategies: [
+				new OpenLayers.Strategy.Refresh({
+					force:true
+				})
+			],
+			styleMap: GIS.core.StyleMap(),
+			visibility: false,
+			displayInLayerSwitcher: false,
+			layerType: gis.conf.finals.layer.type_vector,
+			layerOpacity: config ? config.opacity || 1 : 1,
+			setLayerOpacity: function(number) {
+				if (number) {
+					this.layerOpacity = parseFloat(number);
+				}
+				this.setOpacity(this.layerOpacity);
+			},
+			hasLabels: false
+		});
+
+		layer.id = id;
+
+		return layer;
+	};
+
+	GIS.core.MeasureWindow = function(gis) {
+		var window,
+			label,
+			handleMeasurements,
+			control,
+			styleMap;
+
+		styleMap = new OpenLayers.StyleMap({
+			'default': new OpenLayers.Style()
+		});
+
+		control = new OpenLayers.Control.Measure(OpenLayers.Handler.Path, {
+			persist: true,
+			immediate: true,
+			handlerOption: {
+				layerOptions: {
+					styleMap: styleMap
+				}
+			}
+		});
+
+		handleMeasurements = function(e) {
+			if (e.measure) {
+				label.setText(e.measure.toFixed(2) + ' ' + e.units);
+			}
+		};
+
+		gis.olmap.addControl(control);
+
+		control.events.on({
+			measurepartial: handleMeasurements,
+			measure: handleMeasurements
+		});
+
+		control.geodesic = true;
+		control.activate();
+
+		label = Ext.create('Ext.form.Label', {
+			style: 'height: 20px',
+			text: '0 km'
+		});
+
+		window = Ext.create('Ext.window.Window', {
+			title: GIS.i18n.measure_distance,
+			layout: 'fit',
+			cls: 'gis-container-default gis-plugin',
+			bodyStyle: 'text-align: center',
+			width: 130,
+			minWidth: 130,
+			resizable: false,
+			items: label,
+			listeners: {
+				show: function() {
+					var x = gis.viewport.eastRegion.getPosition()[0] - this.getWidth() - 3,
+						y = gis.viewport.centerRegion.getPosition()[1] + 26;
+					this.setPosition(x, y);
+				},
+				destroy: function() {
+					control.deactivate();
+					gis.olmap.removeControl(control);
+				}
+			}
+		});
+
+		return window;
+	};
+
+	GIS.core.MapLoader = function(gis) {
+		var getMap,
+			setMap,
+			afterLoad,
+			callBack,
+			register = [],
+			loader;
+
+		getMap = function() {
+            var isPlugin = GIS.plugin && !GIS.app,
+                type = isPlugin ? 'jsonp' : 'json',
+                url = gis.init.contextPath + '/api/maps/' + gis.map.id + '.' + type + '?fields=' + gis.conf.url.mapFields.join(','),
+                success,
+                failure;
+
+            success = function(r) {
+
+                // operand
+                if (Ext.isArray(r.mapViews)) {
+                    for (var i = 0, view; i < r.mapViews.length; i++) {
+                        view = r.mapViews[i];
+
+                        if (view) {
+                            if (Ext.isArray(view.columns) && view.columns.length) {
+                                for (var j = 0, dim; j < view.columns.length; j++) {
+                                    dim = view.columns[j];
+
+                                    if (Ext.isArray(dim.items) && dim.items.length) {
+                                        for (var k = 0, item; k < dim.items.length; k++) {
+                                            item = dim.items[k];
+
+                                            item.id = item.id.replace('#', '.');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                gis.map = r;
+                setMap();
+            };
+
+            failure = function(r) {
+                gis.olmap.mask.hide();
+
+                if (Ext.Array.contains([403], r.status)) {
+                    alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                }
+                else {
+                    alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                }
+            };
+
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    }
+                });
+            }
+		};
+
+		setMap = function() {
+			var views = gis.map.mapViews,
+				loader;
+
+			if (!(Ext.isArray(views) && views.length)) {
+				gis.olmap.mask.hide();
+				alert(GIS.i18n.favorite_outdated_create_new);
+				return;
+			}
+
+			for (var i = 0; i < views.length; i++) {
+				views[i] = gis.api.layout.Layout(views[i]);
+			}
+
+			views = Ext.Array.clean(views);
+
+			if (!views.length) {
+				return;
+			}
+
+			if (gis.viewport && gis.viewport.favoriteWindow && gis.viewport.favoriteWindow.isVisible()) {
+				gis.viewport.favoriteWindow.destroy();
+			}
+
+			gis.olmap.closeAllLayers();
+
+			for (var i = 0, layout; i < views.length; i++) {
+				layout = views[i];
+
+				loader = gis.layer[layout.layer].core.getLoader();
+				loader.updateGui = !gis.el;
+				loader.callBack = callBack;
+				loader.load(layout);
+			}
+		};
+
+		callBack = function(layer) {
+			register.push(layer);
+
+			if (register.length === gis.map.mapViews.length) {
+				afterLoad();
+			}
+		};
+
+		afterLoad = function() {
+			register = [];
+
+			if (gis.el) {
+				gis.olmap.zoomToVisibleExtent();
+			}
+			else {
+				if (gis.map.longitude && gis.map.latitude && gis.map.zoom) {
+					gis.olmap.setCenter(new OpenLayers.LonLat(gis.map.longitude, gis.map.latitude), gis.map.zoom);
+				}
+				else {
+					gis.olmap.zoomToVisibleExtent();
+				}
+			}
+
+			// interpretation button
+			if (gis.viewport.shareButton) {
+				gis.viewport.shareButton.enable();
+			}
+
+			// session storage
+			if (GIS.isSessionStorage) {
+				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
+			}
+
+			gis.olmap.mask.hide();
+		};
+
+		loader = {
+			load: function(views) {
+				gis.olmap.mask.show();
+
+				if (gis.map && gis.map.id) {
+					getMap();
+				}
+				else {
+					if (views) {
+						gis.map = {
+							mapViews: views
+						};
+					}
+
+					setMap();
+				}
+			}
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderEvent = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			afterLoad,
+			loader,
+			dimConf = gis.conf.finals.dimension;
+
+		loadOrganisationUnits = function(view) {
+            loadData(view);
+		};
+
+		loadData = function(view) {
+            var paramString = '?',
+                features = [],
+                success;
+
+			view = view || layer.core.view;
+
+            // stage
+            paramString += 'stage=' + view.stage.id;
+
+            // dates
+            paramString += '&startDate=' + view.startDate;
+            paramString += '&endDate=' + view.endDate;
+
+            // ou
+            if (Ext.isArray(view.organisationUnits)) {
+                paramString += '&dimension=ou:';
+
+				for (var i = 0; i < view.organisationUnits.length; i++) {
+					paramString += view.organisationUnits[i].id;
+                    paramString += i < view.organisationUnits.length - 1 ? ';' : '';
+				}
+			}
+
+            // de
+            for (var i = 0, element; i < view.dataElements.length; i++) {
+                element = view.dataElements[i];
+
+                paramString += '&dimension=' + element.dimension + (element.filter ? ':' + element.filter : '');
+
+                //if (element.filter) {
+					//if (element.operator) {
+						//paramString += ':' + element.operator;
+					//}
+
+					//paramString += ':' + element.value;
+                //}
+            }
+
+            success = function(r) {
+                var events = [],
+                    features = [],
+                    rows = [],
+                    lonIndex,
+                    latIndex,
+                    map = Ext.clone(r.metaData.names);
+
+                // name-column map, lonIndex, latIndex
+                for (var i = 0; i < r.headers.length; i++) {
+                    map[r.headers[i].name] = r.headers[i].column;
+
+                    if (r.headers[i].name === 'longitude') {
+                        lonIndex = i;
+                    }
+
+                    if (r.headers[i].name === 'latitude') {
+                        latIndex = i;
+                    }
+                }
+
+                // get events with coordinates
+                if (Ext.isArray(r.rows) && r.rows.length) {
+                    for (var i = 0, row; i < r.rows.length; i++) {
+                        row = r.rows[i];
+
+                        if (row[lonIndex] && row[latIndex]) {
+                            rows.push(row);
+                        }
+                    }
+                }
+
+                if (!rows.length) {
+                    alert('No event coordinates found');
+                    olmap.mask.hide();
+                    return;
+                }
+
+                // name-column map
+                map = r.metaData.names;
+
+                for (var i = 0; i < r.headers.length; i++) {
+                    map[r.headers[i].name] = r.headers[i].column;
+                }
+
+                // events
+                for (var i = 0, row, obj; i < rows.length; i++) {
+                    row = rows[i];
+                    obj = {};
+
+                    for (var j = 0; j < row.length; j++) {
+                        obj[r.headers[j].name] = row[j];
+                    }
+
+                    obj[gis.conf.finals.widget.value] = 0;
+                    obj.label = obj.ouname;
+                    obj.popupText = obj.ouname;
+                    obj.nameColumnMap = map;
+
+                    events.push(obj);
+                }
+
+                // features
+                for (var i = 0, event, point; i < events.length; i++) {
+                    event = events[i];
+
+                    point = gis.util.map.getTransformedPointByXY(event.longitude, event.latitude);
+
+                    features.push(new OpenLayers.Feature.Vector(point, event));
+                }
+
+                layer.removeFeatures(layer.features);
+                layer.addFeatures(features);
+
+                loadLegend(view);
+            };
+
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
+		};
+
+		loadLegend = function(view) {
+			view = view || layer.core.view;
+
+            // classification optionsvar options = {
+            var options = {
+            	indicator: gis.conf.finals.widget.value,
+				method: 2,
+				numClasses: 5,
+				colors: layer.core.getColors('000000', '222222'),
+				minSize: 5,
+				maxSize: 5
+			};
+
+            layer.core.view = view;
+
+            layer.core.applyClassification(options);
+
+            afterLoad(view);
+		};
+
+		afterLoad = function(view) {
+
+			// Layer
+			if (layer.item) {
+				layer.item.setValue(true, view.opacity);
+			}
+			else {
+				layer.setLayerOpacity(view.opacity);
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+			}
+
+			// session storage
+			//if (GIS.isSessionStorage) {
+				//gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
+			//}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+                loadOrganisationUnits(view);
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderFacility = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			addCircles,
+			afterLoad,
+			loader;
+
+		compareView = function(view, doExecute) {
+			var src = layer.core.view,
+				viewIds,
+				viewDim,
+				srcIds,
+				srcDim;
+
+			loader.zoomToVisibleExtent = true;
+
+			if (!src) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// organisation units
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
+			srcDim = src.rows[0];
+
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadOrganisationUnits(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}
+			else {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// Group set
+			loader.zoomToVisibleExtent = false;
+
+			if (view.organisationUnitGroupSet.id !== src.organisationUnitGroupSet.id) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			//if (view.areaRadius !== src.areaRadius) {
+				//if (doExecute) {
+					//loadLegend(view);
+				//}
+				//return gis.conf.finals.widget.loadtype_legend;
+			//}
+
+			// always reload legend
+			if (doExecute) {
+				loadLegend(view);
+				return gis.conf.finals.widget.loadtype_legend;
+			}
+
+			//gis.olmap.mask.hide();
+		};
+
+		loadOrganisationUnits = function(view) {
+            var items = view.rows[0].items,
+                isPlugin = GIS.plugin && !GIS.app,
+                url = function() {
+                    var params = '?ou=ou:';
+
+                    for (var i = 0; i < items.length; i++) {
+                        params += items[i].id;
+                        params += i !== items.length - 1 ? ';' : '';
+                    }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params + '&viewClass=detailed';
+                }(),
+                success,
+                failure;
+
+            success = function(r) {
+                var geojson = layer.core.decode(r),
+                    format = new OpenLayers.Format.GeoJSON(),
+                    features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+
+                if (!Ext.isArray(features)) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.invalid_coordinates);
+                    return;
+                }
+
+                if (!features.length) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.no_valid_coordinates_found);
+                    return;
+                }
+
+                layer.core.featureStore.loadFeatures(features.slice(0));
+
+                loadData(view, features);
+            };
+
+            failure = function() {
+                olmap.mask.hide();
+                alert(GIS.i18n.coordinates_could_not_be_loaded);
+            };
+
+            if (GIS.plugin && !GIS.app) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    }
+                });
+            }
+        };
+
+		loadData = function(view, features) {
+			view = view || layer.core.view;
+			features = features || layer.core.featureStore.features;
+
+			for (var i = 0; i < features.length; i++) {
+				features[i].attributes.popupText = features[i].attributes.name + ' (' + features[i].attributes[view.organisationUnitGroupSet.id] + ')';
+			}
+
+			layer.removeFeatures(layer.features);
+			layer.addFeatures(features);
+
+			loadLegend(view);
+		};
+
+		loadLegend = function(view) {
+            var isPlugin = GIS.plugin && !GIS.app,
+                type = isPlugin ? 'jsonp' : 'json',
+                url = gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.' + type + '?fields=organisationUnitGroups[id,name,symbol]',
+                success;
+
+			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, attr; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name : '';
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
+
+            success = function(r) {
+                var data = r.organisationUnitGroups,
+                    options = {
+                        indicator: view.organisationUnitGroupSet.id
+                    };
+
+                gis.store.groupsByGroupSet.loadData(data);
+
+                layer.core.view = view;
+
+                layer.core.applyClassification({
+                    indicator: view.organisationUnitGroupSet.id
+                });
+
+                addCircles(view);
+
+                afterLoad(view);
+            };
+
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    }
+                });
+            }
+		};
+
+		addCircles = function(view) {
+			var radius = view.areaRadius;
+
+			if (layer.circleLayer) {
+				layer.circleLayer.deactivateControls();
+				layer.circleLayer = null;
+			}
+			if (Ext.isDefined(radius) && radius) {
+				layer.circleLayer = GIS.app.CircleLayer(layer.features, radius);
+				nissa = layer.circleLayer;
+			}
+		};
+
+		afterLoad = function(view) {
+
+			// Legend
+			gis.viewport.eastRegion.doLayout();
+			layer.legendPanel.expand();
+
+			// Layer
+			if (layer.item) {
+				layer.item.setValue(true, view.opacity);
+			}
+			else {
+				layer.setLayerOpacity(view.opacity);
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+
+				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
+				}
+			}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+				if (this.compare) {
+					compareView(view, true);
+				}
+				else {
+					loadOrganisationUnits(view);
+				}
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderBoundary = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			afterLoad,
+			loader;
+
+		compareView = function(view, doExecute) {
+			var src = layer.core.view,
+				viewIds,
+				viewDim,
+				srcIds,
+				srcDim;
+
+			if (!src) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
+			srcDim = src.rows[0];
+
+			// organisation units
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadOrganisationUnits(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+
+                if (doExecute) {
+                    loader.zoomToVisibleExtent = false;
+                    loadLegend(view);
+                }
+
+                return gis.conf.finals.widget.loadtype_legend;
+			}
+			else {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			gis.olmap.mask.hide();
+		};
+
+		loadOrganisationUnits = function(view) {
+			var items = view.rows[0].items,
+                isPlugin = GIS.plugin && !GIS.app,
+                url = function() {
+                    var params = '?ou=ou:';
+
+                    for (var i = 0; i < items.length; i++) {
+                        params += items[i].id;
+                        params += i !== items.length - 1 ? ';' : '';
+                    }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
+                }(),
+                success,
+                failure;
+
+            success = function(r) {
+                var geojson = gis.util.geojson.decode(r, 'DESC'),
+                    format = new OpenLayers.Format.GeoJSON(),
+                    features = gis.util.map.getTransformedFeatureArray(format.read(geojson)),
+                    colors = ['black', 'blue', 'red', 'green', 'yellow'],
+                    levels = [],
+                    levelObjectMap = {};
+
+                if (!Ext.isArray(features)) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.invalid_coordinates);
+                    return;
+                }
+
+                if (!features.length) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.no_valid_coordinates_found);
+                    return;
+                }
+
+                // get levels, colors, map
+                for (var i = 0; i < features.length; i++) {
+                    levels.push(parseFloat(features[i].attributes.level));
+                }
+
+                levels = Ext.Array.unique(levels).sort();
+
+                for (var i = 0; i < levels.length; i++) {
+                    levelObjectMap[levels[i]] = {
+                        strokeColor: colors[i]
+                    };
+                }
+
+                // style
+                for (var i = 0, feature, obj, strokeWidth; i < features.length; i++) {
+                    feature = features[i];
+                    obj = levelObjectMap[feature.attributes.level];
+                    strokeWidth = levels.length === 1 ? 1 : feature.attributes.level == 2 ? 2 : 1;
+
+                    feature.style = {
+                        strokeColor: obj.strokeColor || 'black',
+                        strokeWidth: strokeWidth,
+                        fillOpacity: 0,
+                        pointRadius: 5,
+                        labelAlign: 'cr',
+                        labelYOffset: 13
+                    };
+                }
+
+                layer.core.featureStore.loadFeatures(features.slice(0));
+
+                loadData(view, features);
+            };
+
+            failure = function() {
+                olmap.mask.hide();
+                alert(GIS.i18n.coordinates_could_not_be_loaded);
+            };
+
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
+                    }
+                });
+            }
+		};
+
+		loadData = function(view, features) {
+			view = view || layer.core.view;
+			features = features || layer.core.featureStore.features;
+
+			for (var i = 0; i < features.length; i++) {
+				features[i].attributes.value = 0;
+                features[i].attributes.popupText = features[i].attributes.name;
+			}
+
+			layer.removeFeatures(layer.features);
+			layer.addFeatures(features);
+
+			loadLegend(view);
+		};
+
+		loadLegend = function(view) {
+			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name : '';
+            }
+
+			var options = {
+				indicator: gis.conf.finals.widget.value,
+				method: 2,
+				numClasses: 5,
+				colors: layer.core.getColors('000000', '000000'),
+				minSize: 6,
+				maxSize: 6
+			};
+
+			layer.core.view = view;
+
+			layer.core.applyClassification(options);
+
+            // labels
+            gis.util.layer.setFeatureLabelStyle(layer, view.labels, false, view);
+
+			afterLoad(view);
+		};
+
+		afterLoad = function(view) {
+
+			// Layer
+			if (layer.item) {
+				layer.item.setValue(true, view.opacity);
+			}
+			else {
+				layer.setLayerOpacity(view.opacity);
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+
+				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
+				}
+			}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+				if (this.compare) {
+					compareView(view, true);
+				}
+				else {
+					loadOrganisationUnits(view);
+				}
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
+		};
+
+		return loader;
+	};
+
+	GIS.core.LayerLoaderThematic = function(gis, layer) {
+		var olmap = layer.map,
+			compareView,
+			loadOrganisationUnits,
+			loadData,
+			loadLegend,
+			afterLoad,
+			loader,
+			dimConf = gis.conf.finals.dimension;
+
+		compareView = function(view, doExecute) {
+			var src = layer.core.view,
+				viewIds,
+				viewDim,
+				srcIds,
+				srcDim;
+
+			loader.zoomToVisibleExtent = true;
+
+			if (!src) {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// organisation units
+			viewIds = [];
+			viewDim = view.rows[0];
+			srcIds = [];
+			srcDim = src.rows[0];
+
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadOrganisationUnits(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}
+			else {
+				if (doExecute) {
+					loadOrganisationUnits(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// data
+			loader.zoomToVisibleExtent = false;
+
+			viewIds = [];
+			viewDim = view.columns[0];
+			srcIds = [];
+			srcDim = src.columns[0];
+
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadData(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}
+			else {
+				if (doExecute) {
+					loadData(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// period
+			viewIds = [];
+			viewDim = view.filters[0];
+			srcIds = [];
+			srcDim = src.filters[0];
+
+			if (viewDim.items.length === srcDim.items.length) {
+				for (var i = 0; i < viewDim.items.length; i++) {
+					viewIds.push(viewDim.items[i].id);
+				}
+
+				for (var i = 0; i < srcDim.items.length; i++) {
+					srcIds.push(srcDim.items[i].id);
+				}
+
+				if (Ext.Array.difference(viewIds, srcIds).length !== 0) {
+					if (doExecute) {
+						loadData(view);
+					}
+					return gis.conf.finals.widget.loadtype_organisationunit;
+				}
+			}
+			else {
+				if (doExecute) {
+					loadData(view);
+				}
+				return gis.conf.finals.widget.loadtype_organisationunit;
+			}
+
+			// legend
+			//if (typeof view.legendSet !== typeof src.legendSet) {
+				//if (doExecute) {
+					//loadLegend(view);
+				//}
+				//return gis.conf.finals.widget.loadtype_legend;
+			//}
+			//else if (view.classes !== src.classes ||
+				//view.method !== src.method ||
+				//view.colorLow !== src.colorLow ||
+				//view.radiusLow !== src.radiusLow ||
+				//view.colorHigh !== src.colorHigh ||
+				//view.radiusHigh !== src.radiusHigh) {
+					//if (doExecute) {
+						//loadLegend(view);
+					//}
+					//return gis.conf.finals.widget.loadtype_legend;
+			//}
+
+			// if no changes - reload legend but do not zoom
+			if (doExecute) {
+				loader.zoomToVisibleExtent = false;
+				loadLegend(view);
+				return gis.conf.finals.widget.loadtype_legend;
+			}
+
+			//gis.olmap.mask.hide();
+		};
+
+		loadOrganisationUnits = function(view) {
+			var items = view.rows[0].items,
+                isPlugin = GIS.plugin && !GIS.app,
+                url = function() {
+                    var params = '?ou=ou:';
+
+                    for (var i = 0; i < items.length; i++) {
+                        params += items[i].id;
+                        params += i !== items.length - 1 ? ';' : '';
+                    }
+
+                    params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
+                }(),
+                success,
+                failure;
+
+            success = function(r) {
+                var geojson = gis.util.geojson.decode(r),
+                    format = new OpenLayers.Format.GeoJSON(),
+                    features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
+
+                if (!Ext.isArray(features)) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.invalid_coordinates);
+                    return;
+                }
+
+                if (!features.length) {
+                    olmap.mask.hide();
+                    alert(GIS.i18n.no_valid_coordinates_found);
+                    return;
+                }
+
+                layer.core.featureStore.loadFeatures(features.slice(0));
+
+                loadData(view, features);
+            };
+
+            failure = function() {
+                olmap.mask.hide();
+                alert(GIS.i18n.coordinates_could_not_be_loaded);
+            };
+
+            if (isPlugin) {
+                Ext.data.JsonP.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(r);
+                    }
+                });
+            }
+            else {
+                Ext.Ajax.request({
+                    url: url,
+                    disableCaching: false,
+                    success: function(r) {
+                        success(Ext.decode(r.responseText));
+                    },
+                    failure: function() {
+                        failure();
+                    }
+                });
+            }
+		};
+
+		loadData = function(view, features) {
+			var success;
+
+			view = view || layer.core.view;
+			features = features || layer.core.featureStore.features;
+
+			var dimConf = gis.conf.finals.dimension,
+				paramString = '?',
+				dxItems = view.columns[0].items,
+				isOperand = view.columns[0].dimension === dimConf.operand.objectName,
+				peItems = view.filters[0].items,
+				ouItems = view.rows[0].items;
+
+			// ou
+			paramString += 'dimension=ou:';
+
+			for (var i = 0; i < ouItems.length; i++) {
+				paramString += ouItems[i].id;
+				paramString += i < ouItems.length - 1 ? ';' : '';
+			}
+
+			// dx
+			paramString += '&dimension=dx:';
+
+			for (var i = 0; i < dxItems.length; i++) {
+				paramString += isOperand ? dxItems[i].id.split('.')[0] : dxItems[i].id;
+				paramString += i < dxItems.length - 1 ? ';' : '';
+			}
+
+			paramString += isOperand ? '&dimension=co' : '';
+
+			// pe
+			paramString += '&filter=pe:';
+
+			for (var i = 0; i < peItems.length; i++) {
+				paramString += peItems[i].id;
+				paramString += i < peItems.length - 1 ? ';' : '';
+			}
+
+            // display property
+            paramString += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+			success = function(json) {
+				var response = gis.api.response.Response(json),
+					featureMap = {},
+					valueMap = {},
+					ouIndex,
+					dxIndex,
+					valueIndex,
+					newFeatures = [],
+					dimensions,
+					items = [];
+
+				if (!response) {
+					olmap.mask.hide();
+					return;
+				}
+
+				// ou index, value index
+				for (var i = 0; i < response.headers.length; i++) {
+					if (response.headers[i].name === dimConf.organisationUnit.dimensionName) {
+						ouIndex = i;
+					}
+					else if (response.headers[i].name === dimConf.value.dimensionName) {
+						valueIndex = i;
+					}
+				}
+
+				// Feature map
+				for (var i = 0, id; i < features.length; i++) {
+					var id = features[i].attributes.id;
+
+					featureMap[id] = true;
+				}
+
+				// Value map
+				for (var i = 0; i < response.rows.length; i++) {
+					var id = response.rows[i][ouIndex],
+						value = parseFloat(response.rows[i][valueIndex]);
+
+					valueMap[id] = value;
+				}
+
+				for (var i = 0; i < features.length; i++) {
+					var feature = features[i],
+						id = feature.attributes.id;
+
+					if (featureMap.hasOwnProperty(id) && valueMap.hasOwnProperty(id)) {
+						feature.attributes.value = valueMap[id];
+                        feature.attributes.popupText = feature.attributes.name + ' (' + feature.attributes.value + ')';
+
+						newFeatures.push(feature);
+					}
+				}
+
+				layer.removeFeatures(layer.features);
+				layer.addFeatures(newFeatures);
+
+				gis.response = response;
+
+				loadLegend(view);
+			};
+
+			if (Ext.isObject(GIS.app)) {
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/analytics.json' + paramString,
+					disableCaching: false,
+					failure: function(r) {
+                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+					},
+					success: function(r) {
+						success(Ext.decode(r.responseText));
+					}
+				});
+			}
+			else if (Ext.isObject(GIS.plugin)) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
+		};
+
+		loadLegend = function(view) {
+			var bounds,
+				addNames,
+				fn;
+
+			view = view || layer.core.view;
+
+            // labels
+            for (var i = 0, feature; i < layer.features.length; i++) {
+                attr = layer.features[i].attributes;
+                attr.label = view.labels ? attr.name + ' (' + attr.value + ')' : '';
+            }
+
+            layer.styleMap = GIS.core.StyleMap(view);
+
+			addNames = function(response) {
+
+				// All dimensions
+				var dimensions = Ext.Array.clean([].concat(view.columns || [], view.rows || [], view.filters || [])),
+					metaData = response.metaData,
+					peIds = metaData[dimConf.period.objectName];
+
+				for (var i = 0, dimension; i < dimensions.length; i++) {
+					dimension = dimensions[i];
+
+					for (var j = 0, item; j < dimension.items.length; j++) {
+						item = dimension.items[j];
+
+						if (item.id.indexOf('.') !== -1) {
+							var ids = item.id.split('.');
+							item.name = metaData.names[ids[0]] + ' ' + metaData.names[ids[1]];
+						}
+						else {
+							item.name = metaData.names[item.id];
+						}
+					}
+				}
+
+				// Period name without changing the id
+				view.filters[0].items[0].name = metaData.names[peIds[peIds.length - 1]];
+			};
+
+			fn = function() {
+				addNames(gis.response);
+
+				// Classification options
+				var options = {
+					indicator: gis.conf.finals.widget.value,
+					method: view.legendSet ? mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS : view.method,
+					numClasses: view.classes,
+					bounds: bounds,
+					colors: layer.core.getColors(view.colorLow, view.colorHigh),
+					minSize: view.radiusLow,
+					maxSize: view.radiusHigh
+				};
+
+				layer.core.view = view;
+				layer.core.colorInterpolation = colors;
+				layer.core.applyClassification(options);
+
+				afterLoad(view);
+			};
+
+			if (view.legendSet) {
+				var bounds = [],
+					colors = [],
+					names = [],
+					legends = [];
+
+				Ext.Ajax.request({
+					url: gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
+					scope: this,
+					success: function(r) {
+						legends = Ext.decode(r.responseText).mapLegends;
+
+						Ext.Array.sort(legends, function (a, b) {
+							return a.startValue - b.startValue;
+						});
+
+						for (var i = 0; i < legends.length; i++) {
+							if (bounds[bounds.length - 1] !== legends[i].startValue) {
+								if (bounds.length !== 0) {
+									colors.push(new mapfish.ColorRgb(240,240,240));
+									names.push('');
+								}
+								bounds.push(legends[i].startValue);
+							}
+							colors.push(new mapfish.ColorRgb());
+							colors[colors.length - 1].setFromHex(legends[i].color);
+							names.push(legends[i].name);
+							bounds.push(legends[i].endValue);
+						}
+
+						view.legendSet.names = names;
+						view.legendSet.bounds = bounds;
+						view.legendSet.colors = colors;
+
+						fn();
+					}
+				});
+			}
+			else {
+				fn();
+			}
+		};
+
+		afterLoad = function(view) {
+
+			// Legend
+			gis.viewport.eastRegion.doLayout();
+			layer.legendPanel.expand();
+
+			// Layer
+			layer.setLayerOpacity(view.opacity);
+
+			if (layer.item) {
+				layer.item.setValue(true);
+			}
+
+			// Filter
+			if (layer.filterWindow && layer.filterWindow.isVisible()) {
+				layer.filterWindow.filter();
+			}
+
+			// Gui
+			if (loader.updateGui && Ext.isObject(layer.widget)) {
+				layer.widget.setGui(view);
+			}
+
+			// Zoom
+			if (loader.zoomToVisibleExtent) {
+				olmap.zoomToVisibleExtent();
+			}
+
+			// Mask
+			if (loader.hideMask) {
+				olmap.mask.hide();
+			}
+
+			// Map callback
+			if (loader.callBack) {
+				loader.callBack(layer);
+			}
+			else {
+				gis.map = null;
+				if (gis.viewport.shareButton) {
+                    gis.viewport.shareButton.enable();
+				}
+			}
+
+			// session storage
+			if (GIS.isSessionStorage) {
+				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
+			}
+		};
+
+		loader = {
+			compare: false,
+			updateGui: false,
+			zoomToVisibleExtent: false,
+			hideMask: false,
+			callBack: null,
+			load: function(view) {
+				gis.olmap.mask.show();
+
+				if (this.compare) {
+					compareView(view, true);
+				}
+				else {
+					loadOrganisationUnits(view);
+				}
+			},
+			loadData: loadData,
+			loadLegend: loadLegend
+		};
+
+		return loader;
+	};
+
+	GIS.core.getInstance = function(init) {
+		var conf = {},
+			util = {},
+			api = {},
+			store = {},
+			layers = [],
+			gis = {};
+
+		// conf
+		(function() {
+			conf.finals = {
+				url: {
+					path_commons: '/dhis-web-commons-ajax-json/'
+				},
+				layer: {
+					type_base: 'base',
+					type_vector: 'vector',
+					category_thematic: 'thematic'
+				},
+				dimension: {
+					data: {
+						id: 'data',
+						value: 'data',
+						param: 'dx',
+						dimensionName: 'dx',
+						objectName: 'dx'
+					},
+					category: {
+						name: GIS.i18n.categories,
+						dimensionName: 'co',
+						objectName: 'co',
+					},
+					indicator: {
+						id: 'indicator',
+						value: 'indicators',
+						param: 'in',
+						dimensionName: 'dx',
+						objectName: 'in'
+					},
+					dataElement: {
+						id: 'dataElement',
+						value: 'dataElement',
+						param: 'de',
+						dimensionName: 'dx',
+						objectName: 'de'
+					},
+					operand: {
+						id: 'operand',
+						value: 'operand',
+						param: 'dc',
+						dimensionName: 'dx',
+						objectName: 'dc'
+					},
+					dataSet: {
+						value: 'dataSets',
+						dimensionName: 'dx',
+						objectName: 'ds'
+					},
+					period: {
+						id: 'period',
+						value: 'period',
+						param: 'pe',
+						dimensionName: 'pe',
+						objectName: 'pe'
+					},
+					organisationUnit: {
+						id: 'organisationUnit',
+						value: 'organisationUnit',
+						param: 'ou',
+						dimensionName: 'ou',
+						objectName: 'ou'
+					},
+					value: {
+						id: 'value',
+						value: 'value',
+						param: 'value',
+						dimensionName: 'value',
+						objectName: 'value'
+					}
+				},
+				widget: {
+					value: 'value',
+					legendtype_automatic: 'automatic',
+					legendtype_predefined: 'predefined',
+					symbolizer_color: 'color',
+					symbolizer_image: 'image',
+					loadtype_organisationunit: 'organisationUnit',
+					loadtype_data: 'data',
+					loadtype_legend: 'legend'
+				},
+				openLayers: {
+					point_classname: 'OpenLayers.Geometry.Point'
+				},
+				mapfish: {
+					classify_with_bounds: 1,
+					classify_by_equal_intervals: 2,
+					classify_by_quantils: 3
+				},
+				root: {
+					id: 'root'
+				}
+			};
+
+			conf.layout = {
+				widget: {
+					item_width: 288,
+					itemlabel_width: 95,
+					window_width: 306
+				},
+				tool: {
+					item_width: 228,
+					itemlabel_width: 95,
+					window_width: 250
+				},
+				grid: {
+					row_height: 27
+				},
+				layer: {
+					opacity: 0.8
+				}
+			};
+
+			conf.period = {
+				periodTypes: [
+					{id: 'relativePeriods', name: GIS.i18n.relative},
+					{id: 'Daily', name: GIS.i18n.daily},
+					{id: 'Weekly', name: GIS.i18n.weekly},
+					{id: 'Monthly', name: GIS.i18n.monthly},
+					{id: 'BiMonthly', name: GIS.i18n.bimonthly},
+					{id: 'Quarterly', name: GIS.i18n.quarterly},
+					{id: 'SixMonthly', name: GIS.i18n.sixmonthly},
+                    {id: 'SixMonthlyApril', name: GIS.i18n.sixmonthly_april},
+					{id: 'Yearly', name: GIS.i18n.yearly},
+					{id: 'FinancialOct', name: GIS.i18n.financial_oct},
+					{id: 'FinancialJuly', name: GIS.i18n.financial_july},
+					{id: 'FinancialApril', name: GIS.i18n.financial_april}
+				],
+				relativePeriods: [
+					{id: 'LAST_WEEK', name: GIS.i18n.last_week},
+					{id: 'LAST_MONTH', name: GIS.i18n.last_month},
+					{id: 'LAST_BIMONTH', name: GIS.i18n.last_bimonth},
+					{id: 'LAST_QUARTER', name: GIS.i18n.last_quarter},
+					{id: 'LAST_SIX_MONTH', name: GIS.i18n.last_sixmonth},
+					{id: 'LAST_FINANCIAL_YEAR', name: GIS.i18n.last_financial_year},
+					{id: 'THIS_YEAR', name: GIS.i18n.this_year},
+					{id: 'LAST_YEAR', name: GIS.i18n.last_year}
+				],
+				relativePeriodsMap: {
+					'LAST_WEEK': {id: 'LAST_WEEK', name: GIS.i18n.last_week},
+					'LAST_MONTH': {id: 'LAST_MONTH', name: GIS.i18n.last_month},
+					'LAST_BIMONTH': {id: 'LAST_BIMONTH', name: GIS.i18n.last_bimonth},
+					'LAST_QUARTER': {id: 'LAST_QUARTER', name: GIS.i18n.last_quarter},
+					'LAST_SIX_MONTH': {id: 'LAST_SIX_MONTH', name: GIS.i18n.last_sixmonth},
+					'LAST_FINANCIAL_YEAR': {id: 'LAST_FINANCIAL_YEAR', name: GIS.i18n.last_financial_year},
+					'THIS_YEAR': {id: 'THIS_YEAR', name: GIS.i18n.this_year},
+					'LAST_YEAR': {id: 'LAST_YEAR', name: GIS.i18n.last_year}
+				},
+				integratedRelativePeriodsMap: {
+					'LAST_WEEK': 'LAST_WEEK',
+					'LAST_4_WEEKS': 'LAST_WEEK',
+					'LAST_12_WEEKS': 'LAST_WEEK',
+					'LAST_MONTH': 'LAST_MONTH',
+					'LAST_3_MONTHS': 'LAST_MONTH',
+					'LAST_12_MONTHS': 'LAST_MONTH',
+					'LAST_BIMONTH': 'LAST_BIMONTH',
+					'LAST_6_BIMONTHS': 'LAST_BIMONTH',
+					'LAST_QUARTER': 'LAST_QUARTER',
+					'LAST_4_QUARTERS': 'LAST_QUARTER',
+					'LAST_SIX_MONTH': 'LAST_SIX_MONTH',
+					'LAST_2_SIXMONTHS': 'LAST_SIX_MONTH',
+					'LAST_FINANCIAL_YEAR': 'LAST_FINANCIAL_YEAR',
+					'LAST_5_FINANCIAL_YEARS': 'LAST_FINANCIAL_YEAR',
+					'THIS_YEAR': 'THIS_YEAR',
+					'LAST_YEAR': 'LAST_YEAR',
+					'LAST_5_YEARS': 'LAST_YEAR'
+				}
+			};
+
+            conf.url = {};
+
+            conf.url.analysisFields = [
+                '*',
+                'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                '!lastUpdated',
+                '!href',
+                '!created',
+                '!publicAccess',
+                '!rewindRelativePeriods',
+                '!userOrganisationUnit',
+                '!userOrganisationUnitChildren',
+                '!userOrganisationUnitGrandChildren',
+                '!externalAccess',
+                '!access',
+                '!relativePeriods',
+                '!columnDimensions',
+                '!rowDimensions',
+                '!filterDimensions',
+                '!user',
+                '!organisationUnitGroups',
+                '!itemOrganisationUnitGroups',
+                '!userGroupAccesses',
+                '!indicators',
+                '!dataElements',
+                '!dataElementOperands',
+                '!dataElementGroups',
+                '!dataSets',
+                '!periods',
+                '!organisationUnitLevels',
+                '!organisationUnits',
+
+                '!sortOrder',
+                '!topLimit'
+            ];
+
+            conf.url.mapFields = [
+                conf.url.analysisFields.join(','),
+                'mapViews[' + conf.url.analysisFields.join(',') + ']'
+            ];
+
+            conf.url.mapLegendFields = [
+                '*',
+                '!created',
+                '!lastUpdated',
+                '!displayName',
+                '!externalAccess',
+                '!access',
+                '!userGroupAccesses'
+            ];
+
+            conf.url.mapLegendSetFields = [
+                'id,name,mapLegends[' + conf.url.mapLegendFields.join(',') + ']'
+            ];
+        }());
+
+		// util
+		(function() {
+			util.map = {};
+
+			util.map.getVisibleVectorLayers = function() {
+				var layers = [];
+
+				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
+					layer = gis.olmap.layers[i];
+					if (layer.layerType === conf.finals.layer.type_vector && layer.visibility && layer.features.length) {
+						layers.push(layer);
+					}
+				}
+				return layers;
+			};
+
+			util.map.getRenderedVectorLayers = function() {
+				var layers = [];
+
+				for (var i = 0, layer; i < gis.olmap.layers.length; i++) {
+					layer = gis.olmap.layers[i];
+					if (layer.layerType === conf.finals.layer.type_vector && layer.features.length) {
+						layers.push(layer);
+					}
+				}
+				return layers;
+			};
+
+			util.map.getExtendedBounds = function(layers) {
+				var bounds = null;
+				if (layers.length) {
+					bounds = layers[0].getDataExtent();
+					if (layers.length > 1) {
+						for (var i = 1; i < layers.length; i++) {
+							bounds.extend(layers[i].getDataExtent());
+						}
+					}
+				}
+				return bounds;
+			};
+
+			util.map.zoomToVisibleExtent = function(olmap) {
+				var bounds = util.map.getExtendedBounds(util.map.getVisibleVectorLayers(olmap));
+				if (bounds) {
+					olmap.zoomToExtent(bounds);
+				}
+			};
+
+			util.map.getTransformedFeatureArray = function(features) {
+				var sourceProjection = new OpenLayers.Projection("EPSG:4326"),
+					destinationProjection = new OpenLayers.Projection("EPSG:900913");
+				for (var i = 0; i < features.length; i++) {
+					features[i].geometry.transform(sourceProjection, destinationProjection);
+				}
+				return features;
+			};
+
+			util.geojson = {};
+
+			util.geojson.decode = function(organisationUnits, levelOrder) {
+				var geojson = {
+                    type: 'FeatureCollection',
+                    crs: {
+                        type: 'EPSG',
+                        properties: {
+                            code: '4326'
+                        }
+                    },
+                    features: []
+				};
+
+                levelOrder = levelOrder || 'ASC';
+
+                // sort
+                organisationUnits = util.array.sort(organisationUnits, levelOrder, 'le');
+
+				for (var i = 0, ou, gpid = '', gppg = ''; i < organisationUnits.length; i++) {
+                    ou = organisationUnits[i];
+
+                    // grand parent
+                    if (Ext.isString(ou.pg) && ou.pg.length) {
+                        var ids = Ext.Array.clean(ou.pg.split('/'));
+
+                        // grand parent id
+                        if (ids.length >= 2) {
+                            gpid = ids[ids.length - 2];
+                        }
+
+                        // grand parent parentgraph
+                        if (ids.length > 2) {
+                            gppg = '/' + ids.slice(0, ids.length - 2).join('/');
+                        }
+                    }
+
+					geojson.features.push({
+                        type: 'Feature',
+						geometry: {
+							type: parseInt(ou.ty) === 1 ? 'Point' : 'MultiPolygon',
+							coordinates: JSON.parse(ou.co)
+						},
+						properties: {
+							id: ou.id,
+							name: ou.na,
+							hasCoordinatesDown: ou.hcd,
+							hasCoordinatesUp: ou.hcu,
+							level: ou.le,
+							grandParentParentGraph: gppg,
+							grandParentId: gpid,
+							parentGraph: ou.pg,
+							parentId: ou.pi,
+							parentName: ou.pn
+						}
+					});
+				}
+
+				return geojson;
+			};
+
+			util.gui = {};
+			util.gui.combo = {};
+
+			util.gui.combo.setQueryMode = function(cmpArray, mode) {
+				for (var i = 0; i < cmpArray.length; i++) {
+					cmpArray[i].queryMode = mode;
+				}
+			};
+
+			util.object = {};
+
+			util.object.getLength = function(object) {
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
+
+			util.array = {};
+
+			util.array.sort = function(array, direction, key) {
+				// accepts [number], [string], [{prop: number}], [{prop: string}]
+
+				if (!util.object.getLength(array)) {
+					return array;
+				}
+
+				key = key || 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b) && key) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return 0;
+				});
+
+				return array;
+			};
+
+            util.layout = {};
+
+			util.layout.getAnalytical = function(map) {
+				var layout,
+					layer;
+
+				if (Ext.isObject(map) && Ext.isArray(map.mapViews) && map.mapViews.length) {
+					for (var i = 0, view, id; i < map.mapViews.length; i++) {
+						view = map.mapViews[i];
+						id = view.layer;
+
+						if (gis.layer.hasOwnProperty(id) && gis.layer[id].layerCategory === gis.conf.finals.layer.category_thematic) {
+							layout = gis.api.layout.Layout(view);
+
+							if (layout) {
+								return layout;
+							}
+						}
+					}
+				}
+				else {
+					for (var key in gis.layer) {
+						if (gis.layer.hasOwnProperty(key) && gis.layer[key].layerCategory === gis.conf.finals.layer.category_thematic && gis.layer[key].core.view) {
+							layer = gis.layer[key];
+							layout = gis.api.layout.Layout(layer.core.view);
+
+							if (layout) {
+								if (!layout.parentGraphMap && layer.widget) {
+									layout.parentGraphMap = layer.widget.getParentGraphMap();
+								}
+
+								return layout;
+							}
+						}
+					}
+				}
+
+				return;
+			};
+
+			util.layout.getPluginConfig = function() {
+				var layers = gis.util.map.getVisibleVectorLayers(),
+					map = {};
+
+				if (gis.map) {
+					return gis.map;
+				}
+
+				map.mapViews = [];
+
+				for (var i = 0, layer; i < layers.length; i++) {
+					layer = layers[i];
+
+					if (layer.core.view) {
+						layer.core.view.layer = layer.id;
+
+						map.mapViews.push(layer.core.view);
+					}
+				}
+
+				return map;
+			};
+
+			util.layout.setSessionStorage = function(session, obj, url) {
+				if (GIS.isSessionStorage) {
+					var dhis2 = JSON.parse(sessionStorage.getItem('dhis2')) || {};
+					dhis2[session] = obj;
+					sessionStorage.setItem('dhis2', JSON.stringify(dhis2));
+
+					if (Ext.isString(url)) {
+						window.location.href = url;
+					}
+				}
+			};
+
+            util.layout.getDataDimensionsFromLayout = function(layout) {
+                var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+                    ignoreKeys = ['pe', 'ou'],
+                    dataDimensions = [];
+
+                for (var i = 0; i < dimensions.length; i++) {
+                    if (!Ext.Array.contains(ignoreKeys, dimensions[i].dimension)) {
+                        dataDimensions.push(dimensions[i]);
+                    }
+                }
+
+                return dataDimensions;
+            };
+
+            util.layer = {};
+
+            util.layer.setFeatureLabelStyle = function(layer, isLabel, skipDraw, view) {
+                for (var i = 0, feature, style, label; i < layer.features.length; i++) {
+                    feature = layer.features[i];
+                    style = feature.style;
+
+                    if (isLabel) {
+                        style.label = feature.attributes.label;
+                        style.fontColor = style.strokeColor;
+                        style.fontWeight = style.strokeWidth > 1 ? 'bold' : 'normal';
+                        style.labelAlign = 'cr';
+                        style.labelYOffset = 13;
+
+                        if (view.labelFontSize) {
+                            style.fontSize = view.labelFontSize;
+                        }
+                        if (view.labelFontStyle) {
+                            style.fontStyle = view.labelFontStyle;
+                        }
+                    }
+                    else {
+                        style.label = null;
+                    }
+                }
+
+                if (!skipDraw) {
+                    layer.redraw();
+                }
+            };
+		}());
+
+		gis.init = init;
+		gis.conf = conf;
+		gis.util = util;
+
+		// api
+		(function() {
+			var dimConf = gis.conf.finals.dimension;
+
+			api.layout = {};
+			api.response = {};
+
+			api.layout.Record = function(config) {
+				var record = {};
+
+				// id: string
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Record config is not an object', config);
+						return;
+					}
+
+					if (!Ext.isString(config.id)) {
+						console.log('Record id is not text', config);
+						return;
+					}
+
+					record.id = config.id.replace('#', '.');
+
+					if (Ext.isString(config.name)) {
+						record.name = config.name;
+					}
+
+					return Ext.clone(record);
+				}();
+			};
+
+			api.layout.Dimension = function(config) {
+				var dimension = {};
+
+				// dimension: string
+
+				// items: [Record]
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						//console.log('Dimension config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.dimension)) {
+						console.log('Dimension name is not text', config);
+						return;
+					}
+
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
+						var records = [];
+
+						if (!Ext.isArray(config.items)) {
+							console.log('Dimension items is not an array', config);
+							return;
+						}
+
+						for (var i = 0; i < config.items.length; i++) {
+							record = api.layout.Record(config.items[i]);
+
+							if (record) {
+								records.push(record);
+							}
+						}
+
+						config.items = records;
+
+						if (!config.items.length) {
+							console.log('Dimension has no valid items', config);
+							return;
+						}
+					}
+
+					dimension.dimension = config.dimension;
+					dimension.items = config.items;
+
+					return Ext.clone(dimension);
+				}();
+			};
+
+			api.layout.Layout = function(config, applyConfig) {
+				var config = Ext.clone(config),
+					layout = {},
+					getValidatedDimensionArray,
+					validateSpecialCases;
+
+				// layer: string
+
+				// columns: [Dimension]
+
+				// rows: [Dimension]
+
+				// filters: [Dimension]
+
+				// classes: integer (5) - 1-7
+
+				// method: integer (2) - 2, 3 // 2=equal intervals, 3=equal counts
+
+				// colorLow: string ('ff0000')
+
+				// colorHigh: string ('00ff00')
+
+				// radiusLow: integer (5)
+
+				// radiusHigh: integer (15)
+
+				// opacity: integer (0.8) - 0-1
+
+				// legendSet: object
+
+                // areaRadius: integer
+
+                // hidden: boolean (false)
+
+				getValidatedDimensionArray = function(dimensionArray) {
+					var dimensions = [];
+
+					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+						return;
+					}
+
+					for (var i = 0, dimension; i < dimensionArray.length; i++) {
+						dimension = api.layout.Dimension(dimensionArray[i]);
+
+						if (dimension) {
+							dimensions.push(dimension);
+						}
+					}
+
+					dimensionArray = dimensions;
+
+					return dimensionArray.length ? dimensionArray : null;
+				};
+
+				validateSpecialCases = function(config) {
+					var dimensions = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])),
+						map = conf.period.integratedRelativePeriodsMap,
+						dxDim,
+						peDim,
+						ouDim;
+
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
+
+						if (dim.dimension === dimConf.indicator.objectName ||
+							dim.dimension === dimConf.dataElement.objectName ||
+							dim.dimension === dimConf.operand.objectName ||
+							dim.dimension === dimConf.dataSet.objectName) {
+							dxDim = dim;
+						}
+						else if (dim.dimension === dimConf.period.objectName) {
+							peDim = dim;
+						}
+						else if (dim.dimension === dimConf.organisationUnit.objectName) {
+							ouDim = dim;
+						}
+					}
+
+					if (!ouDim) {
+						alert('No organisation units specified');
+						return;
+					}
+
+					if (dxDim) {
+						dxDim.items = [dxDim.items[0]];
+					}
+
+					if (peDim) {
+						peDim.items = [peDim.items[0]];
+						peDim.items[0].id = map[peDim.items[0].id] ? map[peDim.items[0].id] : peDim.items[0].id;
+					}
+
+					config.columns = [dxDim];
+					config.rows = [ouDim];
+					config.filters = [peDim];
+
+					return config;
+				};
+
+				return function() {
+					var a = [],
+						objectNames = [],
+						dimConf = conf.finals.dimension,
+                        layerConf =
+						isOu = false,
+						isOuc = false,
+						isOugc = false;
+
+					config = validateSpecialCases(config);
+
+					if (!config) {
+						return;
+					}
+
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					if (!config.rows) {
+						console.log('Organisation unit dimension is invalid', config.rows);
+						return;
+					}
+
+                    if (Ext.Array.contains([gis.layer.thematic1.id, gis.layer.thematic2.id, gis.layer.thematic3.id, gis.layer.thematic4.id], config.layer)) {
+                        if (!config.columns) {
+                            return;
+                        }
+                    }
+
+					// Collect object names and user orgunits
+					for (var i = 0, dim, dims = Ext.Array.clean([].concat(config.columns, config.rows, config.filters)); i < dims.length; i++) {
+						dim = dims[i];
+
+						if (dim) {
+
+							// Object names
+							if (Ext.isString(dim.dimension)) {
+								objectNames.push(dim.dimension);
+							}
+
+							// user orgunits
+							if (dim.dimension === dimConf.organisationUnit.objectName && Ext.isArray(dim.items)) {
+								for (var j = 0; j < dim.items.length; j++) {
+									if (dim.items[j].id === 'USER_ORGUNIT') {
+										isOu = true;
+									}
+									else if (dim.items[j].id === 'USER_ORGUNIT_CHILDREN') {
+										isOuc = true;
+									}
+									else if (dim.items[j].id === 'USER_ORGUNIT_GRANDCHILDREN') {
+										isOugc = true;
+									}
+								}
+							}
+						}
+					}
+
+					// Layout
+					layout.columns = config.columns;
+					layout.rows = config.rows;
+					layout.filters = config.filters;
+
+					// Properties
+					layout.layer = Ext.isString(config.layer) && !Ext.isEmpty(config.layer) ? config.layer : 'thematic1';
+					layout.classes = Ext.isNumber(config.classes) && !Ext.isEmpty(config.classes) ? config.classes : 5;
+					layout.method = Ext.isNumber(config.method) && !Ext.isEmpty(config.method) ? config.method : 2;
+					layout.colorLow = Ext.isString(config.colorLow) && !Ext.isEmpty(config.colorLow) ? config.colorLow : 'ff0000';
+					layout.colorHigh = Ext.isString(config.colorHigh) && !Ext.isEmpty(config.colorHigh) ? config.colorHigh : '00ff00';
+					layout.radiusLow = Ext.isNumber(config.radiusLow) && !Ext.isEmpty(config.radiusLow) ? config.radiusLow : 5;
+					layout.radiusHigh = Ext.isNumber(config.radiusHigh) && !Ext.isEmpty(config.radiusHigh) ? config.radiusHigh : 15;
+					layout.opacity = Ext.isNumber(config.opacity) && !Ext.isEmpty(config.opacity) ? config.opacity : gis.conf.layout.layer.opacity;
+					layout.areaRadius = config.areaRadius;
+
+                    layout.labels = !!config.labels;
+
+                    layout.labelFontSize = config.labelFontSize || '11px';
+                    layout.labelFontSize = parseInt(layout.labelFontSize) + 'px';
+
+                    layout.labelFontWeight = Ext.isString(config.labelFontWeight) || Ext.isNumber(config.labelFontWeight) ? config.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.Array.contains(['normal', 'bold', 'bolder', 'lighter'], layout.labelFontWeight) ? layout.labelFontWeight : 'normal';
+                    layout.labelFontWeight = Ext.isNumber(parseInt(layout.labelFontWeight)) && parseInt(layout.labelFontWeight) <= 1000 ? layout.labelFontWeight.toString() : layout.labelFontWeight;
+
+                    layout.labelFontStyle = Ext.Array.contains(['normal', 'italic', 'oblique'], config.labelFontStyle) ? config.labelFontStyle : 'normal';
+
+                    layout.labelFontColor = Ext.isString(config.labelFontColor) || Ext.isNumber(config.labelFontColor) ? config.labelFontColor : 'normal';
+                    layout.labelFontColor = Ext.isNumber(layout.labelFontColor) ? layout.labelFontColor.toString() : layout.labelFontColor;
+                    layout.labelFontColor = layout.labelFontColor.charAt(0) !== '#' ? '#' + layout.labelFontColor : layout.labelFontColor;
+
+                    layout.hidden = !!config.hidden;
+
+					layout.userOrganisationUnit = isOu;
+					layout.userOrganisationUnitChildren = isOuc;
+					layout.userOrganisationUnitGrandChildren = isOugc;
+
+					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+					layout.legendSet = config.legendSet;
+
+					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
+
+					return Ext.apply(layout, applyConfig);
+				}();
+			};
+
+			api.response.Header = function(config) {
+				var header = {};
+
+				// name: string
+
+				// meta: boolean
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Header is not an object', config);
+						return;
+					}
+
+					if (!Ext.isString(config.name)) {
+						console.log('Header name is not text', config);
+						return;
+					}
+
+					if (!Ext.isBoolean(config.meta)) {
+						console.log('Header meta is not boolean', config);
+						return;
+					}
+
+					header.name = config.name;
+					header.meta = config.meta;
+
+					return Ext.clone(header);
+				}();
+			};
+
+			api.response.Response = function(config) {
+				var response = {};
+
+				// headers: [Header]
+
+				return function() {
+					var headers = [];
+
+					if (!(config && Ext.isObject(config))) {
+						alert('Data response invalid', config);
+						return false;
+					}
+
+					if (!(config.headers && Ext.isArray(config.headers))) {
+						alert('Data response invalid', config);
+						return false;
+					}
+
+					for (var i = 0, header; i < config.headers.length; i++) {
+						header = api.response.Header(config.headers[i]);
+
+						if (header) {
+							headers.push(header);
+						}
+					}
+
+					config.headers = headers;
+
+					if (!config.headers.length) {
+						alert('No valid response headers', config);
+						return;
+					}
+
+					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+						alert('No values found', config);
+						return false;
+					}
+
+					if (config.headers.length !== config.rows[0].length) {
+						alert('Data invalid', config);
+						return false;
+					}
+
+					response.headers = config.headers;
+					response.metaData = config.metaData;
+					response.width = config.width;
+					response.height = config.height;
+					response.rows = config.rows;
+
+					return response;
+				}();
+			};
+		}());
+
+		gis.api = api;
+		gis.store = store;
+
+		gis.olmap = GIS.core.getOLMap(gis);
+		gis.layer = GIS.core.getLayers(gis);
+		gis.thematicLayers = [gis.layer.thematic1, gis.layer.thematic2, gis.layer.thematic3, gis.layer.thematic4];
+
+		if (window.google) {
+			layers.push(gis.layer.googleStreets, gis.layer.googleHybrid);
+		}
+
+		layers.push(
+			gis.layer.openStreetMap,
+			gis.layer.thematic4,
+			gis.layer.thematic3,
+			gis.layer.thematic2,
+			gis.layer.thematic1,
+			gis.layer.boundary,
+			gis.layer.facility,
+			gis.layer.event
+		);
+
+		gis.olmap.addLayers(layers);
+
+		GIS.core.instances.push(gis);
+
+		return gis;
+	};
+
+
+	// MAPFISH (mapfish.js)
+
+	(function() {
+	window.mapfish = {
+
+        /**
+         * Property: _scriptName
+         * {String} Relative path of this script.
+         */
+        _scriptName: "MapFish.js",
+
+        /**
+         * Function: _getScriptLocation
+         * Return the path to this script.
+         *
+         * Returns:
+         * Path to this script
+         */
+        _getScriptLocation: function () {
+            // Workaround for Firefox bug:
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=351282
+            if (window.gMfLocation) {
+                return window.gMfLocation;
+            }
+
+            var scriptLocation = "";
+            var scriptName = mapfish._scriptName;
+
+            var scripts = document.getElementsByTagName('script');
+            for (var i = 0; i < scripts.length; i++) {
+                var src = scripts[i].getAttribute('src');
+                if (src) {
+                    var index = src.lastIndexOf(scriptName);
+                    // is it found, at the end of the URL?
+                    if ((index > -1) && (index + scriptName.length == src.length)) {
+                        scriptLocation = src.slice(0, -scriptName.length);
+                        break;
+                    }
+                }
+            }
+            return scriptLocation;
+         }
+    };
+
+	var jsfiles = new Array(
+		"core/Color.js",
+		"core/GeoStat.js",
+		"core/GeoStat/Boundary.js",
+		"core/GeoStat/Thematic1.js",
+		"core/GeoStat/Thematic2.js",
+		"core/GeoStat/Facility.js",
+		"core/GeoStat/Symbol.js",
+		"core/Util.js"
+		//"widgets/geostat/Boundary.js",
+		//"widgets/geostat/Thematic1.js",
+		//"widgets/geostat/Thematic2.js",
+		//"widgets/geostat/Facility.js",
+		//"widgets/geostat/Symbol.js"
+	);
+
+	var allScriptTags = "";
+	var host = mapfish._getScriptLocation();
+
+	for (var i = 0; i < jsfiles.length; i++) {
+		if (/MSIE/.test(navigator.userAgent) || /Safari/.test(navigator.userAgent)) {
+			var currentScriptTag = "<script src='" + host + jsfiles[i] + "'></script>";
+			allScriptTags += currentScriptTag;
+		} else {
+			var s = document.createElement("script");
+			s.src = host + jsfiles[i];
+			var h = document.getElementsByTagName("head").length ?
+					   document.getElementsByTagName("head")[0] :
+					   document.body;
+			h.appendChild(s);
+		}
+	}
+	if (allScriptTags) {
+		//document.write(allScriptTags);
+	}
+
+
+	// MAPFISH COLOR (color.js)
+
+	/**
+	 * An abstract representation of color.
+	 */
+	mapfish.Color = OpenLayers.Class({
+		getColorRgb: function() {}
+	});
+
+	/**
+	 * Class: mapfish.ColorRgb
+	 * Class for representing RGB colors.
+	 */
+	mapfish.ColorRgb = OpenLayers.Class(mapfish.Color, {
+		redLevel: null,
+		greenLevel: null,
+		blueLevel: null,
+
+		/**
+		 * Constructor: mapfish.ColorRgb
+		 *
+		 * Parameters:
+		 * red - {Integer}
+		 * green - {Integer}
+		 * blue - {Integer}
+		 */
+		initialize: function(red, green, blue) {
+			this.redLevel = red;
+			this.greenLevel = green;
+			this.blueLevel = blue;
+		},
+
+		/**
+		 * APIMethod: equals
+		 *      Returns true if the colors at the same.
+		 *
+		 * Parameters:
+		 * {<mapfish.ColorRgb>} color
+		 */
+		equals: function(color) {
+			return color.redLevel == this.redLevel &&
+				   color.greenLevel == this.greenLevel &&
+				   color.blueLevel == this.blueLevel;
+		},
+
+		getColorRgb: function() {
+			return this;
+		},
+
+		getRgbArray: function() {
+			return [
+				this.redLevel,
+				this.greenLevel,
+				this.blueLevel
+			];
+		},
+
+		/**
+		 * Method: hex2rgbArray
+		 * Converts a Hex color string to an Rbg array
+		 *
+		 * Parameters:
+		 * rgbHexString - {String} Hex color string (format: #rrggbb)
+		 */
+		hex2rgbArray: function(rgbHexString) {
+			if (rgbHexString.charAt(0) == '#') {
+				rgbHexString = rgbHexString.substr(1);
+			}
+			var rgbArray = [
+				parseInt(rgbHexString.substring(0,2),16),
+				parseInt(rgbHexString.substring(2,4),16),
+				parseInt(rgbHexString.substring(4,6),16)
+			];
+			for (var i = 0; i < rgbArray.length; i++) {
+				if (rgbArray[i] < 0 || rgbArray[i] > 255 ) {
+					OpenLayers.Console.error("Invalid rgb hex color string: rgbHexString");
+				}
+			}
+			return rgbArray;
+		},
+
+		/**
+		 * APIMethod: setFromHex
+		 * Sets the color from a color hex string
+		 *
+		 * Parameters:
+		 * rgbHexString - {String} Hex color string (format: #rrggbb)
+		 */
+		setFromHex: function(rgbHexString) {
+			var rgbArray = this.hex2rgbArray(rgbHexString);
+			this.redLevel = rgbArray[0];
+			this.greenLevel = rgbArray[1];
+			this.blueLevel = rgbArray[2];
+		},
+
+		/**
+		 * APIMethod: setFromRgb
+		 * Sets the color from a color rgb string
+		 *
+		 */
+		setFromRgb: function(rgbString) {
+			var color = dojo.colorFromString(rgbString);
+			this.redLevel = color.r;
+			this.greenLevel = color.g;
+			this.blueLevel = color.b;
+		},
+
+		/**
+		 * APIMethod: toHexString
+		 * Converts the rgb color to hex string
+		 *
+		 */
+		toHexString: function() {
+			var r = this.toHex(this.redLevel);
+			var g = this.toHex(this.greenLevel);
+			var b = this.toHex(this.blueLevel);
+			return '#' + r + g + b;
+		},
+
+		/**
+		 * Method: toHex
+		 * Converts a color level to its hexadecimal value
+		 *
+		 * Parameters:
+		 * dec - {Integer} Decimal value to convert [0..255]
+		 */
+		toHex: function(dec) {
+			// create list of hex characters
+			var hexCharacters = "0123456789ABCDEF";
+			// if number is out of range return limit
+			if (dec < 0 || dec > 255 ) {
+				var msg = "Invalid decimal value for color level";
+				OpenLayers.Console.error(msg);
+			}
+			// decimal equivalent of first hex character in converted number
+			var i = Math.floor(dec / 16);
+			// decimal equivalent of second hex character in converted number
+			var j = dec % 16;
+			// return hexadecimal equivalent
+			return hexCharacters.charAt(i) + hexCharacters.charAt(j);
+		},
+
+		CLASS_NAME: "mapfish.ColorRgb"
+	});
+
+	/**
+	 * APIMethod: getColorsArrayByRgbInterpolation
+	 *      Get an array of colors based on RGB interpolation.
+	 *
+	 * Parameters:
+	 * firstColor - {<mapfish.Color>} The first color in the range.
+	 * lastColor - {<mapfish.Color>} The last color in the range.
+	 * nbColors - {Integer} The number of colors in the range.
+	 *
+	 * Returns
+	 * {Array({<mapfish.Color>})} The resulting array of colors.
+	 */
+	mapfish.ColorRgb.getColorsArrayByRgbInterpolation = function(firstColor, lastColor, nbColors) {
+		var resultColors = [];
+		var colorA = firstColor.getColorRgb();
+		var colorB = lastColor.getColorRgb();
+		var colorAVal = colorA.getRgbArray();
+		var colorBVal = colorB.getRgbArray();
+		if (nbColors == 1) {
+			return [colorA];
+		}
+		for (var i = 0; i < nbColors; i++) {
+			var rgbTriplet = [];
+			rgbTriplet[0] = colorAVal[0] +
+				i * (colorBVal[0] - colorAVal[0]) / (nbColors - 1);
+			rgbTriplet[1] = colorAVal[1] +
+				i * (colorBVal[1] - colorAVal[1]) / (nbColors - 1);
+			rgbTriplet[2] = colorAVal[2] +
+				i * (colorBVal[2] - colorAVal[2]) / (nbColors - 1);
+			resultColors[i] = new mapfish.ColorRgb(parseInt(rgbTriplet[0]),
+				parseInt(rgbTriplet[1]), parseInt(rgbTriplet[2]));
+		}
+		return resultColors;
+	};
+
+
+	// MAPFISH UTIL (util.js)
+
+	/**
+	 * Namespace: mapfish.Util
+	 * Utility functions
+	 */
+	mapfish.Util = {};
+
+	/**
+	 * APIFunction: sum
+	 * Return the sum of the elements of an array.
+	 */
+	mapfish.Util.sum = function(array) {
+		for (var i=0, sum=0; i < array.length; sum += array[i++]);
+		return sum;
+	};
+
+	/**
+	 * APIFunction: max
+	 * Return the max of the elements of an array.
+	 */
+	mapfish.Util.max = function(array) {
+		return Math.max.apply({}, array);
+	};
+
+	/**
+	 * APIFunction: min
+	 * Return the min of the elements of an array.
+	 */
+	mapfish.Util.min = function(array) {
+		return Math.min.apply({}, array);
+	};
+
+	/**
+	 * Function: getIconUrl
+	 * Builds the URL for a layer icon, based on a WMS GetLegendGraphic request.
+	 *
+	 * Parameters:
+	 * wmsUrl - {String} The URL of a WMS server.
+	 * options - {Object} The options to set in the request:
+	 *                    'layer' - the name of the layer for which the icon is requested (required)
+	 *                    'rule' - the name of a class for this layer (this is set to the layer name if not specified)
+	 *                    'format' - "image/png" by default
+	 *                    ...
+	 *
+	 * Returns:
+	 * {String} The URL at which the icon can be found.
+	 */
+	mapfish.Util.getIconUrl = function(wmsUrl, options) {
+		if (!options.layer) {
+			OpenLayers.Console.warn(
+				'Missing required layer option in mapfish.Util.getIconUrl');
+			return '';
+		}
+		if (!options.rule) {
+			options.rule = options.layer;
+		}
+		if (wmsUrl.indexOf("?") < 0) {
+			//add a ? to the end of the url if it doesn't
+			//already contain one
+			wmsUrl += "?";
+		} else if (wmsUrl.lastIndexOf('&') != (wmsUrl.length - 1)) {
+			//if there was already a ? , assure that the parameters
+			//are ended with an &, except if the ? was at the last char
+			if (wmsUrl.indexOf("?") != (wmsUrl.length - 1)) {
+				wmsUrl += "&";
+			}
+		}
+		var options = OpenLayers.Util.extend({
+			layer: "",
+			rule: "",
+			service: "WMS",
+			version: "1.1.1",
+			request: "GetLegendGraphic",
+			format: "image/png",
+			width: 16,
+			height: 16
+		}, options);
+		options = OpenLayers.Util.upperCaseObject(options);
+		return wmsUrl + OpenLayers.Util.getParameterString(options);
+	};
+
+
+	/**
+	 * APIFunction: arrayEqual
+	 * Compare two arrays containing primitive types.
+	 *
+	 * Parameters:
+	 * a - {Array} 1st to be compared.
+	 * b - {Array} 2nd to be compared.
+	 *
+	 * Returns:
+	 * {Boolean} True if both given arrays contents are the same (elements value and type).
+	 */
+	mapfish.Util.arrayEqual = function(a, b) {
+		if(a == null || b == null)
+			return false;
+		if(typeof(a) != 'object' || typeof(b) != 'object')
+			return false;
+		if (a.length != b.length)
+			return false;
+		for (var i = 0; i < a.length; i++) {
+			if (typeof(a[i]) != typeof(b[i]))
+				return false;
+			if (a[i] != b[i])
+				return false;
+		}
+		return true;
+	};
+
+	/**
+	 * Function: isIE7
+	 *
+	 * Returns:
+	 * {Boolean} True if the browser is Internet Explorer V7
+	 */
+	mapfish.Util.isIE7 = function () {
+		var ua = navigator.userAgent.toLowerCase();
+		return ua.indexOf("msie 7") > -1;
+	};
+
+	/**
+	 * APIFunction: relativeToAbsoluteURL
+	 *
+	 * Parameters:
+	 * source - {String} the source URL
+	 *
+	 * Returns:
+	 * {String} An absolute URL
+	 */
+	mapfish.Util.relativeToAbsoluteURL = function(source) {
+		if (/^\w+:/.test(source) || !source) {
+			return source;
+		}
+
+		var h = location.protocol + "//" + location.host;
+		if (source.indexOf("/") == 0) {
+			return h + source;
+		}
+
+		var p = location.pathname.replace(/\/[^\/]*$/, '');
+		return h + p + "/" + source;
+	};
+
+	/**
+	 * Function: fixArray
+	 *
+	 * In some fields, OpenLayers allows to use a coma separated string instead
+	 * of an array. This method make sure we end up with an array.
+	 *
+	 * Parameters:
+	 * subs - {String/Array}
+	 *
+	 * Returns:
+	 * {Array}
+	 */
+	mapfish.Util.fixArray = function(subs) {
+		if (subs == '' || subs == null) {
+			return [];
+		} else if (subs instanceof Array) {
+			return subs;
+		} else {
+			return subs.split(',');
+		}
+	};
+
+
+	// MAPFISH GEOSTAT (geostat.js)
+
+	/**
+	 * @requires OpenLayers/Layer/Vector.js
+	 * @requires OpenLayers/Popup/AnchoredBubble.js
+	 * @requires OpenLayers/Feature/Vector.js
+	 * @requires OpenLayers/Format/GeoJSON.js
+	 * @requires OpenLayers/Control/SelectFeature.js
+	 * @requires OpenLayers/Ajax.js
+	 */
+
+	mapfish.GeoStat = OpenLayers.Class({
+
+		layer: null,
+
+		format: null,
+
+		url: null,
+
+		requestSuccess: function(request) {},
+
+		requestFailure: function(request) {},
+
+		indicator: null,
+
+		defaultSymbolizer: {},
+
+		legendDiv: null,
+
+		initialize: function(map, options) {
+			this.map = map;
+			this.addOptions(options);
+			if (!this.layer) {
+				var layer = new OpenLayers.Layer.Vector('geostat', {
+					'displayInLayerSwitcher': false,
+					'visibility': false
+				});
+				map.addLayer(layer);
+				this.layer = layer;
+			}
+
+			this.setUrl(this.url);
+			this.legendDiv = Ext.get(options.legendDiv);
+		},
+
+		setUrl: function(url) {
+			this.url = url;
+			if (this.url) {
+				OpenLayers.Request.GET({
+					url: this.url,
+					scope: this,
+					success: this.requestSuccess,
+					failure: this.requestFailure
+				});
+			}
+		},
+
+		getColors: function(low, high) {
+			var startColor = new mapfish.ColorRgb(),
+				endColor = new mapfish.ColorRgb()
+			startColor.setFromHex(low);
+			endColor.setFromHex(high);
+			return [startColor, endColor];
+		},
+
+		addOptions: function(newOptions) {
+			if (newOptions) {
+				if (!this.options) {
+					this.options = {};
+				}
+				// update our copy for clone
+				OpenLayers.Util.extend(this.options, newOptions);
+				// add new options to this
+				OpenLayers.Util.extend(this, newOptions);
+			}
+		},
+
+		extendStyle: function(rules, symbolizer, context) {
+			var style = this.layer.styleMap.styles['default'];
+			if (rules) {
+				style.rules = rules;
+			}
+			if (symbolizer) {
+				style.setDefaultStyle(
+					OpenLayers.Util.applyDefaults(
+						symbolizer,
+						style.defaultStyle
+					)
+				);
+			}
+			if (context) {
+				if (!style.context) {
+					style.context = {};
+				}
+				OpenLayers.Util.extend(style.context, context);
+			}
+		},
+
+		applyClassification: function(options) {
+			this.layer.renderer.clear();
+			this.layer.redraw();
+			this.updateLegend();
+			this.layer.setVisibility(true);
+		},
+
+		showDetails: function(obj) {},
+
+		hideDetails: function(obj) {},
+
+		CLASS_NAME: "mapfish.GeoStat"
+	});
+
+	mapfish.GeoStat.Distribution = OpenLayers.Class({
+
+		labelGenerator: function(bin, binIndex, nbBins) {
+			var lower = parseFloat(bin.lowerBound).toFixed(1),
+				upper = parseFloat(bin.upperBound).toFixed(1);
+			return lower + ' - ' + upper + '&nbsp;&nbsp;' + '(' + bin.nbVal + ')';
+		},
+
+		values: null,
+
+		nbVal: null,
+
+		minVal: null,
+
+		maxVal: null,
+
+		initialize: function(values, options) {
+			OpenLayers.Util.extend(this, options);
+			this.values = values;
+			this.nbVal = values.length;
+			this.minVal = this.nbVal ? mapfish.Util.min(this.values) : 0;
+			this.maxVal = this.nbVal ? mapfish.Util.max(this.values) : 0;
+		},
+
+		classifyWithBounds: function(bounds) {
+			var bins = [];
+			var binCount = [];
+			var sortedValues = [];
+
+			for (var i = 0; i < this.values.length; i++) {
+				sortedValues.push(this.values[i]);
+			}
+			sortedValues.sort(function(a,b) {return a-b;});
+			var nbBins = bounds.length - 1;
+
+			for (var j = 0; j < nbBins; j++) {
+				binCount[j] = 0;
+			}
+
+			for (var k = 0; k < nbBins - 1; k) {
+				if (sortedValues[0] < bounds[k + 1]) {
+					binCount[k] = binCount[k] + 1;
+					sortedValues.shift();
+				} else {
+					k++;
+				}
+			}
+
+			binCount[nbBins - 1] = this.nbVal - mapfish.Util.sum(binCount);
+
+			for (var m = 0; m < nbBins; m++) {
+				bins[m] = new mapfish.GeoStat.Bin(binCount[m], bounds[m], bounds[m + 1], m == (nbBins - 1));
+				var labelGenerator = this.labelGenerator || this.defaultLabelGenerator;
+				bins[m].label = labelGenerator(bins[m], m, nbBins);
+			}
+
+			return new mapfish.GeoStat.Classification(bins);
+		},
+
+		classifyByEqIntervals: function(nbBins) {
+			var bounds = [];
+
+			for (var i = 0; i <= nbBins; i++) {
+				bounds[i] = this.minVal + i*(this.maxVal - this.minVal) / nbBins;
+			}
+
+			return this.classifyWithBounds(bounds);
+		},
+
+		classifyByQuantils: function(nbBins) {
+			var values = this.values;
+			values.sort(function(a,b) {return a-b;});
+			var binSize = Math.round(this.values.length / nbBins);
+
+			var bounds = [];
+			var binLastValPos = (binSize === 0) ? 0 : binSize;
+
+			if (values.length > 0) {
+				bounds[0] = values[0];
+				for (i = 1; i < nbBins; i++) {
+					bounds[i] = values[binLastValPos];
+					binLastValPos += binSize;
+				}
+				bounds.push(values[values.length - 1]);
+			}
+
+			for (var j = 0; j < bounds.length; j++) {
+				bounds[j] = parseFloat(bounds[j]);
+			}
+
+			return this.classifyWithBounds(bounds);
+		},
+
+		sturgesRule: function() {
+			return Math.floor(1 + 3.3 * Math.log(this.nbVal, 10));
+		},
+
+		classify: function(method, nbBins, bounds) {
+			var classification = null;
+			if (!nbBins) {
+				nbBins = this.sturgesRule();
+			}
+
+			switch (parseFloat(method)) {
+			case mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS :
+				classification = this.classifyWithBounds(bounds);
+				break;
+			case mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS :
+				classification = this.classifyByEqIntervals(nbBins);
+				break;
+			case mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS :
+				classification = this.classifyByQuantils(nbBins);
+				break;
+			default:
+				OpenLayers.Console.error("Unsupported or invalid classification method");
+			}
+			return classification;
+		},
+
+		CLASS_NAME: "mapfish.GeoStat.Distribution"
+	});
+
+	mapfish.GeoStat.Distribution.CLASSIFY_WITH_BOUNDS = 1;
+
+	mapfish.GeoStat.Distribution.CLASSIFY_BY_EQUAL_INTERVALS = 2;
+
+	mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS = 3;
+
+	mapfish.GeoStat.Bin = OpenLayers.Class({
+		label: null,
+		nbVal: null,
+		lowerBound: null,
+		upperBound: null,
+		isLast: false,
+
+		initialize: function(nbVal, lowerBound, upperBound, isLast) {
+			this.nbVal = nbVal;
+			this.lowerBound = lowerBound;
+			this.upperBound = upperBound;
+			this.isLast = isLast;
+		},
+
+		CLASS_NAME: "mapfish.GeoStat.Bin"
+	});
+
+	mapfish.GeoStat.Classification = OpenLayers.Class({
+		bins: [],
+
+		initialize: function(bins) {
+			this.bins = bins;
+		},
+
+		getBoundsArray: function() {
+			var bounds = [];
+			for (var i = 0; i < this.bins.length; i++) {
+				bounds.push(this.bins[i].lowerBound);
+			}
+			if (this.bins.length > 0) {
+				bounds.push(this.bins[this.bins.length - 1].upperBound);
+			}
+			return bounds;
+		},
+
+		CLASS_NAME: "mapfish.GeoStat.Classification"
+	});
+
+
+	// MAPFISH ALL (all.js)
+
+	/**
+	 * @requires core/GeoStat.js
+	 */
+
+mapfish.GeoStat.Facility = OpenLayers.Class(mapfish.GeoStat, {
+
+    classification: null,
+
+	gis: null,
+    view: null,
+    featureStore: Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		features: [],
+		loadFeatures: function(features) {
+			if (features && features.length) {
+				var data = [];
+				for (var i = 0; i < features.length; i++) {
+					data.push([features[i].attributes.id, features[i].attributes.name]);
+				}
+				this.loadData(data);
+				this.sortStore();
+
+				this.features = features;
+			}
+			else {
+				this.removeAll();
+			}
+		},
+		sortStore: function() {
+			this.sort('name', 'ASC');
+		}
+	}),
+
+    initialize: function(map, options) {
+        mapfish.GeoStat.prototype.initialize.apply(this, arguments);
+    },
+
+    getLoader: function() {
+		return GIS.core.LayerLoaderFacility(this.gis, this.layer);
+	},
+
+	decode: function(organisationUnits) {
+		var feature,
+			group,
+			attr,
+			geojson = {
+				type: 'FeatureCollection',
+				crs: {
+					type: 'EPSG',
+					properties: {
+						code: '4326'
+					}
+				},
+				features: []
+			};
+
+        for (var i = 0; i < organisationUnits.length; i++) {
+			attr = organisationUnits[i];
+
+			feature = {
+                type: 'Feature',
+                geometry: {
+                    type: parseInt(attr.ty) === 1 ? 'Point' : 'MultiPolygon',
+                    coordinates: JSON.parse(attr.co)
+                },
+                properties: {
+                    id: attr.id,
+                    name: attr.na
+                }
+            };
+            feature.properties = Ext.Object.merge(feature.properties, attr.dimensions);
+
+            geojson.features.push(feature);
+        }
+
+        return geojson;
+    },
+
+	reset: function() {
+		this.layer.destroyFeatures();
+
+		// Legend
+		this.layer.legendPanel.update('');
+		this.layer.legendPanel.collapse();
+
+		if (this.layer.widget) {
+			this.layer.widget.reset();
+		}
+	},
+
+	extendView: function(view, config) {
+		view = view || this.view;
+
+		view.organisationUnitGroupSet = config.organisationUnitGroupSet || view.organisationUnitGroupSet;
+		view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.parentLevel = config.parentLevel || view.parentLevel;
+		view.parentGraph = config.parentGraph || view.parentGraph;
+		view.opacity = config.opacity || view.opacity;
+
+		return view;
+	},
+
+    updateOptions: function(newOptions) {
+        this.addOptions(newOptions);
+    },
+
+    applyClassification: function(options) {
+        this.updateOptions(options);
+
+        var items = this.gis.store.groupsByGroupSet.data.items;
+
+        var rules = new Array(items.length);
+        for (var i = 0; i < items.length; i++) {
+            var rule = new OpenLayers.Rule({
+                symbolizer: {
+                    'pointRadius': 8,
+                    'externalGraphic': '../images/orgunitgroup/' + items[i].data.symbol
+                },
+                filter: new OpenLayers.Filter.Comparison({
+                    type: OpenLayers.Filter.Comparison.EQUAL_TO,
+                    property: this.indicator,
+                    value: items[i].data.name
+                })
+            });
+            rules[i] = rule;
+        }
+
+        this.extendStyle(rules);
+        mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
+    },
+
+    updateLegend: function() {
+		var	element = document.createElement("div"),
+			child = document.createElement("div"),
+			items = this.gis.store.groupsByGroupSet.data.items;
+
+        for (var i = 0; i < items.length; i++) {
+            child = document.createElement("div");
+            child.style.backgroundImage = 'url(../images/orgunitgroup/' + items[i].data.symbol + ')';
+            child.style.backgroundRepeat = 'no-repeat';
+            child.style.width = "21px";
+            child.style.height = "16px";
+            child.style.marginBottom = "2px";
+            child.style.cssFloat = "left";
+            element.appendChild(child);
+
+            child = document.createElement("div");
+            child.innerHTML = items[i].data.name;
+            child.style.height = "16px";
+            child.style.lineHeight = "17px";
+            element.appendChild(child);
+
+            child = document.createElement("div");
+            child.style.clear = "left";
+            element.appendChild(child);
+        }
+
+        this.layer.legendPanel.update(element.outerHTML);
+    },
+
+    CLASS_NAME: "mapfish.GeoStat.Facility"
+});
+
+mapfish.GeoStat.Event = OpenLayers.Class(mapfish.GeoStat, {
+
+    colors: [new mapfish.ColorRgb(120, 120, 0), new mapfish.ColorRgb(255, 0, 0)],
+    method: mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,
+    numClasses: 5,
+	minSize: 4,
+	maxSize: 4,
+	minVal: null,
+	maxVal: null,
+    defaultSymbolizer: {'fillOpacity': 1},
+    classification: null,
+    colorInterpolation: null,
+
+    gis: null,
+    view: null,
+    featureStore: Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		features: [],
+		loadFeatures: function(features) {
+			if (features && features.length) {
+				var data = [];
+				for (var i = 0; i < features.length; i++) {
+					data.push([features[i].attributes.id, features[i].attributes.name]);
+				}
+				this.loadData(data);
+				this.sortStore();
+
+				this.features = features;
+			}
+			else {
+				this.removeAll();
+			}
+		},
+		sortStore: function() {
+			this.sort('name', 'ASC');
+		}
+	}),
+
+    initialize: function(map, options) {
+        mapfish.GeoStat.prototype.initialize.apply(this, arguments);
+    },
+
+    getLoader: function() {
+		return GIS.core.LayerLoaderEvent(this.gis, this.layer);
+	},
+
+	reset: function() {
+		this.layer.destroyFeatures();
+
+		if (this.layer.widget) {
+			this.layer.widget.reset();
+		}
+	},
+
+	extendView: function(view, config) {
+		view = view || this.view;
+
+		view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.parentLevel = config.parentLevel || view.parentLevel;
+		view.parentGraph = config.parentGraph || view.parentGraph;
+		view.opacity = config.opacity || view.opacity;
+
+		return view;
+	},
+
+	getLegendConfig: function() {
+		return;
+	},
+
+	getImageLegendConfig: function() {
+		return;
+	},
+
+    updateOptions: function(newOptions) {
+        var oldOptions = OpenLayers.Util.extend({}, this.options);
+        this.addOptions(newOptions);
+        if (newOptions) {
+            this.setClassification();
+        }
+    },
+
+    createColorInterpolation: function() {
+        var numColors = this.classification.bins.length;
+
+		this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
+    },
+
+    setClassification: function() {
+        var values = [];
+        for (var i = 0; i < this.layer.features.length; i++) {
+            values.push(this.layer.features[i].attributes[this.indicator]);
+        }
+
+        var distOptions = {
+            labelGenerator: this.options.labelGenerator
+        };
+        var dist = new mapfish.GeoStat.Distribution(values, distOptions);
+
+		this.minVal = dist.minVal;
+        this.maxVal = dist.maxVal;
+
+        this.classification = dist.classify(
+            this.method,
+            this.numClasses,
+            null
+        );
+
+        this.createColorInterpolation();
+    },
+
+    applyClassification: function(options) {
+        this.updateOptions(options);
+
+		var calculateRadius = OpenLayers.Function.bind(
+			function(feature) {
+				var value = feature.attributes[this.indicator];
+                var size = (value - this.minVal) / (this.maxVal - this.minVal) *
+					(this.maxSize - this.minSize) + this.minSize;
+                return size || this.minSize;
+            },	this
+		);
+		this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
+
+        var boundsArray = this.classification.getBoundsArray();
+        var rules = new Array(boundsArray.length-1);
+        for (var i = 0; i < boundsArray.length-1; i++) {
+            var rule = new OpenLayers.Rule({
+                symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
+                filter: new OpenLayers.Filter.Comparison({
+                    type: OpenLayers.Filter.Comparison.BETWEEN,
+                    property: this.indicator,
+                    lowerBoundary: boundsArray[i],
+                    upperBoundary: boundsArray[i + 1]
+                })
+            });
+            rules[i] = rule;
+        }
+
+        this.extendStyle(rules);
+        mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
+    },
+
+    updateLegend: function() {
+
+    },
+
+    CLASS_NAME: "mapfish.GeoStat.Event"
+});
+
+mapfish.GeoStat.Boundary = OpenLayers.Class(mapfish.GeoStat, {
+
+    colors: [new mapfish.ColorRgb(120, 120, 0), new mapfish.ColorRgb(255, 0, 0)],
+    method: mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,
+    numClasses: 5,
+	minSize: 3,
+	maxSize: 20,
+	minVal: null,
+	maxVal: null,
+    defaultSymbolizer: {'fillOpacity': 1},
+    classification: null,
+    colorInterpolation: null,
+
+    gis: null,
+    view: null,
+    featureStore: Ext.create('Ext.data.Store', {
+		fields: ['id', 'name'],
+		features: [],
+		loadFeatures: function(features) {
+			if (features && features.length) {
+				var data = [];
+				for (var i = 0; i < features.length; i++) {
+					data.push([features[i].attributes.id, features[i].attributes.name]);
+				}
+				this.loadData(data);
+				this.sortStore();
+
+				this.features = features;
+			}
+			else {
+				this.removeAll();
+			}
+		},
+		sortStore: function() {
+			this.sort('name', 'ASC');
+		}
+	}),
+
+    initialize: function(map, options) {
+        mapfish.GeoStat.prototype.initialize.apply(this, arguments);
+    },
+
+    getLoader: function() {
+		return GIS.core.LayerLoaderBoundary(this.gis, this.layer);
+	},
+
+	reset: function() {
+		this.layer.destroyFeatures();
+
+		if (this.layer.widget) {
+			this.layer.widget.reset();
+		}
+	},
+
+	extendView: function(view, config) {
+		view = view || this.view;
+
+		view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+		view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+		view.parentLevel = config.parentLevel || view.parentLevel;
+		view.parentGraph = config.parentGraph || view.parentGraph;
+		view.opacity = config.opacity || view.opacity;
+
+		return view;
+	},
+
+	getLegendConfig: function() {
+		return;
+	},
+
+	getImageLegendConfig: function() {
+		return;
+	},
+
+    getDefaultFeatureStyle: function() {
+        return {
+            fillOpacity: 0,
+            fillColor: '#000',
+            strokeColor: '#000',
+            strokeWidth: 1,
+            pointRadius: 5,
+            cursor: 'pointer'
+        };
+    },
+
+    setFeatureStyle: function(style) {
+        for (var i = 0; i < this.layer.features.length; i++) {
+            this.layer.features[i].style = style;
+        }
+
+        this.layer.redraw();
+    },
+
+    setFeatureLabelStyle: function(isLabel, skipDraw, view) {
+        for (var i = 0, feature, style, label; i < this.layer.features.length; i++) {
+            feature = this.layer.features[i];
+            style = feature.style;
+
+            if (isLabel) {
+                style.label = feature.attributes.label;
+                style.fontColor = style.strokeColor;
+                style.fontWeight = style.strokeWidth > 1 ? 'bold' : 'normal';
+                style.labelAlign = 'cr';
+                style.labelYOffset = 13;
+
+                if (view.labelFontSize) {
+                    style.fontSize = view.labelFontSize;
+                }
+                if (view.labelFontStyle) {
+                    style.fontStyle = view.labelFontStyle;
+                }
+            }
+            else {
+                style.label = null;
+            }
+        }
+
+        if (!skipDraw) {
+            this.layer.redraw();
+        }
+    },
+
+    updateOptions: function(newOptions) {
+        var oldOptions = OpenLayers.Util.extend({}, this.options);
+        this.addOptions(newOptions);
+        if (newOptions) {
+            this.setClassification();
+        }
+    },
+
+    createColorInterpolation: function() {
+        var numColors = this.classification.bins.length;
+
+		this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
+    },
+
+    setClassification: function() {
+        var values = [];
+        for (var i = 0; i < this.layer.features.length; i++) {
+            values.push(this.layer.features[i].attributes[this.indicator]);
+        }
+
+        var distOptions = {
+            labelGenerator: this.options.labelGenerator
+        };
+        var dist = new mapfish.GeoStat.Distribution(values, distOptions);
+
+		this.minVal = dist.minVal;
+        this.maxVal = dist.maxVal;
+
+        this.classification = dist.classify(
+            this.method,
+            this.numClasses,
+            null
+        );
+
+        this.createColorInterpolation();
+    },
+
+    applyClassification: function(options) {
+        this.updateOptions(options);
+
+		var calculateRadius = OpenLayers.Function.bind(
+			function(feature) {
+				var value = feature.attributes[this.indicator];
+                var size = (value - this.minVal) / (this.maxVal - this.minVal) *
+					(this.maxSize - this.minSize) + this.minSize;
+                return size || this.minSize;
+            },	this
+		);
+		this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
+
+        var boundsArray = this.classification.getBoundsArray();
+        var rules = new Array(boundsArray.length-1);
+        for (var i = 0; i < boundsArray.length-1; i++) {
+            var rule = new OpenLayers.Rule({
+                symbolizer: {fillColor: this.colorInterpolation[i].toHexString()},
+                filter: new OpenLayers.Filter.Comparison({
+                    type: OpenLayers.Filter.Comparison.BETWEEN,
+                    property: this.indicator,
+                    lowerBoundary: boundsArray[i],
+                    upperBoundary: boundsArray[i + 1]
+                })
+            });
+            rules[i] = rule;
+        }
+
+        this.extendStyle(rules);
+        mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
+    },
+
+    updateLegend: function() {
+
+    },
+
+    CLASS_NAME: "mapfish.GeoStat.Boundary"
+});
+
+mapfish.GeoStat.createThematic = function(name) {
+
+	mapfish.GeoStat[name] = OpenLayers.Class(mapfish.GeoStat, {
+		colors: [new mapfish.ColorRgb(120, 120, 0), new mapfish.ColorRgb(255, 0, 0)],
+		method: mapfish.GeoStat.Distribution.CLASSIFY_BY_QUANTILS,
+		numClasses: 5,
+		bounds: null,
+		minSize: 3,
+		maxSize: 20,
+		minVal: null,
+		maxVal: null,
+		defaultSymbolizer: {'fillOpacity': 1},
+		classification: null,
+		colorInterpolation: null,
+
+		gis: null,
+		view: null,
+		featureStore: Ext.create('Ext.data.Store', {
+			fields: ['id', 'name'],
+			features: [],
+			loadFeatures: function(features) {
+				if (features && features.length) {
+					var data = [];
+
+					this.features = features;
+
+					for (var i = 0; i < features.length; i++) {
+						data.push([features[i].attributes.id, features[i].attributes.name]);
+					}
+					this.loadData(data);
+					this.sortStore();
+
+				}
+				else {
+					this.removeAll();
+				}
+			},
+			sortStore: function() {
+				this.sort('name', 'ASC');
+			}
+		}),
+
+		initialize: function(map, options) {
+			mapfish.GeoStat.prototype.initialize.apply(this, arguments);
+		},
+
+		getLoader: function() {
+			return GIS.core.LayerLoaderThematic(this.gis, this.layer);
+		},
+
+		reset: function() {
+			this.layer.destroyFeatures();
+			this.featureStore.loadFeatures(this.layer.features.slice(0));
+
+			// Legend
+			this.layer.legendPanel.update('');
+			this.layer.legendPanel.collapse();
+
+			// Widget
+			if (this.layer.widget) {
+				this.layer.widget.reset();
+			}
+		},
+
+		extendView: function(view, config) {
+			view = view || this.view;
+
+			view.valueType = config.valueType || view.valueType;
+			view.indicatorGroup = config.indicatorGroup || view.indicatorGroup;
+			view.indicator = config.indicator || view.indicator;
+			view.dataElementGroup = config.dataElementGroup || view.dataElementGroup;
+			view.dataElement = config.dataElement || view.dataElement;
+			view.periodType = config.periodType || view.periodType;
+			view.period = config.period || view.period;
+			view.legendType = config.legendType || view.legendType;
+			view.legendSet = config.legendSet || view.legendSet;
+			view.classes = config.classes || view.classes;
+			view.method = config.method || view.method;
+			view.colorLow = config.colorLow || view.colorLow;
+			view.colorHigh = config.colorHigh || view.colorHigh;
+			view.radiusLow = config.radiusLow || view.radiusLow;
+			view.radiusHigh = config.radiusHigh || view.radiusHigh;
+			view.organisationUnitLevel = config.organisationUnitLevel || view.organisationUnitLevel;
+			view.parentOrganisationUnit = config.parentOrganisationUnit || view.parentOrganisationUnit;
+			view.parentLevel = config.parentLevel || view.parentLevel;
+			view.parentGraph = config.parentGraph || view.parentGraph;
+			view.opacity = config.opacity || view.opacity;
+
+			return view;
+		},
+
+		getImageLegendConfig: function() {
+			var bins = this.classification.bins,
+				rgb = this.colorInterpolation,
+				config = [];
+
+			for (var i = 0; i < bins.length; i++) {
+				config.push({
+					color: rgb[i].toHexString(),
+					label: bins[i].lowerBound.toFixed(1) + ' - ' + bins[i].upperBound.toFixed(1) + ' (' + bins[i].nbVal + ')'
+				});
+			}
+
+			return config;
+		},
+
+		updateOptions: function(newOptions) {
+			var oldOptions = OpenLayers.Util.extend({}, this.options);
+			this.addOptions(newOptions);
+			if (newOptions) {
+				this.setClassification();
+			}
+		},
+
+		createColorInterpolation: function() {
+			var numColors = this.classification.bins.length;
+
+			if (!this.view.legendSet) {
+				this.colorInterpolation = mapfish.ColorRgb.getColorsArrayByRgbInterpolation(this.colors[0], this.colors[1], numColors);
+			}
+		},
+
+		setClassification: function() {
+			var values = [];
+			for (var i = 0; i < this.layer.features.length; i++) {
+				values.push(this.layer.features[i].attributes[this.indicator]);
+			}
+
+			var distOptions = {
+				labelGenerator: this.options.labelGenerator
+			};
+			var dist = new mapfish.GeoStat.Distribution(values, distOptions);
+
+			this.minVal = dist.minVal;
+			this.maxVal = dist.maxVal;
+
+			if (this.view.legendType === this.gis.conf.finals.widget.legendtype_predefined) {
+				if (this.bounds[0] > this.minVal) {
+					this.bounds.unshift(this.minVal);
+					//if (this.widget == centroid) { this.widget.symbolizerInterpolation.unshift('blank');
+					this.colorInterpolation.unshift(new mapfish.ColorRgb(240,240,240));
+				}
+
+				if (this.bounds[this.bounds.length-1] < this.maxVal) {
+					this.bounds.push(this.maxVal);
+					//todo if (this.widget == centroid) { G.vars.activeWidget.symbolizerInterpolation.push('blank');
+					this.colorInterpolation.push(new mapfish.ColorRgb(240,240,240));
+				}
+			}
+
+			this.classification = dist.classify(
+				this.method,
+				this.numClasses,
+				this.bounds
+			);
+
+			this.createColorInterpolation();
+		},
+
+		applyClassification: function(options, legend) {
+			this.updateOptions(options, legend);
+
+			var calculateRadius = OpenLayers.Function.bind(
+				function(feature) {
+					var value = feature.attributes[this.indicator];
+					var size = (value - this.minVal) / (this.maxVal - this.minVal) *
+						(this.maxSize - this.minSize) + this.minSize;
+					return size || this.minSize;
+				},	this
+			);
+			this.extendStyle(null, {'pointRadius': '${calculateRadius}'}, {'calculateRadius': calculateRadius});
+
+			var boundsArray = this.classification.getBoundsArray();
+			var rules = new Array(boundsArray.length - 1);
+			for (var i = 0; i < boundsArray.length - 1; i++) {
+				var rule = new OpenLayers.Rule({
+					symbolizer: {
+						fillColor: this.colorInterpolation[i].toHexString()
+					},
+					filter: new OpenLayers.Filter.Comparison({
+						type: OpenLayers.Filter.Comparison.BETWEEN,
+						property: this.indicator,
+						lowerBoundary: boundsArray[i],
+						upperBoundary: boundsArray[i + 1]
+					})
+				});
+				rules[i] = rule;
+			}
+
+			this.extendStyle(rules);
+			mapfish.GeoStat.prototype.applyClassification.apply(this, arguments);
+		},
+
+		updateLegend: function() {
+			var	element = document.createElement("div"),
+				child,
+				legendNames;
+
+			// data
+			child = document.createElement("div");
+			child.style.height = "14px";
+			child.style.overflow = "hidden";
+			child.title = this.view.columns[0].items[0].name;
+			child.innerHTML = this.view.columns[0].items[0].name;
+			element.appendChild(child);
+
+			child = document.createElement("div");
+			child.style.clear = "left";
+			element.appendChild(child);
+
+			// period
+			child = document.createElement("div");
+			child.style.height = "14px";
+			child.style.overflow = "hidden";
+			child.title = this.view.filters[0].items[0].name;
+			child.innerHTML = this.view.filters[0].items[0].name;
+			element.appendChild(child);
+
+			child = document.createElement("div");
+			child.style.clear = "left";
+			element.appendChild(child);
+
+			// separator
+			child = document.createElement("div");
+			child.style.width = "1px";
+			child.style.height = "5px";
+			element.appendChild(child);
+
+			// legends
+			if (this.view.legendSet) {
+				for (var i = 0; i < this.classification.bins.length; i++) {
+					child = document.createElement("div");
+					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
+					child.style.width = "30px";
+					child.style.height = this.view.legendSet.names[i] ? "25px" : "20px";
+					child.style.cssFloat = "left";
+					child.style.marginRight = "8px";
+					element.appendChild(child);
+
+					child = document.createElement("div");
+					child.style.lineHeight = this.view.legendSet.names[i] ? "12px" : "7px";
+					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (this.view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+					element.appendChild(child);
+
+					child = document.createElement("div");
+					child.style.clear = "left";
+					element.appendChild(child);
+				}
+			}
+			else {
+				for (var i = 0; i < this.classification.bins.length; i++) {
+					child = document.createElement("div");
+					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
+					child.style.width = "30px";
+					child.style.height = "15px";
+					child.style.cssFloat = "left";
+					child.style.marginRight = "8px";
+					element.appendChild(child);
+
+					child = document.createElement("div");
+					child.innerHTML = this.classification.bins[i].label;
+					element.appendChild(child);
+
+					child = document.createElement("div");
+					child.style.clear = "left";
+					element.appendChild(child);
+				}
+			}
+
+			this.layer.legendPanel.update(element.outerHTML);
+		},
+
+		CLASS_NAME: "mapfish.GeoStat." + name
+	});
+};
+
+mapfish.GeoStat.createThematic('Thematic1');
+mapfish.GeoStat.createThematic('Thematic2');
+mapfish.GeoStat.createThematic('Thematic3');
+mapfish.GeoStat.createThematic('Thematic4');
+
+	}());
+
+
+	// GIS PLUGIN (plugin.js)
+	var init = {
+			user: {},
+            systemInfo: {}
+		},
+		configs = [],
+		isInitStarted = false,
+		isInitComplete = false,
+		getInit,
+		applyCss,
+		execute;
+
+	GIS.i18n = {
+		facility_layer_legend: 'Facility layer legend',
+		thematic_layer_1_legend: 'Thematic layer 1 legend',
+		thematic_layer_2_legend: 'Thematic layer 2 legend',
+		thematic_layer_3_legend: 'Thematic layer 3 legend',
+		thematic_layer_4_legend: 'Thematic layer 4 legend',
+		measure_distance: 'Measure distance'
+	};
+
+	GIS.plugin = {};
+
+	getInit = function(contextPath) {
+		var isInit = false,
+			requests = [],
+			callbacks = 0,
+			fn;
+
+        init.contextPath = contextPath;
+
+		fn = function() {
+			if (++callbacks === requests.length) {
+				isInitComplete = true;
+
+				for (var i = 0; i < configs.length; i++) {
+					execute(configs[i]);
+				}
+
+				configs = [];
+			}
+		};
+
+        // dhis2
+        requests.push({
+            url: contextPath + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            success: function(r) {
+                var systemSettings = r;
+                init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
+                init.systemInfo.calendar = systemSettings.keyCalendar;
+
+                // user-account
+                Ext.data.JsonP.request({
+                    url: contextPath + '/api/me/user-account.jsonp',
+                    success: function(r) {
+                        init.userAccount = r;
+
+                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
+
+                                                // init
+                                                var defaultKeyUiLocale = 'en',
+                                                    defaultKeyAnalysisDisplayProperty = 'name',
+                                                    namePropertyUrl,
+                                                    contextPath,
+                                                    keyUiLocale,
+                                                    dateFormat;
+
+                                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+
+                                                // local vars
+                                                contextPath = init.contextPath;
+                                                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                                dateFormat = init.systemInfo.dateFormat;
+
+                                                init.namePropertyUrl = namePropertyUrl;
+
+                                                // dhis2
+                                                dhis2.util.namespace('dhis2.gis');
+
+                                                dhis2.gis.store = dhis2.gis.store || new dhis2.storage.Store({
+                                                    name: 'dhis2',
+                                                    adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                                    objectStores: ['optionSets']
+                                                });
+
+                                                // option sets
+                                                Ext.data.JsonP.request({
+                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
+                                                    success: function(r) {
+                                                        var optionSets = r.optionSets || [],
+                                                            store = dhis2.gis.store,
+                                                            ids = [],
+                                                            url = '',
+                                                            callbacks = 0,
+                                                            checkOptionSet,
+                                                            updateStore;
+
+                                                        updateStore = function() {
+                                                            if (++callbacks === optionSets.length) {
+                                                                if (!ids.length) {
+                                                                    fn();
+                                                                    return;
+                                                                }
+
+                                                                for (var i = 0; i < ids.length; i++) {
+                                                                    url += '&filter=id:eq:' + ids[i];
+                                                                }
+
+                                                                Ext.data.JsonP.request({
+                                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                                    success: function(r) {
+                                                                        var sets = r.optionSets;
+
+                                                                        store.setAll('optionSets', sets).done(fn);
+                                                                    }
+                                                                });
+                                                            }
+                                                        };
+
+                                                        registerOptionSet = function(optionSet) {
+                                                            store.get('optionSets', optionSet.id).done( function(obj) {
+                                                                if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                                    ids.push(optionSet.id);
+                                                                }
+
+                                                                updateStore();
+                                                            });
+                                                        };
+
+                                                        store.open().done( function() {
+                                                            for (var i = 0; i < optionSets.length; i++) {
+                                                                registerOptionSet(optionSets[i]);
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    }
+                });
+            }
+        });
+
+		requests.push({
+			url: contextPath + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			success: function(r) {
+				var organisationUnits = r.organisationUnits || [],
+                    ou = [],
+                    ouc = [];
+
+                if (organisationUnits.length) {
+                    for (var i = 0, org; i < organisationUnits.length; i++) {
+                        org = organisationUnits[i];
+
+                        ou.push(org.id);
+
+                        if (org.children) {
+                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                        }
+                    }
+
+                    init.user = init.user || {};
+                    init.user.ou = ou;
+                    init.user.ouc = ouc;
+                }
+                else {
+                    alert('User is not assigned to any organisation units');
+                }
+
+                fn();
+			}
+		});
+
+		requests.push({
+			url: contextPath + '/api/dimensions.jsonp?links=false&paging=false',
+			success: function(r) {
+				init.dimensions = r.dimensions;
+				fn();
+			}
+		});
+
+		for (var i = 0; i < requests.length; i++) {
+			Ext.data.JsonP.request(requests[i]);
+		}
+	};
+
+	applyCss = function() {
+		var css = '.gis-plugin, .gis-plugin * { font-family: arial, sans-serif, liberation sans, consolas; } \n';
+		css += '.x-panel-body, .x-window-body * { font-size: 11px; } \n';
+		css += '.x-panel-header { height: 30px; padding: 7px 4px 4px 7px; border: 0 none; } \n';
+		css += '.gis-container-default .x-window-body { padding: 5px; background: #fff; } \n';
+		css += '.olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n';
+		css += '.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';
+		css += '.olControlPanel.zoomIn { right: 72px; } \n';
+		css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+		css += '.olControlPanel.zoomOut { right: 48px; } \n';
+		css += '.olControlPanel.zoomVisible { right: 24px; } \n';
+		css += '.olControlPermalink { display: none !important; } \n';
+		css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 2px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
+		css += '.olControlMousePosition * { font-size: 10px !important; } \n';
+		css += '.text-mouseposition-lonlat { color: #555; } \n';
+		css += '.olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n';
+		css += '#google-logo { background: url("' + init.contextPath + '/dhis-web-mapping/images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+		css += '.olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n';
+		css += '.olControlScaleLineBottom { display: none; } \n';
+		css += '.olControlScaleLineTop { font-weight: bold; } \n';
+		css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
+		css += '.x-mask-msg div { background-position: 11px center; } \n';
+		css += '.x-mask-msg .x-mask-loading { border: 0 none; background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+		css += '.gis-window-widget-feature { padding: 0; border: 0 none; border-radius: 0; background: transparent; box-shadow: none; } \n';
+		css += '.gis-window-widget-feature .x-window-body-default { border: 0 none; background: transparent; } \n';
+		css += '.gis-window-widget-feature .x-window-body-default .x-panel-body-default { border: 0 none; background: #556; opacity: 0.92; filter: alpha(opacity=92); -ms-filter: "alpha(opacity=92)"; padding: 5px 8px 5px 8px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; color: #fff; font-weight: bold; letter-spacing: 1px; } \n';
+		css += '.x-menu-body { border:1px solid #bbb; border-radius: 2px; padding: 0; background-color: #fff !important; } \n';
+		css += '.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-color: #e1e1e1; background-color: #e1e1e1; background-image: none; } \n';
+		css += '.x-menu-item-link { padding: 4px 5px 4px 26px; } \n';
+		css += '.x-menu-item-text { color: #111; } \n';
+		css += '.disabled { opacity: 0.4; cursor: default !important; } \n';
+		css += '.el-opacity-1 { opacity: 1 !important; } \n';
+		css += '.el-border-0, .el-border-0 .x-panel-body { border: 0 none !important; } \n';
+		css += '.el-fontsize-10 { font-size: 10px !important; } \n';
+		css += '.gis-grid-row-icon-disabled * { cursor: default !important; } \n';
+		css += '.gis-toolbar-btn-menu { margin-top: 4px; } \n';
+		css += '.gis-toolbar-btn-menu .x-panel-body-default { border-radius: 2px; border-color: #999; } \n';
+		css += '.gis-grid .link, .gis-grid .link * { cursor: pointer; cursor: hand; color: blue; text-decoration: underline; } \n';
+		css += '.gis-menu-item-icon-drill, .gis-menu-item-icon-float { left: 6px; } \n';
+		css += '.gis-menu-item-first.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-top-left-radius: 2px; border-top-right-radius: 2px; } \n';
+		css += '.gis-menu-item-last.x-menu-item-active .x-menu-item-link { border-radius: 0; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; } \n';
+		css += '.gis-menu-item-icon-drill { \n background: url("' + init.contextPath + '/dhis-web-mapping/images/drill_16.png") no-repeat; } \n';
+		css += '.gis-menu-item-icon-float { background: url("' + init.contextPath + '/dhis-web-mapping/images/float_16.png") no-repeat; } \n';
+		css += '.x-color-picker a { padding: 0; } \n';
+		css += '.x-color-picker em span { width: 14px; height: 14px; } \n';
+
+		Ext.util.CSS.createStyleSheet(css);
+	};
+
+	execute = function(config) {
+		var validateConfig,
+			createViewport,
+			afterRender,
+			initialize,
+			gis;
+
+		validateConfig = function() {
+			if (!Ext.isString(config.url)) {
+				alert('Invalid url (' + config.el + ')');
+				return;
+			}
+
+			if (config.url.split('').pop() === '/') {
+				config.url = config.url.substr(0, config.url.length - 1);
+			}
+
+			if (!Ext.isString(config.el)) {
+				alert('Invalid html element id (' + config.el + ')');
+				return;
+			}
+
+			config.id = config.id || config.uid;
+
+			if (config.id && !Ext.isString(config.id)) {
+				alert('Invalid map id (' + config.el + ')');
+				return;
+			}
+
+			return true;
+		};
+
+		createViewport = function() {
+			var viewport,
+				eastRegion,
+				centerRegion,
+				el = Ext.get(gis.el);
+
+			viewport = Ext.create('Ext.panel.Panel', {
+				renderTo: el,
+				width: el.getWidth(),
+				height: el.getHeight(),
+				cls: 'gis-plugin',
+				layout: {
+					type: 'hbox',
+					align: 'stretch'
+				},
+				items: [
+					{
+						xtype: 'gx_mappanel',
+						map: gis.olmap,
+						bodyStyle: 'border:0 none',
+						width: el.getWidth() - (gis.map.hideLegend ? 0 : 200),
+						height: el.getHeight(),
+						listeners: {
+							added: function() {
+								centerRegion = this;
+							}
+						}
+					},
+					{
+						xtype: 'panel',
+						layout: 'anchor',
+						bodyStyle: 'border-top:0 none; border-bottom:0 none',
+						width: gis.map.hideLegend ? 0 : 200,
+						preventHeader: true,
+						defaults: {
+							bodyStyle: 'padding: 6px; border: 0 none',
+							collapsible: true,
+							collapsed: true,
+							animCollapse: false
+						},
+						items: [
+							{
+								title: GIS.i18n.thematic_layer_1_legend,
+								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+								listeners: {
+									added: function() {
+										gis.layer.thematic1.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: GIS.i18n.thematic_layer_2_legend,
+								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+								listeners: {
+									added: function() {
+										gis.layer.thematic2.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: GIS.i18n.thematic_layer_3_legend,
+								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+								listeners: {
+									added: function() {
+										gis.layer.thematic3.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: GIS.i18n.thematic_layer_4_legend,
+								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+								listeners: {
+									added: function() {
+										gis.layer.thematic4.legendPanel = this;
+									}
+								}
+							},
+							{
+								title: GIS.i18n.facility_layer_legend,
+								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+								listeners: {
+									added: function() {
+										gis.layer.facility.legendPanel = this;
+									}
+								}
+							}
+						],
+						listeners: {
+							added: function() {
+								eastRegion = this;
+							}
+						}
+					}
+				],
+				listeners: {
+					afterrender: function() {
+						afterRender();
+					}
+				}
+			});
+
+			viewport.centerRegion = centerRegion;
+			viewport.eastRegion = eastRegion;
+
+			return viewport;
+		};
+
+		afterRender = function(vp) {
+			var len = Ext.query('.zoomInButton').length;
+
+			for (var i = 0; i < len; i++) {
+				Ext.query('.zoomInButton')[i].innerHTML = '<img src="' + gis.init.contextPath + '/dhis-web-mapping/images/zoomin_24.png" />';
+				Ext.query('.zoomOutButton')[i].innerHTML = '<img src="' + gis.init.contextPath + '/dhis-web-mapping/images/zoomout_24.png" />';
+				Ext.query('.zoomVisibleButton')[i].innerHTML = '<img src="' + gis.init.contextPath + '/dhis-web-mapping/images/zoomvisible_24.png" />';
+				Ext.query('.measureButton')[i].innerHTML = '<img src="' + gis.init.contextPath + '/dhis-web-mapping/images/measure_24.png" />';
+			}
+
+			// base layer
+			if (Ext.isDefined(gis.map.baseLayer)) {
+				var base = Ext.isString(gis.map.baseLayer) ? gis.map.baseLayer.split(' ').join('').toLowerCase() : gis.map.baseLayer;
+
+				if (!base || base === 'none' || base === 'off') {
+					gis.layer.googleStreets.setVisibility(false);
+				}
+				else if (base === 'gh' || base === 'googlehybrid') {
+					gis.olmap.setBaseLayer(gis.layer.googleHybrid);
+				}
+				else if (base === 'osm' || base === 'openstreetmap') {
+					gis.olmap.setBaseLayer(gis.layer.openStreetMap);
+				}
+			}
+		};
+
+		initialize = function() {
+			if (!validateConfig()) {
+				return;
+			}
+
+			applyCss();
+
+			gis = GIS.core.getInstance(init);
+			gis.el = config.el;
+
+			GIS.core.createSelectHandlers(gis, gis.layer.boundary);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic1);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic2);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic3);
+			GIS.core.createSelectHandlers(gis, gis.layer.thematic4);
+			GIS.core.createSelectHandlers(gis, gis.layer.facility);
+
+			gis.map = config;
+
+			gis.viewport = createViewport();
+
+			gis.olmap.mask = Ext.create('Ext.LoadMask', gis.viewport.centerRegion.getEl(), {
+				msg: 'Loading'
+			});
+
+			GIS.core.MapLoader(gis).load();
+		}();
+	};
+
+	GIS.plugin.getMap = function(config) {
+		if (Ext.isString(config.url) && config.url.split('').pop() === '/') {
+			config.url = config.url.substr(0, config.url.length - 1);
+		}
+
+		if (isInitComplete) {
+			execute(config);
+		}
+		else {
+			configs.push(config);
+
+			if (!isInitStarted) {
+				isInitStarted = true;
+				getInit(config.url);
+			}
+		}
+	};
+
+	DHIS = Ext.isObject(window['DHIS']) ? DHIS : {};
+	DHIS.getMap = GIS.plugin.getMap;
+
+});

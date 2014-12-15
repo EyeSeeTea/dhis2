@@ -44,7 +44,7 @@
 				el: 'chart2',
                 type: 'pie',
 				columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}],
-				rows: [{dimension: 'pe', items: [{id: 'LAST_3_MONTHS'}]}],
+				rows: [{dimension: 'pe', items: [{id: 'LAST_6_MONTHS'}]}],
                 filters: [{dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}],
                 domainAxisTitle: 'PERIODS',
                 rangeAxisTitle: 'PERCENT',
@@ -63,7 +63,8 @@
                     titleFont: '18px sans-serif'
                 },
                 seriesStyle: {
-                    labelFont: '10px sans-serif'
+                    labelFont: '10px sans-serif',
+                    labelColor: 'black'
                 }
 			});
 		});

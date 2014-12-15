@@ -79,7 +79,7 @@ dhis2.db.tmpl = {
 	           "<a href='javascript:dhis2.db.viewImage( \"../api/charts/${id}/data?width=820&height=550\", \"${name}\" )'>${i18n_view}</a>" +
 	           "<a href='javascript:dhis2.db.viewShareForm( \"${id}\", \"chart\", \"${name}\" )'>${i18n_share}</a></div>" +
 	           //"<img src='../api/charts/${id}/data?width=405&height=294' onclick='dhis2.db.exploreChart( \"${id}\" )' title='${i18n_click}'></div></li>",
-               "<div id='plugin-${itemId}'></div>" +
+               "<div id='plugin-${itemId}' style='font-family:sans-serif !important'></div>" +
                "</div></li>",
 
    	eventChartItem: "<li id='liDrop-${itemId}' class='liDropItem'><div class='dropItem' id='drop-${itemId}' data-item='${itemId}'></div></li>" +
@@ -94,7 +94,7 @@ dhis2.db.tmpl = {
 	         "<a href='javascript:dhis2.db.viewImage( \"../api/maps/${id}/data?width=820&height=550\", \"${name}\" )'>${i18n_view}</a>" +
 	         "<a href='javascript:dhis2.db.viewShareForm( \"${id}\", \"map\", \"${name}\" )'>${i18n_share}</a></div>" +
 		     //"<img src='../api/maps/${id}/data?width=405&height=294' onclick='dhis2.db.exploreMap( \"${id}\" )' title='${i18n_click}'></div></li>",
-             "<div id='plugin-${itemId}' style='width:405px;height:294px'></div>" +
+             "<div id='plugin-${itemId}' style='width:383px; height:290px'></div>" +
              "</div></li>",
 
 	reportTableItem: "<li id='liDrop-${itemId}' class='liDropItem'><div class='dropItem' id='drop-${itemId}' data-item='${itemId}'></div></li>" +
@@ -384,7 +384,7 @@ dhis2.db.renderDashboard = function( id )
 {
     var contentWidth = 391,
         scrollbarWidth = /\bchrome\b/.test(navigator.userAgent.toLowerCase()) ? 8 : 17;
-console.log(scrollbarWidth);    
+        
 	if ( !id )
 	{
 		return;
@@ -422,7 +422,10 @@ console.log(scrollbarWidth);
                         el: 'plugin-' + dashboardItem.id,
                         id: dashboardItem.chart.id,
                         width: contentWidth,
-                        height: 290
+                        height: 290,
+                        domainAxisStyle: {
+                            labelRotation: 45
+                        }
                     });                        
 				}
 				if ( "eventChart" == dashboardItem.type )

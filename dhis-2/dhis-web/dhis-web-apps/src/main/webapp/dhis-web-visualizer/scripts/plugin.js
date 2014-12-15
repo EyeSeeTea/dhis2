@@ -2894,9 +2894,29 @@ Ext.onReady(function() {
 
                     // Label
                     if (xLayout.showValues) {
+                        var labelFont = conf.chart.style.fontFamily,
+                            labelColor;
+
+                        if (Ext.isObject(xLayout.seriesStyle)) {
+                            var style = xLayout.seriesStyle;
+
+                            // color
+                            labelColor = style.labelColor || labelColor;
+                            
+                            if (style.labelFont) {
+                                labelFont = style.labelFont;
+                            }
+                            else {
+                                labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                                labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                                labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            }
+                        }
+                        
                         label.display = 'middle';
-                        label.contrast = true;
-                        label.font = '14px ' + conf.chart.style.fontFamily;
+                        label.contrast = !labelColor;
+                        label.font = labelFont;
+                        label.fill = labelColor;
                         label.renderer = function(value) {
                             var record = store.getAt(store.findExact(conf.finals.data.domain, value));
                             return record.data[store.rangeFields[0]];
@@ -2907,7 +2927,7 @@ Ext.onReady(function() {
                     series = [{
                         type: 'pie',
                         field: store.rangeFields[0],
-                        donut: 7,
+                        donut: 5,
                         showInLegend: true,
                         highlight: {
                             segment: {
@@ -2925,7 +2945,8 @@ Ext.onReady(function() {
                             renderer: function(item) {
                                 this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
                             }
-                        }
+                        },
+                        shadowAttributes: false
                     }];
 
                     // Theme
@@ -2949,7 +2970,6 @@ Ext.onReady(function() {
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
-                    chart.shadow = true;
 
                     return chart;
                 };

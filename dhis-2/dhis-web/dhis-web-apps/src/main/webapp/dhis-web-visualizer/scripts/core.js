@@ -2863,6 +2863,7 @@ Ext.onReady( function() {
                         field: store.rangeFields[0],
                         donut: 7,
                         showInLegend: true,
+                        shadowAttributes: false,
                         highlight: {
                             segment: {
                                 margin: 5
