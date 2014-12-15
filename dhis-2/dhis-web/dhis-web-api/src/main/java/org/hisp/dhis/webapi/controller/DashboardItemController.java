@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.event;
+package org.hisp.dhis.webapi.controller;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -30,67 +30,40 @@ package org.hisp.dhis.webapi.controller.event;
 
 import com.google.common.collect.Lists;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramService;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.schema.descriptors.ProgramStageSchemaDescriptor;
-import org.hisp.dhis.webapi.controller.AbstractCrudController;
+import org.hisp.dhis.dashboard.DashboardItem;
+import org.hisp.dhis.schema.descriptors.DashboardItemSchemaDescriptor;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping( value = ProgramStageSchemaDescriptor.API_ENDPOINT )
-public class ProgramStageController
-    extends AbstractCrudController<ProgramStage>
+@RequestMapping( value = DashboardItemSchemaDescriptor.API_ENDPOINT )
+public class DashboardItemController
+    extends AbstractCrudController<DashboardItem>
 {
-    private ProgramService programService;
-
-    @Autowired
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
     @Override
-    protected List<ProgramStage> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
+    protected List<DashboardItem> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
     {
-        List<ProgramStage> entityList = new ArrayList<>();
+        List<DashboardItem> entityList;
 
-        if ( options.getOptions().containsKey( "query" ) )
-        {
-            entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
-        }
-        else if ( options.hasPaging() )
+        if ( options.hasPaging() )
         {
             int count = manager.getCount( getEntityClass() );
 
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<>( manager.getBetweenSorted( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
-        }
-        else if ( options.getOptions().containsKey( "program" ) )
-        {
-            String programId = options.getOptions().get( "program" );
-            Program program = programService.getProgram( programId );
-
-            if ( program != null )
-            {
-                entityList = new ArrayList<>( program.getProgramStages() );
-            }
+            entityList = Lists.newArrayList( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
-            entityList = new ArrayList<>( manager.getAllSorted( getEntityClass() ) );
+            entityList = Lists.newArrayList( manager.getAll( getEntityClass() ) );
         }
 
         return entityList;

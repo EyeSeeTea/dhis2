@@ -573,6 +573,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         // if it already contains this object, don't add it. It might be a list and not set, and we don't want duplicates.
         if ( identifiableObjects.contains( candidate ) )
         {
+            response.setStatus( HttpServletResponse.SC_NO_CONTENT );
             return; // nothing to do, just return with OK
         }
 
@@ -740,7 +741,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = Lists.newArrayList( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+            entityList = Lists.newArrayList( manager.getBetweenSorted( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {

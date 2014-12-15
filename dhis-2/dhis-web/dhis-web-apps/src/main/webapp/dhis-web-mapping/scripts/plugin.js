@@ -3319,7 +3319,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
+			api.layout.Layout = function(config, applyConfig) {
 				var config = Ext.clone(config),
 					layout = {},
 					getValidatedDimensionArray,
@@ -3519,7 +3519,7 @@ Ext.onReady( function() {
 
 					layout.organisationUnitGroupSet = config.organisationUnitGroupSet;
 
-					return layout;
+					return Ext.apply(layout, applyConfig);
 				}();
 			};
 
