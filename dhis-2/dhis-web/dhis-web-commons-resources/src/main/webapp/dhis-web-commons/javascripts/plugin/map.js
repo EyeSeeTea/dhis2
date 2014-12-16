@@ -433,8 +433,7 @@ Ext.onReady( function() {
 			olmap.addControl(panel);
 
 			panel.div.className += ' ' + name;
-			//panel.div.childNodes[0].className += ' ' + name + 'Button';
-			panel.div.childNodes[0].className += ' fa fa-camera-retro fa-lg';
+			panel.div.childNodes[0].className += ' ' + name + 'Button';
 		};
 
 		olmap = new OpenLayers.Map({
@@ -5054,54 +5053,58 @@ mapfish.GeoStat.createThematic = function(name) {
 		},
 
 		updateLegend: function() {
-			var	element = document.createElement("div"),
+			var	view = this.view,
+                response = this.gis.response,
+                isPlugin = this.gis.plugin,
+                element = document.createElement("div"),
+                style = {},
 				child,
-				legendNames;
+                id,
+                name;
+
+                style.dataLineHeight = isPlugin ? '12px' : '14px';
+                style.dataPaddingBottom = isPlugin ? '2px' : '3px';
+                style.colorWidth = isPlugin ? '15px' : '30px';
+                style.colorHeight = isPlugin ? '13px' : '15px';
+                style.colorMarginRight = isPlugin ? '5px' : '8px';
+                style.fontSize = isPlugin ? '10px' : '11px';
 
 			// data
+            id = view.columns[0].items[0].id;
+            name = view.columns[0].items[0].name;
 			child = document.createElement("div");
-			child.style.height = "14px";
-			child.style.overflow = "hidden";
-			child.title = this.view.columns[0].items[0].name;
-			child.innerHTML = this.view.columns[0].items[0].name;
-			element.appendChild(child);
-
-			child = document.createElement("div");
-			child.style.clear = "left";
-			element.appendChild(child);
+            child.style.fontSize = style.fontSize;
+            child.style.lineHeight = style.dataLineHeight;
+            child.style.paddingBottom = style.dataPaddingBottom;
+            child.innerHTML += response.metaData.names[id] || name || id;
+            child.innerHTML += "<br/>";
 
 			// period
-			child = document.createElement("div");
-			child.style.height = "14px";
-			child.style.overflow = "hidden";
-			child.title = this.view.filters[0].items[0].name;
-			child.innerHTML = this.view.filters[0].items[0].name;
+            id = view.filters[0].items[0].id;
+            name = view.filters[0].items[0].name;
+            child.innerHTML += response.metaData.names[id] || name || id;
 			element.appendChild(child);
 
 			child = document.createElement("div");
 			child.style.clear = "left";
-			element.appendChild(child);
-
-			// separator
-			child = document.createElement("div");
-			child.style.width = "1px";
-			child.style.height = "5px";
 			element.appendChild(child);
 
 			// legends
-			if (this.view.legendSet) {
+			if (view.legendSet) {
 				for (var i = 0; i < this.classification.bins.length; i++) {
 					child = document.createElement("div");
+                    child.style.fontSize = style.fontSize;
 					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
-					child.style.width = "30px";
-					child.style.height = this.view.legendSet.names[i] ? "25px" : "20px";
-					child.style.cssFloat = "left";
-					child.style.marginRight = "8px";
+					child.style.width = style.colorWidth;
+					child.style.height = view.legendSet.names[i] ? '25px' : style.colorHeight;
+					child.style.cssFloat = 'left';
+					child.style.marginRight = style.colorMarginRight;
 					element.appendChild(child);
 
 					child = document.createElement("div");
-					child.style.lineHeight = this.view.legendSet.names[i] ? "12px" : "7px";
-					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (this.view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+                    child.style.fontSize = style.fontSize;
+					child.style.lineHeight = view.legendSet.names[i] ? "12px" : "7px";
+					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
 					element.appendChild(child);
 
 					child = document.createElement("div");
@@ -5113,13 +5116,14 @@ mapfish.GeoStat.createThematic = function(name) {
 				for (var i = 0; i < this.classification.bins.length; i++) {
 					child = document.createElement("div");
 					child.style.backgroundColor = this.colorInterpolation[i].toHexString();
-					child.style.width = "30px";
-					child.style.height = "15px";
-					child.style.cssFloat = "left";
-					child.style.marginRight = "8px";
+					child.style.width = style.colorWidth;
+					child.style.height = style.colorHeight;
+					child.style.cssFloat = 'left';
+					child.style.marginRight = style.colorMarginRight;
 					element.appendChild(child);
 
 					child = document.createElement("div");
+                    child.style.fontSize = style.fontSize;
 					child.innerHTML = this.classification.bins[i].label;
 					element.appendChild(child);
 
@@ -5157,11 +5161,11 @@ mapfish.GeoStat.createThematic('Thematic4');
 		execute;
 
 	GIS.i18n = {
-		facility_layer_legend: 'Facility layer legend',
-		thematic_layer_1_legend: 'Thematic layer 1 legend',
-		thematic_layer_2_legend: 'Thematic layer 2 legend',
-		thematic_layer_3_legend: 'Thematic layer 3 legend',
-		thematic_layer_4_legend: 'Thematic layer 4 legend',
+		facility_layer_legend: 'Facility layer',
+		thematic_layer_1_legend: 'Thematic layer 1',
+		thematic_layer_2_legend: 'Thematic layer 2',
+		thematic_layer_3_legend: 'Thematic layer 3',
+		thematic_layer_4_legend: 'Thematic layer 4',
 		measure_distance: 'Measure distance'
 	};
 
@@ -5387,6 +5391,8 @@ mapfish.GeoStat.createThematic('Thematic4');
 		css += '.gis-menu-item-icon-float { background: url("' + init.contextPath + '/dhis-web-mapping/images/float_16.png") no-repeat; } \n';
 		css += '.x-color-picker a { padding: 0; } \n';
 		css += '.x-color-picker em span { width: 14px; height: 14px; } \n';
+        css += '.gis-panel-legend .x-panel-header { height: 24px; background: #eaeaea; padding: 5px 4px 0 5px} \n';
+        css += '.gis-panel-legend .x-panel-header .x-panel-header-text { font-size: 10px; } \n';
 
 		Ext.util.CSS.createStyleSheet(css);
 	};
@@ -5427,7 +5433,8 @@ mapfish.GeoStat.createThematic('Thematic4');
 			var viewport,
 				eastRegion,
 				centerRegion,
-				el = Ext.get(gis.el);
+				el = Ext.get(gis.el),
+                eastWidth = gis.map.hideLegend ? 0 : (gis.plugin ? 120: 200);
 
 			viewport = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
@@ -5443,7 +5450,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 						xtype: 'gx_mappanel',
 						map: gis.olmap,
 						bodyStyle: 'border:0 none',
-						width: el.getWidth() - (gis.map.hideLegend ? 0 : 200),
+						width: el.getWidth() - eastWidth,
 						height: el.getHeight(),
 						listeners: {
 							added: function() {
@@ -5455,7 +5462,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 						xtype: 'panel',
 						layout: 'anchor',
 						bodyStyle: 'border-top:0 none; border-bottom:0 none',
-						width: gis.map.hideLegend ? 0 : 200,
+						width: eastWidth,
 						preventHeader: true,
 						defaults: {
 							bodyStyle: 'padding: 6px; border: 0 none',
@@ -5466,6 +5473,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 						items: [
 							{
 								title: GIS.i18n.thematic_layer_1_legend,
+                                cls: 'gis-panel-legend',
 								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
 								listeners: {
 									added: function() {
@@ -5475,6 +5483,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 							},
 							{
 								title: GIS.i18n.thematic_layer_2_legend,
+                                cls: 'gis-panel-legend',
 								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
 								listeners: {
 									added: function() {
@@ -5484,6 +5493,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 							},
 							{
 								title: GIS.i18n.thematic_layer_3_legend,
+                                cls: 'gis-panel-legend',
 								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
 								listeners: {
 									added: function() {
@@ -5493,6 +5503,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 							},
 							{
 								title: GIS.i18n.thematic_layer_4_legend,
+                                cls: 'gis-panel-legend',
 								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
 								listeners: {
 									added: function() {
@@ -5502,6 +5513,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 							},
 							{
 								title: GIS.i18n.facility_layer_legend,
+                                cls: 'gis-panel-legend',
 								bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
 								listeners: {
 									added: function() {
@@ -5565,6 +5577,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 
 			gis = GIS.core.getInstance(init);
 			gis.el = config.el;
+            gis.plugin = true;
 
 			GIS.core.createSelectHandlers(gis, gis.layer.boundary);
 			GIS.core.createSelectHandlers(gis, gis.layer.thematic1);
