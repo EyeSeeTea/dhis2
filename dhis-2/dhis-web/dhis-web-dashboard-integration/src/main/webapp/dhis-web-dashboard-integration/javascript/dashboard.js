@@ -465,7 +465,8 @@ dhis2.db.renderDashboard = function( id )
                         id: dashboardItem.reportTable.id,
                         width: contentWidth - scrollbarWidth,
                         height: 290,
-                        displayDensity: 'compact'
+                        displayDensity: 'xcompact',
+                        fontSize: 'xsmall'
                     });
 				}
 				else if ( "users" == dashboardItem.type )
