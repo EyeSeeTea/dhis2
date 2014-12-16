@@ -5102,6 +5102,7 @@ mapfish.GeoStat.createThematic = function(name) {
 					element.appendChild(child);
 
 					child = document.createElement("div");
+					child.style.height = view.legendSet.names[i] ? '25px' : style.colorHeight;
                     child.style.fontSize = style.fontSize;
 					child.style.lineHeight = view.legendSet.names[i] ? "12px" : "7px";
 					child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
@@ -5123,6 +5124,7 @@ mapfish.GeoStat.createThematic = function(name) {
 					element.appendChild(child);
 
 					child = document.createElement("div");
+					child.style.height = style.colorHeight;
                     child.style.fontSize = style.fontSize;
 					child.innerHTML = this.classification.bins[i].label;
 					element.appendChild(child);
