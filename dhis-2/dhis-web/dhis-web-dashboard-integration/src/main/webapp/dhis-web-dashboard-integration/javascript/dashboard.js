@@ -399,7 +399,7 @@ dhis2.db.renderDashboard = function( id )
 	$.getJSON( "../api/dashboards/" + id + "/?fields=:all,dashboardItems[:all]&" + dhis2.util.cacheBust(), function( data )
 	{
         $d = $( "#contentList" ).empty();
-		
+        
         updateSharing( data );
 
         if ( data.dashboardItems && data.dashboardItems.length )
@@ -425,6 +425,9 @@ dhis2.db.renderDashboard = function( id )
                         height: 290,
                         domainAxisStyle: {
                             labelRotation: 45
+                        },
+                        legendStyle: {
+                            labelMaxLength: 20
                         }
                     });                        
 				}

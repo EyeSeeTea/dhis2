@@ -2252,12 +2252,10 @@ Ext.onReady(function() {
                             id = failSafeColumnIdMap[store.rangeFields[i]];
                             name = xResponse.metaData.names[id];
 
-                            if (Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
+                            if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
                                 var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
-
-                                if (Ext.isNumber(mxl)) {
-                                    name = name.substr(0, mxl) + '..';
-                                }
+                                
+                                name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
                             }
 
                             a.push(name);
@@ -2556,10 +2554,10 @@ Ext.onReady(function() {
 
                 getDefaultChartSizeHandler = function() {
                     return function() {
-						this.animate = false;
+						//this.animate = false;
                         this.setWidth(ns.app.centerRegion.getWidth() - 15);
                         this.setHeight(ns.app.centerRegion.getHeight() - 40);
-                        this.animate = true;
+                        //this.animate = true;
                     };
                 };
 
@@ -2593,7 +2591,8 @@ Ext.onReady(function() {
                     var chart,
                         store = config.store || {},
                         defaultConfig = {
-                            animate: true,
+                            //animate: true,
+                            animate: false,
                             shadow: false,
                             insetPadding: 35,
                             width: ns.app.centerRegion.getWidth() - 15,
@@ -3025,10 +3024,10 @@ Ext.onReady(function() {
                     chart.height = ns.app.centerRegion.getHeight() - 80;
 
                     chart.setChartSize = function() {
-                        this.animate = false;
+                        //this.animate = false;
                         this.setWidth(ns.app.centerRegion.getWidth());
                         this.setHeight(ns.app.centerRegion.getHeight() - 80);
-                        this.animate = true;
+                        //this.animate = true;
                     };
 
                     return chart;
@@ -3081,10 +3080,11 @@ Ext.onReady(function() {
                         store: store,
                         insetPadding: 100,
                         theme: null,
-                        animate: {
-                            easing: 'elasticIn',
-                            duration: 1000
-                        }
+                        //animate: {
+                            //easing: 'elasticIn',
+                            //duration: 1000
+                        //}
+                        animate: false
                     });
 
                     if (xLayout.showValues) {
@@ -3099,10 +3099,10 @@ Ext.onReady(function() {
                     }
 
                     chart.setChartSize = function() {
-						this.animate = false;
+						//this.animate = false;
                         this.setWidth(ns.app.centerRegion.getWidth());
                         this.setHeight(ns.app.centerRegion.getHeight() * 0.6);
-                        this.animate = true;
+                        //this.animate = true;
                     };
 
                     chart.setTitlePosition = function() {
