@@ -9,6 +9,7 @@ trackerCapture.controller('DashboardController',
                 TEIService, 
                 TEService,
                 OptionSetService,
+                orderByFilter,
                 ProgramFactory,
                 CurrentSelection,
                 TranslationService,
@@ -29,9 +30,14 @@ trackerCapture.controller('DashboardController',
     $rootScope.biggerDashboardWidgets = [];
     $rootScope.smallerDashboardWidgets = [];
     
-    //TODO: build dashboard based on dashboard configuration fow the whole dashboard
-    var ruleboundWidgetConfigs = TrackerWidgetsConfigurationFactory.getWidgetConfiguration($scope.selectedProgramId);
-    angular.forEach(ruleboundWidgetConfigs,function(widgetConfig){
+    //Get widget configuration and order ascending based on index
+    var unorderedWidgetConfigs = TrackerWidgetsConfigurationFactory.getWidgetConfiguration($scope.selectedProgramId);
+    var orderedWidgetConfigs = orderByFilter(
+            unorderedWidgetConfigs,
+            "+index");
+    
+    //Create each widget based on configuration
+    angular.forEach(orderedWidgetConfigs,function(widgetConfig){
         var configuredWidget  = 
                     {
                         title:widgetConfig.title, 

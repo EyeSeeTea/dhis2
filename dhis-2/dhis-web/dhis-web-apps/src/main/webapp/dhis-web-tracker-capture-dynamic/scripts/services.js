@@ -826,7 +826,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:5}
             ]
         },
-        
         getDefaultWidgetConfiguration: function() {
             return [
                 {title: 'enrollment', type:'enrollment', show: true, expand: true, horizontalplacement:"left", index:0},
