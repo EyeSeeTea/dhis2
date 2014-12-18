@@ -67,6 +67,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -76,11 +77,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -128,7 +132,7 @@ public class EventController
     // READ
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/csv", "text/csv" } )
+    @RequestMapping( value = "", method = RequestMethod.GET, produces = { "application/csv", "application/csv+gzip", "text/csv" } )
     @PreAuthorize( "hasRole('ALL') or hasRole('F_TRACKED_ENTITY_DATAVALUE_ADD')" )
     public void getCsvEvents(
         @RequestParam( required = false ) String program,
@@ -141,6 +145,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date startDate,
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
+        @RequestParam( required = false ) String attachment,
         @RequestParam( required = false, defaultValue = "false" ) boolean skipHeader,
         @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request ) throws IOException
     {
@@ -200,7 +205,22 @@ public class EventController
             events.setEvents( PagerUtils.pageCollection( events.getEvents(), pager ) );
         }
 
-        csvEventService.writeEvents( response.getOutputStream(), events, !skipHeader );
+        OutputStream outputStream = response.getOutputStream();
+        response.setContentType( "application/csv" );
+
+        if ( ContextUtils.isAcceptGzip( request ) )
+        {
+            response.addHeader( ContextUtils.HEADER_CONTENT_TRANSFER_ENCODING, "binary" );
+            outputStream = new GZIPOutputStream( outputStream );
+            response.setContentType( "application/csv+gzip" );
+        }
+
+        if ( !StringUtils.isEmpty( attachment ) )
+        {
+            response.addHeader( "Content-Disposition", "attachment; filename=" + attachment );
+        }
+
+        csvEventService.writeEvents( outputStream, events, !skipHeader );
         response.getOutputStream().flush();
         response.getOutputStream().close();
     }
@@ -219,6 +239,7 @@ public class EventController
         @RequestParam( required = false ) @DateTimeFormat( pattern = "yyyy-MM-dd" ) Date endDate,
         @RequestParam( required = false ) EventStatus status,
         @RequestParam( required = false ) boolean skipMeta,
+        @RequestParam( required = false ) String attachment,
         @RequestParam Map<String, String> parameters, Model model, HttpServletResponse response, HttpServletRequest request )
     {
         WebOptions options = new WebOptions( parameters );
@@ -292,6 +313,11 @@ public class EventController
 
         model.addAttribute( "model", events );
         model.addAttribute( "viewClass", options.getViewClass( "detailed" ) );
+
+        if ( !StringUtils.isEmpty( attachment ) )
+        {
+            response.addHeader( "Content-Disposition", "attachment; filename=" + attachment );
+        }
 
         return "events";
     }
@@ -496,7 +522,9 @@ public class EventController
         @RequestParam( required = false, defaultValue = "false" ) boolean skipFirst,
         HttpServletResponse response, HttpServletRequest request, ImportOptions importOptions ) throws IOException
     {
-        Events events = csvEventService.readEvents( request.getInputStream(), skipFirst );
+        InputStream inputStream = ContextUtils.isAcceptGzip( request ) ? new GZIPInputStream( request.getInputStream() ) : request.getInputStream();
+
+        Events events = csvEventService.readEvents( inputStream, skipFirst );
 
         if ( !importOptions.isAsync() )
         {

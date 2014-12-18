@@ -245,7 +245,7 @@ public class CrossTabServiceTest
         List<Object> valueList = new ArrayList<>( operands.size() + 2 );
         valueList.add( 1 );
         valueList.add( 1 );
-        
+
         for ( int i = 0; i < operands.size(); i++ )
         {
             valueList.add( 10.0 );

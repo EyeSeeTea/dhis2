@@ -347,6 +347,7 @@ public class UserCredentials
      * Tests whether the credentials contain all needed parameters to
      * perform an account restore.
      * If a parameter is missing a descriptive error string is returned.
+     *
      * @return null on success, a descriptive error string on failure.
      */
     public String isRestorable()
@@ -444,7 +445,6 @@ public class UserCredentials
     // Getters and setters
     // -------------------------------------------------------------------------
 
-    @JsonIgnore
     public String getPassword()
     {
         return password;
@@ -470,11 +470,11 @@ public class UserCredentials
         this.passwordLastUpdated = passwordLastUpdated;
     }
 
-    @JsonProperty
+    @JsonProperty( "userRoles" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "userAuthorityGroups", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "userAuthorityGroup", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlElementWrapper( localName = "userRoles", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "userRole", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserAuthorityGroup> getUserAuthorityGroups()
     {
         return userAuthorityGroups;

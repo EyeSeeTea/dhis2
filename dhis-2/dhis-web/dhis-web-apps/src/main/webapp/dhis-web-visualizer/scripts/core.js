@@ -541,7 +541,9 @@ Ext.onReady( function() {
 
                 return function() {
                     var objectNames = [],
-						dimConf = conf.finals.dimension;
+						dimConf = conf.finals.dimension,
+                        columnName,
+                        rowName;
 
 					// config must be an object
 					if (!(config && Ext.isObject(config))) {
@@ -549,18 +551,32 @@ Ext.onReady( function() {
 						return;
 					}
 
+					// check dimensions: null means no dimension in layout
+					if (!config.columns) {
+						alert('No series dimension selected.\n\nPlease go to Layout and add a dimension to the Series area.\n\nTo make more dimensions available in Layout please select dimension items in the left menu.');
+						return;
+					}
+
+					if (!config.rows) {
+						alert('No category dimension selected.\n\nPlease go to Layout and add a dimension to the Category area.\n\nTo make more dimensions available in Layout please select dimension items in the left menu.');
+						return;
+					}
+
+                    columnName = config.columns.length ? dimConf.objectNameMap[config.columns[0].dimension].name : null;
+                    rowName = config.rows.length ? dimConf.objectNameMap[config.rows[0].dimension].name : null;
+
                     config.columns = getValidatedDimensionArray(config.columns);
                     config.rows = getValidatedDimensionArray(config.rows);
                     config.filters = getValidatedDimensionArray(config.filters);
 
 					// at least one dimension specified as column and row
 					if (!config.columns) {
-						alert('No series items selected');
+						alert('No series items selected.\n\nPlease select at least one item in the left menu' + (columnName ? ' (' + columnName + ').' : '.'));
 						return;
 					}
 
 					if (!config.rows) {
-						alert('No category items selected');
+						alert('No category items selected.\n\nPlease select at least one item in the left menu' + (rowName ? ' (' + rowName + ').' : '.'));
 						return;
 					}
 
@@ -2365,7 +2381,7 @@ Ext.onReady( function() {
                                 legend = this.legend,
                                 legendCenterX,
                                 titleX;
-                                
+
                             if (this.legend.position === 'top') {
                                 legendCenterX = legend.x + (legend.width / 2);
                                 titleX = titleWidth ? legendCenterX - (titleWidth / 2) : titleXFallback;

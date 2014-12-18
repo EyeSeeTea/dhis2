@@ -98,6 +98,7 @@ public class SystemSettingInterceptor
         map.put( DATE_FORMAT, calendarService.getSystemDateFormat() );
         map.put( KEY_CACHE_STRATEGY, systemSettingManager.getSystemSetting( KEY_CACHE_STRATEGY, DEFAULT_CACHE_STRATEGY ) );
         map.put( KEY_ANALYTICS_MAX_LIMIT, systemSettingManager.getSystemSetting( KEY_ANALYTICS_MAX_LIMIT, DEFAULT_ANALYTICS_MAX_LIMIT ) );
+        map.put( KEY_ANALYSIS_RELATIVE_PERIOD, systemSettingManager.getSystemSetting( KEY_ANALYSIS_RELATIVE_PERIOD, DEFAULT_ANALYSIS_RELATIVE_PERIOD ) );
         map.put( KEY_APPLICATION_TITLE, systemSettingManager.getSystemSetting( KEY_APPLICATION_TITLE, DEFAULT_APPLICATION_TITLE ) );
         map.put( KEY_APPLICATION_INTRO, systemSettingManager.getSystemSetting( KEY_APPLICATION_INTRO ) );
         map.put( KEY_APPLICATION_NOTIFICATION, systemSettingManager.getSystemSetting( KEY_APPLICATION_NOTIFICATION ) );
@@ -119,14 +120,14 @@ public class SystemSettingInterceptor
         map.put( KEY_OPENID_PROVIDER, systemSettingManager.getSystemSetting( KEY_OPENID_PROVIDER ) );
         map.put( KEY_OPENID_PROVIDER_LABEL, systemSettingManager.getSystemSetting( KEY_OPENID_PROVIDER_LABEL ) );
         map.put( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false ) );
-        map.put( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false ) );
         map.put( KEY_CUSTOM_LOGIN_PAGE_LOGO, systemSettingManager.getSystemSetting( KEY_CUSTOM_LOGIN_PAGE_LOGO, false ) );
         map.put( KEY_CUSTOM_TOP_MENU_LOGO, systemSettingManager.getSystemSetting( KEY_CUSTOM_TOP_MENU_LOGO, false ) );
         map.put( KEY_ANALYTICS_MAINTENANCE_MODE, systemSettingManager.getSystemSetting( KEY_ANALYTICS_MAINTENANCE_MODE, false ) );
         map.put( KEY_DATABASE_SERVER_CPUS, systemSettingManager.getSystemSetting( KEY_DATABASE_SERVER_CPUS, DEFAULT_DATABASE_SERVER_CPUS ) );
         map.put( KEY_HELP_PAGE_LINK, systemSettingManager.getSystemSetting( KEY_HELP_PAGE_LINK, DEFAULT_HELP_PAGE_LINK ) );
         map.put( KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, systemSettingManager.getSystemSetting( KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS, false ) );
-        map.put( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, systemSettingManager.getSystemSetting( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, false ) );        
+        map.put( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, systemSettingManager.getSystemSetting( KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL, false ) );
+        map.put( KEY_SYSTEM_NOTIFICATIONS_EMAIL, systemSettingManager.getSystemSetting( KEY_SYSTEM_NOTIFICATIONS_EMAIL ) );
         map.put( SYSPROP_PORTAL, defaultIfEmpty( System.getProperty( SYSPROP_PORTAL ), String.valueOf( false ) ) );
 
         invocation.getStack().push( map );

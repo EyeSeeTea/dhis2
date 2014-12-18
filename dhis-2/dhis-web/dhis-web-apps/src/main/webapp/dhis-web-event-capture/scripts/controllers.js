@@ -10,21 +10,22 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $timeout,
                 storage,
                 Paginator,
-                TranslationService,
                 OptionSetService,
                 ProgramFactory,
                 ProgramStageFactory,                
                 DHIS2EventFactory,
                 DHIS2EventService,
-                GeoJsonFactory,
-                ContextMenuSelectedItem,
+                ContextMenuSelectedItem,                
                 DateUtils,
+                CalendarService,
+                CustomFormService,
                 ModalService,
-                DialogService) {   
-   
-                      
+                DialogService) {
     //selected org unit
     $scope.selectedOrgUnit = '';
+    $scope.treeLoaded = false;
+    
+    $scope.calendarSetting = CalendarService.getSetting();
     
     //Paging
     $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};   
@@ -45,34 +46,22 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     $scope.note = {};
     $scope.today = DateUtils.getToday();
     
-    var loginDetails = storage.get('LOGIN_DETAILS');
-    var storedBy = '';
-    if(loginDetails){
-        storedBy = loginDetails.userCredentials.username;
-    }
+    var userAccount = storage.get('USER_PROFILE');
+    var storedBy = userAccount ? userAccount.userName : '';    
     $scope.noteExists = false;
         
     //watch for selection of org unit from tree
-    $scope.$watch('selectedOrgUnit', function(newObj, oldObj) {
+    $scope.$watch('selectedOrgUnit', function() {
         
         $scope.dhis2Events = [];
-        if( angular.isObject($scope.selectedOrgUnit)){            
-            //apply translation - by now user's profile is fetched from server.
-            TranslationService.translate(); 
+        if( angular.isObject($scope.selectedOrgUnit)){
             $scope.loadPrograms();
         }
     });
     
-    GeoJsonFactory.getAll().then(function(geoJsons){
-        $scope.geoJsons = geoJsons;
-    });
-            
-    
-    
     //load programs associated with the selected org unit.
     $scope.loadPrograms = function() {
-
-        //$scope.selectedOrgUnit = orgUnit;
+        
         $scope.selectedProgram = null;
         $scope.selectedProgramStage = null;
         $scope.dhis2Events = [];
@@ -99,12 +88,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 if(angular.isObject($scope.programs) && $scope.programs.length === 1){
                     $scope.selectedProgram = $scope.programs[0];
                     $scope.loadEvents();
-                }
-                
-            });       
-        }        
-    
-    };    
+                }                
+            });
+        }    
+    };
         
     //get events for the selected program (and org unit)
     $scope.loadEvents = function(){   
@@ -114,6 +101,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         
         //Filtering
         $scope.reverse = false;
+        $scope.sortHeader = {};
         $scope.filterText = {}; 
     
         $scope.dhis2Events = [];
@@ -121,7 +109,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
         $scope.eventFetched = false;
                
-        if( $scope.selectedProgram && $scope.selectedProgram.programStages[0].id){
+        if( $scope.selectedProgram && 
+                $scope.selectedProgram.programStages && 
+                $scope.selectedProgram.programStages[0] && 
+                $scope.selectedProgram.programStages[0].id){
             
             $scope.optionSets = [];
             OptionSetService.getAll().then(function(optionSets){
@@ -138,9 +129,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                     angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
                         section.open = true;
                     });
-
-                    //$scope.customForm = CustomFormService.processCustomForm($scope.selectedProgramStage);
-                    $scope.customForm = $scope.selectedProgramStage.dataEntryForm ? $scope.selectedProgramStage.dataEntryForm.htmlCode : null; 
+                    
+                    //$scope.customForm = $scope.selectedProgramStage.dataEntryForm ? $scope.selectedProgramStage.dataEntryForm.htmlCode : null;
+                    $scope.customForm = CustomFormService.getForProgramStage($scope.selectedProgramStage);
 
                     $scope.prStDes = [];  
                     $scope.eventGridColumns = [];
@@ -183,7 +174,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
                     //Load events for the selected program stage and orgunit
                     DHIS2EventFactory.getByStage($scope.selectedOrgUnit.id, $scope.selectedProgramStage.id, $scope.pager ).then(function(data){
-
+                                            
                         if(data.events){
                             $scope.eventLength = data.events.length;
                         }                
@@ -221,18 +212,18 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                             var val = dataValue.value;
                                             if(angular.isObject($scope.prStDes[dataValue.dataElement].dataElement)){                               
 
-                                                //converting int string value to integer for proper sorting.
+                                                //converting int string value to number for proper sorting.
                                                 if($scope.prStDes[dataValue.dataElement].dataElement.type === 'int'){
-                                                    if( !isNaN(parseInt(val)) ){
-                                                        val = parseInt(val);
-                                                    }
-                                                    else{
-                                                        val = '';
-                                                    }                                        
+                                                    if( dhis2.validation.isNumber(val)  ){
+                                                        val = new Number(val);
+                                                    }                                
                                                 }
                                                 if($scope.prStDes[dataValue.dataElement].dataElement.type === 'string'){
-                                                    if($scope.prStDes[dataValue.dataElement].dataElement.optionSet ){
-                                                        val = OptionSetService.getNameOrCode($scope.optionSets[$scope.prStDes[dataValue.dataElement].dataElement.optionSet.id].options, val);
+                                                    if($scope.prStDes[dataValue.dataElement].dataElement.optionSet &&
+                                                            $scope.prStDes[dataValue.dataElement].dataElement.optionSet.id &&
+                                                            $scope.optionSets[$scope.prStDes[dataValue.dataElement].dataElement.optionSet.id] &&
+                                                            $scope.optionSets[$scope.prStDes[dataValue.dataElement].dataElement.optionSet.id].options ){
+                                                        val = OptionSetService.getName($scope.optionSets[$scope.prStDes[dataValue.dataElement].dataElement.optionSet.id].options, val);
                                                     }                                                
                                                 }
                                                 if($scope.prStDes[dataValue.dataElement].dataElement.type === 'date'){
@@ -258,11 +249,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
                                     delete $scope.dhis2Events[i].dataValues;
                                 }
-                                /*else{//event is empty, remove from grid
-                                    var index = $scope.dhis2Events.indexOf($scope.dhis2Events[i]);                           
-                                    $scope.dhis2Events.splice(index,1);
-                                    i--;                           
-                                }*/
                             }
 
                             if($scope.noteExists){
@@ -270,8 +256,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             }
                         }                
                         $scope.eventFetched = true;
-                    });            
-
+                    });
                 });
             });
         }        
@@ -291,14 +276,21 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         $scope.loadEvents();
     };
     
-    $scope.sortEventGrid = function(gridHeader){
-        
-        if ($scope.sortHeader === gridHeader.id){
+    $scope.sortEventGrid = function(gridHeader){        
+        if ($scope.sortHeader && $scope.sortHeader.id === gridHeader.id){
             $scope.reverse = !$scope.reverse;
             return;
         }        
-        $scope.sortHeader = gridHeader.id;
+        $scope.sortHeader = gridHeader;
         $scope.reverse = false;    
+    };
+    
+    $scope.d2Sort = function(dhis2Event){        
+        if($scope.sortHeader && $scope.sortHeader.type === 'date'){            
+            var d = dhis2Event[$scope.sortHeader.id];         
+            return DateUtils.getDate(d);
+        }
+        return dhis2Event[$scope.sortHeader.id];
     };
     
     $scope.showHideColumns = function(){
@@ -315,7 +307,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             templateUrl: 'views/column-modal.html',
             controller: 'ColumnDisplayController',
             resolve: {
-                eventGridColumns: function () {
+                gridColumns: function () {
                     return $scope.eventGridColumns;
                 },
                 hiddenGridColumns: function(){
@@ -324,8 +316,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             }
         });
 
-        modalInstance.result.then(function (eventGridColumns) {
-            $scope.eventGridColumns = eventGridColumns;
+        modalInstance.result.then(function (gridColumns) {
+            $scope.eventGridColumns = gridColumns;
         }, function () {
         });
     };
@@ -380,10 +372,9 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };    
     
     $scope.showEditEventInGrid = function(){
-        $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();  
+        $scope.currentEvent = ContextMenuSelectedItem.getSelectedItem();
         $scope.currentEventOrginialValue = angular.copy($scope.currentEvent);        
-        $scope.editingEventInGrid = !$scope.editingEventInGrid;              
-        //$scope.currentEvent['uid'] = $scope.currentEvent.event;
+        $scope.editingEventInGrid = !$scope.editingEventInGrid;
         
         $scope.outerForm.$valid = true;
     };
@@ -412,15 +403,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
         //check for form validity
         $scope.outerForm.submitted = true;        
-        if( $scope.outerForm.$invalid ){            
+        if( $scope.outerForm.$invalid ){
             angular.forEach($scope.selectedProgramStage.programStageSections, function(section){
                 section.open = true;
             });
             return false;
-        }
-        
-        if(addingAnotherEvent){
-            $scope.disableSaveAndAddNew = true;
         }
         
         //the form is valid, get the values
@@ -433,11 +420,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             if(val){
                 valueExists = true;            
                 if($scope.prStDes[dataElement].dataElement.type === 'string'){
-                    if($scope.prStDes[dataElement].dataElement.optionSet){
-                        /*if($scope.optionCodesByName[  '"' + val + '"']){
-                            val = $scope.optionCodesByName[  '"' + val + '"'];
-                        }*/
-                        val = OptionSetService.getNameOrCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options,val); //$scope.optionSets[].options$scope.optionCodesByName[  '"' + val + '"'];
+                    if($scope.prStDes[dataElement].dataElement.optionSet){                        
+                        val = OptionSetService.getCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options,val);
                     }
                 }
 
@@ -457,6 +441,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             DialogService.showDialog({}, dialogOptions);
             return false;
         }        
+        
+        if(addingAnotherEvent){
+            $scope.disableSaveAndAddNew = true;
+        }
         
         var newEvent = angular.copy($scope.currentEvent);        
         
@@ -549,11 +537,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             var val = $scope.currentEvent[dataElement];
             
             if(val && $scope.prStDes[dataElement].dataElement.type === 'string'){
-                if($scope.prStDes[dataElement].dataElement.optionSet){                        
-                    /*if($scope.optionCodesByName[  '"' + val + '"']){
-                        val = $scope.optionCodesByName[  '"' + val + '"'];
-                    }*/ 
-                    val = OptionSetService.getNameOrCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options,val); 
+                if($scope.prStDes[dataElement].dataElement.optionSet){                    
+                    val = OptionSetService.getCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options,val); 
                 }    
             }
             if(val && $scope.prStDes[dataElement].dataElement.type === 'date'){
@@ -572,7 +557,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                             dataValues: dataValues
                         };
 
-        
         if($scope.selectedProgramStage.captureCoordinates){
             updatedEvent.coordinate = {latitude: $scope.currentEvent.coordinate.latitude ? $scope.currentEvent.coordinate.latitude : '',
                                      longitude: $scope.currentEvent.coordinate.longitude ? $scope.currentEvent.coordinate.longitude : ''};             
@@ -622,7 +606,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         var oldValue = $scope.currentEventOrginialValue[dataElement];
         
         //check for form validity
-        $scope.outerForm.submitted = true;        
+        $scope.outerForm.submitted = true;
         if( $scope.outerForm.$invalid ){
             $scope.currentElement.updated = false;
             currentEvent[dataElement] = oldValue;
@@ -638,11 +622,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         if( newValue != oldValue ){
             
             if($scope.prStDes[dataElement].dataElement.type === 'string'){
-                if($scope.prStDes[dataElement].dataElement.optionSet){
-                    /*if($scope.optionCodesByName[  '"' + newValue + '"']){
-                        newValue = $scope.optionCodesByName[  '"' + newValue + '"'];
-                    }*/
-                    newValue = OptionSetService.getNameOrCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options, newValue);//$scope.optionCodesByName[  '"' + newValue + '"'];
+                if($scope.prStDes[dataElement].dataElement.optionSet){                    
+                    newValue = OptionSetService.getCode($scope.optionSets[$scope.prStDes[dataElement].dataElement.optionSet.id].options, newValue);//$scope.optionCodesByName[  '"' + newValue + '"'];
                 }
             }            
             if($scope.prStDes[dataElement].dataElement.type === 'date'){

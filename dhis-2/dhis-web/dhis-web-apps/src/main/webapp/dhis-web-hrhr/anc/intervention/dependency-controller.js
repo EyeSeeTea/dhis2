@@ -7,10 +7,8 @@ trackerCapture.controller('DependencyController',
                 TransferHandler,
                 ExpressionService,
                 DialogService,
-                orderByFilter,
-                TranslationService) {
-
-    TranslationService.translate();   
+                orderByFilter) {
+ 
    
     $scope.$on('sharedData', function(event, args) {
         

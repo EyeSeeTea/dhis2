@@ -5,10 +5,8 @@ trackerCapture.controller('ProfileController',
                 ExpressionService,
                 storage,                
                 CurrentSelection,
-                AttributesFactory,
-                TranslationService) {
+                AttributesFactory) {
 
-    TranslationService.translate();
     
     //attributes for profile    
     $scope.attributes = {};    

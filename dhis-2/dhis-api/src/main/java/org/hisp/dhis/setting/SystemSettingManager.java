@@ -91,7 +91,6 @@ public interface SystemSettingManager
     final String KEY_OPENID_PROVIDER = "keyOpenIdProvider";
     final String KEY_OPENID_PROVIDER_LABEL = "keyOpenIdProviderLabel";
     final String KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS = "keyCanGrantOwnUserAuthorityGroups";
-    final String KEY_ONLY_MANAGE_WITHIN_USER_GROUPS = "keyOnlyManageWithinUserGroups";
     final String KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS = "keyHideUnapprovedDataInAnalytics";
     final String KEY_ANALYTICS_MAX_LIMIT = "keyAnalyticsMaxLimit";
     final String KEY_CUSTOM_LOGIN_PAGE_LOGO = "keyCustomLoginPageLogo";
@@ -103,7 +102,9 @@ public interface SystemSettingManager
     final String KEY_LAST_SUCCESSFUL_RESOURCE_TABLES_UPDATE = "keyLastSuccessfulResourceTablesUpdate";
     final String KEY_HELP_PAGE_LINK = "helpPageLink";
     final String KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL = "keyAcceptanceRequiredForApproval";
-
+    final String KEY_SYSTEM_NOTIFICATIONS_EMAIL = "keySystemNotificationsEmail";
+    final String KEY_ANALYSIS_RELATIVE_PERIOD = "keyAnalysisRelativePeriod";
+    
     final String DEFAULT_SCHEDULE_AGGREGATE_QUERY_BUILDER_TASK_STRATEGY = "lastMonth";
     final String DEFAULT_FLAG = "dhis2";
     final int DEFAULT_MAX_NUMBER_OF_ATTEMPTS = 20;
@@ -120,6 +121,7 @@ public interface SystemSettingManager
     final int DEFAULT_ANALYTICS_MAX_LIMIT = 50000;
     final int DEFAULT_DATABASE_SERVER_CPUS = 0; // Detect automatically
     final String DEFAULT_HELP_PAGE_LINK = "../dhis-web-commons-about/help.action";
+    final String DEFAULT_ANALYSIS_RELATIVE_PERIOD = "LAST_12_MONTHS";
 	
     final Map<String, Serializable> DEFAULT_SETTINGS_VALUES = new HashMap<String, Serializable>()
     {
@@ -136,6 +138,7 @@ public interface SystemSettingManager
             put( KEY_TIME_FOR_SENDING_MESSAGE, DEFAULT_TIME_FOR_SENDING_MESSAGE );
             put( KEY_CACHE_STRATEGY, DEFAULT_CACHE_STRATEGY );
             put( KEY_ANALYTICS_MAX_LIMIT, DEFAULT_ANALYTICS_MAX_LIMIT );
+            put( KEY_ANALYSIS_RELATIVE_PERIOD, DEFAULT_ANALYSIS_RELATIVE_PERIOD );
         }
     };
 

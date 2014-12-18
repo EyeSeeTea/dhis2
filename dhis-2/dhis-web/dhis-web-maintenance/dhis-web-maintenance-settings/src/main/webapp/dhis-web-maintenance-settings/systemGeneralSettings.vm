@@ -5,10 +5,13 @@
         cacheStrategy: getFieldValue('cacheStrategy'),
         analyticsMaxLimit: getFieldValue('analyticsMaxLimit'),
         databaseServerCpus: getFieldValue('databaseServerCpus'),
+        infrastructuralIndicators: getFieldValue('infrastructuralIndicators'),
         infrastructuralDataElements: getFieldValue('infrastructuralDataElements'),
         infrastructuralPeriodType: getFieldValue('infrastructuralPeriodType'),
+        analysisRelativePeriod: getFieldValue('analysisRelativePeriod'),
         feedbackRecipients: getFieldValue('feedbackRecipients'),
         offlineOrganisationUnitLevel: getFieldValue('offlineOrganisationUnitLevel'),
+        systemNotificationsEmail: getFieldValue('systemNotificationsEmail'),
         omitIndicatorsZeroNumeratorDataMart: jQuery('#omitIndicatorsZeroNumeratorDataMart').is(':checked'),
         factorDeviation: getFieldValue('factorDeviation'),
         phoneNumberAreaCode: getFieldValue('phoneNumberAreaCode'),
@@ -66,6 +69,16 @@
 </select>
 </div>
 
+<div class="settingLabel">$i18n.getString( "infrastructural_indicators" )</div>
+
+<div class="setting">
+<select id="infrastructuralIndicators" name="infrastructuralIndicators">
+    #foreach ( $group in $indicatorGroups )
+    <option value="$group.id" #if( $group.id == $configuration.infrastructuralIndicators.id )selected="selected"#end>$group.name</option>
+    #end
+</select>
+</div>
+
 <div class="settingLabel">$i18n.getString( "infrastructural_data_elements" )</div>
 
 <div class="setting">
@@ -82,6 +95,16 @@
 <select id="infrastructuralPeriodType" name="infrastructuralPeriodType">
     #foreach ( $type in $periodTypes )
     <option value="$type.name" #if( $type.name == $configuration.infrastructuralPeriodTypeDefaultIfNull.name )selected="selected"#end>$type.name</option>
+    #end
+</select>
+</div>
+
+<div class="settingLabel">$i18n.getString( "default_analysis_relative_period" )</div>
+
+<div class="setting">
+<select id="analysisRelativePeriod" name="analysisRelativePeriod">
+    #foreach ( $period in $relativePeriods )
+    <option value="$period" #if( $period == $keyAnalysisRelativePeriod )selected="selected"#end>$i18n.getString( $period )</option>
     #end
 </select>
 </div>
@@ -108,6 +131,11 @@
     #set( $level = $level + 1)
 	#end
 </select>
+</div>
+
+<div class="settingLabel">$i18n.getString( "system_notifications_email_address" )</div>
+<div class="setting">
+	<input type="text" id="systemNotificationsEmail" name="systemNotificationsEmail" value="$!keySystemNotificationsEmail"/>
 </div>
 
 <div class="settingLabel">$i18n.getString( "data_analysis_factor" )</div>

@@ -67,13 +67,13 @@ public class DefaultFieldFilterService implements FieldFilterService
     @Autowired
     private SchemaService schemaService;
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private Set<PresetProvider> presetProviders = Sets.newHashSet();
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private Set<NodePropertyConverter> nodePropertyConverters = Sets.newHashSet();
 
-    @Autowired(required = false)
+    @Autowired( required = false )
     private Set<NodeTransformer> nodeTransformers = Sets.newHashSet();
 
     private ImmutableMap<String, PresetProvider> presets = ImmutableMap.of();
@@ -154,8 +154,14 @@ public class DefaultFieldFilterService implements FieldFilterService
     private AbstractNode buildNode( FieldMap fieldMap, Class<?> klass, Object object )
     {
         Schema schema = schemaService.getDynamicSchema( klass );
+        return buildNode( fieldMap, klass, object, schema.getName() );
+    }
 
-        ComplexNode complexNode = new ComplexNode( schema.getName() );
+    private AbstractNode buildNode( FieldMap fieldMap, Class<?> klass, Object object, String nodeName )
+    {
+        Schema schema = schemaService.getDynamicSchema( klass );
+
+        ComplexNode complexNode = new ComplexNode( nodeName );
         complexNode.setNamespace( schema.getNamespace() );
 
         if ( object == null )
@@ -268,7 +274,7 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                     for ( Object collectionObject : (Collection<?>) returnValue )
                     {
-                        Node node = buildNode( fieldValue, property.getItemKlass(), collectionObject );
+                        Node node = buildNode( fieldValue, property.getItemKlass(), collectionObject, property.getName() );
 
                         if ( !node.getChildren().isEmpty() )
                         {
@@ -333,7 +339,21 @@ public class DefaultFieldFilterService implements FieldFilterService
 
                 for ( Property property : properties )
                 {
-                    if ( property.isPersisted() )
+                    if ( !fieldMap.containsKey( property.key() ) && property.isPersisted() )
+                    {
+                        fieldMap.put( property.key(), new FieldMap() );
+                    }
+                }
+
+                cleanupFields.add( fieldKey );
+            }
+            else if ( ":owner".equals( fieldKey ) )
+            {
+                List<Property> properties = schema.getProperties();
+
+                for ( Property property : properties )
+                {
+                    if ( !fieldMap.containsKey( property.key() ) && property.isPersisted() && property.isOwner() )
                     {
                         fieldMap.put( property.key(), new FieldMap() );
                     }

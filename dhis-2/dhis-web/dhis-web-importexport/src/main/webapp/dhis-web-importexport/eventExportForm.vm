@@ -10,8 +10,9 @@ $( function() {
         var program = $( '#programs' ).val();
         var programStage = $( '#programStages' ).val();
         var inclusion = $( '#inclusion' ).val();
+        var file = "events" + format + compression;
 
-        var url = '../api/events' + format + compression + "?program=" + program;
+        var url = '../api/' + file + "?attachment=" + file + "&program=" + program;
 
         if( programStage && programStage.length > 0 ) {
             url += "&programStage=" + programStage;
@@ -34,9 +35,9 @@ $( function() {
 
         if( inclusion ) {
           if( "children" == inclusion ) {
-            url += "&includeChildren=true";
+            url += "&ouMode=CHILDREN";
           } else if( "descendants" == inclusion ) {
-            url += "&includeDescendants=true";
+            url += "&ouMode=DESCENDANTS";
           }
         }
 
@@ -96,7 +97,7 @@ $( function() {
 });
 </script>
 
-<h3>$i18n.getString( "event_data_export" )</h3>
+<h3>$i18n.getString( "event_export" )</h3>
 
 <div id="inputCriteria" class="inputCriteria" style="width: 730px;">
 <form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importMetaData.action">
@@ -156,7 +157,8 @@ $( function() {
     <td>
         <select id="format" style="width: 300px;">
             <option value=".xml">XML</option>
-            <option value=".json">Json</option>
+            <option value=".json">JSON</option>
+            <option value=".csv">CSV</option>
         </select>
     </td>
 </tr>
@@ -165,8 +167,8 @@ $( function() {
     <td>$i18n.getString( "compression" )</td>
     <td>
         <select id="compression" style="width: 300px;">
-            <option value="">$i18n.getString( "uncompressed" )</option>
             <option value=".gz">$i18n.getString( "compression_gzip" )</option>
+            <option value="">$i18n.getString( "uncompressed" )</option>
         </select>
     </td>
 </tr>

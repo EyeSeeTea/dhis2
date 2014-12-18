@@ -6,12 +6,11 @@ trackerCapture.controller('DataEntryController',
                 storage,
                 ProgramStageFactory,
                 DHIS2EventFactory,
+                OptionSetService,
                 ModalService,
                 DialogService,
                 CurrentSelection,
-                TranslationService) {
-
-    TranslationService.translate();
+                CustomFormService) {
     
     //Data entry form
     $scope.dataEntryOuterForm = {};
@@ -304,7 +303,7 @@ trackerCapture.controller('DataEntryController',
             $scope.programStageDataElements[prStDe.dataElement.id] = prStDe; 
         }); 
 
-        $scope.customForm = $scope.currentStage.dataEntryForm ? $scope.currentStage.dataEntryForm.htmlCode : null; 
+        $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage);
         $scope.displayCustomForm = $scope.customForm ? true:false;
 
         $scope.allowProvidedElsewhereExists = false;
@@ -337,29 +336,31 @@ trackerCapture.controller('DataEntryController',
     
     $scope.saveDatavalue = function(prStDe){
         
-        $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
-        
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
         if( $scope.dataEntryOuterForm.$invalid ){            
             return false;
         }
          
-        //input is valid
-        $scope.updateSuccess = false;
-        var value = $scope.currentEvent[prStDe.dataElement.id];        
+        //input is valid        
+        var value = $scope.currentEvent[prStDe.dataElement.id];
+        
         if(!angular.isUndefined(value)){
             if(prStDe.dataElement.type === 'date'){                    
                 value = DateUtils.formatFromUserToApi(value);
             }
             if(prStDe.dataElement.type === 'string'){                    
-                if(prStDe.dataElement.optionSet && $scope.optionSets.optionCodesByName[  '"' + value + '"']){                        
-                    value = $scope.optionSets.optionCodesByName[  '"' + value + '"'];                                                      
+                if(prStDe.dataElement.optionSet && $scope.optionSets[prStDe.dataElement.optionSet.id] &&  $scope.optionSets[prStDe.dataElement.optionSet.id].options ) {
+                    value = OptionSetService.getCode($scope.optionSets[prStDe.dataElement.optionSet.id].options, value);
                 }                    
             }
 
             if($scope.currentEventOriginal[prStDe.dataElement.id] !== value){
-                
+
+                $scope.updateSuccess = false;
+        
+                $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
+        
                 var ev = {  event: $scope.currentEvent.event,
                             orgUnit: $scope.currentEvent.orgUnit,
                             program: $scope.currentEvent.program,

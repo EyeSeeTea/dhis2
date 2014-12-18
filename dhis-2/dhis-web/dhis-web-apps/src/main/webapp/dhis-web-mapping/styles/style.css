@@ -53,9 +53,8 @@ html * {
 }
 
 #init {
-    width: 100%;
-    text-align: center;
-    margin-top: 200px;
+    display: table;
+    margin: 200px auto;
     font-size: 15px;
 }
 
@@ -996,6 +995,9 @@ gis-combo .x-form-item-label {
 }
 .gis-grid .x-grid-row .x-grid-cell { /* remove blurry borders */
 	border-top: 0 none;
+}
+.gis-grid.plain .x-grid-row .x-grid-cell {
+	border-style: none;
 }
 
 .gis-grid .link,

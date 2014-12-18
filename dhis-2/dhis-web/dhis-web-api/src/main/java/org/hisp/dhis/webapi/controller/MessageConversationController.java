@@ -109,9 +109,9 @@ public class MessageConversationController
     public RootNode getObject( @PathVariable String uid, Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
-        org.hisp.dhis.message.MessageConversation messageConversationConversation = messageService.getMessageConversation( uid );
+        org.hisp.dhis.message.MessageConversation messageConversation = messageService.getMessageConversation( uid );
 
-        if( messageConversationConversation == null )
+        if( messageConversation == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             RootNode responseNode = new RootNode( "reply" );
@@ -119,7 +119,7 @@ public class MessageConversationController
             return responseNode;
         }
 
-        if( !canReadMessageConversation( currentUserService.getCurrentUser(), messageConversationConversation ) )
+        if( !canReadMessageConversation( currentUserService.getCurrentUser(), messageConversation ) )
         {
             throw new AccessDeniedException( "Not authorized to access this conversation." );
         }
@@ -147,7 +147,7 @@ public class MessageConversationController
         }
         else
         {
-            entityList = new ArrayList<>( manager.getAll( getEntityClass() ) );
+            entityList = new ArrayList<>( messageService.getMessageConversations() );
         }
 
         return entityList;
@@ -282,21 +282,21 @@ public class MessageConversationController
         User currentUser = currentUserService.getCurrentUser();
         User user = userUid != null ? userService.getUser( userUid ) : currentUser;
 
-        if( user == null )
+        if ( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             return responseNode;
         }
 
-        if( !canModifyUserConversation( currentUser, user ) )
+        if ( !canModifyUserConversation( currentUser, user ) )
         {
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversationConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
 
-        if ( messageConversationConversations.isEmpty() )
+        if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
@@ -306,9 +306,9 @@ public class MessageConversationController
         CollectionNode marked = responseNode.addChild( new CollectionNode( "markedRead" ) );
         marked.setWrapping( false );
 
-        for( org.hisp.dhis.message.MessageConversation conversation : messageConversationConversations )
+        for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
-            if( conversation.markRead( user ) )
+            if ( conversation.markRead( user ) )
             {
                 messageService.updateMessageConversation( conversation );
                 marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
@@ -333,21 +333,21 @@ public class MessageConversationController
         User currentUser = currentUserService.getCurrentUser();
         User user = userUid != null ? userService.getUser( userUid ) : currentUser;
 
-        if( user == null )
+        if ( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             return responseNode;
         }
 
-        if( !canModifyUserConversation( currentUser, user ) )
+        if ( !canModifyUserConversation( currentUser, user ) )
         {
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversationConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
 
-        if ( messageConversationConversations.isEmpty() )
+        if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
@@ -357,9 +357,9 @@ public class MessageConversationController
         CollectionNode marked = responseNode.addChild( new CollectionNode( "markedUnread" ) );
         marked.setWrapping( false );
 
-        for( org.hisp.dhis.message.MessageConversation conversation : messageConversationConversations )
+        for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
-            if( conversation.markUnread( user ) )
+            if ( conversation.markUnread( user ) )
             {
                 messageService.updateMessageConversation( conversation );
                 marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
@@ -403,7 +403,7 @@ public class MessageConversationController
 
         User user = userService.getUser( userUid );
 
-        if( user == null )
+        if ( user == null )
         {
             responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
@@ -416,9 +416,9 @@ public class MessageConversationController
             throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
         }
 
-        org.hisp.dhis.message.MessageConversation messageConversationConversation = messageService.getMessageConversation( mcUid );
+        org.hisp.dhis.message.MessageConversation messageConversation = messageService.getMessageConversation( mcUid );
 
-        if( messageConversationConversation == null )
+        if ( messageConversation == null )
         {
             responseNode.addChild( new SimpleNode( "message", "No messageConversation with uid: " + mcUid ) );
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
@@ -427,10 +427,10 @@ public class MessageConversationController
 
         CollectionNode removed = responseNode.addChild( new CollectionNode( "removed" ) );
 
-        if( messageConversationConversation.remove( user ) )
+        if ( messageConversation.remove( user ) )
         {
-            messageService.updateMessageConversation( messageConversationConversation );
-            removed.addChild( new SimpleNode( "uid", messageConversationConversation.getUid() ) );
+            messageService.updateMessageConversation( messageConversation );
+            removed.addChild( new SimpleNode( "uid", messageConversation.getUid() ) );
         }
 
         response.setStatus( HttpServletResponse.SC_OK );
@@ -453,21 +453,21 @@ public class MessageConversationController
 
         User user = userUid == null ? currentUser : userService.getUser( userUid ) ;
 
-        if( user == null )
+        if ( user == null )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "User does not exist: " + userUid ) );
             return responseNode;
         }
 
-        if( !canModifyUserConversation( currentUser, user ) )
+        if ( !canModifyUserConversation( currentUser, user ) )
         {
             throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversationConversations = messageService.getMessageConversations( mcUids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( mcUids );
 
-        if( messageConversationConversations.isEmpty() )
+        if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs." ) );
@@ -476,7 +476,7 @@ public class MessageConversationController
 
         CollectionNode removed = responseNode.addChild( new CollectionNode( "removed" ) );
 
-        for( org.hisp.dhis.message.MessageConversation mc : messageConversationConversations )
+        for ( org.hisp.dhis.message.MessageConversation mc : messageConversations )
         {
             if( mc.remove( user ) )
             {
@@ -515,11 +515,11 @@ public class MessageConversationController
      * Determines whether the given user has permission to read the MessageConversation.
      *
      * @param user the user to check permission for.
-     * @param messageConversationConversation the MessageConversation to access.
+     * @param messageConversation the MessageConversation to access.
      * @return true if the user can read the MessageConversation, false otherwise.
      */
-    private boolean canReadMessageConversation( User user, org.hisp.dhis.message.MessageConversation messageConversationConversation )
+    private boolean canReadMessageConversation( User user, org.hisp.dhis.message.MessageConversation messageConversation )
     {
-        return messageConversationConversation.getUsers().contains( user ) || user.getUserCredentials().hasAnyAuthority( AclService.ACL_OVERRIDE_AUTHORITIES );
+        return messageConversation.getUsers().contains( user ) || user.getUserCredentials().hasAnyAuthority( AclService.ACL_OVERRIDE_AUTHORITIES );
     }
 }

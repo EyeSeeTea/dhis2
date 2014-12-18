@@ -31,6 +31,8 @@ package org.hisp.dhis.dataelement;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -149,6 +151,12 @@ public class DataElementOperand
     // -------------------------------------------------------------------------
 
     @Override
+    public boolean haveUniqueNames()
+    {
+        return false;
+    }
+
+    @Override
     public String getUid()
     {
         if ( uid != null )
@@ -253,9 +261,11 @@ public class DataElementOperand
      */
     public Integer getRelevantAggregationLevel( int organisationUnitLevel )
     {
-        Collections.sort( aggregationLevels );
+        List<Integer> levels = new ArrayList<>( aggregationLevels );
 
-        for ( final Integer aggregationLevel : aggregationLevels )
+        Collections.sort( levels );
+
+        for ( final Integer aggregationLevel : levels )
         {
             if ( aggregationLevel >= organisationUnitLevel )
             {
@@ -424,6 +434,7 @@ public class DataElementOperand
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataElement getDataElement()
     {
         return dataElement;
@@ -437,6 +448,7 @@ public class DataElementOperand
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public DataElementCategoryOptionCombo getCategoryOptionCombo()
     {
         return categoryOptionCombo;
@@ -449,6 +461,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDataElementId()
     {
         return dataElementId;
@@ -461,6 +474,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOptionComboId()
     {
         return optionComboId;
@@ -473,6 +487,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOperandId()
     {
         return operandId;
@@ -485,6 +500,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOperandName()
     {
         return operandName;
@@ -497,6 +513,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getValueType()
     {
         return valueType;
@@ -509,6 +526,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getAggregationOperator()
     {
         return aggregationOperator;
@@ -521,6 +539,8 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlElementWrapper( localName = "aggregationLevels", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "aggregationLevel", namespace = DxfNamespaces.DXF_2_0 )
     public List<Integer> getAggregationLevels()
     {
         return aggregationLevels;
@@ -533,6 +553,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public int getFrequencyOrder()
     {
         return frequencyOrder;
@@ -545,6 +566,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getOperandType()
     {
         return operandType;
@@ -557,6 +579,7 @@ public class DataElementOperand
 
     @JsonProperty
     @JsonView( { DetailedView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isHasAggregationLevels()
     {
         return hasAggregationLevels;

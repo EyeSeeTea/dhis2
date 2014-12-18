@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:sec="http://www.springframework.org/schema/security"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.2.xsd">
 
   <bean id="mappedRedirectStrategy" class="org.hisp.dhis.security.MappedRedirectStrategy">
@@ -44,7 +44,7 @@
       <sec:frame-options />
       <sec:xss-protection />
     </sec:headers>
-    
+
     <sec:http-basic />
     <sec:logout logout-url="/dhis-web-commons-security/logout.action" />
     <sec:intercept-url pattern="/dhis-web-commons/i18nJavaScript.action" access="permitAll()" />
@@ -70,7 +70,7 @@
   </bean>
 
   <!-- Security : Action -->
-  
+
   <bean id="restrictOrganisationUnitsAction" class="org.hisp.dhis.security.action.RestrictOrganisationUnitsAction"
     scope="prototype">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
@@ -136,10 +136,10 @@
   <bean id="accessDecisionManager" class="org.hisp.dhis.security.vote.LogicalOrAccessDecisionManager">
     <property name="accessDecisionManagers">
       <list>
-        <ref local="adminAccessDecisionVoting" />
-        <ref local="regularAccessDecisionVoting" />
-        <ref local="webAccessDecisionVoting" />
-        <ref local="externalAccessDecisionVoting" />
+        <ref bean="adminAccessDecisionVoting" />
+        <ref bean="regularAccessDecisionVoting" />
+        <ref bean="webAccessDecisionVoting" />
+        <ref bean="externalAccessDecisionVoting" />
       </list>
     </property>
   </bean>
@@ -147,7 +147,7 @@
   <bean id="adminAccessDecisionVoting" class="org.springframework.security.access.vote.UnanimousBased">
     <constructor-arg name="decisionVoters">
       <list>
-        <ref local="adminAccessVoter" />
+        <ref bean="adminAccessVoter" />
       </list>
     </constructor-arg>
   </bean>
@@ -159,7 +159,7 @@
   <bean id="webAccessDecisionVoting" class="org.springframework.security.access.vote.UnanimousBased">
     <constructor-arg name="decisionVoters">
       <list>
-        <ref local="webExpressionVoter" />
+        <ref bean="webExpressionVoter" />
       </list>
     </constructor-arg>
   </bean>
@@ -167,7 +167,7 @@
   <bean id="externalAccessDecisionVoting" class="org.springframework.security.access.vote.UnanimousBased">
     <constructor-arg name="decisionVoters">
       <list>
-        <ref local="externalAccessVoter" />
+        <ref bean="externalAccessVoter" />
       </list>
     </constructor-arg>
   </bean>
@@ -175,9 +175,9 @@
   <bean id="regularAccessDecisionVoting" class="org.springframework.security.access.vote.UnanimousBased">
     <constructor-arg name="decisionVoters">
       <list>
-        <ref local="actionAccessVoter" />
-        <ref local="moduleAccessVoter" />
-        <ref local="authenticatedVoter" />
+        <ref bean="actionAccessVoter" />
+        <ref bean="moduleAccessVoter" />
+        <ref bean="authenticatedVoter" />
       </list>
     </constructor-arg>
   </bean>
@@ -250,17 +250,19 @@
   </bean>
 
   <bean id="org.hisp.dhis.security.authority.SystemAuthoritiesProvider"
-    class="org.hisp.dhis.security.authority.CachingSystemAuthoritiesProvider">
-    <property name="source" ref="compositeSystemAuthoritiesProvider" />
-  </bean>
-
-  <bean id="compositeSystemAuthoritiesProvider"
     class="org.hisp.dhis.security.authority.CompositeSystemAuthoritiesProvider">
     <property name="sources">
       <set>
-        <ref bean="detectingSystemAuthoritiesProvider" />
-        <ref bean="moduleSystemAuthoritiesProvider" />
-        <ref bean="simpleSystemAuthoritiesProvider" />
+        <bean class="org.hisp.dhis.security.authority.CachingSystemAuthoritiesProvider">
+          <property name="source" ref="detectingSystemAuthoritiesProvider" />
+        </bean>
+        <bean class="org.hisp.dhis.security.authority.CachingSystemAuthoritiesProvider">
+          <property name="source" ref="moduleSystemAuthoritiesProvider" />
+        </bean>
+        <bean class="org.hisp.dhis.security.authority.CachingSystemAuthoritiesProvider">
+          <property name="source" ref="simpleSystemAuthoritiesProvider" />
+        </bean>
+        <ref bean="appsSystemAuthoritiesProvider" />
       </set>
     </property>
   </bean>
@@ -308,14 +310,17 @@
         <value>F_REPORTTABLE_EXTERNAL</value>
         <value>F_METADATA_EXPORT</value>
         <value>F_METADATA_IMPORT</value>
-        <value>F_METADATA_SUBSET_IMPORT</value>
-        <value>F_METADATA_SUBSET_EXPORT</value>
         <value>F_APPROVE_DATA</value>
         <value>F_APPROVE_DATA_LOWER_LEVELS</value>
         <value>F_ACCEPT_DATA_LOWER_LEVELS</value>
         <value>F_INSERT_CUSTOM_JS_CSS</value>
         <value>F_VIEW_UNAPPROVED_DATA</value>
+        <value>F_USERGROUP_MANAGING_RELATIONSHIPS_ADD</value>
+        <value>F_USERGROUP_MANAGING_RELATIONSHIPS_VIEW</value>
       </set>
     </property>
   </bean>
+
+  <bean id="appsSystemAuthoritiesProvider" class="org.hisp.dhis.security.authority.AppsSystemAuthoritiesProvider" />
+
 </beans>

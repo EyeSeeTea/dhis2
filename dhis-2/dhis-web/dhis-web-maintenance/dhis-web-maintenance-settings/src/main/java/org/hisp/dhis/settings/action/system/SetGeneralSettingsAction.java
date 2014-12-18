@@ -28,12 +28,23 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ANALYTICS_MAINTENANCE_MODE;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ANALYTICS_MAX_LIMIT;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_CACHE_STRATEGY;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_DATABASE_SERVER_CPUS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_FACTOR_OF_DEVIATION;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_GOOGLE_ANALYTICS_UA;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_HELP_PAGE_LINK;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_MULTI_ORGANISATION_UNIT_FORMS;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_OMIT_INDICATORS_ZERO_NUMERATOR_DATAMART;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_PHONE_NUMBER_AREA_CODE;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_SYSTEM_NOTIFICATIONS_EMAIL;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ANALYSIS_RELATIVE_PERIOD;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hisp.dhis.calendar.CalendarService;
 import org.hisp.dhis.configuration.Configuration;
 import org.hisp.dhis.configuration.ConfigurationService;
+import org.hisp.dhis.indicator.IndicatorService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -41,13 +52,11 @@ import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.UserGroupService;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.hisp.dhis.setting.SystemSettingManager.*;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class SetGeneralSettingsAction
     implements Action
@@ -76,6 +85,13 @@ public class SetGeneralSettingsAction
     {
         this.configurationService = configurationService;
     }
+    
+    private IndicatorService indicatorService;
+    
+    public void setIndicatorService( IndicatorService indicatorService )
+    {
+        this.indicatorService = indicatorService;
+    }
 
     private DataElementService dataElementService;
 
@@ -98,9 +114,6 @@ public class SetGeneralSettingsAction
         this.organisationUnitService = organisationUnitService;
     }
     
-    @Autowired
-    private CalendarService calendarService;
-
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -126,6 +139,13 @@ public class SetGeneralSettingsAction
         this.databaseServerCpus = databaseServerCpus;
     }
 
+    private Integer infrastructuralIndicators;
+
+    public void setInfrastructuralIndicators( Integer infrastructuralIndicators )
+    {
+        this.infrastructuralIndicators = infrastructuralIndicators;
+    }
+
     private Integer infrastructuralDataElements;
 
     public void setInfrastructuralDataElements( Integer infrastructuralDataElements )
@@ -138,6 +158,13 @@ public class SetGeneralSettingsAction
     public void setInfrastructuralPeriodType( String infrastructuralPeriodType )
     {
         this.infrastructuralPeriodType = infrastructuralPeriodType;
+    }
+    
+    private String analysisRelativePeriod;
+    
+    public void setAnalysisRelativePeriod( String analysisRelativePeriod )
+    {
+        this.analysisRelativePeriod = analysisRelativePeriod;
     }
 
     private Boolean omitIndicatorsZeroNumeratorDataMart;
@@ -166,6 +193,13 @@ public class SetGeneralSettingsAction
     public void setOfflineOrganisationUnitLevel( Integer offlineOrganisationUnitLevel )
     {
         this.offlineOrganisationUnitLevel = offlineOrganisationUnitLevel;
+    }
+    
+    private String systemNotificationsEmail;
+
+    public void setSystemNotificationsEmail( String systemNotificationsEmail )
+    {
+        this.systemNotificationsEmail = systemNotificationsEmail;
     }
 
     private String phoneNumberAreaCode;
@@ -196,20 +230,6 @@ public class SetGeneralSettingsAction
         this.analyticsMaintenanceMode = analyticsMaintenanceMode;
     }
     
-    private String calendar;
-
-    public void setCalendar( String calendar )
-    {
-        this.calendar = calendar;
-    }
-
-    private String dateFormat;
-
-    public void setDateFormat( String dateFormat )
-    {
-        this.dateFormat = dateFormat;
-    }
-
     private String helpPageLink;
     
     public void setHelpPageLink( String helpPageLink )
@@ -237,7 +257,7 @@ public class SetGeneralSettingsAction
 
     @Override
     public String execute()
-    {
+    { 
         systemSettingManager.saveSystemSetting( KEY_CACHE_STRATEGY, cacheStrategy );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAX_LIMIT, analyticsMaxLimit );
         systemSettingManager.saveSystemSetting( KEY_DATABASE_SERVER_CPUS, databaseServerCpus );
@@ -248,10 +268,9 @@ public class SetGeneralSettingsAction
         systemSettingManager.saveSystemSetting( KEY_GOOGLE_ANALYTICS_UA, googleAnalyticsUA );
         systemSettingManager.saveSystemSetting( KEY_ANALYTICS_MAINTENANCE_MODE, analyticsMaintenanceMode );
         systemSettingManager.saveSystemSetting( KEY_HELP_PAGE_LINK, StringUtils.trimToNull( helpPageLink ) );
+        systemSettingManager.saveSystemSetting( KEY_SYSTEM_NOTIFICATIONS_EMAIL, systemNotificationsEmail );
+        systemSettingManager.saveSystemSetting( KEY_ANALYSIS_RELATIVE_PERIOD, analysisRelativePeriod );
 
-        calendarService.setSystemCalendarKey( calendar );
-        calendarService.setSystemDateFormatKey( dateFormat );
-        
         Configuration configuration = configurationService.getConfiguration();
 
         if ( feedbackRecipients != null )
@@ -265,6 +284,11 @@ public class SetGeneralSettingsAction
                 organisationUnitService.getOrganisationUnitLevel( offlineOrganisationUnitLevel ) );
 
             organisationUnitService.updateVersion();
+        }
+
+        if ( infrastructuralIndicators != null )
+        {
+            configuration.setInfrastructuralIndicators( indicatorService.getIndicatorGroup( infrastructuralIndicators ) );
         }
 
         if ( infrastructuralDataElements != null )

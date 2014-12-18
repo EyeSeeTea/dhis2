@@ -28,27 +28,18 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.common.PagerUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.webapi.service.LinkService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,9 +47,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 @Controller
 @RequestMapping( value = DimensionController.RESOURCE_PATH )
-public class DimensionController
+public class DimensionController extends AbstractCrudController<DimensionalObject>
 {
     public static final String RESOURCE_PATH = "/dimensions";
 
@@ -71,30 +72,21 @@ public class DimensionController
 
     @Autowired
     private IdentifiableObjectManager identifiableObjectManager;
-    
-    @Autowired
-    private LinkService linkService;
 
     // -------------------------------------------------------------------------
     // Controller
     // -------------------------------------------------------------------------
 
-    @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
-    public String getDimension( @PathVariable( "uid" ) String uid,
-        @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
-        Model model )
+    @Override
+    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
     {
-        DimensionalObject dimension = dimensionService.getDimensionalObjectCopy( uid, true );
+        return dimensionService.getAllDimensions();
+    }
 
-        model.addAttribute( "model", dimension );
-        model.addAttribute( "viewClass", "dimensional" );
-
-        if ( links )
-        {
-            linkService.generateLinks( dimension, true );
-        }
-
-        return "dimension";
+    @Override
+    protected List<DimensionalObject> getEntity( String uid, WebOptions options )
+    {
+        return Lists.newArrayList( dimensionService.getDimensionalObjectCopy( uid, true ) );
     }
 
     @RequestMapping( value = "/{uid}/items", method = RequestMethod.GET )
@@ -104,16 +96,31 @@ public class DimensionController
         WebOptions options = new WebOptions( parameters );
         List<NameableObject> items = dimensionService.getCanReadDimensionItems( uid );
 
-        WebMetaData metaData = new WebMetaData();
-        Collections.sort( items, IdentifiableObjectNameComparator.INSTANCE );
-
-        if ( options.hasPaging() )
+        if ( parameters.containsKey( "filter" ) )
         {
-            Pager pager = new Pager( options.getPage(), items.size(), options.getPageSize() );
-            metaData.setPager( pager );
-            items = PagerUtils.pageCollection( items, pager );
+            String filter = parameters.get( "filter" );
+
+            if ( filter.startsWith( "name:like:" ) )
+            {
+                filter = filter.substring( "name:like:".length() );
+
+                Iterator<NameableObject> iterator = items.iterator();
+
+                while ( iterator.hasNext() )
+                {
+                    NameableObject nameableObject = iterator.next();
+
+                    if ( !nameableObject.getName().toLowerCase().contains( filter.toLowerCase() ) )
+                    {
+                        iterator.remove();
+                    }
+                }
+            }
         }
 
+        Collections.sort( items, IdentifiableObjectNameComparator.INSTANCE );
+
+        WebMetaData metaData = new WebMetaData();
         metaData.setItems( items );
 
         model.addAttribute( "model", metaData );
@@ -122,22 +129,52 @@ public class DimensionController
         return "items";
     }
 
-    @RequestMapping( method = RequestMethod.GET )
-    public String getDimensions( @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
-        Model model )
+    @RequestMapping( value = "/{uid}/items", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE )
+    public void getItemsJson( @PathVariable String uid, @RequestParam Map<String, String> parameters,
+        Model model, HttpServletRequest request, HttpServletResponse response ) throws IOException
     {
-        WebMetaData metaData = new WebMetaData();
+        WebOptions options = new WebOptions( parameters );
+        List<NameableObject> items = dimensionService.getCanReadDimensionItems( uid );
 
-        metaData.setDimensions( dimensionService.getAllDimensions() );
-
-        model.addAttribute( "model", metaData );
-
-        if ( links )
+        if ( parameters.containsKey( "filter" ) )
         {
-            linkService.generateLinks( metaData, false );
+            String filter = parameters.get( "filter" );
+
+            if ( filter.startsWith( "name:like:" ) )
+            {
+                filter = filter.substring( "name:like:".length() );
+
+                Iterator<NameableObject> iterator = items.iterator();
+
+                while ( iterator.hasNext() )
+                {
+                    NameableObject nameableObject = iterator.next();
+
+                    if ( !nameableObject.getName().toLowerCase().contains( filter.toLowerCase() ) )
+                    {
+                        iterator.remove();
+                    }
+                }
+            }
         }
 
-        return "dimensions";
+        Collections.sort( items, IdentifiableObjectNameComparator.INSTANCE );
+
+        Map<String, List<?>> output = new HashMap<>();
+        List<Map<?, ?>> itemCollection = new ArrayList<>();
+        output.put( "items", itemCollection );
+
+        for ( NameableObject item : items )
+        {
+            Map<String, Object> o = new HashMap<>();
+            o.put( "id", item.getUid() );
+            o.put( "name", item.getName() );
+
+            itemCollection.add( o );
+        }
+
+        response.setContentType( MediaType.APPLICATION_JSON_VALUE );
+        renderService.toJson( response.getOutputStream(), output );
     }
 
     @RequestMapping( value = "/constraints", method = RequestMethod.GET )
@@ -159,37 +196,37 @@ public class DimensionController
     }
 
     @RequestMapping( value = "/dataSet/{uid}", method = RequestMethod.GET )
-    public String getDimensionsForDataSet( @PathVariable String uid, 
+    public String getDimensionsForDataSet( @PathVariable String uid,
         @RequestParam( value = "links", defaultValue = "true", required = false ) Boolean links,
         Model model, HttpServletResponse response )
     {
         WebMetaData metaData = new WebMetaData();
 
         DataSet dataSet = identifiableObjectManager.get( DataSet.class, uid );
-        
+
         if ( dataSet == null )
         {
             ContextUtils.notFoundResponse( response, "Data set does not exist: " + uid );
             return null;
         }
-        
+
         if ( !dataSet.hasCategoryCombo() )
         {
             ContextUtils.conflictResponse( response, "Data set does not have a category combination: " + uid );
             return null;
         }
-        
+
         List<DimensionalObject> dimensions = new ArrayList<>();
         dimensions.addAll( dataSet.getCategoryCombo().getCategories() );
         dimensions.addAll( dataSet.getCategoryOptionGroupSets() );
-        
+
         dimensions = dimensionService.getCanReadObjects( dimensions );
-        
+
         for ( DimensionalObject dim : dimensions )
         {
             metaData.getDimensions().add( dimensionService.getDimensionalObjectCopy( dim.getUid(), true ) );
         }
-        
+
         model.addAttribute( "model", metaData );
 
         if ( links )

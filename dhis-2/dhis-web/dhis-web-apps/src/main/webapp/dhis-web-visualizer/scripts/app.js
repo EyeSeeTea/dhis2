@@ -415,7 +415,7 @@ Ext.onReady( function() {
             dimensionStore.removeAll();
 
 			if (!isAll) {
-				colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
+				//colStore.add({id: dimConf.data.dimensionName, name: dimConf.data.name});
 				rowStore.add({id: dimConf.period.dimensionName, name: dimConf.period.name});
 				filterStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
 				dimensionStore.add({id: dimConf.category.dimensionName, name: dimConf.category.name});
@@ -1509,7 +1509,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: NS.i18n.manage_favorites,
+			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
 			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -1597,6 +1597,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
+                    style: 'margin-bottom:2px',
 					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'ns-combo',
@@ -1654,6 +1655,11 @@ Ext.onReady( function() {
 		};
 
 		getBody = function() {
+			if (!ns.core.init.user) {
+				alert('User is not assigned to any organisation units');
+				return;
+			}
+
 			var body = {
 				object: {
 					id: sharing.object.id,
@@ -1761,7 +1767,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.sharing_settings,
-			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
+			bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -1769,7 +1775,7 @@ Ext.onReady( function() {
 				{
 					html: sharing.object.name,
 					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
-					style: 'margin-bottom:8px'
+					style: 'margin-bottom:7px'
 				},
 				{
 					xtype: 'container',
@@ -1780,6 +1786,11 @@ Ext.onReady( function() {
 						userGroupButton
 					]
 				},
+				{
+					html: NS.i18n.created_by + ' ' + sharing.object.user.name,
+					bodyStyle: 'border:0 none; color:#777',
+					style: 'margin-top:2px;margin-bottom:7px'
+				},
 				userGroupRowContainer
 			],
 			bbar: [
@@ -1788,7 +1799,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=chart&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -1862,7 +1873,7 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: ns.app.layout.name,
+				title: 'Write interpretation' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 				layout: 'fit',
 				//iconCls: 'ns-window-title-interpretation',
 				width: 500,
@@ -2193,6 +2204,8 @@ Ext.onReady( function() {
 					config = ns.app.optionsWindow.getOptions(),
 					dx = dimConf.data.dimensionName,
 					co = dimConf.category.dimensionName,
+                    pe = dimConf.period.dimensionName,
+                    ou = dimConf.organisationUnit.dimensionName,
 					nameDimArrayMap = {};
 
                 config.type = ns.app.viewport.chartType.getChartType();
@@ -2217,6 +2230,9 @@ Ext.onReady( function() {
 					nameDimArrayMap[dimConf.dataSet.objectName] || []
 				));
 
+                nameDimArrayMap[pe] = nameDimArrayMap[pe] || [];
+                nameDimArrayMap[ou] = nameDimArrayMap[ou] || [];
+
 				// columns, rows, filters
 				for (var i = 0, nameArrays = [columnDimNames, rowDimNames, filterDimNames], axes = [config.columns, config.rows, config.filters], dimNames; i < nameArrays.length; i++) {
 					dimNames = nameArrays[i];
@@ -2236,12 +2252,24 @@ Ext.onReady( function() {
 							}
 						}
 						else if (nameDimArrayMap.hasOwnProperty(dimName) && nameDimArrayMap[dimName]) {
-							for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
-								axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
-							}
+                            if (nameDimArrayMap[dimName].length) {
+                                for (var k = 0; k < nameDimArrayMap[dimName].length; k++) {
+                                    axes[i].push(Ext.clone(nameDimArrayMap[dimName][k]));
+                                }
+                            }
+                            else {
+                                axes[i].push({
+                                    dimension: dimName,
+                                    items: []
+                                });
+                            }
 						}
 					}
 				}
+
+                config.columns = columnDimNames.length ? config.columns : null;
+                config.rows = rowDimNames.length ? config.rows : null;
+                config.filters = filterDimNames.length ? config.filters : null;
 
 				return config;
             };
@@ -2442,6 +2470,7 @@ Ext.onReady( function() {
 			organisationUnitGroupStore,
 
             isScrolled,
+            onDataSelect,
             indicatorLabel,
             indicatorSearch,
             indicatorFilter,
@@ -2696,8 +2725,9 @@ Ext.onReady( function() {
                 this.isPending = false;
                 indicatorSearch.hideFilter();
             },
-            loadPage: function(uid, filter, append) {
+            loadPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
+					params = {},
                     path;
 
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
@@ -2718,27 +2748,31 @@ Ext.onReady( function() {
 				else if (uid === 0) {
 					path = '/indicators.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
 				}
-
+				
 				if (!path) {
-					console.log('Available indicators: invalid id');
 					return;
 				}
 
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
+				}
+				
                 store.isPending = true;
                 ns.core.web.mask.show(indicatorAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.indicators || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2746,7 +2780,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+				
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -2757,7 +2793,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
+
                 ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
 			storage: {},
 			parent: null,
@@ -2769,7 +2810,18 @@ Ext.onReady( function() {
 
 		indicatorSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			data: []
+			data: [],
+            listeners: {
+                add: function() {
+                    onDataSelect();
+                },
+                remove: function() {
+                    onDataSelect();
+                },
+                clear: function() {
+                    onDataSelect();
+                }
+            }
 		});
 		ns.app.stores.indicatorSelected = indicatorSelectedStore;
 
@@ -2820,7 +2872,7 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataElementSearch.hideFilter();
             },
-            loadPage: function(uid, filter, append) {
+            loadPage: function(uid, filter, append, noPaging, fn) {
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
                 filter = filter || dataElementFilter.getValue() || null;
 
@@ -2830,15 +2882,15 @@ Ext.onReady( function() {
                 }
 
                 if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
-                    this.loadTotalsPage(uid, filter, append);
+                    this.loadTotalsPage(uid, filter, append, noPaging, fn);
                 }
                 else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
-                    this.loadDetailsPage(uid, filter, append);
+                    this.loadDetailsPage(uid, filter, append, noPaging, fn);
                 }
             },
-            loadTotalsPage: function(uid, filter, append) {
+            loadTotalsPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
+					params = {},
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2853,8 +2905,15 @@ Ext.onReady( function() {
 				}
 
 				if (!path) {
-					alert('Available data elements: invalid id');
 					return;
+				}
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
 				}
 
                 store.isPending = true;
@@ -2862,16 +2921,13 @@ Ext.onReady( function() {
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataElements || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2879,9 +2935,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-			loadDetailsPage: function(uid, filter, append) {
+			loadDetailsPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
-                    filterPath = filter ? '/query/' + filter : '',
+					params = {},
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2896,8 +2952,15 @@ Ext.onReady( function() {
 				}
 
 				if (!path) {
-					alert('Available data elements: invalid id');
 					return;
+				}
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
 				}
 
                 store.isPending = true;
@@ -2905,10 +2968,7 @@ Ext.onReady( function() {
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
 							data = response.objects || response.dataElementOperands || [],
@@ -2918,7 +2978,7 @@ Ext.onReady( function() {
 							data[i].id = data[i].id.split('.').join('#');
 						}
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2926,7 +2986,9 @@ Ext.onReady( function() {
                     }
                 });
 			},
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+				
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -2937,7 +2999,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
             sortStore: function() {
 				this.sort('name', 'ASC');
@@ -2947,7 +3014,18 @@ Ext.onReady( function() {
 
 		dataElementSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			data: []
+			data: [],
+            listeners: {
+                add: function() {
+                    onDataSelect();
+                },
+                remove: function() {
+                    onDataSelect();
+                },
+                clear: function() {
+                    onDataSelect();
+                }
+            }
 		});
 		ns.app.stores.dataElementSelected = dataElementSelectedStore;
 
@@ -2993,9 +3071,10 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataSetSearch.hideFilter();
             },
-            loadPage: function(filter, append) {
+            loadPage: function(filter, append, noPaging, fn) {
                 var store = this,
-                    path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+					params = {},
+                    path;
 
                 filter = filter || dataSetFilter.getValue() || null;
 
@@ -3008,21 +3087,28 @@ Ext.onReady( function() {
                     return;
                 }
 
+                path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
+				}
+
                 store.isPending = true;
                 ns.core.web.mask.show(dataSetAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataSets || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -3030,7 +3116,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+				
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -3041,7 +3129,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+
+				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
 			storage: {},
 			parent: null,
@@ -3054,7 +3147,18 @@ Ext.onReady( function() {
 
 		dataSetSelectedStore = Ext.create('Ext.data.Store', {
 			fields: ['id', 'name'],
-			data: []
+			data: [],
+            listeners: {
+                add: function() {
+                    onDataSelect();
+                },
+                remove: function() {
+                    onDataSelect();
+                },
+                clear: function() {
+                    onDataSelect();
+                }
+            }
 		});
 		ns.app.stores.dataSetSelected = dataSetSelectedStore;
 
@@ -3159,6 +3263,30 @@ Ext.onReady( function() {
 
 			return scrollBottom / el.scrollHeight > 0.9;
 		};
+
+        onDataSelect = function() {
+            var win = ns.app.layoutWindow,
+                stores = [indicatorSelectedStore, dataElementSelectedStore, dataSetSelectedStore],
+                dimension = dimConf.data,
+                hasItems;
+
+            hasItems = function(storeArray) {
+                for (var i = 0; i < storeArray.length; i++) {
+                    if (storeArray[i].getRange().length) {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+
+            if (hasItems(stores)) {
+                win.addDimension({id: dimension.dimensionName, name: dimension.name});
+            }
+            else if (!hasItems(stores) && win.hasDimension(dimension.dimensionName)) {
+                win.removeDimension(dimension.dimensionName);
+            }
+        };
 
         indicatorLabel = Ext.create('Ext.form.Label', {
             text: NS.i18n.available,
@@ -3284,7 +3412,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+						indicatorAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+						});
 					}
 				}
 			],
@@ -3492,7 +3622,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
+						dataElementAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
+						});
 					}
 				}
 			],
@@ -3755,7 +3887,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						dataSetAvailableStore.loadPage(null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						});
 					}
 				}
 			],
@@ -3890,6 +4024,10 @@ Ext.onReady( function() {
                         period.checkboxes.push(chb);
                         relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
                     }
+                        
+                    if (chb.relativePeriodId === ns.core.init.systemInfo.analysisRelativePeriod) {
+                        chb.setValue(true);
+                    }
                 }
             }
         };
@@ -3968,8 +4106,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: NS.i18n.last_12_months,
-									checked: true
+									boxLabel: NS.i18n.last_12_months
 								}
 							]
 						},
@@ -4844,9 +4981,9 @@ Ext.onReady( function() {
 					this.isPending = false;
 					//indicatorSearch.hideFilter();
 				},
-				loadPage: function(filter, append) {
+				loadPage: function(filter, append, noPaging, fn) {
 					var store = this,
-						filterPath = filter ? '/query/' + filter : '',
+						params = {},
 						path;
 
 					filter = filter || indicatorFilter.getValue() || null;
@@ -4860,23 +4997,28 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
+					path = '/dimensions/' + dimension.id + '/items' + (filter ? '/query/' + filter : '') + '.json';
+
+					if (noPaging) {
+						params.paging = false;
+					}
+					else {
+						params.page = store.nextPage;
+						params.pageSize = 50;
+					}
 
 					store.isPending = true;
                     ns.core.web.mask.show(available.boundList);
 
 					Ext.Ajax.request({
 						url: ns.core.init.contextPath + '/api' + path,
-						params: {
-							page: store.nextPage,
-							pageSize: 50
-						},
+						params: params,
 						success: function(r) {
 							var response = Ext.decode(r.responseText),
 								data = response.items || [],
 								pager = response.pager;
 
-							store.loadStore(data, pager, append);
+							store.loadStore(data, pager, append, fn);
 						},
 						callback: function() {
 							store.isPending = false;
@@ -4884,7 +5026,9 @@ Ext.onReady( function() {
 						}
 					});
 				},
-				loadStore: function(data, pager, append) {
+				loadStore: function(data, pager, append, fn) {
+					pager = pager || {};
+					
 					this.loadData(data, append);
 					this.lastPage = this.nextPage;
 
@@ -4893,7 +5037,12 @@ Ext.onReady( function() {
 					}
 
 					this.isPending = false;
+
 					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+
+					if (fn) {
+						fn();
+					}
 				},
 				sortStore: function() {
 					this.sort('name', 'ASC');
@@ -4941,8 +5090,10 @@ Ext.onReady( function() {
 						xtype: 'button',
 						icon: 'images/arrowrightdouble.png',
 						width: 22,
-						handler: function() {
-							ns.core.web.multiSelect.selectAll(available, selected);
+						handler: function() {						
+							availableStore.loadPage(null, null, true, function() {
+								ns.core.web.multiSelect.selectAll(available, selected);
+							});
 						}
 					}
 				],
@@ -5383,7 +5534,7 @@ Ext.onReady( function() {
 				});
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Plugin configuration',
+                    title: 'Embed in web page' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5440,7 +5591,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Favorite link',
+                    title: 'Favorite link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5489,7 +5640,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'API link',
+                    title: 'API link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5556,17 +5707,55 @@ Ext.onReady( function() {
 			iconCls: 'ns-button-icon-chart',
 			toggleGroup: 'module',
 			pressed: true,
-			handler: function() {
-				if (!this.pressed) {
-					this.toggle();
-				}
-			}
+            menu: {},
+            handler: function(b) {
+                b.menu = Ext.create('Ext.menu.Menu', {
+                    closeAction: 'destroy',
+                    shadow: false,
+                    showSeparator: false,
+                    items: [
+                        {
+                            text: NS.i18n.clear_chart + '&nbsp;&nbsp;', //i18n
+                            cls: 'ns-menu-item-noicon',
+                            handler: function() {
+                                window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer';
+                            }
+                        }
+                    ],
+                    listeners: {
+                        show: function() {
+                            ns.core.web.window.setAnchorPosition(b.menu, b);
+                        },
+                        hide: function() {
+                            b.menu.destroy();
+                            defaultButton.toggle();
+                        },
+                        destroy: function(m) {
+                            b.menu = null;
+                        }
+                    }
+                });
+
+                b.menu.show();
+            }
 		});
 
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
 			autoScroll: true,
+			fullSize: true,
+			cmp: [defaultButton],
+			toggleCmp: function(show) {
+				for (var i = 0; i < this.cmp.length; i++) {
+					if (show) {
+						this.cmp[i].show();
+					}
+					else {
+						this.cmp[i].hide();
+					}
+				}
+			},
 			tbar: {
 				defaults: {
 					height: 26
@@ -5614,7 +5803,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_pivot_tables + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-pivot';
 										}
 									},
 									'-',
@@ -5653,6 +5842,11 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					defaultButton,
@@ -5671,7 +5865,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_maps + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping';
 										}
 									},
 									'-',
@@ -5710,12 +5904,22 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					{
 						xtype: 'tbseparator',
 						height: 18,
 						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
+						}
 					},
 					{
 						xtype: 'button',
@@ -5734,6 +5938,18 @@ Ext.onReady( function() {
                     if (ns.app.xLayout && ns.app.chart) {
                         ns.app.chart.onViewportResize();
                     }
+
+                    // toolbar
+					var width = this.getWidth();
+
+					if (width < 768 && this.fullSize) {
+						this.toggleCmp(false);
+						this.fullSize = false;
+					}
+					else if (width >= 768 && !this.fullSize) {
+						this.toggleCmp(true);
+						this.fullSize = true;
+					}
                 },
 				afterrender: function(p) {
 					var liStyle = 'padding:3px 10px; color:#333',
@@ -6051,12 +6267,18 @@ Ext.onReady( function() {
 						}
 					}
 
-					// Fade in
+                    var initEl = document.getElementById('init');
+                    initEl.parentNode.removeChild(initEl);
+
+                    Ext.getBody().setStyle('background', '#fff');
+                    Ext.getBody().setStyle('opacity', 0);
+
+					// fade in
 					Ext.defer( function() {
 						Ext.getBody().fadeIn({
-							duration: 400
+							duration: 600
 						});
-					}, 500 );
+					}, 300 );
                 }
             }
         });
@@ -6115,11 +6337,12 @@ Ext.onReady( function() {
 
                         // date, calendar
                         Ext.Ajax.request({
-                            url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat',
+                            url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat&key=keyAnalysisRelativePeriod',
                             success: function(r) {
                                 var systemSettings = Ext.decode(r.responseText);
                                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                                 init.systemInfo.calendar = systemSettings.keyCalendar;
+                                init.systemInfo.analysisRelativePeriod = systemSettings.keyAnalysisRelativePeriod || 'LAST_12_MONTHS';
 
                                 // user-account
                                 Ext.Ajax.request({
@@ -6177,45 +6400,42 @@ Ext.onReady( function() {
 
                                         // i18n
                                         requests.push({
-                                            url: 'i18n/' + keyUiLocale + '.properties',
+                                            url: 'i18n/i18n_app.properties',
                                             success: function(r) {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                        success: function(r) {
-                                                            Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
-                                                        },
-                                                        callback: fn
-                                                    })
+                                                if (keyUiLocale === defaultKeyUiLocale) {
+                                                    Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    fn();
                                                 }
                                                 else {
-                                                    fn();
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.apply(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                        },
+                                                        failure: function() {
+                                                            console.log('No translations found for system locale (' + keyUiLocale + ')');
+                                                        },
+                                                        callback: function() {
+                                                            Ext.get('init').update(NS.i18n.initializing + '..');
+                                                            fn();
+                                                        }
+                                                    });
                                                 }
                                             },
                                             failure: function() {
-                                                var onFailure = function() {
-                                                    alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                                };
-
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                        success: function(r) {
-                                                            console.log('No translations found for system locale (' + keyUiLocale + ').');
-                                                            NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        },
-                                                        failure: function() {
-                                                            onFailure();
-                                                        },
-                                                        callback: fn
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                    onFailure();
-                                                }
+                                                Ext.Ajax.request({
+                                                    url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                    success: function(r) {
+                                                        NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                        Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    },
+                                                    failure: function() {
+                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                    },
+                                                    callback: fn
+                                                });
                                             }
                                         });
 

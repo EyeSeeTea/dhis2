@@ -5,10 +5,9 @@ trackerCapture.controller('NotesController',
                 orderByFilter,
                 CurrentSelection,
                 EnrollmentService,
-                NotesDialogService,
-                TranslationService) {
+                NotesDialogService) {
 
-    TranslationService.translate();
+
     
     var loginDetails = storage.get('LOGIN_DETAILS');
     var storedBy = '';

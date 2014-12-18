@@ -90,7 +90,7 @@ public class Property implements Ordered
     /**
      * If this Property is a collection, should it be wrapped with collectionName?
      */
-    private boolean collectionWrapping;
+    private Boolean collectionWrapping;
 
     /**
      * Description if provided, will be fetched from @Description annotation.
@@ -153,6 +153,31 @@ public class Property implements Ordered
      * Can this property be written to.
      */
     private boolean writable;
+
+    /**
+     * Are the values for this property required to be unique?
+     */
+    private boolean unique;
+
+    /**
+     * Nullability of this property.
+     */
+    private boolean nullable;
+
+    /**
+     * Maximum length of this property.
+     */
+    private Integer maxLength;
+
+    /**
+     * Minimum length of this property.
+     */
+    private Integer minLength;
+
+    /**
+     * Cascading used when doing CRUD operations.
+     */
+    private String cascade;
 
     public Property()
     {
@@ -256,7 +281,7 @@ public class Property implements Ordered
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getCollectionName()
     {
-        return collectionName == null ? name : collectionName;
+        return collectionName != null ? collectionName : (isCollection() ? name : null);
     }
 
     public void setCollectionName( String collectionName )
@@ -266,12 +291,12 @@ public class Property implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isCollectionWrapping()
+    public Boolean isCollectionWrapping()
     {
         return collectionWrapping;
     }
 
-    public void setCollectionWrapping( boolean collectionWrapping )
+    public void setCollectionWrapping( Boolean collectionWrapping )
     {
         this.collectionWrapping = collectionWrapping;
     }
@@ -394,6 +419,66 @@ public class Property implements Ordered
     public void setWritable( boolean writable )
     {
         this.writable = writable;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isUnique()
+    {
+        return unique;
+    }
+
+    public void setUnique( boolean unique )
+    {
+        this.unique = unique;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isNullable()
+    {
+        return nullable;
+    }
+
+    public void setNullable( boolean nullable )
+    {
+        this.nullable = nullable;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getMaxLength()
+    {
+        return maxLength;
+    }
+
+    public void setMaxLength( Integer maxLength )
+    {
+        this.maxLength = maxLength;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public Integer getMinLength()
+    {
+        return minLength;
+    }
+
+    public void setMinLength( Integer minLength )
+    {
+        this.minLength = minLength;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getCascade()
+    {
+        return cascade;
+    }
+
+    public void setCascade( String cascade )
+    {
+        this.cascade = cascade;
     }
 
     public String key()

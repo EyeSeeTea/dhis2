@@ -53,6 +53,7 @@ import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -350,7 +351,29 @@ public class OrganisationUnit
         return false;
     }
 
-    public boolean isEqualOrChildOf( Set<OrganisationUnit> ancestors )
+    public boolean isDescendant( OrganisationUnit ancestor )
+    {
+        if ( ancestor == null )
+        {
+            return false;
+        }
+
+        OrganisationUnit unit = this;
+
+        while ( unit != null )
+        {
+            if ( ancestor.equals( unit ) )
+            {
+                return true;
+            }
+            
+            unit = unit.getParent();
+        }
+        
+        return false;
+    }
+    
+    public boolean isDescendant( Set<OrganisationUnit> ancestors )
     {
         if ( ancestors == null || ancestors.isEmpty() )
         {
@@ -534,6 +557,10 @@ public class OrganisationUnit
         return builder.toString();
     }
 
+    /**
+     * Returns the list of ancestor organisation units for this organisation unit.
+     * Does not include itself. The list is ordered by root first.
+     */
     public List<OrganisationUnit> getAncestors()
     {
         List<OrganisationUnit> units = new ArrayList<>();
@@ -543,6 +570,35 @@ public class OrganisationUnit
         while ( unit != null )
         {
             units.add( unit );
+            unit = unit.getParent();
+        }
+
+        Collections.reverse( units );
+        return units;
+    }
+
+    /**
+     * Returns the list of ancestor organisation units up the any of the given roots
+     * for this organisation unit. Does not include itself. The list is ordered 
+     * by root first. 
+     * 
+     * @param roots the root organisation units, if null using real roots.
+     */
+    public List<OrganisationUnit> getAncestors( Collection<OrganisationUnit> roots )
+    {
+        List<OrganisationUnit> units = new ArrayList<>();
+
+        OrganisationUnit unit = parent;
+
+        while ( unit != null )
+        {
+            units.add( unit );
+            
+            if ( roots != null && roots.contains( unit ) )
+            {
+                break;
+            }
+            
             unit = unit.getParent();
         }
 
@@ -640,11 +696,17 @@ public class OrganisationUnit
         return featureType.equals( FEATURETYPE_POINT );
     }
 
-    public String getParentGraph()
+    /**
+     * Returns a string representing the graph of ancestors. The string is delimited
+     * by "/". The ancestors are ordered by root first and represented by UIDs.
+     * 
+     * @param roots the root organisation units, if null using real roots.
+     */
+    public String getParentGraph( Collection<OrganisationUnit> roots )
     {
         StringBuilder builder = new StringBuilder();
 
-        List<OrganisationUnit> ancestors = getAncestors();
+        List<OrganisationUnit> ancestors = getAncestors( roots );
 
         for ( OrganisationUnit unit : ancestors )
         {
@@ -654,11 +716,11 @@ public class OrganisationUnit
         return builder.toString();
     }
 
-    public String getParentNameGraph( boolean includeThis )
+    public String getParentNameGraph( Collection<OrganisationUnit> roots, boolean includeThis )
     {
         StringBuilder builder = new StringBuilder();
 
-        List<OrganisationUnit> ancestors = getAncestors();
+        List<OrganisationUnit> ancestors = getAncestors( roots );
 
         for ( OrganisationUnit unit : ancestors )
         {
@@ -677,7 +739,7 @@ public class OrganisationUnit
      * Returns a mapping between the uid and the uid parent graph of the given
      * organisation units.
      */
-    public static Map<String, String> getParentGraphMap( List<OrganisationUnit> organisationUnits )
+    public static Map<String, String> getParentGraphMap( List<OrganisationUnit> organisationUnits, Collection<OrganisationUnit> roots )
     {
         Map<String, String> map = new HashMap<>();
         
@@ -685,7 +747,7 @@ public class OrganisationUnit
         {
             for ( OrganisationUnit unit : organisationUnits )
             {
-                map.put( unit.getUid(), unit.getParentGraph() );
+                map.put( unit.getUid(), unit.getParentGraph( roots ) );
             }
         }
         
@@ -696,7 +758,7 @@ public class OrganisationUnit
      * Returns a mapping between the uid and the uid parent graph of the given
      * organisation units.
      */
-    public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits, boolean includeThis )
+    public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits, Collection<OrganisationUnit> roots, boolean includeThis )
     {
         Map<String, String> map = new HashMap<>();
         
@@ -704,7 +766,7 @@ public class OrganisationUnit
         {
             for ( OrganisationUnit unit : organisationUnits )
             {
-                map.put( unit.getName(), unit.getParentNameGraph( includeThis ) );
+                map.put( unit.getName(), unit.getParentNameGraph( roots, includeThis ) );
             }
         }
         
@@ -722,6 +784,11 @@ public class OrganisationUnit
         return false;
     }
 
+    public boolean isRoot()
+    {
+        return parent == null;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------

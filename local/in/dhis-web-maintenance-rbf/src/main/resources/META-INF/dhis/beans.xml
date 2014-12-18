@@ -105,15 +105,18 @@
     </bean>    
     
     
+    <!--  PartnerStore -->
+    <bean id="org.hisp.dhis.rbf.api.PartnerStore" class="org.hisp.dhis.rbf.impl.HibernatePartnerStore">
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="jdbcTemplate" ref="jdbcTemplate" />
+    </bean>    
     
+	<!--  PartnerService -->
+    <bean id="org.hisp.dhis.rbf.api.PartnerService" class="org.hisp.dhis.rbf.impl.DefaultPartnerService">
+        <property name="partnerStore" ref="org.hisp.dhis.rbf.api.PartnerStore" />
+    </bean>     
     
-    
-    
-    
-    
-    
-    
-    
+   
 	<!-- Home page -->
 	<bean id="org.hisp.dhis.rbf.action.NoAction" class="org.hisp.dhis.rbf.action.NoAction" scope="prototype">
     </bean>
@@ -797,27 +800,76 @@
 -->	
 	
 	
-    <!-- Partner Form -->
+    <!-- PBF Partner Fund Management -->
+
+    <bean id="org.hisp.dhis.rbf.partner.action.PartnerFundManagement"
+          class="org.hisp.dhis.rbf.partner.action.PartnerFundManagement"
+          scope="prototype">
+    </bean>
+	
+	<!--  Load Partner List -->
+	
+    <bean id="org.hisp.dhis.rbf.partner.action.GetPartnerDateListAction"
+          class="org.hisp.dhis.rbf.partner.action.GetPartnerDateListAction"
+          scope="prototype">
+    </bean>	
+
+	<!--  Show Add Partner form -->	
     <bean id="org.hisp.dhis.rbf.partner.action.PartnerFormAction"
         class="org.hisp.dhis.rbf.partner.action.PartnerFormAction"
         scope="prototype">
     </bean>	
+	
+    <!-- Add/ Update Partner -->
+    <bean id="org.hisp.dhis.rbf.partner.action.SavePartnerDetailsResultAction"
+        class="org.hisp.dhis.rbf.partner.action.SavePartnerDetailsResultAction"
+        scope="prototype">
+        <property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
+        <!--<property name="pbfDataValueService" ref="org.hisp.dhis.rbf.api.PBFDataValueService" />-->
+    </bean>		
+	
+
+	<!--  Show Update Partner form -->
+    <bean id="org.hisp.dhis.rbf.partner.action.UpdatePartnerFormAction"
+        class="org.hisp.dhis.rbf.partner.action.UpdatePartnerFormAction"
+        scope="prototype">
+        <property name="selectionTreeManager"
+            ref="org.hisp.dhis.oust.manager.SelectionTreeManager">
+        </property>        
+    </bean>	
+
+	<!--  Remove Partner -->
+    <bean id="org.hisp.dhis.rbf.partner.action.RemovePartnerAction"
+          class="org.hisp.dhis.rbf.partner.action.RemovePartnerAction"
+          scope="prototype">
+    </bean>		
+
+	<!--  Validate Partner -->
+    <bean id="org.hisp.dhis.rbf.partner.action.ValidatePartnerAction"
+          class="org.hisp.dhis.rbf.partner.action.ValidatePartnerAction"
+          scope="prototype">
+          <property name="selectionTreeManager" 
+          	ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
+    </bean>	
+
 
     <!-- Get DataElements and Periods List-->
     <bean id="org.hisp.dhis.rbf.partner.action.GetDataElementAndPeriodListAction"
         class="org.hisp.dhis.rbf.partner.action.GetDataElementAndPeriodListAction"
         scope="prototype">
+    </bean>	
+	
+	
+	<!-- 
+    <bean id="org.hisp.dhis.rbf.partner.action.PartnerDataListAction"
+          class="org.hisp.dhis.rbf.partner.action.PartnerDataListAction"
+          scope="prototype">
     </bean>
+	-->
 
-	
-    <!-- Partner Form Save -->
-    <bean id="org.hisp.dhis.rbf.partner.action.SavePartnerDetailsResultAction"
-        class="org.hisp.dhis.rbf.partner.action.SavePartnerDetailsResultAction"
-        scope="prototype">
-        <property name="selectionTreeManager" ref="org.hisp.dhis.oust.manager.SelectionTreeManager" />
-        <property name="pbfDataValueService" ref="org.hisp.dhis.rbf.api.PBFDataValueService" />
-    </bean>		
-	
+
+
+
 	
 	
 	

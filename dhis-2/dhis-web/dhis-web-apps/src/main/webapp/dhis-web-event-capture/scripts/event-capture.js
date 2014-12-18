@@ -4,10 +4,6 @@ dhis2.util.namespace('dhis2.ec');
 // whether current user has any organisation units
 dhis2.ec.emptyOrganisationUnits = false;
 
-// Instance of the StorageManager
-dhis2.ec.storageManager = new StorageManager();
-
-var EC_STORE_NAME = "dhis2ec";
 var i18n_no_orgunits = 'No organisation unit attached to current user, no data entry possible';
 var i18n_offline_notification = 'You are offline, data will be stored locally';
 var i18n_online_notification = 'You are online';
@@ -21,10 +17,20 @@ var PROGRAMS_METADATA = 'EVENT_PROGRAMS';
 
 var EVENT_VALUES = 'EVENT_VALUES';
 
-//var ecDAO = {};
-
 dhis2.ec.store = null;
 dhis2.ec.memoryOnly = $('html').hasClass('ie7') || $('html').hasClass('ie8');
+var adapters = [];    
+if( dhis2.ec.memoryOnly ) {
+    adapters = [ dhis2.storage.InMemoryAdapter ];
+} else {
+    adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomLocalStorageAdapter, dhis2.storage.InMemoryAdapter ];
+}
+
+dhis2.ec.store = new dhis2.storage.Store({
+    name: 'dhis2ec',
+    adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+    objectStores: ['programs', 'programStages', 'geoJsons', 'optionSets', 'events']       
+});
 
 (function($) {
     $.safeEach = function(arr, fn)
@@ -51,28 +57,26 @@ $(document).ready(function()
     });
 
     $('#loaderSpan').show();
-
-    $('#orgUnitTree').one('ouwtLoaded', function()
-    { 
-        downloadMetaData();
-        
-    });
     
-    $(document).bind('dhis2.online', function(event, loggedIn)
-    {        
-        if (loggedIn)
-        {
-            if (dhis2.ec.storageManager.hasLocalData())
-            {
+});
+
+
+$(document).bind('dhis2.online', function(event, loggedIn)
+{
+    if (loggedIn)
+    {   
+        var OfflineECStorageService = angular.element('body').injector().get('OfflineECStorageService');
+
+        OfflineECStorageService.hasLocalData().then(function(localData){
+            if(localData){
                 var message = i18n_need_to_sync_notification
-                        + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
+                    + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
 
                 setHeaderMessage(message);
 
                 $('#sync_button').bind('click', uploadLocalData);
             }
-            else
-            {
+            else{
                 if (dhis2.ec.emptyOrganisationUnits) {
                     setHeaderMessage(i18n_no_orgunits);
                 }
@@ -80,39 +84,35 @@ $(document).ready(function()
                     setHeaderDelayMessage(i18n_online_notification);
                 }
             }
-        }
-        else
-        {
-            var form = [
-                '<form style="display:inline;">',
-                '<label for="username">Username</label>',
-                '<input name="username" id="username" type="text" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
-                '<label for="password">Password</label>',
-                '<input name="password" id="password" type="password" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
-                '<button id="login_button" type="button">Login</button>',
-                '</form>'
-            ].join('');
-
-            setHeaderMessage(form);
-            ajax_login();
-        }
-    });
-
-    $(document).bind('dhis2.offline', function()
+        });
+    }
+    else
     {
-        if (dhis2.ec.emptyOrganisationUnits) {
-            setHeaderMessage(i18n_no_orgunits);
-        }
-        else {
-            setHeaderMessage(i18n_offline_notification);
-            selection.responseReceived(); //notify angular 
-        }
-    });
-   
-    dhis2.availability.startAvailabilityCheck();
-    
+        var form = [
+            '<form style="display:inline;">',
+            '<label for="username">Username</label>',
+            '<input name="username" id="username" type="text" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+            '<label for="password">Password</label>',
+            '<input name="password" id="password" type="password" style="width: 70px; margin-left: 10px; margin-right: 10px" size="10"/>',
+            '<button id="login_button" type="button">Login</button>',
+            '</form>'
+        ].join('');
+
+        setHeaderMessage(form);
+        ajax_login();
+    }
 });
 
+$(document).bind('dhis2.offline', function()
+{
+    if (dhis2.ec.emptyOrganisationUnits) {
+        setHeaderMessage(i18n_no_orgunits);
+    }
+    else {
+        setHeaderMessage(i18n_offline_notification);
+    }
+});
+    
 function ajax_login()
 {
     $('#login_button').bind('click', function()
@@ -135,70 +135,31 @@ function ajax_login()
     });
 }
 
-function downloadMetaData(){
-    var adapters = [];    
-    if( dhis2.ec.memoryOnly ) {
-        adapters = [ dhis2.storage.InMemoryAdapter ];
-    } else {
-        adapters = [ dhis2.storage.IndexedDBAdapter, dhis2.storage.DomLocalStorageAdapter, dhis2.storage.InMemoryAdapter ];
-    }
+function downloadMetaData(){    
     
-    
-    dhis2.ec.store = new dhis2.storage.Store({
-        name: EC_STORE_NAME,
-        objectStores: [
-            {
-                name: 'ecPrograms',
-                adapters: adapters
-            },
-            {
-                name: 'programStages',
-                adapters: adapters
-            },
-            {
-                name: 'geoJsons',
-                adapters: adapters
-            },
-            {
-                name: 'optionSets',
-                adapters: adapters
-            }            
-        ]        
-    });
-    
+    console.log('Loading required meta-data');
     var def = $.Deferred();
     var promise = def.promise();
     
     promise = promise.then( dhis2.ec.store.open );
-    promise = promise.then( getUserProfile );
     promise = promise.then( getCalendarSetting );
-    promise = promise.then( getLoginDetails );
     promise = promise.then( getOrgUnitLevels );
-    promise = promise.then( getGeoJsonsByLevel );
+    //promise = promise.then( getGeoJsonsByLevel );
     promise = promise.then( getMetaPrograms );     
     promise = promise.then( getPrograms );     
     promise = promise.then( getProgramStages );
     promise = promise.then( getOptionSets );
-    promise.done( function() {           
-        selection.responseReceived();            
-    });           
+    promise.done( function() {    
+        //Enable ou selection after meta-data has downloaded
+        $( "#orgUnitTree" ).removeClass( "disable-clicks" );
+        
+        console.log( 'Finished loading meta-data' ); 
+        dhis2.availability.startAvailabilityCheck();
+        console.log( 'Started availability check' );
+        selection.responseReceived();
+    });         
 
     def.resolve();
-}
-
-function getUserProfile()
-{
-    var def = $.Deferred();
-
-    $.ajax({
-        url: '../api/me/profile',
-        type: 'GET'
-    }).done( function(response) {            
-        localStorage['USER_PROFILE'] = JSON.stringify(response);           
-        def.resolve();
-    });
-    
-    return def.promise(); 
 }
 
 function getCalendarSetting()
@@ -211,24 +172,11 @@ function getCalendarSetting()
     }).done(function(response) {
         localStorage['CALENDAR_SETTING'] = JSON.stringify(response);
         def.resolve();
+    }).fail(function(){
+        def.resolve();
     });
 
     return def.promise();
-}
-
-function getLoginDetails()
-{
-    var def = $.Deferred();
-
-    $.ajax({
-        url: '../api/me',
-        type: 'GET'
-    }).done( function(response) {            
-        localStorage['LOGIN_DETAILS'] = JSON.stringify(response);           
-        def.resolve();
-    });
-    
-    return def.promise(); 
 }
 
 function getOrgUnitLevels()
@@ -247,6 +195,8 @@ function getOrgUnitLevels()
             });
         }
         def.resolve( ouLevels );
+    }).fail(function(){
+        def.resolve(null);
     });
     
     return def.promise();    
@@ -257,7 +207,7 @@ function getGeoJsonsByLevel( ouLevels )
     if( !ouLevels ){
         return;
     }
-    
+
     var mainDef = $.Deferred();
     var mainPromise = mainDef.promise();
 
@@ -286,10 +236,11 @@ function getGeoJsonsByLevel( ouLevels )
 
     build.done(function() {
         def.resolve();
-
         promise = promise.done( function () {
             mainDef.resolve();
-        } );
+        });
+    }).fail(function(){
+        mainDef.resolve();
     });
 
     builder.resolve();
@@ -329,6 +280,8 @@ function getMetaPrograms()
         });
         
         def.resolve( programs );
+    }).fail(function(){
+        def.resolve( null );
     });
     
     return def.promise(); 
@@ -353,7 +306,7 @@ function getPrograms( programs )
         build = build.then(function() {
             var d = $.Deferred();
             var p = d.promise();
-            dhis2.ec.store.get('ecPrograms', program.id).done(function(obj) {
+            dhis2.ec.store.get('programs', program.id).done(function(obj) {
                 if(!obj || obj.version !== program.version) {
                     promise = promise.then( getProgram( program.id ) );
                 }
@@ -371,6 +324,8 @@ function getPrograms( programs )
         promise = promise.done( function () {
             mainDef.resolve( programs );
         } );
+    }).fail(function(){
+        mainDef.resolve( null );
     });
 
     builder.resolve();
@@ -382,7 +337,7 @@ function getProgram( id )
 {
     return function() {
         return $.ajax( {
-            url: '../api/programs.json?filter=id:eq:' + id +'&fields=id,name,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,organisationUnits[id,name],programStages[id,name,version]',
+            url: '../api/programs.json?filter=id:eq:' + id +'&fields=id,name,type,version,dataEntryMethod,dateOfEnrollmentDescription,dateOfIncidentDescription,displayIncidentDate,ignoreOverdueEvents,organisationUnits[id,name],programStages[id,name,version]',
             type: 'GET'
         }).done( function( response ){
             
@@ -402,7 +357,7 @@ function getProgram( id )
 
                 program.userRoles = ur;
 
-                dhis2.ec.store.set( 'ecPrograms', program );
+                dhis2.ec.store.set( 'programs', program );
 
             });         
         });
@@ -448,6 +403,8 @@ function getProgramStages( programs )
         promise = promise.done( function () {
             mainDef.resolve( programs );
         } );
+    }).fail(function(){
+        mainDef.resolve( null );
     });
 
     builder.resolve();
@@ -459,7 +416,7 @@ function getProgramStage( id )
 {
     return function() {
         return $.ajax( {
-            url: '../api/programStages.json?filter=id:eq:' + id +'&fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,sortOrder,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,name,type,formName,optionSet[id]]]',
+            url: '../api/programStages.json?filter=id:eq:' + id +'&fields=id,name,version,description,reportDateDescription,captureCoordinates,dataEntryForm,minDaysFromStart,repeatable,preGenerateUID,programStageSections[id,name,programStageDataElements[dataElement[id]]],programStageDataElements[displayInReports,sortOrder,allowProvidedElsewhere,allowFutureDate,compulsory,dataElement[id,name,type,numberType,formName,optionSet[id]]]',
             type: 'GET'
         }).done( function( response ){            
             _.each( _.values( response.programStages ), function( programStage ) {                
@@ -509,6 +466,8 @@ function getOptionSets( programs )
         promise = promise.done( function () {
             mainDef.resolve( programs );
         } );
+    }).fail(function(){
+        mainDef.resolve( null );
     });
 
     builder.resolve();
@@ -532,264 +491,13 @@ function getOptionSet( id )
 
 function uploadLocalData()
 {
-    if ( !dhis2.ec.storageManager.hasLocalData() )
-    {
-        return;
-    }
-
-    setHeaderWaitMessage( i18n_uploading_data_notification );
-    
-    var events = dhis2.ec.storageManager.getEventsAsArray();   
-    
-    _.each( _.values( events ), function( event ) {
-        
-        if( event.hasOwnProperty('src')){ 
-            delete event.src;            
-        }       
-        delete event.event;
-    });    
-    
-    events = {events: events};
-    
-    //jackson insists for valid json, where properties are bounded with ""    
-    events = JSON.stringify(events);  
-    
-    $.ajax( {
-        url: '../api/events',
-        type: 'POST',
-        data: events,
-        contentType: 'application/json',              
-        success: function()
-        {
-            dhis2.ec.storageManager.clear();
-            log( 'Successfully uploaded local events' );      
-            setHeaderDelayMessage( i18n_sync_success );
-            selection.responseReceived(); //notify angular 
-        },
-        error: function( xhr )
-        {
-            if ( 409 == xhr.status ) // Invalid event
-            {
-                // there is something wrong with the data - ignore for now.
-
-                dhis2.ec.storageManager.clear();
-            }
-            else // Connection lost during upload
-            {
-                var message = i18n_sync_failed
-                    + ' <button id="sync_button" type="button">' + i18n_sync_now + '</button>';
-
-                setHeaderMessage( message );
-                $( '#sync_button' ).bind( 'click', uploadLocalData );
-            }
-        }
-    } );
-}
-
-// -----------------------------------------------------------------------------
-// StorageManager
-// -----------------------------------------------------------------------------
-
-/**
- * This object provides utility methods for localStorage and manages data entry
- * forms and data values.
- */
-function StorageManager()
-{
-    var MAX_SIZE = new Number(2600000);
-
-    /**
-     * Returns the total number of characters currently in the local storage.
-     *
-     * @return number of characters.
-     */
-    this.totalSize = function()
-    {
-        var totalSize = new Number();
-
-        for (var i = 0; i < localStorage.length; i++)
-        {
-            var value = localStorage.key(i);
-
-            if (value)
-            {
-                totalSize += value.length;
-            }
-        }
-
-        return totalSize;
-    };
-
-    /**
-     * Return the remaining capacity of the local storage in characters, ie. the
-     * maximum size minus the current size.
-     */
-    this.remainingStorage = function()
-    {
-        return MAX_SIZE - this.totalSize();
-    };
-    
-    /**
-     * Clears stored events. 
-     */
-    this.clear = function ()
-    {
-        localStorage.removeItem(EVENT_VALUES);        
-    };    
-    
-    /**
-     * Saves an event
-     *
-     * @param event The event in json format.
-     */
-    this.saveEvent = function(event)
-    {
-        //var newEvent = event;
-        
-        if( !event.hasOwnProperty('src') )
-        {
-            if( !event.event){
-                event.event = this.generatePseudoUid();
-                event.src = 'local';
-            }            
-        }        
-
-        var events = {};
-
-        if (localStorage[EVENT_VALUES] != null)
-        {
-            events = JSON.parse(localStorage[EVENT_VALUES]);
-        }
-
-        events[event.event] = event;
-
-        try
-        {
-            localStorage[EVENT_VALUES] = JSON.stringify(events);
-
-            log('Successfully stored event - locally');
-        }
-        catch (e)
-        {
-            log('Max local storage quota reached, not storing data value locally');
-        }
-    };
-    
-    /**
-     * Gets the value for the event with the given arguments, or null if it
-     * does not exist.
-     *
-     * @param id the event identifier.
-     *
-     */
-    this.getEvent = function(id)
-    {
-        if (localStorage[EVENT_VALUES] != null)
-        {
-            var events = JSON.parse(localStorage[EVENT_VALUES]);
-
-            return events[id];
-        }
-
-        return null;
-    };
-
-    /**
-     * Removes the given event from localStorage.
-     *
-     * @param event and identifiers in json format.
-     */
-    this.clearEvent = function(event)
-    {
-        var events = this.getAllEvents();
-
-        if (events != null && events[event.event] != null)
-        {
-            delete events[event.event];
-            localStorage[EVENT_VALUES] = JSON.stringify(events);
-        }
-    };
-    
-    /**
-     * Returns events matching the arguments provided
-     * 
-     * @param orgUnit 
-     * @param programStage
-     * 
-     * @return a JSON associative array.
-     */
-    this.getEvents = function(orgUnit, programStage)
-    {
-        var events = this.getEventsAsArray();
-        var match = [];
-        for( var i=0; i<events.length; i++){
-            if(events[i].orgUnit == orgUnit && events[i].programStage == programStage ){
-                match.push(events[i]);
-            }
-        }
-        
-        var pager = {pageSize: 50, page: 1, toolBarDisplay: 5, pageCount: 1};  
-        return {events: match, pager: pager};
-    };
-    
-    /**
-     *
-     * @return a JSON associative array.
-     */
-    this.getAllEvents = function()
-    {
-        return localStorage[EVENT_VALUES] != null ? JSON.parse( localStorage[EVENT_VALUES] ) : null;
-    };    
-
-    /**
-     * Returns all event objects in an array. Returns an empty array if no
-     * event exist. Items in array are guaranteed not to be undefined.
-     */
-    this.getEventsAsArray = function()
-    {
-        var values = new Array();
-        var events = this.getAllEvents();
-
-        if (undefined == events)
-        {
-            return values;
-        }
-
-        for (i in events)
-        {
-            if (events.hasOwnProperty(i) && undefined !== events[i])
-            {
-                values.push(events[i]);
-            }
-        }
-
-        return values;
-    };
-    
-    /**
-     * Indicates whether there exists data values or complete data set
-     * registrations in the local storage.
-     *
-     * @return true if local data exists, false otherwise.
-     */
-    this.hasLocalData = function()
-    {
-        var events = this.getAllEvents();        
-
-        if (events == null)
-        {
-            return false;
-        }
-        if (Object.keys(events).length < 1)
-        {
-            return false;
-        }    
-
-        return true;
-    };
-    
-    this.generatePseudoUid = function () 
-    {
-        return Math.random().toString(36).substr(2, 11);
-    };
+    var OfflineECStorageService = angular.element('body').injector().get('OfflineECStorageService');
+    setHeaderWaitMessage(i18n_uploading_data_notification);
+     
+    OfflineECStorageService.uploadLocalData().then(function(){
+        dhis2.ec.store.removeAll( 'events' );
+        log( 'Successfully uploaded local events' );      
+        setHeaderDelayMessage( i18n_sync_success );
+        selection.responseReceived(); //notify angular
+    });
 }

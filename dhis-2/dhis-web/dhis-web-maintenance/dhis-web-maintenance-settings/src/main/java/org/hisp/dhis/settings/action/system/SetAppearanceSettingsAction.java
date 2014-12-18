@@ -28,11 +28,6 @@ package org.hisp.dhis.settings.action.system;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_TITLE;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_INTRO;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_NOTIFICATION;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_APPLICATION_FOOTER;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_FLAG;
 import static org.hisp.dhis.setting.SystemSettingManager.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -166,6 +161,8 @@ public class SetAppearanceSettingsAction
         applicationTitle = StringUtils.trimToNull( applicationTitle );
         applicationNotification = StringUtils.trimToNull( applicationNotification );
         applicationFooter = StringUtils.trimToNull( applicationFooter );
+        flag = StringUtils.trimToNull( flag );
+        startModule = StringUtils.trimToNull( startModule );
 
         if ( flag != null && flag.equals( "NO_FLAG" ) )
         {

@@ -2,16 +2,13 @@
 trackerCapture.controller('InterventionsController',
         function($scope,
                 CurrentSelection,
-                TranslationService,
                 DHIS2EventFactory,
                 storage,
                 TransferHandler,
                 ExpressionService,
                 DialogService,
                 orderByFilter) {
-
-    //do translation of the registration page
-    TranslationService.translate();      
+    
    
     $scope.$on('sharedData', function(event, args) {
        

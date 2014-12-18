@@ -28,16 +28,21 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.organisationunit.OrganisationUnit;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
+import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DATA_IN_ANALYTICS;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This package private class holds the context for deciding on data approval permissions.
@@ -51,9 +56,11 @@ import static org.hisp.dhis.setting.SystemSettingManager.KEY_HIDE_UNAPPROVED_DAT
  */
 class DataApprovalPermissionsEvaluator
 {
-    DataApprovalLevelService dataApprovalLevelService;
+    private final static Log log = LogFactory.getLog( DataApprovalPermissionsEvaluator.class );
 
-    User user;
+    private DataApprovalLevelService dataApprovalLevelService;
+
+    private User user;
 
     private boolean acceptanceRequiredForApproval;
     private boolean hideUnapprovedData;
@@ -63,13 +70,15 @@ class DataApprovalPermissionsEvaluator
     private boolean authorizedToAcceptAtLowerLevels;
     private boolean authorizedToViewUnapprovedData;
 
-    private Map<OrganisationUnit, DataApprovalLevel> userOrgUnitApprovalLevelsCache = new HashMap<>();
-
-    int maxApprovalLevel;
+    private int maxApprovalLevel;
 
     private DataApprovalPermissionsEvaluator()
     {
     }
+
+    private static Cache<String, DataApprovalLevel> USER_APPROVAL_LEVEL_CACHE = CacheBuilder.newBuilder()
+            .expireAfterAccess( 10, TimeUnit.MINUTES ).initialCapacity( 10000 )
+            .maximumSize( 50000 ).build();
 
     /**
      * Allocates and populates the context for determining user permissions
@@ -99,7 +108,7 @@ class DataApprovalPermissionsEvaluator
 
         ev.maxApprovalLevel = dataApprovalLevelService.getAllDataApprovalLevels().size();
 
-        tracePrint( "makePermissionsEvaluator acceptanceRequiredForApproval " + ev.acceptanceRequiredForApproval
+        log.debug( "makePermissionsEvaluator acceptanceRequiredForApproval " + ev.acceptanceRequiredForApproval
                 + " hideUnapprovedData " + ev.hideUnapprovedData + " authorizedToApprove " + ev.authorizedToApprove
                 + " authorizedToAcceptAtLowerLevels " + ev.authorizedToAcceptAtLowerLevels
                 + " authorizedToViewUnapprovedData " + ev.authorizedToViewUnapprovedData + " maxApprovalLevel " + ev.maxApprovalLevel );
@@ -118,7 +127,7 @@ class DataApprovalPermissionsEvaluator
      */
     DataApprovalPermissions getPermissions( DataApprovalStatus status )
     {
-        DataApproval da = status.getDataApproval();
+        final DataApproval da = status.getDataApproval();
 
         DataApprovalState s = status.getState();
 
@@ -126,16 +135,35 @@ class DataApprovalPermissionsEvaluator
 
         if ( da == null || da.getOrganisationUnit() == null )
         {
-            tracePrint( "getPermissions da " + da + ( da != null ? ( " " + da.getOrganisationUnit() ) : "" ) );
+            log.debug( "getPermissions da " + da + ( da != null ? ( " " + da.getOrganisationUnit() ) : "" ) );
 
             return permissions; // No permissions are set.
         }
 
-        DataApprovalLevel userApprovalLevel = getUserOrgUnitApprovalLevel( da.getOrganisationUnit() );
+        DataApprovalLevel userApprovalLevel;
+
+        try
+        {
+            userApprovalLevel = ( USER_APPROVAL_LEVEL_CACHE.get( user.getId() + "-" + da.getOrganisationUnit().getId(), new Callable<DataApprovalLevel>()
+            {
+                public DataApprovalLevel call() throws ExecutionException
+                {
+                    return dataApprovalLevelService.getUserApprovalLevel( user, da.getOrganisationUnit() );
+                }
+            } ) );
+        }
+        catch ( CacheLoader.InvalidCacheLoadException ex )
+        {
+            userApprovalLevel = null; // Google cache doesn't like to cache a null value.
+        }
+        catch ( ExecutionException ex )
+        {
+            throw new RuntimeException( ex );
+        }
 
         if ( userApprovalLevel == null )
         {
-            tracePrint( "getPermissions userApprovalLevel is null" );
+            log.debug( "getPermissions userApprovalLevel null for user " + ( user == null ? "(null)" : user.getUsername() ) + " orgUnit " +  da.getOrganisationUnit().getName() );
 
             return permissions; // Can't find user approval level, so no permissions are set.
         }
@@ -144,13 +172,18 @@ class DataApprovalPermissionsEvaluator
 
         int dataLevel = ( da.getDataApprovalLevel() != null ? da.getDataApprovalLevel().getLevel() : maxApprovalLevel );
 
+        int nextApproveDataLevel = s.isApproved() ? dataLevel - 1 : dataLevel;
+
         boolean mayApproveOrUnapproveAtLevel = ( authorizedToApprove && userLevel == dataLevel && !da.isAccepted() ) ||
                         ( authorizedToApproveAtLowerLevels && userLevel < dataLevel );
+
+        boolean mayApproveAtNextLevel = ( s == DataApprovalState.ACCEPTED_HERE || ( s == DataApprovalState.APPROVED_HERE && ! acceptanceRequiredForApproval ) )
+                && ( ( authorizedToApprove && userLevel == nextApproveDataLevel ) || ( authorizedToApproveAtLowerLevels && userLevel < nextApproveDataLevel ) );
 
         boolean mayAcceptOrUnacceptAtLevel = authorizedToAcceptAtLowerLevels &&
                 ( userLevel == dataLevel - 1 || ( userLevel < dataLevel && authorizedToApproveAtLowerLevels ) );
 
-        boolean mayApprove = s.isApprovable() && mayApproveOrUnapproveAtLevel;
+        boolean mayApprove = ( s.isApprovable() && mayApproveOrUnapproveAtLevel ) || mayApproveAtNextLevel;
 
         boolean mayUnapprove = s.isUnapprovable() && ( ( mayApproveOrUnapproveAtLevel && !da.isAccepted() ) || mayAcceptOrUnacceptAtLevel );
 
@@ -161,9 +194,9 @@ class DataApprovalPermissionsEvaluator
         boolean mayReadData = authorizedToViewUnapprovedData || !hideUnapprovedData || mayApprove
                 || userLevel >= dataLevel;
 
-        tracePrint( "getPermissions orgUnit " + ( da.getOrganisationUnit() == null ? "(null)" : da.getOrganisationUnit().getName() )
+        log.debug( "getPermissions orgUnit " + ( da.getOrganisationUnit() == null ? "(null)" : da.getOrganisationUnit().getName() )
                 + " combo " + da.getAttributeOptionCombo().getName() + " state " + s.name()
-                + " isApproved " + s.isApproved()+ " isApprovable " + s.isApprovable()+ " isUnapprovable " + s.isUnapprovable()
+                + " isApproved " + s.isApproved() + " isApprovable " + s.isApprovable() + " isUnapprovable " + s.isUnapprovable()
                 + " isAccepted " + s.isAccepted() + " isAcceptable " + s.isAcceptable() + " isUnacceptable " + s.isUnacceptable()
                 + " userLevel " + userLevel + " dataLevel " + dataLevel
                 + " mayApproveOrUnapproveAtLevel " + mayApproveOrUnapproveAtLevel + " mayAcceptOrUnacceptAtLevel " + mayAcceptOrUnacceptAtLevel
@@ -178,24 +211,5 @@ class DataApprovalPermissionsEvaluator
         permissions.setMayReadData( mayReadData );
 
         return permissions;
-    }
-
-    private DataApprovalLevel getUserOrgUnitApprovalLevel( OrganisationUnit orgUnit )
-    {
-        DataApprovalLevel level = userOrgUnitApprovalLevelsCache.get( orgUnit );
-
-        if ( level == null )
-        {
-            level = dataApprovalLevelService.getUserApprovalLevel( user, orgUnit, false );
-
-            userOrgUnitApprovalLevelsCache.put( orgUnit, level );
-        }
-
-        return level;
-    }
-
-    private static void tracePrint( String s )
-    {
-//        System.out.println( s );
     }
 }

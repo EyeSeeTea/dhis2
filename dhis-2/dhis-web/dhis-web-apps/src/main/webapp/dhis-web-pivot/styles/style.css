@@ -39,9 +39,12 @@
  *--------------------------------------------------------------------------*/
 
 body {
-	background-color: #e1e1e1;
-	opacity: 0;
-	filter:Alpha(opacity=0)
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 body,
@@ -56,18 +59,10 @@ body,
 	font-family: 'Arial','Sans-serif','Roboto','Helvetica','Consolas';
 }
 
-body {
-    font-size: 10px;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
-
-body.x-windows {
-	-webkit-text-stroke: 0.2px #888;
+#init {
+    display: table;
+    margin: 200px auto;
+    font-size: 15px;
 }
 
 	/* Scrollbar Webkit */
@@ -239,8 +234,8 @@ table.pivot {
 
 .pivot-value {
 	background-color: #fff;
-	white-space: nowrap;
 	text-align: right;
+	max-width: 700px;
 }
 .pivot-value.highlighted {
 	background-color: #f3f3f3;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd">
+  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
 
   <!-- System settings -->
 
@@ -11,6 +11,7 @@
     class="org.hisp.dhis.settings.action.system.GetGeneralSettingsAction"
     scope="prototype">
     <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
+    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
@@ -22,10 +23,16 @@
     scope="prototype">
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
     <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
+    <property name="indicatorService" ref="org.hisp.dhis.indicator.IndicatorService" />
     <property name="dataElementService" ref="org.hisp.dhis.dataelement.DataElementService" />
     <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
     <property name="periodService" ref="org.hisp.dhis.period.PeriodService" />
     <property name="organisationUnitService" ref="org.hisp.dhis.organisationunit.OrganisationUnitService" />
+  </bean>
+
+  <bean id="org.hisp.dhis.settings.action.system.SetCalendarSettingsAction"
+    class="org.hisp.dhis.settings.action.system.SetCalendarSettingsAction"
+    scope="prototype">
   </bean>
 
   <bean id="org.hisp.dhis.settings.action.system.GetAppearanceSettingsAction"

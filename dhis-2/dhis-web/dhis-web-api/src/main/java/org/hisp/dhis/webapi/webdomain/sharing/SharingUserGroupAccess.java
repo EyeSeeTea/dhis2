@@ -29,6 +29,7 @@ package org.hisp.dhis.webapi.webdomain.sharing;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -76,5 +77,11 @@ public class SharingUserGroupAccess
     public void setAccess( String access )
     {
         this.access = access;
+    }
+    
+    public String toString()
+    {
+        return Objects.toStringHelper( this ).
+            add( "id", id ).add( "name", name ).add( "access", access ).toString();
     }
 }

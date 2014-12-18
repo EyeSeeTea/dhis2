@@ -6,11 +6,8 @@ trackerCapture.controller('FundalheightController',
                 storage,
                 TEIService,
                 CurrentSelection,
-                FundalHeight,
-                TranslationService) {
+                FundalHeight) {
     
-    //do page translation
-    TranslationService.translate();  
     
     //selections  
     $scope.selectedEntity = null;

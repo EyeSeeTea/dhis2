@@ -9,14 +9,11 @@ trackerCapture.controller('DashboardController',
                 TEIService,
                 storage,
                 $filter,
-                TranslationService,
                 InterventionService,
                 $location,
                 DialogService,
                 orderByFilter) {
-
-    //do translation of the dashboard page
-    TranslationService.translate();     
+  
     
     $scope.dhis2Events = [];
     $scope.isFirstEvent = false;

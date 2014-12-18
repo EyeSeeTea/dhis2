@@ -243,7 +243,7 @@ public class DataApprovalController
 
         DataApproval dataApproval = status.getDataApproval();
         Date createdDate = dataApproval == null ? null : dataApproval.getCreated();
-        String createdByUsername = dataApproval == null ? null : dataApproval.getCreator().getUsername();
+        String createdByUsername = dataApproval == null || dataApproval.getCreator() == null ? null : dataApproval.getCreator().getUsername();
 
         String state = status.getState().toString();
 
@@ -254,7 +254,8 @@ public class DataApprovalController
     @RequestMapping( value = APPROVALS_PATH + "/categoryOptionCombos", method = RequestMethod.GET, produces = ContextUtils.CONTENT_TYPE_JSON )
     public void getApprovalByCategoryOptionCombos( 
         @RequestParam Set<String> ds, 
-        @RequestParam String pe, 
+        @RequestParam String pe,
+        @RequestParam(required = false) String ou,
         HttpServletResponse response ) throws IOException
     {
         Set<DataSet> dataSets = new HashSet<>( objectManager.getByUid( DataSet.class, ds ) );
@@ -267,7 +268,9 @@ public class DataApprovalController
             return;
         }
         
-        List<DataApprovalStatus> statusList = dataApprovalService.getUserDataApprovalsAndPermissions( dataSets, period, null );
+        OrganisationUnit orgUnit = organisationUnitService.getOrganisationUnit( ou );
+
+        List<DataApprovalStatus> statusList = dataApprovalService.getUserDataApprovalsAndPermissions( dataSets, period, orgUnit );
 
         List<Map<String, Object>> list = new ArrayList<>();
 

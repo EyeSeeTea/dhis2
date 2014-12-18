@@ -1,14 +1,25 @@
 
-<h3>$!i18n.getString( $importFormat ) $i18n.getString( "data_import" )</h3>
+<h3>$i18n.getString( "data_import" )</h3>
 
 <div id="inputCriteria" class="inputCriteria" style="width: 380px">
-<form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importDataValue.action?importFormat=$!{importFormat}">
+<form id="importForm" name="importForm" method="post" enctype="multipart/form-data" action="importDataValue.action">
 <table>
 <col width="140">
 <col>
 <tr>
 	<td>$i18n.getString( "file" )</td>
 	<td><input type="file" id="upload" name="upload" style="margin-left:0px"></td>
+</tr>
+<tr>
+    <td>$i18n.getString( "format" )</td>
+    <td>
+        <select id="importFormat" name="importFormat" style="width: 190px;">
+            <option value="xml">XML</option>
+            <option value="json">JSON</option>
+            <option value="csv">CSV</option>
+            <option value="pdf">PDF</option>
+        </select>
+    </td>
 </tr>
 <tr>
 	<td>$i18n.getString( "dry_run" )</td>
@@ -32,6 +43,7 @@
 <tr class="moreOptions" style="display:none">
 	<td>$i18n.getString( "data_element_id_scheme" )</td>	
 	<td><select id="dataElementIdScheme" name="dataElementIdScheme" style="width:190px">
+		<option>[ $i18n.getString( "select" ) ]</option>
 		<option value="UID">$i18n.getString( "uid" )</option>
 		<option value="CODE">$i18n.getString( "code" )</option>
 		<option value="NAME">$i18n.getString( "name" )</option>
@@ -40,9 +52,18 @@
 <tr class="moreOptions" style="display:none">
 	<td>$i18n.getString( "org_unit_id_scheme" )</td>	
 	<td><select id="orgUnitIdScheme" name="orgUnitIdScheme" style="width:190px">
+		<option>[ $i18n.getString( "select" ) ]</option>
 		<option value="UID">$i18n.getString( "uid" )</option>
 		<option value="CODE">$i18n.getString( "code" )</option>
 		<option value="NAME">$i18n.getString( "name" )</option>
+    </select></td>
+</tr>
+<tr class="moreOptions" style="display:none">
+	<td>$i18n.getString( "id_scheme" ) ($i18n.getString( "all_objects" ))</td>	
+	<td><select id="idScheme" name="idScheme" style="width:190px">
+		<option>[ $i18n.getString( "select" ) ]</option>
+		<option value="UID">$i18n.getString( "uid" )</option>
+		<option value="CODE">$i18n.getString( "code" )</option>
     </select></td>
 </tr>
 <tr class="moreOptions" style="display:none">
@@ -67,4 +88,4 @@
 </table>
 </div>
 
-<div id="importSummaryDiv" class="page formSection" style="display:none; width:400px; padding-bottom:20px;"></div>
+<div id="importSummaryDiv" class="page formSection" style="display:none; width:500px; padding-bottom:20px;"></div>

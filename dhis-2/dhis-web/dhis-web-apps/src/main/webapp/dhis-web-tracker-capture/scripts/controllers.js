@@ -9,7 +9,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 $modal,
                 $location,
                 Paginator,
-                TranslationService, 
                 storage,
                 OptionSetService,
                 OperatorFactory,
@@ -56,9 +55,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             storage.set('SELECTED_OU', $scope.selectedOrgUnit);
             
             $scope.trackedEntityList = [];
-           
-            //apply translation - by now user's profile is fetched from server.
-            TranslationService.translate();
             
             if(!$scope.optionSets){
                 $scope.optionSets = {optionSets: [], optionNamesByCode: new Object(), optionCodesByName: new Object()};
@@ -73,7 +69,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                         $scope.optionSets.optionSets[optionSet.id] = optionSet;
                     });
                 });
-            }            
+            }
             $scope.loadPrograms($scope.selectedOrgUnit);                                
         }
     });
@@ -331,7 +327,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
     
     $scope.showHideColumns = function(){
-        
         $scope.hiddenGridColumns = 0;
         
         angular.forEach($scope.gridColumns, function(gridColumn){

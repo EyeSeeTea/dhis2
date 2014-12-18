@@ -31,12 +31,15 @@ package org.hisp.dhis.de.action;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.struts2.ServletActionContext;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataelement.DataElement;
@@ -50,14 +53,16 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.indicator.IndicatorService;
-import org.hisp.dhis.organisationunit.OrganisationUnitDataSetAssociationSet;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
+
+import static org.hisp.dhis.system.util.TextUtils.SEP;
 
 /**
  * @author Lars Helge Overland
@@ -97,13 +102,6 @@ public class GetMetaDataAction
         this.dataSetService = dataSetService;
     }
 
-    private OrganisationUnitService organisationUnitService;
-
-    public void setOrganisationUnitService( OrganisationUnitService organisationUnitService )
-    {
-        this.organisationUnitService = organisationUnitService;
-    }
-
     private DataElementCategoryService categoryService;
 
     public void setCategoryService( DataElementCategoryService categoryService )
@@ -121,6 +119,9 @@ public class GetMetaDataAction
     @Autowired
     private ConfigurationService configurationService;
 
+    @Autowired
+    private IdentifiableObjectManager identifiableObjectManager;
+    
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
@@ -158,20 +159,6 @@ public class GetMetaDataAction
     public List<DataSet> getDataSets()
     {
         return dataSets;
-    }
-
-    private List<Set<String>> dataSetAssociationSets;
-
-    public List<Set<String>> getDataSetAssociationSets()
-    {
-        return dataSetAssociationSets;
-    }
-
-    private Map<String, Integer> organisationUnitAssociationSetMap;
-
-    public Map<String, Integer> getOrganisationUnitAssociationSetMap()
-    {
-        return organisationUnitAssociationSetMap;
     }
 
     private boolean emptyOrganisationUnits;
@@ -218,6 +205,21 @@ public class GetMetaDataAction
     {
         User user = currentUserService.getCurrentUser();
 
+        Date lastUpdated = DateUtils.max( 
+            identifiableObjectManager.getLastUpdated( DataElement.class ), 
+            identifiableObjectManager.getLastUpdated( OptionSet.class ),
+            identifiableObjectManager.getLastUpdated( Indicator.class ),
+            identifiableObjectManager.getLastUpdated( DataSet.class ),
+            identifiableObjectManager.getLastUpdated( DataElementCategoryCombo.class ),
+            identifiableObjectManager.getLastUpdated( DataElementCategory.class ),
+            identifiableObjectManager.getLastUpdated( DataElementCategoryOption.class ));
+        String tag = lastUpdated != null && user != null ? ( DateUtils.LONG_DATE_FORMAT.format( lastUpdated ) + SEP + user.getUid() ): null;
+        
+        if ( ContextUtils.isNotModified( ServletActionContext.getRequest(), ServletActionContext.getResponse(), tag ) )
+        {
+            return SUCCESS;
+        }
+                
         if ( user != null && user.getOrganisationUnits().isEmpty() )
         {
             emptyOrganisationUnits = true;
@@ -240,16 +242,6 @@ public class GetMetaDataAction
         indicators = indicatorService.getIndicatorsWithDataSets();
 
         expressionService.substituteExpressions( indicators, null );
-
-        OrganisationUnitLevel offlineOrgUnitLevel = configurationService.getConfiguration().getOfflineOrganisationUnitLevel();
-
-        Integer level = offlineOrgUnitLevel != null ? offlineOrgUnitLevel.getLevel() : null;
-
-        OrganisationUnitDataSetAssociationSet organisationUnitSet = organisationUnitService.getOrganisationUnitDataSetAssociationSet( level );
-
-        dataSetAssociationSets = organisationUnitSet.getDataSetAssociationSets();
-
-        organisationUnitAssociationSetMap = organisationUnitSet.getOrganisationUnitAssociationSetMap();
 
         if ( currentUserService.currentUserIsSuper() )
         {

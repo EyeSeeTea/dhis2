@@ -31,6 +31,7 @@ package org.hisp.dhis.webapi.controller.organisationunit;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.google.common.collect.Lists;
+
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
@@ -38,6 +39,7 @@ import org.hisp.dhis.organisationunit.comparator.OrganisationUnitByLevelComparat
 import org.hisp.dhis.schema.descriptors.OrganisationUnitSchemaDescriptor;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.version.VersionService;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
@@ -51,11 +53,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -67,6 +71,9 @@ public class OrganisationUnitController
 {
     @Autowired
     private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private VersionService versionService;
 
     @Autowired
     private CurrentUserService currentUserService;
@@ -153,7 +160,7 @@ public class OrganisationUnitController
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
 
-            entityList = new ArrayList<>( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
+            entityList = new ArrayList<>( manager.getBetweenSorted( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
         }
         else
         {
@@ -236,6 +243,7 @@ public class OrganisationUnitController
     public void getGeoJson(
         @RequestParam( value = "level", required = false ) List<Integer> rpLevels,
         @RequestParam( value = "parent", required = false ) List<String> rpParents,
+        @RequestParam( value = "properties", required = false, defaultValue = "true" ) boolean rpProperties,
         HttpServletResponse response ) throws IOException
     {
         rpLevels = rpLevels != null ? rpLevels : new ArrayList<Integer>();
@@ -266,7 +274,7 @@ public class OrganisationUnitController
 
         for ( OrganisationUnit organisationUnit : organisationUnits )
         {
-            writeFeature( generator, organisationUnit );
+            writeFeature( generator, organisationUnit, rpProperties );
         }
 
         generator.writeEndArray();
@@ -275,7 +283,7 @@ public class OrganisationUnitController
         generator.close();
     }
 
-    public void writeFeature( JsonGenerator generator, OrganisationUnit organisationUnit ) throws IOException
+    public void writeFeature( JsonGenerator generator, OrganisationUnit organisationUnit, boolean includeProperties ) throws IOException
     {
         if ( organisationUnit.getFeatureType() == null || organisationUnit.getCoordinates() == null )
         {
@@ -304,13 +312,38 @@ public class OrganisationUnitController
         generator.writeEndObject();
 
         generator.writeObjectFieldStart( "properties" );
-        generator.writeStringField( "code", organisationUnit.getCode() );
-        generator.writeStringField( "name", organisationUnit.getName() );
-        generator.writeStringField( "level", String.valueOf( organisationUnit.getLevel() ) );
-        generator.writeStringField( "parent", organisationUnit.getParent().getUid() );
-        generator.writeStringField( "parentGraph", organisationUnit.getParentGraph() );
+
+        if ( includeProperties )
+        {
+            Set<OrganisationUnit> roots = currentUserService.getCurrentUser().getDataViewOrganisationUnitsWithFallback();
+            
+            generator.writeStringField( "code", organisationUnit.getCode() );
+            generator.writeStringField( "name", organisationUnit.getName() );
+            generator.writeStringField( "level", String.valueOf( organisationUnit.getLevel() ) );
+            generator.writeStringField( "parent", organisationUnit.getParent().getUid() );
+            generator.writeStringField( "parentGraph", organisationUnit.getParentGraph( roots ) );
+        }
+
         generator.writeEndObject();
 
         generator.writeEndObject();
+    }
+
+    @Override
+    protected void postCreateEntity( OrganisationUnit entity )
+    {
+        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
+    }
+
+    @Override
+    protected void postUpdateEntity( OrganisationUnit entity )
+    {
+        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
+    }
+
+    @Override
+    protected void postDeleteEntity()
+    {
+        versionService.updateVersion( VersionService.ORGANISATIONUNIT_VERSION );
     }
 }

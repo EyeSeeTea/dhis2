@@ -116,6 +116,41 @@ public class DateUtils
 
         return date != null ? format.format( date ) : null;
     }
+    
+    /**
+     * Returns the latest of the two given dates.
+     * 
+     * @param date1 the first date.
+     * @param date2 the second date.
+     * @return the latest of the two given dates.
+     */
+    public static Date max( Date date1, Date date2 )
+    {
+        if ( date1 == null )
+        {
+            return date2 != null ? date2 : null;
+        }
+        
+        return date2 != null ? ( date1.after( date2 ) ? date1 : date2 ) : date1;        
+    }
+
+    /**
+     * Returns the latest of the given dates.
+     * 
+     * @param date the dates.
+     * @return the latest of the given dates.
+     */
+    public static Date max( Date... date )
+    {
+        Date latest = null;
+        
+        for ( Date d : date )
+        {
+            latest = max( d, latest );
+        }
+        
+        return latest;
+    }
 
     /**
      * Formats a Date to the format YYYY-MM-DD.

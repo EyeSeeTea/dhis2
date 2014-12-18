@@ -277,9 +277,9 @@ public class DefaultDataApprovalLevelService
                     ( cogs == null && canSeeAllDimensions ) ||
                     ( cogs != null && securityService.canRead( cogs ) && !CollectionUtils.isEmpty( categoryService.getCategoryOptionGroups( cogs ) ) ) ) );
 
-                //
+                
                 // Test using assignedAtLevel and approvableAtLevel values from the previous (higher) level.
-                //
+                
                 Boolean addBecauseOfPreviousLevel = false;
 
                 if ( canReadThisLevel && ( approvableAtLevel // Approve at previous higher level implies unapprove at current level.
@@ -292,17 +292,15 @@ public class DefaultDataApprovalLevelService
                 {
                     approvableAtAllLowerLevels = true;
                 }
-
-                //
+                
                 // Get new values of assignedAtLevel and approvableAtLevel for the current approval level.
-                //
+                
                 assignedAtLevel = canReadThisLevel && userOrgUnitLevels.contains( approvalLevel.getOrgUnitLevel() );
 
                 approvableAtLevel = canReadThisLevel && ( ( mayApprove && assignedAtLevel ) || approvableAtAllLowerLevels );
-
-                //
+                
                 // Test using assignedAtLevel and approvableAtLevel values from the current level.
-                //
+                
                 if ( approvableAtLevel || addBecauseOfPreviousLevel )
                 {
                     userDataApprovalLevels.add( approvalLevel );
@@ -412,18 +410,18 @@ public class DefaultDataApprovalLevelService
     }
 
     @Override
-    public int addDataApprovalLevel( DataApprovalLevel newLevel )
+    public int addDataApprovalLevel( DataApprovalLevel level )
     {
         List<DataApprovalLevel> dataApprovalLevels = getAllDataApprovalLevels();
 
-        int index = getInsertIndex( dataApprovalLevels, newLevel );
+        int index = getInsertIndex( dataApprovalLevels, level );
 
         if ( index < 0 )
         {
             return -1;
         }
 
-        dataApprovalLevels.add( index, newLevel );
+        dataApprovalLevels.add( index, level );
 
         // Move down from end to here, to avoid duplicate level in database.
 
@@ -432,9 +430,9 @@ public class DefaultDataApprovalLevelService
             update( dataApprovalLevels.get( i ), i );
         }
 
-        newLevel.setLevel( index + 1 );
+        level.setLevel( index + 1 );
 
-        return dataApprovalLevelStore.save( newLevel );
+        return dataApprovalLevelStore.save( level );
     }
 
     @Override
@@ -468,39 +466,33 @@ public class DefaultDataApprovalLevelService
     }
 
     @Override
-    public DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, boolean includeDataViewOrgUnits )
+    public DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit )
     {
         User user = currentUserService.getCurrentUser();
         
-        return getUserApprovalLevel( user, orgUnit, includeDataViewOrgUnits );
+        return getUserApprovalLevel( user, orgUnit );
     }
     
     @Override
-    public DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit, boolean includeDataViewOrgUnits )
+    public DataApprovalLevel getUserApprovalLevel( User user, OrganisationUnit orgUnit )
     {
-        if ( user != null )
+        if ( user == null || orgUnit == null )
         {
-            for ( OrganisationUnit ou : user.getOrganisationUnits() )
+            return null;
+        }
+        
+        OrganisationUnit organisationUnit = null;
+        
+        for ( OrganisationUnit unit : user.getOrganisationUnits() )
+        {
+            if ( orgUnit.isDescendant( unit ) )
             {
-                if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
-                {
-                    return userApprovalLevel( ou, user );
-                }
-            }
-
-            if ( includeDataViewOrgUnits && user.getDataViewOrganisationUnits() != null )
-            {
-                for ( OrganisationUnit ou : user.getDataViewOrganisationUnits() )
-                {
-                    if ( orgUnit.isEqualOrChildOf( org.hisp.dhis.system.util.CollectionUtils.asSet( ou ) ) )
-                    {
-                        return userApprovalLevel( ou, user );
-                    }
-                }
+                organisationUnit = unit;
+                break;
             }
         }
 
-        return null;
+        return organisationUnit != null ? getUserApprovalLevel( organisationUnit, user ) : null;
     }
 
     @Override
@@ -641,11 +633,11 @@ public class DefaultDataApprovalLevelService
      */
     private int requiredApprovalLevel( OrganisationUnit orgUnit, User user )
     {
-        DataApprovalLevel userLevel = userApprovalLevel( orgUnit, user );
+        DataApprovalLevel userLevel = getUserApprovalLevel( orgUnit, user );
 
-        return userLevel == null ? 0 :
-                userLevel.getLevel() == getAllDataApprovalLevels().size() ? APPROVAL_LEVEL_UNAPPROVED :
-                        userLevel.getLevel() + 1;
+        return userLevel == null ? 0 : 
+            userLevel.getLevel() == getAllDataApprovalLevels().size() ? APPROVAL_LEVEL_UNAPPROVED :
+            userLevel.getLevel() + 1;
     }
 
     /**
@@ -670,7 +662,7 @@ public class DefaultDataApprovalLevelService
      * @param orgUnit organisation unit to test.
      * @return approval level for user.
      */
-    private DataApprovalLevel userApprovalLevel( OrganisationUnit orgUnit, User user )
+    private DataApprovalLevel getUserApprovalLevel( OrganisationUnit orgUnit, User user )
     {
         int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
 
@@ -678,7 +670,10 @@ public class DefaultDataApprovalLevelService
 
         for ( DataApprovalLevel level : getAllDataApprovalLevels() )
         {
-            tracePrint("userApprovalLevel( " + orgUnit.getName() + "-" + orgUnitLevel + " ) approval level " + level.getName() + " " + securityService.canRead( level ) );
+            tracePrint("userApprovalLevel( " + orgUnit.getName() + "-" + orgUnitLevel + " ) approval level "
+                    + level.getName() + " " + securityService.canRead( level )
+                    + " COGS " + ( level.getCategoryOptionGroupSet() == null ? "(null)" : level.getCategoryOptionGroupSet().getName() )
+                    + " canReadCOGS " + canReadCOGS( user, level.getCategoryOptionGroupSet() ) );
 
             if ( level.getOrgUnitLevel() >= orgUnitLevel
                     && securityService.canRead( level )

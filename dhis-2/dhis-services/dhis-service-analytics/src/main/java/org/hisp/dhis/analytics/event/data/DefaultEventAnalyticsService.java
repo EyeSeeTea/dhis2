@@ -41,6 +41,7 @@ import static org.hisp.dhis.common.NameableObjectUtils.asTypedList;
 import static org.hisp.dhis.organisationunit.OrganisationUnit.getParentGraphMap;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -85,6 +86,8 @@ import org.hisp.dhis.system.util.DateUtils;
 import org.hisp.dhis.system.util.ListUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -136,6 +139,9 @@ public class DefaultEventAnalyticsService
     @Autowired
     private SystemSettingManager systemSettingManager;
 
+    @Autowired
+    private CurrentUserService currentUserService;
+    
     // -------------------------------------------------------------------------
     // EventAnalyticsService implementation
     // -------------------------------------------------------------------------
@@ -219,11 +225,15 @@ public class DefaultEventAnalyticsService
             metaData.put( NAMES_META_KEY, uidNameMap );
             metaData.put( PERIOD_DIM_ID, getUids( params.getDimensionOrFilter( PERIOD_DIM_ID ) ) );
             metaData.put( ORGUNIT_DIM_ID, getUids( params.getDimensionOrFilter( ORGUNIT_DIM_ID ) ) );
-    
+
+            User user = currentUserService.getCurrentUser();
+            
+            Collection<OrganisationUnit> roots = user != null ? user.getDataViewOrganisationUnits() : null;
+            
             if ( params.isHierarchyMeta() )
             {
                 metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
-                    params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
+                    params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ), roots ) );
             }
 
             grid.setMetaData( metaData );
@@ -307,10 +317,14 @@ public class DefaultEventAnalyticsService
 
         metaData.put( NAMES_META_KEY, uidNameMap );
 
+        User user = currentUserService.getCurrentUser();
+
+        Collection<OrganisationUnit> roots = user != null ? user.getDataViewOrganisationUnits() : null;
+        
         if ( params.isHierarchyMeta() )
         {
             metaData.put( OU_HIERARCHY_KEY, getParentGraphMap( asTypedList( 
-                params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ) ) );
+                params.getDimensionOrFilter( ORGUNIT_DIM_ID ), OrganisationUnit.class ), roots ) );
         }
 
         if ( params.isPaging() )
@@ -327,10 +341,10 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, boolean skipMeta, boolean hierarchyMeta, SortOrder sortOrder, 
-        Integer limit, boolean uniqueInstances, I18nFormat format )
+        Integer limit, boolean uniqueInstances, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
-            skipMeta, hierarchyMeta, false, null, null, format );
+            skipMeta, hierarchyMeta, false, displayProperty, null, null, format );
         
         params.setSortOrder( sortOrder );
         params.setLimit( limit );
@@ -343,7 +357,7 @@ public class DefaultEventAnalyticsService
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
         Set<String> dimension, Set<String> filter, String ouMode, Set<String> asc, Set<String> desc,
-        boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, Integer page, Integer pageSize, I18nFormat format )
+        boolean skipMeta, boolean hierarchyMeta, boolean coordinatesOnly, DisplayProperty displayProperty, Integer page, Integer pageSize, I18nFormat format )
     {
         EventQueryParams params = new EventQueryParams();
 
@@ -448,6 +462,7 @@ public class DefaultEventAnalyticsService
         params.setSkipMeta( skipMeta );
         params.setHierarchyMeta( hierarchyMeta );
         params.setCoordinatesOnly( coordinatesOnly );
+        params.setDisplayProperty( displayProperty );
         params.setPage( page );
         params.setPageSize( pageSize );
         params.setAggregate( false );

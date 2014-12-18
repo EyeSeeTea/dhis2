@@ -57,6 +57,8 @@ public interface DataValueSetService
     void writeDataValueSetJson( Set<String> dataSet, Date startDate, Date endDate, Set<String> ous, boolean includeChildren, OutputStream outputStream, ExportOptions exportOptions );
 
     void writeDataValueSetJson( Date lastUpdated, OutputStream outputStream, ExportOptions exportOptions );
+
+    void writeDataValueSetCsv( String dataSet, String period, String orgUnit, Writer writer, ExportOptions exportOptions );
     
     void writeDataValueSetCsv( Set<String> dataSets, Date startDate, Date endDate, Set<String> orgUnits, boolean includeChildren, Writer writer, ExportOptions exportOptions );
 
@@ -70,6 +72,8 @@ public interface DataValueSetService
     ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions );
 
     ImportSummary saveDataValueSetJson( InputStream in, ImportOptions importOptions );
+    
+    ImportSummary saveDataValueSetCsv( InputStream in, ImportOptions importOptions );
 
     ImportSummary saveDataValueSet( InputStream in, ImportOptions importOptions, TaskId taskId );
 

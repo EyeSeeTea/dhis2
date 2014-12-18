@@ -83,6 +83,8 @@ public interface IdentifiableObjectManager
 
     <T extends IdentifiableObject> List<T> getBetween( Class<T> clazz, int first, int max );
 
+    <T extends IdentifiableObject> List<T> getBetweenSorted( Class<T> clazz, int first, int max );
+
     <T extends IdentifiableObject> List<T> getBetweenLikeName( Class<T> clazz, String name, int first, int max );
 
     <T extends IdentifiableObject> Collection<T> getByLastUpdated( Class<T> clazz, Date lastUpdated );
@@ -92,6 +94,8 @@ public interface IdentifiableObjectManager
     <T extends IdentifiableObject> Collection<T> getByLastUpdatedSorted( Class<T> clazz, Date lastUpdated );
 
     <T extends IdentifiableObject> Collection<T> getByCreatedSorted( Class<T> clazz, Date created );
+    
+    <T extends IdentifiableObject> Date getLastUpdated( Class<T> clazz );
 
     void delete( IdentifiableObject object );
 

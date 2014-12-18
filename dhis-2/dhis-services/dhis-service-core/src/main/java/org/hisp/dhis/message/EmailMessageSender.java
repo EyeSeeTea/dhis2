@@ -55,8 +55,9 @@ public class EmailMessageSender
 {
     private static final Log log = LogFactory.getLog( EmailMessageSender.class );
     private static final String FROM_ADDRESS = "noreply@dhis2.org";
-    private static final String FROM_NAME = "DHIS 2 Message [No reply]";
-    private static final String SUBJECT_PREFIX = "[DHIS 2] ";
+    private static final String DEFAULT_APPLICATION_TITLE = "DHIS 2";
+    private static final String DEFAULT_FROM_NAME = DEFAULT_APPLICATION_TITLE + " Message [No reply]";
+    private static final String DEFAULT_SUBJECT_PREFIX = "[" + DEFAULT_APPLICATION_TITLE + "] ";
     private static final String LB = System.getProperty( "line.separator" );
 
     // -------------------------------------------------------------------------
@@ -109,24 +110,22 @@ public class EmailMessageSender
 
         text = sender == null ? text : ( text + LB + LB + 
             sender.getName() + LB + 
-            sender.getOrganisationUnitsName() + LB +
+            ( sender.getOrganisationUnitsName() != null ? ( sender.getOrganisationUnitsName() + LB ) : StringUtils.EMPTY ) +
             ( sender.getEmail() != null ? ( sender.getEmail() + LB ) : StringUtils.EMPTY ) +
             ( sender.getPhoneNumber() != null ? ( sender.getPhoneNumber() + LB ) : StringUtils.EMPTY ) );
         
         try
         {
             Email email = getEmail( hostName, port, username, password, tls, from );
-            email.setSubject( SUBJECT_PREFIX + subject );
+            email.setSubject( customizeTitle( DEFAULT_SUBJECT_PREFIX ) + subject );
             email.setMsg( text );
-            
+                        
             boolean hasRecipients = false;
             
             for ( User user : users )
             {
-                boolean emailNotification = (Boolean) userService.getUserSettingValue( user, KEY_MESSAGE_EMAIL_NOTIFICATION, false );
+                boolean doSend = forceSend || (Boolean) userService.getUserSettingValue( user, KEY_MESSAGE_EMAIL_NOTIFICATION, false );
                 
-                boolean doSend = forceSend || emailNotification;
-    
                 if ( doSend && user.getEmail() != null && !user.getEmail().trim().isEmpty() )
                 {
                     email.addBcc( user.getEmail() );
@@ -160,7 +159,7 @@ public class EmailMessageSender
     {
         Email email = new SimpleEmail();
         email.setHostName( hostName );
-        email.setFrom( defaultIfEmpty( sender, FROM_ADDRESS ), FROM_NAME );
+        email.setFrom( defaultIfEmpty( sender, FROM_ADDRESS ), customizeTitle( DEFAULT_FROM_NAME ) );
         email.setSmtpPort( port );
         email.setStartTLSEnabled( tls );
         
@@ -170,5 +169,17 @@ public class EmailMessageSender
         }
         
         return email;
+    }
+
+    private String customizeTitle( String s )
+    {
+        String applicationTitle = (String) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_APPLICATION_TITLE );
+
+        if ( applicationTitle != null && !applicationTitle.isEmpty() )
+        {
+            s = s.replace( DEFAULT_APPLICATION_TITLE, applicationTitle );
+        }
+
+        return s;
     }
 }

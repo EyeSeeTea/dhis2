@@ -2723,7 +2723,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: NS.i18n.manage_favorites,
+			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
 			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -2811,6 +2811,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
+                    style: 'margin-bottom:2px',
 					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'ns-combo',
@@ -2980,7 +2981,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.sharing_settings,
-			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
+			bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -2988,7 +2989,7 @@ Ext.onReady( function() {
 				{
 					html: sharing.object.name,
 					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
-					style: 'margin-bottom:8px'
+					style: 'margin-bottom:7px'
 				},
 				{
 					xtype: 'container',
@@ -2999,6 +3000,11 @@ Ext.onReady( function() {
 						userGroupButton
 					]
 				},
+				{
+					html: NS.i18n.created_by + ' ' + sharing.object.user.name,
+					bodyStyle: 'border:0 none; color:#777',
+					style: 'margin-top:2px;margin-bottom:7px'
+				},
 				userGroupRowContainer
 			],
 			bbar: [
@@ -3007,7 +3013,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=eventReport&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -3275,12 +3281,18 @@ Ext.onReady( function() {
 		});
 
 		dataElementsByStageStore = Ext.create('Ext.data.Store', {
-			fields: [''],
+			fields: ['id', 'name', 'isAttribute'],
 			data: [],
-			sorters: [{
-				property: 'name',
-				direction: 'ASC'
-			}]
+			sorters: [
+                {
+                    property: 'isAttribute',
+                    direction: 'DESC'
+                },
+                {
+                    property: 'name',
+                    direction: 'ASC'
+                }
+            ]
 		});
 
 		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
@@ -3523,6 +3535,11 @@ Ext.onReady( function() {
 
                         stages = program.programStages;
                         attributes = Ext.Array.pluck(program.programTrackedEntityAttributes, 'trackedEntityAttribute');
+
+                        // mark as attribute
+                        for (var i = 0; i < attributes.length; i++) {
+                            attributes[i].isAttribute = true;
+                        }
 
                         // attributes cache
                         if (Ext.isArray(attributes) && attributes.length) {
@@ -4031,13 +4048,7 @@ Ext.onReady( function() {
 			labelSeparator: '',
             columnWidth: 0.5,
             height: 44,
-            value: function() {
-                var greg = $.calendars.instance('gregorian'),
-                    date = greg.parseDate('yyyy-mm-dd', (new Date( (new Date()).setMonth( (new Date()).getMonth() - 3))).toJSON().slice(0,10));
-
-                date = ns.core.init.calendar.fromJD(date.toJD());
-                return ns.core.init.calendar.formatDate(ns.core.init.systemInfo.dateFormat, date);
-            }(),
+            value: ns.core.init.calendar.formatDate(ns.core.init.systemInfo.dateFormat, ns.core.init.calendar.today().add(-3, 'm')),
             listeners: {
                 render: function(c) {
                     onDateFieldRender(c);
@@ -4053,7 +4064,7 @@ Ext.onReady( function() {
             columnWidth: 0.5,
             height: 44,
             style: 'margin-left: 1px',
-            value: ns.core.init.calendar.today().toString(),
+            value: ns.core.init.calendar.formatDate(ns.core.init.systemInfo.dateFormat, ns.core.init.calendar.today()),
             listeners: {
                 render: function(c) {
                     onDateFieldRender(c);
@@ -6885,7 +6896,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Favorite link',
+                    title: 'Favorite link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -7012,17 +7023,55 @@ Ext.onReady( function() {
 			iconCls: 'ns-button-icon-table',
 			toggleGroup: 'module',
 			pressed: true,
-			handler: function() {
-				if (!this.pressed) {
-					this.toggle();
-				}
-			}
+            menu: {},
+            handler: function(b) {
+                b.menu = Ext.create('Ext.menu.Menu', {
+                    closeAction: 'destroy',
+                    shadow: false,
+                    showSeparator: false,
+                    items: [
+                        {
+                            text: NS.i18n.clear_event_report + '&nbsp;&nbsp;', //i18n
+                            cls: 'ns-menu-item-noicon',
+                            handler: function() {
+                                window.location.href = ns.core.init.contextPath + '/dhis-web-event-reports';
+                            }
+                        }
+                    ],
+                    listeners: {
+                        show: function() {
+                            ns.core.web.window.setAnchorPosition(b.menu, b);
+                        },
+                        hide: function() {
+                            b.menu.destroy();
+                            defaultButton.toggle();
+                        },
+                        destroy: function(m) {
+                            b.menu = null;
+                        }
+                    }
+                });
+
+                b.menu.show();
+            }
 		});
 
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
 			autoScroll: true,
+			fullSize: true,
+			cmp: [defaultButton],
+			toggleCmp: function(show) {
+				for (var i = 0; i < this.cmp.length; i++) {
+					if (show) {
+						this.cmp[i].show();
+					}
+					else {
+						this.cmp[i].hide();
+					}
+				}
+			},
 			tbar: {
 				defaults: {
 					height: 26
@@ -7071,7 +7120,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_event_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-event-visualizer';
 										}
 									},
 									'-',
@@ -7110,12 +7159,22 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					{
 						xtype: 'tbseparator',
 						height: 18,
 						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
+						}
 					},
 					{
 						xtype: 'button',
@@ -7147,6 +7206,18 @@ Ext.onReady( function() {
 					html += '</div>';
 
 					p.update(html);
+				},
+				resize: function() {
+					var width = this.getWidth();
+
+					if (width < 748 && this.fullSize) {
+						this.toggleCmp(false);
+						this.fullSize = false;
+					}
+					else if (width >= 748 && !this.fullSize) {
+						this.toggleCmp(true);
+						this.fullSize = true;
+					}
 				}
 			}
 		});
@@ -7189,9 +7260,6 @@ Ext.onReady( function() {
 			listeners: {
 				render: function() {
 					ns.app.viewport = this;
-
-                    var initEl = document.getElementById('init');
-                    initEl.parentNode.removeChild(initEl);
 
 					ns.app.aggregateLayoutWindow = AggregateLayoutWindow();
 					ns.app.aggregateLayoutWindow.hide();
@@ -7250,12 +7318,18 @@ Ext.onReady( function() {
 						}
 					}
 
+                    var initEl = document.getElementById('init');
+                    initEl.parentNode.removeChild(initEl);
+
+                    Ext.getBody().setStyle('background', '#fff');
+                    Ext.getBody().setStyle('opacity', 0);
+
 					// fade in
 					Ext.defer( function() {
 						Ext.getBody().fadeIn({
-							duration: 500
+							duration: 600
 						});
-					}, 300);
+					}, 300 );
 				}
 			}
 		});
@@ -7370,46 +7444,42 @@ Ext.onReady( function() {
 
                                         // i18n
                                         requests.push({
-                                            url: 'i18n/' + keyUiLocale + '.properties',
+                                            url: 'i18n/i18n_app.properties',
                                             success: function(r) {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                Ext.get('init').update(NS.i18n.initializing + '..');
 
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                        success: function(r) {
-                                                            Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
-                                                        },
-                                                        callback: fn
-                                                    })
+                                                if (keyUiLocale === defaultKeyUiLocale) {
+                                                    Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    fn();
                                                 }
                                                 else {
-                                                    fn();
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.apply(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                        },
+                                                        failure: function() {
+                                                            console.log('No translations found for system locale (' + keyUiLocale + ')');
+                                                        },
+                                                        callback: function() {
+                                                            Ext.get('init').update(NS.i18n.initializing + '..');
+                                                            fn();
+                                                        }
+                                                    });
                                                 }
                                             },
                                             failure: function() {
-                                                var onFailure = function() {
-                                                    alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                                };
-
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                        success: function(r) {
-                                                            console.log('No translations found for system locale (' + keyUiLocale + ').');
-                                                            NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        },
-                                                        failure: function() {
-                                                            onFailure();
-                                                        },
-                                                        callback: fn
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                    onFailure();
-                                                }
+                                                Ext.Ajax.request({
+                                                    url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                    success: function(r) {
+                                                        NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                        Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    },
+                                                    failure: function() {
+                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                    },
+                                                    callback: fn
+                                                });
                                             }
                                         });
 
@@ -7520,11 +7590,16 @@ Ext.onReady( function() {
                                                     });
                                                 };
 
-                                                store.open().done( function() {
-                                                    for (var i = 0; i < optionSets.length; i++) {
-                                                        registerOptionSet(optionSets[i]);
-                                                    }
-                                                });
+                                                if (optionSets.length) {
+                                                    store.open().done( function() {
+                                                        for (var i = 0; i < optionSets.length; i++) {
+                                                            registerOptionSet(optionSets[i]);
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    fn();
+                                                }
                                             }
                                         });
 

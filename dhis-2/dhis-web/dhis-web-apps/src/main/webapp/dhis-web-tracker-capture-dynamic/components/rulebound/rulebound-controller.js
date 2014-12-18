@@ -1,10 +1,8 @@
 trackerCapture.controller('RuleBoundController',
         function(
                 $rootScope,
-                $scope,                
-                TranslationService) {
+                $scope) {
 
-    TranslationService.translate();
     
     var widget = $scope.$parent.$parent.biggerWidget ? $scope.$parent.$parent.biggerWidget
     : $scope.$parent.$parent.smallerWidget ? $scope.$parent.$parent.smallerWidget : null;

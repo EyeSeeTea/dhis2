@@ -28,15 +28,17 @@ package org.hisp.dhis.user.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import com.opensymphony.xwork2.Action;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
-import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
@@ -59,12 +61,8 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.hisp.dhis.setting.SystemSettingManager.KEY_ONLY_MANAGE_WITHIN_USER_GROUPS;
+import com.google.common.collect.Lists;
+import com.opensymphony.xwork2.Action;
 
 /**
  * @author Torgeir Lorange Ostby
@@ -118,13 +116,6 @@ public class AddUserAction
     public void setAttributeService( AttributeService attributeService )
     {
         this.attributeService = attributeService;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
     }
 
     @Autowired
@@ -292,6 +283,8 @@ public class AddUserAction
     public String execute()
         throws Exception
     {
+        //TODO: Allow user with F_USER_ADD_WITHIN_MANAGED_GROUP to add a user within managed groups.
+
         if ( email != null && email.trim().length() == 0 )
         {
             email = null;
@@ -302,36 +295,6 @@ public class AddUserAction
         inviteEmail = inviteEmail.trim();
 
         User currentUser = currentUserService.getCurrentUser();
-
-        // ---------------------------------------------------------------------
-        // Check if user group is required, before we add the user
-        // ---------------------------------------------------------------------
-
-        boolean canManageGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_ONLY_MANAGE_WITHIN_USER_GROUPS, false );
-
-        if ( canManageGroups && !currentUser.getUserCredentials().getAllAuthorities().contains( "ALL" ) )
-        {
-            boolean groupFound = false;
-
-            for ( String ug : ugSelected )
-            {
-                UserGroup group = userGroupService.getUserGroup( ug );
-
-                if ( group != null && securityService.canWrite( group ) )
-                {
-                    groupFound = true;
-
-                    break;
-                }
-            }
-
-            if ( !groupFound )
-            {
-                message = i18n.getString( "users_must_belong_to_a_group_controlled_by_the_user_manager" );
-
-                return ERROR;
-            }
-        }
 
         // ---------------------------------------------------------------------
         // User credentials and user
@@ -364,7 +327,7 @@ public class AddUserAction
             user.setEmail( email );
             user.setPhoneNumber( phoneNumber );
 
-            userCredentials.setPassword( passwordManager.encodePassword( rawPassword ) );
+            userCredentials.setPassword( passwordManager.encode( rawPassword ) );
         }
 
         if ( jsonAttributeValues != null )

@@ -5,10 +5,7 @@ trackerCapture.controller('ProfileController',
                 DateUtils,
                 TEIService,
                 DialogService,
-                AttributesFactory,
-                TranslationService) {
-
-    TranslationService.translate();
+                AttributesFactory) {
     
     //attributes for profile    
     $scope.attributes = [];    
@@ -81,8 +78,7 @@ trackerCapture.controller('ProfileController',
                     $scope.formEmpty = false;
                 }
                 tei.attributes.push({attribute: attribute.attribute, value: val});
-            }           
-             
+            }             
         });
         
         if($scope.formEmpty){

@@ -33,17 +33,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.configuration.ConfigurationService;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 /**
  * @author Lars Helge Overland
@@ -83,6 +89,20 @@ public class DefaultMessageService
         this.configurationService = configurationService;
     }
 
+    private SystemSettingManager systemSettingManager;
+
+    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
+    {
+        this.systemSettingManager = systemSettingManager;
+    }
+
+    private MessageSender emailMessageSender;
+
+    public void setEmailMessageSender( MessageSender emailMessageSender )
+    {
+        this.emailMessageSender = emailMessageSender;
+    }
+    
     private List<MessageSender> messageSenders;
 
     @Autowired
@@ -165,6 +185,37 @@ public class DefaultMessageService
     public int sendFeedback( String subject, String text, String metaData )
     {
         return sendMessage( subject, text, metaData, new HashSet<User>(), null, true, false );
+    }
+    
+    @Override
+    public int sendSystemNotification( String subject, String text )
+    {
+        String email = (String) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_SYSTEM_NOTIFICATIONS_EMAIL );
+        String appTitle = (String) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_APPLICATION_TITLE );
+
+        // ---------------------------------------------------------------------
+        // Send email to system notification email address
+        // ---------------------------------------------------------------------
+
+        if ( email != null && ValidationUtils.emailIsValid( email ) )
+        {
+            User user = new User();
+            UserCredentials credentials = new UserCredentials();
+            credentials.setUsername( email );
+            user.setEmail( email );
+            
+            User sender = new User();
+            sender.setFirstName( StringUtils.trimToEmpty( appTitle ) );
+            sender.setSurname( email );
+            
+            emailMessageSender.sendMessage( subject, text, sender, Sets.newHashSet( user ), true );
+        }
+
+        // ---------------------------------------------------------------------
+        // Send feedback
+        // ---------------------------------------------------------------------
+
+        return sendFeedback( subject, text, null );
     }
 
     @Override
@@ -256,6 +307,23 @@ public class DefaultMessageService
     @Override
     public MessageConversation getMessageConversation( String uid )
     {
+        /*
+         * TODO:
+         * This is a temporary workaround to ensure transient fields followUp and read
+         * are set correctly (and not just to false). Issue should be tackled in
+         * HibernateIdentifiableObjectStore and/or HibernateMessageConversationStore.
+         */
+
+        MessageConversation mc = messageConversationStore.getByUid( uid );
+
+        if( mc == null )
+        {
+            return null;
+        }
+
+        mc.setFollowUp( mc.isFollowUp( currentUserService.getCurrentUser() ) );
+        mc.setRead( mc.isRead( currentUserService.getCurrentUser() ) );
+
         return messageConversationStore.getByUid( uid );
     }
 
@@ -269,6 +337,12 @@ public class DefaultMessageService
     public long getUnreadMessageConversationCount( User user )
     {
         return messageConversationStore.getUnreadUserMessageConversationCount( user );
+    }
+
+    @Override
+    public List<MessageConversation> getMessageConversations()
+    {
+        return messageConversationStore.getMessageConversations( currentUserService.getCurrentUser(), false, false, null, null );
     }
 
     @Override
@@ -303,12 +377,6 @@ public class DefaultMessageService
     {
         return messageConversationStore.getMessageConversationCount( currentUserService.getCurrentUser(), followUpOnly,
             unreadOnly );
-    }
-
-    @Override
-    public List<MessageConversation> getAllMessageConversations()
-    {
-        return messageConversationStore.getMessageConversations( null, false, false, null, null );
     }
 
     @Override

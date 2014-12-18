@@ -10,10 +10,8 @@ trackerCapture.controller('DataEntryController',
                 ModalService,
                 DialogService,
                 CurrentSelection,
-                TranslationService,
+		CustomFormService,
                 TrackerRulesExecutionService) {
-
-    TranslationService.translate();
     
     //Data entry form
     $scope.dataEntryOuterForm = {};
@@ -347,8 +345,6 @@ trackerCapture.controller('DataEntryController',
     };
     
     $scope.saveDatavalue = function(prStDe){
-
-        $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
         
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
@@ -356,21 +352,25 @@ trackerCapture.controller('DataEntryController',
             return false;
         }
          
-        //input is valid
-        $scope.updateSuccess = false;
-        var value = $scope.currentEvent[prStDe.dataElement.id];        
+        //input is valid        
+        var value = $scope.currentEvent[prStDe.dataElement.id];
+        
         if(!angular.isUndefined(value)){
             if(prStDe.dataElement.type === 'date'){                    
                 value = DateUtils.formatFromUserToApi(value);
             }
             if(prStDe.dataElement.type === 'string'){                    
-                if(prStDe.dataElement.optionSet && $scope.optionSets.optionCodesByName[  '"' + value + '"']){                        
-                    value = $scope.optionSets.optionCodesByName[  '"' + value + '"'];                                                      
+                if(prStDe.dataElement.optionSet && $scope.optionSets[prStDe.dataElement.optionSet.id] &&  $scope.optionSets[prStDe.dataElement.optionSet.id].options ) {
+                    value = OptionSetService.getCode($scope.optionSets[prStDe.dataElement.optionSet.id].options, value);
                 }                    
             }
 
             if($scope.currentEventOriginal[prStDe.dataElement.id] !== value){
-                
+
+                $scope.updateSuccess = false;
+        
+                $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
+        
                 var ev = {  event: $scope.currentEvent.event,
                             orgUnit: $scope.currentEvent.orgUnit,
                             program: $scope.currentEvent.program,

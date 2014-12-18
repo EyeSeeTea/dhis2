@@ -4,15 +4,13 @@ trackerCapture.controller('RelationshipController',
                 $modal,                
                 $location,
                 $route,
+                $translate,
                 CurrentSelection,
-                RelationshipFactory,
-                TranslationService) {
-
-    TranslationService.translate();        
-
+                RelationshipFactory) {
     $rootScope.showAddRelationshipDiv = false;
     $scope.relationshipTypes = []; 
     $scope.relationships = [];
+    $scope.addRelationshipLabel = $translate('add');
     RelationshipFactory.getAll().then(function(rels){
         $scope.relationshipTypes = rels;    
         angular.forEach(rels, function(rel){
@@ -23,9 +21,18 @@ trackerCapture.controller('RelationshipController',
     //listen for the selected entity       
     $scope.$on('dashboardWidgets', function(event, args) { 
         $scope.selections = CurrentSelection.get();
-        $scope.selectedTei = angular.copy($scope.selections.tei);
+        $scope.optionSets = $scope.selections.optionSets;
+        $scope.selectedTei = angular.copy($scope.selections.tei);        
         $scope.trackedEntity = $scope.selections.te;
         $scope.selectedEnrollment = $scope.selections.enrollment;
+        $scope.selectedProgram = $scope.selections.pr;
+        
+        if($scope.selectedProgram && $scope.selectedProgram.relationshipText){
+            $scope.addRelationshipLabel = $scope.selectedProgram.relationshipText;
+        }
+        else{
+            $scope.addRelationshipLabel = $translate('add');
+        }
     });
     
     $scope.showAddRelationship = function() {
@@ -86,18 +93,21 @@ trackerCapture.controller('RelationshipController',
             $modalInstance, 
             relationshipTypes,
             selections,
+            DateUtils,
             selectedTei){
     
     $scope.relationshipTypes = relationshipTypes;
-    $scope.selectedTei = selectedTei;
+    $scope.selectedTei = selectedTei;    
+
     $scope.relationshipSources = ['search_from_existing','register_new'];
     $scope.selectedRelationshipSource = {};   
     $scope.relationship = {};
     
     //Selection
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
-    $scope.selectedTei = selections.tei;
-    
+    $scope.optionSets = selections.optionSets;
+    $scope.selectedTeiForDisplay = angular.copy($scope.selectedTei);       
+   
     ProgramFactory.getAll().then(function(programs){
         $scope.programs = [];
         angular.forEach(programs, function(program){                            
@@ -364,12 +374,7 @@ trackerCapture.controller('RelationshipController',
                 DialogService,
                 CurrentSelection,
                 DateUtils,
-                storage,
-                TranslationService) {
-
-    //do translation of the registration page
-    TranslationService.translate();   
-
+                storage) {
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.enrollment = {enrollmentDate: '', incidentDate: ''};    
     
@@ -430,9 +435,16 @@ trackerCapture.controller('RelationshipController',
         $scope.valueExists = false;
         var registrationAttributes = [];    
         angular.forEach($scope.attributes, function(attribute){
-            if(!angular.isUndefined(attribute.value)){
-                var att = {attribute: attribute.id, value: attribute.value};
-                registrationAttributes.push(att);
+            var val = attribute.value;
+            if(!angular.isUndefined(val)){
+                
+                if(attribute.valueType === 'date'){
+                    val = DateUtils.formatFromUserToApi(val);
+                }
+                if(attribute.valueType === 'optionSet' && $scope.optionSets.optionCodesByName[  '"' + val + '"']){   
+                    val = $scope.optionSets.optionCodesByName[  '"' + val + '"'];
+                }
+                registrationAttributes.push({attribute: attribute.id, value: val});
                 $scope.valueExists = true;
             } 
         });       

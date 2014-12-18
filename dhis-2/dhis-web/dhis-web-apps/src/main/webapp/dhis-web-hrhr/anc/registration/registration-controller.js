@@ -7,11 +7,8 @@ trackerCapture.controller('RegistrationController',
                 EnrollmentService,
                 DateFormatService,
                 DialogService,
-                storage,
-                TranslationService) {
-
-    //do translation of the registration page
-    TranslationService.translate();   
+                storage) {
+ 
     
     $scope.showRegistration = true;
     

@@ -10,7 +10,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                 ModalService,
                 $location,
                 Paginator,
-                TranslationService, 
                 storage,
                 EIFactory,
                 ProgramFactory,
@@ -66,8 +65,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
             
             AttributesFactory.getLocalAttributes().then(function(localAttributes){
                 storage.set('LOCAL_ATTRIBUTES', localAttributes);                
-                //apply translation
-                TranslationService.translate();
 
                 $scope.loadPrograms($scope.selectedOrgUnit); 
             });
@@ -285,10 +282,8 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
 //Controller for the header section
 .controller('HeaderController',
         function($scope,                
-                DHIS2URL,
-                TranslationService) {
+                DHIS2URL) {
 
-    TranslationService.translate();
     
     $scope.home = function(){        
         window.location = DHIS2URL;

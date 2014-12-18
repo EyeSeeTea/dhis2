@@ -51,4 +51,16 @@ public class Option
         this.name = name;
         this.code = code;
     }
+
+    @Override
+    public boolean haveUniqueNames()
+    {
+        return false;
+    }
+
+    @Override
+    public boolean haveUniqueCode()
+    {
+        return false;
+    }
 }

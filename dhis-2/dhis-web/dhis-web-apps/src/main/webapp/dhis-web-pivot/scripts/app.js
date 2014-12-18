@@ -1464,7 +1464,7 @@ Ext.onReady( function() {
 		});
 
 		favoriteWindow = Ext.create('Ext.window.Window', {
-			title: NS.i18n.favorites,
+			title: NS.i18n.favorites + (ns.app.layout && ns.app.layout.name ? '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>' : ''),
 			bodyStyle: 'padding:1px; background-color:#fff',
 			resizable: false,
 			modal: true,
@@ -1552,6 +1552,7 @@ Ext.onReady( function() {
 				var items = [];
 
 				combo = Ext.create('Ext.form.field.ComboBox', {
+                    style: 'margin-bottom:2px',
 					fieldLabel: isPublicAccess ? NS.i18n.public_access : obj.name,
 					labelStyle: 'color:#333',
 					cls: 'ns-combo',
@@ -1721,7 +1722,7 @@ Ext.onReady( function() {
 
 		window = Ext.create('Ext.window.Window', {
 			title: NS.i18n.sharing_settings,
-			bodyStyle: 'padding:6px 6px 0px; background-color:#fff',
+			bodyStyle: 'padding:5px 5px 3px; background-color:#fff',
 			resizable: false,
 			modal: true,
 			destroyOnBlur: true,
@@ -1729,7 +1730,7 @@ Ext.onReady( function() {
 				{
 					html: sharing.object.name,
 					bodyStyle: 'border:0 none; font-weight:bold; color:#333',
-					style: 'margin-bottom:8px'
+					style: 'margin-bottom:7px'
 				},
 				{
 					xtype: 'container',
@@ -1739,6 +1740,11 @@ Ext.onReady( function() {
 						userGroupField,
 						userGroupButton
 					]
+				},
+				{
+					html: NS.i18n.created_by + ' ' + sharing.object.user.name,
+					bodyStyle: 'border:0 none; color:#777',
+					style: 'margin-top:2px;margin-bottom:7px'
 				},
 				userGroupRowContainer
 			],
@@ -1822,10 +1828,9 @@ Ext.onReady( function() {
 			});
 
 			window = Ext.create('Ext.window.Window', {
-				title: ns.app.layout.name,
+				title: 'Write interpretation' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 				layout: 'fit',
-				//iconCls: 'ns-window-title-interpretation',
-				width: 500,
+				width: 550,
 				bodyStyle: 'padding:1px; background-color:#fff',
 				resizable: false,
 				destroyOnBlur: true,
@@ -2128,7 +2133,7 @@ Ext.onReady( function() {
 
                 // headers
                 for (var i = 0; i < headers.length; i++) {
-                    csv += headers[i].column + (i < headers.length - 1 ? ',' : '\n');
+                    csv += '"' + headers[i].column + '"' + (i < headers.length - 1 ? ',' : '\n');
                 }
 
                 // rows
@@ -2137,7 +2142,7 @@ Ext.onReady( function() {
                         val = rows[i][j];
                         isMeta = headers[j].meta;
 
-                        csv += isMeta && names[val] ? names[val] : val;
+                        csv += '"' + (isMeta && names[val] ? names[val] : val) + '"';
                         csv += j < rows[i].length - 1 ? ',' : '\n';
                     }
                 }
@@ -2686,8 +2691,9 @@ Ext.onReady( function() {
                 this.isPending = false;
                 indicatorSearch.hideFilter();
             },
-            loadPage: function(uid, filter, append) {
+            loadPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
+					params = {},
                     path;
 
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : indicatorGroup.getValue();
@@ -2710,8 +2716,15 @@ Ext.onReady( function() {
 				}
 
 				if (!path) {
-					console.log('Available indicators: invalid id');
 					return;
+				}
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
 				}
 
                 store.isPending = true;
@@ -2719,16 +2732,13 @@ Ext.onReady( function() {
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.indicators || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2736,7 +2746,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -2747,7 +2759,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
+
                 ns.core.web.multiSelect.filterAvailable({store: indicatorAvailableStore}, {store: indicatorSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
 			storage: {},
 			parent: null,
@@ -2810,7 +2827,7 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataElementSearch.hideFilter();
             },
-            loadPage: function(uid, filter, append) {
+            loadPage: function(uid, filter, append, noPaging, fn) {
                 uid = (Ext.isString(uid) || Ext.isNumber(uid)) ? uid : dataElementGroup.getValue();
                 filter = filter || dataElementFilter.getValue() || null;
 
@@ -2820,14 +2837,15 @@ Ext.onReady( function() {
                 }
 
                 if (dataElementDetailLevel.getValue() === dimConf.dataElement.objectName) {
-                    this.loadTotalsPage(uid, filter, append);
+                    this.loadTotalsPage(uid, filter, append, noPaging, fn);
                 }
                 else if (dataElementDetailLevel.getValue() === dimConf.operand.objectName) {
-                    this.loadDetailsPage(uid, filter, append);
+                    this.loadDetailsPage(uid, filter, append, noPaging, fn);
                 }
             },
-            loadTotalsPage: function(uid, filter, append) {
+            loadTotalsPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
+					params = {},
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2842,8 +2860,15 @@ Ext.onReady( function() {
 				}
 
 				if (!path) {
-					alert('Available data elements: invalid id');
 					return;
+				}
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
 				}
 
                 store.isPending = true;
@@ -2851,16 +2876,13 @@ Ext.onReady( function() {
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataElements || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2868,8 +2890,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-			loadDetailsPage: function(uid, filter, append) {
+			loadDetailsPage: function(uid, filter, append, noPaging, fn) {
                 var store = this,
+					params = {},
                     path;
 
                 if (store.nextPage === store.lastPage) {
@@ -2884,8 +2907,15 @@ Ext.onReady( function() {
 				}
 
 				if (!path) {
-					alert('Available data elements: invalid id');
 					return;
+				}
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
 				}
 
                 store.isPending = true;
@@ -2893,10 +2923,7 @@ Ext.onReady( function() {
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
 							data = response.objects || response.dataElementOperands || [],
@@ -2906,7 +2933,7 @@ Ext.onReady( function() {
 							data[i].id = data[i].id.split('.').join('#');
 						}
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -2914,7 +2941,9 @@ Ext.onReady( function() {
                     }
                 });
 			},
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -2925,7 +2954,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+
+				ns.core.web.multiSelect.filterAvailable({store: dataElementAvailableStore}, {store: dataElementSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
             sortStore: function() {
 				this.sort('name', 'ASC');
@@ -2981,9 +3015,10 @@ Ext.onReady( function() {
                 this.isPending = false;
                 dataSetSearch.hideFilter();
             },
-            loadPage: function(filter, append) {
+            loadPage: function(filter, append, noPaging, fn) {
                 var store = this,
-                    path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+					params = {},
+                    path;
 
                 filter = filter || dataSetFilter.getValue() || null;
 
@@ -2996,21 +3031,28 @@ Ext.onReady( function() {
                     return;
                 }
 
+                path = '/dataSets.json?fields=id,' + ns.core.init.namePropertyUrl + '' + (filter ? '&filter=name:like:' + filter : '');
+
+				if (noPaging) {
+					params.paging = false;
+				}
+				else {
+					params.page = store.nextPage;
+					params.pageSize = 50;
+				}
+
                 store.isPending = true;
                 ns.core.web.mask.show(dataSetAvailable.boundList);
 
                 Ext.Ajax.request({
                     url: ns.core.init.contextPath + '/api' + path,
-                    params: {
-                        page: store.nextPage,
-                        pageSize: 50
-                    },
+                    params: params,
                     success: function(r) {
                         var response = Ext.decode(r.responseText),
                             data = response.dataSets || [],
                             pager = response.pager;
 
-                        store.loadStore(data, pager, append);
+                        store.loadStore(data, pager, append, fn);
                     },
                     callback: function() {
                         store.isPending = false;
@@ -3018,7 +3060,9 @@ Ext.onReady( function() {
                     }
                 });
             },
-            loadStore: function(data, pager, append) {
+            loadStore: function(data, pager, append, fn) {
+				pager = pager || {};
+
                 this.loadData(data, append);
                 this.sortStore();
 
@@ -3029,7 +3073,12 @@ Ext.onReady( function() {
                 }
 
                 this.isPending = false;
-                ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+
+				ns.core.web.multiSelect.filterAvailable({store: dataSetAvailableStore}, {store: dataSetSelectedStore});
+
+                if (fn) {
+					fn();
+				}
             },
 			storage: {},
 			parent: null,
@@ -3286,7 +3335,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+						indicatorAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(indicatorAvailable, indicatorSelected);
+						});
 					}
 				}
 			],
@@ -3494,7 +3545,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
+						dataElementAvailableStore.loadPage(null, null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(dataElementAvailable, dataElementSelected);
+						});
 					}
 				}
 			],
@@ -3757,7 +3810,9 @@ Ext.onReady( function() {
 					icon: 'images/arrowrightdouble.png',
 					width: 22,
 					handler: function() {
-						ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						dataSetAvailableStore.loadPage(null, null, true, function() {
+							ns.core.web.multiSelect.selectAll(dataSetAvailable, dataSetSelected);
+						});
 					}
 				}
 			],
@@ -3891,6 +3946,10 @@ Ext.onReady( function() {
                     if (chb.xtype === 'checkbox') {
                         period.checkboxes.push(chb);
                         relativePeriod.valueComponentMap[chb.relativePeriodId] = chb;
+
+                        if (chb.relativePeriodId === ns.core.init.systemInfo.analysisRelativePeriod) {
+                            chb.setValue(true);
+                        }
                     }
                 }
             }
@@ -3970,8 +4029,7 @@ Ext.onReady( function() {
 								{
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_12_MONTHS',
-									boxLabel: NS.i18n.last_12_months,
-									checked: true
+									boxLabel: NS.i18n.last_12_months
 								}
 							]
 						},
@@ -4815,6 +4873,9 @@ Ext.onReady( function() {
 			var	onSelect,
                 availableStore,
 				selectedStore,
+				//dataLabel,
+				//dataSearch,
+				//dataFilter,
 				available,
 				selected,
 				panel,
@@ -4846,9 +4907,9 @@ Ext.onReady( function() {
 					this.isPending = false;
 					//indicatorSearch.hideFilter();
 				},
-				loadPage: function(filter, append) {
+				loadPage: function(filter, append, noPaging, fn) {
 					var store = this,
-						filterPath = filter ? '/query/' + filter : '',
+						params = {},
 						path;
 
 					filter = filter || indicatorFilter.getValue() || null;
@@ -4862,23 +4923,28 @@ Ext.onReady( function() {
 						return;
 					}
 
-					path = '/dimensions/' + dimension.id + '/items' + filterPath + '.json';
+					path = '/dimensions/' + dimension.id + '/items' + (filter ? '/query/' + filter : '') + '.json';
+
+					if (noPaging) {
+						params.paging = false;
+					}
+					else {
+						params.page = store.nextPage;
+						params.pageSize = 50;
+					}
 
 					store.isPending = true;
                     ns.core.web.mask.show(available.boundList);
 
 					Ext.Ajax.request({
 						url: ns.core.init.contextPath + '/api' + path,
-						params: {
-							page: store.nextPage,
-							pageSize: 50
-						},
+						params: params,
 						success: function(r) {
 							var response = Ext.decode(r.responseText),
 								data = response.items || [],
 								pager = response.pager;
 
-							store.loadStore(data, pager, append);
+							store.loadStore(data, pager, append, fn);
 						},
 						callback: function() {
 							store.isPending = false;
@@ -4886,7 +4952,9 @@ Ext.onReady( function() {
 						}
 					});
 				},
-				loadStore: function(data, pager, append) {
+				loadStore: function(data, pager, append, fn) {
+					pager = pager || {};
+
 					this.loadData(data, append);
 					this.lastPage = this.nextPage;
 
@@ -4895,7 +4963,12 @@ Ext.onReady( function() {
 					}
 
 					this.isPending = false;
+
 					ns.core.web.multiSelect.filterAvailable({store: availableStore}, {store: selectedStore});
+
+					if (fn) {
+						fn();
+					}
 				},
 				sortStore: function() {
 					this.sort('name', 'ASC');
@@ -4918,6 +4991,75 @@ Ext.onReady( function() {
                 }
 			});
 
+			//dataLabel = Ext.create('Ext.form.Label', {
+				//text: NS.i18n.available,
+				//cls: 'ns-toolbar-multiselect-left-label',
+				//style: 'margin-right:5px'
+			//});
+
+			//dataSearch = Ext.create('Ext.button.Button', {
+				//width: 22,
+				//height: 22,
+				//cls: 'ns-button-icon',
+				//style: 'background: url(images/search_14.png) 3px 3px no-repeat',
+				//showFilter: function() {
+					//dataLabel.hide();
+					//this.hide();
+					//dataFilter.show();
+					//dataFilter.reset();
+				//},
+				//hideFilter: function() {
+					//dataLabel.show();
+					//this.show();
+					//dataFilter.hide();
+					//dataFilter.reset();
+				//},
+				//handler: function() {
+					//this.showFilter();
+				//}
+			//});
+
+			//dataFilter = Ext.create('Ext.form.field.Trigger', {
+				//cls: 'ns-trigger-filter',
+				//emptyText: 'Filter available..',
+				//height: 22,
+				//hidden: true,
+				//enableKeyEvents: true,
+				//fieldStyle: 'height:22px; border-right:0 none',
+				//style: 'height:22px',
+				//onTriggerClick: function() {
+					//if (this.getValue()) {
+						//this.reset();
+						//this.onKeyUp();
+					//}
+				//},
+				//onKeyUp: function() {
+					//var value = indicatorGroup.getValue(),
+						//store = availableStore;
+
+					//if (Ext.isString(value) || Ext.isNumber(value)) {
+						//store.loadPage(null, this.getValue(), false);
+					//}
+				//},
+				//listeners: {
+					//keyup: {
+						//fn: function(cmp) {
+							//cmp.onKeyUp();
+						//},
+						//buffer: 100
+					//},
+					//show: function(cmp) {
+						//cmp.focus(false, 50);
+					//},
+					//focus: function(cmp) {
+						//cmp.addCls('ns-trigger-filter-focused');
+					//},
+					//blur: function(cmp) {
+						//cmp.removeCls('ns-trigger-filter-focused');
+					//}
+				//}
+			//});
+
 			available = Ext.create('Ext.ux.form.MultiSelect', {
 				cls: 'ns-toolbar-multiselect-left',
 				width: (ns.core.conf.layout.west_fieldset_width - ns.core.conf.layout.west_width_padding) / 2,
@@ -4925,11 +5067,6 @@ Ext.onReady( function() {
 				displayField: 'name',
 				store: availableStore,
 				tbar: [
-					{
-						xtype: 'label',
-						text: NS.i18n.available,
-						cls: 'ns-toolbar-multiselect-left-label'
-					},
 					'->',
 					{
 						xtype: 'button',
@@ -4944,7 +5081,9 @@ Ext.onReady( function() {
 						icon: 'images/arrowrightdouble.png',
 						width: 22,
 						handler: function() {
-							ns.core.web.multiSelect.selectAll(available, selected);
+							availableStore.loadPage(null, null, true, function() {
+								ns.core.web.multiSelect.selectAll(available, selected);
+							});
 						}
 					}
 				],
@@ -5458,7 +5597,7 @@ Ext.onReady( function() {
 				});
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Plugin configuration',
+                    title: 'Embed in web page' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5515,7 +5654,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'Favorite link',
+                    title: 'Favorite link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5564,7 +5703,7 @@ Ext.onReady( function() {
                 });
 
 				window = Ext.create('Ext.window.Window', {
-					title: 'API link',
+                    title: 'API link' + '<span style="font-weight:normal">&nbsp;|&nbsp;&nbsp;' + ns.app.layout.name + '</span>',
 					layout: 'fit',
 					modal: true,
 					resizable: false,
@@ -5631,17 +5770,55 @@ Ext.onReady( function() {
 			iconCls: 'ns-button-icon-table',
 			toggleGroup: 'module',
 			pressed: true,
-			handler: function() {
-				if (!this.pressed) {
-					this.toggle();
-				}
-			}
+            menu: {},
+            handler: function(b) {
+                b.menu = Ext.create('Ext.menu.Menu', {
+                    closeAction: 'destroy',
+                    shadow: false,
+                    showSeparator: false,
+                    items: [
+                        {
+                            text: NS.i18n.clear_pivot_table + '&nbsp;&nbsp;', //i18n
+                            cls: 'ns-menu-item-noicon',
+                            handler: function() {
+                                window.location.href = ns.core.init.contextPath + '/dhis-web-pivot';
+                            }
+                        }
+                    ],
+                    listeners: {
+                        show: function() {
+                            ns.core.web.window.setAnchorPosition(b.menu, b);
+                        },
+                        hide: function() {
+                            b.menu.destroy();
+                            defaultButton.toggle();
+                        },
+                        destroy: function(m) {
+                            b.menu = null;
+                        }
+                    }
+                });
+
+                b.menu.show();
+            }
 		});
 
 		centerRegion = Ext.create('Ext.panel.Panel', {
 			region: 'center',
 			bodyStyle: 'padding:1px',
 			autoScroll: true,
+			fullSize: true,
+			cmp: [defaultButton],
+			toggleCmp: function(show) {
+				for (var i = 0; i < this.cmp.length; i++) {
+					if (show) {
+						this.cmp[i].show();
+					}
+					else {
+						this.cmp[i].hide();
+					}
+				}
+			},
 			tbar: {
 				defaults: {
 					height: 26
@@ -5690,7 +5867,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_charts + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-visualizer';
 										}
 									},
 									'-',
@@ -5729,6 +5906,11 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					{
@@ -5746,7 +5928,7 @@ Ext.onReady( function() {
 										text: NS.i18n.go_to_maps + '&nbsp;&nbsp;', //i18n
 										cls: 'ns-menu-item-noicon',
 										handler: function() {
-											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping/index.html';
+											window.location.href = ns.core.init.contextPath + '/dhis-web-mapping';
 										}
 									},
 									'-',
@@ -5785,12 +5967,22 @@ Ext.onReady( function() {
 							});
 
 							b.menu.show();
+						},
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
 						}
 					},
 					{
 						xtype: 'tbseparator',
 						height: 18,
 						style: 'border-color:transparent; border-right-color:#d1d1d1; margin-right:4px',
+						listeners: {
+							render: function() {
+								centerRegion.cmp.push(this);
+							}
+						}
 					},
 					{
 						xtype: 'button',
@@ -5821,6 +6013,18 @@ Ext.onReady( function() {
 					html += '</div>';
 
 					p.update(html);
+				},
+				resize: function() {
+					var width = this.getWidth();
+
+					if (width < 768 && this.fullSize) {
+						this.toggleCmp(false);
+						this.fullSize = false;
+					}
+					else if (width >= 768 && !this.fullSize) {
+						this.toggleCmp(true);
+						this.fullSize = true;
+					}
 				}
 			}
 		});
@@ -6116,10 +6320,16 @@ Ext.onReady( function() {
 						}
 					}
 
+                    var initEl = document.getElementById('init');
+                    initEl.parentNode.removeChild(initEl);
+
+                    Ext.getBody().setStyle('background', '#fff');
+                    Ext.getBody().setStyle('opacity', 0);
+
 					// fade in
 					Ext.defer( function() {
 						Ext.getBody().fadeIn({
-							duration: 500
+							duration: 600
 						});
 					}, 300 );
 				}
@@ -6180,11 +6390,12 @@ Ext.onReady( function() {
 
                         // date, calendar
                         Ext.Ajax.request({
-                            url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat',
+                            url: init.contextPath + '/api/systemSettings.json?key=keyCalendar&key=keyDateFormat&key=keyAnalysisRelativePeriod',
                             success: function(r) {
                                 var systemSettings = Ext.decode(r.responseText);
                                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                                 init.systemInfo.calendar = systemSettings.keyCalendar;
+                                init.systemInfo.analysisRelativePeriod = systemSettings.keyAnalysisRelativePeriod || 'LAST_12_MONTHS';
 
                                 // user-account
                                 Ext.Ajax.request({
@@ -6242,45 +6453,42 @@ Ext.onReady( function() {
 
                                         // i18n
                                         requests.push({
-                                            url: 'i18n/' + keyUiLocale + '.properties',
+                                            url: 'i18n/i18n_app.properties',
                                             success: function(r) {
                                                 NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
 
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.properties',
-                                                        success: function(r) {
-                                                            Ext.applyIf(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
-                                                        },
-                                                        callback: fn
-                                                    })
+                                                if (keyUiLocale === defaultKeyUiLocale) {
+                                                    Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    fn();
                                                 }
                                                 else {
-                                                    fn();
+                                                    Ext.Ajax.request({
+                                                        url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                        success: function(r) {
+                                                            Ext.apply(NS.i18n, dhis2.util.parseJavaProperties(r.responseText));
+                                                        },
+                                                        failure: function() {
+                                                            console.log('No translations found for system locale (' + keyUiLocale + ')');
+                                                        },
+                                                        callback: function() {
+                                                            Ext.get('init').update(NS.i18n.initializing + '..');
+                                                            fn();
+                                                        }
+                                                    });
                                                 }
                                             },
                                             failure: function() {
-                                                var onFailure = function() {
-                                                    alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
-                                                };
-
-                                                if (keyUiLocale !== defaultKeyUiLocale) {
-                                                    Ext.Ajax.request({
-                                                        url: 'i18n/' + defaultKeyUiLocale + '.json',
-                                                        success: function(r) {
-                                                            console.log('No translations found for system locale (' + keyUiLocale + ').');
-                                                            NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
-                                                        },
-                                                        failure: function() {
-                                                            onFailure();
-                                                        },
-                                                        callback: fn
-                                                    });
-                                                }
-                                                else {
-                                                    fn();
-                                                    onFailure();
-                                                }
+                                                Ext.Ajax.request({
+                                                    url: 'i18n/i18n_app_' + keyUiLocale + '.properties',
+                                                    success: function(r) {
+                                                        NS.i18n = dhis2.util.parseJavaProperties(r.responseText);
+                                                        Ext.get('init').update(NS.i18n.initializing + '..');
+                                                    },
+                                                    failure: function() {
+                                                        alert('No translations found for system locale (' + keyUiLocale + ') or default locale (' + defaultKeyUiLocale + ').');
+                                                    },
+                                                    callback: fn
+                                                });
                                             }
                                         });
 

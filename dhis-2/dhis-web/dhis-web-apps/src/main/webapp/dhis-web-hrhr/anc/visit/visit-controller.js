@@ -4,7 +4,6 @@ trackerCapture.controller('VisitController',
                 $scope,
                 $timeout,
                 $location,
-                TranslationService,
                 DateFormatService,
                 InterventionService,
                 CurrentSelection,
@@ -14,9 +13,7 @@ trackerCapture.controller('VisitController',
                 orderByFilter,
                 $filter,
                 storage) {
-
-    //do translation of the registration page
-    TranslationService.translate();   
+  
     
     //pick selected orgUnit and program
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');

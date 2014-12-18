@@ -28,24 +28,10 @@ package org.hisp.dhis.resourcetable;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_CATEGORY_OPTION_COMBO_NAME;
-import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATA_ELEMENT_STRUCTURE;
-import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_DATE_PERIOD_STRUCTURE;
-import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_ORGANISATION_UNIT_STRUCTURE;
-import static org.hisp.dhis.resourcetable.ResourceTableStore.TABLE_NAME_PERIOD_STRUCTURE;
-import static org.hisp.dhis.dataapproval.DataApprovalLevelService.APPROVAL_LEVEL_UNAPPROVED;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
@@ -72,6 +58,17 @@ import org.hisp.dhis.resourcetable.statement.CreateCategoryOptionGroupSetTableSt
 import org.hisp.dhis.sqlview.SqlView;
 import org.hisp.dhis.sqlview.SqlViewService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.hisp.dhis.dataapproval.DataApprovalLevelService.APPROVAL_LEVEL_UNAPPROVED;
+import static org.hisp.dhis.resourcetable.ResourceTableStore.*;
 
 /**
  * @author Lars Helge Overland
@@ -140,7 +137,7 @@ public class DefaultResourceTableService
     {
         this.sqlViewService = sqlViewService;
     }
-        
+
     // -------------------------------------------------------------------------
     // OrganisationUnitStructure
     // -------------------------------------------------------------------------
@@ -151,6 +148,8 @@ public class DefaultResourceTableService
     {
         int maxLevel = organisationUnitService.getMaxOfOrganisationUnitLevels();
 
+        log.info( "Using " + maxLevel + " organisation unit levels for org unit structure table" );
+        
         resourceTableStore.createOrganisationUnitStructure( maxLevel );
 
         List<Object[]> batchArgs = new ArrayList<>();
@@ -347,7 +346,7 @@ public class DefaultResourceTableService
         Collections.sort( categories, IdentifiableObjectNameComparator.INSTANCE );
 
         resourceTableStore.createCategoryStructure( categories );
-        
+
         resourceTableStore.populateCategoryStructure( categories );
 
         log.info( "Category table generated" );
@@ -473,25 +472,25 @@ public class DefaultResourceTableService
             {
                 final Date startDate = period.getStartDate();
                 final PeriodType rowType = period.getPeriodType();
-    
+
                 List<Object> values = new ArrayList<>();
-    
+
                 values.add( period.getId() );
                 values.add( period.getIsoDate() );
                 values.add( period.getDaysInPeriod() );
-    
+
                 for ( PeriodType periodType : PeriodType.PERIOD_TYPES )
                 {
                     if ( rowType.getFrequencyOrder() <= periodType.getFrequencyOrder() )
-                    {                    
-                        values.add( periodType.createPeriod( startDate, calendar ).getIsoDate() );
+                    {
+                        values.add( IdentifiableObjectUtils.getLocalPeriodIdentifier( startDate, periodType, calendar ) );
                     }
                     else
                     {
                         values.add( null );
                     }
                 }
-    
+
                 batchArgs.add( values.toArray() );
             }
         }

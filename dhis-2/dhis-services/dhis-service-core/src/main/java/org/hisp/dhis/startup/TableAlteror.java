@@ -79,6 +79,7 @@ public class TableAlteror
     public void execute()
     {
         int defaultCategoryComboId = getDefaultCategoryCombo();
+        int defaultOptionComboId =  getDefaultOptionCombo();
 
         // ---------------------------------------------------------------------
         // Drop outdated tables
@@ -130,6 +131,7 @@ public class TableAlteror
         executeSql( "DROP TABLE validationrulegroupuserrolestoalert" );
         executeSql( "DROP TABLE expressionoptioncombo" );
         executeSql( "DROP TABLE orgunitgroupdatasets" );
+        executeSql( "DROP TABLE datavalue_audit" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
@@ -141,7 +143,6 @@ public class TableAlteror
         executeSql( "ALTER TABLE reporttable DROP column docategoryoptioncombos" );
         executeSql( "ALTER TABLE reporttable DROP column mode" );
         executeSql( "ALTER TABLE categoryoptioncombo DROP COLUMN displayorder" );
-        executeSql( "ALTER TABLE dataelementcategoryoption DROP COLUMN shortname" );
         executeSql( "ALTER TABLE section DROP COLUMN label" );
         executeSql( "ALTER TABLE section DROP COLUMN title" );
         executeSql( "ALTER TABLE organisationunit DROP COLUMN polygoncoordinates" );
@@ -762,17 +763,22 @@ public class TableAlteror
         executeSql( "alter table dataelement drop column sortorder" );
         executeSql( "alter table indicator drop column sortorder" );
         executeSql( "alter table dataset drop column sortorder" );
+        
+        executeSql( "alter table dataelement drop column active" );
 
         executeSql( "alter table datavalue alter column value type varchar(50000)" );
         executeSql( "alter table datavalue alter column comment type varchar(50000)" );
         executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
+
+        executeSql( "update datavalueaudit set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
+        executeSql( "alter table datavalueaudit alter column attributeoptioncomboid set not null;" );
+        
+        executeSql( "update dataelementcategoryoption set shortname = substring(name,0,50) where shortname is null" );
         
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();
         upgradeTranslations();
-
-        executeSql( "ALTER TABLE dataelement DROP COLUMN active" );
 
         updateOptions();
 
@@ -792,19 +798,13 @@ public class TableAlteror
 
         int optionComboId = getDefaultOptionCombo();
 
-        executeSql( "alter table datavalue_audit drop constraint fk_datavalueaudit_datavalue;" );
-
         executeSql( "alter table datavalue drop constraint datavalue_pkey;" );
 
         executeSql( "alter table datavalue add column attributeoptioncomboid integer;" );
-        executeSql( "update datavalue set attributeoptioncomboid = " + optionComboId
-            + " where attributeoptioncomboid is null;" );
+        executeSql( "update datavalue set attributeoptioncomboid = " + optionComboId + " where attributeoptioncomboid is null;" );
         executeSql( "alter table datavalue alter column attributeoptioncomboid set not null;" );
         executeSql( "alter table datavalue add constraint fk_datavalue_attributeoptioncomboid foreign key (attributeoptioncomboid) references categoryoptioncombo (categoryoptioncomboid) match simple;" );
         executeSql( "alter table datavalue add constraint datavalue_pkey primary key(dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid);" );
-
-        executeSql( "alter table datavalue_audit add constraint fk_datavalueaudit_datavalue foreign key (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) "
-            + "references datavalue (dataelementid, periodid, sourceid, categoryoptioncomboid, attributeoptioncomboid) match simple;" );
 
         log.info( "Data value table upgraded with attributeoptioncomboid column" );
     }

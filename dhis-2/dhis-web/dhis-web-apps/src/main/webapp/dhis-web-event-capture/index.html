@@ -1,18 +1,12 @@
 <!DOCTYPE html>
-<html manifest="event-capture.appcache" ng-app="eventCapture">
+<html manifest="cacheManifest.action" ng-app="eventCapture">
     <head>
         <title>Event Capture</title>
 
         <meta name="description" content="DHIS 2">
         <meta name="keywords" content="DHIS 2">        
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        
-        <script type="text/javascript">
-            window.google = null;
-        </script>
-
-        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false&libraries=geometry"></script>
-        
+       
         <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.min.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery-ui.min.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.plugin.min.js"></script>
@@ -39,8 +33,8 @@
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/angular-route.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/angular-cookies.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/angular-animate.js"></script>  
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/ui-bootstrap-tpls-0.10.0-draggable-modal.js"></script>        
-
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/ui-bootstrap-tpls-0.10.0-draggable-modal.js"></script>
+        
         <script type="text/javascript" src="../dhis-web-commons/javascripts/moment/moment-with-langs.min.js"></script>       
 
         <script type="text/javascript" src="../dhis-web-commons/javascripts/underscore.min.js"></script>
@@ -66,24 +60,23 @@
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.storage.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.contextmenu.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.appcache.js"></script>
-        <!--<script type="text/javascript" src="../dhis-web-commons/ouwt/ouwt.js"></script>-->
+        <script type="text/javascript" src="../dhis-web-commons/ouwt/ouwt.js"></script>
+        <script type="text/javascript" src="scripts/event-capture.js"></script>
         
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angularLocalStorage.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angular-translate.min.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angular-translate-loader-static-files.min.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angular-translate-loader-url.min.js"></script>
-
-        <!--<script type="text/javascript" src="scripts/event-capture.js"></script>-->
-        <script type="text/javascript" src="scripts/app.js"></script>
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/directives.js"></script>
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/filters.js"></script>
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/services.js"></script>
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/controllers.js"></script>
+        
+        <script type="text/javascript" src="scripts/app.js"></script>        
         <script type="text/javascript" src="scripts/services.js"></script>
         <script type="text/javascript" src="scripts/directives.js"></script>
         <script type="text/javascript" src="scripts/controllers.js"></script>        
-        <script type="text/javascript" src="scripts/column-display-controller.js"></script>
-        <script type="text/javascript" src="scripts/header-controller.js"></script>
-        <script type="text/javascript" src="scripts/map-controller.js"></script>
         <script type="text/javascript" src="scripts/notes-controller.js"></script>        
-        <script type="text/javascript" src="scripts/filters.js"></script>
-        <script type="text/javascript" src="scripts/orgunitTreeSearch.js"></script>
+        <script type="text/javascript" src="scripts/filters.js"></script>        
+        <!--<script type="text/javascript" src="scripts/orgunitTreeSearch.js"></script>-->
 
         <!-- Menu scripts -->
         <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.translate.js"></script>
