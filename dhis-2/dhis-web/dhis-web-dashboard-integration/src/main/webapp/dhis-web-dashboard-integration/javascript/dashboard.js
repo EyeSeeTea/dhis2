@@ -454,7 +454,9 @@ dhis2.db.renderDashboard = function( id )
                         el: 'plugin-' + dashboardItem.id,
                         id: dashboardItem.map.id,
                         width: contentWidth - scrollbarWidth,
-                        height: 290
+                        height: 290,
+                        dashboard: true,
+                        crossDomain: false
                     });
 				}
 				else if ( "reportTable" == dashboardItem.type )

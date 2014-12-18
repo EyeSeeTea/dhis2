@@ -1228,8 +1228,8 @@ Ext.onReady( function() {
 			loader;
 
 		getMap = function() {
-            var isPlugin = GIS.plugin && !GIS.app,
-                type = isPlugin ? 'jsonp' : 'json',
+            var isJsonp = gis.plugin && gis.crossDomain,
+                type = isJsonp ? 'jsonp' : 'json',
                 url = gis.init.contextPath + '/api/maps/' + gis.map.id + '.' + type + '?fields=' + gis.conf.url.mapFields.join(','),
                 success,
                 failure;
@@ -1274,7 +1274,7 @@ Ext.onReady( function() {
                 }
             };
 
-            if (isPlugin) {
+            if (isJsonp) {
                 Ext.data.JsonP.request({
                     url: url,
                     success: function(r) {
@@ -1700,7 +1700,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
             var items = view.rows[0].items,
-                isPlugin = GIS.plugin && !GIS.app,
+                isJsonp = gis.plugin && gis.crossDomain,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -1711,7 +1711,7 @@ Ext.onReady( function() {
 
                     params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params + '&viewClass=detailed';
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isJsonp ? 'jsonp' : 'json') + params + '&viewClass=detailed';
                 }(),
                 success,
                 failure;
@@ -1778,8 +1778,8 @@ Ext.onReady( function() {
 		};
 
 		loadLegend = function(view) {
-            var isPlugin = GIS.plugin && !GIS.app,
-                type = isPlugin ? 'jsonp' : 'json',
+                isJsonp = gis.plugin && gis.crossDomain,
+                type = isJsonp ? 'jsonp' : 'json',
                 url = gis.init.contextPath + '/api/organisationUnitGroupSets/' + view.organisationUnitGroupSet.id + '.' + type + '?fields=organisationUnitGroups[id,name,symbol]',
                 success;
 
@@ -1812,7 +1812,7 @@ Ext.onReady( function() {
                 afterLoad(view);
             };
 
-            if (isPlugin) {
+            if (isJsonp) {
                 Ext.data.JsonP.request({
                     url: url,
                     success: function(r) {
@@ -1972,7 +1972,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-                isPlugin = GIS.plugin && !GIS.app,
+                isJsonp = gis.plugin && gis.crossDomain,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -1983,7 +1983,7 @@ Ext.onReady( function() {
 
                     params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isJsonp ? 'jsonp' : 'json') + params;
                 }(),
                 success,
                 failure;
@@ -2047,7 +2047,7 @@ Ext.onReady( function() {
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            if (isPlugin) {
+            if (isJsonp) {
                 Ext.data.JsonP.request({
                     url: url,
                     disableCaching: false,
@@ -2320,7 +2320,7 @@ Ext.onReady( function() {
 
 		loadOrganisationUnits = function(view) {
 			var items = view.rows[0].items,
-                isPlugin = GIS.plugin && !GIS.app,
+                isJsonp = gis.plugin && gis.crossDomain,
                 url = function() {
                     var params = '?ou=ou:';
 
@@ -2331,7 +2331,7 @@ Ext.onReady( function() {
 
                     params += '&displayProperty=' + gis.init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
 
-                    return gis.init.contextPath + '/api/geoFeatures.' + (isPlugin ? 'jsonp' : 'json') + params;
+                    return gis.init.contextPath + '/api/geoFeatures.' + (isJsonp ? 'jsonp' : 'json') + params;
                 }(),
                 success,
                 failure;
@@ -2363,7 +2363,7 @@ Ext.onReady( function() {
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
-            if (isPlugin) {
+            if (isJsonp) {
                 Ext.data.JsonP.request({
                     url: url,
                     disableCaching: false,
@@ -2489,7 +2489,17 @@ Ext.onReady( function() {
 				loadLegend(view);
 			};
 
-			if (Ext.isObject(GIS.app)) {
+			if (gis.plugin && gis.crossDomain) {
+				Ext.data.JsonP.request({
+					url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
+					disableCaching: false,
+					scope: this,
+					success: function(r) {
+						success(r);
+					}
+				});
+			}
+			else {
 				Ext.Ajax.request({
 					url: gis.init.contextPath + '/api/analytics.json' + paramString,
 					disableCaching: false,
@@ -2498,16 +2508,6 @@ Ext.onReady( function() {
 					},
 					success: function(r) {
 						success(Ext.decode(r.responseText));
-					}
-				});
-			}
-			else if (Ext.isObject(GIS.plugin)) {
-				Ext.data.JsonP.request({
-					url: gis.init.contextPath + '/api/analytics.jsonp' + paramString,
-					disableCaching: false,
-					scope: this,
-					success: function(r) {
-						success(r);
 					}
 				});
 			}
@@ -5699,6 +5699,8 @@ mapfish.GeoStat.createThematic('Thematic4');
 			gis = GIS.core.getInstance(init);
 			gis.el = config.el;
             gis.plugin = true;
+            gis.dashboard = Ext.isDefined(config.dashboard) ? config.dashboard : false;
+            gis.crossDomain = Ext.isDefined(config.crossDomain) ? config.crossDomain : true;
 
 			GIS.core.createSelectHandlers(gis, gis.layer.boundary);
 			GIS.core.createSelectHandlers(gis, gis.layer.thematic1);
