@@ -391,10 +391,7 @@ trackerCapture.controller('DataEntryController',
                     
                     TrackerRulesExecutionService.executeRules($scope);
                 });
-                
             }
-            
-            
         }
     };
     

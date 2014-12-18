@@ -32,36 +32,60 @@ trackerCapture.controller('DashboardController',
     //TODO: build dashboard based on dashboard configuration fow the whole dashboard
     var ruleboundWidgetConfigs = TrackerWidgetsConfigurationFactory.getWidgetConfiguration($scope.selectedProgramId);
     angular.forEach(ruleboundWidgetConfigs,function(widgetConfig){
-        var ruleboundWidget = {title:widgetConfig.title, 
-                    view:"components/rulebound/rulebound.html",
-                    show:true,
-                    expanded:true,
-                    code:widgetConfig.code};
+        var configuredWidget  = 
+                    {
+                        title:widgetConfig.title, 
+                        show:widgetConfig.show,
+                        expand:widgetConfig.expand,
+                        code:widgetConfig.code
+                    };
+                    
+        if(widgetConfig.type === "rulebound")
+        {
+            configuredWidget.view = "components/rulebound/rulebound.html";
+        }
+        else if(widgetConfig.type === "enrollment")
+        {
+            configuredWidget.view = "components/enrollment/enrollment.html";
+             $rootScope.enrollmentWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "dataentry")
+        {
+            configuredWidget.view = "components/dataentry/dataentry.html";
+            $rootScope.dataentryWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "report")
+        {
+            configuredWidget.view = "components/report/tei-report.html";
+            $rootScope.reportWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "current_selections")
+        {
+            configuredWidget.view = "components/selected/selected.html";
+            $rootScope.selectedWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "profile")
+        {
+            configuredWidget.view = "components/profile/profile.html";
+            $rootScope.profileWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "relationships")
+        {
+            configuredWidget.view = "components/relationship/relationship.html";
+            $rootScope.relationshipWidget = configuredWidget;
+        }
+        else if(widgetConfig.type === "notes")
+        {
+            configuredWidget.view = "components/notes/notes.html";
+            $rootScope.notesWidget = configuredWidget;
+        }
+        
         if(widgetConfig.horizontalplacement==="left"){
-            $rootScope.biggerDashboardWidgets.push(ruleboundWidget);
+            $rootScope.biggerDashboardWidgets.push(configuredWidget);
         } else {
-            $rootScope.smallerDashboardWidgets.push(ruleboundWidget);
+            $rootScope.smallerDashboardWidgets.push(configuredWidget);
         }
     });
-    
-
-    $rootScope.enrollmentWidget = {title: 'enrollment', view: "components/enrollment/enrollment.html", show: true, expand: true};
-    $rootScope.dataentryWidget = {title: 'dataentry', view: "components/dataentry/dataentry.html", show: true, expand: true};
-    $rootScope.reportWidget = {title: 'report', view: "components/report/tei-report.html", show: true, expand: true};
-    $rootScope.selectedWidget = {title: 'current_selections', view: "components/selected/selected.html", show: false, expand: true};
-    $rootScope.profileWidget = {title: 'profile', view: "components/profile/profile.html", show: true, expand: true};
-    $rootScope.relationshipWidget = {title: 'relationships', view: "components/relationship/relationship.html", show: true, expand: true};
-    $rootScope.notesWidget = {title: 'notes', view: "components/notes/notes.html", show: true, expand: true};    
-    
-    $rootScope.biggerDashboardWidgets.push($rootScope.enrollmentWidget);
-    $rootScope.biggerDashboardWidgets.push($rootScope.dataentryWidget);
-    $rootScope.biggerDashboardWidgets.push($rootScope.reportWidget);
-    $rootScope.smallerDashboardWidgets.push($rootScope.selectedWidget);
-    $rootScope.smallerDashboardWidgets.push($rootScope.profileWidget);
-    $rootScope.smallerDashboardWidgets.push($rootScope.relationshipWidget);
-    $rootScope.smallerDashboardWidgets.push($rootScope.notesWidget);
-    
-  
     
     if($scope.selectedTeiId){
         //Fetch the selected entity

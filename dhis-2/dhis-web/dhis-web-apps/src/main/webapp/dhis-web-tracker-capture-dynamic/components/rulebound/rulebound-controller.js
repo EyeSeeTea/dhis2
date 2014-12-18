@@ -11,8 +11,8 @@ trackerCapture.controller('RuleBoundController',
     $scope.widgetTitle = widget.title;
     $scope.widgetCode = widget.code;
     
-    
     $scope.displayTextEffects = {};
+    $scope.collectDataEffects = {};
     
     //listen for the selected items
     $scope.$on('ruleeffectsupdated', function(event, args) {
@@ -28,6 +28,8 @@ trackerCapture.controller('RuleBoundController',
                     if(!angular.isObject($scope.displayTextEffects[effect.id])){
                         $scope.displayTextEffects[effect.id] = effect;
                     }
+                } else if(effect.action = "collectdata") {
+                    //TODO: WIP
                 }
             }
         });

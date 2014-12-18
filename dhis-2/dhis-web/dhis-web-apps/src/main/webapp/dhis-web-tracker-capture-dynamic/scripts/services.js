@@ -696,42 +696,68 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             //Will be fetched from server
             var rules = [
                 {
-                    ruleName:"rule1",
-                    
+                    ruleId:"otQmefterrt",
                     ruleContent: {
-                        condition: "($var1 < 100)",
+                        condition: "($diastolicFirstStage >= 70)",
                         actions: [{ id:"LOQmKfnYqvf",
                                     action:"displaytext",
                                     location:"con",
-                                    content:"Rule1 says there is a lot of var1"}],
-                        triggers: [] } },
+                                    content:"The diastolic blood pressure is greater than or equal to 70 in the first stage"}],
+                        triggers: ["tracker_data_changed"] 
+                    } 
+                },
                 {
-                    ruleName:"rule2",
                     ruleId:"TtQmKftYqrt",
                     ruleContent: {
-                        condition: "($var2 = false)",
-                        actions: [{id:"LAQmKfnYqvf",
-                                action:"displaytext",
-                                location:"rem",
-                            content:"Rule2 says that var2 is false."},
-                        {   id:"PLTmKfnYqvf",
-                            action:"displaytext",
-                            location:"con",
-                            content:"in summary, Rule2 says that var2 is false."}],
-                        triggers: [] } },
+                        condition: "($systolicFirstStage > $diastolicFirstStage)",
+                        actions: [
+                            
+                                {
+                                    id:"LAQmKfnYqvf",
+                                    action:"displaytext",
+                                    location:"con",
+                                    content:"Systolic higher than diastolic in first stage"
+                                },
+                                {
+                                    id:"PLTmKfnYqvf",
+                                    action:"displaytext",
+                                    location:"rem",
+                                    content:"I repeat, in summary for the first stage, the systolic blood pressure is higher than the diastolic."
+                                }
+                            ],
+                        triggers: [] 
+                    } 
+                },
                 {
-                    ruleName:"rule3",
                     ruleId:"LpQmKklYqxx",
                     ruleContent: {
-                        condition: "($var3 = true)",
-                        actions: [],
-                        triggers: [] } }];
+                        condition: "($malariaBedNetCurrent === true)",
+                        actions: [{ id:"LermKfnYqvf",
+                                    action:"displaytext",
+                                    location:"con",
+                                    content:"Malaria bednet info not given as part of this visit"}],
+                        triggers: [] 
+                    }
+                },
+                {
+                    ruleId:"LpjkKklYyyx",
+                    ruleContent: {
+                        condition: "($malariaBedNetLatest === false)",
+                        actions: [{ id:"LermKfnYqvf",
+                                    action:"displaytext",
+                                    location:"con",
+                                    content:"Malaria bednet info was given in the most recent visist"}],
+                        triggers: [] 
+                    }
+                }];
             
             //Go through all rules and replace operators for javascript:
-            angular.forEach(rules,function(rule){
+            /*
+             * TODO: Fix the rule washing - needs to see difference between = and >=
+             * angular.forEach(rules,function(rule){
                rule.ruleContent.condition = 
                     rule.ruleContent.condition.replace("=", "==="); 
-            });
+            });*/
 
             return rules;
         }
@@ -745,28 +771,36 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getUserDefinedProgramFieldCodes : function(programUid){
             return {
                 var1: {
-                    variablename: "$var1",
+                    variablename: "$diastolicFirstStage",
                     defaultvalue:0,
                     type: "dataelement_newest_event_program_stage",
-                    dataelement_uID: "AAaJGnWR5js",
+                    dataelement_uID: "dyYdfamSY2Z",
                     programstage_uID: "WZbXY0S00lP",
-                    program_uID: ""
+                    program_uID: "WSGAb5XwJ3Y"
                 },
                 var2: {
-                    variablename: "$var2",
-                    defaultvalue:false,
-                    type: "dataelement_newest_event_program",
-                    dataelement_uID: "WpQmKfbYqvt",
-                    programstage_uID: "",
-                    program_uID: ""
+                    variablename: "$systolicFirstStage",
+                    defaultvalue:0,
+                    type: "dataelement_newest_event_program_stage",
+                    dataelement_uID: "M4HEOoEFTAT",
+                    programstage_uID: "WZbXY0S00lP",
+                    program_uID: "WSGAb5XwJ3Y"
                 },
                 var3: {
-                    variablename: "$var3",
+                    variablename: "$malariaBedNetLatest",
+                    defaultvalue:false,
+                    type: "dataelement_newest_event_program",
+                    dataelement_uID: "ytV9rX4ADnn",
+                    programstage_uID: "",
+                    program_uID: "WSGAb5XwJ3Y"
+                },
+                var4: {
+                    variablename: "$malariaBedNetCurrent",
                     defaultvalue:false,
                     type: "dataelement_current_event",
-                    dataelement_uID: "Mh7nK8UKoZP",
+                    dataelement_uID: "ytV9rX4ADnn",
                     programstage_uID: "",
-                    program_uID: ""
+                    program_uID: "WSGAb5XwJ3Y"
                 }
             }
         }
@@ -777,13 +811,35 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TrackerWidgetsConfigurationFactory', function(){
     return{
         getWidgetConfiguration : function(programUid){
+            //If no config exists, return default config
+            
             return [
-                   {title: 'Conditions/Complications', code:"con", horizontalplacement:"right"},
-                   {title: 'Reminders', code:"rem", horizontalplacement:"right"},
-                   {title: 'Dependencies', code:"dep",horizontalplacement:"left"},
+                {title: 'enrollment', type:'enrollment', show: false, expand: true, horizontalplacement:"left", index:0},
+                {title: 'dataentry', type: 'dataentry', show: true, expand: true, horizontalplacement:"left", index:1},
+                {title: 'Dependencies', type:'rulebound', code:"dep", show: true, expand: true, horizontalplacement:"left", index:2},
+                {title: 'report', type: 'report', show: false, expand: true, horizontalplacement:"left", index:3},
+                {title: 'current_selections', type: 'current_selections', show: false, expand: true, horizontalplacement:"right", index:0},
+                {title: 'profile', type: 'profile', show: false, expand: true, horizontalplacement:"right", index:1},
+                {title: 'Conditions/Complications',  type:'rulebound', code:"con", show: true, expand: true, horizontalplacement:"right", index:2},
+                {title: 'Reminders',  type:'rulebound', code:"rem", show: true, expand: true, horizontalplacement:"right", index:3},
+                {title: 'relationships', type: 'relationships', show: false, expand: true, horizontalplacement:"right", index:4},
+                {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:5}
+            ]
+        },
+        
+        getDefaultWidgetConfiguration: function() {
+            return [
+                {title: 'enrollment', type:'enrollment', show: true, expand: true, horizontalplacement:"left", index:0},
+                {title: 'dataentry', type: 'dataentry', show: true, expand: true, horizontalplacement:"left", index:1},
+                {title: 'report', type: 'report', show: true, expand: true, horizontalplacement:"left", index:2},
+                {title: 'current_selections', type: 'current_selections', show: false, expand: true, horizontalplacement:"right", index:0},
+                {title: 'profile', type: 'profile', show: true, expand: true, horizontalplacement:"right", index:1},
+                {title: 'relationships', type: 'relationships', show: true, expand: true, horizontalplacement:"right", index:2},
+                {title: 'notes', type: 'notes', show: true, expand: true, horizontalplacement:"right", index:3}
             ]
         }
     };
+            
 })
 
 .service('EntityQueryFactory', function(OperatorFactory, DateUtils){  
