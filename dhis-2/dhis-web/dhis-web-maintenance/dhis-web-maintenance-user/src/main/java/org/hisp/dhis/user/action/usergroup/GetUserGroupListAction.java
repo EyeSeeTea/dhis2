@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.usergroup.action;
+package org.hisp.dhis.user.action.usergroup;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,31 +28,25 @@ package org.hisp.dhis.dashboard.usergroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.List;
+import static org.apache.commons.lang.StringUtils.isNotBlank;
 
-import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.system.util.AttributeUtils;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.paging.ActionPagingSupport;
+import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
-import org.hisp.dhis.user.UserService;
 
-import com.opensymphony.xwork2.Action;
-
-public class AddUserGroupAction
-    implements Action
+public class GetUserGroupListAction
+    extends ActionPagingSupport<UserGroup>
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private UserService userService;
-
-    public void setUserService( UserService userService )
-    {
-        this.userService = userService;
-    }
 
     private UserGroupService userGroupService;
 
@@ -60,37 +54,48 @@ public class AddUserGroupAction
     {
         this.userGroupService = userGroupService;
     }
+    private CurrentUserService currentUserService;
 
-    private AttributeService attributeService;
-
-    public void setAttributeService( AttributeService attributeService )
+    public void setCurrentUserService( CurrentUserService currentUserService )
     {
-        this.attributeService = attributeService;
+        this.currentUserService = currentUserService;
     }
 
     // -------------------------------------------------------------------------
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<String> usersSelected;
+    private List<UserGroup> userGroupList;
 
-    public void setUsersSelected( List<String> usersSelected )
+    public List<UserGroup> getUserGroupList()
     {
-        this.usersSelected = usersSelected;
+        return userGroupList;
     }
 
-    private String name;
+    private Map<UserGroup, Boolean> isCurrentUserMemberMap;
 
-    public void setName( String name )
+    public Map<UserGroup, Boolean> getIsCurrentUserMemberMap()
     {
-        this.name = name;
+        return isCurrentUserMemberMap;
     }
 
-    private List<String> jsonAttributeValues;
-
-    public void setJsonAttributeValues( List<String> jsonAttributeValues )
+    private String key;
+    
+    public String getKey()
     {
-        this.jsonAttributeValues = jsonAttributeValues;
+        return key;
+    }
+
+    public void setKey( String key )
+    {
+        this.key = key;
+    }
+
+    private String currentUserUid;
+
+    public String getCurrentUserUid()
+    {
+        return currentUserUid;
     }
 
     // -------------------------------------------------------------------------
@@ -101,32 +106,42 @@ public class AddUserGroupAction
     public String execute()
         throws Exception
     {
-        if ( usersSelected == null )
+        if ( isNotBlank( key ) ) // Filter on key only if set
         {
-            usersSelected = new ArrayList<>();
+            this.paging = createPaging( userGroupService.getUserGroupCountByName( key ) );
+            
+            userGroupList = new ArrayList<>( userGroupService.getUserGroupsBetweenByName( key, paging.getStartPos(), paging.getPageSize() ) );
+        }
+        else
+        {
+            this.paging = createPaging( userGroupService.getUserGroupCount() );
+            
+            userGroupList = new ArrayList<>( userGroupService.getUserGroupsBetween( paging.getStartPos(), paging.getPageSize() ) );
         }
 
-        UserGroup userGroup = new UserGroup( name );
+        currentUserUid = currentUserService.getCurrentUser().getUid();
 
-        for ( String userUid : usersSelected )
-        {
-            User user = userService.getUser( userUid );
-
-            if( user == null )
-            {
-                continue;
-            }
-
-            userGroup.addUser( user );
-        }
-
-        if ( jsonAttributeValues != null )
-        {
-            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues, attributeService );
-        }
-
-        userGroupService.addUserGroup( userGroup );
-
+        isCurrentUserMemberMap = populateMemberShipMap( userGroupList );
+        
         return SUCCESS;
     }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private Map<UserGroup, Boolean> populateMemberShipMap( List<UserGroup> userGroups )
+    {
+        User currentUser = currentUserService.getCurrentUser();
+
+        Map<UserGroup, Boolean> map = new HashMap<>();
+
+        for( UserGroup ug : userGroups )
+        {
+            map.put( ug, ug.getMembers().contains( currentUser ) );
+        }
+
+        return map;
+    }
 }
+

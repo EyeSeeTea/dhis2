@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.usergroup.action;
+package org.hisp.dhis.user.action.usergroup;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,31 +28,15 @@ package org.hisp.dhis.dashboard.usergroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
-import org.hisp.dhis.system.util.AttributeUtils;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.common.DeleteNotAllowedException;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
-/**
- * @author Lars Helge Overland
- */
-public class EditUserGroupFormAction
+public class RemoveUserGroupAction
     implements Action
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
 
     private UserGroupService userGroupService;
 
@@ -61,74 +45,59 @@ public class EditUserGroupFormAction
         this.userGroupService = userGroupService;
     }
 
-    private AttributeService attributeService;
+    // -------------------------------------------------------------------------
+    // I18n
+    // -------------------------------------------------------------------------
 
-    public void setAttributeService( AttributeService attributeService )
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
     {
-        this.attributeService = attributeService;
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
-    // Parameters
+    // Input
     // -------------------------------------------------------------------------
 
-    private Integer userGroupId;
-
-    public void setUserGroupId( Integer userGroupId )
+    private Integer id;
+    
+    public void setId( Integer id )
     {
-        this.userGroupId = userGroupId;
-    }
-
-    public Integer getUserGroupId()
-    {
-        return userGroupId;
-    }
-
-    private List<User> groupMembers = new ArrayList<>();
-
-    public List<User> getGroupMembers()
-    {
-        return groupMembers;
-    }
-
-    private UserGroup group;
-
-    public UserGroup getGroup()
-    {
-        return group;
-    }
-
-    private List<Attribute> attributes;
-
-    public List<Attribute> getAttributes()
-    {
-        return attributes;
-    }
-
-    public Map<Integer, String> attributeValues = new HashMap<>();
-
-    public Map<Integer, String> getAttributeValues()
-    {
-        return attributeValues;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
-    // Action Implementation
+    // Output
+    // -------------------------------------------------------------------------
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
     // -------------------------------------------------------------------------
 
     @Override
     public String execute()
-        throws Exception
     {
-        group = userGroupService.getUserGroup( userGroupId );
+        try
+        {
+            userGroupService.deleteUserGroup( userGroupService.getUserGroup( id ) );
+        }
+        catch ( DeleteNotAllowedException ex )
+        {
+            if ( ex.getErrorCode().equals( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS ) )
+            {
+                message = i18n.getString( "object_not_deleted_associated_by_objects" ) + " " + ex.getMessage();
 
-        groupMembers = new ArrayList<>( group.getMembers() );
-
-        attributes = new ArrayList<>( attributeService.getUserGroupAttributes() );
-
-        attributeValues = AttributeUtils.getAttributeValueMap( group.getAttributeValues() );
-
-        Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
+                return ERROR;
+            }
+        }
 
         return SUCCESS;
     }

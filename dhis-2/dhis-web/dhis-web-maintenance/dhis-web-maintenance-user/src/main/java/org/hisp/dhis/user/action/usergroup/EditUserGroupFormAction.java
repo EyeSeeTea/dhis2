@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.usergroup.action;
+package org.hisp.dhis.user.action.usergroup;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,12 +28,26 @@ package org.hisp.dhis.dashboard.usergroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.i18n.I18n;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hisp.dhis.attribute.Attribute;
+import org.hisp.dhis.attribute.AttributeService;
+import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
+import org.hisp.dhis.system.util.AttributeUtils;
+import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 
-public class ValidateUserGroupAction
+import com.opensymphony.xwork2.Action;
+
+/**
+ * @author Lars Helge Overland
+ */
+public class EditUserGroupFormAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -47,36 +61,55 @@ public class ValidateUserGroupAction
         this.userGroupService = userGroupService;
     }
 
-    private I18n i18n;
+    private AttributeService attributeService;
 
-    public void setI18n( I18n i18n )
+    public void setAttributeService( AttributeService attributeService )
     {
-        this.i18n = i18n;
+        this.attributeService = attributeService;
     }
 
     // -------------------------------------------------------------------------
     // Parameters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer userGroupId;
 
-    public void setId( Integer id )
+    public void setUserGroupId( Integer userGroupId )
     {
-        this.id = id;
+        this.userGroupId = userGroupId;
     }
 
-    private String name;
-
-    public void setName( String name )
+    public Integer getUserGroupId()
     {
-        this.name = name;
+        return userGroupId;
     }
 
-    private String message;
+    private List<User> groupMembers = new ArrayList<>();
 
-    public String getMessage()
+    public List<User> getGroupMembers()
     {
-        return message;
+        return groupMembers;
+    }
+
+    private UserGroup group;
+
+    public UserGroup getGroup()
+    {
+        return group;
+    }
+
+    private List<Attribute> attributes;
+
+    public List<Attribute> getAttributes()
+    {
+        return attributes;
+    }
+
+    public Map<Integer, String> attributeValues = new HashMap<>();
+
+    public Map<Integer, String> getAttributeValues()
+    {
+        return attributeValues;
     }
 
     // -------------------------------------------------------------------------
@@ -87,20 +120,15 @@ public class ValidateUserGroupAction
     public String execute()
         throws Exception
     {
+        group = userGroupService.getUserGroup( userGroupId );
 
-        if ( name != null )
-        {
-            UserGroup match = userGroupService.getUserGroupByName( name ).get( 0 );
+        groupMembers = new ArrayList<>( group.getMembers() );
 
-            if ( match != null && (id == null || match.getId() != id) )
-            {
-                message = i18n.getString( "name_in_use" );
+        attributes = new ArrayList<>( attributeService.getUserGroupAttributes() );
 
-                return ERROR;
-            }
-        }
+        attributeValues = AttributeUtils.getAttributeValueMap( group.getAttributeValues() );
 
-        message = i18n.getString( "ok" );
+        Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
 
         return SUCCESS;
     }

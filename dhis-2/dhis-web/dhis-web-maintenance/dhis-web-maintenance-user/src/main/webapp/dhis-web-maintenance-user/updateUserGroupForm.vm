@@ -16,7 +16,9 @@
             },
             'rules': getValidationRules( 'userGroup' )
         } );
+		checkValueIsExist("name", "validateUserGroup.action", { id: userGroupId });
     });
+	
 </script>
 
 <h3>$i18n.getString( "edit_user_group" )</h3>
