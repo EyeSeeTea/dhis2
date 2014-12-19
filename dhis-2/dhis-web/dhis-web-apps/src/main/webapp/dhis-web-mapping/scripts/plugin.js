@@ -5173,13 +5173,14 @@ mapfish.GeoStat.createThematic('Thematic4');
 
 	GIS.plugin = {};
 
-	getInit = function(contextPath) {
+	getInit = function(config) {
 		var isInit = false,
 			requests = [],
 			callbacks = 0,
+            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
 			fn;
 
-        init.contextPath = contextPath;
+        init.contextPath = config.url;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
@@ -5195,24 +5196,29 @@ mapfish.GeoStat.createThematic('Thematic4');
 
         // dhis2
         requests.push({
-            url: contextPath + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',
             success: function(r) {
-                var systemSettings = r;
+                var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
+                    userAccountConfig;
+
                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                 init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                // user-account
-                Ext.data.JsonP.request({
-                    url: contextPath + '/api/me/user-account.jsonp',
-                    success: function(r) {
-                        init.userAccount = r;
+                // optionSetsConfig
 
-                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
-                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
-                                Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
-                                    Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
-                                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
-                                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
+
+                // user-account
+                userAccountConfig = {
+                    url: init.contextPath + '/api/me/user-account.' + type + '',
+                    success: function(r) {
+                        init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
+
+                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
 
                                                 // init
                                                 var defaultKeyUiLocale = 'en',
@@ -5220,7 +5226,8 @@ mapfish.GeoStat.createThematic('Thematic4');
                                                     namePropertyUrl,
                                                     contextPath,
                                                     keyUiLocale,
-                                                    dateFormat;
+                                                    dateFormat,
+                                                    optionSetVersionConfig;
 
                                                 init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
                                                 init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
@@ -5243,17 +5250,26 @@ mapfish.GeoStat.createThematic('Thematic4');
                                                     objectStores: ['optionSets']
                                                 });
 
-                                                // option sets
-                                                Ext.data.JsonP.request({
-                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
+                                                optionSetVersionConfig = {
+                                                    url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
                                                     success: function(r) {
-                                                        var optionSets = r.optionSets || [],
+                                                        var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
                                                             store = dhis2.gis.store,
                                                             ids = [],
                                                             url = '',
                                                             callbacks = 0,
                                                             checkOptionSet,
-                                                            updateStore;
+                                                            updateStore,
+                                                            optionSetConfig;
+
+                                                        optionSetConfig = {
+                                                            url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            success: function(r) {
+                                                                var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
+
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        };
 
                                                         updateStore = function() {
                                                             if (++callbacks === optionSets.length) {
@@ -5266,14 +5282,12 @@ mapfish.GeoStat.createThematic('Thematic4');
                                                                     url += '&filter=id:eq:' + ids[i];
                                                                 }
 
-                                                                Ext.data.JsonP.request({
-                                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false' + url,
-                                                                    success: function(r) {
-                                                                        var sets = r.optionSets;
-
-                                                                        store.setAll('optionSets', sets).done(fn);
-                                                                    }
-                                                                });
+                                                                if (type === 'jsonp') {
+                                                                    Ext.data.JsonP.request(optionSetConfig);
+                                                                }
+                                                                else {
+                                                                    Ext.Ajax.request(optionSetConfig);
+                                                                }
                                                             }
                                                         };
 
@@ -5293,7 +5307,15 @@ mapfish.GeoStat.createThematic('Thematic4');
                                                             }
                                                         });
                                                     }
-                                                });
+                                                };
+
+                                                // option sets
+                                                if (type === 'jsonp') {
+                                                    Ext.data.JsonP.request(optionSetVersionConfig);
+                                                }
+                                                else {
+                                                    Ext.Ajax.request(optionSetVersionConfig);
+                                                }
                                             });
                                         });
                                     });
@@ -5301,14 +5323,22 @@ mapfish.GeoStat.createThematic('Thematic4');
                             });
                         });
                     }
-                });
+                };
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(userAccountConfig);
+                }
+                else {
+                    Ext.Ajax.request(userAccountConfig);
+                }
             }
         });
 
+        // user orgunit
 		requests.push({
-			url: contextPath + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
 			success: function(r) {
-				var organisationUnits = r.organisationUnits || [],
+				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
                     ouc = [];
 
@@ -5336,15 +5366,20 @@ mapfish.GeoStat.createThematic('Thematic4');
 		});
 
 		requests.push({
-			url: contextPath + '/api/dimensions.jsonp?links=false&paging=false',
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
 			success: function(r) {
-				init.dimensions = r.dimensions;
+				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
 			}
 		});
 
 		for (var i = 0; i < requests.length; i++) {
-			Ext.data.JsonP.request(requests[i]);
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(requests[i]);
+            }
+            else {
+                Ext.Ajax.request(requests[i]);
+            }
 		}
 	};
 
@@ -5696,11 +5731,20 @@ mapfish.GeoStat.createThematic('Thematic4');
 
 			applyCss();
 
+            init.plugin = true;
+            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
+            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
+
 			gis = GIS.core.getInstance(init);
+
 			gis.el = config.el;
-            gis.plugin = true;
-            gis.dashboard = Ext.isDefined(config.dashboard) ? config.dashboard : false;
-            gis.crossDomain = Ext.isDefined(config.crossDomain) ? config.crossDomain : true;
+            gis.plugin = init.plugin;
+            gis.dashboard = init.dashboard;
+            gis.crossDomain = init.crossDomain;
+            gis.skipMask = init.skipMask;
+            gis.skipFade = init.skipFade;
 
 			GIS.core.createSelectHandlers(gis, gis.layer.boundary);
 			GIS.core.createSelectHandlers(gis, gis.layer.thematic1);
@@ -5734,7 +5778,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 
 			if (!isInitStarted) {
 				isInitStarted = true;
-				getInit(config.url);
+				getInit(config);
 			}
 		}
 	};
