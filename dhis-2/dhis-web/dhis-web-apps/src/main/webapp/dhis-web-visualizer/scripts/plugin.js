@@ -3170,19 +3170,6 @@ Ext.onReady(function() {
 		};
     };
 
-	// chart tips css
-	var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
-	css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
-	css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
-
-	// load mask css
-	css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
-	css += '.x-mask-msg div { background-position: 11px center; } \n';
-	css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
-    css += '.x-mask { opacity: 0; } \n';
-
-	Ext.util.CSS.createStyleSheet(css);
-
 	// i18n
 	DV.i18n = {
 		target: 'Target',
@@ -3199,15 +3186,17 @@ Ext.onReady(function() {
 		isInitStarted = false,
 		isInitComplete = false,
 		getInit,
+        applyCss,
 		execute;
 
-	getInit = function(url) {
+	getInit = function(config) {
 		var isInit = false,
 			requests = [],
 			callbacks = 0,
+            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
 			fn;
 
-        init.contextPath = url;
+        init.contextPath = config.url;
 
 		fn = function() {
 			if (++callbacks === requests.length) {
@@ -3223,9 +3212,9 @@ Ext.onReady(function() {
 
         // user-account
         requests.push({
-            url: init.contextPath + '/api/me/user-account.jsonp',
+            url: init.contextPath + '/api/me/user-account.' + type,
             success: function(r) {
-                init.userAccount = r;
+                init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
 
                 // init
                 var defaultKeyUiLocale = 'en',
@@ -3250,9 +3239,9 @@ Ext.onReady(function() {
         });
 
 		requests.push({
-			url: url + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
 			success: function(r) {
-				var organisationUnits = r.organisationUnits || [],
+				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
                     ouc = [];
 
@@ -3281,18 +3270,39 @@ Ext.onReady(function() {
 		});
 
 		requests.push({
-			url: url + '/api/dimensions.jsonp?links=false&paging=false',
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
 			success: function(r) {
-				init.dimensions = r.dimensions;
+				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
 			}
 		});
 
 		for (var i = 0; i < requests.length; i++) {
-			Ext.data.JsonP.request(requests[i]);
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(requests[i]);
+            }
+            else {
+                Ext.Ajax.request(requests[i]);
+            }
 		}
 	};
 
+	applyCss = function() {
+        
+        // chart tips css
+        var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
+        css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
+        css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
+
+        // load mask css
+        css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
+        css += '.x-mask-msg div { background-position: 11px center; } \n';
+        css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+        css += '.x-mask { opacity: 0; } \n';
+
+        Ext.util.CSS.createStyleSheet(css);
+    };
+    
 	execute = function(config) {
 		var validateConfig,
             extendInstance,
@@ -3477,8 +3487,14 @@ Ext.onReady(function() {
 				return;
 			}
 
+			applyCss();
+
 			ns.core = DV.getCore(Ext.clone(init));
 			extendInstance(ns);
+            
+            ns.plugin = true;
+            ns.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            ns.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
@@ -3511,7 +3527,7 @@ Ext.onReady(function() {
 
 			if (!isInitStarted) {
 				isInitStarted = true;
-				getInit(config.url);
+				getInit(config);
 			}
 		}
 	};
