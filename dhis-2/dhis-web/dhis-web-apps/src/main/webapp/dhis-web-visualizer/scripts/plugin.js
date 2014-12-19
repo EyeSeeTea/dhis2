@@ -1655,6 +1655,10 @@ Ext.onReady(function() {
 			web.mask = {};
 
 			web.mask.show = function(component, message) {
+                if (init.skipMask) {
+                    return;
+                }
+                
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.show: component not an object');
 					return null;
@@ -1678,6 +1682,10 @@ Ext.onReady(function() {
 			};
 
 			web.mask.hide = function(component) {
+                if (init.skipMask) {
+                    return;
+                }
+                
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.hide: component not an object');
 					return null;
@@ -3335,37 +3343,68 @@ Ext.onReady(function() {
                 conf = ns.core.conf,
 				support = ns.core.support,
 				service = ns.core.service,
-				web = ns.core.web;
+				web = ns.core.web,
+                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                headerMap = {
+                    json: 'application/json',
+                    jsonp: 'application/javascript'
+                },
+                headers = {
+                    'Content-Type': headerMap[type],
+                    'Accepts': headerMap[type]
+                };
+
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
 
 			init.el = config.el;
-            Ext.get(init.el).setStyle('opacity', 0);
+            //Ext.get(init.el).setStyle('opacity', 0);
 
 			web.chart = web.chart || {};
 
             web.chart.loadChart = function(obj) {
+                var success,
+                    failure,
+                    config = {};
+                    
                 if (!(obj && obj.id)) {
                     console.log('Error, no chart id');
                     return;
                 }
 
-				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/charts/' + obj.id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
-					failure: function(r) {
-						window.open(init.contextPath + '/api/charts/' + obj.id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
-					},
-					success: function(r) {
-						var layout = api.layout.Layout(r, obj);
+                success = function(r) {
+                    var layout = api.layout.Layout((r.responseText ? Ext.decode(r.responseText) : r), obj);
 
-						if (layout) {
-							web.chart.getData(layout, true);
-						}
-					}
-				});
+                    if (layout) {
+                        web.chart.getData(layout, true);
+                    }
+                };
+
+                failure = function(r) {
+                    console.log(obj.id, (r.responseText ? Ext.decode(r.responseText) : r));
+                };
+
+                config.url = init.contextPath + '/api/charts/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.chart.getData = function(layout, isUpdateGui) {
 				var xLayout,
-					paramString;
+					paramString,
+                    success,
+                    failure,
+                    config = {};
 
 				if (!layout) {
 					return;
@@ -3375,42 +3414,46 @@ Ext.onReady(function() {
 				paramString = web.analytics.getParamString(xLayout, true);
 
 				// show mask
-				web.mask.show(ns.app.centerRegion);
+                web.mask.show(ns.app.centerRegion);
 
-				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/analytics.jsonp' + paramString,
-					timeout: 60000,
-					headers: {
-						'Content-Type': 'application/json',
-						'Accepts': 'application/json'
-					},
-					disableCaching: false,
-					failure: function(r) {
-						web.mask.hide(ns.app.centerRegion);
+                success = function(r) {
+                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-						window.open(init.contextPath + '/api/analytics.json' + paramString, '_blank');
-					},
-					success: function(r) {
-						var response = api.response.Response(r);
+                    if (!response) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
 
-						if (!response) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
+                    // sync xLayout with response
+                    xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
 
-						// sync xLayout with response
-						xLayout = service.layout.getSyncronizedXLayout(xLayout, response);
+                    if (!xLayout) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
 
-						if (!xLayout) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
+                    ns.app.paramString = paramString;
 
-						ns.app.paramString = paramString;
+                    web.chart.getChart(layout, xLayout, response, isUpdateGui);
+                };
 
-						web.chart.getChart(layout, xLayout, response, isUpdateGui);
-					}
-				});
+                failure = function(r) {
+                    web.mask.hide(ns.app.centerRegion);
+                };
+
+                config.url = init.contextPath + '/api/analytics.' + type + paramString;
+                config.timeout = 60000;
+                config.headers = headers;
+                config.disableCaching = false;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.chart.getChart = function(layout, xLayout, response, isUpdateGui) {
@@ -3488,13 +3531,14 @@ Ext.onReady(function() {
 			}
 
 			applyCss();
+            
+            init.plugin = true;
+            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
+            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
 
 			ns.core = DV.getCore(Ext.clone(init));
 			extendInstance(ns);
-            
-            ns.plugin = true;
-            ns.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
-            ns.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
