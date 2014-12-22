@@ -3386,7 +3386,28 @@ Ext.onReady( function() {
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web,
-                dimConf = conf.finals.dimension;
+                dimConf = conf.finals.dimension,
+                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                headerMap = {
+                    json: 'application/json',
+                    jsonp: 'application/javascript'
+                },
+                headers = {
+                    'Content-Type': headerMap[type],
+                    'Accepts': headerMap[type]
+                };
+
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
+
+			init.el = config.el;
+
+            if (!ns.skipFade) {
+                Ext.get(init.el).setStyle('opacity', 0);
+            }
 
 			// mouse events
 			web.events = web.events || {};
@@ -3442,65 +3463,106 @@ Ext.onReady( function() {
 			// report
 			web.report = web.report || {};
 
-			web.report.loadReport = function(id) {
-				if (!Ext.isString(id)) {
-					alert('Invalid event report id');
-					return;
-				}
+			web.report.loadReport = function(obj) {
+                var success,
+                    failure,
+                    config = {};
 
-				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/eventReports/' + id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
-					failure: function(r) {
-						window.open(init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
-					},
-					success: function(r) {
-						var layout = api.layout.Layout(r);
+                if (!(obj && obj.id)) {
+                    console.log('Error, no chart id');
+                    return;
+                }
 
-						if (layout) {
-							web.report.getData(layout, true);
-						}
-					}
-				});
+                success = function(r) {
+                    var layout = api.layout.Layout((r.responseText ? Ext.decode(r.responseText) : r), obj);
+
+                    if (layout) {
+                        web.report.getData(layout, true);
+                    }
+                };
+
+                failure = function(r) {
+                    console.log(obj.id, (r.responseText ? Ext.decode(r.responseText) : r));
+                };
+
+                config.url = init.contextPath + '/api/eventReports/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.disableCaching = false;
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.report.getData = function(view, isUpdateGui) {
-				var paramString = web.analytics.getParamString(view, 'jsonp');
+				var xLayout,
+					paramString,
+                    success,
+                    failure,
+                    config = {};
 
-				// show mask
-				web.mask.show(ns.app.centerRegion);
+				if (!layout) {
+					return;
+				}
 
-				Ext.data.JsonP.request({
-					url: ns.core.init.contextPath + paramString,
-					disableCaching: false,
-					scope: this,
-					failure: function(r) {
-						web.mask.hide(ns.app.centerRegion);
+                //xLayout = service.layout.getExtendedLayout(layout);
+				paramString = web.analytics.getParamString(layout, type);
 
-                        console.log(r.status + '\n' + r.statusText + '\n' + r.responseText);
-					},
-					success: function(r) {
-                        var response = api.response.Response(r);
+				// mask
+                if (!ns.skipMask) {
+                    web.mask.show(ns.app.centerRegion);
+                }
 
-                        if (!response) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
+                success = function(r) {
+                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                        // add to dimConf, TODO
-                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                            header = response.headers[i];
-                            map[header.name] = map[header.name] || {
-                                id: header.name,
-                                dimensionName: header.name,
-                                name: header.column
-                            };
-                        }
+                    if (!response && !ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
 
-                        ns.app.paramString = paramString;
+                    // add to dimConf, TODO
+                    for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                        header = response.headers[i];
+                        map[header.name] = map[header.name] || {
+                            id: header.name,
+                            dimensionName: header.name,
+                            name: header.column
+                        };
+                    }
 
-                        web.report.createReport(view, response, isUpdateGui);
-					}
-				});
+                    ns.app.paramString = paramString;
+
+                    web.report.createReport(view, response, isUpdateGui);
+                };
+
+                failure = function(r) {
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    console.log(r);
+                };
+
+                config.url = init.contextPath + paramString;
+                config.disableCaching = false;
+                config.scope = this;
+                config.timeout = 60000;
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
@@ -3572,7 +3634,10 @@ Ext.onReady( function() {
 
                         if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
                             alert('Table has too many cells. Please reduce the table and try again.');
-                            web.mask.hide(ns.app.centerRegion);
+
+                            if (!ns.skipMask) {
+                                web.mask.hide(ns.app.centerRegion);
+                            }
                             return;
                         }
 
@@ -3585,11 +3650,16 @@ Ext.onReady( function() {
                         //ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
 
-                        Ext.defer( function() {
-                            Ext.get(ns.core.init.el).fadeIn({
-                                duration: 400
+                        // fade
+                        if (!ns.skipFade) {
+                            chart.on('afterrender', function() {
+                                Ext.defer( function() {
+                                    Ext.get(init.el).fadeIn({
+                                        duration: 400
+                                    });
+                                }, 300 );
                             });
-                        }, 300 );
+                        }
 
                         // after render
                         ns.app.layout = layout;
@@ -3605,7 +3675,9 @@ Ext.onReady( function() {
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
                         }
 
-                        web.mask.hide(ns.app.centerRegion);
+                        if (!ns.skipMask) {
+                            web.mask.hide(ns.app.centerRegion);
+                        }
 
                         if (ER.isDebug) {
                             console.log("Number of cells", table.tdCount);
@@ -3667,7 +3739,9 @@ Ext.onReady( function() {
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
                         }
 
-                        web.mask.hide(ns.app.centerRegion);
+                        if (!ns.skipMask) {
+                            web.mask.hide(ns.app.centerRegion);
+                        }
                     };
 
                     // execute

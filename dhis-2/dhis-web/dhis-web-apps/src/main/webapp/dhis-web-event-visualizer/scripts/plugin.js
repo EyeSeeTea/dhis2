@@ -3952,10 +3952,10 @@ Ext.onReady( function() {
                 };
 
                 config.url = init.contextPath + paramString;
+                config.disableCaching = false;
                 config.scope = this;
                 config.timeout = 60000;
                 config.headers = headers;
-                config.disableCaching = false;
                 config.success = success;
                 config.failure = failure;
 
