@@ -3611,7 +3611,7 @@ Ext.onReady( function() {
 
                 // user-account
                 userAccountConfig = {
-                    url: init.contextPath + '/api/me/user-account.' + type + '',
+                    url: init.contextPath + '/api/me/user-account.' + type,
                     disableCaching: false,
                     success: function(r) {
                         init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
