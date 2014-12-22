@@ -2943,6 +2943,7 @@ Ext.onReady( function() {
         // user-account
         requests.push({
             url: init.contextPath + '/api/me/user-account.' + type,
+            disableCaching: false,
             success: function(r) {
                 init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
 
@@ -2971,6 +2972,7 @@ Ext.onReady( function() {
         // user orgunit
 		requests.push({
 			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
@@ -3001,6 +3003,7 @@ Ext.onReady( function() {
 
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
@@ -3174,7 +3177,7 @@ Ext.onReady( function() {
                 var success,
                     failure,
                     config = {};
-                    
+
                 if (!(obj && obj.id)) {
                     console.log('Error, no report table id');
                     return;
@@ -3193,6 +3196,7 @@ Ext.onReady( function() {
                 };
 
                 config.url = init.contextPath + '/api/reportTables/' + obj.id + '.' + type + '?fields=' + ns.core.conf.url.analysisFields.join(',');
+                config.disableCaching = false;
                 config.headers = headers;
                 config.success = success;
                 config.failure = failure;
@@ -3252,9 +3256,9 @@ Ext.onReady( function() {
                 };
 
                 config.url = init.contextPath + '/api/analytics.' + type + paramString;
+                config.disableCaching = false;
                 config.timeout = 60000;
                 config.headers = headers;
-                config.disableCaching = false;
                 config.success = success;
                 config.failure = failure;
 
@@ -3388,7 +3392,7 @@ Ext.onReady( function() {
 			}
 
             applyCss();
-            
+
             init.plugin = true;
             init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;

@@ -685,6 +685,7 @@ Ext.onReady( function() {
 			showInfo = function() {
 				Ext.Ajax.request({
 					url: gis.init.contextPath + '/api/organisationUnits/' + att.id + '.json?links=false',
+                    disableCaching: false,
 					success: function(r) {
 						var ou = Ext.decode(r.responseText);
 
@@ -813,6 +814,7 @@ Ext.onReady( function() {
 
 													Ext.Ajax.request({
 														url: url,
+                                                        disableCaching: false,
 														success: function(r) {
 															var response = Ext.decode(r.responseText),
 																data = [];
@@ -971,6 +973,7 @@ Ext.onReady( function() {
                         if (Ext.isNumber(geo.x) && Ext.isNumber(geo.y) && gis.init.user.isAdmin) {
                             Ext.Ajax.request({
                                 url: gis.init.contextPath + '/api/organisationUnits/' + id + '.json?links=false',
+                                disableCaching: false,
                                 success: function(r) {
                                     var orgUnit = Ext.decode(r.responseText);
 
@@ -1228,18 +1231,18 @@ Ext.onReady( function() {
 			loader;
 
 		getMap = function() {
-            var isJsonp = gis.plugin && gis.crossDomain,
-                type = isJsonp ? 'jsonp' : 'json',
-                url = gis.init.contextPath + '/api/maps/' + gis.map.id + '.' + type + '?fields=' + gis.conf.url.mapFields.join(','),
+            var type = gis.plugin && gis.crossDomain ? 'jsonp' : 'json',
                 success,
-                failure;
+                failure,
+                config = {};
 
             success = function(r) {
+                var response = r.responseText ? Ext.decode(r.responseText) : r;
 
                 // operand
-                if (Ext.isArray(r.mapViews)) {
-                    for (var i = 0, view; i < r.mapViews.length; i++) {
-                        view = r.mapViews[i];
+                if (Ext.isArray(response.mapViews)) {
+                    for (var i = 0, view; i < response.mapViews.length; i++) {
+                        view = response.mapViews[i];
 
                         if (view) {
                             if (Ext.isArray(view.columns) && view.columns.length) {
@@ -1259,7 +1262,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                gis.map = r;
+                gis.map = response;
                 setMap();
             };
 
@@ -1274,21 +1277,16 @@ Ext.onReady( function() {
                 }
             };
 
-            if (isJsonp) {
-                Ext.data.JsonP.request({
-                    url: url,
-                    success: function(r) {
-                        success(r);
-                    }
-                });
+            config.url = gis.init.contextPath + '/api/maps/' + gis.map.id + '.' + type + '?fields=' + gis.conf.url.mapFields.join(',');
+            config.disableCaching = false;
+            config.success = success;
+            config.failure = failure;
+
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(config);
             }
             else {
-                Ext.Ajax.request({
-                    url: url,
-                    success: function(r) {
-                        success(Ext.decode(r.responseText));
-                    }
-                });
+                Ext.Ajax.request(config);
             }
 		};
 
@@ -1815,6 +1813,7 @@ Ext.onReady( function() {
             if (isJsonp) {
                 Ext.data.JsonP.request({
                     url: url,
+                    disableCaching: false,
                     success: function(r) {
                         success(r);
                     }
@@ -1823,6 +1822,7 @@ Ext.onReady( function() {
             else {
                 Ext.Ajax.request({
                     url: url,
+                    disableCaching: false,
                     success: function(r) {
                         success(Ext.decode(r.responseText));
                     }
@@ -2620,11 +2620,11 @@ Ext.onReady( function() {
                 };
 
                 config.url = gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.' + type + '?fields=' + gis.conf.url.mapLegendSetFields.join(',');
+                config.disableCaching = false;
                 config.scope = this;
                 config.success = success;
                 config.failure = failure;
                 config.callback = fn;
-                config.disableCaching = false;
 
                 if (type === 'jsonp') {
                     Ext.data.JsonP.request(config);
@@ -5213,6 +5213,7 @@ mapfish.GeoStat.createThematic('Thematic4');
         // dhis2
         requests.push({
             url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',
+            disableCaching: false,
             success: function(r) {
                 var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
                     userAccountConfig;
@@ -5225,7 +5226,8 @@ mapfish.GeoStat.createThematic('Thematic4');
 
                 // user-account
                 userAccountConfig = {
-                    url: init.contextPath + '/api/me/user-account.' + type + '',
+                    url: init.contextPath + '/api/me/user-account.' + type,
+                    disableCaching: false,
                     success: function(r) {
                         init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
 
@@ -5268,6 +5270,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 
                                                 optionSetVersionConfig = {
                                                     url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
+                                                    disableCaching: false,
                                                     success: function(r) {
                                                         var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
                                                             store = dhis2.gis.store,
@@ -5280,6 +5283,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 
                                                         optionSetConfig = {
                                                             url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            disableCaching: false,
                                                             success: function(r) {
                                                                 var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
 
@@ -5353,6 +5357,7 @@ mapfish.GeoStat.createThematic('Thematic4');
         // user orgunit
 		requests.push({
 			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
@@ -5384,6 +5389,7 @@ mapfish.GeoStat.createThematic('Thematic4');
         // dimensions
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();

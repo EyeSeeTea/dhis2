@@ -61,6 +61,10 @@ Ext.onReady(function() {
 	// ext config
 	Ext.Ajax.method = 'GET';
 
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
 	// namespace
 	DV = {};
 
@@ -3178,6 +3182,8 @@ Ext.onReady(function() {
 		};
     };
 
+    // PLUGIN
+
 	// i18n
 	DV.i18n = {
 		target: 'Target',
@@ -3221,6 +3227,7 @@ Ext.onReady(function() {
         // user-account
         requests.push({
             url: init.contextPath + '/api/me/user-account.' + type,
+            disableCaching: false,
             success: function(r) {
                 init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
 
@@ -3246,8 +3253,10 @@ Ext.onReady(function() {
             }
         });
 
+        // user orgunit
 		requests.push({
 			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
@@ -3279,6 +3288,7 @@ Ext.onReady(function() {
 
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
@@ -3358,9 +3368,13 @@ Ext.onReady(function() {
             ns.dashboard = init.dashboard;
             ns.crossDomain = init.crossDomain;
             ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
 
 			init.el = config.el;
-            //Ext.get(init.el).setStyle('opacity', 0);
+
+            if (!ns.skipFade) {
+                Ext.get(init.el).setStyle('opacity', 0);
+            }
 
 			web.chart = web.chart || {};
 
@@ -3387,6 +3401,7 @@ Ext.onReady(function() {
                 };
 
                 config.url = init.contextPath + '/api/charts/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.disableCaching = false;
                 config.headers = headers;
                 config.success = success;
                 config.failure = failure;
@@ -3413,8 +3428,10 @@ Ext.onReady(function() {
 				xLayout = service.layout.getExtendedLayout(layout);
 				paramString = web.analytics.getParamString(xLayout, true);
 
-				// show mask
-                web.mask.show(ns.app.centerRegion);
+				// mask
+                if (!ns.skipMask) {
+                    web.mask.show(ns.app.centerRegion);
+                }
 
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
@@ -3438,13 +3455,15 @@ Ext.onReady(function() {
                 };
 
                 failure = function(r) {
-                    web.mask.hide(ns.app.centerRegion);
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
                 };
 
                 config.url = init.contextPath + '/api/analytics.' + type + paramString;
+                config.disableCaching = false;
                 config.timeout = 60000;
                 config.headers = headers;
-                config.disableCaching = false;
                 config.success = success;
                 config.failure = failure;
 
@@ -3485,19 +3504,24 @@ Ext.onReady(function() {
 				// create chart
 				ns.app.chart = ns.core.web.chart.createChart(ns);
 
-                ns.app.chart.on('afterrender', function() {
-                    Ext.defer( function() {
-                        Ext.get(ns.core.init.el).fadeIn({
-                            duration: 400
-                        });
-                    }, 300 );
-                });
+                // fade
+                if (!ns.skipFade) {
+                    ns.app.chart.on('afterrender', function() {
+                        Ext.defer( function() {
+                            Ext.get(ns.core.init.el).fadeIn({
+                                duration: 400
+                            });
+                        }, 300 );
+                    });
+                }
 
 				// update viewport
 				ns.app.centerRegion.removeAll();
 				ns.app.centerRegion.add(ns.app.chart);
-
-				web.mask.hide(ns.app.centerRegion);
+                
+                if (!ns.skipMask) {
+                    web.mask.hide(ns.app.centerRegion);
+                }
 			};
 		};
 
@@ -3536,6 +3560,7 @@ Ext.onReady(function() {
             init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
 			ns.core = DV.getCore(Ext.clone(init));
 			extendInstance(ns);

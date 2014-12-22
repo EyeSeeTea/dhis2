@@ -1,1 +1,4165 @@
-Ext.onReady(function(){Ext.Ajax.method="GET";Ext.isIE=function(){return/trident/.test(Ext.userAgent)}();EV={};EV.instances=[];EV.i18n={};EV.isDebug=false;EV.isSessionStorage=("sessionStorage" in window&&window.sessionStorage!==null);EV.getCore=function(n){var j={},l={},k={},h={},i={},m;(function(){j.finals={dimension:{data:{value:"data",name:EV.i18n.data,dimensionName:"dx",objectName:"dx",warning:{filter:"..."}},category:{name:EV.i18n.categories,dimensionName:"co",objectName:"co"},indicator:{value:"indicators",name:EV.i18n.indicators,dimensionName:"dx",objectName:"in"},dataElement:{value:"dataElements",name:EV.i18n.data_elements,dimensionName:"dx",objectName:"de"},operand:{value:"operand",name:"Operand",dimensionName:"dx",objectName:"dc"},dataSet:{value:"dataSets",name:EV.i18n.data_sets,dimensionName:"dx",objectName:"ds"},period:{value:"period",name:EV.i18n.periods,dimensionName:"pe",objectName:"pe"},fixedPeriod:{value:"periods"},relativePeriod:{value:"relativePeriods",name:EV.i18n.relative_periods},startEndDate:{value:"dates",name:EV.i18n.start_end_dates},organisationUnit:{value:"organisationUnits",name:EV.i18n.organisation_units,dimensionName:"ou",objectName:"ou"},dimension:{value:"dimension"},value:{value:"value"}},chart:{series:"series",category:"category",filter:"filter",column:"column",stackedcolumn:"stackedcolumn",bar:"bar",stackedbar:"stackedbar",line:"line",area:"area",pie:"pie",radar:"radar"},data:{domain:"domain_",targetLine:"targetline_",baseLine:"baseline_",trendLine:"trendline_"},image:{png:"png",pdf:"pdf"},cmd:{init:"init_",none:"none_",urlparam:"id"},root:{id:"root"}};m=j.finals.dimension;m.objectNameMap={};m.objectNameMap[m.data.objectName]=m.data;m.objectNameMap[m.indicator.objectName]=m.indicator;m.objectNameMap[m.dataElement.objectName]=m.dataElement;m.objectNameMap[m.operand.objectName]=m.operand;m.objectNameMap[m.dataSet.objectName]=m.dataSet;m.objectNameMap[m.category.objectName]=m.category;m.objectNameMap[m.period.objectName]=m.period;m.objectNameMap[m.organisationUnit.objectName]=m.organisationUnit;m.objectNameMap[m.dimension.objectName]=m.dimension;j.period={periodTypes:[{id:"Daily",name:EV.i18n.daily},{id:"Weekly",name:EV.i18n.weekly},{id:"Monthly",name:EV.i18n.monthly},{id:"BiMonthly",name:EV.i18n.bimonthly},{id:"Quarterly",name:EV.i18n.quarterly},{id:"SixMonthly",name:EV.i18n.sixmonthly},{id:"Yearly",name:EV.i18n.yearly},{id:"FinancialOct",name:EV.i18n.financial_oct},{id:"FinancialJuly",name:EV.i18n.financial_july},{id:"FinancialApril",name:EV.i18n.financial_april}]};j.layout={west_width:452,west_fill:2,west_fill_accordion_indicator:56,west_fill_accordion_dataelement:59,west_fill_accordion_dataset:31,west_fill_accordion_period:307,west_fill_accordion_organisationunit:58,west_maxheight_accordion_indicator:450,west_maxheight_accordion_dataset:350,west_maxheight_accordion_period:405,west_maxheight_accordion_organisationunit:500,west_scrollbarheight_accordion_indicator:300,west_scrollbarheight_accordion_dataset:250,west_scrollbarheight_accordion_period:405,west_scrollbarheight_accordion_organisationunit:350,east_tbar_height:31,east_gridcolumn_height:30,form_label_width:55,window_favorite_ypos:100,window_confirm_width:250,window_share_width:500,grid_favorite_width:420,grid_row_height:27,treepanel_minheight:135,treepanel_maxheight:400,treepanel_fill_default:310,treepanel_toolbar_menu_width_group:140,treepanel_toolbar_menu_width_level:120,multiselect_minheight:100,multiselect_maxheight:250,multiselect_fill_default:345,multiselect_fill_reportingrates:315};j.chart={style:{inset:30,fontFamily:"Arial,Sans-serif,Lucida Grande,Ubuntu"},theme:{dv1:["#94ae0a","#1d5991","#a61120","#ff8809","#7c7474","#a61187","#ffd13e","#24ad9a","#a66111","#414141","#4500c4","#1d5700"]}};j.url={analysisFields:["*","program[id,name]","programStage[id,name]","columns[dimension,filter,items[id,"+n.namePropertyUrl+"]]","rows[dimension,filter,items[id,"+n.namePropertyUrl+"]]","filters[dimension,filter,items[id,"+n.namePropertyUrl+"]]","!lastUpdated","!href","!created","!publicAccess","!rewindRelativePeriods","!userOrganisationUnit","!userOrganisationUnitChildren","!userOrganisationUnitGrandChildren","!externalAccess","!access","!relativePeriods","!columnDimensions","!rowDimensions","!filterDimensions","!user","!organisationUnitGroups","!itemOrganisationUnitGroups","!userGroupAccesses","!indicators","!dataElements","!dataElementOperands","!dataElementGroups","!dataSets","!periods","!organisationUnitLevels","!organisationUnits"]}}());(function(){l.layout={};l.layout.Record=function(o){var o=Ext.clone(o);return function(){if(!Ext.isObject(o)){console.log("Record: config is not an object: "+o);return}if(!Ext.isString(o.id)){alert("Record: id is not text: "+o);return}return o}()};l.layout.Dimension=function(o){var o=Ext.clone(o);return function(){if(!Ext.isObject(o)){console.log("Dimension: config is not an object: "+o);return}if(!Ext.isString(o.dimension)){console.log("Dimension: name is not a string: "+o);return}if(o.dimension!==j.finals.dimension.category.objectName){var p=[]}return o}()};l.layout.Layout=function(p){var p=Ext.clone(p),q={},o,r;o=function(t){var t=Ext.clone(t);if(!(t&&Ext.isArray(t)&&t.length)){return}for(var s=0;s<t.length;s++){t[s]=l.layout.Dimension(t[s])}t=Ext.Array.clean(t);return t.length?t:null};r=function(){var u=j.finals.dimension,t,v={};if(!q){return}t=Ext.Array.clean([].concat(q.columns||[],q.rows||[],q.filters||[]));for(var s=0;s<t.length;s++){v[t[s].dimension]=t[s]}if(q.filters&&q.filters.length){for(var s=0;s<q.filters.length;s++){if(q.filters[s].dimension===u.indicator.objectName){i.message.alert(EV.i18n.indicators_cannot_be_specified_as_filter||"Indicators cannot be specified as filter");return}if(q.filters[s].dimension===u.category.objectName){i.message.alert(EV.i18n.categories_cannot_be_specified_as_filter||"Categories cannot be specified as filter");return}if(q.filters[s].dimension===u.dataSet.objectName){i.message.alert(EV.i18n.data_sets_cannot_be_specified_as_filter||"Data sets cannot be specified as filter");return}}}if(v[u.operand.objectName]&&v[u.indicator.objectName]){i.message.alert("Indicators and detailed data elements cannot be specified together");return}if(v[u.operand.objectName]&&v[u.dataElement.objectName]){i.message.alert("Detailed data elements and totals cannot be specified together");return}if(v[u.operand.objectName]&&v[u.dataSet.objectName]){i.message.alert("Data sets and detailed data elements cannot be specified together");return}if(v[u.operand.objectName]&&v[u.category.objectName]){i.message.alert("Categories and detailed data elements cannot be specified together");return}return true};return function(){var s=[],u=j.finals.dimension;if(!(p&&Ext.isObject(p))){console.log("Layout: config is not an object ("+n.el+")");return}for(var t=0,v=Ext.Array.clean([].concat(p.columns||[],p.rows||[],p.filters||[]));t<v.length;t++){if(l.layout.Dimension(v[t])){s.push(v[t].dimension)}}if(!Ext.Array.contains(s,"pe")&&!(p.startDate&&p.endDate)){alert("At least one fixed period, one relative period or start/end dates must be specified");return}p.columns=o(p.columns);p.rows=o(p.rows);p.filters=o(p.filters);if(!p.columns){alert("No series items selected");return}if(p.columns.length>1){p.filters=p.filters||[];p.filters=p.filters.concat(p.columns.splice(1))}if(!p.rows){alert("No category items selected");return}if(p.rows.length>1){p.filters=p.filters||[];p.filters=p.filters.concat(p.rows.splice(1))}if(p.id){q.id=p.id}if(p.name){q.name=p.name}q.columns=p.columns;q.rows=p.rows;q.filters=p.filters;q.type=Ext.isString(p.type)?p.type:"column";q.program=p.program;q.programStage=p.programStage;if(p.startDate&&p.endDate){q.startDate=p.startDate.substr(0,10);q.endDate=p.endDate.substr(0,10)}q.showValues=Ext.isBoolean(p.showData)?p.showData:(Ext.isBoolean(p.showValues)?p.showValues:true);q.hideEmptyRows=Ext.isBoolean(p.hideEmptyRows)?p.hideEmptyRows:(Ext.isBoolean(p.hideEmptyRows)?p.hideEmptyRows:true);q.showTrendLine=Ext.isBoolean(p.regression)?p.regression:(Ext.isBoolean(p.showTrendLine)?p.showTrendLine:false);q.targetLineValue=Ext.isNumber(p.targetLineValue)?p.targetLineValue:null;q.targetLineTitle=Ext.isString(p.targetLineLabel)&&!Ext.isEmpty(p.targetLineLabel)?p.targetLineLabel:(Ext.isString(p.targetLineTitle)&&!Ext.isEmpty(p.targetLineTitle)?p.targetLineTitle:null);q.baseLineValue=Ext.isNumber(p.baseLineValue)?p.baseLineValue:null;q.baseLineTitle=Ext.isString(p.baseLineLabel)&&!Ext.isEmpty(p.baseLineLabel)?p.baseLineLabel:(Ext.isString(p.baseLineTitle)&&!Ext.isEmpty(p.baseLineTitle)?p.baseLineTitle:null);q.sortOrder=Ext.isNumber(p.sortOrder)?p.sortOrder:0;q.rangeAxisMaxValue=Ext.isNumber(p.rangeAxisMaxValue)?p.rangeAxisMaxValue:null;q.rangeAxisMinValue=Ext.isNumber(p.rangeAxisMinValue)?p.rangeAxisMinValue:null;q.rangeAxisSteps=Ext.isNumber(p.rangeAxisSteps)?p.rangeAxisSteps:null;q.rangeAxisDecimals=Ext.isNumber(p.rangeAxisDecimals)?p.rangeAxisDecimals:null;q.rangeAxisTitle=Ext.isString(p.rangeAxisLabel)&&!Ext.isEmpty(p.rangeAxisLabel)?p.rangeAxisLabel:(Ext.isString(p.rangeAxisTitle)&&!Ext.isEmpty(p.rangeAxisTitle)?p.rangeAxisTitle:null);q.domainAxisTitle=Ext.isString(p.domainAxisLabel)&&!Ext.isEmpty(p.domainAxisLabel)?p.domainAxisLabel:(Ext.isString(p.domainAxisTitle)&&!Ext.isEmpty(p.domainAxisTitle)?p.domainAxisTitle:null);q.hideLegend=Ext.isBoolean(p.hideLegend)?p.hideLegend:false;q.hideTitle=Ext.isBoolean(p.hideTitle)?p.hideTitle:false;q.title=Ext.isString(p.title)&&!Ext.isEmpty(p.title)?p.title:null;q.parentGraphMap=Ext.isObject(p.parentGraphMap)?p.parentGraphMap:null;q.legend=Ext.isObject(p.legend)?p.legend:null;if(!r()){return}return q}()};l.response={};l.response.Header=function(o){var o=Ext.clone(o);return function(){if(!Ext.isObject(o)){console.log("Header: config is not an object: "+o);return}if(!Ext.isString(o.name)){console.log("Header: name is not a string: "+o);return}if(!Ext.isBoolean(o.meta)){console.log("Header: meta is not boolean: "+o);return}return o}()};l.response.Response=function(o){var o=Ext.clone(o);return function(){if(!(o&&Ext.isObject(o))){console.log("Response: config is not an object");return}if(!(o.headers&&Ext.isArray(o.headers))){console.log("Response: headers is not an array");return}for(var p=0,q;p<o.headers.length;p++){o.headers[p]=l.response.Header(o.headers[p])}o.headers=Ext.Array.clean(o.headers);if(!o.headers.length){console.log("Response: no valid headers");return}if(!(Ext.isArray(o.rows)&&o.rows.length>0)){alert("No values found");return}if(o.headers.length!==o.rows[0].length){console.log("Response: headers.length !== rows[0].length")}return o}()}}());(function(){k.prototype={};k.prototype.array={};k.prototype.array.getLength=function(p,o){if(!Ext.isArray(p)){if(!o){console.log("support.prototype.array.getLength: not an array")}return null}return p.length};k.prototype.array.sort=function(q,p,o){if(!k.prototype.array.getLength(q)){return}o=!!o||Ext.isNumber(o)?o:"name";q.sort(function(s,r){if(Ext.isObject(s)&&Ext.isObject(r)){s=s[o];r=r[o]}if(Ext.isArray(s)&&Ext.isArray(r)){s=s[o];r=r[o]}if(Ext.isString(s)&&Ext.isString(r)){s=s.toLowerCase();r=r.toLowerCase();if(p==="DESC"){return s<r?1:(s>r?-1:0)}else{return s<r?-1:(s>r?1:0)}}else{if(Ext.isNumber(s)&&Ext.isNumber(r)){return p==="DESC"?r-s:s-r}}return -1});return q};k.prototype.array.uniqueByProperty=function(t,r){var s=[],o=[];for(var p=0,q;p<t.length;p++){q=t[p];if(!Ext.Array.contains(s,q[r])){o.push(q);s.push(q[r])}}return o};k.prototype.array.getObjectMap=function(v,q,p,u){if(!(Ext.isArray(v)&&v.length)){return{}}var t={};q=q||"id";p=p||"name";u=u||"";for(var r=0,s;r<v.length;r++){s=v[r];t[u+s[q]]=s[p]}return t};k.prototype.object={};k.prototype.object.getLength=function(o,r){if(!Ext.isObject(o)){if(!r){console.log("support.prototype.object.getLength: not an object")}return null}var q=0;for(var p in o){if(o.hasOwnProperty(p)){q++}}return q};k.prototype.object.hasObject=function(p,s,r){if(!k.prototype.object.getLength(p)){return null}for(var q in p){var o=p[q];if(p.hasOwnProperty(q)&&o[s]===r){return true}}return null};k.prototype.str={};k.prototype.str.replaceAll=function(o,r,q){if(Ext.isString(o)){o=o.split(r).join(q)}else{if(Ext.isArray(o)){for(var p=0;p<o.length;p++){o[p]=o[p].split(r).join(q)}}}return o};k.prototype.str.toggleDirection=function(o){return o==="DESC"?"ASC":"DESC"};k.prototype.number={};k.prototype.number.getNumberOfDecimals=function(o){var p=new String(o);return(p.indexOf(".")>-1)?(p.length-p.indexOf(".")-1):0};k.prototype.number.roundIf=function(q,o){q=parseFloat(q);o=parseFloat(o);if(Ext.isNumber(q)&&Ext.isNumber(o)){var p=k.prototype.number.getNumberOfDecimals(q);return p>o?Ext.Number.toFixed(q,o):q}return q};k.prototype.number.prettyPrint=function(o,p){p=p||"space";if(p==="none"){return o}return o.toString().replace(/\B(?=(\d{3})+(?!\d))/g,j.report.digitGroupSeparator[p])};k.color={};k.color.hexToRgb=function(q){var p=/^#?([a-f\d])([a-f\d])([a-f\d])$/i,o;q=q.replace(p,function(t,v,u,s){return v+v+u+u+s+s});o=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(q);return o?{r:parseInt(o[1],16),g:parseInt(o[2],16),b:parseInt(o[3],16)}:null}}());(function(){h.layout={};h.layout.cleanDimensionArray=function(p){if(!k.prototype.array.getLength(p)){return null}var q=[];for(var o=0;o<p.length;o++){q.push(l.layout.Dimension(p[o]))}q=Ext.Array.clean(q);return q.length?q:null};h.layout.sortDimensionArray=function(r,q){if(!k.prototype.array.getLength(r,true)){return null}r=h.layout.cleanDimensionArray(r);if(!r){console.log("service.layout.sortDimensionArray: no valid dimensions");return null}q=q||"dimensionName";Ext.Array.sort(r,function(t,s){if(t[q]<s[q]){return -1}if(t[q]>s[q]){return 1}return 0});for(var p=0,o;p<r.length;p++){k.prototype.array.sort(r[p].items,"ASC","id");if(k.prototype.array.getLength(r[p].ids)){k.prototype.array.sort(r[p].ids)}}return r};h.layout.getObjectNameDimensionMapFromDimensionArray=function(r){var q={};if(!k.prototype.array.getLength(r)){return null}for(var o=0,p;o<r.length;o++){p=l.layout.Dimension(r[o]);if(p){q[p.dimension]=p}}return k.prototype.object.getLength(q)?q:null};h.layout.getObjectNameDimensionItemsMapFromDimensionArray=function(r){var q={};if(!k.prototype.array.getLength(r)){return null}for(var o=0,p;o<r.length;o++){p=l.layout.Dimension(r[o]);if(p){q[p.dimension]=p.items}}return k.prototype.object.getLength(q)?q:null};h.layout.getItemName=function(v,s,r,o){var q=s.metaData,p="";if(h.layout.isHierarchy(v,s,r)){var w=q.names[r].split("/");w.shift();for(var u=0,t;u<w.length;u++){t=!!(u===w.length-1);p+=(o&&!t?'<span class="text-weak">':"")+w[u]+(o&&!t?"</span>":"")+(!t?" / ":"")}return p}p+=q.names[r];return p};h.layout.getExtendedLayout=function(t){var t=Ext.clone(t),v;v={columns:[],rows:[],filters:[],columnObjectNames:[],columnDimensionNames:[],rowObjectNames:[],rowDimensionNames:[],axisDimensions:[],axisObjectNames:[],axisDimensionNames:[],sortedAxisDimensionNames:[],filterDimensions:[],filterObjectNames:[],filterDimensionNames:[],sortedFilterDimensions:[],dimensions:[],objectNames:[],dimensionNames:[],objectNameDimensionsMap:{},objectNameItemsMap:{},objectNameIdsMap:{},dimensionNameDimensionsMap:{},dimensionNameItemsMap:{},dimensionNameIdsMap:{},dimensionNameSortedIdsMap:{}};Ext.applyIf(v,t);if(t.columns){for(var r=0,s,u,o;r<t.columns.length;r++){s=t.columns[r];u=s.items;o={};o.dimension=s.dimension;o.objectName=s.dimension;o.dimensionName=m.objectNameMap.hasOwnProperty(s.dimension)?m.objectNameMap[s.dimension].dimensionName||s.dimension:s.dimension;o.items=[];o.ids=[];if(u){o.items=u;for(var q=0;q<u.length;q++){o.ids.push(u[q].id)}}v.columns.push(o);v.columnObjectNames.push(o.objectName);v.columnDimensionNames.push(o.dimensionName);v.axisDimensions.push(o);v.axisObjectNames.push(o.objectName);v.axisDimensionNames.push(m.objectNameMap.hasOwnProperty(o.objectName)?m.objectNameMap[o.objectName].dimensionName||o.objectName:o.objectName);v.objectNameDimensionsMap[o.objectName]=o;v.objectNameItemsMap[o.objectName]=o.items;v.objectNameIdsMap[o.objectName]=o.ids}}if(t.rows){for(var r=0,s,u,o;r<t.rows.length;r++){s=Ext.clone(t.rows[r]);u=s.items;o={};o.dimension=s.dimension;o.objectName=s.dimension;o.dimensionName=m.objectNameMap.hasOwnProperty(s.dimension)?m.objectNameMap[s.dimension].dimensionName||s.dimension:s.dimension;o.items=[];o.ids=[];if(u){o.items=u;for(var q=0;q<u.length;q++){o.ids.push(u[q].id)}}v.rows.push(o);v.rowObjectNames.push(o.objectName);v.rowDimensionNames.push(o.dimensionName);v.axisDimensions.push(o);v.axisObjectNames.push(o.objectName);v.axisDimensionNames.push(m.objectNameMap.hasOwnProperty(o.objectName)?m.objectNameMap[o.objectName].dimensionName||o.objectName:o.objectName);v.objectNameDimensionsMap[o.objectName]=o;v.objectNameItemsMap[o.objectName]=o.items;v.objectNameIdsMap[o.objectName]=o.ids}}if(t.filters){for(var r=0,s,u,o;r<t.filters.length;r++){s=t.filters[r];u=s.items;o={};o.dimension=s.dimension;o.objectName=s.dimension;o.dimensionName=m.objectNameMap.hasOwnProperty(s.dimension)?m.objectNameMap[s.dimension].dimensionName||s.dimension:s.dimension;o.items=[];o.ids=[];if(u){o.items=u;for(var q=0;q<u.length;q++){o.ids.push(u[q].id)}}v.filters.push(o);v.filterDimensions.push(o);v.filterObjectNames.push(o.objectName);v.filterDimensionNames.push(m.objectNameMap.hasOwnProperty(o.objectName)?m.objectNameMap[o.objectName].dimensionName||o.objectName:o.objectName);v.objectNameDimensionsMap[o.objectName]=o;v.objectNameItemsMap[o.objectName]=o.items;v.objectNameIdsMap[o.objectName]=o.ids}}v.legendSet=t.legendSet?n.idLegendSetMap[t.legendSet.id]:null;if(t.legendSet&&t.legendSet.mapLegends){v.legendSet=n.idLegendSetMap[t.legendSet.id];k.prototype.array.sort(v.legendSet.mapLegends,"ASC","startValue")}v.axisDimensionNames=Ext.Array.unique(v.axisDimensionNames);v.filterDimensionNames=Ext.Array.unique(v.filterDimensionNames);v.columnDimensionNames=Ext.Array.unique(v.columnDimensionNames);v.rowDimensionNames=Ext.Array.unique(v.rowDimensionNames);v.filterDimensionNames=Ext.Array.unique(v.filterDimensionNames);v.sortedAxisDimensionNames=Ext.clone(v.axisDimensionNames).sort();v.sortedFilterDimensions=h.layout.sortDimensionArray(Ext.clone(v.filterDimensions));v.dimensions=[].concat(v.axisDimensions,v.filterDimensions);v.objectNames=[].concat(v.axisObjectNames,v.filterObjectNames);v.dimensionNames=[].concat(v.axisDimensionNames,v.filterDimensionNames);for(var r=0,p;r<v.dimensionNames.length;r++){p=v.dimensionNames[r];v.dimensionNameDimensionsMap[p]=[];v.dimensionNameItemsMap[p]=[];v.dimensionNameIdsMap[p]=[]}for(var r=0,o;r<v.dimensions.length;r++){o=v.dimensions[r];v.dimensionNameDimensionsMap[o.dimensionName].push(o);v.dimensionNameItemsMap[o.dimensionName]=v.dimensionNameItemsMap[o.dimensionName].concat(o.items);v.dimensionNameIdsMap[o.dimensionName]=v.dimensionNameIdsMap[o.dimensionName].concat(o.ids)}for(var w in v.dimensionNameIdsMap){if(v.dimensionNameIdsMap.hasOwnProperty(w)){v.dimensionNameSortedIdsMap[w]=Ext.clone(v.dimensionNameIdsMap[w]).sort()}}v.tableUuid=n.el+"_"+Ext.data.IdGenerator.get("uuid").generate();return v};h.layout.getSyncronizedXLayout=function(r,p,u){var s,t,q=Ext.Array.clean([].concat(p.columns||[],p.rows||[],p.filters||[])),v=Ext.Array.clean([].concat(r.columns||[],r.rows||[],r.filters||[])),o,r;s=function(x){var w;w=function(z){var A;z=Ext.clone(z);for(var y=0;y<z.length;y++){if(z[y].dimension===x){A=z[y]}}if(A){Ext.Array.remove(z,A)}return z};if(p.columns){p.columns=w(p.columns)}if(p.rows){p.rows=w(p.rows)}if(p.filters){p.filters=w(p.filters)}};t=function(){var x=[];for(var w=0;w<u.headers.length;w++){x.push(u.headers[w].name)}return x};o=function(w){var x=w.columns[0].ids.length*w.rows[0].ids.length,y="This chart is potentially very large due to the high number of series and category items. Create the chart anyway?";if(x>200){if(!confirm(y)){return null}}return w};return function(){for(var A=0,D,C;A<q.length;A++){D=q[A];D.items=[];C=u.nameHeaderMap[D.dimension];if(C){for(var z=0,w;z<C.ids.length;z++){w=C.ids[z];D.items.push({id:w,name:u.metaData.names[w]||w})}}}for(var A=0,F;A<v.length;A++){F=v[A];if(Ext.isString(F.filter)){var G=F.filter.split(":");if(G[0]==="IN"&&G.length>1&&Ext.isString(G[1])){var I=G[1].split(";"),E=[];for(var z=0,D;z<q.length;z++){D=q[z];if(D.dimension===F.dimension&&D.items&&D.items.length){var E=[];for(var y=0,B;y<I.length;y++){B=I[y];for(var x=0,H;x<D.items.length;x++){H=D.items[x];if(H.name===B){E.push(H)}}}D.items=E}}}}}r=l.layout.Layout(p);if(!r){return null}p=h.layout.getExtendedLayout(r);p=o(p);if(!p){return null}return p}()};h.layout.getExtendedAxis=function(z,Y){var t,r,A=[],y=1,I,q,E=[],X=[],s=[],D=[],w=[],x=[],M=[],u={};if(Y==="col"){t=Ext.clone(z.columnDimensionNames);r="colSpan"}else{if(Y==="row"){t=Ext.clone(z.rowDimensionNames);r="rowSpan"}}if(!(Ext.isArray(t)&&t.length)){return}for(var T=0;T<t.length;T++){A.push({dimensionName:t[T]})}q=function(){var Z=[];for(var aa=0;aa<A.length;aa++){Z.push(z.dimensionNameIdsMap[A[aa].dimensionName])}return Z}();I=q.length;for(var T=0,K;T<I;T++){K=q[T].length;E.push(K);y=y*K;X.push(y)}for(var T=0;T<I;T++){if(E[T]===1){if(T===0){s.push(y)}else{if(z.hideEmptyRows&&Y==="row"){s.push(y/X[T])}else{s.push(s[0])}}}else{s.push(y/X[T])}}D.push(q[0]);if(I.length>1){for(var T=1,V,N;T<I;T++){V=[];N=E[T]===1?E[0]:X[T-1];for(var R=0;R<N;R++){V=V.concat(q[T])}D.push(V)}}for(var T=0,v,O,B,S;T<I;T++){v=[];O=q[T];B=s[T];S=y/(B*O.length);for(var R=0;R<S;R++){for(var Q=0;Q<O.length;Q++){for(var P=0;P<B;P++){v.push(O[Q])}}}w.push(v)}for(var T=0,H;T<y;T++){H="";for(var R=0;R<I;R++){H+=w[R][T]}if(H){x.push(H)}}for(var T=0,F;T<w.length;T++){F=[];for(var R=0,p;R<w[T].length;R++){p={id:w[T][R],uuid:Ext.data.IdGenerator.get("uuid").generate(),dim:T,axis:Y};if(T===w.length-1){p.leaf=true}F.push(p)}M.push(F)}for(var T=0;T<M.length;T++){for(var R=0,p,W=0,o;R<M[T].length;R++){p=M[T][R];if(W===0){p[r]=s[T];p.children=p.leaf?0:s[T];p.oldest=true;if(T===0){p.root=true}o=p}p.oldestSibling=o;if(++W===s[T]){W=0}}}if(I>1){for(var T=1,F;T<I;T++){F=M[T];for(var R=0,W=0,B=s[T-1];R<F.length;R++){F[R].parent=M[T-1][R]}}}if(M.length){var B=I>1?k.prototype.array.sort(Ext.clone(s))[1]:y,J=M[M.length-1];for(var T=0,U,C,p,G=[];T<J.length;T++){U=J[T];G.push(U.uuid);C=[];p=U;while(p.parent){p=p.parent;C.push(p.oldestSibling.uuid)}U.uuids=Ext.clone(C);if(G.length===B){for(var R=(T-B)+1,U;R<=T;R++){U=J[R];U.uuids=U.uuids.concat(Ext.clone(G))}G=[]}}}for(var T=0;T<M.length;T++){for(var R=0,L;R<M[T].length;R++){L=M[T][R];u[L.uuid]=L}}return{type:Y,items:A,xItems:{unique:q,gui:D,all:w},objects:{all:M},ids:x,span:s,dims:I,size:y,uuidObjectMap:u}};h.layout.isHierarchy=function(p,o,q){return p.showHierarchy&&Ext.isObject(o.metaData.ouHierarchy)&&o.metaData.ouHierarchy.hasOwnProperty(q)};h.layout.getHierarchyName=function(s,t,u){var r=s[u],q=Ext.Array.clean(r.split("/")),o="";if(q.length<2){return t[u]}for(var p=0;p<q.length;p++){o+=t[q[p]]+" / "}o+=t[u];return o};h.layout.layout2plugin=function(t,q){var t=Ext.clone(t),s=Ext.Array.clean([].concat(t.columns||[],t.rows||[],t.filters||[]));t.url=n.contextPath;if(q){t.el=q}if(Ext.isString(t.id)){return{id:t.id}}for(var p=0,u,r;p<s.length;p++){u=s[p];delete u.id;delete u.ids;delete u.type;delete u.dimensionName;delete u.objectName;for(var o=0,r;o<u.items.length;o++){r=u.items[o];delete r.name;delete r.code;delete r.created;delete r.lastUpdated;delete r.value}}if(t.showTotals){delete t.showTotals}if(t.showSubTotals){delete t.showSubTotals}if(!t.hideEmptyRows){delete t.hideEmptyRows}if(!t.showHierarchy){delete t.showHierarchy}if(t.displayDensity==="normal"){delete t.displayDensity}if(t.fontSize==="normal"){delete t.fontSize}if(t.digitGroupSeparator==="space"){delete t.digitGroupSeparator}if(!t.legendSet){delete t.legendSet}if(!t.sorting){delete t.sorting}delete t.parentGraphMap;delete t.reportingPeriod;delete t.organisationUnit;delete t.parentOrganisationUnit;delete t.regression;delete t.cumulative;delete t.topLimit;return t};h.layout.getDataDimensionsFromLayout=function(s){var r=Ext.Array.clean([].concat(s.columns||[],s.rows||[],s.filters||[])),q=["pe","ou"],o=[];for(var p=0;p<r.length;p++){if(!Ext.Array.contains(q,r[p].dimension)){o.push(r[p])}}return o};h.response={};h.response.aggregate={};h.response.aggregate.getExtendedResponse=function(z,p){var J="[N/A]",x=["ou","pe"],D,y,q;p=Ext.clone(p);q=p.headers;D=p.metaData.ouHierarchy,y=p.metaData.names;y[J]=J;p.metaData.optionNames={};p.nameHeaderMap={};p.idValueMap={};for(var H=0,G,A;H<q.length;H++){G=q[H];G.ids=[];A=Ext.Array.contains(x,G.name);if(G.meta){if(G.type==="java.lang.Double"){var o=[];for(var F=0,C,s,t,B;F<p.rows.length;F++){C=p.rows[F][H]||J;s=G.name+C;t=parseFloat(C);B=Ext.isNumber(t)?t:(y[C]||C);y[s]=(A?"":G.column+" ")+B;p.rows[F][H]=s;o.push({id:s,sortingId:Ext.isNumber(t)?t:Number.MAX_VALUE})}k.prototype.array.sort(o,"ASC","sortingId");G.ids=Ext.Array.pluck(o,"id")}else{var o=[];for(var F=0,C,s,K,r;F<p.rows.length;F++){C=p.rows[F][H]||J;s=G.name+C;r=h.layout.isHierarchy(z,p,C);K=A?"":G.column+" ";K=r?h.layout.getHierarchyName(D,y,C):(y[C]||C);y[s]=K;p.rows[F][H]=s;if(r){D[s]=D[C]}o.push({id:s,sortingId:G.name==="pe"?s:K})}k.prototype.array.sort(o,"ASC","sortingId");G.ids=Ext.Array.pluck(o,"id")}}G.ids=Ext.Array.unique(G.ids);G.size=G.ids.length;G.index=H;p.nameHeaderMap[G.name]=G}var E=p.nameHeaderMap[j.finals.dimension.value.value].index,w=m.data.dimensionName,v=z.axisDimensionNames,I=[];for(var H=0;H<v.length;H++){I.push(p.nameHeaderMap[v[H]].index)}for(var H=0,u,C;H<p.rows.length;H++){u=p.rows[H];C="";for(var F=0;F<I.length;F++){C+=u[I[F]]}p.idValueMap[C]=u[E]}return p}}());(function(){i.mask={};i.mask.show=function(o,p){if(!Ext.isObject(o)){console.log("web.mask.show: component not an object");return null}p=p||"Loading..";if(o.mask&&o.mask.destroy){o.mask.destroy();o.mask=null}o.mask=new Ext.create("Ext.LoadMask",o,{shadow:false,msg:p,style:"box-shadow:0",bodyStyle:"box-shadow:0"});o.mask.show()};i.mask.hide=function(o){if(!Ext.isObject(o)){console.log("support.gui.mask.hide: component not an object");return null}if(o.mask&&o.mask.destroy){o.mask.destroy();o.mask=null}};i.message={};i.message.alert=function(o){console.log(o)};i.analytics={};i.analytics.getParamString=function(u,w){var q,o=Ext.Array.clean([].concat(u.columns||[],u.rows||[])),v=["longitude","latitude"],p;q="/api/analytics/events/aggregate/"+u.program.id+"."+(w||"json")+"?";q+="stage="+u.programStage.id;if(o){for(var s=0,t;s<o.length;s++){t=o[s];if(Ext.Array.contains(v,t.dimension)||(t.dimension==="pe"&&!t.items&&!t.filter)){continue}q+="&dimension="+t.dimension;if(t.items&&t.items.length){q+=":";for(var r=0,x;r<t.items.length;r++){x=t.items[r];q+=encodeURIComponent(x.id)+((r<(t.items.length-1))?";":"")}}else{q+=t.filter?":"+encodeURIComponent(t.filter):""}}}if(u.filters){for(var s=0,t;s<u.filters.length;s++){t=u.filters[s];q+="&filter="+t.dimension;if(Ext.isArray(t.items)&&t.items.length){q+=":";for(var r=0;r<t.items.length;r++){q+=encodeURIComponent(t.items[r].id);q+=r<t.items.length-1?";":""}}else{q+=t.filter?":"+encodeURIComponent(t.filter):""}}}if(u.startDate&&u.endDate){q+="&startDate="+u.startDate+"&endDate="+u.endDate}q+="&displayProperty="+n.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();return q};i.analytics.validateUrl=function(p){var q;if(Ext.isIE){q="Too many items selected (url has "+p.length+" characters). Internet Explorer accepts maximum 2048 characters."}else{var o=p.length>8000?"8000":(p.length>4000?"4000":"2000");q="Too many items selected (url has "+p.length+" characters). Please reduce to less than "+o+" characters."}q+="\n\nHint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.";alert(q)};i.report={};i.report.aggregate={};i.report.aggregate.sort=function(v,A,p){var u=v.sorting.id,q=v.rows[0].dimension,o=A.nameHeaderMap[q].ids,r=A.idValueMap,w=v.sorting?v.sorting.direction:"DESC",z=[],t;if(Ext.isString(u)){u=u.toLowerCase()==="total"?"total_":u}else{if(Ext.isNumber(u)){if(u===0){u="total_"}else{u=p.ids[parseInt(u)-1]}}else{return A}}for(var s=0,y,x;s<o.length;s++){y=u+o[s];x=parseFloat(r[y]);z.push({id:o[s],value:Ext.isNumber(x)?x:(Number.MAX_VALUE*-1)})}k.prototype.array.sort(z,w,"value");A.nameHeaderMap[q].ids=Ext.Array.pluck(z,"id");return A};i.report.aggregate.createChart=function(P,I,x,p){var q=I.columnDimensionNames[0]?I.dimensionNameIdsMap[I.columnDimensionNames[0]]:[],A=[],F={},L=function(){for(var T=0,U;T<q.length;T++){U=Ext.data.IdGenerator.get("uuid").generate();A.push(U);F[U]=q[T];x.metaData.names[U]=x.metaData.names[q[T]]}}(),t=I.rowDimensionNames[0]?I.dimensionNameIdsMap[I.rowDimensionNames[0]]:[],G=function(){var U=[];if(I.filters){for(var T=0;T<I.filters.length;T++){U=U.concat(I.filters[T].ids||[])}}return U}(),z=Ext.data.IdGenerator.get("uuid").generate(),y=function(X,V){for(var U=0,Y,W;U<X.length;U++){Y=X[U];W=0;for(var T=0;T<V.length;T++){W+=parseFloat(Y[V[T]]);Y[z]=W}}},C,u,K,v,Q,S,r,B,O,J,R,w,H,s,N,M,E,D,o={};v=function(ag){var ac=[],ai=[],af=[],X=[],ah;for(var ad=0,ab,V,aj,aa;ad<t.length;ad++){ab={};V=t[ad];aj=[];aa=false;ab[j.finals.data.domain]=x.metaData.names[V];for(var Z=0,U,ae;Z<q.length;Z++){U=k.prototype.str.replaceAll(q[Z],"#","")+k.prototype.str.replaceAll(t[ad],"#","");ae=x.idValueMap[U];aj.push(ae);ab[A[Z]]=ae?parseFloat(ae):"0.0"}aa=!(Ext.Array.clean(aj).length);if(!(aa&&I.hideEmptyRows)){ac.push(ab)}}if(ag){y(ac,A)}if(I.sortOrder){var Y=ag?z:A[0];k.prototype.array.sort(ac,I.sortOrder===-1?"ASC":"DESC",Y)}if(I.showTrendLine){var W,T;if(ag){W=new SimpleRegression();T=j.finals.data.trendLine+z;for(var ad=0,ae;ad<ac.length;ad++){ae=ac[ad][z];W.addData(ad,parseFloat(ae))}for(var ad=0;ad<ac.length;ad++){ac[ad][T]=parseFloat(W.predict(ad).toFixed(1))}ai.push(T);x.metaData.names[T]=EV.i18n.trend+" (Total)"}else{for(var ad=0;ad<A.length;ad++){W=new SimpleRegression();T=j.finals.data.trendLine+A[ad];for(var Z=0,ae;Z<ac.length;Z++){ae=ac[Z][A[ad]];W.addData(Z,parseFloat(ae))}for(var Z=0;Z<ac.length;Z++){ac[Z][T]=parseFloat(W.predict(Z).toFixed(1))}ai.push(T);x.metaData.names[T]=EV.i18n.trend+" ("+x.metaData.names[A[ad]]+")"}}}if(Ext.isNumber(I.targetLineValue)||Ext.isNumber(parseFloat(I.targetLineValue))){for(var ad=0;ad<ac.length;ad++){ac[ad][j.finals.data.targetLine]=parseFloat(I.targetLineValue)}af.push(j.finals.data.targetLine)}if(Ext.isNumber(I.baseLineValue)||Ext.isNumber(parseFloat(I.baseLineValue))){for(var ad=0;ad<ac.length;ad++){ac[ad][j.finals.data.baseLine]=parseFloat(I.baseLineValue)}X.push(j.finals.data.baseLine)}ah=Ext.create("Ext.data.Store",{fields:function(){var ak=Ext.clone(A);ak.push(j.finals.data.domain);ak=ak.concat(ai,af,X);return ak}(),data:ac});ah.rangeFields=A;ah.domainFields=[j.finals.data.domain];ah.trendLineFields=ai;ah.targetLineFields=af;ah.baseLineFields=X;ah.numericFields=[].concat(ah.rangeFields,ah.trendLineFields,ah.targetLineFields,ah.baseLineFields);ah.getMaximum=function(){var al=[];for(var ak=0;ak<ah.numericFields.length;ak++){al.push(ah.max(ah.numericFields[ak]))}return Ext.Array.max(al)};ah.getMinimum=function(){var al=[];for(var ak=0;ak<ah.numericFields.length;ak++){al.push(ah.min(ah.numericFields[ak]))}return Ext.Array.min(al)};ah.getMaximumSum=function(){var al=[],ak=0;ah.each(function(am){ak=0;for(var an=0;an<ah.rangeFields.length;an++){ak+=am.data[ah.rangeFields[an]]}al.push(ak)});return Ext.Array.max(al)};ah.hasDecimals=function(){var ak=ah.getRange();for(var am=0;am<ak.length;am++){for(var al=0,an;al<ah.rangeFields.length;al++){an=ak[am].data[ah.rangeFields[al]];if(Ext.isNumber(an)&&(an%1)){return true}}}return false};ah.getNumberOfDecimals=function(){var al=ah.getRange(),ak=[];for(var an=0;an<al.length;an++){for(var am=0,ao;am<ah.rangeFields.length;am++){ao=al[an].data[ah.rangeFields[am]];if(Ext.isNumber(ao)&&(ao%1)){ao=ao.toString();ak.push(ao.length-ao.indexOf(".")-1)}}}return Ext.Array.max(ak)};if(EV.isDebug){console.log("store",ah);console.log("data",ac);console.log("rangeFields",ah.rangeFields);console.log("domainFields",ah.domainFields);console.log("trendLineFields",ah.trendLineFields);console.log("targetLineFields",ah.targetLineFields);console.log("baseLineFields",ah.baseLineFields)}return ah};Q=function(W){var V=j.finals.chart,Y=W.getMinimum(),Z,U,X;getRenderer=function(aa){var ac="0.";for(var ab=0;ab<aa;ab++){ac+="0"}return ac};if((I.type===V.stackedcolumn||I.type===V.stackedbar)&&(I.showTrendLine||I.targetLineValue||I.baseLineValue)){var T=[W.getMaximum(),W.getMaximumSum()];Z=Math.ceil(Ext.Array.max(T)*1.1);Z=Math.floor(Z/10)*10}U=W.getNumberOfDecimals();renderer=!!U&&(W.getMaximum()<20)?getRenderer(U):"0,0";X={type:"Numeric",position:"left",fields:W.numericFields,minimum:Y<0?Y:0,label:{renderer:Ext.util.Format.numberRenderer(renderer)},labelTitle:{font:"bold 13px "+j.chart.style.fontFamily},grid:{odd:{opacity:1,stroke:"#aaa","stroke-width":0.1},even:{opacity:1,stroke:"#aaa","stroke-width":0.1}}};if(Z){X.maximum=Z}if(I.rangeAxisMaxValue){X.maximum=I.rangeAxisMaxValue}if(I.rangeAxisMinValue){X.minimum=I.rangeAxisMinValue}if(I.rangeAxisSteps){X.majorTickSteps=I.rangeAxisSteps-1}if(I.rangeAxisDecimals){X.label.renderer=Ext.util.Format.numberRenderer(getRenderer(I.rangeAxisDecimals))}if(I.rangeAxisTitle){X.title=I.rangeAxisTitle}return X};S=function(T){var U={type:"Category",position:"bottom",fields:T.domainFields,label:{rotate:{degrees:320},style:{fontSize:"11px"}}};if(I.domainAxisTitle){U.title=I.domainAxisTitle;U.labelTitle={font:"bold 13px "+j.chart.style.fontFamily}}return U};r=function(U){var T=[];if(Ext.isObject(I.legend)&&Ext.isArray(I.legend.seriesNames)){return I.legend.seriesNames}else{for(var X=0,Z,W,V,Y;X<U.rangeFields.length;X++){Z=F[U.rangeFields[X]];W=x.metaData.optionNames[Z]||x.metaData.names[Z];if(Ext.isObject(I.legend)&&I.legend.maxLength){var V=parseInt(I.legend.maxLength);if(Ext.isNumber(V)){W=W.substr(0,V)+".."}}T.push(W)}}return T};B=function(U){var T={type:"column",axis:"left",xField:U.domainFields,yField:U.rangeFields,style:{opacity:0.8,lineWidth:3},markerConfig:{type:"circle",radius:4},tips:w(),title:r(U)};if(I.showValues){T.label={display:"outside","text-anchor":"middle",field:U.rangeFields,font:j.chart.style.fontFamily,renderer:function(V){return V==="0.0"?"":V}}}return T};O=function(U,X){var T=[];for(var V=0,W;V<U.trendLineFields.length;V++){W=X?"#000":j.chart.theme.dv1[V];T.push({type:"line",axis:"left",xField:U.domainFields,yField:U.trendLineFields[V],style:{opacity:0.8,lineWidth:2,"stroke-dasharray":14,stroke:W},markerConfig:{type:"circle",radius:0,fill:W},title:x.metaData.names[U.trendLineFields[V]]})}return T};J=function(T){return{type:"line",axis:"left",xField:T.domainFields,yField:T.targetLineFields,style:{opacity:1,lineWidth:1,"stroke-width":1,stroke:"#000"},showMarkers:false,title:(Ext.isString(I.targetLineTitle)?I.targetLineTitle:EV.i18n.target)+" ("+I.targetLineValue+")"}};R=function(T){return{type:"line",axis:"left",xField:T.domainFields,yField:T.baseLineFields,style:{opacity:1,lineWidth:1,"stroke-width":1,stroke:"#000"},showMarkers:false,title:(Ext.isString(I.baseLineTitle)?I.baseLineTitle:EV.i18n.base)+" ("+I.baseLineValue+")"}};w=function(){return{trackMouse:true,cls:"dv-chart-tips",renderer:function(T,U){if(U.value){var V=U.value[1]==="0.0"?"-":U.value[1];this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">'+V+'</div><div style="font-size:10px">'+T.data[j.finals.data.domain]+"</div></div>")}}}};H=function(U){var T=j.chart.theme.dv1.slice(0,U.rangeFields.length);Ext.chart.theme.dv1=Ext.extend(Ext.chart.theme.Base,{constructor:function(V){Ext.chart.theme.Base.prototype.constructor.call(this,Ext.apply({seriesThemes:T,colors:T},V))}})};s=function(ae){var aa=30,Z=7,af,ag=0,ab="",V,ad=false,Y="top",ah=12,ac=0,X=["top","right","bottom","left"];if(I.type===j.finals.chart.pie){af=ae.getCount();ae.each(function(ai){ab+=ai.data[ae.domainFields[0]]})}else{af=ae.rangeFields.length;for(var W=0,U,T;W<ae.rangeFields.length;W++){if(ae.rangeFields[W].indexOf("#")!==-1){T=ae.rangeFields[W].split("#");U=x.metaData.names[T[0]]+" "+x.metaData.names[T[1]]}else{U=x.metaData.names[ae.rangeFields[W]]}ab+=U}}ag=ab.length;V=(af*aa)+(ag*Z);if(V>p.getWidth()-50){ad=true;Y="right"}if(Y==="right"){ac=5}if(I.legend){if(Ext.Array.contains(X,I.legend.position)){Y=I.legend.position}ah=parseInt(I.legend.fontSize)||ah;ah=ah+"px"}return Ext.create("Ext.chart.Legend",{position:Y,isVertical:ad,labelFont:ah+" "+j.chart.style.fontFamily,boxStroke:"#ffffff",boxStrokeWidth:0,padding:ac})};N=function(ac){var ab=[],ag="",ai,Z=x.metaData.names,V={EQ:"=",GT:">",GE:">=",LT:"<",LE:"<=",NE:"!="};if(I.startDate&&I.endDate){ag=I.startDate+" - "+I.endDate}if(I.title){ag+=(ag.length?", ":"")+I.title}else{if(I.type===j.finals.chart.pie){var T=Ext.Array.clean([].concat(q||[]));if(Ext.isArray(T)&&T.length){for(var X=0;X<T.length;X++){ag+=x.metaData.names[T[X]];ag+=X<T.length-1?", ":""}}}else{var ah=["pe","ou"];if(P.filters){for(var X=0,Y;X<P.filters.length;X++){Y=P.filters[X];ag+=(ag.length?", ":"");if(Ext.Array.contains(ah,Y.dimension)){var T=x.metaData[Y.dimension],af="";for(var ae=0;ae<T.length;ae++){af+=(af.length?", ":"")+Z[T[ae]]}ag+=af}else{if(Y.filter){var ab=Y.filter.split(":");if(ab.length===2){var U=ab[0],aa=ab[1].split(";"),af="";if(U==="IN"){for(var ae=0;ae<aa.length;ae++){af+=(af.length?", ":"")+aa[ae]}ag+=af}else{ag+=Z[Y.dimension]+" "+V[U]+" "+ab[1]}}else{var W=[],ad=[],af="";for(var ae=0;ae<ab.length;ae++){if(ae%2){ad.push(ab[ae])}else{W.push(ab[ae])}}for(var ae=0;ae<W.length;ae++){af+=(af.length?", ":"")+Z[Y.dimension]+" "+(V[W[ae]]||"")+" "+ad[ae]}ag+=af}}else{ag+=Z[Y.dimension]}}}}}}ai=(p.getWidth()/ag.length)<11.6?13:18;return Ext.create("Ext.draw.Sprite",{type:"text",text:ag,font:"bold "+ai+"px "+j.chart.style.fontFamily,fill:"#111",height:20,y:20})};M=function(){return function(){this.animate=false;this.setWidth(p.getWidth()-15);this.setHeight(p.getHeight()-40);this.animate=true}};E=function(){return function(){if(this.items){var Y=this.items[0],Z=Ext.isIE?Y.el.dom.scrollWidth:Y.el.getWidth(),V=10,U=this.legend,X,T;if(this.legend.position==="top"){X=U.x+(U.width/2);T=Z?X-(Z/2):V}else{var W=U?U.width:0;T=Z?(this.width/2)-(Z/2):V}Y.setAttributes({x:T},true)}}};D=function(V){var W,U=V.store||{},T={animate:true,shadow:false,insetPadding:35,width:p.getWidth()-15,height:p.getHeight()-40,theme:"dv1"};if(!I.hideLegend){T.legend=s(U);if(T.legend.position==="right"){T.insetPadding=40}}if(!I.hideTitle){T.items=[N(U)]}else{T.insetPadding=10}Ext.apply(T,V);W=Ext.create("Ext.chart.Chart",T);W.setChartSize=M();W.setTitlePosition=E();W.onViewportResize=function(){W.setChartSize();W.redraw();W.setTitlePosition()};W.on("afterrender",function(){W.setTitlePosition()});return W};o.column=function(V){var T=v(V),Y=Q(T),X=S(T),W=[Y,X],U=[B(T)];if(I.showTrendLine){U=U.concat(O(T,V))}if(I.targetLineValue){U.push(J(T))}if(I.baseLineValue){U.push(R(T))}H(T,V);return D({store:T,axes:W,series:U})};o.stackedcolumn=function(){var U=this.column(true);for(var T=0,V;T<U.series.items.length;T++){V=U.series.items[T];if(V.type===j.finals.chart.column){V.stacked=true}}return U};o.bar=function(ab){var ac=v(ab),X=Q(ac),Y=S(ac),aa,W=B(ac),T,U,ad,Z;X.position="bottom";Y.position="left";Y.label.rotate.degrees=360;aa=[X,Y];W.type="bar";W.axis="bottom";if(I.showValues){W.label={display:"outside","text-anchor":"middle",field:ac.rangeFields}}W=[W];if(I.showTrendLine){T=O(ac,ab);for(var V=0;V<T.length;V++){T[V].axis="bottom";T[V].xField=ac.trendLineFields[V];T[V].yField=ac.domainFields}W=W.concat(T)}if(I.targetLineValue){U=J(ac);U.axis="bottom";U.xField=ac.targetLineFields;U.yField=ac.domainFields;W.push(U)}if(I.baseLineValue){ad=R(ac);ad.axis="bottom";ad.xField=ac.baseLineFields;ad.yField=ac.domainFields;W.push(ad)}H(ac);return D({store:ac,axes:aa,series:W})};o.stackedbar=function(){var U=this.bar(true);for(var T=0,V;T<U.series.items.length;T++){V=U.series.items[T];if(V.type===j.finals.chart.bar){V.stacked=true}}return U};o.line=function(){var aa=v(),W=Q(aa),X=S(aa),Y=[W,X],U=[],T=j.chart.theme.dv1.slice(0,aa.rangeFields.length),Z=r(aa);for(var V=0,ab;V<aa.rangeFields.length;V++){ab={type:"line",axis:"left",xField:aa.domainFields,yField:aa.rangeFields[V],style:{opacity:0.8,lineWidth:3},markerConfig:{type:"circle",radius:4},tips:w(),title:Z[V]};U.push(ab)}if(I.showTrendLine){U=O(aa).concat(U);T=T.concat(T)}if(I.targetLineValue){U.push(J(aa));T.push("#051a2e")}if(I.baseLineValue){U.push(R(aa));T.push("#051a2e")}Ext.chart.theme.dv1=Ext.extend(Ext.chart.theme.Base,{constructor:function(ac){Ext.chart.theme.Base.prototype.constructor.call(this,Ext.apply({seriesThemes:T,colors:T},ac))}});return D({store:aa,axes:Y,series:U})};o.area=function(){I.hideEmptyRows=true;var T=v(true),X=Q(T),W=S(T),V=[X,W],U=B(T);U.type="area";U.style.opacity=0.7;U.style.lineWidth=0;delete U.label;delete U.tips;U=[U];if(I.showTrendLine){U=U.concat(O(T,true))}if(I.targetLineValue){U.push(J(T))}if(I.baseLineValue){U.push(R(T))}H(T);return D({store:T,axes:V,series:U})};o.pie=function(){var U=v(),W,T,X,V={field:j.finals.data.domain};if(I.showValues){V.display="middle";V.contrast=true;V.font="14px "+j.chart.style.fontFamily;V.renderer=function(Z){var Y=U.getAt(U.findExact(j.finals.data.domain,Z));return Y.data[U.rangeFields[0]]}}W=[{type:"pie",field:U.rangeFields[0],donut:7,showInLegend:true,highlight:{segment:{margin:5}},label:V,style:{opacity:0.8,stroke:"#555"},tips:{trackMouse:true,cls:"dv-chart-tips",renderer:function(Y){this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">'+Y.data[U.rangeFields[0]]+'</div><div style="font-size:10px">'+Y.data[j.finals.data.domain]+"</div></div>")}}}];T=j.chart.theme.dv1.slice(0,x.nameHeaderMap[I.rowDimensionNames[0]].ids.length);Ext.chart.theme.dv1=Ext.extend(Ext.chart.theme.Base,{constructor:function(Y){Ext.chart.theme.Base.prototype.constructor.call(this,Ext.apply({seriesThemes:T,colors:T},Y))}});X=D({store:U,series:W});X.insetPadding=40;X.shadow=true;return X};o.radar=function(){var T=v(),Z=[],W=[],V=r(T),X;Z.push({type:"Radial",position:"radial",label:{display:true}});for(var U=0,Y;U<T.rangeFields.length;U++){Y={showInLegend:true,type:"radar",xField:T.domainFields,yField:T.rangeFields[U],style:{opacity:0.5},tips:w(),title:V[U]};if(I.showValues){Y.label={display:"over",field:T.rangeFields[U]}}W.push(Y)}X=D({store:T,axes:Z,series:W,theme:"Category2"});X.insetPadding=40;X.height=p.getHeight()-80;X.setChartSize=function(){this.animate=false;this.setWidth(p.getWidth());this.setHeight(p.getHeight()-80);this.animate=true};return X};return o[I.type]()}}());(function(){if(Ext.isArray(n.dimensions)){k.prototype.array.sort(n.dimensions);for(var o=0,p;o<n.dimensions.length;o++){p=n.dimensions[o];p.dimensionName=p.id;p.objectName=j.finals.dimension.dimension.objectName;j.finals.dimension.objectNameMap[p.id]=p}}if(n.user&&n.user.ouc){k.prototype.array.sort(n.user.ouc)}}());return{conf:j,api:l,support:k,service:h,web:i,init:n}};var c=".dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n";c+=".dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n";c+=".dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n";c+=".x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n";c+=".x-mask-msg div { background-position: 11px center; } \n";c+=".x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n";c+=".x-mask { opacity: 0; } \n";Ext.util.CSS.createStyleSheet(c);EV.plugin={};var f={user:{},systemInfo:{}},e=[],g=false,b=false,a,d;a=function(j){var n=false,m=[],h=0,l;f.contextPath=j;l=function(){if(++h===m.length){b=true;for(var o=0;o<e.length;o++){d(e[o])}e=[]}};m.push({url:j+"/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat",success:function(o){var i=o;f.systemInfo.dateFormat=Ext.isString(i.keyDateFormat)?i.keyDateFormat.toLowerCase():"yyyy-mm-dd";f.systemInfo.calendar=i.keyCalendar;Ext.data.JsonP.request({url:j+"/api/me/user-account.jsonp",success:function(p){f.userAccount=p;Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/jQuery/jquery.min.js",function(){Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/dhis2/dhis2.util.js",function(){Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.js",function(){Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js",function(){Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js",function(){Ext.Loader.injectScriptElement(j+"/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js",function(){var v="en",t="name",s,u,r,q;f.userAccount.settings.keyUiLocale=f.userAccount.settings.keyUiLocale||v;f.userAccount.settings.keyAnalysisDisplayProperty=f.userAccount.settings.keyAnalysisDisplayProperty||t;u=f.contextPath;r=f.userAccount.settings.keyUiLocale;keyAnalysisDisplayProperty=f.userAccount.settings.keyAnalysisDisplayProperty;s=keyAnalysisDisplayProperty===t?keyAnalysisDisplayProperty:keyAnalysisDisplayProperty+"|rename("+t+")";q=f.systemInfo.dateFormat;f.namePropertyUrl=s;dhis2.util.namespace("dhis2.ev");dhis2.ev.store=dhis2.ev.store||new dhis2.storage.Store({name:"dhis2",adapters:[dhis2.storage.IndexedDBAdapter,dhis2.storage.DomSessionStorageAdapter,dhis2.storage.InMemoryAdapter],objectStores:["optionSets"]});Ext.data.JsonP.request({url:u+"/api/optionSets.jsonp?fields=id,version&paging=false",success:function(B){var A=B.optionSets||[],w=dhis2.ev.store,y=[],x="",z=0,D,C;C=function(){if(++z===A.length){if(!y.length){l();return}for(var E=0;E<y.length;E++){x+="&filter=id:eq:"+y[E]}Ext.data.JsonP.request({url:u+"/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false"+x,success:function(G){var F=G.optionSets;w.setAll("optionSets",F).done(l)}})}};registerOptionSet=function(E){w.get("optionSets",E.id).done(function(F){if(!Ext.isObject(F)||F.version!==E.version){y.push(E.id)}C()})};w.open().done(function(){for(var E=0;E<A.length;E++){registerOptionSet(A[E])}})}})})})})})})})}})}});m.push({url:j+"/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false",success:function(s){var q=s.organisationUnits||[],p=[],t=[];if(q.length){for(var o=0,u;o<q.length;o++){u=q[o];p.push(u.id);if(u.children){t=Ext.Array.clean(t.concat(Ext.Array.pluck(u.children,"id")||[]))}}f.user=f.user||{};f.user.ou=p;f.user.ouc=t}else{alert("User is not assigned to any organisation units")}l()}});f.legendSets=[];m.push({url:j+"/api/dimensions.jsonp?links=false&paging=false",success:function(i){f.dimensions=i.dimensions;l()}});for(var k=0;k<m.length;k++){Ext.data.JsonP.request(m[k])}};d=function(k){var m,j,i,h,l={core:{},app:{}};m=function(n){if(!Ext.isObject(n)){console.log("Event report configuration is not an object");return}if(!Ext.isString(n.el)){console.log("No valid element id provided");return}n.id=n.id||n.uid;return true};j=function(s){var u=s.core.init,p=s.core.conf,r=s.core.api,q=s.core.support,n=s.core.service,o=s.core.web,t=p.finals.dimension;u.el=k.el;Ext.get(u.el).setStyle("opacity",0);o.report=o.report||{};o.report.loadReport=function(v){if(!Ext.isString(v)){alert("Invalid event report id");return}Ext.data.JsonP.request({url:u.contextPath+"/api/eventCharts/"+v+".jsonp?fields="+p.url.analysisFields.join(","),failure:function(w){window.open(u.contextPath+"/api/eventCharts/"+v+".json?fields="+p.url.analysisFields.join(","),"_blank")},success:function(x){var w=r.layout.Layout(x);if(w){o.report.getData(w,true)}}})};o.report.getData=function(v,w){var x=o.analytics.getParamString(v,"jsonp");o.mask.show(s.app.centerRegion);Ext.data.JsonP.request({url:s.core.init.contextPath+x,disableCaching:false,scope:this,failure:function(y){o.mask.hide(s.app.centerRegion);console.log(y.status+"\n"+y.statusText+"\n"+y.responseText)},success:function(A){var y=r.response.Response(A);if(!y){o.mask.hide(s.app.centerRegion);return}for(var z=0,B=t.objectNameMap,C;z<y.headers.length;z++){C=y.headers[z];B[C.name]=B[C.name]||{id:C.name,dimensionName:C.name,name:C.column}}s.app.paramString=x;o.report.createReport(v,y,w)}})};o.report.createReport=function(B,A,x){var E,G,v,z,D,w,F,y,C;w=function(R,M){var Q=[];for(var J=0;J<R.headers.length;J++){if(Ext.isString(R.headers[J].optionSet)){Q.push(R.headers[J])}}if(Q.length){var L=0,O={},N,P;P=function(){if(++L===Q.length){R.metaData.optionNames=O;M()}};N=function(T,S){dhis2.ev.store.get("optionSets",T).done(function(U){Ext.apply(O,q.prototype.array.getObjectMap(U.options,"code","name",S));P()})};for(var J=0,K,H,I;J<Q.length;J++){K=Q[J];H=K.optionSet;I=K.name;N(H,I)}}else{M()}};F=function(){if(!E){o.mask.hide(s.app.centerRegion);return}D=o.report.aggregate.createChart(B,E,G,s.app.centerRegion);D.on("afterrender",function(){Ext.defer(function(){Ext.get(s.core.init.el).fadeIn({duration:400})},300)});s.app.centerRegion.removeAll();s.app.centerRegion.add(D);s.app.layout=B;s.app.xLayout=E;s.app.response=A;s.app.xResponse=G;s.app.chart=D;o.mask.hide(s.app.centerRegion);if(EV.isDebug){console.log("layout",B);console.log("response",A);console.log("xResponse",G);console.log("xLayout",E);console.log("core",s.core);console.log("app",s.app)}};y=function(){E=n.layout.getSyncronizedXLayout(B,E,G);F()};C=function(){E=n.layout.getExtendedLayout(B);G=n.response.aggregate.getExtendedResponse(E,A);w(G,y)};A=A||s.app.response;C()}};i=function(){var s=Ext.get(l.core.init.el),u,o=parseInt(s.getStyle("border-left-width"))+parseInt(s.getStyle("border-right-width")),q=parseInt(s.getStyle("border-top-width"))+parseInt(s.getStyle("border-bottom-width")),t=parseInt(s.getStyle("padding-left"))+parseInt(s.getStyle("padding-right")),p=parseInt(s.getStyle("padding-top"))+parseInt(s.getStyle("padding-bottom")),r=s.getWidth()-o-t,n=s.getHeight()-q-p;u=Ext.create("Ext.panel.Panel",{renderTo:s,bodyStyle:"border: 0 none",width:k.width||r,height:k.height||n,layout:"fit"});return{centerRegion:u}};h=function(){if(!m(k)){return}l.core=EV.getCore(Ext.clone(f));l.core.init.el=k.el;Ext.get(l.core.init.el).setStyle("opacity",0);j(l);l.app.viewport=i();l.app.centerRegion=l.app.viewport.centerRegion;if(k.id){l.core.web.report.loadReport(k.id)}else{layout=l.core.api.layout.Layout(k);if(!layout){return}l.core.web.report.getData(layout)}}()};EV.plugin.getEventChart=function(h){if(Ext.isString(h.url)&&h.url.split("").pop()==="/"){h.url=h.url.substr(0,h.url.length-1)}if(b){d(h)}else{e.push(h);if(!g){g=true;a(h.url)}}};DHIS=Ext.isObject(window.DHIS)?DHIS:{};DHIS.getEventChart=EV.plugin.getEventChart});
+Ext.onReady( function() {
+
+	// SIMPLE REGRESSION
+	function SimpleRegression()
+	{
+		var sumX = 0; // Sum of x values
+		var sumY = 0; // Sum of y values
+		var sumXX = 0; // Total variation in x
+		var sumXY = 0; // Sum of products
+		var n = 0; // Number of observations
+		var xbar = 0; // Mean of accumulated x values, used in updating formulas
+		var ybar = 0; // Mean of accumulated y values, used in updating formulas
+
+		this.addData = function( x, y )
+		{
+			if ( n == 0 )
+			{
+				xbar = x;
+				ybar = y;
+			}
+			else
+			{
+				var dx = x - xbar;
+				var dy = y - ybar;
+				sumXX += dx * dx * n / ( n + 1 );
+				sumXY += dx * dy * n / ( n + 1 );
+				xbar += dx / ( n + 1 );
+				ybar += dy / ( n + 1 );
+			}
+
+			sumX += x;
+			sumY += y;
+			n++;
+		};
+
+		this.predict = function( x )
+		{
+			var b1 = this.getSlope();
+
+			return this.getIntercept( b1 ) + b1 * x;
+		};
+
+		this.getSlope = function()
+		{
+			if ( n < 2 )
+			{
+				return Number.NaN;
+			}
+
+			return sumXY / sumXX;
+		};
+
+		this.getIntercept = function( slope )
+		{
+			return ( sumY - slope * sumX ) / n;
+		};
+	}
+
+	// CORE
+
+	// ext config
+	Ext.Ajax.method = 'GET';
+
+    Ext.isIE = function() {
+        return /trident/.test(Ext.userAgent);
+    }();
+
+	// namespace
+	EV = {};
+
+	EV.instances = [];
+	EV.i18n = {};
+	EV.isDebug = false;
+	EV.isSessionStorage = ('sessionStorage' in window && window['sessionStorage'] !== null);
+
+    // core
+	EV.getCore = function(init) {
+        var conf = {},
+            api = {},
+            support = {},
+            service = {},
+            web = {},
+            dimConf;
+
+		// conf
+		(function() {
+			conf.finals = {
+				dimension: {
+					data: {
+						value: 'data',
+						name: EV.i18n.data,
+						dimensionName: 'dx',
+						objectName: 'dx',
+						warning: {
+							filter: '...'//EV.i18n.wm_multiple_filter_ind_de
+						}
+					},
+					category: {
+						name: EV.i18n.categories,
+						dimensionName: 'co',
+						objectName: 'co',
+					},
+					indicator: {
+						value: 'indicators',
+						name: EV.i18n.indicators,
+						dimensionName: 'dx',
+						objectName: 'in'
+					},
+					dataElement: {
+						value: 'dataElements',
+						name: EV.i18n.data_elements,
+						dimensionName: 'dx',
+						objectName: 'de'
+					},
+					operand: {
+						value: 'operand',
+						name: 'Operand',
+						dimensionName: 'dx',
+						objectName: 'dc'
+					},
+					dataSet: {
+						value: 'dataSets',
+						name: EV.i18n.data_sets,
+						dimensionName: 'dx',
+						objectName: 'ds'
+					},
+					period: {
+						value: 'period',
+						name: EV.i18n.periods,
+						dimensionName: 'pe',
+						objectName: 'pe'
+					},
+					fixedPeriod: {
+						value: 'periods'
+					},
+					relativePeriod: {
+						value: 'relativePeriods',
+						name: EV.i18n.relative_periods
+					},
+                    startEndDate: {
+                        value: 'dates',
+                        name: EV.i18n.start_end_dates
+                    },
+					organisationUnit: {
+						value: 'organisationUnits',
+						name: EV.i18n.organisation_units,
+						dimensionName: 'ou',
+						objectName: 'ou'
+					},
+					dimension: {
+						value: 'dimension'
+						//objectName: 'di'
+					},
+					value: {
+						value: 'value'
+					}
+				},
+                chart: {
+                    series: 'series',
+                    category: 'category',
+                    filter: 'filter',
+                    column: 'column',
+                    stackedcolumn: 'stackedcolumn',
+                    bar: 'bar',
+                    stackedbar: 'stackedbar',
+                    line: 'line',
+                    area: 'area',
+                    pie: 'pie',
+                    radar: 'radar'
+                },
+                data: {
+                    domain: 'domain_',
+                    targetLine: 'targetline_',
+                    baseLine: 'baseline_',
+                    trendLine: 'trendline_'
+                },
+                image: {
+                    png: 'png',
+                    pdf: 'pdf'
+                },
+                cmd: {
+                    init: 'init_',
+                    none: 'none_',
+                    urlparam: 'id'
+                },
+                root: {
+                    id: 'root'
+                }
+			};
+
+			dimConf = conf.finals.dimension;
+
+			dimConf.objectNameMap = {};
+			dimConf.objectNameMap[dimConf.data.objectName] = dimConf.data;
+			dimConf.objectNameMap[dimConf.indicator.objectName] = dimConf.indicator;
+			dimConf.objectNameMap[dimConf.dataElement.objectName] = dimConf.dataElement;
+			dimConf.objectNameMap[dimConf.operand.objectName] = dimConf.operand;
+			dimConf.objectNameMap[dimConf.dataSet.objectName] = dimConf.dataSet;
+			dimConf.objectNameMap[dimConf.category.objectName] = dimConf.category;
+			dimConf.objectNameMap[dimConf.period.objectName] = dimConf.period;
+			dimConf.objectNameMap[dimConf.organisationUnit.objectName] = dimConf.organisationUnit;
+			dimConf.objectNameMap[dimConf.dimension.objectName] = dimConf.dimension;
+
+			conf.period = {
+				periodTypes: [
+					{id: 'Daily', name: EV.i18n.daily},
+					{id: 'Weekly', name: EV.i18n.weekly},
+					{id: 'Monthly', name: EV.i18n.monthly},
+					{id: 'BiMonthly', name: EV.i18n.bimonthly},
+					{id: 'Quarterly', name: EV.i18n.quarterly},
+					{id: 'SixMonthly', name: EV.i18n.sixmonthly},
+					{id: 'Yearly', name: EV.i18n.yearly},
+					{id: 'FinancialOct', name: EV.i18n.financial_oct},
+					{id: 'FinancialJuly', name: EV.i18n.financial_july},
+					{id: 'FinancialApril', name: EV.i18n.financial_april}
+				]
+			};
+
+			conf.layout = {
+				west_width: 452,
+				west_fill: 2,
+                west_fill_accordion_indicator: 56,
+                west_fill_accordion_dataelement: 59,
+                west_fill_accordion_dataset: 31,
+                west_fill_accordion_period: 307,
+                west_fill_accordion_organisationunit: 58,
+                west_maxheight_accordion_indicator: 450,
+                west_maxheight_accordion_dataset: 350,
+                west_maxheight_accordion_period: 405,
+                west_maxheight_accordion_organisationunit: 500,
+                west_scrollbarheight_accordion_indicator: 300,
+                west_scrollbarheight_accordion_dataset: 250,
+                west_scrollbarheight_accordion_period: 405,
+                west_scrollbarheight_accordion_organisationunit: 350,
+				east_tbar_height: 31,
+				east_gridcolumn_height: 30,
+				form_label_width: 55,
+				window_favorite_ypos: 100,
+				window_confirm_width: 250,
+				window_share_width: 500,
+				grid_favorite_width: 420,
+				grid_row_height: 27,
+				treepanel_minheight: 135,
+				treepanel_maxheight: 400,
+				treepanel_fill_default: 310,
+				treepanel_toolbar_menu_width_group: 140,
+				treepanel_toolbar_menu_width_level: 120,
+				multiselect_minheight: 100,
+				multiselect_maxheight: 250,
+				multiselect_fill_default: 345,
+				multiselect_fill_reportingrates: 315
+			};
+
+			conf.chart = {
+                style: {
+                    inset: 30,
+                    fontFamily: 'Arial,Sans-serif,Lucida Grande,Ubuntu'
+                },
+                theme: {
+                    dv1: ['#94ae0a', '#1d5991', '#a61120', '#ff8809', '#7c7474', '#a61187', '#ffd13e', '#24ad9a', '#a66111', '#414141', '#4500c4', '#1d5700']
+                }
+            };
+
+            conf.url = {
+                analysisFields: [
+                    '*',
+                    'program[id,name]',
+                    'programStage[id,name]',
+                    'columns[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'rows[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    'filters[dimension,filter,items[id,' + init.namePropertyUrl + ']]',
+                    '!lastUpdated',
+                    '!href',
+                    '!created',
+                    '!publicAccess',
+                    '!rewindRelativePeriods',
+                    '!userOrganisationUnit',
+                    '!userOrganisationUnitChildren',
+                    '!userOrganisationUnitGrandChildren',
+                    '!externalAccess',
+                    '!access',
+                    '!relativePeriods',
+                    '!columnDimensions',
+                    '!rowDimensions',
+                    '!filterDimensions',
+                    '!user',
+                    '!organisationUnitGroups',
+                    '!itemOrganisationUnitGroups',
+                    '!userGroupAccesses',
+                    '!indicators',
+                    '!dataElements',
+                    '!dataElementOperands',
+                    '!dataElementGroups',
+                    '!dataSets',
+                    '!periods',
+                    '!organisationUnitLevels',
+                    '!organisationUnits'
+                ]
+            };
+		}());
+
+		// api
+		(function() {
+			api.layout = {};
+
+			api.layout.Record = function(config) {
+				var config = Ext.clone(config);
+
+				// id: string
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Record: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.id)) {
+						alert('Record: id is not text: ' + config);
+						return;
+					}
+
+					return config;
+				}();
+			};
+
+			api.layout.Dimension = function(config) {
+				var config = Ext.clone(config);
+
+				// dimension: string
+
+				// items: [Record]
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Dimension: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.dimension)) {
+						console.log('Dimension: name is not a string: ' + config);
+						return;
+					}
+
+					if (config.dimension !== conf.finals.dimension.category.objectName) {
+						var records = [];
+
+						//if (!Ext.isArray(config.items)) {
+							//console.log('Dimension: items is not an array: ' + config);
+							//return;
+						//}
+
+						//for (var i = 0; i < config.items.length; i++) {
+							//records.push(api.layout.Record(config.items[i]));
+						//}
+
+						//config.items = Ext.Array.clean(records);
+
+						//if (!config.items.length) {
+							//console.log('Dimension: has no valid items: ' + config);
+							//return;
+						//}
+					}
+
+					return config;
+				}();
+			};
+
+			api.layout.Layout = function(config, applyConfig) {
+				var config = Ext.clone(config),
+					layout = {},
+					getValidatedDimensionArray,
+					validateSpecialCases;
+
+                // type: string ('column') - 'column', 'stackedcolumn', 'bar', 'stackedbar', 'line', 'area', 'pie'
+
+                // program: object
+
+                // programStage: object
+
+				// columns: [Dimension]
+
+				// rows: [Dimension]
+
+				// filters: [Dimension]
+
+                // showTrendLine: boolean (false)
+
+                // targetLineValue: number
+
+                // targetLineTitle: string
+
+                // baseLineValue: number
+
+                // baseLineTitle: string
+
+                // sortOrder: number
+
+                // rangeAxisMaxValue: number
+
+                // rangeAxisMinValue: number
+
+                // rangeAxisSteps: number
+
+                // rangeAxisDecimals: number
+
+                // showValues: boolean (true)
+
+                    // showTotals: boolean (true)
+
+                    // showSubTotals: boolean (true)
+
+				// hideEmptyRows: boolean (false)
+
+                    // aggregationType: string ('default') - 'default', 'count', 'sum'
+
+                    // showHierarchy: boolean (false)
+
+                    // displayDensity: string ('normal') - 'compact', 'normal', 'comfortable'
+
+                    // fontSize: string ('normal') - 'small', 'normal', 'large'
+
+                    // digitGroupSeparator: string ('space') - 'none', 'comma', 'space'
+
+                    // legendSet: object
+
+                // hideLegend: boolean (false)
+
+                // hideTitle: boolean (false)
+
+                // domainAxisTitle: string
+
+                // rangeAxisTitle: string
+
+                // userOrganisationUnit: boolean (false)
+
+                // userOrganisationUnitChildren: boolean (false)
+
+				// parentGraphMap: object
+
+				// sorting: transient object
+
+                    // reportingPeriod: boolean (false) //report tables only
+
+                    // organisationUnit: boolean (false) //report tables only
+
+                    // parentOrganisationUnit: boolean (false) //report tables only
+
+				// regression: boolean (false)
+
+				// cumulative: boolean (false)
+
+				// sortOrder: integer (0) //-1, 0, 1
+
+				// topLimit: integer (100) //5, 10, 20, 50, 100
+
+				getValidatedDimensionArray = function(dimensionArray) {
+					var dimensionArray = Ext.clone(dimensionArray);
+
+					if (!(dimensionArray && Ext.isArray(dimensionArray) && dimensionArray.length)) {
+						return;
+					}
+
+					for (var i = 0; i < dimensionArray.length; i++) {
+						dimensionArray[i] = api.layout.Dimension(dimensionArray[i]);
+					}
+
+					dimensionArray = Ext.Array.clean(dimensionArray);
+
+					return dimensionArray.length ? dimensionArray : null;
+				};
+
+				validateSpecialCases = function() {
+					var dimConf = conf.finals.dimension,
+						dimensions,
+						objectNameDimensionMap = {};
+
+					if (!layout) {
+						return;
+					}
+
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+
+					for (var i = 0; i < dimensions.length; i++) {
+						objectNameDimensionMap[dimensions[i].dimension] = dimensions[i];
+					}
+
+					if (layout.filters && layout.filters.length) {
+						for (var i = 0; i < layout.filters.length; i++) {
+
+							// Indicators as filter
+							if (layout.filters[i].dimension === dimConf.indicator.objectName) {
+								web.message.alert(EV.i18n.indicators_cannot_be_specified_as_filter || 'Indicators cannot be specified as filter');
+								return;
+							}
+
+							// Categories as filter
+							if (layout.filters[i].dimension === dimConf.category.objectName) {
+								web.message.alert(EV.i18n.categories_cannot_be_specified_as_filter || 'Categories cannot be specified as filter');
+								return;
+							}
+
+							// Data sets as filter
+							if (layout.filters[i].dimension === dimConf.dataSet.objectName) {
+								web.message.alert(EV.i18n.data_sets_cannot_be_specified_as_filter || 'Data sets cannot be specified as filter');
+								return;
+							}
+						}
+					}
+
+					// dc and in
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.indicator.objectName]) {
+						web.message.alert('Indicators and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and de
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataElement.objectName]) {
+						web.message.alert('Detailed data elements and totals cannot be specified together');
+						return;
+					}
+
+					// dc and ds
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.dataSet.objectName]) {
+						web.message.alert('Data sets and detailed data elements cannot be specified together');
+						return;
+					}
+
+					// dc and co
+					if (objectNameDimensionMap[dimConf.operand.objectName] && objectNameDimensionMap[dimConf.category.objectName]) {
+						web.message.alert('Categories and detailed data elements cannot be specified together');
+						return;
+					}
+
+					return true;
+				};
+
+				return function() {
+					var objectNames = [],
+						dimConf = conf.finals.dimension;
+
+					// config must be an object
+					if (!(config && Ext.isObject(config))) {
+						console.log('Layout: config is not an object (' + init.el + ')');
+						return;
+					}
+
+					// get object names
+					for (var i = 0, dims = Ext.Array.clean([].concat(config.columns || [], config.rows || [], config.filters || [])); i < dims.length; i++) {
+
+						// Object names
+						if (api.layout.Dimension(dims[i])) {
+							objectNames.push(dims[i].dimension);
+						}
+					}
+
+                    // period
+                    if (!Ext.Array.contains(objectNames, 'pe') && !(config.startDate && config.endDate)) {
+                        alert('At least one fixed period, one relative period or start/end dates must be specified');
+                        return;
+                    }
+
+					config.columns = getValidatedDimensionArray(config.columns);
+					config.rows = getValidatedDimensionArray(config.rows);
+					config.filters = getValidatedDimensionArray(config.filters);
+
+					// column
+					if (!config.columns) {
+						alert('No series items selected');
+						return;
+					}
+
+                    if (config.columns.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.columns.splice(1));
+                    }
+
+					// row
+					if (!config.rows) {
+						alert('No category items selected');
+						return;
+					}
+
+                    if (config.rows.length > 1) {
+                        config.filters = config.filters || [];
+
+                        config.filters = config.filters.concat(config.rows.splice(1));
+                    }
+
+					// favorite
+					if (config.id) {
+						layout.id = config.id;
+					}
+
+					if (config.name) {
+						layout.name = config.name;
+					}
+
+					// layout
+					layout.columns = config.columns;
+					layout.rows = config.rows;
+					layout.filters = config.filters;
+
+                    layout.type = Ext.isString(config.type) ? config.type : 'column';
+                    layout.program = config.program;
+                    layout.programStage = config.programStage;
+
+                    // dates
+                    if (config.startDate && config.endDate) {
+                        layout.startDate = config.startDate.substr(0,10);
+                        layout.endDate = config.endDate.substr(0,10);
+                    }
+
+					// properties
+                    layout.showValues = Ext.isBoolean(config.showData) ? config.showData : (Ext.isBoolean(config.showValues) ? config.showValues : true);
+                    layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : (Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : true);
+                    layout.showTrendLine = Ext.isBoolean(config.regression) ? config.regression : (Ext.isBoolean(config.showTrendLine) ? config.showTrendLine : false);
+                    layout.targetLineValue = Ext.isNumber(config.targetLineValue) ? config.targetLineValue : null;
+                    layout.targetLineTitle = Ext.isString(config.targetLineLabel) && !Ext.isEmpty(config.targetLineLabel) ? config.targetLineLabel :
+                        (Ext.isString(config.targetLineTitle) && !Ext.isEmpty(config.targetLineTitle) ? config.targetLineTitle : null);
+                    layout.baseLineValue = Ext.isNumber(config.baseLineValue) ? config.baseLineValue : null;
+                    layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
+                        (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
+                    layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+
+					layout.rangeAxisMaxValue = Ext.isNumber(config.rangeAxisMaxValue) ? config.rangeAxisMaxValue : null;
+					layout.rangeAxisMinValue = Ext.isNumber(config.rangeAxisMinValue) ? config.rangeAxisMinValue : null;
+					layout.rangeAxisSteps = Ext.isNumber(config.rangeAxisSteps) ? config.rangeAxisSteps : null;
+					layout.rangeAxisDecimals = Ext.isNumber(config.rangeAxisDecimals) ? config.rangeAxisDecimals : null;
+					layout.rangeAxisTitle = Ext.isString(config.rangeAxisLabel) && !Ext.isEmpty(config.rangeAxisLabel) ? config.rangeAxisLabel :
+                        (Ext.isString(config.rangeAxisTitle) && !Ext.isEmpty(config.rangeAxisTitle) ? config.rangeAxisTitle : null);
+					layout.domainAxisTitle = Ext.isString(config.domainAxisLabel) && !Ext.isEmpty(config.domainAxisLabel) ? config.domainAxisLabel :
+                        (Ext.isString(config.domainAxisTitle) && !Ext.isEmpty(config.domainAxisTitle) ? config.domainAxisTitle : null);
+
+                    layout.hideLegend = Ext.isBoolean(config.hideLegend) ? config.hideLegend : false;
+                    layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
+                    layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
+
+                    layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+
+					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
+					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+
+                    // style
+                    if (Ext.isObject(config.domainAxisStyle)) {
+                        layout.domainAxisStyle = config.domainAxisStyle;
+                    }
+                    
+                    if (Ext.isObject(config.rangeAxisStyle)) {
+                        layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
+                    
+                    if (Ext.isObject(config.legendStyle)) {
+                        layout.legendStyle = config.legendStyle;
+                    }
+                    
+                    if (Ext.isObject(config.seriesStyle)) {
+                        layout.seriesStyle = config.seriesStyle;
+                    }
+
+					if (!validateSpecialCases()) {
+						return;
+					}
+
+					return Ext.apply(layout, applyConfig);
+
+					return layout;
+				}();
+			};
+
+			api.response = {};
+
+			api.response.Header = function(config) {
+				var config = Ext.clone(config);
+
+				// name: string
+
+				// meta: boolean
+
+				return function() {
+					if (!Ext.isObject(config)) {
+						console.log('Header: config is not an object: ' + config);
+						return;
+					}
+
+					if (!Ext.isString(config.name)) {
+						console.log('Header: name is not a string: ' + config);
+						return;
+					}
+
+					if (!Ext.isBoolean(config.meta)) {
+						console.log('Header: meta is not boolean: ' + config);
+						return;
+					}
+
+					return config;
+				}();
+			};
+
+			api.response.Response = function(config) {
+				var config = Ext.clone(config);
+
+				// headers: [Header]
+
+				return function() {
+					if (!(config && Ext.isObject(config))) {
+						console.log('Response: config is not an object');
+						return;
+					}
+
+					if (!(config.headers && Ext.isArray(config.headers))) {
+						console.log('Response: headers is not an array');
+						return;
+					}
+
+					for (var i = 0, header; i < config.headers.length; i++) {
+						config.headers[i] = api.response.Header(config.headers[i]);
+					}
+
+					config.headers = Ext.Array.clean(config.headers);
+
+					if (!config.headers.length) {
+						console.log('Response: no valid headers');
+						return;
+					}
+
+					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
+						alert('No values found');
+						return;
+					}
+
+					if (config.headers.length !== config.rows[0].length) {
+						console.log('Response: headers.length !== rows[0].length');
+					}
+
+					return config;
+				}();
+			};
+		}());
+
+		// support
+		(function() {
+
+			// prototype
+			support.prototype = {};
+
+				// array
+			support.prototype.array = {};
+
+			support.prototype.array.getLength = function(array, suppressWarning) {
+				if (!Ext.isArray(array)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.array.getLength: not an array');
+					}
+
+					return null;
+				}
+
+				return array.length;
+			};
+
+			support.prototype.array.sort = function(array, direction, key) {
+				// supports [number], [string], [{key: number}], [{key: string}], [[string]], [[number]]
+
+				if (!support.prototype.array.getLength(array)) {
+					return;
+				}
+
+				key = !!key || Ext.isNumber(key) ? key : 'name';
+
+				array.sort( function(a, b) {
+
+					// if object, get the property values
+					if (Ext.isObject(a) && Ext.isObject(b)) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// if array, get from the right index
+					if (Ext.isArray(a) && Ext.isArray(b)) {
+						a = a[key];
+						b = b[key];
+					}
+
+					// string
+					if (Ext.isString(a) && Ext.isString(b)) {
+						a = a.toLowerCase();
+						b = b.toLowerCase();
+
+						if (direction === 'DESC') {
+							return a < b ? 1 : (a > b ? -1 : 0);
+						}
+						else {
+							return a < b ? -1 : (a > b ? 1 : 0);
+						}
+					}
+
+					// number
+					else if (Ext.isNumber(a) && Ext.isNumber(b)) {
+						return direction === 'DESC' ? b - a : a - b;
+					}
+
+					return -1;
+				});
+
+				return array;
+			};
+
+            support.prototype.array.uniqueByProperty = function(array, property) {
+                var names = [],
+                    uniqueItems = [];
+
+                for (var i = 0, item; i < array.length; i++) {
+                    item = array[i];
+
+                    if (!Ext.Array.contains(names, item[property])) {
+                        uniqueItems.push(item);
+                        names.push(item[property]);
+                    }
+                }
+
+                return uniqueItems;
+            };
+
+            support.prototype.array.getObjectMap = function(array, idProperty, nameProperty, namePrefix) {
+                if (!(Ext.isArray(array) && array.length)) {
+                    return {};
+                }
+
+                var o = {};
+                idProperty = idProperty || 'id';
+                nameProperty = nameProperty || 'name';
+                namePrefix = namePrefix || '';
+
+                for (var i = 0, obj; i < array.length; i++) {
+                    obj = array[i];
+
+                    o[namePrefix + obj[idProperty]] = obj[nameProperty];
+                }
+
+                return o;
+            };
+
+				// object
+			support.prototype.object = {};
+
+			support.prototype.object.getLength = function(object, suppressWarning) {
+				if (!Ext.isObject(object)) {
+					if (!suppressWarning) {
+						console.log('support.prototype.object.getLength: not an object');
+					}
+
+					return null;
+				}
+
+				var size = 0;
+
+				for (var key in object) {
+					if (object.hasOwnProperty(key)) {
+						size++;
+					}
+				}
+
+				return size;
+			};
+
+			support.prototype.object.hasObject = function(object, property, value) {
+				if (!support.prototype.object.getLength(object)) {
+					return null;
+				}
+
+				for (var key in object) {
+					var record = object[key];
+
+					if (object.hasOwnProperty(key) && record[property] === value) {
+						return true;
+					}
+				}
+
+				return null;
+			};
+
+				// str
+			support.prototype.str = {};
+
+			support.prototype.str.replaceAll = function(variable, find, replace) {
+                if (Ext.isString(variable)) {
+                    variable = variable.split(find).join(replace);
+                }
+                else if (Ext.isArray(variable)) {
+                    for (var i = 0; i < variable.length; i++) {
+                        variable[i] = variable[i].split(find).join(replace);
+                    }
+                }
+
+                return variable;
+			};
+
+			support.prototype.str.toggleDirection = function(direction) {
+				return direction === 'DESC' ? 'ASC' : 'DESC';
+			};
+
+				// number
+			support.prototype.number = {};
+
+			support.prototype.number.getNumberOfDecimals = function(number) {
+				var str = new String(number);
+				return (str.indexOf('.') > -1) ? (str.length - str.indexOf('.') - 1) : 0;
+			};
+
+			support.prototype.number.roundIf = function(number, precision) {
+				number = parseFloat(number);
+				precision = parseFloat(precision);
+
+				if (Ext.isNumber(number) && Ext.isNumber(precision)) {
+					var numberOfDecimals = support.prototype.number.getNumberOfDecimals(number);
+					return numberOfDecimals > precision ? Ext.Number.toFixed(number, precision) : number;
+				}
+
+				return number;
+			};
+
+			support.prototype.number.prettyPrint = function(number, separator) {
+				separator = separator || 'space';
+
+				if (separator === 'none') {
+					return number;
+				}
+
+				return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, conf.report.digitGroupSeparator[separator]);
+			};
+
+			// color
+			support.color = {};
+
+			support.color.hexToRgb = function(hex) {
+				var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i,
+					result;
+
+				hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+					return r + r + g + g + b + b;
+				});
+
+				result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+				return result ? {
+					r: parseInt(result[1], 16),
+					g: parseInt(result[2], 16),
+					b: parseInt(result[3], 16)
+				} : null;
+			};
+
+		}());
+
+		// service
+		(function() {
+
+			// layout
+			service.layout = {};
+
+			service.layout.cleanDimensionArray = function(dimensionArray) {
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				var array = [];
+
+				for (var i = 0; i < dimensionArray.length; i++) {
+					array.push(api.layout.Dimension(dimensionArray[i]));
+				}
+
+				array = Ext.Array.clean(array);
+
+				return array.length ? array : null;
+			};
+
+			service.layout.sortDimensionArray = function(dimensionArray, key) {
+				if (!support.prototype.array.getLength(dimensionArray, true)) {
+					return null;
+				}
+
+				// Clean dimension array
+				dimensionArray = service.layout.cleanDimensionArray(dimensionArray);
+
+				if (!dimensionArray) {
+					console.log('service.layout.sortDimensionArray: no valid dimensions');
+					return null;
+				}
+
+				key = key || 'dimensionName';
+
+				// Dimension order
+				Ext.Array.sort(dimensionArray, function(a,b) {
+					if (a[key] < b[key]) {
+						return -1;
+					}
+					if (a[key] > b[key]) {
+						return 1;
+					}
+					return 0;
+				});
+
+				// Sort object items, ids
+				for (var i = 0, items; i < dimensionArray.length; i++) {
+					support.prototype.array.sort(dimensionArray[i].items, 'ASC', 'id');
+
+					if (support.prototype.array.getLength(dimensionArray[i].ids)) {
+						support.prototype.array.sort(dimensionArray[i].ids);
+					}
+				}
+
+				return dimensionArray;
+			};
+
+			service.layout.getObjectNameDimensionMapFromDimensionArray = function(dimensionArray) {
+				var map = {};
+
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension;
+					}
+				}
+
+				return support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.getObjectNameDimensionItemsMapFromDimensionArray = function(dimensionArray) {
+				var map = {};
+
+				if (!support.prototype.array.getLength(dimensionArray)) {
+					return null;
+				}
+
+				for (var i = 0, dimension; i < dimensionArray.length; i++) {
+					dimension = api.layout.Dimension(dimensionArray[i]);
+
+					if (dimension) {
+						map[dimension.dimension] = dimension.items;
+					}
+				}
+
+				return support.prototype.object.getLength(map) ? map : null;
+			};
+
+			service.layout.getItemName = function(layout, response, id, isHtml) {
+				var metaData = response.metaData,
+					name = '';
+
+				if (service.layout.isHierarchy(layout, response, id)) {
+					var a = metaData.names[id].split('/');
+					a.shift();
+
+					for (var i = 0, isLast; i < a.length; i++) {
+						isLast = !!(i === a.length - 1);
+
+						name += (isHtml && !isLast ? '<span class="text-weak">' : '') + a[i] + (isHtml && !isLast ? '</span>' : '') + (!isLast ? ' / ' : '');
+					}
+
+					return name;
+				}
+
+				name += metaData.names[id];
+
+				return name;
+			};
+
+			service.layout.getExtendedLayout = function(layout) {
+				var layout = Ext.clone(layout),
+					xLayout;
+
+				xLayout = {
+					columns: [],
+					rows: [],
+					filters: [],
+
+					columnObjectNames: [],
+					columnDimensionNames: [],
+					rowObjectNames: [],
+					rowDimensionNames: [],
+
+					// axis
+					axisDimensions: [],
+					axisObjectNames: [],
+					axisDimensionNames: [],
+
+						// for param string
+					sortedAxisDimensionNames: [],
+
+					// Filter
+					filterDimensions: [],
+					filterObjectNames: [],
+					filterDimensionNames: [],
+
+						// for param string
+					sortedFilterDimensions: [],
+
+					// all
+					dimensions: [],
+					objectNames: [],
+					dimensionNames: [],
+
+					// oject name maps
+					objectNameDimensionsMap: {},
+					objectNameItemsMap: {},
+					objectNameIdsMap: {},
+
+					// dimension name maps
+					dimensionNameDimensionsMap: {},
+					dimensionNameItemsMap: {},
+					dimensionNameIdsMap: {},
+
+						// for param string
+					dimensionNameSortedIdsMap: {}
+
+					// sort table by column
+					//sortableIdObjects: []
+				};
+
+				Ext.applyIf(xLayout, layout);
+
+				// columns, rows, filters
+				if (layout.columns) {
+                    //layout.columns = support.prototype.array.uniqueByProperty(layout.columns, 'dimension');
+
+					for (var i = 0, dim, items, xDim; i < layout.columns.length; i++) {
+						dim = layout.columns[i];
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
+
+						if (items) {
+							xDim.items = items;
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.columns.push(xDim);
+
+						xLayout.columnObjectNames.push(xDim.objectName);
+						xLayout.columnDimensionNames.push(xDim.dimensionName);
+
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
+
+				if (layout.rows) {
+                    //layout.rows = support.prototype.array.uniqueByProperty(layout.rows, 'dimension');
+
+					for (var i = 0, dim, items, xDim; i < layout.rows.length; i++) {
+						dim = Ext.clone(layout.rows[i]);
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
+
+						if (items) {
+							xDim.items = items;
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.rows.push(xDim);
+
+						xLayout.rowObjectNames.push(xDim.objectName);
+						xLayout.rowDimensionNames.push(xDim.dimensionName);
+
+						xLayout.axisDimensions.push(xDim);
+						xLayout.axisObjectNames.push(xDim.objectName);
+						xLayout.axisDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
+
+				if (layout.filters) {
+                    //layout.filters = support.prototype.array.uniqueByProperty(layout.filters, 'dimension');
+
+					for (var i = 0, dim, items, xDim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
+						items = dim.items;
+						xDim = {};
+
+						xDim.dimension = dim.dimension;
+						xDim.objectName = dim.dimension;
+						xDim.dimensionName = dimConf.objectNameMap.hasOwnProperty(dim.dimension) ? dimConf.objectNameMap[dim.dimension].dimensionName || dim.dimension : dim.dimension;
+
+						xDim.items = [];
+						xDim.ids = [];
+
+						if (items) {
+							xDim.items = items;
+
+							for (var j = 0; j < items.length; j++) {
+								xDim.ids.push(items[j].id);
+							}
+						}
+
+						xLayout.filters.push(xDim);
+
+						xLayout.filterDimensions.push(xDim);
+						xLayout.filterObjectNames.push(xDim.objectName);
+						xLayout.filterDimensionNames.push(dimConf.objectNameMap.hasOwnProperty(xDim.objectName) ? dimConf.objectNameMap[xDim.objectName].dimensionName || xDim.objectName : xDim.objectName);
+
+						xLayout.objectNameDimensionsMap[xDim.objectName] = xDim;
+						xLayout.objectNameItemsMap[xDim.objectName] = xDim.items;
+						xLayout.objectNameIdsMap[xDim.objectName] = xDim.ids;
+					}
+				}
+
+				// legend set
+				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
+
+				if (layout.legendSet && layout.legendSet.mapLegends) {
+					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
+					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
+				}
+
+				// unique dimension names
+				xLayout.axisDimensionNames = Ext.Array.unique(xLayout.axisDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+				xLayout.columnDimensionNames = Ext.Array.unique(xLayout.columnDimensionNames);
+				xLayout.rowDimensionNames = Ext.Array.unique(xLayout.rowDimensionNames);
+				xLayout.filterDimensionNames = Ext.Array.unique(xLayout.filterDimensionNames);
+
+					// for param string
+				xLayout.sortedAxisDimensionNames = Ext.clone(xLayout.axisDimensionNames).sort();
+				xLayout.sortedFilterDimensions = service.layout.sortDimensionArray(Ext.clone(xLayout.filterDimensions));
+
+				// all
+				xLayout.dimensions = [].concat(xLayout.axisDimensions, xLayout.filterDimensions);
+				xLayout.objectNames = [].concat(xLayout.axisObjectNames, xLayout.filterObjectNames);
+				xLayout.dimensionNames = [].concat(xLayout.axisDimensionNames, xLayout.filterDimensionNames);
+
+				// dimension name maps
+				for (var i = 0, dimName; i < xLayout.dimensionNames.length; i++) {
+					dimName = xLayout.dimensionNames[i];
+
+					xLayout.dimensionNameDimensionsMap[dimName] = [];
+					xLayout.dimensionNameItemsMap[dimName] = [];
+					xLayout.dimensionNameIdsMap[dimName] = [];
+				}
+
+				for (var i = 0, xDim; i < xLayout.dimensions.length; i++) {
+					xDim = xLayout.dimensions[i];
+
+					xLayout.dimensionNameDimensionsMap[xDim.dimensionName].push(xDim);
+					xLayout.dimensionNameItemsMap[xDim.dimensionName] = xLayout.dimensionNameItemsMap[xDim.dimensionName].concat(xDim.items);
+					xLayout.dimensionNameIdsMap[xDim.dimensionName] = xLayout.dimensionNameIdsMap[xDim.dimensionName].concat(xDim.ids);
+				}
+
+					// for param string
+				for (var key in xLayout.dimensionNameIdsMap) {
+					if (xLayout.dimensionNameIdsMap.hasOwnProperty(key)) {
+						xLayout.dimensionNameSortedIdsMap[key] = Ext.clone(xLayout.dimensionNameIdsMap[key]).sort();
+					}
+				}
+
+				// Uuid
+				xLayout.tableUuid = init.el + '_' + Ext.data.IdGenerator.get('uuid').generate();
+
+				return xLayout;
+			};
+
+			service.layout.getSyncronizedXLayout = function(layout, xLayout, xResponse) {
+				var removeDimensionFromXLayout,
+					getHeaderNames,
+					dimensions = Ext.Array.clean([].concat(xLayout.columns || [], xLayout.rows || [], xLayout.filters || [])),
+                    originalDimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+                    getSeriesValidatedLayout,
+                    layout;
+
+				removeDimensionFromXLayout = function(objectName) {
+					var getUpdatedAxis;
+
+					getUpdatedAxis = function(axis) {
+						var dimension;
+						axis = Ext.clone(axis);
+
+						for (var i = 0; i < axis.length; i++) {
+							if (axis[i].dimension === objectName) {
+								dimension = axis[i];
+							}
+						}
+
+						if (dimension) {
+							Ext.Array.remove(axis, dimension);
+						}
+
+						return axis;
+					};
+
+					if (xLayout.columns) {
+						xLayout.columns = getUpdatedAxis(xLayout.columns);
+					}
+					if (xLayout.rows) {
+						xLayout.rows = getUpdatedAxis(xLayout.rows);
+					}
+					if (xLayout.filters) {
+						xLayout.filters = getUpdatedAxis(xLayout.filters);
+					}
+				};
+
+				getHeaderNames = function() {
+					var headerNames = [];
+
+					for (var i = 0; i < xResponse.headers.length; i++) {
+						headerNames.push(xResponse.headers[i].name);
+					}
+
+					return headerNames;
+				};
+
+                getSeriesValidatedLayout = function(xLayout) {
+                    var nSeries = xLayout.columns[0].ids.length * xLayout.rows[0].ids.length,
+                        message = 'This chart is potentially very large due to the high number of series and category items. Create the chart anyway?';
+
+                    if (nSeries > 200) {
+                        if (!confirm(message))  {
+                            return null;
+                        }
+                    }
+
+                    return xLayout;
+                };
+
+				return function() {
+
+					// items
+					for (var i = 0, dim, header; i < dimensions.length; i++) {
+						dim = dimensions[i];
+						dim.items = [];
+						header = xResponse.nameHeaderMap[dim.dimension];
+
+						if (header) {
+							for (var j = 0, id; j < header.ids.length; j++) {
+								id = header.ids[j];
+
+								dim.items.push({
+									id: id,
+									name: xResponse.metaData.names[id] || id
+								});
+							}
+						}
+					}
+
+                    // restore order for options
+                    for (var i = 0, orgDim; i < originalDimensions.length; i++) {
+                        orgDim = originalDimensions[i];
+
+                        if (Ext.isString(orgDim.filter)) {
+                            var a = orgDim.filter.split(':');
+
+                            if (a[0] === 'IN' && a.length > 1 && Ext.isString(a[1])) {
+                                var options = a[1].split(';'),
+                                    items = [];
+
+                                for (var j = 0, dim; j < dimensions.length; j++) {
+                                    dim = dimensions[j];
+
+                                    if (dim.dimension === orgDim.dimension && dim.items && dim.items.length) {
+                                        var items = [];
+
+                                        for (var k = 0, option; k < options.length; k++) {
+                                            option = options[k];
+
+                                            for (var l = 0, item; l < dim.items.length; l++) {
+                                                item = dim.items[l];
+
+                                                if (item.name === option) {
+                                                    items.push(item);
+                                                }
+                                            }
+                                        }
+
+                                        dim.items = items;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+					// Re-layout
+					layout = api.layout.Layout(xLayout);
+
+                    if (!layout) {
+                        return null;
+                    }
+
+                    xLayout = service.layout.getExtendedLayout(layout);
+
+                    // validate number of series
+                    xLayout = getSeriesValidatedLayout(xLayout);
+
+                    if (!xLayout) {
+                        return null;
+                    }
+
+                    return xLayout;
+				}();
+			};
+
+			service.layout.getExtendedAxis = function(xLayout, type) {
+				var dimensionNames,
+					spanType,
+					aDimensions = [],
+					nAxisWidth = 1,
+					nAxisHeight,
+					aaUniqueFloorIds,
+					aUniqueFloorWidth = [],
+					aAccFloorWidth = [],
+					aFloorSpan = [],
+					aaGuiFloorIds = [],
+					aaAllFloorIds = [],
+					aCondoId = [],
+					aaAllFloorObjects = [],
+					uuidObjectMap = {};
+
+				if (type === 'col') {
+					dimensionNames = Ext.clone(xLayout.columnDimensionNames);
+					spanType = 'colSpan';
+				}
+				else if (type === 'row') {
+					dimensionNames = Ext.clone(xLayout.rowDimensionNames);
+					spanType = 'rowSpan';
+				}
+
+				if (!(Ext.isArray(dimensionNames) && dimensionNames.length)) {
+					return;
+				}
+	//dimensionNames = ['pe', 'ou'];
+
+				// aDimensions: array of dimension objects with dimensionName property
+				for (var i = 0; i < dimensionNames.length; i++) {
+					aDimensions.push({
+						dimensionName: dimensionNames[i]
+					});
+				}
+	//aDimensions = [{
+		//dimensionName: 'pe'
+	//}]
+
+				// aaUniqueFloorIds: array of arrays with unique ids for each dimension floor
+				aaUniqueFloorIds = function() {
+					var a = [];
+
+					for (var i = 0; i < aDimensions.length; i++) {
+						a.push(xLayout.dimensionNameIdsMap[aDimensions[i].dimensionName]);
+					}
+
+					return a;
+				}();
+	//aaUniqueFloorIds	= [ [de-id1, de-id2, de-id3],
+	//					    [pe-id1],
+	//					    [ou-id1, ou-id2, ou-id3, ou-id4] ]
+
+
+				// nAxisHeight
+				nAxisHeight = aaUniqueFloorIds.length;
+	//nAxisHeight = 3
+
+
+				// aUniqueFloorWidth, nAxisWidth, aAccFloorWidth
+				for (var i = 0, nUniqueFloorWidth; i < nAxisHeight; i++) {
+					nUniqueFloorWidth = aaUniqueFloorIds[i].length;
+
+					aUniqueFloorWidth.push(nUniqueFloorWidth);
+					nAxisWidth = nAxisWidth * nUniqueFloorWidth;
+					aAccFloorWidth.push(nAxisWidth);
+				}
+	//aUniqueFloorWidth	= [3, 1, 4]
+	//nAxisWidth		= 12 (3 * 1 * 4)
+	//aAccFloorWidth	= [3, 3, 12]
+
+				// aFloorSpan
+				for (var i = 0; i < nAxisHeight; i++) {
+					if (aUniqueFloorWidth[i] === 1) {
+						if (i === 0) { // if top floor
+							aFloorSpan.push(nAxisWidth); // span max
+						}
+						else {
+							if (xLayout.hideEmptyRows && type === 'row') {
+								aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
+							}
+							else {
+								aFloorSpan.push(aFloorSpan[0]); //if just one item and not top level, span same as top level
+							}
+						}
+					}
+					else {
+						aFloorSpan.push(nAxisWidth / aAccFloorWidth[i]);
+					}
+				}
+	//aFloorSpan			= [4, 12, 1]
+
+
+				// aaGuiFloorIds
+				aaGuiFloorIds.push(aaUniqueFloorIds[0]);
+
+				if (nAxisHeight.length > 1) {
+					for (var i = 1, a, n; i < nAxisHeight; i++) {
+						a = [];
+						n = aUniqueFloorWidth[i] === 1 ? aUniqueFloorWidth[0] : aAccFloorWidth[i-1];
+
+						for (var j = 0; j < n; j++) {
+							a = a.concat(aaUniqueFloorIds[i]);
+						}
+
+						aaGuiFloorIds.push(a);
+					}
+				}
+	//aaGuiFloorIds	= [ [d1, d2, d3], (3)
+	//					[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (15)
+	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2...] (30)
+	//		  	  	  ]
+
+
+				// aaAllFloorIds
+				for (var i = 0, aAllFloorIds, aUniqueFloorIds, span, factor; i < nAxisHeight; i++) {
+					aAllFloorIds = [];
+					aUniqueFloorIds = aaUniqueFloorIds[i];
+					span = aFloorSpan[i];
+					factor = nAxisWidth / (span * aUniqueFloorIds.length);
+
+					for (var j = 0; j < factor; j++) {
+						for (var k = 0; k < aUniqueFloorIds.length; k++) {
+							for (var l = 0; l < span; l++) {
+								aAllFloorIds.push(aUniqueFloorIds[k]);
+							}
+						}
+					}
+
+					aaAllFloorIds.push(aAllFloorIds);
+				}
+	//aaAllFloorIds	= [ [d1, d1, d1, d1, d1, d1, d1, d1, d1, d1, d2, d2, d2, d2, d2, d2, d2, d2, d2, d2, d3, d3, d3, d3, d3, d3, d3, d3, d3, d3], (30)
+	//					[p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5, p1, p2, p3, p4, p5], (30)
+	//					[o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2, o1, o2] (30)
+	//		  	  	  ]
+
+
+				// aCondoId
+				for (var i = 0, id; i < nAxisWidth; i++) {
+					id = '';
+
+					for (var j = 0; j < nAxisHeight; j++) {
+						id += aaAllFloorIds[j][i];
+					}
+
+					if (id) {
+						aCondoId.push(id);
+					}
+				}
+	//aCondoId	= [ id11+id21+id31, id12+id22+id32, ... ]
+
+
+				// allObjects
+				for (var i = 0, allFloor; i < aaAllFloorIds.length; i++) {
+					allFloor = [];
+
+					for (var j = 0, obj; j < aaAllFloorIds[i].length; j++) {
+						obj = {
+							id: aaAllFloorIds[i][j],
+							uuid: Ext.data.IdGenerator.get('uuid').generate(),
+							dim: i,
+							axis: type
+						};
+
+						// leaf?
+						if (i === aaAllFloorIds.length - 1) {
+							obj.leaf = true;
+						}
+
+						allFloor.push(obj);
+					}
+
+					aaAllFloorObjects.push(allFloor);
+				}
+
+				// add span and children
+				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+					for (var j = 0, obj, doorCount = 0, oldestObj; j < aaAllFloorObjects[i].length; j++) {
+
+						obj = aaAllFloorObjects[i][j];
+
+						if (doorCount === 0) {
+
+							// span
+							obj[spanType] = aFloorSpan[i];
+
+							// children
+							//obj.children = Ext.isDefined(aFloorSpan[i + 1]) ? aFloorSpan[i] / aFloorSpan[i + 1] : 0;
+							obj.children = obj.leaf ? 0 : aFloorSpan[i];
+
+							// first sibling
+							obj.oldest = true;
+
+							// root?
+							if (i === 0) {
+								obj.root = true;
+							}
+
+							// tmp oldest uuid
+							oldestObj = obj;
+						}
+
+						obj.oldestSibling = oldestObj;
+
+						if (++doorCount === aFloorSpan[i]) {
+							doorCount = 0;
+						}
+					}
+				}
+
+				// add parents if more than 1 floor
+				if (nAxisHeight > 1) {
+					for (var i = 1, allFloor; i < nAxisHeight; i++) {
+						allFloor = aaAllFloorObjects[i];
+
+						//for (var j = 0, obj, doorCount = 0, span = aFloorSpan[i - 1], parentObj = aaAllFloorObjects[i - 1][0]; j < allFloor.length; j++) {
+						for (var j = 0, doorCount = 0, span = aFloorSpan[i - 1]; j < allFloor.length; j++) {
+							allFloor[j].parent = aaAllFloorObjects[i - 1][j];
+
+							//doorCount++;
+
+							//if (doorCount === span) {
+								//parentObj = aaAllFloorObjects[i - 1][j + 1];
+								//doorCount = 0;
+							//}
+						}
+					}
+				}
+
+				// add uuids array to leaves
+				if (aaAllFloorObjects.length) {
+
+					// set span to second lowest span number: if aFloorSpan == [15,3,15,1], set span to 3
+					var span = nAxisHeight > 1 ? support.prototype.array.sort(Ext.clone(aFloorSpan))[1] : nAxisWidth,
+						allFloorObjectsLast = aaAllFloorObjects[aaAllFloorObjects.length - 1];
+
+					for (var i = 0, leaf, parentUuids, obj, leafUuids = []; i < allFloorObjectsLast.length; i++) {
+						leaf = allFloorObjectsLast[i];
+						leafUuids.push(leaf.uuid);
+						parentUuids = [];
+						obj = leaf;
+
+						// get the uuid of the oldest sibling
+						while (obj.parent) {
+							obj = obj.parent;
+							parentUuids.push(obj.oldestSibling.uuid);
+						}
+
+						// add parent uuids to leaf
+						leaf.uuids = Ext.clone(parentUuids);
+
+						// add uuid for all leaves
+						if (leafUuids.length === span) {
+							for (var j = (i - span) + 1, leaf; j <= i; j++) {
+								leaf = allFloorObjectsLast[j];
+								leaf.uuids = leaf.uuids.concat(Ext.clone(leafUuids));
+							}
+
+							leafUuids = [];
+						}
+					}
+				}
+
+				// populate uuidObject map
+				for (var i = 0; i < aaAllFloorObjects.length; i++) {
+					for (var j = 0, object; j < aaAllFloorObjects[i].length; j++) {
+						object = aaAllFloorObjects[i][j];
+//console.log(object.uuid, object);
+						uuidObjectMap[object.uuid] = object;
+					}
+				}
+
+//console.log("aaAllFloorObjects", aaAllFloorObjects);
+
+				return {
+					type: type,
+					items: aDimensions,
+					xItems: {
+						unique: aaUniqueFloorIds,
+						gui: aaGuiFloorIds,
+						all: aaAllFloorIds
+					},
+					objects: {
+						all: aaAllFloorObjects
+					},
+					ids: aCondoId,
+					span: aFloorSpan,
+					dims: nAxisHeight,
+					size: nAxisWidth,
+					uuidObjectMap: uuidObjectMap
+				};
+			};
+
+			service.layout.isHierarchy = function(layout, response, id) {
+				return layout.showHierarchy && Ext.isObject(response.metaData.ouHierarchy) && response.metaData.ouHierarchy.hasOwnProperty(id);
+			};
+
+            service.layout.getHierarchyName = function(ouHierarchy, names, id) {
+                var graph = ouHierarchy[id],
+                    ids = Ext.Array.clean(graph.split('/')),
+                    hierarchyName = '';
+
+                if (ids.length < 2) {
+                    return names[id];
+                }
+
+                for (var i = 0; i < ids.length; i++) {
+                    hierarchyName += names[ids[i]] + ' / ';
+                }
+
+                hierarchyName += names[id];
+
+                return hierarchyName;
+            };
+
+			service.layout.layout2plugin = function(layout, el) {
+				var layout = Ext.clone(layout),
+					dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || []));
+
+				layout.url = init.contextPath;
+
+				if (el) {
+					layout.el = el;
+				}
+
+				if (Ext.isString(layout.id)) {
+					return {id: layout.id};
+				}
+
+				for (var i = 0, dimension, item; i < dimensions.length; i++) {
+					dimension = dimensions[i];
+
+					delete dimension.id;
+					delete dimension.ids;
+					delete dimension.type;
+					delete dimension.dimensionName;
+					delete dimension.objectName;
+
+					for (var j = 0, item; j < dimension.items.length; j++) {
+						item = dimension.items[j];
+
+						delete item.name;
+						delete item.code;
+						delete item.created;
+						delete item.lastUpdated;
+						delete item.value;
+					}
+				}
+
+				if (layout.showTotals) {
+					delete layout.showTotals;
+				}
+
+				if (layout.showSubTotals) {
+					delete layout.showSubTotals;
+				}
+
+				if (!layout.hideEmptyRows) {
+					delete layout.hideEmptyRows;
+				}
+
+				if (!layout.showHierarchy) {
+					delete layout.showHierarchy;
+				}
+
+				if (layout.displayDensity === 'normal') {
+					delete layout.displayDensity;
+				}
+
+				if (layout.fontSize === 'normal') {
+					delete layout.fontSize;
+				}
+
+				if (layout.digitGroupSeparator === 'space') {
+					delete layout.digitGroupSeparator;
+				}
+
+				if (!layout.legendSet) {
+					delete layout.legendSet;
+				}
+
+				if (!layout.sorting) {
+					delete layout.sorting;
+				}
+
+				delete layout.parentGraphMap;
+				delete layout.reportingPeriod;
+				delete layout.organisationUnit;
+				delete layout.parentOrganisationUnit;
+				delete layout.regression;
+				delete layout.cumulative;
+				delete layout.topLimit;
+
+				return layout;
+			};
+
+            service.layout.getDataDimensionsFromLayout = function(layout) {
+                var dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [], layout.filters || [])),
+                    ignoreKeys = ['pe', 'ou'],
+                    dataDimensions = [];
+
+                for (var i = 0; i < dimensions.length; i++) {
+                    if (!Ext.Array.contains(ignoreKeys, dimensions[i].dimension)) {
+                        dataDimensions.push(dimensions[i]);
+                    }
+                }
+
+                return dataDimensions;
+            };
+
+			// response
+			service.response = {};
+
+				// aggregate
+			service.response.aggregate = {};
+
+			service.response.aggregate.getExtendedResponse = function(xLayout, response) {
+				var emptyId = '[N/A]',
+                    meta = ['ou', 'pe'],
+                    ouHierarchy,
+                    names,
+					headers;
+
+				response = Ext.clone(response);
+				headers = response.headers;
+                ouHierarchy = response.metaData.ouHierarchy,
+                names = response.metaData.names;
+                names[emptyId] = emptyId;
+
+                response.metaData.optionNames = {};
+				response.nameHeaderMap = {};
+				response.idValueMap = {};
+
+				// add to headers: size, index, response ids
+				for (var i = 0, header, isMeta; i < headers.length; i++) {
+					header = headers[i];
+                    header.ids = [];
+                    isMeta = Ext.Array.contains(meta, header.name);
+
+                    // overwrite row ids, update metadata, set unique header ids
+                    if (header.meta) {
+                        if (header.type === 'java.lang.Double') {
+                            var objects = [];
+
+                            for (var j = 0, id, fullId, parsedId, displayId; j < response.rows.length; j++) {
+                                id = response.rows[j][i] || emptyId;
+                                fullId = header.name + id;
+                                parsedId = parseFloat(id);
+                                displayId = Ext.isNumber(parsedId) ? parsedId : (names[id] || id);
+
+								// update names
+                                names[fullId] = (isMeta ? '' : header.column + ' ') + displayId;
+
+								// update rows
+                                response.rows[j][i] = fullId;
+
+								// number sorting
+                                objects.push({
+                                    id: fullId,
+                                    sortingId: Ext.isNumber(parsedId) ? parsedId : Number.MAX_VALUE
+                                });
+                            }
+
+                            support.prototype.array.sort(objects, 'ASC', 'sortingId');
+                            header.ids = Ext.Array.pluck(objects, 'id');
+                        }
+                        else {
+							var objects = [];
+
+                            for (var j = 0, id, fullId, name, isHierarchy; j < response.rows.length; j++) {
+                                id = response.rows[j][i] || emptyId;
+                                fullId = header.name + id;
+                                isHierarchy = service.layout.isHierarchy(xLayout, response, id);
+
+                                // add dimension name prefix if not pe/ou
+                                name = isMeta ? '' : header.column + ' ';
+
+                                // add hierarchy if ou and showHierarchy
+                                name = isHierarchy ? service.layout.getHierarchyName(ouHierarchy, names, id) : (names[id] || id);
+
+                                names[fullId] = name;
+
+                                // update rows
+                                response.rows[j][i] = fullId;
+
+                                // update ou hierarchy
+                                if (isHierarchy) {
+									ouHierarchy[fullId] = ouHierarchy[id];
+								}
+
+								objects.push({
+									id: fullId,
+									sortingId: header.name === 'pe' ? fullId : name
+								});
+                            }
+
+                            support.prototype.array.sort(objects, 'ASC', 'sortingId');
+                            header.ids = Ext.Array.pluck(objects, 'id');
+                        }
+                    }
+
+					header.ids = Ext.Array.unique(header.ids);
+
+					header.size = header.ids.length;
+					header.index = i;
+
+					response.nameHeaderMap[header.name] = header;
+				}
+
+				// idValueMap: vars
+				var valueHeaderIndex = response.nameHeaderMap[conf.finals.dimension.value.value].index,
+					dx = dimConf.data.dimensionName,
+					axisDimensionNames = xLayout.axisDimensionNames,
+					idIndexOrder = [];
+
+				// idValueMap: idIndexOrder
+				for (var i = 0; i < axisDimensionNames.length; i++) {
+					idIndexOrder.push(response.nameHeaderMap[axisDimensionNames[i]].index);
+				}
+
+				// idValueMap
+				for (var i = 0, row, id; i < response.rows.length; i++) {
+					row = response.rows[i];
+					id = '';
+
+					for (var j = 0; j < idIndexOrder.length; j++) {
+						id += row[idIndexOrder[j]];
+					}
+
+					response.idValueMap[id] = row[valueHeaderIndex];
+				}
+
+				return response;
+			};
+        }());
+
+		// web
+		(function() {
+
+			// mask
+			web.mask = {};
+
+			web.mask.show = function(component, message) {
+				if (!Ext.isObject(component)) {
+					console.log('web.mask.show: component not an object');
+					return null;
+				}
+
+				message = message || 'Loading..';
+
+				if (component.mask && component.mask.destroy) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+
+				component.mask = new Ext.create('Ext.LoadMask', component, {
+					shadow: false,
+					msg: message,
+					style: 'box-shadow:0',
+					bodyStyle: 'box-shadow:0'
+				});
+
+				component.mask.show();
+			};
+
+			web.mask.hide = function(component) {
+				if (!Ext.isObject(component)) {
+					console.log('support.gui.mask.hide: component not an object');
+					return null;
+				}
+
+				if (component.mask && component.mask.destroy) {
+					component.mask.destroy();
+					component.mask = null;
+				}
+			};
+
+			// message
+			web.message = {};
+
+			web.message.alert = function(message) {
+				console.log(message);
+			};
+
+			// analytics
+			web.analytics = {};
+
+			web.analytics.getParamString = function(layout, format) {
+                var paramString,
+                    dimensions = Ext.Array.clean([].concat(layout.columns || [], layout.rows || [])),
+                    ignoreKeys = ['longitude', 'latitude'],
+                    nameItemsMap;
+
+                paramString = '/api/analytics/events/aggregate/' + layout.program.id + '.' + (format || 'json') + '?';
+
+				// stage
+				paramString += 'stage=' + layout.programStage.id;
+
+                // dimensions
+                if (dimensions) {
+					for (var i = 0, dim; i < dimensions.length; i++) {
+						dim = dimensions[i];
+
+						if (Ext.Array.contains(ignoreKeys, dim.dimension) || (dim.dimension === 'pe' && !dim.items && !dim.filter)) {
+							continue;
+						}
+
+						paramString += '&dimension=' + dim.dimension;
+
+						if (dim.items && dim.items.length) {
+							paramString += ':';
+
+							for (var j = 0, item; j < dim.items.length; j++) {
+								item = dim.items[j];
+
+								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
+							}
+						}
+						else {
+							paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+						}
+					}
+				}
+
+                // filters
+                if (layout.filters) {
+					for (var i = 0, dim; i < layout.filters.length; i++) {
+						dim = layout.filters[i];
+
+                        paramString += '&filter=' + dim.dimension;
+
+                        if (Ext.isArray(dim.items) && dim.items.length) {
+                            paramString += ':';
+
+                            for (var j = 0; j < dim.items.length; j++) {
+                                paramString += encodeURIComponent(dim.items[j].id);
+                                paramString += j < dim.items.length - 1 ? ';' : '';
+                            }
+                        }
+                        else {
+                            paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
+                        }
+					}
+				}
+
+                // dates
+                if (layout.startDate && layout.endDate) {
+                    paramString += '&startDate=' + layout.startDate + '&endDate=' + layout.endDate;
+                }
+
+                // display property
+                paramString += '&displayProperty=' + init.userAccount.settings.keyAnalysisDisplayProperty.toUpperCase();
+
+                return paramString;
+            };
+
+			web.analytics.validateUrl = function(url) {
+				var msg;
+
+                if (Ext.isIE) {
+                    msg = 'Too many items selected (url has ' + url.length + ' characters). Internet Explorer accepts maximum 2048 characters.';
+                }
+                else {
+					var len = url.length > 8000 ? '8000' : (url.length > 4000 ? '4000' : '2000');
+					msg = 'Too many items selected (url has ' + url.length + ' characters). Please reduce to less than ' + len + ' characters.';
+                }
+
+                msg += '\n\n' + 'Hint: A good way to reduce the number of items is to use relative periods and level/group organisation unit selection modes.';
+
+                alert(msg);
+			};
+
+			// report
+			web.report = {};
+
+				// aggregate
+			web.report.aggregate = {};
+
+			web.report.aggregate.sort = function(xLayout, xResponse, xColAxis) {
+				var condoId = xLayout.sorting.id,
+					name = xLayout.rows[0].dimension,
+					ids = xResponse.nameHeaderMap[name].ids,
+					valueMap = xResponse.idValueMap,
+					direction = xLayout.sorting ? xLayout.sorting.direction : 'DESC',
+					objects = [],
+					layout;
+
+				// relative id?
+				if (Ext.isString(condoId)) {
+					condoId = condoId.toLowerCase() === 'total' ? 'total_' : condoId;
+				}
+				else if (Ext.isNumber(condoId)) {
+					if (condoId === 0) {
+						condoId = 'total_';
+					}
+					else {
+						condoId = xColAxis.ids[parseInt(condoId) - 1];
+					}
+				}
+				else {
+					return xResponse;
+				}
+
+				// collect values
+				for (var i = 0, key, value; i < ids.length; i++) {
+					key = condoId + ids[i];
+					value = parseFloat(valueMap[key]);
+
+					objects.push({
+						id: ids[i],
+						value: Ext.isNumber(value) ? value : (Number.MAX_VALUE * -1)
+					});
+				}
+
+				support.prototype.array.sort(objects, direction, 'value');
+
+				// new id order
+				xResponse.nameHeaderMap[name].ids = Ext.Array.pluck(objects, 'id');
+
+				return xResponse;
+			};
+
+			web.report.aggregate.createChart = function(ns, legendSet) {
+                var xLayout = ns.app.xLayout,
+                    xResponse = ns.app.xResponse,
+                    columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
+                    failSafeColumnIds = [],
+                    failSafeColumnIdMap = {},
+                    createFailSafeIds = function() {
+                        for (var i = 0, uuid; i < columnIds.length; i++) {
+                            uuid = Ext.data.IdGenerator.get('uuid').generate();
+
+                            failSafeColumnIds.push(uuid);
+                            failSafeColumnIdMap[uuid] = columnIds[i];
+
+                            xResponse.metaData.names[uuid] = xResponse.metaData.names[columnIds[i]];
+                        }
+                    }(),
+
+                    // row ids
+                    rowIds = xLayout.rowDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.rowDimensionNames[0]] : [],
+
+                    // filter ids
+                    filterIds = function() {
+                        var ids = [];
+
+                        if (xLayout.filters) {
+                            for (var i = 0; i < xLayout.filters.length; i++) {
+                                ids = ids.concat(xLayout.filters[i].ids || []);
+                            }
+                        }
+
+                        return ids;
+                    }(),
+
+                    // totals
+                    dataTotalKey = Ext.data.IdGenerator.get('uuid').generate(),
+                    addDataTotals = function(data, ids) {
+                        for (var i = 0, obj, total; i < data.length; i++) {
+                            obj = data[i];
+                            total = 0;
+
+                            for (var j = 0; j < ids.length; j++) {
+                                total += parseFloat(obj[ids[j]]);
+                                obj[dataTotalKey] = total;
+                            }
+                        }
+                    },
+
+					getSyncronizedXLayout,
+                    getExtendedResponse,
+                    validateUrl,
+
+                    getDefaultStore,
+                    getDefaultNumericAxis,
+                    getDefaultCategoryAxis,
+                    getDefaultSeriesTitle,
+                    getDefaultSeries,
+                    getDefaultTrendLines,
+                    getDefaultTargetLine,
+                    getDefaultBaseLine,
+                    getDefaultTips,
+                    setDefaultTheme,
+                    getDefaultLegend,
+                    getDefaultChartTitle,
+                    getDefaultChartSizeHandler,
+                    getDefaultChartTitlePositionHandler,
+                    getDefaultChart,
+
+                    generator = {};
+
+                getDefaultStore = function(isStacked) {
+                    var data = [],
+                        trendLineFields = [],
+                        targetLineFields = [],
+                        baseLineFields = [],
+                        store;
+
+                    // data
+                    for (var i = 0, obj, category, rowValues, isEmpty; i < rowIds.length; i++) {
+                        obj = {};
+                        category = rowIds[i];
+                        rowValues = [];
+                        isEmpty = false;
+
+                        obj[conf.finals.data.domain] = xResponse.metaData.names[category];
+
+                        for (var j = 0, id, value; j < columnIds.length; j++) {
+                            id = support.prototype.str.replaceAll(columnIds[j], '#', '') + support.prototype.str.replaceAll(rowIds[i], '#', '');
+                            value = xResponse.idValueMap[id];
+                            rowValues.push(value);
+
+                            obj[failSafeColumnIds[j]] = value ? parseFloat(value) : '0.0';
+                        }
+
+                        isEmpty = !(Ext.Array.clean(rowValues).length);
+
+                        if (!(isEmpty && xLayout.hideEmptyRows)) {
+                            data.push(obj);
+                        }
+                    }
+
+                    // stacked
+                    if (isStacked) {
+                        addDataTotals(data, failSafeColumnIds);
+                    }
+
+                    // sort order
+                    if (xLayout.sortOrder) {
+                        var sortingKey = isStacked ? dataTotalKey : failSafeColumnIds[0];
+
+                        support.prototype.array.sort(data, xLayout.sortOrder === -1 ? 'ASC' : 'DESC', sortingKey);
+                    }
+
+                    // trend lines
+                    if (xLayout.showTrendLine) {
+                        var regression,
+                            regressionKey;
+
+                        if (isStacked) {
+                            regression = new SimpleRegression();
+                            regressionKey = conf.finals.data.trendLine + dataTotalKey;
+
+                            for (var i = 0, value; i < data.length; i++) {
+                                value = data[i][dataTotalKey];
+                                regression.addData(i, parseFloat(value));
+                            }
+
+                            for (var i = 0; i < data.length; i++) {
+                                data[i][regressionKey] = parseFloat(regression.predict(i).toFixed(1));
+                            }
+
+                            trendLineFields.push(regressionKey);
+                            xResponse.metaData.names[regressionKey] = EV.i18n.trend + ' (Total)';
+                        }
+                        else {
+                            for (var i = 0; i < failSafeColumnIds.length; i++) {
+                                regression = new SimpleRegression();
+                                regressionKey = conf.finals.data.trendLine + failSafeColumnIds[i];
+
+                                for (var j = 0, value; j < data.length; j++) {
+                                    value = data[j][failSafeColumnIds[i]];
+                                    regression.addData(j, parseFloat(value));
+                                }
+
+                                for (var j = 0; j < data.length; j++) {
+                                    data[j][regressionKey] = parseFloat(regression.predict(j).toFixed(1));
+                                }
+
+                                trendLineFields.push(regressionKey);
+                                xResponse.metaData.names[regressionKey] = EV.i18n.trend + ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')';
+                            }
+                        }
+                    }
+
+                    // target line
+                    if (Ext.isNumber(xLayout.targetLineValue) || Ext.isNumber(parseFloat(xLayout.targetLineValue))) {
+                        for (var i = 0; i < data.length; i++) {
+                            data[i][conf.finals.data.targetLine] = parseFloat(xLayout.targetLineValue);
+                        }
+
+                        targetLineFields.push(conf.finals.data.targetLine);
+                    }
+
+                    // base line
+                    if (Ext.isNumber(xLayout.baseLineValue) || Ext.isNumber(parseFloat(xLayout.baseLineValue))) {
+                        for (var i = 0; i < data.length; i++) {
+                            data[i][conf.finals.data.baseLine] = parseFloat(xLayout.baseLineValue);
+                        }
+
+                        baseLineFields.push(conf.finals.data.baseLine);
+                    }
+
+                    store = Ext.create('Ext.data.Store', {
+                        fields: function() {
+                            var fields = Ext.clone(failSafeColumnIds);
+                            fields.push(conf.finals.data.domain);
+                            fields = fields.concat(trendLineFields, targetLineFields, baseLineFields);
+
+                            return fields;
+                        }(),
+                        data: data
+                    });
+
+                    store.rangeFields = failSafeColumnIds;
+                    store.domainFields = [conf.finals.data.domain];
+                    store.trendLineFields = trendLineFields;
+                    store.targetLineFields = targetLineFields;
+                    store.baseLineFields = baseLineFields;
+                    store.numericFields = [].concat(store.rangeFields, store.trendLineFields, store.targetLineFields, store.baseLineFields);
+
+                    store.getMaximum = function() {
+                        var maximums = [];
+
+                        for (var i = 0; i < store.numericFields.length; i++) {
+                            maximums.push(store.max(store.numericFields[i]));
+                        }
+
+                        return Ext.Array.max(maximums);
+                    };
+
+                    store.getMinimum = function() {
+                        var minimums = [];
+
+                        for (var i = 0; i < store.numericFields.length; i++) {
+                            minimums.push(store.min(store.numericFields[i]));
+                        }
+
+                        return Ext.Array.min(minimums);
+                    };
+
+                    store.getMaximumSum = function() {
+                        var sums = [],
+                            recordSum = 0;
+
+                        store.each(function(record) {
+                            recordSum = 0;
+
+                            for (var i = 0; i < store.rangeFields.length; i++) {
+                                recordSum += record.data[store.rangeFields[i]];
+                            }
+
+                            sums.push(recordSum);
+                        });
+
+                        return Ext.Array.max(sums);
+                    };
+
+                    store.hasDecimals = function() {
+                        var records = store.getRange();
+
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    return true;
+                                }
+                            }
+                        }
+
+                        return false;
+                    };
+
+                    store.getNumberOfDecimals = function() {
+                        var records = store.getRange(),
+                            values = [];
+
+                        for (var i = 0; i < records.length; i++) {
+                            for (var j = 0, value; j < store.rangeFields.length; j++) {
+                                value = records[i].data[store.rangeFields[j]];
+
+                                if (Ext.isNumber(value) && (value % 1)) {
+                                    value = value.toString();
+
+                                    values.push(value.length - value.indexOf('.') - 1);
+                                }
+                            }
+                        }
+
+                        return Ext.Array.max(values);
+                    };
+
+                    if (EV.isDebug) {
+                        console.log("data", data);
+                        console.log("rangeFields", store.rangeFields);
+                        console.log("domainFields", store.domainFields);
+                        console.log("trendLineFields", store.trendLineFields);
+                        console.log("targetLineFields", store.targetLineFields);
+                        console.log("baseLineFields", store.baseLineFields);
+                    }
+
+                    return store;
+                };
+
+                getDefaultNumericAxis = function(store) {
+                    var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
+                        labelColor = 'black',
+                        labelRotation = 0,
+                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
+                        titleColor = 'black',
+                        
+                        typeConf = conf.finals.chart,
+                        minimum = store.getMinimum(),
+                        maximum,
+                        numberOfDecimals,
+                        axis;
+
+                    getRenderer = function(numberOfDecimals) {
+                        var renderer = '0.';
+
+                        for (var i = 0; i < numberOfDecimals; i++) {
+                            renderer += '0';
+                        }
+
+                        return renderer;
+                    };
+
+                    // set maximum if stacked + extra line
+                    if ((xLayout.type === typeConf.stackedcolumn || xLayout.type === typeConf.stackedbar) &&
+                        (xLayout.showTrendLine || xLayout.targetLineValue || xLayout.baseLineValue)) {
+                        var a = [store.getMaximum(), store.getMaximumSum()];
+                        maximum = Math.ceil(Ext.Array.max(a) * 1.1);
+                        maximum = Math.floor(maximum / 10) * 10;
+                    }
+
+                    // renderer
+                    numberOfDecimals = store.getNumberOfDecimals();
+                    renderer = !!numberOfDecimals && (store.getMaximum() < 20) ? getRenderer(numberOfDecimals) : '0,0';
+
+                    axis = {
+                        type: 'Numeric',
+                        position: 'left',
+                        fields: store.numericFields,
+                        minimum: minimum < 0 ? minimum : 0,
+                        label: {
+                            renderer: Ext.util.Format.numberRenderer(renderer),
+                            style: {},
+                            rotate: {}
+                        },
+                        labelTitle: {},
+                        grid: {
+                            odd: {
+                                opacity: 1,
+                                stroke: '#aaa',
+                                'stroke-width': 0.1
+                            },
+                            even: {
+                                opacity: 1,
+                                stroke: '#aaa',
+                                'stroke-width': 0.1
+                            }
+                        }
+                    };
+
+                    if (maximum) {
+                        axis.maximum = maximum;
+                    }
+
+                    if (xLayout.rangeAxisMaxValue) {
+						axis.maximum = xLayout.rangeAxisMaxValue;
+					}
+
+                    if (xLayout.rangeAxisMinValue) {
+						axis.minimum = xLayout.rangeAxisMinValue;
+					}
+
+					if (xLayout.rangeAxisSteps) {
+						axis.majorTickSteps = xLayout.rangeAxisSteps - 1;
+					}
+
+					if (xLayout.rangeAxisDecimals) {
+						axis.label.renderer = Ext.util.Format.numberRenderer(getRenderer(xLayout.rangeAxisDecimals));
+					}
+
+                    if (xLayout.rangeAxisTitle) {
+                        axis.title = xLayout.rangeAxisTitle;
+                    }
+
+                    // style
+                    if (Ext.isObject(xLayout.rangeAxisStyle)) {
+                        var style = xLayout.rangeAxisStyle;
+
+                        // label
+                        labelColor = style.labelColor || labelColor;
+                        
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
+                        }
+                        else {
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                        }
+
+                        // rotation
+                        if (Ext.isNumber(parseFloat(style.labelRotation))) {
+                            labelRotation = 360 - parseFloat(style.labelRotation);
+                        }
+
+                        // title
+                        titleColor = style.titleColor || titleColor;
+                        
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'bold ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : '12px ';
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
+
+                    axis.label.style.fill = labelColor;
+                    axis.label.style.font = labelFont;
+                    axis.label.rotate.degrees = labelRotation;
+
+                    axis.labelTitle.fill = titleColor;
+                    axis.labelTitle.font = titleFont;
+
+                    return axis;
+                };
+
+                getDefaultCategoryAxis = function(store) {
+                    var labelFont = 'normal 11px ' + conf.chart.style.fontFamily,
+                        labelColor = 'black',
+                        labelRotation = 315,
+                        titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
+                        titleColor = 'black',
+                    
+                        axis = {
+                            type: 'Category',
+                            position: 'bottom',
+                            fields: store.domainFields,
+                            label: {
+                                rotate: {},
+                                style: {}
+                            },
+                            labelTitle: {}
+                        };
+                    
+                    if (xLayout.domainAxisTitle) {
+                        axis.title = xLayout.domainAxisTitle;
+                    }
+
+                    // style
+                    if (Ext.isObject(xLayout.domainAxisStyle)) {
+                        var style = xLayout.domainAxisStyle;
+
+                        // label
+                        labelColor = style.labelColor || labelColor;
+                        
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
+                        }
+                        else {
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                        }
+
+                        // rotation
+                        if (Ext.isNumber(parseFloat(style.labelRotation))) {
+                            labelRotation = 360 - parseFloat(style.labelRotation);
+                        }
+
+                        // title
+                        titleColor = style.titleColor || titleColor;
+                        
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'bold ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : '12px ';
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
+
+                    axis.label.style.fill = labelColor;
+                    axis.label.style.font = labelFont;
+                    axis.label.rotate.degrees = labelRotation;
+
+                    axis.labelTitle.fill = titleColor;
+                    axis.labelTitle.font = titleFont;
+
+                    return axis;
+                };
+
+                getDefaultSeriesTitle = function(store) {
+                    var a = [];
+
+                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.labelNames)) {
+                        return xLayout.legendStyle.labelNames;
+                    }
+                    else {
+                        for (var i = 0, id, name, mxl, ids; i < store.rangeFields.length; i++) {
+                            id = failSafeColumnIdMap[store.rangeFields[i]];
+                            name = xResponse.metaData.names[id];
+
+                            if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
+                                var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
+                                
+                                name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
+                            }
+
+                            a.push(name);
+                        }
+                    }
+
+                    return a;
+				};
+
+                getDefaultSeries = function(store) {
+                    var main = {
+                        type: 'column',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.rangeFields,
+                        style: {
+                            opacity: 0.8,
+                            lineWidth: 3
+                        },
+                        markerConfig: {
+                            type: 'circle',
+                            radius: 4
+                        },
+                        tips: getDefaultTips(),
+                        title: getDefaultSeriesTitle(store)
+                    };
+
+                    if (xLayout.showValues) {
+                        var labelFont = conf.chart.style.fontFamily,
+                            labelColor = 'black';
+
+                        if (Ext.isObject(xLayout.seriesStyle)) {
+                            var style = xLayout.seriesStyle;
+
+                            // label
+                            labelColor = style.labelColor || labelColor;
+                            
+                            if (style.labelFont) {
+                                labelFont = style.labelFont;
+                            }
+                            else {
+                                labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                                labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                                labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            }
+                        }                            
+                            
+                        main.label = {
+                            display: 'outside',
+                            'text-anchor': 'middle',
+                            field: store.rangeFields,
+                            font: labelFont,
+                            fill: labelColor,
+                            renderer: function(n) {
+                                return n === '0.0' ? '' : n;
+                            }
+                        };
+                    }
+
+                    return main;
+                };
+
+                getDefaultTrendLines = function(store, isStacked) {
+                    var a = [];
+
+                    for (var i = 0, strokeColor; i < store.trendLineFields.length; i++) {
+                        strokeColor = isStacked ? '#000' : conf.chart.theme.dv1[i];
+
+                        a.push({
+                            type: 'line',
+                            axis: 'left',
+                            xField: store.domainFields,
+                            yField: store.trendLineFields[i],
+                            style: {
+                                opacity: 0.8,
+                                lineWidth: 2,
+                                'stroke-dasharray': 14,
+                                stroke: strokeColor
+                            },
+                            markerConfig: {
+                                type: 'circle',
+                                radius: 0,
+                                fill: strokeColor
+                            },
+                            title: function() {
+                                var title = xResponse.metaData.names[store.trendLineFields[i]],
+                                    ls = xLayout.legendStyle;
+                                return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
+                            }()
+                        });
+                    }
+
+                    return a;
+                };
+
+                getDefaultTargetLine = function(store) {
+                    return {
+                        type: 'line',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.targetLineFields,
+                        style: {
+                            opacity: 1,
+                            lineWidth: 1,
+                            'stroke-width': 1,
+                            stroke: '#000'
+                        },
+                        showMarkers: false,
+                        title: function() {
+                            var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : EV.i18n.target) + ' (' + xLayout.targetLineValue + ')',
+                                ls = xLayout.legendStyle;
+                            return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
+                        }()                                
+                    };
+                };
+
+                getDefaultBaseLine = function(store) {
+                    return {
+                        type: 'line',
+                        axis: 'left',
+                        xField: store.domainFields,
+                        yField: store.baseLineFields,
+                        style: {
+                            opacity: 1,
+                            lineWidth: 1,
+                            'stroke-width': 1,
+                            stroke: '#000'
+                        },
+                        showMarkers: false,
+                        title: function() {
+                            var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : EV.i18n.base) + ' (' + xLayout.baseLineValue + ')',
+                                ls = xLayout.legendStyle;
+                            return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
+                        }()                                
+                    };
+                };
+
+                getDefaultTips = function() {
+                    return {
+                        trackMouse: true,
+                        cls: 'dv-chart-tips',
+                        renderer: function(si, item) {
+                            if (item.value) {
+                                var value = item.value[1] === '0.0' ? '-' : item.value[1];
+                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + value + '</div><div style="font-size:10px">' + si.data[conf.finals.data.domain] + '</div></div>');
+                            }
+                        }
+                    };
+                };
+
+                setDefaultTheme = function(store) {
+                    var colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length);
+
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+                };
+
+                getDefaultLegend = function(store, chartConfig) {
+                    var itemLength = 30,
+                        charLength = 6,
+                        numberOfItems = 0,
+                        numberOfChars = 0,
+                        str = '',
+                        width,
+                        isVertical = false,
+                        labelFont = '11px ' + conf.chart.style.fontFamily,
+                        position = 'top',
+                        padding = 0,
+                        positions = ['top', 'right', 'bottom', 'left'],
+                        series = chartConfig.series;
+
+                    if (xLayout.type === conf.finals.chart.pie) {
+                        numberOfItems = store.getCount();
+                        store.each(function(r) {
+                            str += r.data[store.domainFields[0]];
+                        });
+                    }
+                    else {
+                        for (var i = 0, title; i < series.length; i++) {
+                            title = series[i].title;
+
+                            if (Ext.isString(title)) {
+                                numberOfItems += 1;
+                                numberOfChars += title.length;
+                            }
+                            else if (Ext.isArray(title)) {
+                                numberOfItems += title.length;
+                                numberOfChars += title.toString().split(',').join('').length;
+                            }
+                        }
+                    }
+
+                    width = (numberOfItems * itemLength) + (numberOfChars * charLength);
+                    
+                    if (width > ns.app.centerRegion.getWidth() - 10) {
+                        isVertical = true;
+                        position = 'right';
+                    }
+
+                    // style
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+                        
+                        if (Ext.Array.contains(positions, style.position)) {
+                            position = style.position;
+                        }
+
+                        if (style.labelFont) {
+                            labelFont = style.labelFont;
+                        }
+                        else {
+                            labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                            labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
+
+                    // padding
+                    if (position === 'right') {
+                        padding = 5;
+                    }
+
+                    return Ext.create('Ext.chart.Legend', {
+                        position: position,
+                        isVertical: isVertical,
+                        labelFont: labelFont,
+                        boxStroke: '#ffffff',
+                        boxStrokeWidth: 0,
+                        padding: padding
+                    });
+                };
+
+                getDefaultChartTitle = function(store) {
+                    var ids = [],
+                        text = '',
+                        titleFont,
+                        titleColor,
+                        isPie = xLayout.type === conf.finals.chart.pie,
+                        isGauge = xLayout.type === conf.finals.chart.gauge;
+
+                    if (isPie) {
+                        ids.push(columnIds[0]);
+                    }
+                    else if (isGauge) {
+                        ids.push(columnIds[0], rowIds[0]);
+                    }
+
+                    ids = Ext.Array.clean(ids.concat(filterIds || []));
+
+                    if (Ext.isArray(ids) && ids.length) {
+                        for (var i = 0; i < ids.length; i++) {
+                            text += xResponse.metaData.names[ids[i]];
+                            text += i < ids.length - 1 ? ', ' : '';
+                        }
+                    }
+
+                    if (xLayout.title) {
+                        text = xLayout.title;
+                    }
+
+                    fontSize = (ns.app.centerRegion.getWidth() / text.length) < 11.6 ? 12 : 17;
+                    titleFont = 'normal ' + fontSize + 'px ' + conf.chart.style.fontFamily;
+                    titleColor = 'black';
+
+                    // legend
+                    if (Ext.isObject(xLayout.legendStyle)) {
+                        var style = xLayout.legendStyle;
+
+                        titleColor = style.titleColor || titleColor;
+
+                        if (style.titleFont) {
+                            titleFont = style.titleFont;
+                        }
+                        else {
+                            titleFont = style.titleFontWeight ? style.titleFontWeight + ' ' : 'normal ';
+                            titleFont += style.titleFontSize ? parseFloat(style.titleFontSize) + 'px ' : (fontSize + 'px ');
+                            titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
+                        }
+                    }
+
+                    return Ext.create('Ext.draw.Sprite', {
+                        type: 'text',
+                        text: text,
+                        font: titleFont,
+                        fill: titleColor,
+                        height: 20,
+                        y: 	20
+                    });
+                };
+
+                getDefaultChartSizeHandler = function() {
+                    return function() {
+						//this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth() - 15);
+                        this.setHeight(ns.app.centerRegion.getHeight() - 40);
+                        //this.animate = true;
+                    };
+                };
+
+                getDefaultChartTitlePositionHandler = function() {
+                    return function() {
+                        if (this.items) {
+                            var title = this.items[0],
+                                titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
+                                titleXFallback = 10,
+                                legend = this.legend,
+                                legendCenterX,
+                                titleX;
+
+                            if (this.legend.position === 'top') {
+                                legendCenterX = legend.x + (legend.width / 2);
+                                titleX = titleWidth ? legendCenterX - (titleWidth / 2) : titleXFallback;
+                            }
+                            else {
+                                var legendWidth = legend ? legend.width : 0;
+                                titleX = titleWidth ? (this.width / 2) - (titleWidth / 2) : titleXFallback;
+                            }
+
+                            title.setAttributes({
+                                x: titleX
+                            }, true);
+                        }
+                    };
+                };
+
+                getDefaultChart = function(config) {
+                    var chart,
+                        store = config.store || {},
+                        defaultConfig = {
+                            //animate: true,
+                            animate: false,
+                            shadow: false,
+                            insetPadding: 35,
+                            width: ns.app.centerRegion.getWidth() - 15,
+                            height: ns.app.centerRegion.getHeight() - 40,
+                            theme: 'dv1'
+                        };
+
+                    // legend
+                    if (!xLayout.hideLegend) {
+                        defaultConfig.legend = getDefaultLegend(store, config);
+
+                        if (defaultConfig.legend.position === 'right') {
+                            defaultConfig.insetPadding = 40;
+                        }
+                    }
+
+                    // title
+                    if (!xLayout.hideTitle) {
+                        defaultConfig.items = [getDefaultChartTitle(store)];
+                    }
+                    else {
+                        defaultConfig.insetPadding = 10;
+                    }
+
+                    Ext.apply(defaultConfig, config);
+
+                    chart = Ext.create('Ext.chart.Chart', defaultConfig);
+
+                    chart.setChartSize = getDefaultChartSizeHandler();
+                    chart.setTitlePosition = getDefaultChartTitlePositionHandler();
+
+                    chart.onViewportResize = function() {
+                        chart.setChartSize();
+                        chart.redraw();
+                        chart.setTitlePosition();
+                    };
+
+                    chart.on('afterrender', function() {
+                        chart.setTitlePosition();
+                    });
+
+                    return chart;
+                };
+
+                generator.column = function(isStacked) {
+                    var store = getDefaultStore(isStacked),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = [getDefaultSeries(store)];
+
+                    // options
+                    if (xLayout.showTrendLine) {
+                        series = series.concat(getDefaultTrendLines(store, isStacked));
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+                    }
+
+                    // theme
+                    setDefaultTheme(store, isStacked);
+
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
+                };
+
+                generator.stackedcolumn = function() {
+                    var chart = this.column(true);
+
+                    for (var i = 0, item; i < chart.series.items.length; i++) {
+                        item = chart.series.items[i];
+
+                        if (item.type === conf.finals.chart.column) {
+                            item.stacked = true;
+                        }
+                    }
+
+                    return chart;
+                };
+
+                generator.bar = function(isStacked) {
+                    var store = getDefaultStore(isStacked),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes,
+                        series = getDefaultSeries(store),
+                        trendLines,
+                        targetLine,
+                        baseLine,
+                        chart;
+
+                    // Axes
+                    numericAxis.position = 'bottom';
+                    categoryAxis.position = 'left';
+                    categoryAxis.label.rotate.degrees = 360;
+                    axes = [numericAxis, categoryAxis];
+
+                    // Series
+                    series.type = 'bar';
+                    series.axis = 'bottom';
+
+                    // Options
+                    if (xLayout.showValues) {
+                        series.label = {
+                            display: 'outside',
+                            'text-anchor': 'middle',
+                            field: store.rangeFields
+                        };
+                    }
+
+                    series = [series];
+
+                    if (xLayout.showTrendLine) {
+                        trendLines = getDefaultTrendLines(store, isStacked);
+
+                        for (var i = 0; i < trendLines.length; i++) {
+                            trendLines[i].axis = 'bottom';
+                            trendLines[i].xField = store.trendLineFields[i];
+                            trendLines[i].yField = store.domainFields;
+                        }
+
+                        series = series.concat(trendLines);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        targetLine = getDefaultTargetLine(store);
+                        targetLine.axis = 'bottom';
+                        targetLine.xField = store.targetLineFields;
+                        targetLine.yField = store.domainFields;
+
+                        series.push(targetLine);
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        baseLine = getDefaultBaseLine(store);
+                        baseLine.axis = 'bottom';
+                        baseLine.xField = store.baseLineFields;
+                        baseLine.yField = store.domainFields;
+
+                        series.push(baseLine);
+                    }
+
+                    // Theme
+                    setDefaultTheme(store);
+
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
+                };
+
+                generator.stackedbar = function() {
+                    var chart = this.bar(true);
+
+                    for (var i = 0, item; i < chart.series.items.length; i++) {
+                        item = chart.series.items[i];
+
+                        if (item.type === conf.finals.chart.bar) {
+                            item.stacked = true;
+                        }
+                    }
+
+                    return chart;
+                };
+
+                generator.line = function() {
+                    var store = getDefaultStore(),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = [],
+                        colors = conf.chart.theme.dv1.slice(0, store.rangeFields.length),
+                        seriesTitles = getDefaultSeriesTitle(store);
+
+                    // Series
+                    for (var i = 0, line; i < store.rangeFields.length; i++) {
+                        line = {
+                            type: 'line',
+                            axis: 'left',
+                            xField: store.domainFields,
+                            yField: store.rangeFields[i],
+                            style: {
+                                opacity: 0.8,
+                                lineWidth: 3
+                            },
+                            markerConfig: {
+                                type: 'circle',
+                                radius: 4
+                            },
+                            tips: getDefaultTips(),
+                            title: seriesTitles[i]
+                        };
+
+                        //if (xLayout.showValues) {
+                            //line.label = {
+                                //display: 'over',
+                                //field: store.rangeFields[i]
+                            //};
+                        //}
+
+                        series.push(line);
+                    }
+
+                    // Options, theme colors
+                    if (xLayout.showTrendLine) {
+                        series = getDefaultTrendLines(store).concat(series);
+
+                        colors = colors.concat(colors);
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+
+                        colors.push('#051a2e');
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+
+                        colors.push('#051a2e');
+                    }
+
+                    // Theme
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
+                };
+
+                generator.area = function() {
+
+                    // NB, always true for area charts as extjs area charts cannot handle nulls
+                    xLayout.hideEmptyRows = true;
+
+                    var store = getDefaultStore(true),
+                        numericAxis = getDefaultNumericAxis(store),
+                        categoryAxis = getDefaultCategoryAxis(store),
+                        axes = [numericAxis, categoryAxis],
+                        series = getDefaultSeries(store);
+
+                    series.type = 'area';
+                    series.style.opacity = 0.7;
+                    series.style.lineWidth = 0;
+                    delete series.label;
+                    delete series.tips;
+                    series = [series];
+
+                    // Options
+                    if (xLayout.showTrendLine) {
+                        series = series.concat(getDefaultTrendLines(store, true));
+                    }
+
+                    if (xLayout.targetLineValue) {
+                        series.push(getDefaultTargetLine(store));
+                    }
+
+                    if (xLayout.baseLineValue) {
+                        series.push(getDefaultBaseLine(store));
+                    }
+
+                    // Theme
+                    setDefaultTheme(store);
+
+                    return getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series
+                    });
+                };
+
+                generator.pie = function() {
+                    var store = getDefaultStore(),
+                        series,
+                        colors,
+                        chart,
+                        label = {
+                            field: conf.finals.data.domain
+                        };
+
+                    // Label
+                    if (xLayout.showValues) {
+                        var labelFont = conf.chart.style.fontFamily,
+                            labelColor;
+
+                        if (Ext.isObject(xLayout.seriesStyle)) {
+                            var style = xLayout.seriesStyle;
+
+                            // color
+                            labelColor = style.labelColor || labelColor;
+                            
+                            if (style.labelFont) {
+                                labelFont = style.labelFont;
+                            }
+                            else {
+                                labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
+                                labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
+                                labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            }
+                        }
+                        
+                        label.display = 'middle';
+                        label.contrast = !labelColor;
+                        label.font = labelFont;
+                        label.fill = labelColor;
+                        label.renderer = function(value) {
+                            var record = store.getAt(store.findExact(conf.finals.data.domain, value));
+                            return record.data[store.rangeFields[0]];
+                        };
+                    }
+
+                    // Series
+                    series = [{
+                        type: 'pie',
+                        field: store.rangeFields[0],
+                        donut: 5,
+                        showInLegend: true,
+                        highlight: {
+                            segment: {
+                                margin: 5
+                            }
+                        },
+                        label: label,
+                        style: {
+                            opacity: 0.8,
+                            stroke: '#555'
+                        },
+                        tips: {
+                            trackMouse: true,
+                            cls: 'dv-chart-tips',
+                            renderer: function(item) {
+                                this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
+                            }
+                        },
+                        shadowAttributes: false
+                    }];
+
+                    // Theme
+                    colors = conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rowDimensionNames[0]].ids.length);
+
+                    Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
+                        constructor: function(config) {
+                            Ext.chart.theme.Base.prototype.constructor.call(this, Ext.apply({
+                                seriesThemes: colors,
+                                colors: colors
+                            }, config));
+                        }
+                    });
+
+                    // Chart
+                    chart = getDefaultChart({
+                        store: store,
+                        series: series
+                    });
+
+                    //chart.legend.position = 'right';
+                    //chart.legend.isVertical = true;
+                    chart.insetPadding = 40;
+
+                    return chart;
+                };
+
+                generator.radar = function() {
+                    var store = getDefaultStore(),
+                        axes = [],
+                        series = [],
+                        seriesTitles = getDefaultSeriesTitle(store),
+                        chart;
+
+                    // axes
+                    axes.push({
+                        type: 'Radial',
+                        position: 'radial',
+                        label: {
+                            display: true
+                        }
+                    });
+
+                    // series
+                    for (var i = 0, obj; i < store.rangeFields.length; i++) {
+                        obj = {
+                            showInLegend: true,
+                            type: 'radar',
+                            xField: store.domainFields,
+                            yField: store.rangeFields[i],
+                            style: {
+                                opacity: 0.5
+                            },
+                            tips: getDefaultTips(),
+                            title: seriesTitles[i]
+                        };
+
+                        if (xLayout.showValues) {
+                            obj.label = {
+                                display: 'over',
+                                field: store.rangeFields[i]
+                            };
+                        }
+
+                        series.push(obj);
+                    }
+
+                    chart = getDefaultChart({
+                        store: store,
+                        axes: axes,
+                        series: series,
+                        theme: 'Category2'
+                    });
+
+                    chart.insetPadding = 40;
+                    chart.height = ns.app.centerRegion.getHeight() - 80;
+
+                    chart.setChartSize = function() {
+                        //this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
+                        //this.animate = true;
+                    };
+
+                    return chart;
+                };
+
+                generator.gauge = function() {
+                    var valueColor = '#aaa',
+                        store,
+                        axis,
+                        series,
+                        legend,
+                        config,
+                        chart;
+
+                    // overwrite items
+                    columnIds = [columnIds[0]];
+                    failSafeColumnIds = [failSafeColumnIds[0]];
+                    rowIds = [rowIds[0]];
+
+                    // store
+                    store = getDefaultStore();
+
+                    // axis
+                    axis = {
+                        type: 'gauge',
+                        position: 'gauge',
+                        minimum: 0,
+                        maximum: 100,
+                        steps: 10,
+                        margin: -7
+                    };
+
+                    // series, legendset
+                    if (legendSet) {
+                        valueColor = service.mapLegend.getColorByValue(legendSet, store.getRange()[0].data[failSafeColumnIds[0]]) || valueColor;
+                    }
+
+                    series = {
+                        type: 'gauge',
+                        field: store.rangeFields[0],
+                        //donut: 5,
+                        colorSet: [valueColor, '#ddd']
+                    };
+
+                    chart = getDefaultChart({
+                        axes: [axis],
+                        series: [series],
+                        width: ns.app.centerRegion.getWidth(),
+                        height: ns.app.centerRegion.getHeight() * 0.6,
+                        store: store,
+                        insetPadding: 100,
+                        theme: null,
+                        //animate: {
+                            //easing: 'elasticIn',
+                            //duration: 1000
+                        //}
+                        animate: false
+                    });
+
+                    if (xLayout.showValues) {
+                        chart.items.push(Ext.create('Ext.draw.Sprite', {
+                            type: 'text',
+                            text: store.getRange()[0].data[failSafeColumnIds[0]],
+                            font: 'normal 26px ' + conf.chart.style.fontFamily,
+                            fill: '#111',
+                            height: 40,
+                            y: 	60
+                        }));
+                    }
+
+                    chart.setChartSize = function() {
+						//this.animate = false;
+                        this.setWidth(ns.app.centerRegion.getWidth());
+                        this.setHeight(ns.app.centerRegion.getHeight() * 0.6);
+                        //this.animate = true;
+                    };
+
+                    chart.setTitlePosition = function() {
+                        if (this.items) {
+                            var title = this.items[0],
+                                subTitle = this.items[1],
+                                titleXFallback = 10;
+
+                            if (title) {
+                                var titleWidth = Ext.isIE ? title.el.dom.scrollWidth : title.el.getWidth(),
+                                    titleX = titleWidth ? (ns.app.centerRegion.getWidth() / 2) - (titleWidth / 2) : titleXFallback;
+                                title.setAttributes({
+                                    x: titleX
+                                }, true);
+                            }
+
+                            if (subTitle) {
+                                var subTitleWidth = Ext.isIE ? subTitle.el.dom.scrollWidth : subTitle.el.getWidth(),
+                                    subTitleX = subTitleWidth ? (ns.app.centerRegion.getWidth() / 2) - (subTitleWidth / 2) : titleXFallback;
+                                subTitle.setAttributes({
+                                    x: subTitleX
+                                }, true);
+                            }
+                        }
+                    };
+
+                    return chart;
+                };
+
+                // initialize
+                return generator[xLayout.type]();
+            };
+
+		}());
+
+		// extend init
+		(function() {
+
+			// sort and extend dynamic dimensions
+			if (Ext.isArray(init.dimensions)) {
+				support.prototype.array.sort(init.dimensions);
+
+				for (var i = 0, dim; i < init.dimensions.length; i++) {
+					dim = init.dimensions[i];
+					dim.dimensionName = dim.id;
+					dim.objectName = conf.finals.dimension.dimension.objectName;
+					conf.finals.dimension.objectNameMap[dim.id] = dim;
+				}
+			}
+
+			// sort ouc
+			if (init.user && init.user.ouc) {
+				support.prototype.array.sort(init.user.ouc);
+			}
+
+			// legend set map
+			//init.idLegendSetMap = {};
+
+			//for (var i = 0, set; i < init.legendSets.length; i++) {
+				//set = init.legendSets[i];
+				//init.idLegendSetMap[set.id] = set;
+			//}
+		}());
+
+		// instance
+		return {
+			conf: conf,
+			api: api,
+			support: support,
+			service: service,
+			web: web,
+			init: init
+		};
+	};
+
+	// PLUGIN
+
+	// chart tips css
+
+	EV.plugin = {};
+
+	var init = {
+			user: {},
+            systemInfo: {}
+		},
+		configs = [],
+		isInitStarted = false,
+		isInitComplete = false,
+		getInit,
+        applyCss,
+		execute;
+
+	getInit = function(config) {
+		var isInit = false,
+			requests = [],
+			callbacks = 0,
+            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
+			fn;
+
+        init.contextPath = config.url;
+
+		fn = function() {
+			if (++callbacks === requests.length) {
+				isInitComplete = true;
+
+				for (var i = 0; i < configs.length; i++) {
+					execute(configs[i]);
+				}
+
+				configs = [];
+			}
+		};
+
+        // dhis2
+        requests.push({
+            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',            
+            disableCaching: false,
+            success: function(r) {
+                var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
+                    userAccountConfig;
+
+                init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
+                init.systemInfo.calendar = systemSettings.keyCalendar;
+
+                // optionSetsConfig
+
+
+                // user-account
+                userAccountConfig = {
+                    url: init.contextPath + '/api/me/user-account.' + type + '',
+                    disableCaching: false,
+                    success: function(r) {
+                        init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
+
+                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
+
+                                                // init
+                                                var defaultKeyUiLocale = 'en',
+                                                    defaultKeyAnalysisDisplayProperty = 'name',
+                                                    namePropertyUrl,
+                                                    contextPath,
+                                                    keyUiLocale,
+                                                    dateFormat,
+                                                    optionSetVersionConfig;
+
+                                                init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
+                                                init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
+
+                                                // local vars
+                                                contextPath = init.contextPath;
+                                                keyUiLocale = init.userAccount.settings.keyUiLocale;
+                                                keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty;
+                                                namePropertyUrl = keyAnalysisDisplayProperty === defaultKeyAnalysisDisplayProperty ? keyAnalysisDisplayProperty : keyAnalysisDisplayProperty + '|rename(' + defaultKeyAnalysisDisplayProperty + ')';
+                                                dateFormat = init.systemInfo.dateFormat;
+
+                                                init.namePropertyUrl = namePropertyUrl;
+
+                                                // dhis2
+                                                dhis2.util.namespace('dhis2.ev');
+
+                                                dhis2.ev.store = dhis2.ev.store || new dhis2.storage.Store({
+                                                    name: 'dhis2',
+                                                    adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
+                                                    objectStores: ['optionSets']
+                                                });
+
+                                                optionSetVersionConfig = {
+                                                    url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
+                                                    disableCashing: false,
+                                                    success: function(r) {
+                                                        var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
+                                                            store = dhis2.ev.store,
+                                                            ids = [],
+                                                            url = '',
+                                                            callbacks = 0,
+                                                            checkOptionSet,
+                                                            updateStore,
+                                                            optionSetConfig;
+
+                                                        optionSetConfig = {
+                                                            url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            disableCashing: false,
+                                                            success: function(r) {
+                                                                var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        };
+
+                                                        updateStore = function() {
+                                                            if (++callbacks === optionSets.length) {
+                                                                if (!ids.length) {
+                                                                    fn();
+                                                                    return;
+                                                                }
+
+                                                                for (var i = 0; i < ids.length; i++) {
+                                                                    url += '&filter=id:eq:' + ids[i];
+                                                                }
+
+                                                                if (type === 'jsonp') {
+                                                                    Ext.data.JsonP.request(optionSetConfig);
+                                                                }
+                                                                else {
+                                                                    Ext.Ajax.request(optionSetConfig);
+                                                                }
+                                                            }
+                                                        };
+
+                                                        registerOptionSet = function(optionSet) {
+                                                            store.get('optionSets', optionSet.id).done( function(obj) {
+                                                                if (!Ext.isObject(obj) || obj.version !== optionSet.version) {
+                                                                    ids.push(optionSet.id);
+                                                                }
+
+                                                                updateStore();
+                                                            });
+                                                        };
+
+                                                        store.open().done( function() {
+                                                            for (var i = 0; i < optionSets.length; i++) {
+                                                                registerOptionSet(optionSets[i]);
+                                                            }
+                                                        });
+                                                    }
+                                                };
+
+                                                // option sets
+                                                if (type === 'jsonp') {
+                                                    Ext.data.JsonP.request(optionSetVersionConfig);
+                                                }
+                                                else {
+                                                    Ext.Ajax.request(optionSetVersionConfig);
+                                                }
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    }
+                };
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(userAccountConfig);
+                }
+                else {
+                    Ext.Ajax.request(userAccountConfig);
+                }
+            }
+        });
+
+		// user orgunit
+		requests.push({
+			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
+			success: function(r) {
+				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
+                    ou = [],
+                    ouc = [];
+
+                if (organisationUnits.length) {
+                    for (var i = 0, org; i < organisationUnits.length; i++) {
+                        org = organisationUnits[i];
+
+                        ou.push(org.id);
+
+                        if (org.children) {
+                            ouc = Ext.Array.clean(ouc.concat(Ext.Array.pluck(org.children, 'id') || []));
+                        }
+                    }
+
+                    init.user = init.user || {};
+                    init.user.ou = ou;
+                    init.user.ouc = ouc;
+                }
+                else {
+                    alert('User is not assigned to any organisation units');
+                }
+
+                fn();
+			}
+		});
+
+        // dimensions
+		requests.push({
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
+			success: function(r) {
+				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
+				fn();
+			}
+		});
+
+        init.legendSets = [];
+
+		for (var i = 0; i < requests.length; i++) {
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(requests[i]);
+            }
+            else {
+                Ext.Ajax.request(requests[i]);
+            }
+		}
+	};
+
+    applyCss = function() {
+        var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
+        css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
+        css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
+
+        // load mask css
+        css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
+        css += '.x-mask-msg div { background-position: 11px center; } \n';
+        css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+        css += '.x-mask { opacity: 0; } \n';
+
+        Ext.util.CSS.createStyleSheet(css);
+    };
+
+	execute = function(config) {
+		var validateConfig,
+            extendInstance,
+			createViewport,
+			initialize,
+			ns = {
+				core: {},
+				app: {}
+			};
+
+		validateConfig = function(config) {
+			if (!Ext.isObject(config)) {
+				console.log('Event report configuration is not an object');
+				return;
+			}
+
+			if (!Ext.isString(config.el)) {
+				console.log('No valid element id provided');
+				return;
+			}
+
+			config.id = config.id || config.uid;
+
+			return true;
+		};
+
+        extendInstance = function(ns) {
+            var init = ns.core.init,
+                conf = ns.core.conf,
+				api = ns.core.api,
+				support = ns.core.support,
+				service = ns.core.service,
+				web = ns.core.web,
+                dimConf = conf.finals.dimension,
+                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                headerMap = {
+                    json: 'application/json',
+                    jsonp: 'application/javascript'
+                },
+                headers = {
+                    'Content-Type': headerMap[type],
+                    'Accepts': headerMap[type]
+                };
+
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
+
+			init.el = config.el;
+
+            if (!ns.skipFade) {
+                Ext.get(init.el).setStyle('opacity', 0);
+            }
+
+			// report
+			web.report = web.report || {};
+
+			web.report.loadReport = function(obj) {
+                var success,
+                    failure,
+                    config = {};
+                    
+                if (!(obj && obj.id)) {
+                    console.log('Error, no chart id');
+                    return;
+                }
+
+                success = function(r) {
+                    var layout = api.layout.Layout((r.responseText ? Ext.decode(r.responseText) : r), obj);
+
+                    if (layout) {
+                        web.report.getData(layout, true);
+                    }
+                };
+
+                failure = function(r) {
+                    console.log(obj.id, (r.responseText ? Ext.decode(r.responseText) : r));
+                };
+
+                config.url = init.contextPath + '/api/eventCharts/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.disableCaching = false;
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
+			};
+
+			web.report.getData = function(layout, isUpdateGui) {
+				var xLayout,
+					paramString,
+                    success,
+                    failure,
+                    config = {};
+
+				if (!layout) {
+					return;
+				}
+
+                //xLayout = service.layout.getExtendedLayout(layout);
+				paramString = web.analytics.getParamString(layout, type);
+
+				// mask
+                if (!ns.skipMask) {
+                    web.mask.show(ns.app.centerRegion);
+                }
+
+                success = function(r) {
+                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
+
+                    if (!response && !ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
+
+                    // add to dimConf, TODO
+                    for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                        header = response.headers[i];
+                        map[header.name] = map[header.name] || {
+                            id: header.name,
+                            dimensionName: header.name,
+                            name: header.column
+                        };
+                    }
+
+                    ns.app.paramString = paramString;
+
+                    web.report.createReport(layout, response, isUpdateGui);
+                };
+
+                failure = function(r) {
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    console.log(r);
+                };
+
+                config.url = init.contextPath + paramString;
+                config.scope = this;
+                config.timeout = 60000;
+                config.headers = headers;
+                config.disableCaching = false;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
+			};
+
+			web.report.createReport = function(layout, response, isUpdateGui) {
+                var xLayout,
+                    xResponse,
+                    xColAxis,
+                    xRowAxis,
+                    chart,
+                    getOptionSets,
+                    getReport,
+                    getSXLayout,
+                    getXResponse;
+
+                getOptionSets = function(xResponse, callbackFn) {
+                    var optionSetHeaders = [];
+
+                    for (var i = 0; i < xResponse.headers.length; i++) {
+                        if (Ext.isString(xResponse.headers[i].optionSet)) {
+                            optionSetHeaders.push(xResponse.headers[i]);
+                        }
+                    }
+
+                    if (optionSetHeaders.length) {
+                        var callbacks = 0,
+                            optionMap = {},
+                            getOptions,
+                            fn;
+
+                        fn = function() {
+                            if (++callbacks === optionSetHeaders.length) {
+                                xResponse.metaData.optionNames = optionMap;
+                                callbackFn();
+                            }
+                        };
+
+                        getOptions = function(optionSetId, dataElementId) {
+                            dhis2.ev.store.get('optionSets', optionSetId).done( function(obj) {
+                                Ext.apply(optionMap, support.prototype.array.getObjectMap(obj.options, 'code', 'name', dataElementId));
+                                fn();
+                            });
+                        };
+
+                        // execute
+                        for (var i = 0, header, optionSetId, dataElementId; i < optionSetHeaders.length; i++) {
+                            header = optionSetHeaders[i];
+                            optionSetId = header.optionSet;
+                            dataElementId = header.name;
+
+                            getOptions(optionSetId, dataElementId);
+                        }
+                    }
+                    else {
+                        callbackFn();
+                    }
+                };
+
+                getReport = function() {
+                    if (!xLayout && !ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
+                    
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
+
+                    chart = web.report.aggregate.createChart(ns);
+
+                    // fade
+                    if (!ns.skipFade) {
+                        chart.on('afterrender', function() {
+                            Ext.defer( function() {
+                                Ext.get(init.el).fadeIn({
+                                    duration: 400
+                                });
+                            }, 300 );
+                        });
+                    }
+
+                    ns.app.centerRegion.removeAll();
+                    ns.app.centerRegion.add(chart);
+
+                    // after render
+                    ns.app.chart = chart;
+                    
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    if (EV.isDebug) {
+                        console.log("layout", layout);
+                        console.log("response", response);
+                        console.log("xResponse", xResponse);
+                        console.log("xLayout", xLayout);
+                        console.log("core", ns.core);
+                        console.log("app", ns.app);
+                    }
+                };
+
+                getSXLayout = function() {
+                    xLayout = service.layout.getSyncronizedXLayout(layout, xLayout, xResponse);
+
+                    getReport();
+                };
+
+                getXResponse = function() {
+                    xLayout = service.layout.getExtendedLayout(layout);
+                    xResponse = service.response.aggregate.getExtendedResponse(xLayout, response);
+
+                    getOptionSets(xResponse, getSXLayout);
+                };
+
+                // execute
+                response = response || ns.app.response;
+
+                getXResponse();
+			};
+        };
+
+		createViewport = function() {
+			var el = Ext.get(ns.core.init.el),
+				centerRegion,
+				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
+				elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
+				elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
+				elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom')),
+				width = el.getWidth() - elBorderW - elPaddingW,
+				height = el.getHeight() - elBorderH - elPaddingH;
+
+			centerRegion = Ext.create('Ext.panel.Panel', {
+				renderTo: el,
+				bodyStyle: 'border: 0 none',
+				width: config.width || width,
+				height: config.height || height,
+				layout: 'fit'
+			});
+
+			return {
+				centerRegion: centerRegion
+			};
+        };
+
+		initialize = function() {
+			if (!validateConfig(config)) {
+				return;
+			}
+
+            applyCss();
+            
+            init.plugin = true;
+            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
+            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
+
+			ns.core = EV.getCore(Ext.clone(init));
+			extendInstance(ns);
+
+			ns.app.viewport = createViewport();
+			ns.app.centerRegion = ns.app.viewport.centerRegion;
+
+			if (config && config.id) {
+				ns.core.web.report.loadReport(config);
+			}
+			else {
+				layout = ns.core.api.layout.Layout(config);
+
+				if (!layout) {
+					return;
+				}
+
+				ns.core.web.report.getData(layout);
+			}
+		}();
+	};
+
+	EV.plugin.getEventChart = function(config) {
+		if (Ext.isString(config.url) && config.url.split('').pop() === '/') {
+			config.url = config.url.substr(0, config.url.length - 1);
+		}
+
+		if (isInitComplete) {
+			execute(config);
+		}
+		else {
+			configs.push(config);
+
+			if (!isInitStarted) {
+				isInitStarted = true;
+				getInit(config);
+			}
+		}
+	};
+
+	DHIS = Ext.isObject(window['DHIS']) ? DHIS : {};
+	DHIS.getEventChart = EV.plugin.getEventChart;
+});
