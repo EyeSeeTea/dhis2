@@ -1,5 +1,61 @@
 Ext.onReady( function() {
 
+	// SIMPLE REGRESSION
+	function SimpleRegression()
+	{
+		var sumX = 0; // Sum of x values
+		var sumY = 0; // Sum of y values
+		var sumXX = 0; // Total variation in x
+		var sumXY = 0; // Sum of products
+		var n = 0; // Number of observations
+		var xbar = 0; // Mean of accumulated x values, used in updating formulas
+		var ybar = 0; // Mean of accumulated y values, used in updating formulas
+
+		this.addData = function( x, y )
+		{
+			if ( n == 0 )
+			{
+				xbar = x;
+				ybar = y;
+			}
+			else
+			{
+				var dx = x - xbar;
+				var dy = y - ybar;
+				sumXX += dx * dx * n / ( n + 1 );
+				sumXY += dx * dy * n / ( n + 1 );
+				xbar += dx / ( n + 1 );
+				ybar += dy / ( n + 1 );
+			}
+
+			sumX += x;
+			sumY += y;
+			n++;
+		};
+
+		this.predict = function( x )
+		{
+			var b1 = this.getSlope();
+
+			return this.getIntercept( b1 ) + b1 * x;
+		};
+
+		this.getSlope = function()
+		{
+			if ( n < 2 )
+			{
+				return Number.NaN;
+			}
+
+			return sumXY / sumXX;
+		};
+
+		this.getIntercept = function( slope )
+		{
+			return ( sumY - slope * sumX ) / n;
+		};
+	}
+
 	// CORE
 
 	// ext config
@@ -309,7 +365,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
+			api.layout.Layout = function(config, applyConfig) {
 				var config = Ext.clone(config),
 					layout = {},
 					getValidatedDimensionArray,
@@ -582,15 +638,32 @@ Ext.onReady( function() {
 
                     layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 
-                    layout.legend = Ext.isObject(config.legend) ? config.legend : null;
-
 					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
 					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
+                    // style
+                    if (Ext.isObject(config.domainAxisStyle)) {
+                        layout.domainAxisStyle = config.domainAxisStyle;
+                    }
+                    
+                    if (Ext.isObject(config.rangeAxisStyle)) {
+                        layout.rangeAxisStyle = config.rangeAxisStyle;
+                    }
+                    
+                    if (Ext.isObject(config.legendStyle)) {
+                        layout.legendStyle = config.legendStyle;
+                    }
+                    
+                    if (Ext.isObject(config.seriesStyle)) {
+                        layout.seriesStyle = config.seriesStyle;
+                    }
+
 					if (!validateSpecialCases()) {
 						return;
 					}
+
+					return Ext.apply(layout, applyConfig);
 
 					return layout;
 				}();

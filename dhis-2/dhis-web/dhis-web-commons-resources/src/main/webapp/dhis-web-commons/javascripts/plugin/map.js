@@ -2182,7 +2182,8 @@ Ext.onReady( function() {
 			loadLegend,
 			afterLoad,
 			loader,
-			dimConf = gis.conf.finals.dimension;
+			dimConf = gis.conf.finals.dimension,
+            type = gis.plugin && gis.crossDomain ? 'jsonp' : 'json';
 
 		compareView = function(view, doExecute) {
 			var src = layer.core.view,
@@ -2576,46 +2577,61 @@ Ext.onReady( function() {
 				afterLoad(view);
 			};
 
-			if (view.legendSet) {
+			if (!view.legendSet) {
+                fn();
+            }
+            else {
 				var bounds = [],
 					colors = [],
 					names = [],
-					legends = [];
+					legends = [],
+                    success,
+                    failure,
+                    config = {};
 
-				Ext.Ajax.request({
-					url: gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
-					scope: this,
-					success: function(r) {
-						legends = Ext.decode(r.responseText).mapLegends;
+                success = function(r) {
+                    legends = r.responseText ? Ext.decode(r.responseText).mapLegends : r.mapLegends;
 
-						Ext.Array.sort(legends, function (a, b) {
-							return a.startValue - b.startValue;
-						});
+                    Ext.Array.sort(legends, function (a, b) {
+                        return a.startValue - b.startValue;
+                    });
 
-						for (var i = 0; i < legends.length; i++) {
-							if (bounds[bounds.length - 1] !== legends[i].startValue) {
-								if (bounds.length !== 0) {
-									colors.push(new mapfish.ColorRgb(240,240,240));
-									names.push('');
-								}
-								bounds.push(legends[i].startValue);
-							}
-							colors.push(new mapfish.ColorRgb());
-							colors[colors.length - 1].setFromHex(legends[i].color);
-							names.push(legends[i].name);
-							bounds.push(legends[i].endValue);
-						}
+                    for (var i = 0; i < legends.length; i++) {
+                        if (bounds[bounds.length - 1] !== legends[i].startValue) {
+                            if (bounds.length !== 0) {
+                                colors.push(new mapfish.ColorRgb(240,240,240));
+                                names.push('');
+                            }
+                            bounds.push(legends[i].startValue);
+                        }
+                        colors.push(new mapfish.ColorRgb());
+                        colors[colors.length - 1].setFromHex(legends[i].color);
+                        names.push(legends[i].name);
+                        bounds.push(legends[i].endValue);
+                    }
 
-						view.legendSet.names = names;
-						view.legendSet.bounds = bounds;
-						view.legendSet.colors = colors;
+                    view.legendSet.names = names;
+                    view.legendSet.bounds = bounds;
+                    view.legendSet.colors = colors;
+                };
 
-						fn();
-					}
-				});
-			}
-			else {
-				fn();
+                failure = function(r) {
+                    console.log(r);
+                };
+
+                config.url = gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.' + type + '?fields=' + gis.conf.url.mapLegendSetFields.join(',');
+                config.scope = this;
+                config.success = success;
+                config.failure = failure;
+                config.callback = fn;
+                config.disableCaching = false;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			}
 		};
 
