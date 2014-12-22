@@ -3182,6 +3182,8 @@ Ext.onReady(function() {
 		};
     };
 
+    // PLUGIN
+
 	// i18n
 	DV.i18n = {
 		target: 'Target',

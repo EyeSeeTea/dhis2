@@ -3366,17 +3366,6 @@ Ext.onReady( function() {
 	// PLUGIN
 
 	// chart tips css
-	var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
-	css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
-	css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
-
-	// load mask css
-	css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
-	css += '.x-mask-msg div { background-position: 11px center; } \n';
-	css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
-    css += '.x-mask { opacity: 0; } \n';
-
-	Ext.util.CSS.createStyleSheet(css);
 
 	EV.plugin = {};
 
@@ -3388,18 +3377,20 @@ Ext.onReady( function() {
 		isInitStarted = false,
 		isInitComplete = false,
 		getInit,
+        applyCss,
 		execute;
 
 	getInit = function(contextPath) {
 		var isInit = false,
 			requests = [],
-			callbackCount = 0,
+			callbacks = 0,
+            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
 			fn;
 
-        init.contextPath = contextPath;
+        init.contextPath = config.url;
 
 		fn = function() {
-			if (++callbackCount === requests.length) {
+			if (++callbacks === requests.length) {
 				isInitComplete = true;
 
 				for (var i = 0; i < configs.length; i++) {
@@ -3410,26 +3401,31 @@ Ext.onReady( function() {
 			}
 		};
 
-        // date, calendar
+        // dhis2
         requests.push({
-            url: contextPath + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',
             success: function(r) {
-                var systemSettings = r;
+                var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
+                    userAccountConfig;
+
                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                 init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                // user-account
-                Ext.data.JsonP.request({
-                    url: contextPath + '/api/me/user-account.jsonp',
-                    success: function(r) {
-                        init.userAccount = r;
+                // optionSetsConfig
 
-                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
-                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
-                                Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
-                                    Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
-                                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
-                                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
+
+                // user-account
+                userAccountConfig = {
+                    url: init.contextPath + '/api/me/user-account.' + type + '',
+                    success: function(r) {
+                        init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
+
+                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
 
                                                 // init
                                                 var defaultKeyUiLocale = 'en',
@@ -3437,7 +3433,8 @@ Ext.onReady( function() {
                                                     namePropertyUrl,
                                                     contextPath,
                                                     keyUiLocale,
-                                                    dateFormat;
+                                                    dateFormat,
+                                                    optionSetVersionConfig;
 
                                                 init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
                                                 init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
@@ -3460,17 +3457,26 @@ Ext.onReady( function() {
                                                     objectStores: ['optionSets']
                                                 });
 
-                                                // option sets
-                                                Ext.data.JsonP.request({
-                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
+                                                optionSetVersionConfig = {
+                                                    url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
                                                     success: function(r) {
-                                                        var optionSets = r.optionSets || [],
+                                                        var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
                                                             store = dhis2.ev.store,
                                                             ids = [],
                                                             url = '',
                                                             callbacks = 0,
                                                             checkOptionSet,
-                                                            updateStore;
+                                                            updateStore,
+                                                            optionSetConfig;
+
+                                                        optionSetConfig = {
+                                                            url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            success: function(r) {
+                                                                var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
+
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        };
 
                                                         updateStore = function() {
                                                             if (++callbacks === optionSets.length) {
@@ -3483,14 +3489,12 @@ Ext.onReady( function() {
                                                                     url += '&filter=id:eq:' + ids[i];
                                                                 }
 
-                                                                Ext.data.JsonP.request({
-                                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false' + url,
-                                                                    success: function(r) {
-                                                                        var sets = r.optionSets;
-
-                                                                        store.setAll('optionSets', sets).done(fn);
-                                                                    }
-                                                                });
+                                                                if (type === 'jsonp') {
+                                                                    Ext.data.JsonP.request(optionSetConfig);
+                                                                }
+                                                                else {
+                                                                    Ext.Ajax.request(optionSetConfig);
+                                                                }
                                                             }
                                                         };
 
@@ -3510,7 +3514,15 @@ Ext.onReady( function() {
                                                             }
                                                         });
                                                     }
-                                                });
+                                                };
+
+                                                // option sets
+                                                if (type === 'jsonp') {
+                                                    Ext.data.JsonP.request(optionSetVersionConfig);
+                                                }
+                                                else {
+                                                    Ext.Ajax.request(optionSetVersionConfig);
+                                                }
                                             });
                                         });
                                     });
@@ -3518,14 +3530,22 @@ Ext.onReady( function() {
                             });
                         });
                     }
-                });
+                };
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(userAccountConfig);
+                }
+                else {
+                    Ext.Ajax.request(userAccountConfig);
+                }
             }
         });
 
+		// user orgunit
 		requests.push({
-			url: contextPath + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
 			success: function(r) {
-				var organisationUnits = r.organisationUnits || [],
+				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
                     ouc = [];
 
@@ -3552,20 +3572,40 @@ Ext.onReady( function() {
 			}
 		});
 
-        init.legendSets = [];
-
+        // dimensions
 		requests.push({
-			url: contextPath + '/api/dimensions.jsonp?links=false&paging=false',
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
 			success: function(r) {
-				init.dimensions = r.dimensions;
+				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
 			}
 		});
 
+        init.legendSets = [];
+
 		for (var i = 0; i < requests.length; i++) {
-			Ext.data.JsonP.request(requests[i]);
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(requests[i]);
+            }
+            else {
+                Ext.Ajax.request(requests[i]);
+            }
 		}
 	};
+
+    applyCss = function() {
+        var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
+        css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
+        css += '.dv-chart-tips .x-tip-body div { font-family: arial,sans-serif,ubuntu,consolas !important; } \n';
+
+        // load mask css
+        css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
+        css += '.x-mask-msg div { background-position: 11px center; } \n';
+        css += '.x-mask-msg .x-mask-loading { border: 0 none; \n background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+        css += '.x-mask { opacity: 0; } \n';
+
+        Ext.util.CSS.createStyleSheet(css);
+    };
 
 	execute = function(config) {
 		var validateConfig,
@@ -3809,6 +3849,8 @@ Ext.onReady( function() {
 				return;
 			}
 
+            applyCss();
+
 			ns.core = EV.getCore(Ext.clone(init));
             ns.core.init.el = config.el;
             Ext.get(ns.core.init.el).setStyle('opacity', 0);
@@ -3845,7 +3887,7 @@ Ext.onReady( function() {
 
 			if (!isInitStarted) {
 				isInitStarted = true;
-				getInit(config.url);
+				getInit(config);
 			}
 		}
 	};

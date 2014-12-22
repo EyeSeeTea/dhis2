@@ -5381,6 +5381,7 @@ mapfish.GeoStat.createThematic('Thematic4');
 			}
 		});
 
+        // dimensions
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
 			success: function(r) {
