@@ -3380,7 +3380,7 @@ Ext.onReady( function() {
         applyCss,
 		execute;
 
-	getInit = function(contextPath) {
+	getInit = function(config) {
 		var isInit = false,
 			requests = [],
 			callbacks = 0,
