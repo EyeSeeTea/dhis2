@@ -664,8 +664,6 @@ Ext.onReady( function() {
 					}
 
 					return Ext.apply(layout, applyConfig);
-
-					return layout;
 				}();
 			};
 
