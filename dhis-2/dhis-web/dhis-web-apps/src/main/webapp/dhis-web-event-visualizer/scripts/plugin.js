@@ -3597,7 +3597,8 @@ Ext.onReady( function() {
 
         // dhis2
         requests.push({
-            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',
+            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',            
+            disableCaching: false,
             success: function(r) {
                 var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
                     userAccountConfig;
@@ -3611,6 +3612,7 @@ Ext.onReady( function() {
                 // user-account
                 userAccountConfig = {
                     url: init.contextPath + '/api/me/user-account.' + type + '',
+                    disableCaching: false,
                     success: function(r) {
                         init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
 
@@ -3653,6 +3655,7 @@ Ext.onReady( function() {
 
                                                 optionSetVersionConfig = {
                                                     url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
+                                                    disableCashing: false,
                                                     success: function(r) {
                                                         var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
                                                             store = dhis2.ev.store,
@@ -3665,9 +3668,9 @@ Ext.onReady( function() {
 
                                                         optionSetConfig = {
                                                             url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            disableCashing: false,
                                                             success: function(r) {
                                                                 var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
-
                                                                 store.setAll('optionSets', sets).done(fn);
                                                             }
                                                         };
@@ -3738,6 +3741,7 @@ Ext.onReady( function() {
 		// user orgunit
 		requests.push({
 			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
@@ -3769,6 +3773,7 @@ Ext.onReady( function() {
         // dimensions
 		requests.push({
 			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
 			success: function(r) {
 				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
@@ -3883,6 +3888,7 @@ Ext.onReady( function() {
                 };
 
                 config.url = init.contextPath + '/api/eventCharts/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.disableCaching = false;
                 config.headers = headers;
                 config.success = success;
                 config.failure = failure;
