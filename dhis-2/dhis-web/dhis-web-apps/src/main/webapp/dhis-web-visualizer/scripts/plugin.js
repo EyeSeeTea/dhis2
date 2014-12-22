@@ -3514,8 +3514,10 @@ Ext.onReady(function() {
 				// update viewport
 				ns.app.centerRegion.removeAll();
 				ns.app.centerRegion.add(ns.app.chart);
-
-				web.mask.hide(ns.app.centerRegion);
+                
+                if (!ns.skipMask) {
+                    web.mask.hide(ns.app.centerRegion);
+                }
 			};
 		};
 
