@@ -3556,6 +3556,7 @@ Ext.onReady(function() {
             init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
 			ns.core = DV.getCore(Ext.clone(init));
 			extendInstance(ns);

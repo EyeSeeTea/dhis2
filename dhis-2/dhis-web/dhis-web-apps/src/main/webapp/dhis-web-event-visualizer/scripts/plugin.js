@@ -3917,7 +3917,7 @@ Ext.onReady( function() {
                 success = function(r) {
                     var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                    if (!response) {
+                    if (!response && !ns.skipMask) {
                         web.mask.hide(ns.app.centerRegion);
                         return;
                     }
@@ -4016,16 +4016,21 @@ Ext.onReady( function() {
                 };
 
                 getReport = function() {
-                    if (!xLayout || !ns.skipMask) {
+                    if (!xLayout && !ns.skipMask) {
                         web.mask.hide(ns.app.centerRegion);
                         return;
                     }
+                    
+                    ns.app.layout = layout;
+                    ns.app.xLayout = xLayout;
+                    ns.app.response = response;
+                    ns.app.xResponse = xResponse;
 
                     chart = web.report.aggregate.createChart(ns);
 
                     // fade
                     if (!ns.skipFade) {
-                        ns.app.chart.on('afterrender', function() {
+                        chart.on('afterrender', function() {
                             Ext.defer( function() {
                                 Ext.get(init.el).fadeIn({
                                     duration: 400
@@ -4038,10 +4043,6 @@ Ext.onReady( function() {
                     ns.app.centerRegion.add(chart);
 
                     // after render
-                    ns.app.layout = layout;
-                    ns.app.xLayout = xLayout;
-                    ns.app.response = response;
-                    ns.app.xResponse = xResponse;
                     ns.app.chart = chart;
                     
                     if (!ns.skipMask) {
@@ -4107,17 +4108,21 @@ Ext.onReady( function() {
 			}
 
             applyCss();
+            
+            init.plugin = true;
+            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
+            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
 			ns.core = EV.getCore(Ext.clone(init));
-            ns.core.init.el = config.el;
-            Ext.get(ns.core.init.el).setStyle('opacity', 0);
 			extendInstance(ns);
 
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
-			if (config.id) {
-				ns.core.web.report.loadReport(config.id);
+			if (config && config.id) {
+				ns.core.web.report.loadReport(config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);
