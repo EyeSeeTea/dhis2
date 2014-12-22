@@ -86,19 +86,7 @@ public class HibernateUserCredentialsStore
     @Override
     public void updateUserCredentials( UserCredentials userCredentials )
     {
-        Session session = sessionFactory.getCurrentSession();
-
-        User persistedUser = userService.getUser( userCredentials.getUser().getUid() );
-
-        if ( persistedUser != null && persistedUser.getUserCredentials() != null
-            && persistedUser.getUserCredentials().getPassword() != null
-            && userCredentials.getPassword() != null
-            && !persistedUser.getUserCredentials().getPassword().equals( userCredentials.getPassword() ) )
-        {
-            userCredentials.setPasswordLastUpdated( new Date() );
-        }
-
-        session.update( userCredentials );
+        sessionFactory.getCurrentSession().update( userCredentials );
     }
 
     @Override

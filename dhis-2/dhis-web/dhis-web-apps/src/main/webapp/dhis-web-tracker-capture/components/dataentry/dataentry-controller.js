@@ -6,6 +6,7 @@ trackerCapture.controller('DataEntryController',
                 storage,
                 ProgramStageFactory,
                 DHIS2EventFactory,
+                OptionSetService,
                 ModalService,
                 DialogService,
                 CurrentSelection,
@@ -39,7 +40,7 @@ trackerCapture.controller('DataEntryController',
     $scope.showEventColors = false;
     
     //listen for the selected items
-    $scope.$on('dashboardWidgets', function(event, args) {  
+    $scope.$on('dashboardWidgets', function() {  
         $scope.showDataEntryDiv = false;
         $scope.showEventCreationDiv = false;
         $scope.showDummyEventDiv = false;        
@@ -59,19 +60,20 @@ trackerCapture.controller('DataEntryController',
         $scope.optionSets = selections.optionSets;
         $scope.selectedProgramWithStage = [];
         
-        if($scope.selectedOrgUnit && $scope.selectedProgram && $scope.selectedEntity && $scope.selectedEnrollment){            
-            angular.forEach($scope.selectedProgram.programStages, function(st){                
-                ProgramStageFactory.get(st.id).then(function(stage){
+        if($scope.selectedOrgUnit && $scope.selectedProgram && $scope.selectedEntity && $scope.selectedEnrollment){
+            
+            ProgramStageFactory.getByProgram($scope.selectedProgram).then(function(stages){
+                
+                angular.forEach(stages, function(stage){
                     if(stage.openAfterEnrollment){
                         $scope.currentStage = stage;
                     }
                     $scope.selectedProgramWithStage[stage.id] = stage;
                 });
-            });
-            
-            setTimeout(function () {
+                
                 $scope.getEvents();
-            }, 100);
+                
+            });
         }
     });
     
@@ -103,16 +105,17 @@ trackerCapture.controller('DataEntryController',
                                 dhis2Event.sortingDate = dhis2Event.eventDate;
                             }                       
 
-                            dhis2Event.statusColor = EventUtils.getEventStatusColor(dhis2Event);  
-                            //dhis2Event = EventUtils.setEventOrgUnitName(dhis2Event);
+                            dhis2Event.statusColor = EventUtils.getEventStatusColor(dhis2Event);
                             
                             if($scope.currentStage && $scope.currentStage.id === dhis2Event.programStage){
                                 $scope.currentEvent = dhis2Event;                                
                                 $scope.showDataEntry($scope.currentEvent, true);
                             }
                         } 
-                    }                    
+                    }
                 });
+                
+                $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-sortingDate');
             }
             
             $scope.dummyEvents = $scope.checkForEventCreation($scope.dhis2Events, $scope.selectedProgram);
@@ -335,29 +338,31 @@ trackerCapture.controller('DataEntryController',
     
     $scope.saveDatavalue = function(prStDe){
         
-        $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
-        
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
         if( $scope.dataEntryOuterForm.$invalid ){            
             return false;
         }
          
-        //input is valid
-        $scope.updateSuccess = false;
-        var value = $scope.currentEvent[prStDe.dataElement.id];        
+        //input is valid        
+        var value = $scope.currentEvent[prStDe.dataElement.id];
+        
         if(!angular.isUndefined(value)){
             if(prStDe.dataElement.type === 'date'){                    
                 value = DateUtils.formatFromUserToApi(value);
             }
             if(prStDe.dataElement.type === 'string'){                    
-                if(prStDe.dataElement.optionSet && $scope.optionSets.optionCodesByName[  '"' + value + '"']){                        
-                    value = $scope.optionSets.optionCodesByName[  '"' + value + '"'];                                                      
+                if(prStDe.dataElement.optionSet && $scope.optionSets[prStDe.dataElement.optionSet.id] &&  $scope.optionSets[prStDe.dataElement.optionSet.id].options ) {
+                    value = OptionSetService.getCode($scope.optionSets[prStDe.dataElement.optionSet.id].options, value);
                 }                    
             }
 
             if($scope.currentEventOriginal[prStDe.dataElement.id] !== value){
-                
+
+                $scope.updateSuccess = false;
+        
+                $scope.currentElement = {id: prStDe.dataElement.id, saved: false};
+        
                 var ev = {  event: $scope.currentEvent.event,
                             orgUnit: $scope.currentEvent.orgUnit,
                             program: $scope.currentEvent.program,

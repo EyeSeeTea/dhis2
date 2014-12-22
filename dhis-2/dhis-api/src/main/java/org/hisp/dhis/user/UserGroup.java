@@ -46,11 +46,12 @@ import org.hisp.dhis.common.view.ExportView;
 import java.util.HashSet;
 import java.util.Set;
 
-@JacksonXmlRootElement(localName = "userGroup", namespace = DxfNamespaces.DXF_2_0)
+@JacksonXmlRootElement( localName = "userGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class UserGroup
     extends BaseIdentifiableObject
 {
     public static final String AUTH_USER_ADD = "F_USER_ADD";
+    public static final String AUTH_USER_ADD_IN_GROUP = "F_USER_ADD_WITHIN_MANAGED_GROUP";
     public static final String AUTH_USER_DELETE = "F_USER_DELETE";
     public static final String AUTH_USER_VIEW = "F_USER_VIEW";
 
@@ -157,11 +158,11 @@ public class UserGroup
         this.user = user;
     }
 
-    @JsonProperty(value = "users")
-    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlElementWrapper(localName = "users", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty(localName = "user", namespace = DxfNamespaces.DXF_2_0)
+    @JsonProperty( "users" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
     public Set<User> getMembers()
     {
         return members;
@@ -172,11 +173,11 @@ public class UserGroup
         this.members = members;
     }
 
-    @JsonProperty(value = "managedGroups")
-    @JsonSerialize(contentAs = BaseIdentifiableObject.class)
-    @JsonView({ DetailedView.class, ExportView.class })
-    @JacksonXmlElementWrapper(localName = "managedGroups", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty(localName = "managedGroup", namespace = DxfNamespaces.DXF_2_0)
+    @JsonProperty( "managedGroups" )
+    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlElementWrapper( localName = "managedGroups", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "managedGroup", namespace = DxfNamespaces.DXF_2_0 )
     public Set<UserGroup> getManagedGroups()
     {
         return managedGroups;
@@ -187,7 +188,7 @@ public class UserGroup
         this.managedGroups = managedGroups;
     }
 
-    @JsonProperty(value = "managedByGroups")
+    @JsonProperty( "managedByGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "managedByGroups", namespace = DxfNamespaces.DXF_2_0 )
@@ -202,10 +203,10 @@ public class UserGroup
         this.managedByGroups = managedByGroups;
     }
 
-    @JsonProperty( value = "attributeValues" )
+    @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

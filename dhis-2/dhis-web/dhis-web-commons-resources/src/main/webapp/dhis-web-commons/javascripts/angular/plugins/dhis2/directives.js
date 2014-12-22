@@ -14,7 +14,7 @@ var d2Directives = angular.module('d2Directives', [])
                 return parseFloat(value || '');
             });
         }
-    };   
+    };
 })
 
 .directive('selectedOrgUnit', function($timeout, storage) {        
@@ -28,7 +28,16 @@ var d2Directives = angular.module('d2Directives', [])
                 dhis2.ou.store.open().done( function() {
                     selection.load();
                     $( "#orgUnitTree" ).one( "ouwtLoaded", function(event, ids, names) {
-                        console.log('Finished loading orgunit tree');                        
+                        console.log('Finished loading orgunit tree');
+                        
+                        //Disable ou selection until meta-data has downloaded
+                        $( "#orgUnitTree" ).addClass( "disable-clicks" );
+                        
+                        $timeout(function() {
+                            scope.treeLoaded = true;
+                            scope.$apply();
+                        });
+                        
                         downloadMetaData();
                     });
                 });
@@ -62,6 +71,19 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
+.directive('d2Enter', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown keypress", function (event) {
+            if(event.which === 13) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.d2Enter);
+                });
+                event.preventDefault();
+            }
+        });
+    };
+})
+
 .directive('d2NumberValidation', function() {
     
     return {
@@ -81,7 +103,7 @@ var d2Directives = angular.module('d2Directives', [])
                     case "negInt":
                         isValid = dhis2.validation.isNegativeInt(value);
                         break;
-                    case "zeroPostitiveInt":
+                    case "zeroPositiveInt":
                         isValid = dhis2.validation.isZeroOrPositiveInt(value);
                         break;
                     case "int":
@@ -114,7 +136,8 @@ var d2Directives = angular.module('d2Directives', [])
 })
 
 .directive('typeaheadOpenOnFocus', function () {
-  return {
+  	
+  	return {
         require: ['typeahead', 'ngModel'],
         link: function (scope, element, attr, ctrls) {
             element.bind('focus', function () {
@@ -147,14 +170,15 @@ var d2Directives = angular.module('d2Directives', [])
 })
 
 .directive('d2PopOver', function($compile, $templateCache){
+    
     return {        
         restrict: 'EA',
         link: function(scope, element, attrs){
-            var content = $templateCache.get("note.html");
+            var content = $templateCache.get("popover.html");
             content = $compile(content)(scope);
             var options = {
                     content: content,
-                    placement: 'right',
+                    placement: 'bottom',
                     trigger: 'hover',
                     html: true,
                     title: scope.title               
@@ -185,6 +209,7 @@ var d2Directives = angular.module('d2Directives', [])
 })
 
 .directive('serversidePaginator', function factory() {
+    
     return {
         restrict: 'E',
         controller: function ($scope, Paginator) {
@@ -195,11 +220,12 @@ var d2Directives = angular.module('d2Directives', [])
 })
 
 .directive('draggableModal', function(){
+    
     return {
-      restrict: 'EA',
-      link: function(scope, element) {
-        element.draggable();
-      }
+      	restrict: 'EA',
+      	link: function(scope, element) {
+        	element.draggable();
+      	}
     };  
 })
 

@@ -1,92 +1,6 @@
 /* Pagination service */
 var d2Services = angular.module('d2Services', ['ngResource'])
 
-/* Factory to fetch geojsons */
-.factory('GeoJsonFactory', function($q, $rootScope, StorageService) { 
-    return {
-        getAll: function(){
-
-            var def = $q.defer();
-            
-            StorageService.currentStore.open().done(function(){
-                StorageService.currentStore.getAll('geoJsons').done(function(geoJsons){
-                    $rootScope.$apply(function(){
-                        def.resolve(geoJsons);
-                    });                    
-                });
-            });
-            
-            return def.promise;            
-        },
-        get: function(level){
-            
-            var def = $q.defer();
-            
-            StorageService.currentStore.open().done(function(){
-                StorageService.currentStore.get('geoJsons', level).done(function(geoJson){                    
-                    $rootScope.$apply(function(){
-                        def.resolve(geoJson);
-                    });
-                });
-            });                        
-            return def.promise;            
-        }
-    };
-})
-
-/* Factory to fetch optionSets */
-.factory('OptionSetService', function($q, $rootScope, StorageService) { 
-    return {
-        getAll: function(){
-            
-            var def = $q.defer();
-            
-            StorageService.currentStore.open().done(function(){
-                StorageService.currentStore.getAll('optionSets').done(function(optionSets){
-                    $rootScope.$apply(function(){
-                        def.resolve(optionSets);
-                    });                    
-                });
-            });            
-            
-            return def.promise;            
-        },
-        get: function(uid){
-            
-            var def = $q.defer();
-            
-            StorageService.currentStore.open().done(function(){
-                StorageService.currentStore.get('optionSets', uid).done(function(optionSet){                    
-                    $rootScope.$apply(function(){
-                        def.resolve(optionSet);
-                    });
-                });
-            });                        
-            return def.promise;            
-        },        
-        getCode: function(options, key){
-            if(options){
-                for(var i=0; i<options.length; i++){
-                    if( key === options[i].name){
-                        return options[i].code;
-                    }
-                }
-            }            
-            return key;
-        },        
-        getName: function(options, key){
-            if(options){
-                for(var i=0; i<options.length; i++){                    
-                    if( key === options[i].code){
-                        return options[i].name;
-                    }
-                }
-            }            
-            return key;
-        }
-    };
-})
-
 /* Factory for loading translation strings */
 .factory('i18nLoader', function ($q, $http, storage, DialogService) {
  
@@ -213,10 +127,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             if(!dateValue){
                 return;
             }
-            
-            if( isNaN( Date.parse(dateValue) ) ){
-                return;
-            }
+
             var calendarSetting = CalendarService.getSetting();            
             dateValue = moment(dateValue, calendarSetting.momentFormat)._d;
             dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat);            
@@ -254,9 +165,7 @@ var d2Services = angular.module('d2Services', ['ngResource'])
             }            
             var calendarSetting = CalendarService.getSetting();
             dateValue = moment(dateValue, 'YYYY-MM-DD')._d;
-            dateValue = Date.parse(dateValue);     
-            dateValue = $filter('date')(dateValue, calendarSetting.keyDateFormat); 
-            return dateValue;
+            return $filter('date')(this.getDate(dateValue), calendarSetting.keyDateFormat); 
         }
     };
 })

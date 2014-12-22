@@ -28,6 +28,8 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
+
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +38,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
@@ -43,11 +46,12 @@ import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.schema.descriptors.UserSchemaDescriptor;
-import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserAuthorityGroup;
+import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
@@ -59,7 +63,6 @@ import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -87,17 +90,14 @@ public class UserController
     private UserGroupService userGroupService;
 
     @Autowired
-    private PasswordManager passwordManager;
-
-    @Autowired
     private SecurityService securityService;
 
     @Autowired
     private SystemSettingManager systemSettingManager;
-
-    //--------------------------------------------------------------------------
+    
+    // -------------------------------------------------------------------------
     // GET
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     @Override
     @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
@@ -158,9 +158,9 @@ public class UserController
         return users;
     }
 
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // POST
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
@@ -203,6 +203,14 @@ public class UserController
 
         for ( User user : users.getUsers() )
         {
+            if ( !validateInviteUser( user, response ) )
+            {
+                return;
+            }
+        }
+        
+        for ( User user : users.getUsers() )
+        {
             inviteUser( user, request, response );
         }
     }
@@ -214,13 +222,21 @@ public class UserController
 
         for ( User user : users.getUsers() )
         {
+            if ( !validateInviteUser( user, response ) )
+            {
+                return;
+            }
+        }
+        
+        for ( User user : users.getUsers() )
+        {
             inviteUser( user, request, response );
         }
     }
 
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // PUT
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
@@ -276,19 +292,57 @@ public class UserController
         renderService.toJson( response.getOutputStream(), summary );
     }
 
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // Supportive methods
-    //--------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
 
+    private boolean validateInviteUser( User user, HttpServletResponse response )
+    {
+        UserCredentials credentials = user.getUserCredentials();
+
+        if ( credentials == null )
+        {
+            ContextUtils.conflictResponse( response, "User credentials is not present" );
+            return false;
+        }
+        
+        credentials.setUser( user );
+        
+        List<UserAuthorityGroup> userRoles = userService.getUserRolesByUid( getUids( credentials.getUserAuthorityGroups() ) );
+
+        for ( UserAuthorityGroup role : userRoles )
+        {
+            if ( role != null && role.hasCriticalAuthorities() )
+            {
+                ContextUtils.conflictResponse( response, "User cannot be invited with user role which has critical authorities: " + role );
+                return false;
+            }
+        }
+        
+        String valid = securityService.validateInvite( user.getUserCredentials() );
+        
+        if ( valid != null )
+        {
+            ContextUtils.conflictResponse( response, valid + ": " + user.getUserCredentials() );
+            return false;
+        }
+        
+        return true;
+    }
+    
     /**
      * Creates a user invitation and invites the user
      *
-     * @param user     user object parsed from the POST request
+     * @param user user object parsed from the POST request
      * @param response response for created user invitation
-     * @throws Exception
      */
     private void inviteUser( User user, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
+        if ( !validateInviteUser( user, response ) )
+        {
+            return;
+        }
+        
         RestoreOptions restoreOptions = user.getUsername() == null || user.getUsername().isEmpty() ?
             RestoreOptions.INVITE_WITH_USERNAME_CHOICE : RestoreOptions.INVITE_WITH_DEFINED_USERNAME;
 
@@ -303,9 +357,8 @@ public class UserController
     /**
      * Creates a user
      *
-     * @param user     user object parsed from the POST request
+     * @param user user object parsed from the POST request
      * @param response response for created user
-     * @throws Exception
      */
     private void createUser( User user, HttpServletResponse response ) throws Exception
     {
@@ -330,8 +383,8 @@ public class UserController
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
 
         renderService.toJson( response.getOutputStream(), summary );
-
-        addUserGroups( user );
+        
+        userGroupService.addUserToGroups( user, IdentifiableObjectUtils.getUids( user.getGroups() ) );
     }
 
     /**
@@ -351,8 +404,7 @@ public class UserController
 
         if ( currentUser != null && user.getGroups() != null )
         {
-            boolean authorizedToAdd = currentUserService.currentUserIsSuper() ||
-                    currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_USER_ADD );
+            boolean authorizedToAdd = currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_USER_ADD );
 
             for ( UserGroup ug : user.getGroups() )
             {
@@ -360,15 +412,10 @@ public class UserController
 
                 if ( group == null )
                 {
-                    throw new CreateAccessDeniedException( "Can't add/update user: Can't find user group with UID = " + ug.getUid() );
+                    throw new CreateAccessDeniedException( "Can't add/update user, can't find user group: " + ug.getUid() );
                 }
 
-                if ( !securityService.canRead( group ) )
-                {
-                    throw new CreateAccessDeniedException( "Can't add/update user: Can't read the group with UID = " + ug.getUid() );
-                }
-
-                if ( !authorizedToAdd && CollectionUtils.containsAny( group.getManagedByGroups(), currentUser.getGroups() ) )
+                if ( !authorizedToAdd && currentUser.canManage( group ) )
                 {
                     authorizedToAdd = true;
                 }
@@ -376,27 +423,7 @@ public class UserController
 
             if ( !authorizedToAdd )
             {
-                throw new CreateAccessDeniedException( "Can't add user: User must belong to a group that you manage." );
-            }
-        }
-    }
-
-    /**
-     * Adds user groups (if any) to the newly-created user
-     *
-     * @param user user object (including user groups) parsed from the POST request
-     */
-    private void addUserGroups( User user )
-    {
-        if ( user.getGroups() != null )
-        {
-            for ( UserGroup ug : new ArrayList<>( user.getGroups() ) )
-            {
-                UserGroup group = userGroupService.getUserGroup( ug.getUid() );
-
-                group.addUser( user );
-
-                userGroupService.updateUserGroup( group );
+                throw new CreateAccessDeniedException( "Can't add user, user must belong to a group that you manage." );
             }
         }
     }

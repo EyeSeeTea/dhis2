@@ -28,6 +28,9 @@
       <ref bean="jsonMessageConverter" />
       <ref bean="jsonPMessageConverter" />
       <ref bean="xmlMessageConverter" />
+      <ref bean="csvMessageConverter" />
+      <ref bean="pdfMessageConverter" />
+      <ref bean="excelMessageConverter" />
       <bean class="org.springframework.http.converter.StringHttpMessageConverter"/>
       <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter"/>
       <bean class="org.springframework.http.converter.FormHttpMessageConverter"/>
@@ -57,6 +60,7 @@
         <entry key="png" value="image/png" />
         <entry key="pdf" value="application/pdf" />
         <entry key="xls" value="application/vnd.ms-excel" />
+        <entry key="xlsx" value="application/vnd.ms-excel" />
         <entry key="csv" value="application/csv" />
         <entry key="csv.gz" value="application/csv+gzip" />
         <entry key="geojson" value="application/json+geojson" />

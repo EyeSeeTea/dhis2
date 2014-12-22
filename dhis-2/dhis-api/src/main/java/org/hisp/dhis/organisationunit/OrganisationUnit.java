@@ -34,7 +34,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
@@ -49,6 +48,9 @@ import org.hisp.dhis.common.view.UuidView;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.annotation.Property;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.user.User;
 
 import java.util.ArrayList;
@@ -332,7 +334,7 @@ public class OrganisationUnit
     {
         return !this.children.isEmpty();
     }
-    
+
     public boolean isLeaf()
     {
         return children == null || children.isEmpty();
@@ -366,20 +368,20 @@ public class OrganisationUnit
             {
                 return true;
             }
-            
+
             unit = unit.getParent();
         }
-        
+
         return false;
     }
-    
+
     public boolean isDescendant( Set<OrganisationUnit> ancestors )
     {
         if ( ancestors == null || ancestors.isEmpty() )
         {
             return false;
         }
-        
+
         OrganisationUnit unit = this;
 
         while ( unit != null )
@@ -388,11 +390,11 @@ public class OrganisationUnit
             {
                 return true;
             }
-            
+
             unit = unit.getParent();
         }
-        
-        return false;        
+
+        return false;
     }
 
     public boolean hasCoordinatesUp()
@@ -404,7 +406,7 @@ public class OrganisationUnit
                 return parent.getParent().hasChildrenWithCoordinates();
             }
         }
-        
+
         return false;
     }
 
@@ -579,9 +581,9 @@ public class OrganisationUnit
 
     /**
      * Returns the list of ancestor organisation units up the any of the given roots
-     * for this organisation unit. Does not include itself. The list is ordered 
-     * by root first. 
-     * 
+     * for this organisation unit. Does not include itself. The list is ordered
+     * by root first.
+     *
      * @param roots the root organisation units, if null using real roots.
      */
     public List<OrganisationUnit> getAncestors( Collection<OrganisationUnit> roots )
@@ -593,19 +595,19 @@ public class OrganisationUnit
         while ( unit != null )
         {
             units.add( unit );
-            
+
             if ( roots != null && roots.contains( unit ) )
             {
                 break;
             }
-            
+
             unit = unit.getParent();
         }
 
         Collections.reverse( units );
         return units;
     }
-    
+
     public Set<DataElement> getDataElementsInDataSets()
     {
         Set<DataElement> dataElements = new HashSet<>();
@@ -620,21 +622,21 @@ public class OrganisationUnit
 
     public Map<PeriodType, Set<DataElement>> getDataElementsInDataSetsByPeriodType()
     {
-    	Map<PeriodType,Set<DataElement>> map = new HashMap<>();
-    	
+        Map<PeriodType, Set<DataElement>> map = new HashMap<>();
+
         for ( DataSet dataSet : dataSets )
         {
             Set<DataElement> dataElements = map.get( dataSet.getPeriodType() );
-            
+
             if ( dataElements == null )
             {
                 dataElements = new HashSet<>();
                 map.put( dataSet.getPeriodType(), dataElements );
             }
-            
+
             dataElements.addAll( dataSet.getDataElements() );
         }
-        
+
         return map;
     }
 
@@ -699,7 +701,7 @@ public class OrganisationUnit
     /**
      * Returns a string representing the graph of ancestors. The string is delimited
      * by "/". The ancestors are ordered by root first and represented by UIDs.
-     * 
+     *
      * @param roots the root organisation units, if null using real roots.
      */
     public String getParentGraph( Collection<OrganisationUnit> roots )
@@ -731,7 +733,7 @@ public class OrganisationUnit
         {
             builder.append( "/" ).append( name );
         }
-        
+
         return builder.toString();
     }
 
@@ -742,7 +744,7 @@ public class OrganisationUnit
     public static Map<String, String> getParentGraphMap( List<OrganisationUnit> organisationUnits, Collection<OrganisationUnit> roots )
     {
         Map<String, String> map = new HashMap<>();
-        
+
         if ( organisationUnits != null )
         {
             for ( OrganisationUnit unit : organisationUnits )
@@ -750,7 +752,7 @@ public class OrganisationUnit
                 map.put( unit.getUid(), unit.getParentGraph( roots ) );
             }
         }
-        
+
         return map;
     }
 
@@ -761,7 +763,7 @@ public class OrganisationUnit
     public static Map<String, String> getParentNameGraphMap( List<OrganisationUnit> organisationUnits, Collection<OrganisationUnit> roots, boolean includeThis )
     {
         Map<String, String> map = new HashMap<>();
-        
+
         if ( organisationUnits != null )
         {
             for ( OrganisationUnit unit : organisationUnits )
@@ -769,7 +771,7 @@ public class OrganisationUnit
                 map.put( unit.getName(), unit.getParentNameGraph( roots, includeThis ) );
             }
         }
-        
+
         return map;
     }
 
@@ -777,11 +779,16 @@ public class OrganisationUnit
     {
         return level > 0;
     }
-    
+
     @Override
     public boolean haveUniqueNames()
     {
         return false;
+    }
+
+    public boolean isRoot()
+    {
+        return parent == null;
     }
 
     // -------------------------------------------------------------------------
@@ -791,6 +798,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( UuidView.class )
     @JacksonXmlProperty( isAttribute = true )
+    @PropertyRange( min = 36, max = 36 )
     public String getUuid()
     {
         return uuid;
@@ -816,7 +824,7 @@ public class OrganisationUnit
     }
 
     @JsonProperty
-    @JsonSerialize( contentUsing = JacksonOrganisationUnitChildrenSerializer.class)
+    @JsonSerialize( contentUsing = JacksonOrganisationUnitChildrenSerializer.class )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "children", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "child", namespace = DxfNamespaces.DXF_2_0 )
@@ -881,6 +889,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getComment()
     {
         return comment;
@@ -907,6 +916,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Property( PropertyType.GEOLOCATION )
     public String getCoordinates()
     {
         return coordinates;
@@ -920,6 +930,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Property( PropertyType.URL )
     public String getUrl()
     {
         return url;
@@ -959,6 +970,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Property( PropertyType.EMAIL )
     public String getEmail()
     {
         return email;
@@ -972,6 +984,7 @@ public class OrganisationUnit
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Property( PropertyType.PHONENUMBER )
     public String getPhoneNumber()
     {
         return phoneNumber;
@@ -995,7 +1008,7 @@ public class OrganisationUnit
         this.type = type;
     }
 
-    @JsonProperty( value = "organisationUnitGroups" )
+    @JsonProperty( "organisationUnitGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "organisationUnitGroups", namespace = DxfNamespaces.DXF_2_0 )
@@ -1040,10 +1053,10 @@ public class OrganisationUnit
         this.users = users;
     }
 
-    @JsonProperty( value = "attributeValues" )
+    @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0)
-    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0)
+    @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
     public Set<AttributeValue> getAttributeValues()
     {
         return attributeValues;

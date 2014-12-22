@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.webmessage.responses;
+package org.hisp.dhis.schema.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,38 +28,17 @@ package org.hisp.dhis.dxf2.webmessage.responses;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.dxf2.webmessage.AbstractWebMessageResponse;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JsonPropertyOrder( {
-    "validationViolations"
-} )
-public class ValidationViolationsWebMessageResponse extends AbstractWebMessageResponse
+@Target( { ElementType.FIELD, ElementType.METHOD } )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface Property
 {
-    private List<ValidationViolation> validationViolations = new ArrayList<>();
-
-    public ValidationViolationsWebMessageResponse()
-    {
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public List<ValidationViolation> getValidationViolations()
-    {
-        return validationViolations;
-    }
-
-    public void setValidationViolations( List<ValidationViolation> validationViolations )
-    {
-        this.validationViolations = validationViolations;
-    }
+    org.hisp.dhis.schema.PropertyType value() default org.hisp.dhis.schema.PropertyType.TEXT;
 }

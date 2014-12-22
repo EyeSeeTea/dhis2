@@ -30,17 +30,15 @@ package org.hisp.dhis.user;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.AuditLogUtil;
@@ -52,7 +50,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.security.migration.MigrationPasswordManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.hisp.dhis.system.util.DateUtils;
@@ -94,13 +92,6 @@ public class DefaultUserService
         this.userAuthorityGroupStore = userAuthorityGroupStore;
     }
     
-    private UserSettingStore userSettingStore;
-
-    public void setUserSettingStore( UserSettingStore userSettingStore )
-    {
-        this.userSettingStore = userSettingStore;
-    }
-
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -115,18 +106,18 @@ public class DefaultUserService
         this.categoryService = categoryService;
     }
     
-    private SecurityService securityService;
-    
-    public void setSecurityService( SecurityService securityService )
-    {
-        this.securityService = securityService;
-    }
-
     private SystemSettingManager systemSettingManager;
 
     public void setSystemSettingManager( SystemSettingManager systemSettingManager )
     {
         this.systemSettingManager = systemSettingManager;
+    }
+
+    private MigrationPasswordManager passwordManager;
+
+    public void setPasswordManager( MigrationPasswordManager passwordManager )
+    {
+        this.passwordManager = passwordManager;
     }
 
     // -------------------------------------------------------------------------
@@ -181,7 +172,7 @@ public class DefaultUserService
             return false;
         }
 
-        return (userAuthorityGroup.getAuthorities().contains( "ALL" )) ? true : false;
+        return ( userAuthorityGroup.getAuthorities().contains( "ALL" ) );
     }
 
     @Override
@@ -445,6 +436,12 @@ public class DefaultUserService
     }
 
     @Override
+    public List<UserAuthorityGroup> getUserRolesByUid( Collection<String> uids )
+    {
+        return userAuthorityGroupStore.getByUid( uids );
+    }
+
+    @Override
     public Collection<UserAuthorityGroup> getUserRolesBetween( int first, int max )
     {
         return userAuthorityGroupStore.getAllOrderedName( first, max );
@@ -516,6 +513,26 @@ public class DefaultUserService
     public Collection<UserCredentials> getAllUserCredentials()
     {
         return userCredentialsStore.getAllUserCredentials();
+    }
+
+    @Override
+    public void encodeAndSetPassword( User user, String rawPassword )
+    {
+        encodeAndSetPassword( user.getUserCredentials(), rawPassword );
+    }
+
+    @Override
+    public void encodeAndSetPassword( UserCredentials userCredentials, String rawPassword )
+    {
+        boolean isNewPassword = StringUtils.isBlank( userCredentials.getPassword() ) ||
+            !passwordManager.legacyOrCurrentMatches( rawPassword, userCredentials.getPassword(), userCredentials.getUsername() );
+
+        if ( isNewPassword )
+        {
+            userCredentials.setPasswordLastUpdated( new Date() );
+        }
+
+        userCredentials.setPassword( passwordManager.encode( rawPassword ) );
     }
 
     @Override
@@ -687,88 +704,9 @@ public class DefaultUserService
     // -------------------------------------------------------------------------
 
     @Override
-    public void addUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.addUserSetting( userSetting );
-    }
-
-    @Override
-    public void addOrUpdateUserSetting( UserSetting userSetting )
-    {
-        UserSetting setting = getUserSetting( userSetting.getUser(), userSetting.getName() );
-
-        if ( setting != null )
-        {
-            setting.mergeWith( userSetting );
-            updateUserSetting( setting );
-        }
-        else
-        {
-            addUserSetting( userSetting );
-        }
-    }
-
-    @Override
-    public void updateUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.updateUserSetting( userSetting );
-    }
-
-    @Override
-    public void deleteUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.deleteUserSetting( userSetting );
-    }
-
-    @Override
-    public Collection<UserSetting> getAllUserSettings( User user )
-    {
-        return userSettingStore.getAllUserSettings( user );
-    }
-
-    @Override
-    public Collection<UserSetting> getUserSettings( String name )
-    {
-        return userSettingStore.getUserSettings( name );
-    }
-
-    @Override
-    public UserSetting getUserSetting( User user, String name )
-    {
-        return userSettingStore.getUserSetting( user, name );
-    }
-
-    @Override
-    public Serializable getUserSettingValue( User user, String name, Serializable defaultValue )
-    {
-        UserSetting setting = getUserSetting( user, name );
-
-        return setting != null && setting.getValue() != null ? setting.getValue() : defaultValue;
-    }
-
-    @Override
-    public Map<User, Serializable> getUserSettings( String name, Serializable defaultValue )
-    {
-        Map<User, Serializable> map = new HashMap<>();
-
-        for ( UserSetting setting : userSettingStore.getUserSettings( name ) )
-        {
-            map.put( setting.getUser(), setting.getValue() != null ? setting.getValue() : defaultValue );
-        }
-
-        return map;
-    }
-
-    @Override
     public Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> units )
     {
         return userStore.getUsersByOrganisationUnits( units );
-    }
-
-    @Override
-    public void removeUserSettings( User user )
-    {
-        userStore.removeUserSettings( user );
     }
 
     @Override

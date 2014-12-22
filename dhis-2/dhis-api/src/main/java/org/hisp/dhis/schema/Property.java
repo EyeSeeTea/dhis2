@@ -31,6 +31,7 @@ package org.hisp.dhis.schema;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -51,9 +52,19 @@ public class Property implements Ordered
     private Class<?> klass;
 
     /**
+     * Normalized type of this property
+     */
+    private PropertyType propertyType;
+
+    /**
      * If this property is a collection, this is the class of the items inside the collection.
      */
     private Class<?> itemKlass;
+
+    /**
+     * If this property is a collection, this is the normalized type of the items inside the collection.
+     */
+    private PropertyType itemPropertyType;
 
     /**
      * Direct link to getter for this property.
@@ -162,17 +173,17 @@ public class Property implements Ordered
     /**
      * Nullability of this property.
      */
-    private boolean nullable;
+    private boolean required;
 
     /**
-     * Maximum length of this property.
+     * Maximum length/size/value of this property.
      */
-    private Integer maxLength;
+    private int max = Integer.MAX_VALUE;
 
     /**
-     * Minimum length of this property.
+     * Minimum length/size/value of this property.
      */
-    private Integer minLength;
+    private int min;
 
     /**
      * Cascading used when doing CRUD operations.
@@ -211,6 +222,18 @@ public class Property implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public PropertyType getPropertyType()
+    {
+        return propertyType;
+    }
+
+    public void setPropertyType( PropertyType propertyType )
+    {
+        this.propertyType = propertyType;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Class<?> getItemKlass()
     {
         return itemKlass;
@@ -219,6 +242,18 @@ public class Property implements Ordered
     public void setItemKlass( Class<?> itemKlass )
     {
         this.itemKlass = itemKlass;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public PropertyType getItemPropertyType()
+    {
+        return itemPropertyType;
+    }
+
+    public void setItemPropertyType( PropertyType itemPropertyType )
+    {
+        this.itemPropertyType = itemPropertyType;
     }
 
     public Method getGetterMethod()
@@ -435,38 +470,38 @@ public class Property implements Ordered
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isNullable()
+    public boolean isRequired()
     {
-        return nullable;
+        return required;
     }
 
-    public void setNullable( boolean nullable )
+    public void setRequired( boolean required )
     {
-        this.nullable = nullable;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Integer getMaxLength()
-    {
-        return maxLength;
-    }
-
-    public void setMaxLength( Integer maxLength )
-    {
-        this.maxLength = maxLength;
+        this.required = required;
     }
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Integer getMinLength()
+    public int getMax()
     {
-        return minLength;
+        return max;
     }
 
-    public void setMinLength( Integer minLength )
+    public void setMax( int max )
     {
-        this.minLength = minLength;
+        this.max = max;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getMin()
+    {
+        return min;
+    }
+
+    public void setMin( int min )
+    {
+        this.min = min;
     }
 
     @JsonProperty
@@ -514,6 +549,7 @@ public class Property implements Ordered
         final Property other = (Property) obj;
 
         return Objects.equal( this.klass, other.klass ) && Objects.equal( this.itemKlass, other.itemKlass )
+            && Objects.equal( this.propertyType, other.propertyType ) && Objects.equal( this.itemPropertyType, other.itemPropertyType )
             && Objects.equal( this.getterMethod, other.getterMethod ) && Objects.equal( this.setterMethod, other.setterMethod )
             && Objects.equal( this.name, other.name ) && Objects.equal( this.fieldName, other.fieldName )
             && Objects.equal( this.persisted, other.persisted ) && Objects.equal( this.collectionName, other.collectionName )
@@ -526,9 +562,11 @@ public class Property implements Ordered
     @Override
     public String toString()
     {
-        return Objects.toStringHelper( this )
+        return MoreObjects.toStringHelper( this )
             .add( "klass", klass )
+            .add( "propertyType", propertyType )
             .add( "itemKlass", itemKlass )
+            .add( "itemPropertyType", itemPropertyType )
             .add( "getterMethod", getterMethod )
             .add( "name", name )
             .add( "fieldName", fieldName )

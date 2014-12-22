@@ -28,12 +28,16 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.dxf2.render.RenderService;
+import org.hisp.dhis.dxf2.schema.SchemaValidator;
+import org.hisp.dhis.dxf2.schema.ValidationViolation;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.schema.Schemas;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,15 +45,26 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Controller
-@RequestMapping(value = "/schemas", method = RequestMethod.GET)
+@RequestMapping( value = "/schemas", method = RequestMethod.GET )
 public class SchemaController
 {
     @Autowired
     private SchemaService schemaService;
+
+    @Autowired
+    private SchemaValidator schemaValidator;
+
+    @Autowired
+    private RenderService renderService;
 
     @RequestMapping
     public @ResponseBody Schemas getSchemas()
@@ -57,10 +72,10 @@ public class SchemaController
         return new Schemas( schemaService.getSortedSchemas() );
     }
 
-    @RequestMapping(value = "/{type}")
+    @RequestMapping( value = "/{type}", method = RequestMethod.GET )
     public @ResponseBody Schema getSchema( @PathVariable String type )
     {
-        Schema schema = schemaService.getSchemaBySingularName( type );
+        Schema schema = getSchemaFromType( type );
 
         if ( schema != null )
         {
@@ -70,10 +85,31 @@ public class SchemaController
         throw new HttpClientErrorException( HttpStatus.NOT_FOUND, "Type " + type + " does not exist." );
     }
 
-    @RequestMapping( value = "/{type}/{property}" )
+    @RequestMapping( value = "/{type}", method = { RequestMethod.POST, RequestMethod.PUT }, consumes = MediaType.APPLICATION_JSON_VALUE )
+    public void validateSchema( @PathVariable String type, HttpServletRequest request, HttpServletResponse response ) throws IOException
+    {
+        Schema schema = getSchemaFromType( type );
+
+        if ( schema == null )
+        {
+            throw new HttpClientErrorException( HttpStatus.NOT_FOUND, "Type " + type + " does not exist." );
+        }
+
+        Object object = renderService.fromJson( request.getInputStream(), schema.getKlass() );
+        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+
+        renderService.toJson( response.getOutputStream(), validationViolations );
+    }
+
+    @RequestMapping( value = "/{type}/{property}", method = RequestMethod.GET )
     public @ResponseBody Property getSchemaProperty( @PathVariable String type, @PathVariable String property )
     {
-        Schema schema = schemaService.getSchemaBySingularName( type );
+        Schema schema = getSchemaFromType( type );
+
+        if ( schema == null )
+        {
+            throw new HttpClientErrorException( HttpStatus.NOT_FOUND, "Type " + type + " does not exist." );
+        }
 
         if ( schema.getPropertyMap().containsKey( property ) )
         {
@@ -81,5 +117,23 @@ public class SchemaController
         }
 
         throw new HttpClientErrorException( HttpStatus.NOT_FOUND, "Property " + property + " does not exist on type " + type + "." );
+    }
+
+    private Schema getSchemaFromType( String type )
+    {
+        Schema schema = schemaService.getSchemaBySingularName( type );
+
+        if ( schema == null )
+        {
+            try
+            {
+                schema = schemaService.getSchema( Class.forName( type ) );
+            }
+            catch ( ClassNotFoundException ignored )
+            {
+            }
+        }
+
+        return schema;
     }
 }

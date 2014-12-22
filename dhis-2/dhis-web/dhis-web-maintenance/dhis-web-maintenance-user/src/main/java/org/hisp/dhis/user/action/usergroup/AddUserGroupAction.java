@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.usergroup.action;
+package org.hisp.dhis.user.action.usergroup;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -29,13 +29,10 @@ package org.hisp.dhis.dashboard.usergroup.action;
  */
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.system.util.AttributeUtils;
-import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
@@ -43,21 +40,18 @@ import org.hisp.dhis.user.UserService;
 
 import com.opensymphony.xwork2.Action;
 
-public class UpdateUserGroupAction
+public class AddUserGroupAction
     implements Action
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
     private UserService userService;
 
     public void setUserService( UserService userService )
     {
         this.userService = userService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
     }
 
     private UserGroupService userGroupService;
@@ -92,13 +86,6 @@ public class UpdateUserGroupAction
         this.name = name;
     }
 
-    private Integer userGroupId;
-
-    public void setUserGroupId( Integer userGroupId )
-    {
-        this.userGroupId = userGroupId;
-    }
-
     private List<String> jsonAttributeValues;
 
     public void setJsonAttributeValues( List<String> jsonAttributeValues )
@@ -119,39 +106,26 @@ public class UpdateUserGroupAction
             usersSelected = new ArrayList<>();
         }
 
-        UserGroup userGroup = userGroupService.getUserGroup( userGroupId );
-
-        if ( !userGroup.getManagedByGroups().isEmpty() && !currentUserService.currentUserIsSuper() )
-        {
-            //TODO: Allow user with F_USER_ADD_WITHIN_MANAGED_GROUP to modify their managed groups
-            //as long as they are not loosing or gaining users to manage.
-
-            return ERROR;
-        }
-
-        Set<User> users = new HashSet<>();
+        UserGroup userGroup = new UserGroup( name );
 
         for ( String userUid : usersSelected )
         {
             User user = userService.getUser( userUid );
 
-            if ( user == null )
+            if( user == null )
             {
                 continue;
             }
 
-            users.add( user );
+            userGroup.addUser( user );
         }
-
-        userGroup.setName( name );
-        userGroup.updateUsers( users );
 
         if ( jsonAttributeValues != null )
         {
             AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues, attributeService );
         }
 
-        userGroupService.updateUserGroup( userGroup );
+        userGroupService.addUserGroup( userGroup );
 
         return SUCCESS;
     }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.webmessage.responses;
+package org.hisp.dhis.security.authority;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,35 +28,36 @@ package org.hisp.dhis.dxf2.webmessage.responses;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.apache.commons.lang3.StringUtils;
+import org.hisp.dhis.appmanager.App;
+import org.hisp.dhis.appmanager.AppManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JsonPropertyOrder( {
-    "message"
-} )
-public class ValidationViolation
+public class AppsSystemAuthoritiesProvider implements SystemAuthoritiesProvider
 {
-    private String message;
+    @Autowired
+    private AppManager appManager;
 
-    public ValidationViolation( String message )
+    @Override
+    public Collection<String> getSystemAuthorities()
     {
-        this.message = message;
-    }
+        List<String> authorities = new ArrayList<>();
 
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getMessage()
-    {
-        return message;
-    }
+        for ( App app : appManager.getApps() )
+        {
+            if ( !StringUtils.isEmpty( app.getName() ) )
+            {
+                authorities.add( "See " + app.getName().trim() );
+            }
+        }
 
-    public void setMessage( String message )
-    {
-        this.message = message;
+        return authorities;
     }
 }

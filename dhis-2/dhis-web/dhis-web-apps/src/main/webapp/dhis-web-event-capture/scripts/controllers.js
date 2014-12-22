@@ -15,7 +15,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 ProgramStageFactory,                
                 DHIS2EventFactory,
                 DHIS2EventService,
-                GeoJsonFactory,
                 ContextMenuSelectedItem,                
                 DateUtils,
                 CalendarService,
@@ -24,6 +23,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 DialogService) {
     //selected org unit
     $scope.selectedOrgUnit = '';
+    $scope.treeLoaded = false;
     
     $scope.calendarSetting = CalendarService.getSetting();
     
@@ -57,10 +57,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         if( angular.isObject($scope.selectedOrgUnit)){
             $scope.loadPrograms();
         }
-    });
-    
-    GeoJsonFactory.getAll().then(function(geoJsons){
-        $scope.geoJsons = geoJsons;
     });
     
     //load programs associated with the selected org unit.
@@ -320,8 +316,8 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
             }
         });
 
-        modalInstance.result.then(function (eventGridColumns) {
-            $scope.eventGridColumns = eventGridColumns;
+        modalInstance.result.then(function (gridColumns) {
+            $scope.eventGridColumns = gridColumns;
         }, function () {
         });
     };

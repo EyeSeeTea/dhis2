@@ -44,6 +44,7 @@ import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -247,6 +248,18 @@ public class User
     {
         return userCredentials != null && userCredentials.isSuper();
     }
+    
+    /**
+     * Indicates whether this user can manage the given user group. This is derived
+     * from which user groups are managed by the given group.
+     * 
+     * @param userGroup the user group to test.
+     * @return true if the given user group can be managed by this user, false if not.
+     */
+    public boolean canManage( UserGroup userGroup )
+    {
+        return userGroup != null && CollectionUtils.containsAny( groups, userGroup.getManagedByGroups() );
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -261,6 +274,7 @@ public class User
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getFirstName()
     {
         return firstName;
@@ -274,6 +288,7 @@ public class User
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getSurname()
     {
         return surname;
@@ -453,7 +468,7 @@ public class User
         this.userCredentials = userCredentials;
     }
 
-    @JsonProperty
+    @JsonProperty( "userGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "userGroups", namespace = DxfNamespaces.DXF_2_0 )
@@ -498,7 +513,7 @@ public class User
         this.dataViewOrganisationUnits = dataViewOrganisationUnits;
     }
 
-    @JsonProperty( value = "attributeValues" )
+    @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )

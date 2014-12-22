@@ -37,11 +37,15 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.apache.commons.lang.Validate;
 import org.hisp.dhis.acl.Access;
+import org.hisp.dhis.acl.AccessStringHelper;
 import org.hisp.dhis.common.annotation.Description;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.SharingBasicView;
 import org.hisp.dhis.common.view.SharingDetailedView;
 import org.hisp.dhis.common.view.SharingExportView;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.annotation.Property;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroupAccess;
 
@@ -103,7 +107,7 @@ public class BaseIdentifiableObject
     /**
      * Access string for public access.
      */
-    protected String publicAccess;
+    protected String publicAccess = AccessStringHelper.DEFAULT;
 
     /**
      * Owner of this object.
@@ -186,6 +190,8 @@ public class BaseIdentifiableObject
     @JsonProperty( value = "id" )
     @JacksonXmlProperty( localName = "id", isAttribute = true )
     @Description( "The Unique Identifier for this Object." )
+    @Property( PropertyType.IDENTIFIER )
+    @PropertyRange( min = 11, max = 11 )
     public String getUid()
     {
         return uid;
@@ -200,6 +206,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
     @Description( "The unique code for this Object." )
+    @Property( PropertyType.IDENTIFIER )
     public String getCode()
     {
         return code;
@@ -214,6 +221,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
     @Description( "The name of this Object. Required and unique." )
+    @PropertyRange( min = 2 )
     public String getName()
     {
         return name;
@@ -274,6 +282,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JsonView( { SharingBasicView.class, SharingDetailedView.class, SharingExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 8, max = 8 )
     public String getPublicAccess()
     {
         return publicAccess;

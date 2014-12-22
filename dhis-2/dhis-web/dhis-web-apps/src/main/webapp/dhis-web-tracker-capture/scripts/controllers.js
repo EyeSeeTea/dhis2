@@ -22,6 +22,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     $scope.ouModes = [{name: 'SELECTED'}, {name: 'CHILDREN'}, {name: 'DESCENDANTS'}, {name: 'ACCESSIBLE'}];         
     $scope.selectedOuMode = $scope.ouModes[0];
     $scope.dashboardProgramId = ($location.search()).program; 
+    $scope.treeLoaded = false;
     
     //Paging
     $scope.pager = {pageSize: 50, page: 1, toolBarDisplay: 5};   
@@ -69,7 +70,7 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
                         $scope.optionSets.optionSets[optionSet.id] = optionSet;
                     });
                 });
-            }            
+            }
             $scope.loadPrograms($scope.selectedOrgUnit);                                
         }
     });
@@ -327,7 +328,6 @@ var trackerCaptureControllers = angular.module('trackerCaptureControllers', [])
     };
     
     $scope.showHideColumns = function(){
-        
         $scope.hiddenGridColumns = 0;
         
         angular.forEach($scope.gridColumns, function(gridColumn){

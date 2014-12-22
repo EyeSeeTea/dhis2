@@ -1,4 +1,4 @@
-package org.hisp.dhis.dashboard.usergroup.action;
+package org.hisp.dhis.user.action.usergroup;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,39 +28,58 @@ package org.hisp.dhis.dashboard.usergroup.action;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
-import org.hisp.dhis.attribute.Attribute;
-import org.hisp.dhis.attribute.AttributeService;
-import org.hisp.dhis.attribute.comparator.AttributeSortOrderComparator;
+import org.hisp.dhis.i18n.I18n;
+import org.hisp.dhis.user.UserGroup;
+import org.hisp.dhis.user.UserGroupService;
 
 import com.opensymphony.xwork2.Action;
 
-public class AddUserGroupFormAction
+public class ValidateUserGroupAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private AttributeService attributeService;
+    private UserGroupService userGroupService;
 
-    public void setAttributeService( AttributeService attributeService )
+    public void setUserGroupService( UserGroupService userGroupService )
     {
-        this.attributeService = attributeService;
+        this.userGroupService = userGroupService;
+    }
+
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<Attribute> attributes;
+    private Integer id;
 
-    public List<Attribute> getAttributes()
+    public void setId( Integer id )
     {
-        return attributes;
+        this.id = id;
+    }
+
+    private String name;
+
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+
+    private String message;
+
+    public String getMessage()
+    {
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -71,8 +90,24 @@ public class AddUserGroupFormAction
     public String execute()
         throws Exception
     {
-        attributes = new ArrayList<>( attributeService.getUserGroupAttributes() );
-        Collections.sort( attributes, AttributeSortOrderComparator.INSTANCE );
+
+        if ( name != null )
+        {
+            List<UserGroup> matches = userGroupService.getUserGroupByName( name );
+            if( matches != null && matches.size() > 0 )
+            {
+                UserGroup match = matches.get( 0 );
+                
+            if ( match != null && (id == null || match.getId() != id) )
+            {
+                message = i18n.getString( "name_in_use" );
+
+                return ERROR;
+            }
+            }
+        }
+
+        message = i18n.getString( "ok" );
 
         return SUCCESS;
     }
