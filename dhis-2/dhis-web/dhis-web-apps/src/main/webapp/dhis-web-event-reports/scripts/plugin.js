@@ -520,7 +520,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+					return Ext.apply(layout, applyConfig);
 				}();
 			};
 
