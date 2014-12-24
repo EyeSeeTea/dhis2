@@ -3372,7 +3372,7 @@ Ext.onReady(function() {
 
 			init.el = config.el;
 
-            if (!ns.skipFade) {
+            if (!ns.skipFade && init.el && Ext.get(init.el)) {
                 Ext.get(init.el).setStyle('opacity', 0);
             }
 
@@ -3505,7 +3505,7 @@ Ext.onReady(function() {
 				ns.app.chart = ns.core.web.chart.createChart(ns);
 
                 // fade
-                if (!ns.skipFade) {
+                if (!ns.skipFade && ns.core.init.el && Ext.get(ns.core.init.el)) {
                     ns.app.chart.on('afterrender', function() {
                         Ext.defer( function() {
                             Ext.get(ns.core.init.el).fadeIn({
@@ -3529,18 +3529,24 @@ Ext.onReady(function() {
 			var el = Ext.get(ns.core.init.el),
 				setFavorite,
 				centerRegion,
-				elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
-				elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
-				elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
-				elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom')),
+                width,
+                height;
+
+            if (!ns.skipFade && init.el && Ext.get(init.el)) {
+				var elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
+                    elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
+                    elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
+                    elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom'));
+                    
 				width = el.getWidth() - elBorderW - elPaddingW,
 				height = el.getHeight() - elBorderH - elPaddingH;
+            }
 
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
 				bodyStyle: 'border: 0 none',
-				width: config.width || width,
-				height: config.height || height,
+				width: config.width || width || '100%',
+				height: config.height || height || '50%',
 				layout: 'fit'
 			});
 
