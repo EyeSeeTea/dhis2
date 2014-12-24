@@ -464,7 +464,6 @@ Ext.onReady( function() {
 		olmap.events.register('mousemove', null, function(e) {
 			gis.olmap.mouseMove.x = e.clientX;
 			gis.olmap.mouseMove.y = e.clientY;
-console.log(e);
 		});
 
 		olmap.zoomToVisibleExtent = function() {
