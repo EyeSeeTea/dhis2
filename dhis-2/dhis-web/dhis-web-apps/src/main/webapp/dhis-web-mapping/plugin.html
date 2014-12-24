@@ -15,7 +15,18 @@
     <script src="//localhost:8080/dhis-web-commons/javascripts/openlayers/OpenLayers.js"></script>
     <script src="scripts/plugin.js"></script>
 
-    <style>h1 {font-size: 20px; padding: 30px 0 20px;}</style>
+    <style>
+        h1 {
+            font-size: 20px;
+            padding: 20px 0 10px;
+        }
+
+        #map1, #map2 {
+            width: 700px;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+    </style>
 
     <script>
 		Ext.onReady(function() {
@@ -59,10 +70,10 @@
 <body style="margin:10px 0 0 30px; font-family:arial,sans-serif">
 
 	<h1>MAP BY UID</h1>
-	<div id="map1" style="width:700px; height:400px"></div>
+	<div id="map1"></div>
 
 	<h1>MAP BY CONFIG</h1>
-	<div id="map2" style="width:700px; height:400px"></div>
+	<div id="map2"></div>
 
 </body>
 
