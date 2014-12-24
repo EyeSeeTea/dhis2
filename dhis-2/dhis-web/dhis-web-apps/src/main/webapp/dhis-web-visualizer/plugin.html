@@ -2,10 +2,11 @@
 <html>
 <head>
     <link rel="stylesheet" type="text/css" href="../dhis-web-commons/javascripts/ext/resources/css/ext-plugin-gray.css" />
-<!--
+    
     <script type="text/javascript" src="../dhis-web-commons/javascripts/ext/ext-all.js"></script>
+<!--
+    <script type="text/javascript" src="ext-all.js"></script>
 -->
-    <script type="text/javascript" src="ext-all-debug-w-comments.js"></script>
     <script src="scripts/plugin.js"></script>
 
     <style type="text/css">
@@ -13,7 +14,7 @@
 
 		h1 {font-size: 20px; margin: 20px 0;}
 
-		#chart1, #chart2 {width: 700px; margin-bottom: 50px; height: 320px}
+		#chart1, #chart2 {width: 800px; height: 320px; margin-bottom: 50px; }
     </style>
 
 	<script>
@@ -41,34 +42,34 @@
                 }
 			});
 
-			//DHIS.getChart({
-				//url: url,
-				//el: 'chart2',
-                ////type: 'pie',
-				//columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}],
-				//rows: [{dimension: 'pe', items: [{id: 'LAST_6_MONTHS'}]}],
-                //filters: [{dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}],
-                //domainAxisTitle: 'PERIODS',
-                //rangeAxisTitle: 'PERCENT',
-                //domainAxisStyle: {
-                    //labelFont: '10px sans-serif',
-                    //labelRotation: 0,
-                    //titleFont: 'bold 10px sans-serif'
-                //},
-                //rangeAxisStyle: {
-                    //labelFont: '10px arial',
-                    //titleFont: 'bold 10px sans-serif'
-                //},
-                //legendStyle: {
-                    //labelMaxLength: 9,
-                    //labelFontSize: 10,
-                    //titleFont: '18px sans-serif'
-                //},
-                //seriesStyle: {
-                    //labelFont: '10px sans-serif',
-                    //labelColor: 'black'
-                //}
-			//});
+			DHIS.getChart({
+				url: url,
+				el: 'chart2',
+                //type: 'pie',
+				columns: [{dimension: 'in', items: [{id: 'Uvn6LCg7dVU'}, {id: 'OdiHJayrsKo'}, {id: 'sB79w2hiLp8'}, {id: 'AUqdhY4mpvp'}]}],
+				rows: [{dimension: 'pe', items: [{id: 'LAST_6_MONTHS'}]}],
+                filters: [{dimension: 'ou', items: [{id: 'USER_ORGUNIT'}]}],
+                domainAxisTitle: 'PERIODS',
+                rangeAxisTitle: 'PERCENT',
+                domainAxisStyle: {
+                    labelFont: '10px sans-serif',
+                    labelRotation: 0,
+                    titleFont: 'bold 10px sans-serif'
+                },
+                rangeAxisStyle: {
+                    labelFont: '10px arial',
+                    titleFont: 'bold 10px sans-serif'
+                },
+                legendStyle: {
+                    labelMaxLength: 9,
+                    labelFontSize: 10,
+                    titleFont: '18px sans-serif'
+                },
+                seriesStyle: {
+                    labelFont: '10px sans-serif',
+                    labelColor: 'black'
+                }
+			});
 		});
 	</script>
 </head>

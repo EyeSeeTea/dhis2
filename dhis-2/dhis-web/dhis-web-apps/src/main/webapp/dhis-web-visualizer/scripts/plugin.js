@@ -3532,7 +3532,7 @@ Ext.onReady(function() {
                 width,
                 height;
 
-            if (!ns.skipFade && init.el && Ext.get(init.el)) {
+            if (!ns.skipFade && el && Ext.get(el)) {
 				var elBorderW = parseInt(el.getStyle('border-left-width')) + parseInt(el.getStyle('border-right-width')),
                     elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
                     elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
@@ -3541,7 +3541,7 @@ Ext.onReady(function() {
 				width = el.getWidth() - elBorderW - elPaddingW,
 				height = el.getHeight() - elBorderH - elPaddingH;
             }
-
+            
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
 				bodyStyle: 'border: 0 none',
