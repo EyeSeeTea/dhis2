@@ -43,7 +43,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Nguyen Hong Duc
- * @version $Id: UserStoreTest.java 5724 2008-09-18 14:37:01Z larshelg $
  */
 public class UserStoreTest
     extends DhisSpringTest
