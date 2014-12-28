@@ -101,8 +101,6 @@ public interface UserService
 
     List<User> getUsersByUid( List<String> uids );
 
-    List<User> queryForUsers( String query );
-
     /**
      * Returns a set of CategoryOptionGroups that may be seen by the current
      * user, if the current user has any CategoryOptionGroupSet constraint(s).

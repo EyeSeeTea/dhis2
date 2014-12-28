@@ -30,7 +30,6 @@ package org.hisp.dhis.user;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -267,23 +266,6 @@ public class DefaultUserService
         return getUsers( params );   
     }
     
-    @Override
-    public List<User> queryForUsers( String query )
-    {
-        List<User> users = new ArrayList<>();
-
-        User uidUser = userStore.getByUid( query );
-
-        if ( uidUser != null )
-        {
-            users.add( uidUser );
-        }
-
-        users.addAll( userStore.getAllLikeName( query, 0, 1000 ) ); //TODO
-
-        return users;
-    }
-
     @Override
     public Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials )
     {
