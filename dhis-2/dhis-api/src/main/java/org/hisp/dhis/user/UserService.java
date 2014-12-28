@@ -279,33 +279,9 @@ public interface UserService
      */
     void setLastLogin( String username );
 
-    Collection<UserCredentials> searchUsersByName( String key );
-
-    Collection<UserCredentials> searchUsersByName( String name, int first, int max );
-
-    Collection<UserCredentials> getUsersBetween( int first, int max );
-
-    Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
-
     int getActiveUsersCount( int days );
 
     int getActiveUsersCount( Date since );
-
-    /**
-     * Filters the given list of users based on whether the current
-     * user is allowed to update.
-     *
-     * @param users the list of users.
-     */
-    void canUpdateUsersFilter( Collection<User> users );
-
-    /**
-     * Filters the given list of user credentials based on whether the current
-     * user is allowed to update.
-     *
-     * @param userCredentials the list of user credentials.
-     */
-    void canUpdateUserCredentialsFilter( Collection<UserCredentials> userCredentials );
 
     boolean credentialsNonExpired( UserCredentials credentials );
     

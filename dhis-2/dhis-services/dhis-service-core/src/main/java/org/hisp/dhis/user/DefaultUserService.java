@@ -53,7 +53,6 @@ import org.hisp.dhis.security.migration.MigrationPasswordManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -623,18 +622,6 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<UserCredentials> getUsersBetween( int first, int max )
-    {
-        return userCredentialsStore.getUsersBetween( first, max );
-    }
-
-    @Override
-    public Collection<UserCredentials> getUsersBetweenByName( String username, int first, int max )
-    {
-        return userCredentialsStore.getUsersBetweenByName( username, first, max );
-    }
-
-    @Override
     public int getUserCount()
     {
         return userCredentialsStore.getUserCount();
@@ -644,18 +631,6 @@ public class DefaultUserService
     public int getUserCountByName( String userName )
     {
         return userCredentialsStore.getUserCountByName( userName );
-    }
-
-    @Override
-    public Collection<UserCredentials> searchUsersByName( String name )
-    {
-        return userCredentialsStore.searchUsersByName( name );
-    }
-
-    @Override
-    public Collection<UserCredentials> searchUsersByName( String name, int first, int max )
-    {
-        return userCredentialsStore.searchUsersByName( name, first, max );
     }
 
     @Override
@@ -684,40 +659,6 @@ public class DefaultUserService
         return getUserCount( params );
     }
     
-    @Override
-    public void canUpdateUsersFilter( Collection<User> users )
-    {
-        final UserCredentials currentUserCredentials = currentUserService.getCurrentUser().getUserCredentials();
-        final boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
-
-        FilterUtils.filter( users, new Filter<User>() {
-            @Override
-            public boolean retain( User user )
-            {
-                UserCredentials userCredentials = user.getUserCredentials();
-                
-                return currentUserCredentials != null && userCredentials != null
-                    && currentUserCredentials.canIssueUserRoles( userCredentials.getUserAuthorityGroups(), canGrantOwnUserAuthorityGroups );
-            }
-        } );
-    }
-
-    @Override
-    public void canUpdateUserCredentialsFilter( Collection<UserCredentials> userCredentials )
-    {
-        final UserCredentials currentUserCredentials = currentUserService.getCurrentUser().getUserCredentials();
-        final boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
-
-        FilterUtils.filter( userCredentials, new Filter<UserCredentials>() {
-            @Override
-            public boolean retain( UserCredentials userCredentials )
-            {
-                return currentUserCredentials != null && userCredentials != null
-                    && currentUserCredentials.canIssueUserRoles( userCredentials.getUserAuthorityGroups(), canGrantOwnUserAuthorityGroups );
-            }
-        } );
-    }
-
     @Override
     public boolean credentialsNonExpired( UserCredentials credentials )
     {
