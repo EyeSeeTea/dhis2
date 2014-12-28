@@ -93,14 +93,6 @@ public interface UserService
     Collection<User> getUsersByLastUpdated( Date lastUpdated );
 
     /**
-     * Returns a Collection of Users which are having given Phone number.
-     *
-     * @param phoneNumber
-     * @return a Collection of Users.
-     */
-    Collection<User> getUsersByPhoneNumber( String phoneNumber );
-
-    /**
      * Deletes a User.
      *
      * @param user the User to delete.
@@ -138,8 +130,6 @@ public interface UserService
     boolean isSuperRole( UserAuthorityGroup userAuthorityGroup );
 
     boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup );
-
-    Collection<User> getUsersByName( String name );
 
     /**
      * Returns all users which are managed by the given user through its managed

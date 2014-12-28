@@ -260,18 +260,6 @@ public class DefaultUserService
     }
     
     @Override
-    public Collection<User> getUsersByPhoneNumber( String phoneNumber )
-    {
-        return userStore.getUsersByPhoneNumber( phoneNumber );
-    }
-
-    @Override
-    public Collection<User> getUsersByName( String name )
-    {
-        return userStore.getUsersByName( name );
-    }
-
-    @Override
     public User searchForUser( String query )
     {
         User user = userStore.getByUid( query );

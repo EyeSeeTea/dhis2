@@ -40,6 +40,7 @@ import org.hisp.dhis.sms.outbound.OutboundSms;
 import org.hisp.dhis.sms.outbound.OutboundSmsService;
 import org.hisp.dhis.sms.outbound.OutboundSmsStatus;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserService;
 
 public class ShowSentSMSAction
@@ -168,7 +169,10 @@ public class ShowSentSMSAction
             tempString = "";
             for ( String phoneNumber : outboundSms.getRecipients() )
             {
-                Collection<User> users = userService.getUsersByPhoneNumber( phoneNumber );
+                UserQueryParams params = new UserQueryParams();
+                params.setPhoneNumber( phoneNumber );                
+                List<User> users = userService.getUsers( params );
+                
                 if ( users == null || users.size() == 0 )
                 {
                     tempString += "[unknown]";
