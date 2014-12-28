@@ -343,12 +343,6 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<String> getUsernames( String query, Integer max )
-    {
-        return userCredentialsStore.getUsernames( query, max );
-    }
-
-    @Override
     public boolean isSuperUser( UserCredentials userCredentials )
     {
         if ( userCredentials == null )
@@ -619,18 +613,6 @@ public class DefaultUserService
     public UserCredentials getUserCredentialsByOpenID( String openId )
     {
         return userCredentialsStore.getUserCredentialsByOpenID( openId );
-    }
-
-    @Override
-    public int getUserCount()
-    {
-        return userCredentialsStore.getUserCount();
-    }
-
-    @Override
-    public int getUserCountByName( String userName )
-    {
-        return userCredentialsStore.getUserCountByName( userName );
     }
 
     @Override

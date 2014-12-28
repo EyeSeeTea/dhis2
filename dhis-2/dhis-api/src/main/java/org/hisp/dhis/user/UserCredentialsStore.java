@@ -96,18 +96,4 @@ public interface UserCredentialsStore
     void deleteUserCredentials( UserCredentials userCredentials );
 
     UserCredentials getUserCredentialsByOpenID( String openId );
-    
-    Collection<UserCredentials> searchUsersByName( String key );
-
-    Collection<UserCredentials> searchUsersByName( String key, int first, int max );
-
-    Collection<UserCredentials> getUsersBetween( int first, int max );
-
-    Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
-
-    int getUserCount();
-
-    int getUserCountByName( String name );
-
-    Collection<String> getUsernames( String key, Integer max );
 }

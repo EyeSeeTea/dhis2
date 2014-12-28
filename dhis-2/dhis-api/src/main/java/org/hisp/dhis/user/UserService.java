@@ -107,10 +107,6 @@ public interface UserService
      */
     void deleteUser( User user );
 
-    int getUserCount();
-
-    int getUserCountByName( String name );
-
     List<User> getUsersByUid( List<String> uids );
 
     User searchForUser( String query );
@@ -144,8 +140,6 @@ public interface UserService
     boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup );
 
     Collection<User> getUsersByName( String name );
-
-    Collection<String> getUsernames( String query, Integer max );
 
     /**
      * Returns all users which are managed by the given user through its managed
