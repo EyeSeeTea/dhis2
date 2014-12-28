@@ -287,16 +287,6 @@ public interface UserService
 
     Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
 
-    Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max );
-
-    int getSelfRegisteredUserCredentialsCount();
-
-    Collection<UserCredentials> getInactiveUsers( int months );
-
-    Collection<UserCredentials> getInactiveUsers( int months, int first, int max );
-
-    int getInactiveUsersCount( int months );
-
     int getActiveUsersCount( int days );
 
     int getActiveUsersCount( Date since );

@@ -29,7 +29,6 @@ package org.hisp.dhis.user.hibernate;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
@@ -235,65 +234,6 @@ public class HibernateUserCredentialsStore
         criteria.setMaxResults( max );
 
         return criteria.list();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max )
-    {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( UserCredentials.class );
-        criteria.add( Restrictions.eq( "selfRegistered", true ) );
-        criteria.addOrder( Order.desc( "created" ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-
-        return criteria.list();
-    }
-
-    @Override
-    public int getSelfRegisteredUserCredentialsCount()
-    {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( UserCredentials.class );
-        criteria.add( Restrictions.eq( "selfRegistered", true ) );
-        criteria.setProjection( Projections.rowCount() );
-
-        Number rs = (Number) criteria.uniqueResult();
-
-        return rs != null ? rs.intValue() : 0;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<UserCredentials> getInactiveUsers( Date date )
-    {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( UserCredentials.class );
-        criteria.add( Restrictions.lt( "lastLogin", date ) );
-
-        return criteria.list();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<UserCredentials> getInactiveUsers( Date date, int first, int max )
-    {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( UserCredentials.class );
-        criteria.add( Restrictions.lt( "lastLogin", date ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-
-        return criteria.list();
-    }
-
-    @Override
-    public int getInactiveUsersCount( Date date )
-    {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria( UserCredentials.class );
-        criteria.add( Restrictions.lt( "lastLogin", date ) );
-        criteria.setProjection( Projections.rowCount() );
-
-        Number rs = (Number) criteria.uniqueResult();
-
-        return rs != null ? rs.intValue() : 0;
     }
 
     @Override

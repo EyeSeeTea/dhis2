@@ -29,7 +29,6 @@ package org.hisp.dhis.user;
  */
 
 import java.util.Collection;
-import java.util.Date;
 
 /**
  * @author Lars Helge Overland
@@ -105,16 +104,6 @@ public interface UserCredentialsStore
     Collection<UserCredentials> getUsersBetween( int first, int max );
 
     Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
-
-    Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max );
-
-    int getSelfRegisteredUserCredentialsCount();
-
-    Collection<UserCredentials> getInactiveUsers( Date date );
-
-    Collection<UserCredentials> getInactiveUsers( Date date, int first, int max );
-
-    int getInactiveUsersCount( Date date );
 
     int getUserCount();
 

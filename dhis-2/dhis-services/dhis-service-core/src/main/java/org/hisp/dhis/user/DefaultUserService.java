@@ -685,45 +685,6 @@ public class DefaultUserService
     }
     
     @Override
-    public Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max )
-    {
-        return userCredentialsStore.getSelfRegisteredUserCredentials( first, max );
-    }
-
-    @Override
-    public int getSelfRegisteredUserCredentialsCount()
-    {
-        return userCredentialsStore.getSelfRegisteredUserCredentialsCount();
-    }
-
-    @Override
-    public Collection<UserCredentials> getInactiveUsers( int months )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsers( cal.getTime() );
-    }
-
-    @Override
-    public Collection<UserCredentials> getInactiveUsers( int months, int first, int max )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsers( cal.getTime(), first, max );
-    }
-
-    @Override
-    public int getInactiveUsersCount( int months )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsersCount( cal.getTime() );
-    }
-
-    @Override
     public void canUpdateUsersFilter( Collection<User> users )
     {
         final UserCredentials currentUserCredentials = currentUserService.getCurrentUser().getUserCredentials();
