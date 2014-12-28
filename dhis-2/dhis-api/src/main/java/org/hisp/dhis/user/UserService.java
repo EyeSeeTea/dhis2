@@ -101,8 +101,6 @@ public interface UserService
 
     List<User> getUsersByUid( List<String> uids );
 
-    User searchForUser( String query );
-
     List<User> queryForUsers( String query );
 
     /**
@@ -164,6 +162,8 @@ public interface UserService
      * @return number of users.
      */
     int getUserCount( UserQueryParams params );
+    
+    List<User> getUsersByPhoneNumber( String phoneNumber );
     
     /**
      * Tests whether the current user is allowed to create a user associated

@@ -260,19 +260,13 @@ public class DefaultUserService
     }
     
     @Override
-    public User searchForUser( String query )
+    public List<User> getUsersByPhoneNumber( String phoneNumber )
     {
-        User user = userStore.getByUid( query );
-
-        if ( user == null )
-        {
-            UserCredentials credentials = userCredentialsStore.getUserCredentialsByUsername( query );
-            user = credentials != null ? credentials.getUser() : null;
-        }
-
-        return user;
+        UserQueryParams params = new UserQueryParams();
+        params.setPhoneNumber( phoneNumber );
+        return getUsers( params );   
     }
-
+    
     @Override
     public List<User> queryForUsers( String query )
     {
