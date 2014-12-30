@@ -31,29 +31,28 @@ package org.hisp.dhis.webapi.controller.user;
 import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.Pager;
+import org.hisp.dhis.dxf2.importsummary.ImportStatus;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
-import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
-import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.importexport.ImportStrategy;
-import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.schema.descriptors.UserSchemaDescriptor;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
+import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
-import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.Users;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
@@ -61,12 +60,10 @@ import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
@@ -88,6 +85,9 @@ public class UserController
 
     @Autowired
     private UserGroupService userGroupService;
+    
+    @Autowired
+    private CurrentUserService currentUserService;
 
     @Autowired
     private SecurityService securityService;
@@ -95,53 +95,50 @@ public class UserController
     @Autowired
     private SystemSettingManager systemSettingManager;
     
+    @Autowired
+    private OrganisationUnitService organisationUnitService;
+    
     // -------------------------------------------------------------------------
     // GET
     // -------------------------------------------------------------------------
 
     @Override
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
-    public RootNode getObjectList( @RequestParam Map<String, String> parameters, HttpServletResponse response, HttpServletRequest request )
-    {
-        //TODO: Allow user with F_USER_VIEW_WITHIN_MANAGED_GROUP and restrict viewing to within managed groups.
-
-        return super.getObjectList( parameters, response, request );
-    }
-
-    @Override
-    @PreAuthorize( "hasRole('ALL') or hasRole('F_USER_VIEW')" )
-    public RootNode getObject( @PathVariable( "uid" ) String uid, @RequestParam Map<String, String> parameters,
-        HttpServletRequest request, HttpServletResponse response ) throws Exception
-    {
-        //TODO: Allow user with F_USER_VIEW_WITHIN_MANAGED_GROUP and restrict viewing to within managed groups.
-
-        return super.getObject( uid, parameters, request, response );
-    }
-
-    @Override
     protected List<User> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
     {
-        List<User> entityList;
-
-        if ( options.getOptions().containsKey( "query" ) )
+        UserQueryParams params = new UserQueryParams();
+        params.setQuery( options.get( "query" ) );
+        params.setPhoneNumber( options.get( "phoneNumber" ) );
+        params.setCanManage( options.isTrue( "canManage" ) );
+        params.setAuthSubset( options.isTrue( "authSubset" ) );
+        params.setLastLogin( options.getDate( "lastLogin" ) );
+        params.setInactiveMonths( options.getInt( "inactiveMonths" ) );
+        params.setInactiveSince( options.getDate( "inactiveSince" ) );
+        params.setSelfRegistered( options.isTrue( "selfRegistered" ) );
+        
+        String ou = options.get( "ou" );
+        
+        if ( ou != null )
         {
-            entityList = Lists.newArrayList( manager.filter( getEntityClass(), options.getOptions().get( "query" ) ) );
+            params.setOrganisationUnit( organisationUnitService.getOrganisationUnit( ou ) );    
         }
-        else if ( options.hasPaging() )
+        
+        if ( options.isManage() )
         {
-            int count = userService.getUserCount();
-
-            Pager pager = new Pager( options.getPage(), count );
+            params.setCanManage( true );
+            params.setAuthSubset( true );
+        }
+        
+        int count = userService.getUserCount( params );
+        
+        if ( options.hasPaging() )
+        {
+            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
             metaData.setPager( pager );
-
-            entityList = new ArrayList<>( userService.getAllUsersBetween( pager.getOffset(), pager.getPageSize() ) );
+            params.setFirst( pager.getOffset() );
+            params.setMax( pager.getPageSize() );
         }
-        else
-        {
-            entityList = new ArrayList<>( userService.getAllUsers() );
-        }
-
-        return entityList;
+        
+        return userService.getUsers( params );
     }
 
     @Override
@@ -168,7 +165,12 @@ public class UserController
     {
         User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
 
-        createUser( user, response );
+        if ( !validateCreateUser( user, response ) )
+        {
+            return;
+        }
+        
+        renderService.toXml( response.getOutputStream(), createUser( user, response ) );
     }
 
     @Override
@@ -177,7 +179,12 @@ public class UserController
     {
         User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
 
-        createUser( user, response );
+        if ( !validateCreateUser( user, response ) )
+        {
+            return;
+        }
+        
+        renderService.toJson( response.getOutputStream(), createUser( user, response ) );
     }
 
     @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
@@ -185,7 +192,12 @@ public class UserController
     {
         User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
 
-        inviteUser( user, request, response );
+        if ( !validateInviteUser( user, response ) )
+        {
+            return;
+        }
+        
+        renderService.toXml( response.getOutputStream(), inviteUser( user, request, response ) );
     }
 
     @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = "application/json" )
@@ -193,7 +205,12 @@ public class UserController
     {
         User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
 
-        inviteUser( user, request, response );
+        if ( !validateInviteUser( user, response ) )
+        {
+            return;
+        }
+        
+        renderService.toJson( response.getOutputStream(), inviteUser( user, request, response ) );
     }
 
     @RequestMapping( value = BULK_INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
@@ -240,8 +257,8 @@ public class UserController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
-        input ) throws Exception
+    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, 
+        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         List<User> users = getEntity( uid );
 
@@ -253,22 +270,28 @@ public class UserController
 
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), users.get( 0 ) ) )
         {
-            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
+            ContextUtils.conflictResponse( response, "You don't have the proper permissions to update this object." );
+            return;
         }
 
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
-        checkUserGroups( parsed );
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE );
+        if ( !userService.canAddOrUpdateUser( IdentifiableObjectUtils.getUids( parsed.getGroups() ) ) )
+        {
+            ContextUtils.conflictResponse( response, "You must have permissions to create user, or ability to manage at least one user group for the user." );
+            return;
+        }
+
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        
         renderService.toXml( response.getOutputStream(), summary );
     }
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream
-        input ) throws Exception
+    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, 
+        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
     {
         List<User> users = getEntity( uid );
 
@@ -280,15 +303,21 @@ public class UserController
 
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), users.get( 0 ) ) )
         {
-            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
+            ContextUtils.conflictResponse( response, "You don't have the proper permissions to update this object." );
+            return;
         }
 
         User parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
         parsed.setUid( uid );
-        checkUserGroups( parsed );
+        
+        if ( !userService.canAddOrUpdateUser( IdentifiableObjectUtils.getUids( parsed.getGroups() ) ) )
+        {
+            ContextUtils.conflictResponse( response, "You must have permissions to create user, or ability to manage at least one user group for the user." );
+            return;
+        }
 
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed,
-            ImportStrategy.UPDATE );
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
+        
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -296,8 +325,77 @@ public class UserController
     // Supportive methods
     // -------------------------------------------------------------------------
 
+    /**
+     * Validates whether the given user can be created.
+     * 
+     * @param user the user.
+     * @param response the response.
+     */
+    private boolean validateCreateUser( User user, HttpServletResponse response )
+    {
+        if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
+        {
+            ContextUtils.conflictResponse( response, "You don't have the proper permissions to create this object." );
+            return false;
+        }
+
+        if ( !userService.canAddOrUpdateUser( IdentifiableObjectUtils.getUids( user.getGroups() ) ) )
+        {
+            ContextUtils.conflictResponse( response, "You must have permissions to create user, or ability to manage at least one user group for the user." );
+            return false;
+        }
+        
+        List<String> uids = IdentifiableObjectUtils.getUids( user.getGroups() );
+        
+        for ( String uid : uids )
+        {
+            if ( !userGroupService.canAddOrRemoveMember( uid ) )
+            {
+                ContextUtils.conflictResponse( response, "You don't have permissions to add user to user group: " + uid );
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Creates a user.
+     *
+     * @param user user object parsed from the POST request.
+     * @param response the response.
+     */
+    private ImportSummary createUser( User user, HttpServletResponse response ) throws Exception
+    {
+        user.getUserCredentials().getCogsDimensionConstraints().addAll(
+            currentUserService.getCurrentUser().getUserCredentials().getCogsDimensionConstraints() );
+
+        user.getUserCredentials().getCatDimensionConstraints().addAll(
+            currentUserService.getCurrentUser().getUserCredentials().getCatDimensionConstraints() );
+
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
+
+        if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getImported() == 1 )
+        {        
+            userGroupService.addUserToGroups( user, IdentifiableObjectUtils.getUids( user.getGroups() ) );
+        }
+
+        return summary;
+    }
+    
+    /**
+     * Validates whether a user can be invited / created.
+     * 
+     * @param user the user.
+     * @param response the response.
+     */
     private boolean validateInviteUser( User user, HttpServletResponse response )
     {
+        if ( !validateCreateUser( user, response ) )
+        {
+            return false;
+        }
+        
         UserCredentials credentials = user.getUserCredentials();
 
         if ( credentials == null )
@@ -331,100 +429,26 @@ public class UserController
     }
     
     /**
-     * Creates a user invitation and invites the user
+     * Creates a user invitation and invites the user.
      *
-     * @param user user object parsed from the POST request
-     * @param response response for created user invitation
+     * @param user user object parsed from the POST request.
+     * @param response the response.
      */
-    private void inviteUser( User user, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    private ImportSummary inviteUser( User user, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        if ( !validateInviteUser( user, response ) )
-        {
-            return;
-        }
-        
         RestoreOptions restoreOptions = user.getUsername() == null || user.getUsername().isEmpty() ?
             RestoreOptions.INVITE_WITH_USERNAME_CHOICE : RestoreOptions.INVITE_WITH_DEFINED_USERNAME;
 
         securityService.prepareUserForInvite( user );
 
-        createUser( user, response );
+        ImportSummary summary = createUser( user, response );
 
-        securityService.sendRestoreMessage( user.getUserCredentials(),
-            ContextUtils.getContextPath( request ), restoreOptions );
-    }
-
-    /**
-     * Creates a user
-     *
-     * @param user user object parsed from the POST request
-     * @param response response for created user
-     */
-    private void createUser( User user, HttpServletResponse response ) throws Exception
-    {
-        if ( currentUserService.getCurrentUser() == null )
+        if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getImported() == 1 )
         {
-            throw new CreateAccessDeniedException( "Internal error: currentUserService.getCurrentUser() returns null." );
+            securityService.sendRestoreMessage( user.getUserCredentials(),
+                ContextUtils.getContextPath( request ), restoreOptions );
         }
 
-        if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
-        {
-            throw new CreateAccessDeniedException( "You don't have the proper permissions to create this object." );
-        }
-
-        checkUserGroups( user );
-
-        user.getUserCredentials().getCogsDimensionConstraints().addAll(
-            currentUserService.getCurrentUser().getUserCredentials().getCogsDimensionConstraints() );
-
-        user.getUserCredentials().getCatDimensionConstraints().addAll(
-            currentUserService.getCurrentUser().getUserCredentials().getCatDimensionConstraints() );
-
-        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
-
-        renderService.toJson( response.getOutputStream(), summary );
-        
-        userGroupService.addUserToGroups( user, IdentifiableObjectUtils.getUids( user.getGroups() ) );
-    }
-
-    /**
-     * Before adding or updating the user, checks to see that any specified user
-     * groups exist.
-     * <p>
-     * Also, if the current user doesn't have the F_USER_ADD authority, that
-     * means they have the weaker F_USER_ADD_WITHIN_MANAGED_GROUP authority.
-     * In this case, the new user must be added to a group that is managed
-     * by the current user.
-     *
-     * @param user user object parsed from the request
-     */
-    private void checkUserGroups( User user )
-    {
-        User currentUser = currentUserService.getCurrentUser();
-
-        if ( currentUser != null && user.getGroups() != null )
-        {
-            boolean authorizedToAdd = currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_USER_ADD );
-
-            for ( UserGroup ug : user.getGroups() )
-            {
-                UserGroup group = userGroupService.getUserGroup( ug.getUid() );
-
-                if ( group == null )
-                {
-                    throw new CreateAccessDeniedException( "Can't add/update user, can't find user group: " + ug.getUid() );
-                }
-
-                if ( !authorizedToAdd && currentUser.canManage( group ) )
-                {
-                    authorizedToAdd = true;
-                }
-            }
-
-            if ( !authorizedToAdd )
-            {
-                throw new CreateAccessDeniedException( "Can't add user, user must belong to a group that you manage." );
-            }
-        }
+        return summary;
     }
 }

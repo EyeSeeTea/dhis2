@@ -46,6 +46,9 @@ import org.hisp.dhis.common.view.ExportView;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * @author Lars Helge Overland
+ */
 @JacksonXmlRootElement( localName = "userGroup", namespace = DxfNamespaces.DXF_2_0 )
 public class UserGroup
     extends BaseIdentifiableObject
@@ -70,6 +73,7 @@ public class UserGroup
      * User groups (if any) that members of this user group can manage
      * the members within.
      */
+    @Scanned
     private Set<UserGroup> managedGroups = new HashSet<>();
 
     /**
@@ -134,6 +138,34 @@ public class UserGroup
         }
     }
 
+    public void addManagedGroup( UserGroup group )
+    {
+        managedGroups.add( group );
+        group.getManagedByGroups().add( this );
+    }
+    
+    public void removeManagedGroup( UserGroup group )
+    {
+        managedByGroups.remove( group );
+        group.getManagedByGroups().remove( this );
+    }
+    
+    public void updateManagedGroups( Set<UserGroup> updates )
+    {
+        for ( UserGroup group : new HashSet<>( managedGroups ) )
+        {
+            if ( !updates.contains( group ) )
+            {
+                removeManagedGroup( group );
+            }
+        }
+        
+        for ( UserGroup group : updates )
+        {
+            addManagedGroup( group );
+        }
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------

@@ -36,23 +36,13 @@ import java.util.Set;
 import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Chau Thu Tran
- * @version $Id$
  */
 public interface UserService
 {
     String ID = UserService.class.getName();
-
-    boolean isSuperUser( UserCredentials userCredentials );
-
-    boolean isLastSuperUser( UserCredentials userCredentials );
-
-    boolean isSuperRole( UserAuthorityGroup userAuthorityGroup );
-
-    boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup );
 
     // -------------------------------------------------------------------------
     // User
@@ -96,35 +86,16 @@ public interface UserService
      */
     Collection<User> getAllUsers();
 
-    List<User> getAllUsersBetween( int first, int max );
-
+    /**
+     * Retrieves all Users with first name, surname or user name like the given
+     * name.
+     * 
+     * @param name the name.
+     * @param first the first item to return.
+     * @param max the max number of item to return.
+     * @return a list of Users.
+     */
     List<User> getAllUsersBetweenByName( String name, int first, int max );
-
-    Collection<User> getUsersByLastUpdated( Date lastUpdated );
-
-    /**
-     * Returns a Collection of the Users which are not associated with any
-     * OrganisationUnits.
-     *
-     * @return a Collection of Users.
-     */
-    Collection<User> getUsersWithoutOrganisationUnit();
-
-    /**
-     * Returns a Collection of the Users which are associated with OrganisationUnits.
-     *
-     * @param units a Collection of the organization units.
-     * @return a Collection of Users.
-     */
-    Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> units );
-
-    /**
-     * Returns a Collection of Users which are having given Phone number.
-     *
-     * @param phoneNumber
-     * @return a Collection of Users.
-     */
-    Collection<User> getUsersByPhoneNumber( String phoneNumber );
 
     /**
      * Deletes a User.
@@ -133,23 +104,7 @@ public interface UserService
      */
     void deleteUser( User user );
 
-    int getUserCount();
-
-    int getUserCountByName( String name );
-
-    int getUsersWithoutOrganisationUnitCount();
-
-    int getUsersWithoutOrganisationUnitCountByName( String name );
-
-    int getUsersByOrganisationUnitCount( OrganisationUnit orgUnit );
-
-    int getUsersByOrganisationUnitCountByName( OrganisationUnit orgUnit, String name );
-
     List<User> getUsersByUid( List<String> uids );
-
-    User searchForUser( String query );
-
-    List<User> queryForUsers( String query );
 
     /**
      * Returns a set of CategoryOptionGroups that may be seen by the current
@@ -169,6 +124,58 @@ public interface UserService
      */
     public Set<DataElementCategoryOption> getCoDimensionConstraints( UserCredentials userCredentials );
 
+    boolean isLastSuperUser( UserCredentials userCredentials );
+
+    boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup );
+
+    /**
+     * Returns all users which are managed by the given user through its managed
+     * groups association.
+     * 
+     * @param user the user.
+     * @return a Collection of users.
+     */
+    List<User> getManagedUsers( User user );
+
+    /**
+     * Returns the number of users which are managed by the given user through its 
+     * managed groups association.
+     * 
+     * @param user the user.
+     * @return number of users.
+     */
+    int getManagedUserCount( User user );
+
+    /**
+     * Returns a list of users based on the given query parameters.
+     * 
+     * @param params the user query parameters.
+     * @return a List of users.
+     */
+    List<User> getUsers( UserQueryParams params );
+
+    /**
+     * Returns the number of users based on the given query parameters.
+     * 
+     * @param params the user query parameters.
+     * @return number of users.
+     */
+    int getUserCount( UserQueryParams params );
+    
+    List<User> getUsersByPhoneNumber( String phoneNumber );
+    
+    /**
+     * Tests whether the current user is allowed to create a user associated
+     * with the given user group identifiers. Returns true if current user has 
+     * the F_USER_ADD authority. Returns true if the current user has the 
+     * F_USER_ADD_WITHIN_MANAGED_GROUP authority and can manage any of the given
+     * user groups. Returns false otherwise.
+     * 
+     * @param userGroups the user group identifiers.
+     * @return true if the current user can create user, false if not.
+     */
+    boolean canAddOrUpdateUser( Collection<String> userGroups );
+    
     // -------------------------------------------------------------------------
     // UserCredentials
     // -------------------------------------------------------------------------
@@ -255,60 +262,12 @@ public interface UserService
      */
     void setLastLogin( String username );
 
-    Collection<UserCredentials> searchUsersByName( String key );
-
-    Collection<UserCredentials> searchUsersByName( String name, int first, int max );
-
-    Collection<UserCredentials> getUsersBetween( int first, int max );
-
-    Collection<UserCredentials> getUsersBetweenByName( String name, int first, int max );
-
-    Collection<UserCredentials> getUsersWithoutOrganisationUnitBetween( int first, int max );
-
-    Collection<UserCredentials> getUsersWithoutOrganisationUnitBetweenByName( String name, int first, int max );
-
-    Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit orgUnit, int first, int max );
-
-    Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit orgUnit, String name, int first, int max );
-
-    Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max );
-
-    int getSelfRegisteredUserCredentialsCount();
-
-    Collection<UserCredentials> getInactiveUsers( int months );
-
-    Collection<UserCredentials> getInactiveUsers( int months, int first, int max );
-
-    int getInactiveUsersCount( int months );
-
     int getActiveUsersCount( int days );
 
     int getActiveUsersCount( Date since );
 
-    /**
-     * Filters the given list of users based on whether the current
-     * user is allowed to update.
-     *
-     * @param users the list of users.
-     */
-    void canUpdateUsersFilter( Collection<User> users );
-
-    /**
-     * Filters the given list of user credentials based on whether the current
-     * user is allowed to update.
-     *
-     * @param userCredentials the list of user credentials.
-     */
-    void canUpdateFilter( Collection<UserCredentials> userCredentials );
-
-    /**
-     * Is the current user allowed to update this user?
-     *
-     * @param userCredentials credentials to check for allowing update.
-     * @return true if current user can update this user, else false.
-     */
-    boolean canUpdate( UserCredentials userCredentials );
-
+    boolean credentialsNonExpired( UserCredentials credentials );
+    
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -388,10 +347,29 @@ public interface UserService
      */
     Collection<UserAuthorityGroup> getUserRolesBetweenByName( String name, int first, int max );
 
+    /**
+     * Returns the number of UserAuthorityGroups which are associated with the
+     * given DataSet.
+     *  
+     * @param dataSet the DataSet.
+     * @return number of UserAuthorityGroups.
+     */
+    int countDataSetUserAuthorityGroups( DataSet dataSet );
+
     void assignDataSetToUserRole( DataSet dataSet );
 
+    /**
+     * Returns the number of UserAuthorityGroups.
+     * 
+     * @return the number of UserAuthorityGroups.
+     */
     int getUserRoleCount();
 
+    /**
+     * Returns the number of UserAuthorityGroups with the given name.
+     * 
+     * @return the number of UserAuthorityGroups with the given name.
+     */
     int getUserRoleCountByName( String name );
 
     /**
@@ -401,12 +379,4 @@ public interface UserService
      * @param userRoles the collection of user roles.
      */
     void canIssueFilter( Collection<UserAuthorityGroup> userRoles );
-    
-    Collection<User> getUsersByName( String name );
-
-    Collection<String> getUsernames( String query, Integer max );
-
-    int countDataSetUserAuthorityGroups( DataSet dataSet );
-
-    boolean credentialsNonExpired( UserCredentials credentials );
 }

@@ -31,6 +31,7 @@ package org.hisp.dhis.dxf2.schema;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 
 /**
@@ -39,13 +40,29 @@ import org.hisp.dhis.common.DxfNamespaces;
 @JsonPropertyOrder( {
     "message"
 } )
+@JacksonXmlRootElement( localName = "validationViolation", namespace = DxfNamespaces.DXF_2_0 )
 public class ValidationViolation
 {
+    private String property;
+
     private String message;
 
-    public ValidationViolation( String message )
+    public ValidationViolation( String property, String message )
     {
+        this.property = property;
         this.message = message;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getProperty()
+    {
+        return property;
+    }
+
+    public void setProperty( String property )
+    {
+        this.property = property;
     }
 
     @JsonProperty
@@ -64,7 +81,8 @@ public class ValidationViolation
     public String toString()
     {
         final StringBuilder sb = new StringBuilder( "ValidationViolation{" );
-        sb.append( "message='" ).append( message ).append( '\'' );
+        sb.append( "property='" ).append( property ).append( '\'' );
+        sb.append( ", message='" ).append( message ).append( '\'' );
         sb.append( '}' );
         return sb.toString();
     }

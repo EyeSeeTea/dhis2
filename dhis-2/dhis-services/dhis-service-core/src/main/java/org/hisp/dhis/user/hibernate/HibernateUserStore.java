@@ -28,18 +28,17 @@ package org.hisp.dhis.user.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserStore;
-
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+
+import org.hibernate.Query;
+import org.hisp.dhis.common.IdentifiableObjectUtils;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.system.util.SqlHelper;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserQueryParams;
+import org.hisp.dhis.user.UserStore;
 
 /**
  * @author Nguyen Hong Duc
@@ -48,82 +47,152 @@ public class HibernateUserStore
     extends HibernateIdentifiableObjectStore<User>
     implements UserStore
 {
-    // -------------------------------------------------------------------------
-    // UserStore implementation
-    // -------------------------------------------------------------------------
-
     @Override
     @SuppressWarnings("unchecked")
-    public List<User> getAllOrderedName( int first, int max )
+    public List<User> getUsers( UserQueryParams params )
     {
-        Criteria criteria = getCriteria();
-        criteria.addOrder( Order.asc( "surname" ) ).addOrder( Order.asc( "firstName" ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-        return criteria.list();
+        return getUserQuery( params, false ).list();
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<User> getAllLikeName( String name, int first, int max )
+    public int getUserCount( UserQueryParams params )
     {
-        Criteria criteria = getCriteria();
-        criteria.add( Restrictions.or( Restrictions.ilike( "surname", "%" + name + "%" ),
-            Restrictions.ilike( "firstName", "%" + name + "%" ) ) );
-        criteria.addOrder( Order.asc( "surname" ) ).addOrder( Order.asc( "firstName" ) );
-        criteria.setFirstResult( first );
-        criteria.setMaxResults( max );
-        return criteria.list();
+        Long count = (Long) getUserQuery( params, true ).uniqueResult();
+        return count != null ? count.intValue() : 0;
     }
 
-    @Override
-    public List<User> getUsersWithoutOrganisationUnit()
+    private Query getUserQuery( UserQueryParams params, boolean count )
     {
-        List<User> users = getAll();
+        SqlHelper hlp = new SqlHelper();
+        
+        String hql = count ? "select count(distinct u) " : "select distinct u ";
+        
+        hql +=
+            "from User u " +
+            "inner join u.userCredentials uc " +
+            "left join u.groups g ";
 
-        Iterator<User> iterator = users.iterator();
-
-        while ( iterator.hasNext() )
+        if ( params.getQuery() != null )
         {
-            if ( iterator.next().getOrganisationUnits().size() > 0 )
-            {
-                iterator.remove();
-            }
+            hql += hlp.whereAnd() + " (" +
+                "lower(u.firstName) like :key " +
+                "or lower(u.email) like :key " +
+                "or lower(u.surname) like :key " +
+                "or lower(uc.username) like :key) ";
         }
-
-        return users;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<User> getUsersByPhoneNumber( String phoneNumber )
-    {
-        String hql = "from User u where u.phoneNumber = :phoneNumber";
-
+        
+        if ( params.getPhoneNumber() != null )
+        {
+            hql += hlp.whereAnd() + " u.phoneNumber = :phoneNumber ";
+        }
+        
+        if ( params.isCanManage() )
+        {
+            hql += hlp.whereAnd() + " g.id in (:ids) ";
+        }
+        
+        if ( params.isAuthSubset() )
+        {
+            hql += hlp.whereAnd() + " not exists (" +
+                "select uc2 from UserCredentials uc2 " +
+                "inner join uc2.userAuthorityGroups ag2 " +
+                "inner join ag2.authorities a " +
+                "where uc2.id = uc.id " +
+                "and a not in (:auths) ) ";
+        }
+        
+        if ( params.isDisjointRoles() )
+        {
+            hql += hlp.whereAnd() + " not exists (" +
+                "select uc3 from UserCredentials uc3 " +
+                "inner join uc3.userAuthorityGroups ag3 " +
+                "where uc3.id = uc.id " +
+                "and ag3.id in (:roles) ) ";
+        }
+        
+        if ( params.getLastLogin() != null )
+        {
+            hql += hlp.whereAnd() + " uc.lastLogin >= :lastLogin ";
+        }
+        
+        if ( params.getInactiveSince() != null )
+        {
+            hql += hlp.whereAnd() + " uc.lastLogin < :inactiveSince ";
+        }
+        
+        if ( params.isSelfRegistered() )
+        {
+            hql += hlp.whereAnd() + " uc.selfRegistered = true ";
+        }
+        
+        if ( params.getOrganisationUnit() != null )
+        {
+            hql += hlp.whereAnd() + " :organisationUnit in elements(u.organisationUnits) ";
+        }
+        
+        if ( !count )
+        {
+            hql += "order by u.surname, u.firstName";
+        }
+        
         Query query = sessionFactory.getCurrentSession().createQuery( hql );
-        query.setString( "phoneNumber", phoneNumber );
+        
+        if ( params.getQuery() != null )
+        {
+            query.setString( "key", "%" + params.getQuery().toLowerCase() + "%" );
+        }
+        
+        if ( params.getPhoneNumber() != null )
+        {
+            query.setString( "phoneNumber", params.getPhoneNumber() );
+        }
+        
+        if ( params.isCanManage() && params.getUser() != null )
+        {
+            Collection<Integer> managedGroups = IdentifiableObjectUtils.getIdentifiers( params.getUser().getManagedGroups() );
 
-        return query.list();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> orgunits )
-    {
-        String hql = "select distinct u from User u join u.organisationUnits o where o.id in (:ids)";
-
-        return sessionFactory.getCurrentSession().createQuery( hql ).setParameterList( "ids", orgunits ).list();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<User> getUsersByName( String name )
-    {
-        Criteria criteria = getCriteria();
-        criteria.add( Restrictions.or( Restrictions.ilike( "surname", "%" + name + "%" ),
-            Restrictions.ilike( "firstName", "%" + name + "%" ) ) );
-        criteria.addOrder( Order.asc( "surname" ) ).addOrder( Order.asc( "firstName" ) );
-
-        return criteria.list();
+            query.setParameterList( "ids", managedGroups );
+        }
+        
+        if ( params.isAuthSubset() && params.getUser() != null )
+        {
+            Set<String> auths = params.getUser().getUserCredentials().getAllAuthorities();
+            
+            query.setParameterList( "auths", auths );
+        }
+        
+        if ( params.isDisjointRoles() && params.getUser() != null )
+        {
+            Collection<Integer> roles = IdentifiableObjectUtils.getIdentifiers( params.getUser().getUserCredentials().getUserAuthorityGroups() );
+            
+            query.setParameterList( "roles", roles );
+        }
+        
+        if ( params.getLastLogin() != null )
+        {
+            query.setDate( "lastLogin", params.getLastLogin() );
+        }
+        
+        if ( params.getInactiveSince() != null )
+        {
+            query.setDate( "inactiveSince", params.getInactiveSince() );
+        }
+        
+        if ( params.getOrganisationUnit() != null )
+        {
+            query.setEntity( "organisationUnit", params.getOrganisationUnit() );
+        }
+        
+        if ( params.getFirst() != null )
+        {
+            query.setFirstResult( params.getFirst() );
+        }
+        
+        if ( params.getMax() != null )
+        {
+            query.setMaxResults( params.getMax() ).list();
+        }
+        
+        return query;
     }
 }

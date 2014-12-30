@@ -31,6 +31,7 @@ package org.hisp.dhis.dataapproval.hibernate;
 import static org.hisp.dhis.dataapproval.DataApprovalState.ACCEPTED_HERE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.APPROVED_ABOVE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.APPROVED_HERE;
+import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_ABOVE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_READY;
 import static org.hisp.dhis.dataapproval.DataApprovalState.UNAPPROVED_WAITING;
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_ACCEPTANCE_REQUIRED_FOR_APPROVAL;
@@ -367,7 +368,8 @@ public class HibernateDataApprovalStore
                     "left join usergroupaccess uga on uga.usergroupaccessid = couga.usergroupaccessid " +
                     "left join usergroupmembers ugm on ugm.usergroupid = uga.usergroupid " +
                     "where ( coo.categoryoptionid is null or ous.organisationunitid is not null " + testAncestors + ") " +
-                     ( isSuperUser || user == null ? "" : "and ( ugm.userid = " + user.getId() + " or co.userid = " + user.getId() + " or left(co.publicaccess, 1) = 'r' ) " ) +
+                     ( isSuperUser || user == null ? "" : "and ( ugm.userid = " + user.getId() + " or co.userid = " + user.getId() +
+                             "or co.publicaccess is null or left(co.publicaccess, 1) = 'r' ) " ) +
                      ( attributeOptionCombo == null ? "" : "and cocco.categoryoptioncomboid = " + attributeOptionCombo.getId() + " " ) +
                 ") as a";
 
@@ -417,9 +419,11 @@ public class HibernateDataApprovalStore
 
                 DataApprovalState state = (
                     statusLevel == null ?
-                        readyBelow ?
-                            UNAPPROVED_READY :
-                            UNAPPROVED_WAITING :
+                        lowestApprovalLevelForOrgUnit == null ?
+                            UNAPPROVED_ABOVE :
+                            readyBelow ?
+                                UNAPPROVED_READY :
+                                UNAPPROVED_WAITING :
                         approvedAbove ?
                             APPROVED_ABOVE :
                             accepted ?

@@ -28,12 +28,12 @@ package org.hisp.dhis.user.action.usergroup;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.system.util.AttributeUtils;
-import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserGroupService;
 import org.hisp.dhis.user.UserService;
@@ -72,9 +72,9 @@ public class AddUserGroupAction
     // Parameters
     // -------------------------------------------------------------------------
 
-    private List<String> usersSelected;
+    private Set<String> usersSelected = new HashSet<>();
 
-    public void setUsersSelected( List<String> usersSelected )
+    public void setUsersSelected( Set<String> usersSelected )
     {
         this.usersSelected = usersSelected;
     }
@@ -93,6 +93,13 @@ public class AddUserGroupAction
         this.jsonAttributeValues = jsonAttributeValues;
     }
 
+    private Set<String> userGroupsSelected = new HashSet<>();
+
+    public void setUserGroupsSelected( Set<String> userGroupsSelected )
+    {
+        this.userGroupsSelected = userGroupsSelected;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -101,30 +108,24 @@ public class AddUserGroupAction
     public String execute()
         throws Exception
     {
-        if ( usersSelected == null )
-        {
-            usersSelected = new ArrayList<>();
-        }
-
         UserGroup userGroup = new UserGroup( name );
 
-        for ( String userUid : usersSelected )
+        for ( String uid : usersSelected )
         {
-            User user = userService.getUser( userUid );
-
-            if( user == null )
-            {
-                continue;
-            }
-
-            userGroup.addUser( user );
+            userGroup.addUser( userService.getUser( uid ) );
         }
 
         if ( jsonAttributeValues != null )
         {
-            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues, attributeService );
+            AttributeUtils.updateAttributeValuesFromJson( userGroup.getAttributeValues(), jsonAttributeValues,
+                attributeService );
         }
 
+        for ( String uid : userGroupsSelected )
+        {
+            userGroup.addManagedGroup( userGroupService.getUserGroup( uid ) );
+        }
+        
         userGroupService.addUserGroup( userGroup );
 
         return SUCCESS;

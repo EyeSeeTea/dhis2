@@ -432,11 +432,16 @@ dhis2.db.renderDashboard = function( id )
 			id: dashboardItem.chart.id,
 			width: contentWidth,
 			height: 290,
+			skipMask: true,
 			domainAxisStyle: {
-			    labelRotation: 45
+			    labelRotation: 45,
+			    fontSize: '19px'
 			},
 			legendStyle: {
 			    labelMaxLength: 10
+			},
+			seriesStyle: {
+			    fontSize: '9px'
 			}
 		    });                        
 		}
@@ -450,7 +455,8 @@ dhis2.db.renderDashboard = function( id )
 			el: 'plugin-' + dashboardItem.id,
 			id: dashboardItem.eventChart.id,
 			width: contentWidth,
-			height: 290
+			height: 290,
+			skipMask: true
 		    }); 
 		}
 		else if ( "map" == dashboardItem.type )
@@ -465,7 +471,8 @@ dhis2.db.renderDashboard = function( id )
 			//width: contentWidth,
 			//height: 290,
 			dashboard: true,
-			crossDomain: false
+			crossDomain: false,
+			skipMask: true
 		    });
 		}
 		else if ( "reportTable" == dashboardItem.type )
@@ -479,6 +486,7 @@ dhis2.db.renderDashboard = function( id )
 			id: dashboardItem.reportTable.id,
 			width: contentWidth - scrollbarWidth,
 			height: 290,
+			skipMask: true,
 			displayDensity: 'compact',
 			fontSize: 'small'
 		    });
@@ -494,6 +502,7 @@ dhis2.db.renderDashboard = function( id )
 			id: dashboardItem.reportTable.id,
 			width: contentWidth - scrollbarWidth,
 			height: 290,
+			skipMask: true,
 			displayDensity: 'compact',
 			fontSize: 'small'
 		    });

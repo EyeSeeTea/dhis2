@@ -35,7 +35,7 @@ public interface UserGroupService
 {
     String ID = UserGroupService.class.getName();
 
-    void addUserGroup( UserGroup userGroup );
+    int addUserGroup( UserGroup userGroup );
     
     void updateUserGroup( UserGroup userGroup );
 
@@ -45,7 +45,7 @@ public interface UserGroupService
 
     UserGroup getUserGroup( String uid );
 
-    boolean canAddOrRemove( User user, Collection<String> uids );
+    boolean canAddOrRemoveMember( String uid );
     
     void addUserToGroups( User user, Collection<String> uids );
     
