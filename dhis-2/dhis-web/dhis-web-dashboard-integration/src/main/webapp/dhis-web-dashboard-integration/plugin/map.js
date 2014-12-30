@@ -1267,7 +1267,9 @@ Ext.onReady( function() {
             };
 
             failure = function(r) {
-                gis.olmap.mask.hide();
+                if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 
                 if (Ext.Array.contains([403], r.status)) {
                     alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
@@ -1295,7 +1297,9 @@ Ext.onReady( function() {
 				loader;
 
 			if (!(Ext.isArray(views) && views.length)) {
-				gis.olmap.mask.hide();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 				alert(GIS.i18n.favorite_outdated_create_new);
 				return;
 			}
@@ -1359,12 +1363,16 @@ Ext.onReady( function() {
 				gis.util.layout.setSessionStorage('map', gis.util.layout.getAnalytical());
 			}
 
-			gis.olmap.mask.hide();
+			if (gis.olmap.mask && !gis.skipMask) {
+                gis.olmap.mask.hide();
+            }
 		};
 
 		loader = {
 			load: function(views) {
-				gis.olmap.mask.show();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.show();
+                }
 
 				if (gis.map && gis.map.id) {
 					getMap();
@@ -1471,7 +1479,9 @@ Ext.onReady( function() {
 
                 if (!rows.length) {
                     alert('No event coordinates found');
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     return;
                 }
 
@@ -1580,7 +1590,9 @@ Ext.onReady( function() {
 
 			// Mask
 			if (loader.hideMask) {
-				olmap.mask.hide();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 			}
 
 			// Map callback
@@ -1604,7 +1616,9 @@ Ext.onReady( function() {
 			hideMask: false,
 			callBack: null,
 			load: function(view) {
-				gis.olmap.mask.show();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.show();
+                }
 
                 loadOrganisationUnits(view);
 			},
@@ -1720,13 +1734,17 @@ Ext.onReady( function() {
                     features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
                 if (!Ext.isArray(features)) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
@@ -1737,7 +1755,9 @@ Ext.onReady( function() {
             };
 
             failure = function() {
-                olmap.mask.hide();
+                if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
@@ -1869,7 +1889,9 @@ Ext.onReady( function() {
 
 			// Mask
 			if (loader.hideMask) {
-				olmap.mask.hide();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 			}
 
 			// Map callback
@@ -1892,7 +1914,9 @@ Ext.onReady( function() {
 			hideMask: false,
 			callBack: null,
 			load: function(view) {
-				gis.olmap.mask.show();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.show();
+                }
 
 				if (this.compare) {
 					compareView(view, true);
@@ -1967,7 +1991,9 @@ Ext.onReady( function() {
 				return gis.conf.finals.widget.loadtype_organisationunit;
 			}
 
-			gis.olmap.mask.hide();
+			if (gis.olmap.mask && !gis.skipMask) {
+                gis.olmap.mask.hide();
+            }
 		};
 
 		loadOrganisationUnits = function(view) {
@@ -1997,13 +2023,17 @@ Ext.onReady( function() {
                     levelObjectMap = {};
 
                 if (!Ext.isArray(features)) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
@@ -2043,7 +2073,9 @@ Ext.onReady( function() {
             };
 
             failure = function() {
-                olmap.mask.hide();
+                if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
@@ -2135,7 +2167,9 @@ Ext.onReady( function() {
 
 			// Mask
 			if (loader.hideMask) {
-				olmap.mask.hide();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 			}
 
 			// Map callback
@@ -2158,7 +2192,9 @@ Ext.onReady( function() {
 			hideMask: false,
 			callBack: null,
 			load: function(view) {
-				gis.olmap.mask.show();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.show();
+                }
 
 				if (this.compare) {
 					compareView(view, true);
@@ -2343,13 +2379,17 @@ Ext.onReady( function() {
                     features = gis.util.map.getTransformedFeatureArray(format.read(geojson));
 
                 if (!Ext.isArray(features)) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
                 if (!features.length) {
-                    olmap.mask.hide();
+                    if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
                     alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
@@ -2360,7 +2400,9 @@ Ext.onReady( function() {
             };
 
             failure = function() {
-                olmap.mask.hide();
+                if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
                 alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
@@ -2441,7 +2483,9 @@ Ext.onReady( function() {
 					items = [];
 
 				if (!response) {
-					olmap.mask.hide();
+					if (gis.olmap.mask && !gis.skipMask) {
+                        gis.olmap.mask.hide();
+                    }
 					return;
 				}
 
@@ -2665,7 +2709,9 @@ Ext.onReady( function() {
 
 			// Mask
 			if (loader.hideMask) {
-				olmap.mask.hide();
+				if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.hide();
+                }
 			}
 
 			// Map callback
@@ -2692,7 +2738,9 @@ Ext.onReady( function() {
 			hideMask: false,
 			callBack: null,
 			load: function(view) {
-				gis.olmap.mask.show();
+                if (gis.olmap.mask && !gis.skipMask) {
+                    gis.olmap.mask.show();
+                }
 
 				if (this.compare) {
 					compareView(view, true);

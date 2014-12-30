@@ -2242,7 +2242,7 @@ Ext.onReady(function() {
                             titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
                         }
                     }
-
+                    
                     axis.label.style.fill = labelColor;
                     axis.label.style.font = labelFont;
                     axis.label.rotate.degrees = labelRotation;

@@ -420,6 +420,8 @@ dhis2.db.renderDashboard = function( id )
 		    return true;
 		}
 		console.log(dashboardItem);
+
+        var labelFont = 'normal 10px arial,sans-serif';
 				
 		if ( "chart" == dashboardItem.type )
 		{
@@ -435,13 +437,16 @@ dhis2.db.renderDashboard = function( id )
 			skipMask: true,
 			domainAxisStyle: {
 			    labelRotation: 45,
-			    fontSize: '19px'
+			    labelFont: labelFont
 			},
+            rangeAxisStyle: {
+                labelFont: '9px arial,sans-serif'
+            },
 			legendStyle: {
 			    labelMaxLength: 10
 			},
 			seriesStyle: {
-			    fontSize: '9px'
+			    labelFontSize: '9px arial,sans-serif'
 			}
 		    });                        
 		}
