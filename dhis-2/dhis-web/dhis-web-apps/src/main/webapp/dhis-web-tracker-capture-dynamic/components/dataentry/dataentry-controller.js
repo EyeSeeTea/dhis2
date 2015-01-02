@@ -10,6 +10,7 @@ trackerCapture.controller('DataEntryController',
                 ModalService,
                 DialogService,
                 CurrentSelection,
+                OptionSetService,
 		CustomFormService,
                 TrackerRulesExecutionService) {
     
@@ -40,6 +41,21 @@ trackerCapture.controller('DataEntryController',
                             {color: 'alert-default', description: 'skipped'}
                          ];
     $scope.showEventColors = false;
+    
+    //check if field is hidden
+    $scope.isHidden = function(id) {
+        //TODO: This function is working, but non-optimalized.
+        var hide = false;
+        
+        
+        angular.forEach($rootScope.ruleeffects, function(effect) {
+            //in the data entry controller we only care about the "hidefield" actions
+            if(effect.action === "hidefield" && effect.content === id) {
+                hide = effect.ineffect;
+            }
+        });
+        return hide;
+    }; 
     
     //listen for the selected items
     $scope.$on('dashboardWidgets', function(event, args) {  
@@ -331,9 +347,11 @@ trackerCapture.controller('DataEntryController',
         $scope.allowProvidedElsewhereExists = false;
         angular.forEach($scope.currentStage.programStageDataElements, function(prStDe){
             $scope.currentStage.programStageDataElements[prStDe.dataElement.id] = prStDe.dataElement;
+            $scope.currentStage.programStageDataElements[prStDe.dataElement.id].hide = false;
             if(prStDe.allowProvidedElsewhere){
-                $scope.allowProvidedElsewhereExists = true;                
-                $scope.currentEvent.providedElsewhere[prStDe] = prStDe.dataValue.providedElsewhere;
+                $scope.allowProvidedElsewhereExists = true; 
+                //TODO: Fix the below line - find out where the "providedelsewhere" is actually stored
+                //$scope.currentEvent.providedElsewhere[prStDe] = prStDe.dataValue.providedElsewhere;
             }
         });
 

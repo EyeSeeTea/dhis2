@@ -807,7 +807,28 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                     content:"Malaria bednet info was given in the most recent visist"}],
                         triggers: [] 
                     }
-                }];
+                },
+                {
+                        ruleId:"TsQsdqtYqqt",
+                        ruleContent: {
+                            condition: "($diastolicFirstStage === 0)",
+                            actions: [
+                                    {
+                                        id:"sAQmKddYqvf",
+                                        action:"displaytext",
+                                        location:"rem",
+                                        content:"Remember to add diastolic blood pressure"
+                                    },
+                                    {
+                                        id:"PsTmKfnttvf",
+                                        action:"hidefield",
+                                        location:null,
+                                        content:"M4HEOoEFTAT"
+                                    }
+                                ],
+                            triggers: [] 
+                        } 
+                    }];
             
             //Go through all rules and replace operators for javascript:
             /*
@@ -1465,36 +1486,22 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
  
  
-/* var rules = [
-                {
-                    ruleName:"rule1",
-                    
-                    ruleContent: {
-                        condition: "($var1 < 100)",
-                        actions: [{ id:"PpQmKfnYqvf",
-                                    action:"displaytext",
-                                    location:"condcomp",
-                                    content:"Rule1 says there is a lot of var1"}],
-                        triggers: [] } },
-                {
-                    ruleName:"rule2",
-                    ruleId:"TtQmKftYqrt",
-                    ruleContent: {
-                        condition: "($var2 = false)",
-                        actions: [{id:"PpQmKfnYqvf",
-                                action:"displaytext",
-                                location:"condcomp",
-                            content:"Rule2 says that var2 is false."},
-                        {   id:"PpQmKfnYqvf",
-                            action:"displaytext",
-                            location:"summary",
-                            content:"in summary, Rule2 says that var2 is false."}],
-                        triggers: [] } },
-                {
-                    ruleName:"rule3",
-                    ruleId:"LpQmKklYqxx",
-                    ruleContent: {
-                        condition: "($var3 = true)",
-                        actions: [],
-                        triggers: [] } }];
+/*                      ruleContent: {
+                            condition: "($diastolicFirstStage = 0)",
+                            actions: [
+                                    {
+                                        id:"sAQmKddYqvf",
+                                        action:"displaytext",
+                                        location:"rem",
+                                        content:"Remember to add diastolic blood pressure"
+                                    },
+                                    {
+                                        id:"PsTmKfnttvf",
+                                        action:"hidefield",
+                                        location:null,
+                                        content:"M4HEOoEFTAT"
+                                    }
+                                ],
+                            triggers: [] 
+                        }
              */
