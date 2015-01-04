@@ -28,14 +28,8 @@ package org.hisp.dhis.webapi.controller.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
-
-import java.io.InputStream;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.Pager;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
@@ -52,6 +46,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAuthorityGroup;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroupService;
+import org.hisp.dhis.user.UserInvitationStatus;
 import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.user.Users;
@@ -65,8 +60,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
+
+import static org.hisp.dhis.common.IdentifiableObjectUtils.getUids;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -85,7 +83,7 @@ public class UserController
 
     @Autowired
     private UserGroupService userGroupService;
-    
+
     @Autowired
     private CurrentUserService currentUserService;
 
@@ -94,10 +92,10 @@ public class UserController
 
     @Autowired
     private SystemSettingManager systemSettingManager;
-    
+
     @Autowired
     private OrganisationUnitService organisationUnitService;
-    
+
     // -------------------------------------------------------------------------
     // GET
     // -------------------------------------------------------------------------
@@ -114,22 +112,23 @@ public class UserController
         params.setInactiveMonths( options.getInt( "inactiveMonths" ) );
         params.setInactiveSince( options.getDate( "inactiveSince" ) );
         params.setSelfRegistered( options.isTrue( "selfRegistered" ) );
-        
+        params.setInvitationStatus( UserInvitationStatus.fromValue( options.get( "invitationStatus" ) ) );
+
         String ou = options.get( "ou" );
-        
+
         if ( ou != null )
         {
-            params.setOrganisationUnit( organisationUnitService.getOrganisationUnit( ou ) );    
+            params.setOrganisationUnit( organisationUnitService.getOrganisationUnit( ou ) );
         }
-        
+
         if ( options.isManage() )
         {
             params.setCanManage( true );
             params.setAuthSubset( true );
         }
-        
+
         int count = userService.getUserCount( params );
-        
+
         if ( options.hasPaging() )
         {
             Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
@@ -137,7 +136,7 @@ public class UserController
             params.setFirst( pager.getOffset() );
             params.setMax( pager.getPageSize() );
         }
-        
+
         return userService.getUsers( params );
     }
 
@@ -161,7 +160,7 @@ public class UserController
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postXmlObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
 
@@ -169,13 +168,13 @@ public class UserController
         {
             return;
         }
-        
+
         renderService.toXml( response.getOutputStream(), createUser( user, response ) );
     }
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postJsonObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
 
@@ -183,12 +182,12 @@ public class UserController
         {
             return;
         }
-        
+
         renderService.toJson( response.getOutputStream(), createUser( user, response ) );
     }
 
     @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postXmlInvite( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postXmlInvite( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         User user = renderService.fromXml( request.getInputStream(), getEntityClass() );
 
@@ -196,12 +195,12 @@ public class UserController
         {
             return;
         }
-        
+
         renderService.toXml( response.getOutputStream(), inviteUser( user, request, response ) );
     }
 
     @RequestMapping( value = INVITE_PATH, method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonInvite( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postJsonInvite( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         User user = renderService.fromJson( request.getInputStream(), getEntityClass() );
 
@@ -209,12 +208,12 @@ public class UserController
         {
             return;
         }
-        
+
         renderService.toJson( response.getOutputStream(), inviteUser( user, request, response ) );
     }
 
     @RequestMapping( value = BULK_INVITE_PATH, method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postXmlInvites( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postXmlInvites( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         Users users = renderService.fromXml( request.getInputStream(), Users.class );
 
@@ -225,7 +224,7 @@ public class UserController
                 return;
             }
         }
-        
+
         for ( User user : users.getUsers() )
         {
             inviteUser( user, request, response );
@@ -233,7 +232,7 @@ public class UserController
     }
 
     @RequestMapping( value = BULK_INVITE_PATH, method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonInvites( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postJsonInvites( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         Users users = renderService.fromJson( request.getInputStream(), Users.class );
 
@@ -244,7 +243,7 @@ public class UserController
                 return;
             }
         }
-        
+
         for ( User user : users.getUsers() )
         {
             inviteUser( user, request, response );
@@ -257,25 +256,24 @@ public class UserController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { "application/xml", "text/xml" } )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request, 
-        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putXmlObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<User> users = getEntity( uid );
+        List<User> users = getEntity( pvUid );
 
         if ( users.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + pvUid );
             return;
         }
 
         if ( !aclService.canUpdate( currentUserService.getCurrentUser(), users.get( 0 ) ) )
         {
-            ContextUtils.conflictResponse( response, "You don't have the proper permissions to update this object." );
+            ContextUtils.conflictResponse( response, "You don't have the proper permissions to update this user." );
             return;
         }
 
         User parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
-        parsed.setUid( uid );
+        parsed.setUid( pvUid );
 
         if ( !userService.canAddOrUpdateUser( IdentifiableObjectUtils.getUids( parsed.getGroups() ) ) )
         {
@@ -284,20 +282,19 @@ public class UserController
         }
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
-        
+
         renderService.toXml( response.getOutputStream(), summary );
     }
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, 
-        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putJsonObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<User> users = getEntity( uid );
+        List<User> users = getEntity( pvUid );
 
         if ( users.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + pvUid );
             return;
         }
 
@@ -308,8 +305,8 @@ public class UserController
         }
 
         User parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
-        parsed.setUid( uid );
-        
+        parsed.setUid( pvUid );
+
         if ( !userService.canAddOrUpdateUser( IdentifiableObjectUtils.getUids( parsed.getGroups() ) ) )
         {
             ContextUtils.conflictResponse( response, "You must have permissions to create user, or ability to manage at least one user group for the user." );
@@ -317,7 +314,7 @@ public class UserController
         }
 
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), parsed, ImportStrategy.UPDATE );
-        
+
         renderService.toJson( response.getOutputStream(), summary );
     }
 
@@ -327,8 +324,8 @@ public class UserController
 
     /**
      * Validates whether the given user can be created.
-     * 
-     * @param user the user.
+     *
+     * @param user     the user.
      * @param response the response.
      */
     private boolean validateCreateUser( User user, HttpServletResponse response )
@@ -344,9 +341,9 @@ public class UserController
             ContextUtils.conflictResponse( response, "You must have permissions to create user, or ability to manage at least one user group for the user." );
             return false;
         }
-        
+
         List<String> uids = IdentifiableObjectUtils.getUids( user.getGroups() );
-        
+
         for ( String uid : uids )
         {
             if ( !userGroupService.canAddOrRemoveMember( uid ) )
@@ -355,14 +352,14 @@ public class UserController
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Creates a user.
      *
-     * @param user user object parsed from the POST request.
+     * @param user     user object parsed from the POST request.
      * @param response the response.
      */
     private ImportSummary createUser( User user, HttpServletResponse response ) throws Exception
@@ -376,17 +373,17 @@ public class UserController
         ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), user, ImportStrategy.CREATE );
 
         if ( summary.isStatus( ImportStatus.SUCCESS ) && summary.getImportCount().getImported() == 1 )
-        {        
+        {
             userGroupService.addUserToGroups( user, IdentifiableObjectUtils.getUids( user.getGroups() ) );
         }
 
         return summary;
     }
-    
+
     /**
      * Validates whether a user can be invited / created.
-     * 
-     * @param user the user.
+     *
+     * @param user     the user.
      * @param response the response.
      */
     private boolean validateInviteUser( User user, HttpServletResponse response )
@@ -395,7 +392,7 @@ public class UserController
         {
             return false;
         }
-        
+
         UserCredentials credentials = user.getUserCredentials();
 
         if ( credentials == null )
@@ -403,9 +400,9 @@ public class UserController
             ContextUtils.conflictResponse( response, "User credentials is not present" );
             return false;
         }
-        
+
         credentials.setUser( user );
-        
+
         List<UserAuthorityGroup> userRoles = userService.getUserRolesByUid( getUids( credentials.getUserAuthorityGroups() ) );
 
         for ( UserAuthorityGroup role : userRoles )
@@ -416,22 +413,22 @@ public class UserController
                 return false;
             }
         }
-        
+
         String valid = securityService.validateInvite( user.getUserCredentials() );
-        
+
         if ( valid != null )
         {
             ContextUtils.conflictResponse( response, valid + ": " + user.getUserCredentials() );
             return false;
         }
-        
+
         return true;
     }
-    
+
     /**
      * Creates a user invitation and invites the user.
      *
-     * @param user user object parsed from the POST request.
+     * @param user     user object parsed from the POST request.
      * @param response the response.
      */
     private ImportSummary inviteUser( User user, HttpServletRequest request, HttpServletResponse response ) throws Exception

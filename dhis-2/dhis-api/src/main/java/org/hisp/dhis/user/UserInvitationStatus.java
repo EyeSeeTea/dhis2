@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms.outbound;
+package org.hisp.dhis.user;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,23 +28,30 @@ package org.hisp.dhis.sms.outbound;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-public interface OutboundSmsStore
+/**
+ * @author Lars Helge Overland
+ */
+public enum UserInvitationStatus
 {
-    int saveOutboundSms( OutboundSms sms );
-    
-    List<OutboundSms> getAllOutboundSms();
-    
-    List<OutboundSms> getAllOutboundSms( Integer min, Integer max );
+    NONE( "none" ), ALL( "all" ), EXPIRED( "expired" );
 
-    OutboundSms getOutboundSmsbyId( int id );
+    private final String value;
     
-    List<OutboundSms> get( OutboundSmsStatus status );
+    private UserInvitationStatus( String value )
+    {
+        this.value = value;
+    }
     
-    List<OutboundSms> get( OutboundSmsStatus status, Integer min, Integer max );
-    
-    void updateOutboundSms( OutboundSms sms );
-    
-    void deleteOutboundSms( OutboundSms sms );
+    public static UserInvitationStatus fromValue( String value )
+    {
+        for ( UserInvitationStatus status : UserInvitationStatus.values() )
+        {
+            if ( status.value.equalsIgnoreCase( value ) )
+            {
+                return status;
+            }
+        }
+        
+        return null;
+    }
 }

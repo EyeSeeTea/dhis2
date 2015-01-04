@@ -17,16 +17,14 @@ function getI18nAvailableMetaData( metaDataCategoryName )
     {
         case "Attributes":
             return i18n_available_attributeTypes;
-        case "Dimensions":
+        case "Categories":
             return i18n_available_categories;
+        case "CategoryCombos":
+            return i18n_available_category_combos;
         case "Charts":
             return i18n_available_charts;
-        case "Concepts":
-            return i18n_available_concepts;
         case "Constants":
             return i18n_available_constants;
-        case "DataDictionaries":
-            return i18n_available_dataDictionaries;
         case "DataElementGroupSets":
             return i18n_available_dataElementGroupSets;
         case "DataElementGroups":
@@ -87,16 +85,14 @@ function getI18nSelectedMetaData( metaDataCategoryName )
     {
         case "Attributes":
             return i18n_selected_attributeTypes;
-        case "Dimensions":
+        case "Categories":
             return i18n_selected_categories;
+        case "CategoryCombos":
+            return i18n_selected_category_combos;
         case "Charts":
             return i18n_selected_charts;
-        case "Concepts":
-            return i18n_selected_concepts;
         case "Constants":
             return i18n_selected_constants;
-        case "DataDictionaries":
-            return i18n_selected_dataDictionaries;
         case "DataElementGroupSets":
             return i18n_selected_dataElementGroupSets;
         case "DataElementGroups":

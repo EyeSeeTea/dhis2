@@ -37,6 +37,7 @@ import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserInvitationStatus;
 import org.hisp.dhis.user.UserQueryParams;
 import org.hisp.dhis.user.UserStore;
 
@@ -86,12 +87,12 @@ public class HibernateUserStore
             hql += hlp.whereAnd() + " u.phoneNumber = :phoneNumber ";
         }
         
-        if ( params.isCanManage() )
+        if ( params.isCanManage() && params.getUser() != null )
         {
             hql += hlp.whereAnd() + " g.id in (:ids) ";
         }
         
-        if ( params.isAuthSubset() )
+        if ( params.isAuthSubset() && params.getUser() != null )
         {
             hql += hlp.whereAnd() + " not exists (" +
                 "select uc2 from UserCredentials uc2 " +
@@ -101,7 +102,7 @@ public class HibernateUserStore
                 "and a not in (:auths) ) ";
         }
         
-        if ( params.isDisjointRoles() )
+        if ( params.isDisjointRoles() && params.getUser() != null )
         {
             hql += hlp.whereAnd() + " not exists (" +
                 "select uc3 from UserCredentials uc3 " +
@@ -125,6 +126,16 @@ public class HibernateUserStore
             hql += hlp.whereAnd() + " uc.selfRegistered = true ";
         }
         
+        if ( UserInvitationStatus.ALL.equals( params.getInvitationStatus() ) )
+        {
+            hql += hlp.whereAnd() + " uc.invitation = true ";
+        }
+        
+        if ( UserInvitationStatus.EXPIRED.equals( params.getInvitationStatus() ) )
+        {
+            hql += hlp.whereAnd() + " uc.invitation = true and uc.restoreExpiry < current_timestamp() ";
+        }
+                
         if ( params.getOrganisationUnit() != null )
         {
             hql += hlp.whereAnd() + " :organisationUnit in elements(u.organisationUnits) ";

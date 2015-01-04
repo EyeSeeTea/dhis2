@@ -229,8 +229,8 @@ public class DefaultUserService
     
     private void handleUserQueryParams( UserQueryParams params )
     {
-        boolean disjointRoles = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
-        params.setDisjointRoles( disjointRoles );
+        boolean canGrantOwnRoles = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
+        params.setDisjointRoles( !canGrantOwnRoles );
         
         if ( params.getUser() == null )
         {
@@ -241,6 +241,7 @@ public class DefaultUserService
         {
             params.setCanManage( false );
             params.setAuthSubset( false );
+            params.setDisjointRoles( false );
         }
 
         if ( params.getInactiveMonths() != null )
@@ -336,7 +337,7 @@ public class DefaultUserService
         return true;
     }
 
-    public boolean canAddOrUpdateUser( Collection<String> uids )
+    public boolean canAddOrUpdateUser( Collection<String> userGroups )
     {
     	User currentUser = currentUserService.getCurrentUser();
     	
@@ -359,17 +360,20 @@ public class DefaultUserService
     	    return false;
     	}
     	
-    	for ( String uid : uids )
+    	boolean canManageAnyGroup = false;
+    	
+    	for ( String uid : userGroups )
     	{
     	    UserGroup userGroup = userGroupService.getUserGroup( uid );
             
             if ( currentUser.canManage( userGroup ) )
             {
-                return true;
+                canManageAnyGroup = true;
+                break;
             }
     	}
     	
-    	return true;
+    	return canManageAnyGroup;
     }
     
     // -------------------------------------------------------------------------
