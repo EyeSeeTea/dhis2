@@ -371,6 +371,110 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
+    // Mark conversations for followup
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "followup", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
+    public @ResponseBody RootNode markMessageConversationFollowup(
+        @RequestParam( value = "user", required = false ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
+    {
+        RootNode responseNode = new RootNode( "response" );
+
+        User currentUser = currentUserService.getCurrentUser();
+        User user = userUid != null ? userService.getUser( userUid ) : currentUser;
+
+        if ( user == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
+            return responseNode;
+        }
+
+        if ( !canModifyUserConversation( currentUser, user ) )
+        {
+            throw new UpdateAccessDeniedException( "Not authorize to modify this object." );
+        }
+
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+
+        if( messageConversations.isEmpty() )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs" ) );
+            return responseNode;
+        }
+
+        CollectionNode marked = responseNode.addChild( new CollectionNode( "markedFollowup" ) );
+        marked.setWrapping( false );
+
+        for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
+        {
+            conversation.setFollowUp( true );
+            messageService.updateMessageConversation( conversation );
+            marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
+        }
+
+        response.setStatus( HttpServletResponse.SC_OK );
+
+        return responseNode;
+    }
+
+    //--------------------------------------------------------------------------
+    // Un-mark conversations for followup
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = "unfollowup", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
+    public @ResponseBody RootNode unmarkMessageConversationFollowup(
+        @RequestParam( value = "user", required = false ) String userUid, @RequestBody String[] uids, HttpServletResponse response )
+    {
+        RootNode responseNode = new RootNode( "response" );
+
+        User currentUser = currentUserService.getCurrentUser();
+        User user = userUid != null ? userService.getUser( userUid ) : currentUser;
+
+        if ( user == null )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No user with uid: " + userUid ) );
+            return responseNode;
+        }
+
+        if ( !canModifyUserConversation( currentUser, user ) )
+        {
+            throw new UpdateAccessDeniedException( "Not authorize to modify this object." );
+        }
+
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+
+        if( messageConversations.isEmpty() )
+        {
+            response.setStatus( HttpServletResponse.SC_NOT_FOUND );
+            responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs" ) );
+            return responseNode;
+        }
+
+        CollectionNode marked = responseNode.addChild( new CollectionNode( "unmarkedFollowup" ) );
+        marked.setWrapping( false );
+
+        for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
+        {
+            if ( !conversation.isFollowUp() )
+            {
+                marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
+            }
+            else if ( conversation.toggleFollowUp( user ) )
+            {
+                messageService.updateMessageConversation( conversation );
+                marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
+            }
+        }
+
+        response.setStatus( HttpServletResponse.SC_OK );
+
+        return responseNode;
+    }
+
+    //--------------------------------------------------------------------------
     // Delete a MessageConversation (requires override auth)
     //--------------------------------------------------------------------------
 
