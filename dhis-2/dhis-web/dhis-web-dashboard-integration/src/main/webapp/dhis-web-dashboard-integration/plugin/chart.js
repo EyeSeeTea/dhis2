@@ -2560,7 +2560,7 @@ Ext.onReady(function() {
                         font: titleFont,
                         fill: titleColor,
                         height: 20,
-                        y: 	20
+                        y: ns.dashboard ? 11 : 20
                     });
                 };
 
@@ -2606,7 +2606,7 @@ Ext.onReady(function() {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: ns.dashboard ? 30 : 35,
+                            insetPadding: ns.dashboard ? 23 : 35,
                             width: ns.app.centerRegion.getWidth() - 15,
                             height: ns.app.centerRegion.getHeight() - 40,
                             theme: 'dv1'
@@ -2617,11 +2617,7 @@ Ext.onReady(function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPadding = 40;
-
-                            if (ns.dashboard) {
-                                defaultConfig.insetPadding = 35;
-                            }
+                            defaultConfig.insetPadding = ns.dashboard ? 32 : 40;
                         }
                     }
 
@@ -2984,11 +2980,7 @@ Ext.onReady(function() {
 
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
-                    chart.insetPadding = 40;
-
-                    if (ns.dashboard) {
-                        chart.insetPadding = 35;
-                    }
+                    chart.insetPadding = ns.dashboard ? 25 : 40;
 
                     return chart;
                 };
@@ -3040,11 +3032,7 @@ Ext.onReady(function() {
                         theme: 'Category2'
                     });
 
-                    chart.insetPadding = 40;
-
-                    if (ns.dashboard) {
-                        chart.insetPadding = 35;
-                    }
+                    chart.insetPadding = ns.dashboard ? 32 : 40;
 
                     chart.height = ns.app.centerRegion.getHeight() - 80;
 
@@ -3103,7 +3091,7 @@ Ext.onReady(function() {
                         width: ns.app.centerRegion.getWidth(),
                         height: ns.app.centerRegion.getHeight() * 0.6,
                         store: store,
-                        insetPadding: 100,
+                        insetPadding: ns.dashboard ? 50 : 100,
                         theme: null,
                         //animate: {
                             //easing: 'elasticIn',
