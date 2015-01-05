@@ -94,7 +94,7 @@ dhis2.db.tmpl = {
 	         "<a href='javascript:dhis2.db.viewImage( \"../api/maps/${id}/data?width=820&height=550\", \"${name}\" )'>${i18n_view}</a>" +
 	         "<a href='javascript:dhis2.db.viewShareForm( \"${id}\", \"map\", \"${name}\" )'>${i18n_share}</a></div>" +
 		     //"<img src='../api/maps/${id}/data?width=405&height=294' onclick='dhis2.db.exploreMap( \"${id}\" )' title='${i18n_click}'></div></li>",
-		 "<div id='plugin-${itemId}' style='width:391px; height:290px'></div>" +
+		 "<div id='plugin-${itemId}' style='width:405px; height:304px'></div>" +
 		 "</div></li>",
 
 	reportTableItem: "<li id='liDrop-${itemId}' class='liDropItem'><div class='dropItem' id='drop-${itemId}' data-item='${itemId}'></div></li>" +
@@ -392,6 +392,7 @@ dhis2.db.clearDashboard = function()
 dhis2.db.renderDashboard = function( id )
 {
     var contentWidth = 405,
+        contentHeight = 304,
         isChrome = /\bchrome\b/.test(navigator.userAgent.toLowerCase()),
         scrollbarWidth = isChrome ? 8 : 17;
 
@@ -432,7 +433,8 @@ dhis2.db.renderDashboard = function( id )
                 el: 'plugin-' + dashboardItem.id,
                 id: dashboardItem.chart.id,
                 width: contentWidth,
-                height: 290,
+                height: contentHeight,
+                dashboard: true,
                 skipMask: true,
                 domainAxisStyle: {
                     labelRotation: 45,
