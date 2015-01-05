@@ -679,15 +679,15 @@ Ext.onReady(function() {
                     if (Ext.isObject(config.domainAxisStyle)) {
                         layout.domainAxisStyle = config.domainAxisStyle;
                     }
-                    
+
                     if (Ext.isObject(config.rangeAxisStyle)) {
                         layout.rangeAxisStyle = config.rangeAxisStyle;
                     }
-                    
+
                     if (Ext.isObject(config.legendStyle)) {
                         layout.legendStyle = config.legendStyle;
                     }
-                    
+
                     if (Ext.isObject(config.seriesStyle)) {
                         layout.seriesStyle = config.seriesStyle;
                     }
@@ -1662,7 +1662,7 @@ Ext.onReady(function() {
                 if (init.skipMask) {
                     return;
                 }
-                
+
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.show: component not an object');
 					return null;
@@ -1689,7 +1689,7 @@ Ext.onReady(function() {
                 if (init.skipMask) {
                     return;
                 }
-                
+
 				if (!Ext.isObject(component)) {
 					console.log('support.gui.mask.hide: component not an object');
 					return null;
@@ -2065,7 +2065,7 @@ Ext.onReady(function() {
                         labelRotation = 0,
                         titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
                         titleColor = 'black',
-                        
+
                         typeConf = conf.finals.chart,
                         minimum = store.getMinimum(),
                         maximum,
@@ -2149,7 +2149,7 @@ Ext.onReady(function() {
 
                         // label
                         labelColor = style.labelColor || labelColor;
-                        
+
                         if (style.labelFont) {
                             labelFont = style.labelFont;
                         }
@@ -2166,7 +2166,7 @@ Ext.onReady(function() {
 
                         // title
                         titleColor = style.titleColor || titleColor;
-                        
+
                         if (style.titleFont) {
                             titleFont = style.titleFont;
                         }
@@ -2193,7 +2193,7 @@ Ext.onReady(function() {
                         labelRotation = 315,
                         titleFont = 'bold 12px ' + conf.chart.style.fontFamily,
                         titleColor = 'black',
-                    
+
                         axis = {
                             type: 'Category',
                             position: 'bottom',
@@ -2204,7 +2204,7 @@ Ext.onReady(function() {
                             },
                             labelTitle: {}
                         };
-                    
+
                     if (xLayout.domainAxisTitle) {
                         axis.title = xLayout.domainAxisTitle;
                     }
@@ -2215,7 +2215,7 @@ Ext.onReady(function() {
 
                         // label
                         labelColor = style.labelColor || labelColor;
-                        
+
                         if (style.labelFont) {
                             labelFont = style.labelFont;
                         }
@@ -2232,7 +2232,7 @@ Ext.onReady(function() {
 
                         // title
                         titleColor = style.titleColor || titleColor;
-                        
+
                         if (style.titleFont) {
                             titleFont = style.titleFont;
                         }
@@ -2242,7 +2242,7 @@ Ext.onReady(function() {
                             titleFont +=  style.titleFontFamily ? style.titleFontFamily : conf.chart.style.fontFamily;
                         }
                     }
-                    
+
                     axis.label.style.fill = labelColor;
                     axis.label.style.font = labelFont;
                     axis.label.rotate.degrees = labelRotation;
@@ -2266,7 +2266,7 @@ Ext.onReady(function() {
 
                             if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
                                 var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
-                                
+
                                 name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
                             }
 
@@ -2304,7 +2304,7 @@ Ext.onReady(function() {
 
                             // label
                             labelColor = style.labelColor || labelColor;
-                            
+
                             if (style.labelFont) {
                                 labelFont = style.labelFont;
                             }
@@ -2313,8 +2313,8 @@ Ext.onReady(function() {
                                 labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
                                 labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                             }
-                        }                            
-                            
+                        }
+
                         main.label = {
                             display: 'outside',
                             'text-anchor': 'middle',
@@ -2380,7 +2380,7 @@ Ext.onReady(function() {
                             var title = (Ext.isString(xLayout.targetLineTitle) ? xLayout.targetLineTitle : DV.i18n.target) + ' (' + xLayout.targetLineValue + ')',
                                 ls = xLayout.legendStyle;
                             return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
-                        }()                                
+                        }()
                     };
                 };
 
@@ -2401,7 +2401,7 @@ Ext.onReady(function() {
                             var title = (Ext.isString(xLayout.baseLineTitle) ? xLayout.baseLineTitle : DV.i18n.base) + ' (' + xLayout.baseLineValue + ')',
                                 ls = xLayout.legendStyle;
                             return ls && Ext.isNumber(ls.labelMaxLength) ? title.substr(0, ls.labelMaxLength) + '..' : title;
-                        }()                                
+                        }()
                     };
                 };
 
@@ -2467,7 +2467,7 @@ Ext.onReady(function() {
                     }
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-                    
+
                     if (width > ns.app.centerRegion.getWidth() - 10) {
                         isVertical = true;
                         position = 'right';
@@ -2476,7 +2476,7 @@ Ext.onReady(function() {
                     // style
                     if (Ext.isObject(xLayout.legendStyle)) {
                         var style = xLayout.legendStyle;
-                        
+
                         if (Ext.Array.contains(positions, style.position)) {
                             position = style.position;
                         }
@@ -2606,7 +2606,7 @@ Ext.onReady(function() {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: 35,
+                            insetPadding: ns.dashboard ? 30 : 35,
                             width: ns.app.centerRegion.getWidth() - 15,
                             height: ns.app.centerRegion.getHeight() - 40,
                             theme: 'dv1'
@@ -2618,6 +2618,10 @@ Ext.onReady(function() {
 
                         if (defaultConfig.legend.position === 'right') {
                             defaultConfig.insetPadding = 40;
+
+                            if (ns.dashboard) {
+                                defaultConfig.insetPadding = 35;
+                            }
                         }
                     }
 
@@ -2913,7 +2917,7 @@ Ext.onReady(function() {
 
                             // color
                             labelColor = style.labelColor || labelColor;
-                            
+
                             if (style.labelFont) {
                                 labelFont = style.labelFont;
                             }
@@ -2923,7 +2927,7 @@ Ext.onReady(function() {
                                 labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                             }
                         }
-                        
+
                         label.display = 'middle';
                         label.contrast = !labelColor;
                         label.font = labelFont;
@@ -2982,6 +2986,10 @@ Ext.onReady(function() {
                     //chart.legend.isVertical = true;
                     chart.insetPadding = 40;
 
+                    if (ns.dashboard) {
+                        chart.insetPadding = 35;
+                    }
+
                     return chart;
                 };
 
@@ -3033,6 +3041,11 @@ Ext.onReady(function() {
                     });
 
                     chart.insetPadding = 40;
+
+                    if (ns.dashboard) {
+                        chart.insetPadding = 35;
+                    }
+
                     chart.height = ns.app.centerRegion.getHeight() - 80;
 
                     chart.setChartSize = function() {
@@ -3306,7 +3319,7 @@ Ext.onReady(function() {
 	};
 
 	applyCss = function() {
-        
+
         // chart tips css
         var css = '.dv-chart-tips { border-radius: 2px; padding: 0px 3px 1px; border: 2px solid #000; background-color: #000; } \n';
         css += '.dv-chart-tips .x-tip-body { background-color: #000; font-size: 13px; font-weight: normal; color: #fff; -webkit-text-stroke: 0; } \n';
@@ -3320,7 +3333,7 @@ Ext.onReady(function() {
 
         Ext.util.CSS.createStyleSheet(css);
     };
-    
+
 	execute = function(config) {
 		var validateConfig,
             extendInstance,
@@ -3382,7 +3395,7 @@ Ext.onReady(function() {
                 var success,
                     failure,
                     config = {};
-                    
+
                 if (!(obj && obj.id)) {
                     console.log('Error, no chart id');
                     return;
@@ -3518,7 +3531,7 @@ Ext.onReady(function() {
 				// update viewport
 				ns.app.centerRegion.removeAll();
 				ns.app.centerRegion.add(ns.app.chart);
-                
+
                 if (!ns.skipMask) {
                     web.mask.hide(ns.app.centerRegion);
                 }
@@ -3537,11 +3550,11 @@ Ext.onReady(function() {
                     elBorderH = parseInt(el.getStyle('border-top-width')) + parseInt(el.getStyle('border-bottom-width')),
                     elPaddingW = parseInt(el.getStyle('padding-left')) + parseInt(el.getStyle('padding-right')),
                     elPaddingH = parseInt(el.getStyle('padding-top')) + parseInt(el.getStyle('padding-bottom'));
-                    
+
 				width = el.getWidth() - elBorderW - elPaddingW,
 				height = el.getHeight() - elBorderH - elPaddingH;
             }
-            
+
 			centerRegion = Ext.create('Ext.panel.Panel', {
 				renderTo: el,
 				bodyStyle: 'border: 0 none',
@@ -3561,7 +3574,7 @@ Ext.onReady(function() {
 			}
 
 			applyCss();
-            
+
             init.plugin = true;
             init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
