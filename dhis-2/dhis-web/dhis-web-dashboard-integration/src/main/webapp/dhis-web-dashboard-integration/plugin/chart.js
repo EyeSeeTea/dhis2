@@ -2108,13 +2108,13 @@ Ext.onReady(function() {
                         grid: {
                             odd: {
                                 opacity: 1,
-                                stroke: '#aaa',
-                                'stroke-width': 0.1
+                                stroke: '#000',
+                                'stroke-width': 0.03
                             },
                             even: {
                                 opacity: 1,
-                                stroke: '#aaa',
-                                'stroke-width': 0.1
+                                stroke: '#000',
+                                'stroke-width': 0.03
                             }
                         }
                     };
