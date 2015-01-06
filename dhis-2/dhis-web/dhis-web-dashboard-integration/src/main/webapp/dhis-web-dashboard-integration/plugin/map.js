@@ -1477,7 +1477,8 @@ Ext.onReady(function () {
 
     GIS.core.getOLMap = function (gis) {
         var olmap,
-            addControl;
+            addControl,
+	    logoName = gis.dashboard ? 'google-logo-small' : 'google-logo';
 
         addControl = function (name, fn) {
             var button,
@@ -1504,17 +1505,17 @@ Ext.onReady(function () {
 
         olmap = new OpenLayers.Map({
             controls: [
-    new OpenLayers.Control.Navigation({
+		new OpenLayers.Control.Navigation({
                     zoomWheelEnabled: true,
                     documentDrag: true
                 }),
-    new OpenLayers.Control.MousePosition({
+		new OpenLayers.Control.MousePosition({
                     prefix: '<span id="mouseposition" class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
                     separator: '<span class="text-mouseposition-lonlat">,&nbsp;LAT </span>',
-                    suffix: '<div id="google-logo" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'
+                    suffix: '<div class="' + logoName + '" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'
                 }),
-    new OpenLayers.Control.Permalink(),
-    new OpenLayers.Control.ScaleLine({
+		new OpenLayers.Control.Permalink(),
+		new OpenLayers.Control.ScaleLine({
                     geodesic: true,
                     maxWidth: 170,
                     minWidth: 100
@@ -1694,9 +1695,12 @@ Ext.onReady(function () {
             var eastX = gis.viewport.eastRegion.getPosition()[0],
                 centerX = gis.viewport.centerRegion.getPosition()[0],
                 centerRegionCenterX = centerX + ((eastX - centerX) / 2),
-                centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0);
+                centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (GIS.app ? 32 : 0),
 
-            defaultHoverWindow.setPosition(centerRegionCenterX - (defaultHoverWindow.getWidth() / 2), centerRegionY);
+		x = centerRegionCenterX - (defaultHoverWindow.getWidth() / 2),
+		y = centerRegionY;
+
+            defaultHoverWindow.setPosition(x, y);
         };
 
         defaultHoverUnselect = function fn(feature) {
@@ -2256,7 +2260,7 @@ Ext.onReady(function () {
                 fillOpacity: 0.9,
                 strokeColor: '#fff',
                 strokeWidth: 1,
-                pointRadius: 8,
+                //pointRadius: 8,
                 cursor: 'pointer',
                 labelAlign: 'cr',
                 labelYOffset: 13
@@ -3873,13 +3877,20 @@ Ext.onReady(function () {
         return loader;
     };
 
-    GIS.core.getInstance = function (init) {
+    GIS.core.getInstance = function(init) {
         var conf = {},
             util = {},
             api = {},
             store = {},
             layers = [],
             gis = {};
+
+	gis.plugin = init.plugin;
+	gis.el = init.el;
+	gis.dashboard = init.dashboard;
+	gis.crossDomain = init.crossDomain;
+	gis.skipMask = init.skipMask;
+	gis.skipFade = init.skipFade;
 
         // conf
         (function () {
@@ -6754,16 +6765,23 @@ Ext.onReady(function () {
         css += '.gis-container-default .x-window-body { padding: 5px; background: #fff; } \n';
         css += '.olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n';
         css += '.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';
-        css += '.olControlPanel.zoomIn { right: 72px; } \n';
-        css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
-        css += '.olControlPanel.zoomOut { right: 48px; } \n';
-        css += '.olControlPanel.zoomVisible { right: 24px; } \n';
+        //css += '.olControlPanel.zoomIn { right: 72px; } \n';
+        //css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        //css += '.olControlPanel.zoomOut { right: 48px; } \n';
+        //css += '.olControlPanel.zoomVisible { right: 24px; } \n';
+	//css += '.olControlPanel.zoomIn { right: 72px; } \n';
+        //css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        css += '.olControlPanel.zoomOut { top: 24px; } \n';
+        css += '.olControlPanel.zoomVisible { top: 48px; } \n';
+	css += '.olControlPanel.measure { top: 72px; } \n';
+	css += '.olControlPanel.measure .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
-        css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 2px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
+        css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
         css += '.text-mouseposition-lonlat { color: #555; } \n';
         css += '.olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n';
-        css += '#google-logo { background: url("images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo { background: url("images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+	css += '.google-logo-small { background: url("images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
         css += '.olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n';
         css += '.olControlScaleLineBottom { display: none; } \n';
         css += '.olControlScaleLineTop { font-weight: bold; } \n';
@@ -6772,7 +6790,7 @@ Ext.onReady(function () {
         css += '.x-mask-msg .x-mask-loading { border: 0 none; background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
         css += '.gis-window-widget-feature { padding: 0; border: 0 none; border-radius: 0; background: transparent; box-shadow: none; } \n';
         css += '.gis-window-widget-feature .x-window-body-default { border: 0 none; background: transparent; } \n';
-        css += '.gis-window-widget-feature .x-window-body-default .x-panel-body-default { border: 0 none; background: #556; opacity: 0.92; filter: alpha(opacity=92); -ms-filter: "alpha(opacity=92)"; padding: 5px 8px 5px 8px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; color: #fff; font-weight: bold; letter-spacing: 1px; } \n';
+        css += '.gis-window-widget-feature .x-window-body-default .x-panel-body-default { border: 0 none; background: #556; opacity: 0.92; filter: alpha(opacity=92); -ms-filter: "alpha(opacity=92)"; padding: 5px 8px 4px 8px; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; color: #fff; font-weight: bold; letter-spacing: 1px; } \n';
         css += '.x-menu-body { border:1px solid #bbb; border-radius: 2px; padding: 0; background-color: #fff !important; } \n';
         css += '.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-color: #e1e1e1; background-color: #e1e1e1; background-image: none; } \n';
         css += '.x-menu-item-link { padding: 4px 5px 4px 26px; } \n';
@@ -6990,7 +7008,8 @@ Ext.onReady(function () {
             applyCss();
 
             init.plugin = true;
-            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+	    init.el = config.el;
+	    init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
             init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
