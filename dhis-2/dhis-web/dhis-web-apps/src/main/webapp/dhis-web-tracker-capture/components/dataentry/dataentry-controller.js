@@ -40,7 +40,7 @@ trackerCapture.controller('DataEntryController',
     $scope.showEventColors = false;
     
     //listen for the selected items
-    $scope.$on('dashboardWidgets', function() {  
+    $scope.$on('dashboardWidgets', function() {        
         $scope.showDataEntryDiv = false;
         $scope.showEventCreationDiv = false;
         $scope.showDummyEventDiv = false;        
@@ -56,10 +56,10 @@ trackerCapture.controller('DataEntryController',
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
         $scope.selectedEntity = selections.tei;      
         $scope.selectedProgram = selections.pr;        
-        $scope.selectedEnrollment = selections.enrollment;   
+        $scope.selectedEnrollment = selections.selectedEnrollment;   
         $scope.optionSets = selections.optionSets;
-        $scope.selectedProgramWithStage = [];
         
+        $scope.selectedProgramWithStage = [];        
         if($scope.selectedOrgUnit && $scope.selectedProgram && $scope.selectedEntity && $scope.selectedEnrollment){
             
             ProgramStageFactory.getByProgram($scope.selectedProgram).then(function(stages){
@@ -71,20 +71,17 @@ trackerCapture.controller('DataEntryController',
                     $scope.selectedProgramWithStage[stage.id] = stage;
                 });
                 
-                $scope.getEvents();
-                
+                $scope.getEvents();                
             });
         }
     });
     
-    $scope.getEvents = function(){        
-        $scope.dhis2Events = '';
-        DHIS2EventFactory.getEventsByStatus($scope.selectedEntity.trackedEntityInstance, $scope.selectedOrgUnit.id, $scope.selectedProgram.id, 'ACTIVE').then(function(data){
-            $scope.dhis2Events = data;
-            if(angular.isObject($scope.dhis2Events)){
-                angular.forEach($scope.dhis2Events, function(dhis2Event){                    
+    $scope.getEvents = function(){
+        $scope.dhis2Events = [];
+        DHIS2EventFactory.getEventsByProgram($scope.selectedEntity.trackedEntityInstance, $scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(events){
+            if(angular.isObject(events)){
+                angular.forEach(events, function(dhis2Event){                    
                     if(dhis2Event.enrollment === $scope.selectedEnrollment.enrollment){
-                        
                         if(dhis2Event.notes){
                             dhis2Event.notes = orderByFilter(dhis2Event.notes, '-storedDate');            
                             angular.forEach(dhis2Event.notes, function(note){
@@ -111,13 +108,14 @@ trackerCapture.controller('DataEntryController',
                                 $scope.currentEvent = dhis2Event;                                
                                 $scope.showDataEntry($scope.currentEvent, true);
                             }
-                        } 
+                        }
+                        
+                        $scope.dhis2Events.push(dhis2Event);
                     }
                 });
-                
-                $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-sortingDate');
             }
             
+            $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-sortingDate');            
             $scope.dummyEvents = $scope.checkForEventCreation($scope.dhis2Events, $scope.selectedProgram);
         });          
     };
@@ -299,10 +297,14 @@ trackerCapture.controller('DataEntryController',
         $scope.currentEvent.providedElsewhere = [];
         
         $scope.currentStage = $scope.selectedProgramWithStage[$scope.currentEvent.programStage];
-
-        $scope.programStageDataElements = [];                  
+        
+        angular.forEach($scope.currentStage.programStageSections, function(section){
+            section.open = true;
+        });
+        
+        $scope.prStDes = [];                  
         angular.forEach($scope.currentStage.programStageDataElements, function(prStDe){
-            $scope.programStageDataElements[prStDe.dataElement.id] = prStDe; 
+            $scope.prStDes[prStDe.dataElement.id] = prStDe; 
         }); 
 
         $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage);
@@ -337,13 +339,13 @@ trackerCapture.controller('DataEntryController',
     };
     
     $scope.saveDatavalue = function(prStDe){
-        
+
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
         if( $scope.dataEntryOuterForm.$invalid ){            
             return false;
         }
-         
+
         //input is valid        
         var value = $scope.currentEvent[prStDe.dataElement.id];
         

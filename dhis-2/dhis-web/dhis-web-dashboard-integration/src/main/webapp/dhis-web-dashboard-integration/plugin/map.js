@@ -4937,43 +4937,6 @@ Ext.onReady(function () {
             }
         };
 
-        var jsfiles = new Array(
-            "core/Color.js",
-            "core/GeoStat.js",
-            "core/GeoStat/Boundary.js",
-            "core/GeoStat/Thematic1.js",
-            "core/GeoStat/Thematic2.js",
-            "core/GeoStat/Facility.js",
-            "core/GeoStat/Symbol.js",
-            "core/Util.js"
-            //"widgets/geostat/Boundary.js",
-            //"widgets/geostat/Thematic1.js",
-            //"widgets/geostat/Thematic2.js",
-            //"widgets/geostat/Facility.js",
-            //"widgets/geostat/Symbol.js"
-        );
-
-        var allScriptTags = "";
-        var host = mapfish._getScriptLocation();
-
-        for (var i = 0; i < jsfiles.length; i++) {
-            if (/MSIE/.test(navigator.userAgent) || /Safari/.test(navigator.userAgent)) {
-                var currentScriptTag = "<script src='" + host + jsfiles[i] + "'></script>";
-                allScriptTags += currentScriptTag;
-            } else {
-                var s = document.createElement("script");
-                s.src = host + jsfiles[i];
-                var h = document.getElementsByTagName("head").length ?
-                    document.getElementsByTagName("head")[0] :
-                    document.body;
-                h.appendChild(s);
-            }
-        }
-        if (allScriptTags) {
-            //document.write(allScriptTags);
-        }
-
-
         // MAPFISH COLOR (color.js)
 
         /**
