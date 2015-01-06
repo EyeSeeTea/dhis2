@@ -1553,6 +1553,8 @@ Ext.onReady(function () {
             GIS.core.MeasureWindow(gis).show();
         });
 
+	olmap.addButtonControl = addControl;
+
         return olmap;
     };
 
@@ -6942,14 +6944,29 @@ Ext.onReady(function () {
         };
 
         afterRender = function (vp) {
-            var len = Ext.query('.zoomInButton').length;
 
-            for (var i = 0; i < len; i++) {
-                Ext.query('.zoomInButton')[i].innerHTML = '<img src="images/zoomin_24.png" />';
-                Ext.query('.zoomOutButton')[i].innerHTML = '<img src="images/zoomout_24.png" />';
-                Ext.query('.zoomVisibleButton')[i].innerHTML = '<img src="images/zoomvisible_24.png" />';
-                Ext.query('.measureButton')[i].innerHTML = '<img src="images/measure_24.png" />';
-            }
+	    // map buttons
+	    var clsArray = ['zoomInButton', 'zoomOutButton', 'zoomVisibleButton', 'measureButton', 'legendButton'],
+		map = {
+		    zoomInButton: 'zoomin_24.png',
+		    zoomOutButton: 'zoomout_24.png',
+		    zoomVisibleButton: 'zoomvisible_24.png',
+		    measureButton: 'measure_24.png',
+		    legendButton: 'legend_24.png'
+		};
+
+	    for (var i = 0, cls, elArray; i < clsArray.length; i++) {
+		cls = clsArray[i];
+		elArray = Ext.query('.' + cls);
+
+		for (var j = 0, el; j < elArray.length; j++) {
+		    el = elArray[j];
+
+		    if (el) {
+			el.innerHTML = '<img src="images/' + map[cls] + '" />';
+		    }
+		}
+	    }
 
             // base layer
             if (Ext.isDefined(gis.map.baseLayer)) {

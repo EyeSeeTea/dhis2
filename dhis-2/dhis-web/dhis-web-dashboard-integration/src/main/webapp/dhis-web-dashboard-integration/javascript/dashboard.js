@@ -477,6 +477,7 @@ dhis2.db.renderDashboard = function( id )
 			id: dashboardItem.map.id,
 			width: contentWidth,
 			height: 290,
+			hideLegend: true,
 			dashboard: true,
 			crossDomain: false,
 			skipMask: true
