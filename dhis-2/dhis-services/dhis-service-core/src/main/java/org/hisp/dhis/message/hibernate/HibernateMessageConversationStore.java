@@ -28,7 +28,11 @@ package org.hisp.dhis.message.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.jdbc.StatementBuilder;
@@ -41,7 +45,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -133,46 +137,7 @@ public class HibernateMessageConversationStore
     @SuppressWarnings( "unchecked" )
     public Collection<MessageConversation> getMessageConversations( String[] uids )
     {
-        final String params = prepareArrayParameters( uids );
-
-        if( params == null )
-        {
-            return new ArrayList<>();
-        }
-
-        final String sql =
-            "SELECT mc.messageconversationid, mc.uid, mc.subject, mc.lastmessage, " +
-            "ui.surname, ui.firstname, um.isread, um.isfollowup, " +
-            "(SELECT count(messageconversationid) FROM messageconversation_messages mcm WHERE mcm.messageconversationid=mc.messageconversationid) " +
-            "AS messagecount, mc.created, mc.lastupdated FROM messageconversation mc " +
-            "INNER JOIN messageconversation_usermessages mu on mc.messageconversationid=mu.messageconversationid " +
-            "INNER JOIN usermessage um on mu.usermessageid=um.usermessageid " +
-            "LEFT JOIN userinfo ui on mc.lastsenderid=ui.userinfoid " +
-            "WHERE mc.uid IN (" + params + ") ";
-
-        return jdbcTemplate.query( sql, new RowMapper<MessageConversation>()
-        {
-            @Override
-            public MessageConversation mapRow( ResultSet resultSet, int i )
-                throws SQLException
-            {
-                MessageConversation conversation = new MessageConversation();
-
-                conversation.setId( resultSet.getInt( "messageconversationid" ) );
-                conversation.setUid( resultSet.getString( "uid" ) );
-                conversation.setSubject( resultSet.getString( "subject" ) );
-                conversation.setLastMessage( resultSet.getDate( "lastmessage" ) );
-                conversation.setLastSenderSurname( resultSet.getString( "surname" ) );
-                conversation.setLastSenderFirstname( resultSet.getString( "firstname" ) );
-                conversation.setRead( resultSet.getBoolean( "isread" ) );
-                conversation.setFollowUp( resultSet.getBoolean( "isfollowup" ) );
-                conversation.setMessageCount( resultSet.getInt( "messagecount" ) );
-                conversation.setCreated( resultSet.getTimestamp( "created" ) );
-                conversation.setLastUpdated( resultSet.getTimestamp( "lastupdated" ) );
-
-                return conversation;
-            }
-        } );
+        return getSharingCriteria().add( Restrictions.in( "uid", Arrays.asList( uids ) ) ).list();
     }
 
     @Override

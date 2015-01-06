@@ -293,7 +293,7 @@ public class MessageConversationController
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
         if ( messageConversations.isEmpty() )
         {
@@ -344,7 +344,7 @@ public class MessageConversationController
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
         if ( messageConversations.isEmpty() )
         {
@@ -395,7 +395,7 @@ public class MessageConversationController
             throw new UpdateAccessDeniedException( "Not authorize to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
         if( messageConversations.isEmpty() )
         {
@@ -409,8 +409,11 @@ public class MessageConversationController
 
         for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
-            conversation.setFollowUp( true );
-            messageService.updateMessageConversation( conversation );
+            if( !conversation.isFollowUp() )
+            {
+                conversation.toggleFollowUp( user );
+                messageService.updateMessageConversation( conversation );
+            }
             marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
         }
 
@@ -444,7 +447,7 @@ public class MessageConversationController
             throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( uids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
         if( messageConversations.isEmpty() )
         {
@@ -458,13 +461,12 @@ public class MessageConversationController
 
         for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
-            marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
-
             if ( conversation.isFollowUp() )
             {
                 conversation.toggleFollowUp( user );
                 messageService.updateMessageConversation( conversation );
             }
+            marked.addChild( new SimpleNode( "uid", conversation.getUid() ) );
         }
 
         response.setStatus( HttpServletResponse.SC_OK );
@@ -567,7 +569,7 @@ public class MessageConversationController
             throw new DeleteAccessDeniedException( "Not authorized to modify user: " + user.getUid() );
         }
 
-        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( mcUids );
+        Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, mcUids );
 
         if ( messageConversations.isEmpty() )
         {
