@@ -371,7 +371,7 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // Mark conversations for followup
+    // Mark conversations for follow up
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "followup", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
@@ -423,7 +423,7 @@ public class MessageConversationController
     }
 
     //--------------------------------------------------------------------------
-    // Un-mark conversations for followup
+    // Clear follow up
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "unfollowup", method = RequestMethod.POST, produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE } )
