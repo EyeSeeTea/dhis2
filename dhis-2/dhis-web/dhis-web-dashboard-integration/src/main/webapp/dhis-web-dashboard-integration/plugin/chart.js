@@ -2801,7 +2801,7 @@ Ext.onReady(function() {
                             },
                             markerConfig: {
                                 type: 'circle',
-                                radius: 4
+                                radius: ns.dashboard ? 3 : 4
                             },
                             tips: getDefaultTips(),
                             title: seriesTitles[i]
@@ -3201,7 +3201,7 @@ Ext.onReady(function() {
 		isInitStarted = false,
 		isInitComplete = false,
 		getInit,
-        applyCss,
+		applyCss,
 		execute;
 
 	getInit = function(config) {
