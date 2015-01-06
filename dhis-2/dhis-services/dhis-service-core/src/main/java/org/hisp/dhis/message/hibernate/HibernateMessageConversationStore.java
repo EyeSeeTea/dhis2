@@ -29,6 +29,7 @@ package org.hisp.dhis.message.hibernate;
  */
 
 import org.hibernate.Query;
+import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.message.MessageConversation;
@@ -40,6 +41,7 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -128,15 +130,49 @@ public class HibernateMessageConversationStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Collection<MessageConversation> getMessageConversations( String[] messageConversationUids )
+    @SuppressWarnings( "unchecked" )
+    public Collection<MessageConversation> getMessageConversations( String[] uids )
     {
-        String hql = ( "FROM MessageConversation where uid in :messageConversationUids" );
+        final String params = prepareArrayParameters( uids );
 
-        Query query = getQuery( hql );
-        query.setParameterList( "messageConversationUids", messageConversationUids );
+        if( params == null )
+        {
+            return new ArrayList<>();
+        }
 
-        return query.list();
+        final String sql =
+            "SELECT mc.messageconversationid, mc.uid, mc.subject, mc.lastmessage, " +
+            "ui.surname, ui.firstname, um.isread, um.isfollowup, " +
+            "(SELECT count(messageconversationid) FROM messageconversation_messages mcm WHERE mcm.messageconversationid=mc.messageconversationid) " +
+            "AS messagecount, mc.created, mc.lastupdated FROM messageconversation mc " +
+            "INNER JOIN messageconversation_usermessages mu on mc.messageconversationid=mu.messageconversationid " +
+            "INNER JOIN usermessage um on mu.usermessageid=um.usermessageid " +
+            "LEFT JOIN userinfo ui on mc.lastsenderid=ui.userinfoid " +
+            "WHERE mc.uid IN (" + params + ") ";
+
+        return jdbcTemplate.query( sql, new RowMapper<MessageConversation>()
+        {
+            @Override
+            public MessageConversation mapRow( ResultSet resultSet, int i )
+                throws SQLException
+            {
+                MessageConversation conversation = new MessageConversation();
+
+                conversation.setId( resultSet.getInt( "messageconversationid" ) );
+                conversation.setUid( resultSet.getString( "uid" ) );
+                conversation.setSubject( resultSet.getString( "subject" ) );
+                conversation.setLastMessage( resultSet.getDate( "lastmessage" ) );
+                conversation.setLastSenderSurname( resultSet.getString( "surname" ) );
+                conversation.setLastSenderFirstname( resultSet.getString( "firstname" ) );
+                conversation.setRead( resultSet.getBoolean( "isread" ) );
+                conversation.setFollowUp( resultSet.getBoolean( "isfollowup" ) );
+                conversation.setMessageCount( resultSet.getInt( "messagecount" ) );
+                conversation.setCreated( resultSet.getTimestamp( "created" ) );
+                conversation.setLastUpdated( resultSet.getTimestamp( "lastupdated" ) );
+
+                return conversation;
+            }
+        } );
     }
 
     @Override
@@ -258,5 +294,31 @@ public class HibernateMessageConversationStore
         } );
 
         return recipients;
+    }
+
+    // -------------------------------------------------------------------------
+    // Supportive methods
+    // -------------------------------------------------------------------------
+
+    private String prepareArrayParameters( String[] parameterArray )
+    {
+        if( parameterArray.length < 1 )
+        {
+            return null;
+        }
+
+        String params = parameterArray[0];
+
+        for ( int i = 1 ; i < parameterArray.length; i++ )
+        {
+            if( !CodeGenerator.isValidCode( parameterArray[i] ) )
+            {
+                return null;
+            }
+
+            params += "," + "'" + parameterArray[i] + "'";
+        }
+
+        return params;
     }
 }
