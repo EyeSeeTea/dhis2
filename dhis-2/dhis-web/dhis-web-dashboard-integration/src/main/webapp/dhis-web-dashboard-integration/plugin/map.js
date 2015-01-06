@@ -1501,6 +1501,8 @@ Ext.onReady(function () {
 
             panel.div.className += ' ' + name;
             panel.div.childNodes[0].className += ' ' + name + 'Button';
+
+	    return panel;
         };
 
         olmap = new OpenLayers.Map({
@@ -1555,7 +1557,7 @@ Ext.onReady(function () {
         });
 
 	olmap.addButtonControl = addControl;
-
+	
         return olmap;
     };
 
@@ -6388,6 +6390,8 @@ Ext.onReady(function () {
                     }
 
                     this.layer.legendPanel.update(element.outerHTML);
+
+		    return element;
                 },
 
                 CLASS_NAME: "mapfish.GeoStat." + name
