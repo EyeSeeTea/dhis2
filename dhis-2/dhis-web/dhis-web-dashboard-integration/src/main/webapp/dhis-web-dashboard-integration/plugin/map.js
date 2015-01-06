@@ -1547,10 +1547,10 @@ Ext.onReady(function () {
             gis.layer.thematic4.core.reset();
         };
 
-        addControl('zoomIn', olmap.zoomIn);
-        addControl('zoomOut', olmap.zoomOut);
-        addControl('zoomVisible', olmap.zoomToVisibleExtent);
-        addControl('measure', function () {
+        addControl('zoomIn' + (gis.dashboard ? '-vertical' : ''), olmap.zoomIn);
+        addControl('zoomOut' + (gis.dashboard ? '-vertical' : ''), olmap.zoomOut);
+        addControl('zoomVisible' + (gis.dashboard ? '-vertical' : ''), olmap.zoomToVisibleExtent);
+        addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
             GIS.core.MeasureWindow(gis).show();
         });
 
@@ -6765,16 +6765,15 @@ Ext.onReady(function () {
         css += '.gis-container-default .x-window-body { padding: 5px; background: #fff; } \n';
         css += '.olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n';
         css += '.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';
-        //css += '.olControlPanel.zoomIn { right: 72px; } \n';
-        //css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
-        //css += '.olControlPanel.zoomOut { right: 48px; } \n';
-        //css += '.olControlPanel.zoomVisible { right: 24px; } \n';
-	//css += '.olControlPanel.zoomIn { right: 72px; } \n';
-        //css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
-        css += '.olControlPanel.zoomOut { top: 24px; } \n';
-        css += '.olControlPanel.zoomVisible { top: 48px; } \n';
-	css += '.olControlPanel.measure { top: 72px; } \n';
-	css += '.olControlPanel.measure .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        css += '.olControlPanel.zoomIn { right: 72px; } \n';
+        css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        css += '.olControlPanel.zoomOut { right: 48px; } \n';
+        css += '.olControlPanel.zoomVisible { right: 24px; } \n';	
+        css += '.olControlPanel.zoomIn-vertical { right: 1px; } \n';
+	css += '.olControlPanel.zoomOut-vertical { top: 24px; right: 1px; } \n';
+        css += '.olControlPanel.zoomVisible-vertical { top: 48px; right: 1px; } \n';
+	css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
+	css += '.olControlPanel.measure-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
         css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
@@ -6964,13 +6963,13 @@ Ext.onReady(function () {
         afterRender = function (vp) {
 
 	    // map buttons
-	    var clsArray = ['zoomInButton', 'zoomOutButton', 'zoomVisibleButton', 'measureButton', 'legendButton'],
+	    var clsArray = ['zoomIn-verticalButton', 'zoomOut-verticalButton', 'zoomVisible-verticalButton', 'measure-verticalButton', 'legend-verticalButton'],
 		map = {
-		    zoomInButton: 'zoomin_24.png',
-		    zoomOutButton: 'zoomout_24.png',
-		    zoomVisibleButton: 'zoomvisible_24.png',
-		    measureButton: 'measure_24.png',
-		    legendButton: 'legend_24.png'
+		    'zoomIn-verticalButton': 'zoomin_24.png',
+		    'zoomOut-verticalButton': 'zoomout_24.png',
+		    'zoomVisible-verticalButton': 'zoomvisible_24.png',
+		    'measure-verticalButton': 'measure_24.png',
+		    'legend-verticalButton': 'legend_24.png'
 		};
 
 	    for (var i = 0, cls, elArray; i < clsArray.length; i++) {
