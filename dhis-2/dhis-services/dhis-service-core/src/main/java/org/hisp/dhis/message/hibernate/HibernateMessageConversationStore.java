@@ -307,16 +307,21 @@ public class HibernateMessageConversationStore
             return null;
         }
 
-        String params = parameterArray[0];
+        String params = "";
 
-        for ( int i = 1 ; i < parameterArray.length; i++ )
+        for ( int i = 0 ; i < parameterArray.length; i++ )
         {
             if( !CodeGenerator.isValidCode( parameterArray[i] ) )
             {
-                return null;
+                continue;
             }
 
-            params += "," + "'" + parameterArray[i] + "'";
+            if( i > 0 )
+            {
+                params += ",";
+            }
+
+            params += "'" + parameterArray[i] + "'";
         }
 
         return params;
