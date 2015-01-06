@@ -429,27 +429,27 @@ dhis2.db.renderDashboard = function( id )
 			"i18n_remove": i18n_remove, "i18n_view": i18n_view_full_size, "i18n_share": i18n_share_interpretation, "i18n_click": i18n_click_to_explore_drag_to_new_position } ) );
 
 		    DHIS.getChart({
-                url: '..',
-                el: 'plugin-' + dashboardItem.id,
-                id: dashboardItem.chart.id,
-                width: contentWidth,
-                height: contentHeight,
-                dashboard: true,
-                skipMask: true,
-                domainAxisStyle: {
-                    labelRotation: 45,
-                    labelFont: '10px arial,sans-serif'
-                },
-                rangeAxisStyle: {
-                    labelFont: '9px arial,sans-serif'
-                },
-                legendStyle: {
-                    labelMaxLength: 10,
-                    titleFont: '15px arial,sans-serif'
-                },
-                seriesStyle: {
-                    labelFontSize: '9px arial,sans-serif'
-                }
+			url: '..',
+			el: 'plugin-' + dashboardItem.id,
+			id: dashboardItem.chart.id,
+			width: contentWidth,
+			height: contentHeight,
+			dashboard: true,
+			skipMask: true,
+			domainAxisStyle: {
+			    labelRotation: 45,
+			    labelFont: '10px arial,sans-serif'
+			},
+			rangeAxisStyle: {
+			    labelFont: '9px arial,sans-serif'
+			},
+			legendStyle: {
+			    labelMaxLength: 10,
+			    titleFont: '15px arial,sans-serif'
+			},
+			seriesStyle: {
+			    labelFontSize: '9px arial,sans-serif'
+			}
 		    });
 		}
 		if ( "eventChart" == dashboardItem.type )
@@ -458,12 +458,12 @@ dhis2.db.renderDashboard = function( id )
 			"i18n_remove": i18n_remove, "i18n_view": i18n_view_full_size, "i18n_share": i18n_share_interpretation, "i18n_click": i18n_click_to_explore_drag_to_new_position } ) );
 
 		    DHIS.getEventChart({
-                url: '..',
-                el: 'plugin-' + dashboardItem.id,
-                id: dashboardItem.eventChart.id,
-                width: contentWidth,
-                height: 290,
-                skipMask: true
+			url: '..',
+			el: 'plugin-' + dashboardItem.id,
+			id: dashboardItem.eventChart.id,
+			width: contentWidth,
+			height: 290,
+			skipMask: true
 		    });
 		}
 		else if ( "map" == dashboardItem.type )
@@ -472,14 +472,14 @@ dhis2.db.renderDashboard = function( id )
 			"i18n_remove": i18n_remove, "i18n_view": i18n_view_full_size, "i18n_share": i18n_share_interpretation, "i18n_click": i18n_click_to_explore_drag_to_new_position } ) );
 
 		    DHIS.getMap({
-                url: '..',
-                el: 'plugin-' + dashboardItem.id,
-                id: dashboardItem.map.id,
-                width: contentWidth,
-                height: 290,
-                dashboard: true,
-                crossDomain: false,
-                skipMask: true
+			url: '..',
+			el: 'plugin-' + dashboardItem.id,
+			id: dashboardItem.map.id,
+			width: contentWidth,
+			height: 290,
+			dashboard: true,
+			crossDomain: false,
+			skipMask: true
 		    });
 		}
 		else if ( "reportTable" == dashboardItem.type )
@@ -488,14 +488,14 @@ dhis2.db.renderDashboard = function( id )
 			"i18n_remove": i18n_remove, "i18n_view": i18n_view_full_size, "i18n_share": i18n_share_interpretation, "i18n_click": i18n_click_to_explore_drag_to_new_position } ) );
 
 		    DHIS.getTable({
-                url: '..',
-                el: 'plugin-' + dashboardItem.id,
-                id: dashboardItem.reportTable.id,
-                width: contentWidth - scrollbarWidth,
-                height: 290,
-                skipMask: true,
-                displayDensity: 'compact',
-                fontSize: 'small'
+			url: '..',
+			el: 'plugin-' + dashboardItem.id,
+			id: dashboardItem.reportTable.id,
+			width: contentWidth,
+			height: 290,
+			skipMask: true,
+			displayDensity: 'compact',
+			fontSize: 'small'
 		    });
 		}
 		else if ( "eventReport" == dashboardItem.type )
@@ -503,16 +503,16 @@ dhis2.db.renderDashboard = function( id )
 		    $d.append( $.tmpl( dhis2.db.tmpl.reportTableItem, { "itemId": dashboardItem.id, "id": dashboardItem.reportTable.id, "name": dashboardItem.reportTable.name,
 			"i18n_remove": i18n_remove, "i18n_view": i18n_view_full_size, "i18n_share": i18n_share_interpretation, "i18n_click": i18n_click_to_explore_drag_to_new_position } ) );
 
-		    //DHIS.getEventReport({
-                //url: '..',
-                //el: 'plugin-' + dashboardItem.id,
-                //id: dashboardItem.reportTable.id,
-                //width: contentWidth - scrollbarWidth,
-                //height: 290,
-                //skipMask: true,
-                //displayDensity: 'compact',
-                //fontSize: 'small'
-		    //});
+		    DHIS.getEventReport({
+			url: '..',
+			el: 'plugin-' + dashboardItem.id,
+			id: dashboardItem.reportTable.id,
+			width: contentWidth - scrollbarWidth,
+			height: 290,
+			skipMask: true,
+			displayDensity: 'compact',
+			fontSize: 'small'
+		    });
 		}
 		else if ( "users" == dashboardItem.type )
 		{
