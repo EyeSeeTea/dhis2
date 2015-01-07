@@ -368,7 +368,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* Service for getting tracked entity instances */
-.factory('TEIService', function($http, $q, AttributesFactory, OptionSetService, DateUtils) {
+.factory('TEIService', function($http, $q, AttributesFactory, OptionSetService, CurrentSelection, DateUtils) {
 
     return {        
         convertFromApiToUser: function(promise, optionSets){            
@@ -443,7 +443,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             
             return def.promise;
-        },
+        },        
         get: function(entityUid, optionSets){            
             var promise = $http.get(  '../api/trackedEntityInstances/' +  entityUid );
             this.convertFromApiToUser(promise, optionSets).then(function(response){
@@ -500,38 +500,108 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;
         },
-        processAttributes: function(selectedTei, selectedProgram, selectedEnrollment, optionSets){
+        processAttributes: function(selectedTei, selectedProgram, selectedEnrollment){
             var def = $q.defer();            
             if(selectedTei.attributes){
                 if(selectedProgram && selectedEnrollment){
                     //show attribute for selected program and enrollment
                     AttributesFactory.getByProgram(selectedProgram).then(function(atts){
-                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, true, optionSets);
+                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, true);
                         def.resolve(selectedTei);
                     }); 
                 }
                 if(selectedProgram && !selectedEnrollment){
                     //show attributes for selected program            
                     AttributesFactory.getByProgram(selectedProgram).then(function(atts){    
-                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, false, optionSets);
+                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, false);
                         def.resolve(selectedTei);
                     }); 
                 }
                 if(!selectedProgram && !selectedEnrollment){
                     //show attributes in no program            
                     AttributesFactory.getWithoutProgram().then(function(atts){                
-                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, false, optionSets);     
+                        selectedTei.attributes = AttributesFactory.showRequiredAttributes(atts,selectedTei.attributes, false);     
                         def.resolve(selectedTei);
                     });
                 }
             }       
             return def.promise;
+        },
+        reconstructForWebApi: function(attributes, attributesById, optionSets){
+            
+            var registrationAttributes = [];
+            var formEmpty = true;
+            angular.forEach(attributes, function(att){
+                if(att.valueType === 'trueOnly'){
+                    if(att.value){
+                        registrationAttributes.push({attribute: att.id, value: ''});
+                    }
+                    else{
+                        registrationAttributes.push({attribute: att.id, value: 'true'});
+                    }
+                    
+                    formEmpty = false;
+                }            
+                else{
+                    var val = att.value;
+                    if(val){
+                        if(att.valueType === 'date'){   
+                            val = DateUtils.formatFromUserToApi(val);
+                        }
+                        if(att.valueType === 'optionSet' && 
+                                attributesById[att.id] && 
+                                attributesById[att.id].optionSet && 
+                                optionSets[attributesById[att.id].optionSet.id]){                        
+                            val = OptionSetService.getCode(optionSets[attributesById[att.id].optionSet.id].options, val);
+                        }
+
+                        registrationAttributes.push({attribute: att.id, value: val});
+                        formEmpty = false;
+                    }
+                }                        
+            });
+
+            return {attributes: registrationAttributes, formEmpty: formEmpty};
+        },
+        reconstructForUser: function(tei, attributes, attributesById, optionSets){
+            var registrationAttributes = [];
+            var formEmpty = true;
+            angular.forEach(attributes, function(att){            
+                if(att.valueType === 'trueOnly'){ 
+                    if(!tei[att.id]){
+                        registrationAttributes.push({attribute: att.id, value: ''});
+                        formEmpty = false;                    
+                    }
+                    else{
+                        registrationAttributes.push({attribute: att.id, value: 'true'});
+                        formEmpty = false;
+                    }
+                }            
+                else{
+                    if(tei[att.id] !== '' && tei[att.id]){
+
+                        var val = tei[att.id];                    
+                        if(att.valueType === 'date'){   
+                            val = DateUtils.formatFromApiToUser(val);
+                        }   
+
+                        if(att.valueType === 'optionSet' && attributesById[att.id] && attributesById[att.id].optionSet && optionSets[attributesById[att.id].optionSet.id]){                        
+                            val = OptionSetService.getName(optionSets[attributesById[att.id].optionSet.id].options, val);
+                        }
+
+                        registrationAttributes.push({attribute: att.id, value: val});
+                        formEmpty = false;
+                    }
+                }                        
+            });
+
+            return {attributes: registrationAttributes, formEmpty: formEmpty};
         }
     };
 })
 
 /* Factory for getting tracked entity attributes */
-.factory('AttributesFactory', function($q, $rootScope, TCStorageService, orderByFilter, DateUtils) {      
+.factory('AttributesFactory', function($q, $rootScope, TCStorageService, orderByFilter) {      
 
     return {
         getAll: function(){
@@ -606,7 +676,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });            
             return def.promise();            
         },
-        showRequiredAttributes: function(requiredAttributes, teiAttributes, fromEnrollment, optionSets){        
+        showRequiredAttributes: function(requiredAttributes, teiAttributes, fromEnrollment){        
             
             //first reset teiAttributes
             for(var j=0; j<teiAttributes.length; j++){
@@ -883,28 +953,34 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .service('CurrentSelection', function(){
     this.currentSelection = '';
     this.relationshipInfo = '';
+    this.optionSets = null;
     
     this.set = function(currentSelection){  
         this.currentSelection = currentSelection;        
-    };
-    
+    };    
     this.get = function(){
         return this.currentSelection;
     };
     
     this.setRelationshipInfo = function(relationshipInfo){  
         this.relationshipInfo = relationshipInfo;        
-    };
-    
+    };    
     this.getRelationshipInfo = function(){
         return this.relationshipInfo;
     };
+    
+    this.setOptionSets = function(optionSets){
+        this.optionSets = optionSets;
+    };
+    this.getOptionSets = function(){
+        return this.optionSets;
+    };    
 })
 
-.service('TEIGridService', function(OrgUnitService, DateUtils, $translate, AttributesFactory){
+.service('TEIGridService', function(OrgUnitService, OptionSetService, DateUtils, $translate, AttributesFactory){
     
     return {
-        format: function(grid, map, optionNamesByCode){
+        format: function(grid, map, optionSets){
             if(!grid || !grid.rows){
                 return;
             }
@@ -946,11 +1022,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             if(row[i] && row[i] !== ''){
                                 isEmpty = false;
                                 var val = row[i];
+                                
                                 if(attributes[grid.headers[i].name] && 
                                         attributes[grid.headers[i].name].valueType === 'optionSet' && 
-                                        optionNamesByCode &&    
-                                        optionNamesByCode[  '"' + val + '"']){
-                                    val = optionNamesByCode[  '"' + val + '"'];
+                                        optionSets &&    
+                                        attributes[grid.headers[i].name].optionSet &&
+                                        optionSets[attributes[grid.headers[i].name].optionSet.id] ){
+                                    val = OptionSetService.getName(optionSets[attributes[grid.headers[i].name].optionSet.id].options, val);
                                 }
                                 if(attributes[grid.headers[i].name] && attributes[grid.headers[i].name].valueType === 'date'){                                    
                                     val = DateUtils.formatFromApiToUser( val );
@@ -967,7 +1045,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             else{
                                 entityList.push(entity);
                             }
-                        }        
+                        }
                     });                
                 });
             }); 

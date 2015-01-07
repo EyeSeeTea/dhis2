@@ -132,6 +132,10 @@ public class TableAlteror
         executeSql( "DROP TABLE expressionoptioncombo" );
         executeSql( "DROP TABLE orgunitgroupdatasets" );
         executeSql( "DROP TABLE datavalue_audit" );
+        executeSql( "DROP TABLE datadictionaryusergroupaccesses" );
+        executeSql( "DROP TABLE datadictionaryindicators" );
+        executeSql( "DROP TABLE datadictionarydataelements" );
+        executeSql( "DROP TABLE datadictionary" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column userid" );
         executeSql( "ALTER TABLE categoryoptioncombo drop column publicaccess" );
         executeSql( "ALTER TABLE dataelementcategoryoption drop column categoryid" );
@@ -732,6 +736,7 @@ public class TableAlteror
         executeSql( "UPDATE attribute SET userattribute=false WHERE userattribute IS NULL" );
         executeSql( "UPDATE attribute SET usergroupattribute=false WHERE usergroupattribute IS NULL" );
         executeSql( "UPDATE attribute SET datasetattribute=false WHERE datasetattribute IS NULL" );
+        executeSql( "UPDATE attribute SET programattribute=false WHERE programattribute IS NULL" );
 
         executeSql( "ALTER TABLE trackedentityattributedimension DROP COLUMN operator" );
         executeSql( "ALTER TABLE trackedentitydataelementdimension DROP COLUMN operator" );
@@ -774,7 +779,11 @@ public class TableAlteror
         executeSql( "alter table datavalueaudit alter column attributeoptioncomboid set not null;" );
         
         executeSql( "update dataelementcategoryoption set shortname = substring(name,0,50) where shortname is null" );
-        
+
+        // AttributeValue
+        executeSql( "UPDATE attributevalue SET created=now() WHERE created IS NULL" );
+        executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
+
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();
         upgradeMapViewsToAnalyticalObject();

@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.NameableObject.NameableProperty;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -630,6 +631,56 @@ public class DefaultIdentifiableObjectManager
 
     @Override
     @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, IdentifiableProperty property )
+    {
+        Map<String, T> map = new HashMap<>();
+
+        GenericIdentifiableObjectStore<T> store = (GenericIdentifiableObjectStore<T>) getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return map;
+        }
+
+        Collection<T> objects = store.getAllNoAcl();
+
+        for ( T object : objects )
+        {
+            if ( IdentifiableProperty.ID.equals( property ) )
+            {
+                if ( object.getId() > 0 )
+                {
+                    map.put( String.valueOf( object.getId() ), object );
+                }
+            }
+            else if ( IdentifiableProperty.UID.equals( property ) )
+            {
+                if ( object.getUid() != null )
+                {
+                    map.put( object.getUid(), object );
+                }
+            }
+            else if ( IdentifiableProperty.CODE.equals( property ) )
+            {
+                if ( object.getCode() != null )
+                {
+                    map.put( object.getCode(), object );
+                }
+            }
+            else if ( IdentifiableProperty.NAME.equals( property ) )
+            {
+                if ( object.getName() != null )
+                {
+                    map.put( object.getName(), object );
+                }
+            }
+        }
+
+        return map;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
     public <T extends NameableObject> Map<String, T> getIdMap( Class<T> clazz, NameableProperty property )
     {
         Map<String, T> map = new HashMap<>();
@@ -637,6 +688,30 @@ public class DefaultIdentifiableObjectManager
         GenericNameableObjectStore<T> store = (GenericNameableObjectStore<T>) getNameableObjectStore( clazz );
 
         Collection<T> objects = store.getAll();
+
+        for ( T object : objects )
+        {
+            if ( property == NameableProperty.SHORT_NAME )
+            {
+                if ( object.getShortName() != null )
+                {
+                    map.put( object.getShortName(), object );
+                }
+            }
+        }
+
+        return map;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends NameableObject> Map<String, T> getIdMapNoAcl( Class<T> clazz, NameableProperty property )
+    {
+        Map<String, T> map = new HashMap<>();
+
+        GenericNameableObjectStore<T> store = (GenericNameableObjectStore<T>) getNameableObjectStore( clazz );
+
+        Collection<T> objects = store.getAllNoAcl();
 
         for ( T object : objects )
         {
@@ -743,6 +818,47 @@ public class DefaultIdentifiableObjectManager
         }
     }
 
+    @Override
+    public <T extends IdentifiableObject> int getCountNoAcl( Class<T> clazz )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store != null )
+        {
+            return store.getCountNoAcl();
+        }
+
+        return 0;
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Collection<T> getAllNoAcl( Class<T> clazz )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (Collection<T>) store.getAllNoAcl();
+    }
+
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends IdentifiableObject> Collection<T> getBetweenNoAcl( Class<T> clazz, int first, int max )
+    {
+        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (Collection<T>) store.getAllNoAcl( first, max );
+    }
+
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -758,7 +874,7 @@ public class DefaultIdentifiableObjectManager
         {
             store = identifiableObjectStoreMap.get( clazz.getSuperclass() );
 
-            if ( store == null )
+            if ( store == null && !UserCredentials.class.isAssignableFrom( clazz ) )
             {
                 log.warn( "No IdentifiableObjectStore found for class: " + clazz );
             }

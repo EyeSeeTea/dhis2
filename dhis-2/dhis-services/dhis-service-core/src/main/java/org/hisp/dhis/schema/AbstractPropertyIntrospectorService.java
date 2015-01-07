@@ -28,9 +28,11 @@ package org.hisp.dhis.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
  */
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
@@ -53,10 +55,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -139,14 +140,14 @@ public abstract class AbstractPropertyIntrospectorService
         LocalSessionFactoryBean sessionFactoryBean = getLocalSessionFactoryBean();
         PersistentClass persistentClass = sessionFactoryBean.getConfiguration().getClassMapping( klass.getName() );
 
-        Iterator propertyIterator = persistentClass.getPropertyClosureIterator();
+        Iterator<?> propertyIterator = persistentClass.getPropertyClosureIterator();
 
         Map<String, Property> properties = new HashMap<>();
 
         while ( propertyIterator.hasNext() )
         {
             Property property = new Property( klass );
-            property.setNullable( true );
+            property.setRequired( false );
             property.setPersisted( true );
             property.setOwner( true );
 
@@ -185,10 +186,10 @@ public abstract class AbstractPropertyIntrospectorService
                 Column column = (Column) hibernateProperty.getColumnIterator().next();
 
                 property.setUnique( column.isUnique() );
-                property.setNullable( column.isNullable() );
+                property.setRequired( !column.isNullable() );
 
-                property.setMaxLength( column.getLength() );
-                property.setMinLength( 0 );
+                property.setMax( column.getLength() );
+                property.setMin( 0 );
             }
 
             properties.put( property.getName(), property );

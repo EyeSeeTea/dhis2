@@ -37,6 +37,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -62,6 +64,8 @@ import com.google.common.collect.Maps;
 public class DefaultDataApprovalLevelService
     implements DataApprovalLevelService
 {
+    private static final Log log = LogFactory.getLog( DefaultDataApprovalLevelService.class );
+    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -150,7 +154,9 @@ public class DefaultDataApprovalLevelService
 
         tracePrint( "getHighestDataApprovalLevel - data approval level count: " + getAllDataApprovalLevels().size() );
 
-        for ( DataApprovalLevel level : getUserDataApprovalLevels() )
+        List<DataApprovalLevel> userApprovalLevels = getUserDataApprovalLevels();
+        
+        for ( DataApprovalLevel level : userApprovalLevels )
         {
             tracePrint( "getHighestDataApprovalLevel - data approval level: " + level.getName() );
 
@@ -189,7 +195,9 @@ public class DefaultDataApprovalLevelService
 
         int orgUnitLevel = organisationUnitService.getLevelOfOrganisationUnit( orgUnit );
 
-        for ( DataApprovalLevel level : Lists.reverse( getDataApprovalLevelsByOrgUnitLevel( orgUnitLevel ) ) )
+        List<DataApprovalLevel> approvalLevels = getDataApprovalLevelsByOrgUnitLevel( orgUnitLevel );
+        
+        for ( DataApprovalLevel level : Lists.reverse( approvalLevels ) )
         {
             if ( level.getCategoryOptionGroupSet() == null )
             {
@@ -254,12 +262,19 @@ public class DefaultDataApprovalLevelService
         {
             Set<Integer> userOrgUnitLevels = new HashSet<>();
 
+            int lowestNumberOrgUnitLevel = 99999999;
+
             for ( OrganisationUnit orgUnit : user.getOrganisationUnits() )
             {
                 int orgUnitLevel = orgUnit.hasLevel() ?
                     orgUnit.getLevel() : organisationUnitService.getLevelOfOrganisationUnit( orgUnit.getId() );
 
                 userOrgUnitLevels.add( orgUnitLevel );
+
+                if ( orgUnitLevel < lowestNumberOrgUnitLevel )
+                {
+                    lowestNumberOrgUnitLevel = orgUnitLevel;
+                }
             }
 
             boolean assignedAtLevel = false;
@@ -267,26 +282,22 @@ public class DefaultDataApprovalLevelService
             boolean approvableAtAllLowerLevels = false;
 
             boolean canSeeAllDimensions = CollectionUtils.isEmpty( userService.getCoDimensionConstraints( user.getUserCredentials() ) )
-                    && CollectionUtils.isEmpty( userService.getCogDimensionConstraints( user.getUserCredentials() ) );
+                && CollectionUtils.isEmpty( userService.getCogDimensionConstraints( user.getUserCredentials() ) );
 
-            for ( DataApprovalLevel approvalLevel : getAllDataApprovalLevels() )
+            List<DataApprovalLevel> approvalLevels = getAllDataApprovalLevels();
+            
+            for ( DataApprovalLevel approvalLevel : approvalLevels )
             {
                 CategoryOptionGroupSet cogs = approvalLevel.getCategoryOptionGroupSet();
 
                 Boolean canReadThisLevel = ( securityService.canRead( approvalLevel ) && (
                     ( cogs == null && canSeeAllDimensions ) ||
                     ( cogs != null && securityService.canRead( cogs ) && !CollectionUtils.isEmpty( categoryService.getCategoryOptionGroups( cogs ) ) ) ) );
-
                 
                 // Test using assignedAtLevel and approvableAtLevel values from the previous (higher) level.
                 
-                Boolean addBecauseOfPreviousLevel = false;
-
-                if ( canReadThisLevel && ( approvableAtLevel // Approve at previous higher level implies unapprove at current level.
-                    || ( assignedAtLevel && mayAcceptAtLowerLevels ) ) ) // Assigned at previous level and mayAcceptAtLowerLevels means may accept here.
-                {
-                    addBecauseOfPreviousLevel = true;
-                }
+                Boolean addBecauseOfPreviousLevel = canReadThisLevel && ( approvableAtLevel // Approve at previous higher level implies unapprove at current level.
+                    || ( assignedAtLevel && mayAcceptAtLowerLevels ) ); // Assigned at previous level and mayAcceptAtLowerLevels means may accept here.
 
                 if ( assignedAtLevel && mayApproveAtLowerLevels )
                 {
@@ -295,7 +306,8 @@ public class DefaultDataApprovalLevelService
                 
                 // Get new values of assignedAtLevel and approvableAtLevel for the current approval level.
                 
-                assignedAtLevel = canReadThisLevel && userOrgUnitLevels.contains( approvalLevel.getOrgUnitLevel() );
+                assignedAtLevel = canReadThisLevel && ( userOrgUnitLevels.contains( approvalLevel.getOrgUnitLevel() )
+                        || ( ( mayApproveAtLowerLevels || mayAcceptAtLowerLevels ) && approvalLevel.getOrgUnitLevel() > lowestNumberOrgUnitLevel ) );
 
                 approvableAtLevel = canReadThisLevel && ( ( mayApprove && assignedAtLevel ) || approvableAtAllLowerLevels );
                 
@@ -541,7 +553,7 @@ public class DefaultDataApprovalLevelService
 
     private void tracePrint( String s ) // Temporary, for development
     {
-//        System.out.println( s );
+        log.trace( s );
     }
 
     /**

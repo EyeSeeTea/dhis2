@@ -32,7 +32,6 @@ import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensions;
 import static org.hisp.dhis.webapi.utils.ContextUtils.DATE_PATTERN;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Date;
 import java.util.Set;
 
@@ -104,9 +103,9 @@ public class EventChartController
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input ) throws Exception
+    public void postJsonObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        EventChart eventChart = JacksonUtils.fromJson( input, EventChart.class );
+        EventChart eventChart = JacksonUtils.fromJson( request.getInputStream(), EventChart.class );
 
         mergeEventChart( eventChart );
 
@@ -117,7 +116,7 @@ public class EventChartController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putJsonObject( @PathVariable String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         EventChart eventChart = eventChartService.getEventChart( uid );
 
@@ -127,7 +126,7 @@ public class EventChartController
             return;
         }
 
-        EventChart newEventChart = JacksonUtils.fromJson( input, EventChart.class );
+        EventChart newEventChart = JacksonUtils.fromJson( request.getInputStream(), EventChart.class );
 
         mergeEventChart( newEventChart );
 
@@ -138,7 +137,7 @@ public class EventChartController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE )
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request, @PathVariable( "uid" ) String uid ) throws Exception
+    public void deleteObject( @PathVariable String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         EventChart eventChart = eventChartService.getEventChart( uid );
 

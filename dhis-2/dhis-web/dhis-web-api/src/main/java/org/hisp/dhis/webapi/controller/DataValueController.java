@@ -66,6 +66,10 @@ public class DataValueController
 {
     public static final String RESOURCE_PATH = "/dataValues";
 
+    // ---------------------------------------------------------------------
+    // Dependencies
+    // ---------------------------------------------------------------------
+
     @Autowired
     private CurrentUserService currentUserService;
 
@@ -86,6 +90,10 @@ public class DataValueController
 
     @Autowired
     private InputUtils inputUtils;
+
+    // ---------------------------------------------------------------------
+    // POST
+    // ---------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_ADD')" )
     @RequestMapping( method = RequestMethod.POST, produces = "text/plain" )
@@ -177,6 +185,17 @@ public class DataValueController
         }
 
         // ---------------------------------------------------------------------
+        // Future period constraint check
+        // ---------------------------------------------------------------------
+
+        if ( period.isFuture() && !dataElement.isAllowFuturePeriods() )
+        {
+            ContextUtils.conflictResponse( response, "Cannot save data value for future period. " +
+                "One or more data sets for data element " + de + " does not allow future periods." );
+            return;
+        }
+
+        // ---------------------------------------------------------------------
         // Locking validation
         // ---------------------------------------------------------------------
 
@@ -239,6 +258,10 @@ public class DataValueController
             dataValueService.updateDataValue( dataValue );
         }
     }
+
+    // ---------------------------------------------------------------------
+    // DELETE
+    // ---------------------------------------------------------------------
 
     @PreAuthorize( "hasRole('ALL') or hasRole('F_DATAVALUE_DELETE')" )
     @RequestMapping( method = RequestMethod.DELETE, produces = "text/plain" )
@@ -334,6 +357,10 @@ public class DataValueController
 
         dataValueService.deleteDataValue( dataValue );
     }
+
+    // ---------------------------------------------------------------------
+    // GET
+    // ---------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
     public String getDataValue(

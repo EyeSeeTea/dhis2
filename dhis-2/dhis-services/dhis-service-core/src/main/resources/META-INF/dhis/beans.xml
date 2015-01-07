@@ -270,8 +270,9 @@
   </bean>
 
   <bean id="org.hisp.dhis.user.UserCredentialsStore" class="org.hisp.dhis.user.hibernate.HibernateUserCredentialsStore">
+    <property name="clazz" value="org.hisp.dhis.user.UserCredentials" />
     <property name="sessionFactory" ref="sessionFactory" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="cacheable" value="true" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserGroupStore" class="org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore">
@@ -585,22 +586,25 @@
 
   <bean id="org.hisp.dhis.user.UserSettingService" class="org.hisp.dhis.user.DefaultUserSettingService">
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="userSettingStore" ref="org.hisp.dhis.user.UserSettingStore" />
     <property name="userService" ref="org.hisp.dhis.user.UserService" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserService" class="org.hisp.dhis.user.DefaultUserService">
     <property name="userStore" ref="org.hisp.dhis.user.UserStore" />
+    <property name="userGroupService" ref="org.hisp.dhis.user.UserGroupService" />
     <property name="userCredentialsStore" ref="org.hisp.dhis.user.UserCredentialsStore" />
     <property name="userAuthorityGroupStore" ref="org.hisp.dhis.user.UserAuthorityGroupStore" />
-    <property name="userSettingStore" ref="org.hisp.dhis.user.UserSettingStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="categoryService" ref="org.hisp.dhis.dataelement.DataElementCategoryService" />
-    <property name="securityService" ref="org.hisp.dhis.security.SecurityService" />
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
+    <property name="passwordManager" ref="org.hisp.dhis.security.PasswordManager" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserGroupService" class="org.hisp.dhis.user.DefaultUserGroupService">
     <property name="userGroupStore" ref="org.hisp.dhis.user.UserGroupStore" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="aclService" ref="org.hisp.dhis.acl.AclService" />
   </bean>
 
   <bean id="org.hisp.dhis.user.UserGroupAccessService" class="org.hisp.dhis.user.DefaultUserGroupAccessService">
@@ -629,14 +633,13 @@
     <property name="messageConversationStore" ref="org.hisp.dhis.message.MessageConversationStore" />
     <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
     <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
-    <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
-    <property name="emailMessageSender" ref="emailMessageSender" />
+    <property name="emailService" ref="org.hisp.dhis.email.EmailService" />
   </bean>
 
   <bean id="emailMessageSender" class="org.hisp.dhis.message.EmailMessageSender">
     <property name="systemSettingManager" ref="org.hisp.dhis.setting.SystemSettingManager" />
     <property name="configurationService" ref="org.hisp.dhis.configuration.ConfigurationService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
+    <property name="userSettingService" ref="org.hisp.dhis.user.UserSettingService" />
   </bean>
 
   <bean id="org.hisp.dhis.email.EmailService" class="org.hisp.dhis.email.DefaultEmailService">
@@ -887,7 +890,6 @@
     <property name="smsCommandService" ref="smsCommandService" />
     <property name="messageService" ref="org.hisp.dhis.message.MessageService" />
     <property name="smsMessageSender" ref="org.hisp.dhis.sms.SmsMessageSender" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
     <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
   </bean>
 
@@ -899,10 +901,7 @@
     <property name="incomingSmsService" ref="org.hisp.dhis.sms.incoming.IncomingSmsService" />
   </bean>
 
-  <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender">
-    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
-    <property name="userService" ref="org.hisp.dhis.user.UserService" />
-  </bean>
+  <bean id="org.hisp.dhis.sms.SmsMessageSender" class="org.hisp.dhis.sms.SmsMessageSender"/>
 
   <bean id="org.hisp.dhis.sms.task.SendSmsTask" class="org.hisp.dhis.sms.task.SendSmsTask" />
 
@@ -944,7 +943,7 @@
   <!-- Startup routine definitions -->
 
   <bean id="org.hisp.dhis.startup.InitTableAlteror" class="org.hisp.dhis.startup.InitTableAlteror">
-    <property name="name" value="TableAlteror" />
+    <property name="name" value="InitTableAlteror" />
     <property name="runlevel" value="1" />
     <property name="skipInTests" value="true" />
   </bean>

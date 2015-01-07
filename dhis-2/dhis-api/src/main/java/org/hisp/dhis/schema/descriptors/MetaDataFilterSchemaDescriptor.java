@@ -33,12 +33,14 @@ import org.hisp.dhis.schema.Authority;
 import org.hisp.dhis.schema.AuthorityType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaDescriptor;
+import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
 
 /**
  * @author Lars Helge Overland
  */
+@Component
 public class MetaDataFilterSchemaDescriptor implements SchemaDescriptor
 {
     public static final String SINGULAR = "metaDataFilter";
@@ -52,7 +54,6 @@ public class MetaDataFilterSchemaDescriptor implements SchemaDescriptor
     {
         Schema schema = new Schema( MetaDataFilter.class, SINGULAR, PLURAL );
         schema.setApiEndpoint( API_ENDPOINT );
-        schema.setShareable( true );
         schema.setOrder( 1430 );
 
         schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_METADATA_EXPORT" ) ) );

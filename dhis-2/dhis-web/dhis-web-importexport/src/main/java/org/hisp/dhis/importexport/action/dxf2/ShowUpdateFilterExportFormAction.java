@@ -1,5 +1,3 @@
-package org.hisp.dhis.user.comparator;
-
 /*
  * Copyright (c) 2004-2014, University of Oslo
  * All rights reserved.
@@ -27,30 +25,60 @@ package org.hisp.dhis.user.comparator;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.hisp.dhis.importexport.action.dxf2;
 
-import java.util.Comparator;
+import org.hisp.dhis.filter.MetaDataFilter;
+import org.hisp.dhis.filter.MetaDataFilterService;
 
-import org.hisp.dhis.user.UserGroup;
+import com.opensymphony.xwork2.Action;
 
 /**
- * @author mortenoh
+ * @author Chau Thu Tran
+ *
+ * @version $ ShowUpdateFilterExportFormAction.java Jan 4, 2015 8:33:34 PM $
  */
-public class UserGroupComparator
-    implements Comparator<UserGroup>
+public class ShowUpdateFilterExportFormAction
+    implements Action
 {
-    @Override
-    public int compare( UserGroup ug0, UserGroup ug1 )
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    private MetaDataFilterService metaDataFilterService;
+
+    public void setMetaDataFilterService( MetaDataFilterService metaDataFilterService )
     {
-        if ( ug0 == null )
-        {
-            return 1;
-        }
-
-        if ( ug1 == null )
-        {
-            return -1;
-        }
-
-        return ug0.getName().compareTo( ug1.getName() );
+        this.metaDataFilterService = metaDataFilterService;
     }
+
+    // -------------------------------------------------------------------------
+    // Input
+    // -------------------------------------------------------------------------
+
+    private Integer id;
+
+    public void setId( Integer id )
+    {
+        this.id = id;
+    }
+
+    private MetaDataFilter filter;
+
+    public MetaDataFilter getFilter()
+    {
+        return filter;
+    }
+
+    // -------------------------------------------------------------------------
+    // Action implementation
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String execute()
+    {
+        filter = metaDataFilterService.getFilter( id );
+        
+        return SUCCESS;
+    }
+
 }

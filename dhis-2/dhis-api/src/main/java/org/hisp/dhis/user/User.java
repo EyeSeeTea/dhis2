@@ -44,6 +44,7 @@ import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -247,6 +248,88 @@ public class User
     {
         return userCredentials != null && userCredentials.isSuper();
     }
+    
+    public Set<UserGroup> getManagedGroups()
+    {
+        Set<UserGroup> managedGroups = new HashSet<>();
+        
+        for ( UserGroup group : groups )
+        {
+            managedGroups.addAll( group.getManagedGroups() );
+        }
+        
+        return managedGroups;
+    }
+    
+    /**
+     * Indicates whether this user can manage the given user group.
+     * 
+     * @param userGroup the user group to test.
+     * @return true if the given user group can be managed by this user, false if not.
+     */
+    public boolean canManage( UserGroup userGroup )
+    {
+        return userGroup != null && CollectionUtils.containsAny( groups, userGroup.getManagedByGroups() );
+    }
+    
+    /**
+     * Indicates whether this user can manage the given user.
+     * 
+     * @param user the user to test.
+     * @return true if the given user can be managed by this user, false if not.
+     */
+    public boolean canManage( User user )
+    {
+        if ( user == null || user.getGroups() == null )
+        {
+            return false;
+        }
+        
+        for ( UserGroup group : user.getGroups() )
+        {
+            if ( canManage( group ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Indicates whether this user is managed by the given user group.
+     * 
+     * @param userGroup the user group to test.
+     * @return true if the given user group is managed by this user, false if not.
+     */
+    public boolean isManagedBy( UserGroup userGroup )
+    {
+        return userGroup != null && CollectionUtils.containsAny( groups, userGroup.getManagedGroups() );
+    }
+
+    /**
+     * Indicates whether this user is managed by the given user.
+     * 
+     * @param userGroup the user  to test.
+     * @return true if the given user is managed by this user, false if not.
+     */
+    public boolean isManagedBy( User user )
+    {
+        if ( user == null || user.getGroups() == null )
+        {
+            return false;
+        }
+        
+        for ( UserGroup group : user.getGroups() )
+        {
+            if ( isManagedBy( group ) )
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -261,6 +344,7 @@ public class User
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getFirstName()
     {
         return firstName;
@@ -274,6 +358,7 @@ public class User
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getSurname()
     {
         return surname;
@@ -453,7 +538,7 @@ public class User
         this.userCredentials = userCredentials;
     }
 
-    @JsonProperty
+    @JsonProperty( "userGroups" )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "userGroups", namespace = DxfNamespaces.DXF_2_0 )
@@ -498,7 +583,7 @@ public class User
         this.dataViewOrganisationUnits = dataViewOrganisationUnits;
     }
 
-    @JsonProperty( value = "attributeValues" )
+    @JsonProperty( "attributeValues" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "attributeValues", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "attributeValue", namespace = DxfNamespaces.DXF_2_0 )
@@ -531,9 +616,8 @@ public class User
         {
             User user = (User) other;
 
-            firstName = user.getFirstName();
             surname = user.getSurname();
-
+            firstName = user.getFirstName();
             email = user.getEmail();
             phoneNumber = user.getPhoneNumber();
             jobTitle = user.getJobTitle();

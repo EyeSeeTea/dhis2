@@ -29,16 +29,15 @@ package org.hisp.dhis.schema;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Primitives;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.annotation.Description;
-import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -95,7 +94,16 @@ public class Jackson2PropertyIntrospectorService
 
             String fieldName = getFieldName( method );
             property.setName( !StringUtils.isEmpty( jsonProperty.value() ) ? jsonProperty.value() : fieldName );
-            property.setReadable( true );
+
+            if ( property.getGetterMethod() != null )
+            {
+                property.setReadable( true );
+            }
+
+            if ( property.getSetterMethod() != null )
+            {
+                property.setWritable( true );
+            }
 
             if ( classFieldNames.contains( fieldName ) )
             {
@@ -108,9 +116,9 @@ public class Jackson2PropertyIntrospectorService
                 property.setPersisted( true );
                 property.setWritable( true );
                 property.setUnique( hibernateProperty.isUnique() );
-                property.setNullable( hibernateProperty.isNullable() );
-                property.setMaxLength( hibernateProperty.getMaxLength() );
-                property.setMinLength( hibernateProperty.getMinLength() );
+                property.setRequired( hibernateProperty.isRequired() );
+                property.setMax( hibernateProperty.getMax() );
+                property.setMin( hibernateProperty.getMin() );
                 property.setCollection( hibernateProperty.isCollection() );
                 property.setCascade( hibernateProperty.getCascade() );
                 property.setOwner( hibernateProperty.isOwner() );
@@ -147,7 +155,7 @@ public class Jackson2PropertyIntrospectorService
             }
 
             Class<?> returnType = method.getReturnType();
-            property.setKlass( returnType );
+            property.setKlass( Primitives.wrap( returnType ) );
 
             if ( Collection.class.isAssignableFrom( returnType ) )
             {
@@ -160,7 +168,7 @@ public class Jackson2PropertyIntrospectorService
                 {
                     ParameterizedType parameterizedType = (ParameterizedType) type;
                     Class<?> klass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
-                    property.setItemKlass( klass );
+                    property.setItemKlass( Primitives.wrap( klass ) );
 
                     if ( collectProperties( klass ).isEmpty() )
                     {
@@ -206,6 +214,8 @@ public class Jackson2PropertyIntrospectorService
             {
                 propertyMap.put( property.getName(), property );
             }
+
+            SchemaUtils.updatePropertyTypes( property );
         }
 
         return propertyMap;

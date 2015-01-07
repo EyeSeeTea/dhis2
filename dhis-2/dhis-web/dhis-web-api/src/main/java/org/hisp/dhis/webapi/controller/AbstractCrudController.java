@@ -66,6 +66,7 @@ import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -74,7 +75,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
+import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -128,13 +129,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
-    public @ResponseBody RootNode getObjectList( @RequestParam Map<String, String> parameters,
-        HttpServletResponse response, HttpServletRequest request )
+    public @ResponseBody RootNode getObjectList(
+        @RequestParam Map<String, String> rpParameters, HttpServletResponse response, HttpServletRequest request )
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
 
-        WebOptions options = new WebOptions( parameters );
+        WebOptions options = new WebOptions( rpParameters );
         WebMetaData metaData = new WebMetaData();
 
         Schema schema = getSchema();
@@ -157,6 +158,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         {
             Iterator<String> iterator = filters.iterator();
             String name = null;
+
+            // Use database query for name filter
 
             if ( schema.getProperty( "name" ) != null && schema.getProperty( "name" ).isPersisted() )
             {
@@ -192,7 +195,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             }
             else
             {
-                // get full list if we are using filters
+                // Get full list when using filters other than name / objects without persisted name
+
                 if ( !filters.isEmpty() )
                 {
                     if ( options.hasPaging() )
@@ -217,7 +221,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         postProcessEntities( entityList );
-        postProcessEntities( entityList, options, parameters );
+        postProcessEntities( entityList, options, rpParameters );
 
         if ( fields.contains( "access" ) )
         {
@@ -232,7 +236,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         rootNode.setDefaultNamespace( DxfNamespaces.DXF_2_0 );
         rootNode.setNamespace( DxfNamespaces.DXF_2_0 );
 
-        rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( parameters.get( "inclusionStrategy" ) ) );
+        rootNode.getConfig().setInclusionStrategy( getInclusionStrategy( rpParameters.get( "inclusionStrategy" ) ) );
 
         if ( pager != null )
         {
@@ -251,8 +255,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     public @ResponseBody RootNode getObject(
-        @PathVariable( "uid" ) String pvUid,
-        @RequestParam Map<String, String> parameters,
+        @PathVariable( "uid" ) String pvUid, @RequestParam Map<String, String> rpParameters,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
@@ -263,16 +266,64 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             fields.add( ":all" );
         }
 
-        return getObjectInternal( pvUid, parameters, filters, fields );
+        return getObjectInternal( pvUid, rpParameters, filters, fields );
     }
 
     @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectProperty(
-        @PathVariable( "uid" ) String uid,
-        @PathVariable( "property" ) String pvProperty,
-        @RequestParam Map<String, String> parameters, HttpServletRequest request, HttpServletResponse response ) throws Exception
+        @PathVariable( "uid" ) String pvUid, @PathVariable( "property" ) String pvProperty, @RequestParam Map<String, String> rpParameters,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        return getObjectInternal( uid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
+        return getObjectInternal( pvUid, rpParameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
+    }
+
+    @RequestMapping( value = "/{uid}/{property}", method = { RequestMethod.PUT, RequestMethod.PATCH } )
+    public void updateObjectProperty(
+        @PathVariable( "uid" ) String pvUid, @PathVariable( "property" ) String pvProperty, @RequestParam Map<String, String> rpParameters,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
+    {
+        WebOptions options = new WebOptions( rpParameters );
+        List<T> entities = getEntity( pvUid, options );
+
+        if ( entities.isEmpty() )
+        {
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
+            return;
+        }
+
+        if ( !getSchema().getPropertyMap().containsKey( pvProperty ) )
+        {
+            ContextUtils.notFoundResponse( response, "Property " + pvProperty + " does not exist on " + getEntityName() );
+            return;
+        }
+
+        Property property = getSchema().getProperty( pvProperty );
+        T persistedObject = entities.get( 0 );
+
+        if ( !aclService.canUpdate( currentUserService.getCurrentUser(), persistedObject ) )
+        {
+            throw new UpdateAccessDeniedException( "You don't have the proper permissions to update this object." );
+        }
+
+        if ( !property.isWritable() )
+        {
+            throw new UpdateAccessDeniedException( "This property is read-only." );
+        }
+
+        T object = deserialize( request );
+
+        if ( object == null )
+        {
+            ContextUtils.badRequestResponse( response, "Unknown payload format." );
+            return;
+        }
+
+        Object value = property.getGetterMethod().invoke( object );
+
+        property.getSetterMethod().invoke( persistedObject, value );
+
+        ImportTypeSummary summary = importService.importObject( currentUserService.getCurrentUser().getUid(), persistedObject, ImportStrategy.UPDATE );
+        serialize( request, response, summary );
     }
 
     private RootNode getObjectInternal( String uid, Map<String, String> parameters,
@@ -334,7 +385,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.POST, consumes = { "application/xml", "text/xml" } )
-    public void postXmlObject( HttpServletResponse response, HttpServletRequest request, InputStream input )
+    public void postXmlObject( HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
@@ -363,7 +414,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonObject( HttpServletResponse response, HttpServletRequest request, InputStream input )
+    public void postJsonObject( HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
         if ( !aclService.canCreate( currentUserService.getCurrentUser(), getEntityClass() ) )
@@ -396,14 +447,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.TEXT_XML_VALUE } )
-    public void putXmlObject( HttpServletResponse response, HttpServletRequest request,
-        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putXmlObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<T> objects = getEntity( uid );
+        List<T> objects = getEntity( pvUid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
             return;
         }
 
@@ -413,7 +463,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromXml( request.getInputStream(), getEntityClass() );
-        ((BaseIdentifiableObject) parsed).setUid( uid );
+        ((BaseIdentifiableObject) parsed).setUid( pvUid );
 
         preUpdateEntity( parsed );
 
@@ -428,14 +478,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = MediaType.APPLICATION_JSON_VALUE )
-    public void putJsonObject( HttpServletResponse response, HttpServletRequest request,
-        @PathVariable( "uid" ) String uid, InputStream input ) throws Exception
+    public void putJsonObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<T> objects = getEntity( uid );
+        List<T> objects = getEntity( pvUid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
             return;
         }
 
@@ -445,7 +494,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         T parsed = renderService.fromJson( request.getInputStream(), getEntityClass() );
-        ((BaseIdentifiableObject) parsed).setUid( uid );
+        ((BaseIdentifiableObject) parsed).setUid( pvUid );
 
         preUpdateEntity( parsed );
 
@@ -464,14 +513,13 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public void deleteObject( HttpServletResponse response, HttpServletRequest request,
-        @PathVariable( "uid" ) String uid ) throws Exception
+    public void deleteObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        List<T> objects = getEntity( uid );
+        List<T> objects = getEntity( pvUid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + uid );
+            ContextUtils.notFoundResponse( response, getEntityName() + " does not exist: " + pvUid );
             return;
         }
 
@@ -496,7 +544,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         @PathVariable( "uid" ) String pvUid,
         @PathVariable( "property" ) String pvProperty,
         @PathVariable( "itemId" ) String pvItemId,
-        @RequestParam Map<String, String> parameters, HttpServletResponse response ) throws Exception
+        @RequestParam Map<String, String> parameters,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         RootNode rootNode = getObjectInternal( pvUid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
 
@@ -529,7 +578,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void addCollectionItem(
         @PathVariable( "uid" ) String pvUid,
         @PathVariable( "property" ) String pvProperty,
-        @PathVariable( "itemId" ) String pvItemId, HttpServletResponse response ) throws Exception
+        @PathVariable( "itemId" ) String pvItemId,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<T> objects = getEntity( pvUid );
 
@@ -595,7 +645,8 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     public void deleteCollectionItem(
         @PathVariable( "uid" ) String pvUid,
         @PathVariable( "property" ) String pvProperty,
-        @PathVariable( "itemId" ) String pvItemId, HttpServletResponse response ) throws Exception
+        @PathVariable( "itemId" ) String pvItemId,
+        HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<T> objects = getEntity( pvUid );
 
@@ -811,6 +862,99 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         }
 
         return InclusionStrategy.Include.NON_NULL;
+    }
+
+    /**
+     * Serializes an object, tries to guess output format using this order.
+     *
+     * @param request  HttpServletRequest from current session
+     * @param response HttpServletResponse from current session
+     * @param object   Object to serialize
+     */
+    protected void serialize( HttpServletRequest request, HttpServletResponse response, Object object ) throws IOException
+    {
+        String type = request.getHeader( "Accept" );
+        type = !StringUtils.isEmpty( type ) ? type : request.getContentType();
+        type = !StringUtils.isEmpty( type ) ? type : MediaType.APPLICATION_JSON_VALUE;
+
+        // allow type to be overridden by path extension
+        if ( request.getPathInfo().endsWith( ".json" ) )
+        {
+            type = MediaType.APPLICATION_JSON_VALUE;
+        }
+        else if ( request.getPathInfo().endsWith( ".xml" ) )
+        {
+            type = MediaType.APPLICATION_XML_VALUE;
+        }
+
+        if ( isCompatibleWith( type, MediaType.APPLICATION_JSON ) )
+        {
+            renderService.toJson( response.getOutputStream(), object );
+        }
+        else if ( isCompatibleWith( type, MediaType.APPLICATION_XML ) )
+        {
+            renderService.toXml( response.getOutputStream(), object );
+        }
+    }
+
+    /**
+     * Deserializes a payload from the request, handles JSON/XML payloads
+     *
+     * @param request HttpServletRequest from current session
+     * @return Parsed entity or null if invalid type
+     */
+    protected T deserialize( HttpServletRequest request ) throws IOException
+    {
+        String type = request.getContentType();
+        type = !StringUtils.isEmpty( type ) ? type : MediaType.APPLICATION_JSON_VALUE;
+
+        // allow type to be overridden by path extension
+        if ( request.getPathInfo().endsWith( ".json" ) )
+        {
+            type = MediaType.APPLICATION_JSON_VALUE;
+        }
+        else if ( request.getPathInfo().endsWith( ".xml" ) )
+        {
+            type = MediaType.APPLICATION_XML_VALUE;
+        }
+
+        if ( isCompatibleWith( type, MediaType.APPLICATION_JSON ) )
+        {
+            return renderService.fromJson( request.getInputStream(), getEntityClass() );
+        }
+        else if ( isCompatibleWith( type, MediaType.APPLICATION_XML ) )
+        {
+            return renderService.fromXml( request.getInputStream(), getEntityClass() );
+        }
+
+        return null;
+    }
+
+    /**
+     * Are we receiving JSON data?
+     *
+     * @param request HttpServletRequest from current session
+     * @return true if JSON compatible
+     */
+    protected boolean isJson( HttpServletRequest request )
+    {
+        return isCompatibleWith( request.getContentType(), MediaType.APPLICATION_JSON );
+    }
+
+    /**
+     * Are we receiving XML data?
+     *
+     * @param request HttpServletRequest from current session
+     * @return true if XML compatible
+     */
+    protected boolean isXml( HttpServletRequest request )
+    {
+        return isCompatibleWith( request.getContentType(), MediaType.APPLICATION_XML );
+    }
+
+    protected boolean isCompatibleWith( String type, MediaType mediaType )
+    {
+        return !StringUtils.isEmpty( type ) && MediaType.parseMediaType( type ).isCompatibleWith( mediaType );
     }
 
     //--------------------------------------------------------------------------

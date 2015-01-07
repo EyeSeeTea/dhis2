@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.struts2.ServletActionContext;
 import org.hisp.dhis.attribute.AttributeService;
 import org.hisp.dhis.common.IdentifiableObjectManager;
@@ -42,7 +43,6 @@ import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.oust.manager.SelectionTreeManager;
 import org.hisp.dhis.ouwt.manager.OrganisationUnitSelectionManager;
-import org.hisp.dhis.security.PasswordManager;
 import org.hisp.dhis.security.RestoreOptions;
 import org.hisp.dhis.security.SecurityService;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -59,7 +59,6 @@ import org.hisp.dhis.user.UserSetting;
 import org.hisp.dhis.user.UserSettingService;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.opensymphony.xwork2.Action;
@@ -104,13 +103,6 @@ public class AddUserAction
         this.securityService = securityService;
     }
 
-    private PasswordManager passwordManager;
-
-    public void setPasswordManager( PasswordManager passwordManager )
-    {
-        this.passwordManager = passwordManager;
-    }
-
     private AttributeService attributeService;
 
     public void setAttributeService( AttributeService attributeService )
@@ -123,6 +115,9 @@ public class AddUserAction
 
     @Autowired
     private CurrentUserService currentUserService;
+    
+    @Autowired
+    private UserSettingService userSettingService;
 
     @Autowired
     private UserGroupService userGroupService;
@@ -285,11 +280,7 @@ public class AddUserAction
     {
         //TODO: Allow user with F_USER_ADD_WITHIN_MANAGED_GROUP to add a user within managed groups.
 
-        if ( email != null && email.trim().length() == 0 )
-        {
-            email = null;
-        }
-
+        email = StringUtils.trimToNull( email );
         username = username.trim();
         inviteUsername = inviteUsername.trim();
         inviteEmail = inviteEmail.trim();
@@ -316,6 +307,7 @@ public class AddUserAction
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {
             userCredentials.setUsername( inviteUsername );
+            userCredentials.setInvitation( true );
             user.setEmail( inviteEmail );
 
             securityService.prepareUserForInvite( user );
@@ -327,7 +319,7 @@ public class AddUserAction
             user.setEmail( email );
             user.setPhoneNumber( phoneNumber );
 
-            userCredentials.setPassword( passwordManager.encode( rawPassword ) );
+            userService.encodeAndSetPassword( userCredentials, rawPassword );
         }
 
         if ( jsonAttributeValues != null )
@@ -366,10 +358,8 @@ public class AddUserAction
         userCredentials.setUserAuthorityGroups( userAuthorityGroups );
 
         // ---------------------------------------------------------------------
-        // Dimension constraints
-        //
-        // Note that any new user must inherit dimension constraints (if any)
-        // from the current user.
+        // Dimension constraints. Note that any new user must inherit dimension 
+        // constraints if any from the current user.
         // ---------------------------------------------------------------------
 
         userCredentials.setCogsDimensionConstraints( new HashSet<>( currentUser.getUserCredentials().getCogsDimensionConstraints() ) );
@@ -405,8 +395,8 @@ public class AddUserAction
         // User settings
         // ---------------------------------------------------------------------
 
-        userService.addUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
-        userService.addUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
+        userSettingService.addUserSetting( new UserSetting( user, UserSettingService.KEY_UI_LOCALE, LocaleUtils.getLocale( localeUi ) ) );
+        userSettingService.addUserSetting( new UserSetting( user, UserSettingService.KEY_DB_LOCALE, LocaleUtils.getLocale( localeDb ) ) );
 
         if ( ACCOUNT_ACTION_INVITE.equals( accountAction ) )
         {

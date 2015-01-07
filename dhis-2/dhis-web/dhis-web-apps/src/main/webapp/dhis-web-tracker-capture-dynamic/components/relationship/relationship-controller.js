@@ -6,11 +6,13 @@ trackerCapture.controller('RelationshipController',
                 $route,
                 $translate,
                 CurrentSelection,
+                TEIService,
                 RelationshipFactory) {
     $rootScope.showAddRelationshipDiv = false;
     $scope.relationshipTypes = []; 
     $scope.relationships = [];
-    $scope.addRelationshipLabel = $translate('add');
+    $scope.addRelationshipLabel = $translate('add');   
+            
     RelationshipFactory.getAll().then(function(rels){
         $scope.relationshipTypes = rels;    
         angular.forEach(rels, function(rel){
@@ -20,12 +22,14 @@ trackerCapture.controller('RelationshipController',
     
     //listen for the selected entity       
     $scope.$on('dashboardWidgets', function(event, args) { 
+        $scope.relatedTeis = [];
         $scope.selections = CurrentSelection.get();
         $scope.optionSets = $scope.selections.optionSets;
         $scope.selectedTei = angular.copy($scope.selections.tei);        
         $scope.trackedEntity = $scope.selections.te;
-        $scope.selectedEnrollment = $scope.selections.enrollment;
+        $scope.selectedEnrollment = $scope.selections.selectedEnrollment;
         $scope.selectedProgram = $scope.selections.pr;
+        $scope.programs = $scope.selections.pr;
         
         if($scope.selectedProgram && $scope.selectedProgram.relationshipText){
             $scope.addRelationshipLabel = $scope.selectedProgram.relationshipText;
@@ -33,6 +37,9 @@ trackerCapture.controller('RelationshipController',
         else{
             $scope.addRelationshipLabel = $translate('add');
         }
+        
+        setRelationships();
+        
     });
     
     $scope.showAddRelationship = function() {
@@ -52,27 +59,54 @@ trackerCapture.controller('RelationshipController',
                     },
                     selectedTei: function(){
                         return $scope.selectedTei;
+                    },
+                    selectedProgram: function(){
+                        return $scope.selectedProgram;
                     }
                 }
             });
 
             modalInstance.result.then(function (relationships) {
-                $scope.selectedTei.relationships = relationships;           
-            });
-        }        
-    };    
-    
-    $scope.showDashboard = function(rel){
-        var relativeTeiId = '';
-        if($scope.selectedTei.trackedEntityInstance === rel.trackedEntityInstanceA){
-            relativeTeiId = rel.trackedEntityInstanceB;
-        }
-        else{
-            relativeTeiId = rel.trackedEntityInstanceA;
-        }          
+                $scope.selectedTei.relationships = relationships;
                 
-        $location.path('/dashboard').search({tei: relativeTeiId, program: null}); 
+                setRelationships();
+            });
+        }
+    };
+    
+    $scope.showDashboard = function(teiId, relId){
+        
+        var dashboardProgram = null;
+        
+        if($scope.selectedProgram && $scope.selectedProgram.relationshipType){
+            if($scope.selectedProgram.relationshipType.id === relId && $scope.selectedProgram.relatedProgram ){
+                dashboardProgram = $scope.selectedProgram.relatedProgram.id;
+            }
+        }        
+    
+        $location.path('/dashboard').search({tei: teiId, program: dashboardProgram}); 
         $route.reload();                                 
+    };
+    
+    var setRelationships = function(){
+        $scope.relatedTeis = [];
+        angular.forEach($scope.selectedTei.relationships, function(rel){            
+            var teiId = rel.trackedEntityInstanceA;
+            var relName = $scope.relationships[rel.relationship].aIsToB;
+            if($scope.selectedTei.trackedEntityInstance === rel.trackedEntityInstanceA){
+                teiId = rel.trackedEntityInstanceB;
+                relName = $scope.relationships[rel.relationship].bIsToA;
+            }
+            var relative = {trackedEntityInstance: teiId, relName: relName, relId: rel.relationship};
+            $scope.relatedTeis.push(relative);
+            
+            /*TEIService.get(teiId, $scope.optionSets).then(function(tei){               
+               var relative = tei.data;
+               relative.relName = relName;
+               relative.relId = rel.relationship;               
+               $scope.relatedTeis.push(relative);
+            });*/
+        });
     };
 })
 
@@ -84,7 +118,6 @@ trackerCapture.controller('RelationshipController',
             OperatorFactory,
             AttributesFactory,
             EntityQueryFactory,
-            ProgramFactory,
             TEIService,
             TEIGridService,
             DialogService,
@@ -92,12 +125,14 @@ trackerCapture.controller('RelationshipController',
             storage,
             $modalInstance, 
             relationshipTypes,
+            selectedProgram,
             selections,
-            DateUtils,
             selectedTei){
     
     $scope.relationshipTypes = relationshipTypes;
-    $scope.selectedTei = selectedTei;    
+    $scope.selectedProgram = selectedProgram;
+    $scope.selectedTei = selectedTei;
+    $scope.programs = selections.prs;
 
     $scope.relationshipSources = ['search_from_existing','register_new'];
     $scope.selectedRelationshipSource = {};   
@@ -107,31 +142,43 @@ trackerCapture.controller('RelationshipController',
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.optionSets = selections.optionSets;
     $scope.selectedTeiForDisplay = angular.copy($scope.selectedTei);       
-   
-    ProgramFactory.getAll().then(function(programs){
-        $scope.programs = [];
-        angular.forEach(programs, function(program){                            
-            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
-                $scope.programs.push(program);
-            }
-        });
-
-        if(angular.isObject($scope.programs) && $scope.programs.length === 1){
-            $scope.selectedProgramForRelative = $scope.programs[0];
-            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
-                $scope.attributes = atts;
-                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
-            });
-        }   
-        else{
-            AttributesFactory.getWithoutProgram().then(function(atts){
-                $scope.attributes = atts;
-                $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
-                $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+    
+    if(angular.isObject($scope.programs) && $scope.programs.length === 1){
+        $scope.selectedProgramForRelative = $scope.programs[0];        
+    } 
+    
+    if($scope.selectedProgram){
+        if($scope.selectedProgram.relatedProgram){
+            angular.forEach($scope.programs, function(pr){
+                if(pr.id === $scope.selectedProgram.relatedProgram.id){
+                    $scope.selectedProgramForRelative = pr;
+                }
             });
         }
-    });    
+        
+        if($scope.selectedProgram.relationshipType){
+            angular.forEach($scope.relationshipTypes, function(rel){
+                if(rel.id === $scope.selectedProgram.relationshipType.id){
+                    $scope.relationship.selected = rel;
+                }
+            });
+        }
+    }    
+    
+    if($scope.selectedProgramForRelative){
+        AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+            $scope.attributes = atts;
+            $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+            $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+        });
+    }   
+    else{
+        AttributesFactory.getWithoutProgram().then(function(atts){
+            $scope.attributes = atts;
+            $scope.attributes = $scope.generateAttributeFilters($scope.attributes);
+            $scope.gridColumns = $scope.generateGridColumns($scope.attributes);
+        });
+    }    
     
     //set attributes as per selected program
     $scope.setAttributesForSearch = function(program){
@@ -175,7 +222,7 @@ trackerCapture.controller('RelationshipController',
     $scope.searchMode = {listAll: 'LIST_ALL', freeText: 'FREE_TEXT', attributeBased: 'ATTRIBUTE_BASED'};      
     
     //listen for selections
-    $scope.$on('relationship', function(event, args) { 
+    $scope.$on('relationship', function() { 
         var relationshipInfo = CurrentSelection.getRelationshipInfo();
         $scope.teiForRelationship = relationshipInfo.tei;
     });
@@ -255,7 +302,7 @@ trackerCapture.controller('RelationshipController',
             }
             
             //process tei grid
-            $scope.trackedEntityList = TEIGridService.format(data,false, null);
+            $scope.trackedEntityList = TEIGridService.format(data,false, $scope.optionSets);
             $scope.showTrackedEntityDiv = true;
             $scope.teiFetched = true;            
         });
@@ -346,7 +393,7 @@ trackerCapture.controller('RelationshipController',
                 $scope.selectedTei.relationships = [relationship];
             }
             
-            TEIService.update($scope.selectedTei).then(function(response){
+            TEIService.update($scope.selectedTei, $scope.optionSets).then(function(response){
                 if(response.status !== 'SUCCESS'){//update has failed
                     var dialogOptions = {
                             headerText: 'relationship_error',
@@ -367,32 +414,27 @@ trackerCapture.controller('RelationshipController',
                 $scope,
                 $timeout,
                 AttributesFactory,
-                ProgramFactory,
                 TEService,
                 TEIService,
                 EnrollmentService,
                 DialogService,
                 CurrentSelection,
+                OptionSetService,
                 DateUtils,
                 storage) {
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.enrollment = {enrollmentDate: '', incidentDate: ''};    
     
-    ProgramFactory.getAll().then(function(programs){
-        $scope.programs = [];
-        angular.forEach(programs, function(program){                            
-            if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id)){                                
-                $scope.programs.push(program);
-            }
+    var selections = CurrentSelection.get();
+    $scope.optionSets = selections.optionSets;
+    $scope.programs = selections.prs;    
+  
+    if(angular.isObject($scope.programs) && $scope.programs.length === 1){
+        $scope.selectedProgramForRelative = $scope.programs[0];
+        AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
+            $scope.attributes = atts;
         });
-
-        if(angular.isObject($scope.programs) && $scope.programs.length === 1){
-            $scope.selectedProgramForRelative = $scope.programs[0];
-            AttributesFactory.getByProgram($scope.selectedProgramForRelative).then(function(atts){
-                $scope.attributes = atts;
-            });
-        }                
-    });
+    }  
     
     //watch for selection of program
     $scope.$watch('selectedProgramForRelative', function() {        
@@ -436,13 +478,17 @@ trackerCapture.controller('RelationshipController',
         var registrationAttributes = [];    
         angular.forEach($scope.attributes, function(attribute){
             var val = attribute.value;
-            if(!angular.isUndefined(val)){
-                
+            if(!angular.isUndefined(val)){                
                 if(attribute.valueType === 'date'){
                     val = DateUtils.formatFromUserToApi(val);
                 }
-                if(attribute.valueType === 'optionSet' && $scope.optionSets.optionCodesByName[  '"' + val + '"']){   
-                    val = $scope.optionSets.optionCodesByName[  '"' + val + '"'];
+                if(attribute.valueType === 'optionSet' &&
+                        attribute.optionSet &&
+                        attribute.optionSet.id &&                
+                        $scope.optionSets[attribute.optionSet.id] &&
+                        $scope.optionSets[attribute.optionSet.id].options ){  
+                    
+                    val = OptionSetService.getCode($scope.optionSets[attribute.optionSet.id].options, val);
                 }
                 registrationAttributes.push({attribute: attribute.id, value: val});
                 $scope.valueExists = true;

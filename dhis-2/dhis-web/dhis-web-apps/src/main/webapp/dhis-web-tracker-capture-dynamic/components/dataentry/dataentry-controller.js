@@ -75,7 +75,7 @@ trackerCapture.controller('DataEntryController',
         $scope.selectedOrgUnit = storage.get('SELECTED_OU');
         $scope.selectedEntity = selections.tei;      
         $scope.selectedProgram = selections.pr;        
-        $scope.selectedEnrollment = selections.enrollment;   
+        $scope.selectedEnrollment = selections.selectedEnrollment;   
         $scope.optionSets = selections.optionSets;
         $scope.selectedProgramWithStage = [];
         
@@ -135,6 +135,7 @@ trackerCapture.controller('DataEntryController',
                 });
             }
             
+            $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-sortingDate');            
             $scope.dummyEvents = $scope.checkForEventCreation($scope.dhis2Events, $scope.selectedProgram);
         });          
     };
@@ -316,13 +317,17 @@ trackerCapture.controller('DataEntryController',
         $scope.currentEvent.providedElsewhere = [];
         
         $scope.currentStage = $scope.selectedProgramWithStage[$scope.currentEvent.programStage];
-
-        $scope.programStageDataElements = [];                  
+        
+        angular.forEach($scope.currentStage.programStageSections, function(section){
+            section.open = true;
+        });
+        
+        $scope.prStDes = [];                  
         angular.forEach($scope.currentStage.programStageDataElements, function(prStDe){
-            $scope.programStageDataElements[prStDe.dataElement.id] = prStDe; 
+            $scope.prStDes[prStDe.dataElement.id] = prStDe; 
         }); 
 
-        $scope.customForm = $scope.currentStage.dataEntryForm ? $scope.currentStage.dataEntryForm.htmlCode : null; 
+        $scope.customForm = CustomFormService.getForProgramStage($scope.currentStage);
         $scope.displayCustomForm = $scope.customForm ? true:false;
 
         $scope.dhis2Events = orderByFilter($scope.dhis2Events, '-eventDate');
@@ -357,19 +362,38 @@ trackerCapture.controller('DataEntryController',
 
         $scope.currentEventOriginal = angular.copy($scope.currentEvent);  
         
+        angular.forEach($scope.currentEvent.dataValues, function(dataValue){
+            var val = dataValue.value;
+            var de = $scope.currentStage.programStageDataElements[dataValue.dataElement];
+            if(val){                
+                if( de && de.type === 'int'){
+                    val = parseInt(val);
+                }
+                if(de.type === 'date'){
+                    val = DateUtils.formatFromApiToUser(val);
+                }
+            }    
+            $scope.currentEvent[dataValue.dataElement] = val;
+            if(dataValue.providedElsewhere){
+                $scope.currentEvent.providedElsewhere[dataValue.dataElement] = dataValue.providedElsewhere;
+            }
+        });
+
+        $scope.currentEventOriginal = angular.copy($scope.currentEvent);
+
         //Execute rules for the first time, to make the initial page appear correctly.
         //Subsequent calls will be made from the "saveDataValue" function.
-        TrackerRulesExecutionService.executeRules($scope);
+        TrackerRulesExecutionService.executeRules($scope);        
     };
     
     $scope.saveDatavalue = function(prStDe){
-        
+
         //check for input validity
         $scope.dataEntryOuterForm.submitted = true;        
         if( $scope.dataEntryOuterForm.$invalid ){            
             return false;
         }
-         
+
         //input is valid        
         var value = $scope.currentEvent[prStDe.dataElement.id];
         

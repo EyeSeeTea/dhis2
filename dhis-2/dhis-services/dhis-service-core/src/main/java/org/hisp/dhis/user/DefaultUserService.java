@@ -30,17 +30,14 @@ package org.hisp.dhis.user;
 
 import static org.hisp.dhis.setting.SystemSettingManager.KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.AuditLogUtil;
@@ -50,13 +47,11 @@ import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.security.SecurityService;
+import org.hisp.dhis.security.migration.MigrationPasswordManager;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.hisp.dhis.system.util.DateUtils;
-import org.hisp.dhis.system.util.Filter;
 import org.hisp.dhis.system.util.FilterUtils;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -79,6 +74,13 @@ public class DefaultUserService
     {
         this.userStore = userStore;
     }
+    
+    private UserGroupService userGroupService;
+
+    public void setUserGroupService( UserGroupService userGroupService )
+    {
+        this.userGroupService = userGroupService;
+    }
 
     private UserCredentialsStore userCredentialsStore;
 
@@ -94,13 +96,6 @@ public class DefaultUserService
         this.userAuthorityGroupStore = userAuthorityGroupStore;
     }
     
-    private UserSettingStore userSettingStore;
-
-    public void setUserSettingStore( UserSettingStore userSettingStore )
-    {
-        this.userSettingStore = userSettingStore;
-    }
-
     private CurrentUserService currentUserService;
 
     public void setCurrentUserService( CurrentUserService currentUserService )
@@ -115,13 +110,6 @@ public class DefaultUserService
         this.categoryService = categoryService;
     }
     
-    private SecurityService securityService;
-    
-    public void setSecurityService( SecurityService securityService )
-    {
-        this.securityService = securityService;
-    }
-
     private SystemSettingManager systemSettingManager;
 
     public void setSystemSettingManager( SystemSettingManager systemSettingManager )
@@ -129,76 +117,16 @@ public class DefaultUserService
         this.systemSettingManager = systemSettingManager;
     }
 
+    private MigrationPasswordManager passwordManager;
+
+    public void setPasswordManager( MigrationPasswordManager passwordManager )
+    {
+        this.passwordManager = passwordManager;
+    }
+
     // -------------------------------------------------------------------------
-    // Implementing methods
+    // UserService implementation
     // -------------------------------------------------------------------------
-
-    @Override
-    public boolean isSuperUser( UserCredentials userCredentials )
-    {
-        if ( userCredentials == null )
-        {
-            return false;
-        }
-
-        for ( UserAuthorityGroup group : userCredentials.getUserAuthorityGroups() )
-        {
-            if ( group.getAuthorities().contains( "ALL" ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    @Override
-    public boolean isLastSuperUser( UserCredentials userCredentials )
-    {
-        if ( !isSuperUser( userCredentials ) )
-        {
-            return false; // Cannot be last if not super user
-        }
-
-        Collection<UserCredentials> users = userCredentialsStore.getAllUserCredentials();
-
-        for ( UserCredentials user : users )
-        {
-            if ( isSuperUser( user ) && !user.equals( userCredentials ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean isSuperRole( UserAuthorityGroup userAuthorityGroup )
-    {
-        if ( userAuthorityGroup == null )
-        {
-            return false;
-        }
-
-        return (userAuthorityGroup.getAuthorities().contains( "ALL" )) ? true : false;
-    }
-
-    @Override
-    public boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup )
-    {
-        Collection<UserAuthorityGroup> groups = userAuthorityGroupStore.getAll();
-
-        for ( UserAuthorityGroup group : groups )
-        {
-            if ( isSuperRole( group ) && group.getId() != userAuthorityGroup.getId() )
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
 
     // -------------------------------------------------------------------------
     // User
@@ -225,7 +153,7 @@ public class DefaultUserService
     {
         AuditLogUtil.infoWrapper( log, currentUserService.getCurrentUsername(), user, AuditLogUtil.ACTION_DELETE );
 
-        userCredentialsStore.deleteUserCredentials( user.getUserCredentials() );
+        userCredentialsStore.delete( user.getUserCredentials() );
 
         userStore.delete( user );
     }
@@ -234,24 +162,6 @@ public class DefaultUserService
     public Collection<User> getAllUsers()
     {
         return userStore.getAll();
-    }
-
-    @Override
-    public List<User> getAllUsersBetween( int first, int max )
-    {
-        return userStore.getAllOrderedName( first, max );
-    }
-
-    @Override
-    public List<User> getAllUsersBetweenByName( String name, int first, int max )
-    {
-        return userStore.getAllLikeName( name, first, max );
-    }
-
-    @Override
-    public Collection<User> getUsersByLastUpdated( Date lastUpdated )
-    {
-        return userStore.getAllGeLastUpdated( lastUpdated );
     }
 
     @Override
@@ -273,91 +183,83 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<UserCredentials> getUsersByOrganisationUnitBetween( OrganisationUnit unit, int first, int max )
+    public List<User> getAllUsersBetweenByName( String name, int first, int max )
     {
-        return userCredentialsStore.getUsersByOrganisationUnitBetween( unit, first, max );
+        UserQueryParams params = new UserQueryParams();
+        params.setQuery( name );
+        params.setFirst( first );
+        params.setMax( max );
+        
+        return userStore.getUsers( params );
     }
 
     @Override
-    public Collection<UserCredentials> getUsersByOrganisationUnitBetweenByName( OrganisationUnit unit, String userName,
-        int first, int max )
+    public List<User> getManagedUsers( User user )
     {
-        return userCredentialsStore.getUsersByOrganisationUnitBetweenByName( unit, userName, first, max );
+        UserQueryParams params = new UserQueryParams( user );
+        params.setCanManage( true );
+        params.setAuthSubset( true );
+        
+        return userStore.getUsers( params );
     }
 
     @Override
-    public int getUsersByOrganisationUnitCount( OrganisationUnit unit )
+    public int getManagedUserCount( User user )
     {
-        return userCredentialsStore.getUsersByOrganisationUnitCount( unit );
+        UserQueryParams params = new UserQueryParams( user );
+        params.setCanManage( true );
+        params.setAuthSubset( true );
+        
+        return userStore.getUserCount( params );
+    }
+    
+    @Override
+    public List<User> getUsers( UserQueryParams params )
+    {
+        handleUserQueryParams( params );
+        return userStore.getUsers( params );
     }
 
     @Override
-    public int getUsersByOrganisationUnitCountByName( OrganisationUnit unit, String userName )
+    public int getUserCount( UserQueryParams params )
     {
-        return userCredentialsStore.getUsersByOrganisationUnitCountByName( unit, userName );
+        handleUserQueryParams( params );
+        return userStore.getUserCount( params );
     }
-
-    @Override
-    public Collection<User> getUsersByPhoneNumber( String phoneNumber )
+    
+    private void handleUserQueryParams( UserQueryParams params )
     {
-        return userStore.getUsersByPhoneNumber( phoneNumber );
-    }
-
-    @Override
-    public Collection<User> getUsersByName( String name )
-    {
-        return userStore.getUsersByName( name );
-    }
-
-    @Override
-    public Collection<User> getUsersWithoutOrganisationUnit()
-    {
-        return userStore.getUsersWithoutOrganisationUnit();
-    }
-
-    @Override
-    public int getUsersWithoutOrganisationUnitCount()
-    {
-        return userCredentialsStore.getUsersWithoutOrganisationUnitCount();
-    }
-
-    @Override
-    public int getUsersWithoutOrganisationUnitCountByName( String userName )
-    {
-        return userCredentialsStore.getUsersWithoutOrganisationUnitCountByName( userName );
-    }
-
-    @Override
-    public User searchForUser( String query )
-    {
-        User user = userStore.getByUid( query );
-
-        if ( user == null )
+        boolean canGrantOwnRoles = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
+        params.setDisjointRoles( !canGrantOwnRoles );
+        
+        if ( params.getUser() == null )
         {
-            UserCredentials credentials = userCredentialsStore.getUserCredentialsByUsername( query );
-            user = credentials != null ? credentials.getUser() : null;
+            params.setUser( currentUserService.getCurrentUser() );
+        }
+        
+        if ( params.getUser() != null && params.getUser().isSuper() )
+        {
+            params.setCanManage( false );
+            params.setAuthSubset( false );
+            params.setDisjointRoles( false );
         }
 
-        return user;
-    }
-
-    @Override
-    public List<User> queryForUsers( String query )
-    {
-        List<User> users = new ArrayList<>();
-
-        User uidUser = userStore.getByUid( query );
-
-        if ( uidUser != null )
+        if ( params.getInactiveMonths() != null )
         {
-            users.add( uidUser );
+            Calendar cal = PeriodType.createCalendarInstance();
+            cal.add( Calendar.MONTH, ( params.getInactiveMonths() * -1 ) );
+            params.setInactiveSince( cal.getTime() );
         }
-
-        users.addAll( userStore.getAllLikeName( query, 0, 1000 ) ); //TODO
-
-        return users;
     }
-
+    
+    @Override
+    public List<User> getUsersByPhoneNumber( String phoneNumber )
+    {
+        UserQueryParams params = new UserQueryParams();
+        params.setPhoneNumber( phoneNumber );
+        return getUsers( params );   
+    }
+    
     @Override
     public Set<CategoryOptionGroup> getCogDimensionConstraints( UserCredentials userCredentials )
     {
@@ -398,6 +300,82 @@ public class DefaultUserService
         return options;
     }
 
+    @Override
+    public boolean isLastSuperUser( UserCredentials userCredentials )
+    {
+        if ( !userCredentials.isSuper() )
+        {
+            return false; // Cannot be last if not super user
+        }
+
+        Collection<UserCredentials> users = userCredentialsStore.getAll();
+
+        for ( UserCredentials user : users )
+        {
+            if ( user.isSuper() && !user.equals( userCredentials ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean isLastSuperRole( UserAuthorityGroup userAuthorityGroup )
+    {
+        Collection<UserAuthorityGroup> groups = userAuthorityGroupStore.getAll();
+
+        for ( UserAuthorityGroup group : groups )
+        {
+            if ( group.isSuper() && group.getId() != userAuthorityGroup.getId() )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public boolean canAddOrUpdateUser( Collection<String> userGroups )
+    {
+    	User currentUser = currentUserService.getCurrentUser();
+    	
+    	if ( currentUser == null )
+    	{
+    	    return false;
+    	}
+    	
+    	boolean canAdd = currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_USER_ADD );
+    	
+    	if ( canAdd )
+    	{
+    	    return true;
+    	}
+    	
+    	boolean canAddInGroup = currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_USER_ADD_IN_GROUP );
+    	
+    	if ( !canAddInGroup )
+    	{
+    	    return false;
+    	}
+    	
+    	boolean canManageAnyGroup = false;
+    	
+    	for ( String uid : userGroups )
+    	{
+    	    UserGroup userGroup = userGroupService.getUserGroup( uid );
+            
+            if ( currentUser.canManage( userGroup ) )
+            {
+                canManageAnyGroup = true;
+                break;
+            }
+    	}
+    	
+    	return canManageAnyGroup;
+    }
+    
     // -------------------------------------------------------------------------
     // UserAuthorityGroup
     // -------------------------------------------------------------------------
@@ -445,6 +423,12 @@ public class DefaultUserService
     }
 
     @Override
+    public List<UserAuthorityGroup> getUserRolesByUid( Collection<String> uids )
+    {
+        return userAuthorityGroupStore.getByUid( uids );
+    }
+
+    @Override
     public Collection<UserAuthorityGroup> getUserRolesBetween( int first, int max )
     {
         return userAuthorityGroupStore.getAllOrderedName( first, max );
@@ -468,6 +452,12 @@ public class DefaultUserService
         return userAuthorityGroupStore.getCountLikeName( name );
     }
 
+    @Override
+    public int countDataSetUserAuthorityGroups( DataSet dataSet )
+    {
+        return userAuthorityGroupStore.countDataSetUserAuthorityGroups( dataSet );
+    }
+    
     @Override
     public void assignDataSetToUserRole( DataSet dataSet )
     {
@@ -503,25 +493,50 @@ public class DefaultUserService
     @Override
     public int addUserCredentials( UserCredentials userCredentials )
     {
-        return userCredentialsStore.addUserCredentials( userCredentials );
+        return userCredentialsStore.save( userCredentials );
     }
 
     @Override
     public void updateUserCredentials( UserCredentials userCredentials )
     {
-        userCredentialsStore.updateUserCredentials( userCredentials );
+        userCredentialsStore.update( userCredentials );
     }
 
     @Override
     public Collection<UserCredentials> getAllUserCredentials()
     {
-        return userCredentialsStore.getAllUserCredentials();
+        return userCredentialsStore.getAll();
+    }
+
+    @Override
+    public void encodeAndSetPassword( User user, String rawPassword )
+    {
+        encodeAndSetPassword( user.getUserCredentials(), rawPassword );
+    }
+
+    @Override
+    public void encodeAndSetPassword( UserCredentials userCredentials, String rawPassword )
+    {
+        boolean isNewPassword = StringUtils.isBlank( userCredentials.getPassword() ) ||
+            !passwordManager.legacyOrCurrentMatches( rawPassword, userCredentials.getPassword(), userCredentials.getUsername() );
+
+        if ( isNewPassword )
+        {
+            userCredentials.setPasswordLastUpdated( new Date() );
+        }
+
+        userCredentials.setPassword( passwordManager.encode( rawPassword ) );
     }
 
     @Override
     public UserCredentials getUserCredentials( User user )
     {
-        return userCredentialsStore.getUserCredentials( user );
+        if ( user == null )
+        {
+            return null;
+        }
+        
+        return userCredentialsStore.get( user.getId() );
     }
 
     @Override
@@ -537,54 +552,6 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<UserCredentials> getUsersBetween( int first, int max )
-    {
-        return userCredentialsStore.getUsersBetween( first, max );
-    }
-
-    @Override
-    public Collection<UserCredentials> getUsersBetweenByName( String username, int first, int max )
-    {
-        return userCredentialsStore.getUsersBetweenByName( username, first, max );
-    }
-
-    @Override
-    public int getUserCount()
-    {
-        return userCredentialsStore.getUserCount();
-    }
-
-    @Override
-    public int getUserCountByName( String userName )
-    {
-        return userCredentialsStore.getUserCountByName( userName );
-    }
-
-    @Override
-    public Collection<UserCredentials> getUsersWithoutOrganisationUnitBetween( int first, int max )
-    {
-        return userCredentialsStore.getUsersWithoutOrganisationUnitBetween( first, max );
-    }
-
-    @Override
-    public Collection<UserCredentials> getUsersWithoutOrganisationUnitBetweenByName( String username, int first, int max )
-    {
-        return userCredentialsStore.getUsersWithoutOrganisationUnitBetweenByName( username, first, max );
-    }
-
-    @Override
-    public Collection<UserCredentials> searchUsersByName( String name )
-    {
-        return userCredentialsStore.searchUsersByName( name );
-    }
-
-    @Override
-    public Collection<UserCredentials> searchUsersByName( String name, int first, int max )
-    {
-        return userCredentialsStore.searchUsersByName( name, first, max );
-    }
-
-    @Override
     public void setLastLogin( String username )
     {
         UserCredentials credentials = getUserCredentialsByUsername( username );
@@ -593,196 +560,23 @@ public class DefaultUserService
     }
 
     @Override
-    public Collection<UserCredentials> getSelfRegisteredUserCredentials( int first, int max )
-    {
-        return userCredentialsStore.getSelfRegisteredUserCredentials( first, max );
-    }
-
-    @Override
-    public int getSelfRegisteredUserCredentialsCount()
-    {
-        return userCredentialsStore.getSelfRegisteredUserCredentialsCount();
-    }
-
-    @Override
-    public Collection<UserCredentials> getInactiveUsers( int months )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsers( cal.getTime() );
-    }
-
-    @Override
-    public Collection<UserCredentials> getInactiveUsers( int months, int first, int max )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsers( cal.getTime(), first, max );
-    }
-
-    @Override
-    public int getInactiveUsersCount( int months )
-    {
-        Calendar cal = PeriodType.createCalendarInstance();
-        cal.add( Calendar.MONTH, (months * -1) );
-
-        return userCredentialsStore.getInactiveUsersCount( cal.getTime() );
-    }
-
-    @Override
     public int getActiveUsersCount( int days )
     {
         Calendar cal = PeriodType.createCalendarInstance();
         cal.add( Calendar.DAY_OF_YEAR, (days * -1) );
 
-        return userCredentialsStore.getActiveUsersCount( cal.getTime() );
+        return getActiveUsersCount( cal.getTime() );
     }
 
     @Override
     public int getActiveUsersCount( Date since )
     {
-        return userCredentialsStore.getActiveUsersCount( since );
+        UserQueryParams params = new UserQueryParams();
+        params.setLastLogin( since );
+        
+        return getUserCount( params );
     }
-
-    @Override
-    public void canUpdateUsersFilter( Collection<User> users )
-    {
-        FilterUtils.filter( users,
-            new Filter<User>()
-            {
-                @Override
-                public boolean retain( User object )
-                {
-                    return canUpdate( object.getUserCredentials() );
-                }
-            }
-        );
-    }
-
-    @Override
-    public void canUpdateFilter( Collection<UserCredentials> userCredentials )
-    {
-        FilterUtils.filter( userCredentials,
-            new Filter<UserCredentials>()
-            {
-                @Override
-                public boolean retain( UserCredentials object )
-                {
-                    return canUpdate( object );
-                }
-            }
-        );
-    }
-
-    @Override
-    public boolean canUpdate( UserCredentials userCredentials )
-    {
-        return hasAuthorityToUpdateUser( userCredentials );
-    }
-
-    // -------------------------------------------------------------------------
-    // UserSettings
-    // -------------------------------------------------------------------------
-
-    @Override
-    public void addUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.addUserSetting( userSetting );
-    }
-
-    @Override
-    public void addOrUpdateUserSetting( UserSetting userSetting )
-    {
-        UserSetting setting = getUserSetting( userSetting.getUser(), userSetting.getName() );
-
-        if ( setting != null )
-        {
-            setting.mergeWith( userSetting );
-            updateUserSetting( setting );
-        }
-        else
-        {
-            addUserSetting( userSetting );
-        }
-    }
-
-    @Override
-    public void updateUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.updateUserSetting( userSetting );
-    }
-
-    @Override
-    public void deleteUserSetting( UserSetting userSetting )
-    {
-        userSettingStore.deleteUserSetting( userSetting );
-    }
-
-    @Override
-    public Collection<UserSetting> getAllUserSettings( User user )
-    {
-        return userSettingStore.getAllUserSettings( user );
-    }
-
-    @Override
-    public Collection<UserSetting> getUserSettings( String name )
-    {
-        return userSettingStore.getUserSettings( name );
-    }
-
-    @Override
-    public UserSetting getUserSetting( User user, String name )
-    {
-        return userSettingStore.getUserSetting( user, name );
-    }
-
-    @Override
-    public Serializable getUserSettingValue( User user, String name, Serializable defaultValue )
-    {
-        UserSetting setting = getUserSetting( user, name );
-
-        return setting != null && setting.getValue() != null ? setting.getValue() : defaultValue;
-    }
-
-    @Override
-    public Map<User, Serializable> getUserSettings( String name, Serializable defaultValue )
-    {
-        Map<User, Serializable> map = new HashMap<>();
-
-        for ( UserSetting setting : userSettingStore.getUserSettings( name ) )
-        {
-            map.put( setting.getUser(), setting.getValue() != null ? setting.getValue() : defaultValue );
-        }
-
-        return map;
-    }
-
-    @Override
-    public Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> units )
-    {
-        return userStore.getUsersByOrganisationUnits( units );
-    }
-
-    @Override
-    public void removeUserSettings( User user )
-    {
-        userStore.removeUserSettings( user );
-    }
-
-    @Override
-    public Collection<String> getUsernames( String query, Integer max )
-    {
-        return userCredentialsStore.getUsernames( query, max );
-    }
-
-    @Override
-    public int countDataSetUserAuthorityGroups( DataSet dataSet )
-    {
-        return userAuthorityGroupStore.countDataSetUserAuthorityGroups( dataSet );
-    }
-
+    
     @Override
     public boolean credentialsNonExpired( UserCredentials credentials )
     {
@@ -796,26 +590,5 @@ public class DefaultUserService
         int months = DateUtils.monthsBetween( credentials.getPasswordLastUpdated(), new Date() );
 
         return months < credentialsExpires;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    /**
-     * Determines if the current user has all the authorities required to
-     * update a user.
-     *
-     * @param userCredentials The user to be updated.
-     * @return true if current user has authorities, else false.
-     */
-    private boolean hasAuthorityToUpdateUser( UserCredentials userCredentials )
-    {
-        UserCredentials currentUserCredentials = currentUserService.getCurrentUser().getUserCredentials();
-
-        boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( KEY_CAN_GRANT_OWN_USER_AUTHORITY_GROUPS, false );
-
-        return currentUserCredentials != null && userCredentials != null
-                && currentUserCredentials.canIssueAll( userCredentials.getUserAuthorityGroups(), canGrantOwnUserAuthorityGroups );
     }
 }

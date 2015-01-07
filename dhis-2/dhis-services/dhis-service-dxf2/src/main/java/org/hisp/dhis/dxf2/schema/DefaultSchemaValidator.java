@@ -28,18 +28,18 @@ package org.hisp.dhis.dxf2.schema;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.dxf2.webmessage.WebMessage;
-import org.hisp.dhis.dxf2.webmessage.WebMessageStatus;
-import org.hisp.dhis.dxf2.webmessage.responses.ValidationViolation;
-import org.hisp.dhis.dxf2.webmessage.responses.ValidationViolationsWebMessageResponse;
+import org.apache.commons.validator.GenericValidator;
 import org.hisp.dhis.schema.Property;
+import org.hisp.dhis.schema.PropertyType;
 import org.hisp.dhis.schema.Schema;
 import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
+import org.hisp.dhis.system.util.ValidationUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -50,47 +50,165 @@ public class DefaultSchemaValidator implements SchemaValidator
     private SchemaService schemaService;
 
     @Override
-    public <T extends IdentifiableObject> WebMessage validate( T object )
+    public List<ValidationViolation> validate( Object object )
     {
-        Assert.notNull( object, "SchemaValidator.validate requires a non-null object to validate." );
+        if ( object == null || schemaService.getSchema( object.getClass() ) == null )
+        {
+            return new ArrayList<>();
+        }
 
         Schema schema = schemaService.getSchema( object.getClass() );
 
-        Assert.notNull( schema, "Could not validate object, no schema exists for objects of this type." );
-
-        WebMessage message = new WebMessage( WebMessageStatus.OK, HttpStatus.OK.value() );
-        ValidationViolationsWebMessageResponse validationViolations = new ValidationViolationsWebMessageResponse();
+        List<ValidationViolation> validationViolations = new ArrayList<>();
 
         for ( Property property : schema.getProperties() )
         {
-            if ( !property.isPersisted() )
-            {
-                continue;
-            }
-
             Object value = ReflectionUtils.invokeMethod( object, property.getGetterMethod() );
 
-            if ( !property.isNullable() && value == null )
+            if ( value == null )
             {
-                validationViolations.getValidationViolations().add( new ValidationViolation( "Property '" + property.getName() + "' can not be null." ) );
+                if ( property.isRequired() )
+                {
+                    validationViolations.add( new ValidationViolation( property.getName(), "Required property missing." ) );
+                }
+
                 continue;
             }
 
-            if ( String.class.isInstance( value ) && property.getMaxLength() < ((String) value).length() )
-            {
-                validationViolations.getValidationViolations().add( new ValidationViolation( "Property '" + property.getName() + "' is too long ("
-                    + ((String) value).length() + "), maximum length is " + property.getMaxLength() ) );
-                continue;
-            }
+            validationViolations.addAll( validateString( value, property ) );
+            validationViolations.addAll( validateCollection( value, property ) );
+            validationViolations.addAll( validateInteger( value, property ) );
+            validationViolations.addAll( validateFloat( value, property ) );
+            validationViolations.addAll( validateDouble( value, property ) );
         }
 
-        if ( !validationViolations.getValidationViolations().isEmpty() )
+        return validationViolations;
+    }
+
+    private Collection<? extends ValidationViolation> validateString( Object object, Property property )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        if ( !String.class.isInstance( object ) )
         {
-            message.setStatus( WebMessageStatus.ERROR );
-            message.setHttpStatusCode( HttpStatus.BAD_REQUEST.value() );
-            message.setResponse( validationViolations );
+            return validationViolations;
         }
 
-        return message;
+        String value = (String) object;
+
+        if ( value.length() < property.getMin() || value.length() > property.getMax() )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Allowed range for length ["
+                + property.getMin() + ", " + property.getMax() + "], length is " + value.length() ) );
+        }
+
+        if ( PropertyType.EMAIL == property.getPropertyType() && !GenericValidator.isEmail( value ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid email." ) );
+        }
+
+        if ( PropertyType.URL == property.getPropertyType() && !GenericValidator.isUrl( value ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid URL." ) );
+        }
+
+        if ( PropertyType.PASSWORD == property.getPropertyType() && !ValidationUtils.passwordIsValid( value ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid password." ) );
+        }
+
+        if ( PropertyType.COLOR == property.getPropertyType() && !ValidationUtils.isValidHexColor( value ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid color (in hex format)." ) );
+        }
+
+        /* TODO add proper validation for both Points and Polygons, ValidationUtils only supports points at this time
+        if ( PropertyType.GEOLOCATION == property.getPropertyType() && !ValidationUtils.coordinateIsValid( value ) )
+        {
+            validationViolations.add( new ValidationViolation( "Value is not a valid coordinate pair [lon, lat]." ) );
+        }
+        */
+
+        return validationViolations;
+    }
+
+    private Collection<? extends ValidationViolation> validateCollection( Object object, Property property )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        if ( !Collection.class.isInstance( object ) )
+        {
+            return validationViolations;
+        }
+
+        Collection<?> value = (Collection<?>) object;
+
+        if ( value.size() < property.getMin() || value.size() > property.getMax() )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Invalid range for size ["
+                + property.getMin() + ", " + property.getMax() + "], size is " + value.size() ) );
+        }
+
+        return validationViolations;
+    }
+
+    private Collection<? extends ValidationViolation> validateInteger( Object object, Property property )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        if ( !Integer.class.isInstance( object ) )
+        {
+            return validationViolations;
+        }
+
+        Integer value = (Integer) object;
+
+        if ( !GenericValidator.isInRange( value, property.getMin(), property.getMax() ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Invalid range for value ["
+                + property.getMin() + ", " + property.getMax() + "], value is " + value ) );
+        }
+
+        return validationViolations;
+    }
+
+    private Collection<? extends ValidationViolation> validateFloat( Object object, Property property )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        if ( !Float.class.isInstance( object ) )
+        {
+            return validationViolations;
+        }
+
+        Float value = (Float) object;
+
+        if ( !GenericValidator.isInRange( value, property.getMin(), property.getMax() ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Invalid range for value ["
+                + property.getMin() + ", " + property.getMax() + "], value is " + value ) );
+        }
+
+        return validationViolations;
+    }
+
+    private Collection<? extends ValidationViolation> validateDouble( Object object, Property property )
+    {
+        List<ValidationViolation> validationViolations = new ArrayList<>();
+
+        if ( !Double.class.isInstance( object ) )
+        {
+            return validationViolations;
+        }
+
+        Double value = (Double) object;
+
+        if ( !GenericValidator.isInRange( value, property.getMin(), property.getMax() ) )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Invalid range for value ["
+                + property.getMin() + ", " + property.getMax() + "], value is " + value ) );
+        }
+
+        return validationViolations;
     }
 }

@@ -43,16 +43,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Nguyen Hong Duc
- * @version $Id: UserStoreTest.java 5724 2008-09-18 14:37:01Z larshelg $
  */
 public class UserStoreTest
     extends DhisSpringTest
 {
     @Autowired
     private UserStore userStore;
-
-    @Autowired
-    private UserCredentialsStore userCredentialsStore;
 
     @Autowired
     private OrganisationUnitService organisationUnitService;
@@ -130,21 +126,5 @@ public class UserStoreTest
         
         assertNull( userStore.get( idA ) );
         assertNotNull( userStore.get( idB ) );
-    }
-
-    @Test
-    public void testAddGetUserCredentials()
-    {
-        User userA = createUser( 'A' );
-        User userB = createUser( 'B' );
-        
-        UserCredentials credentialsA = createUserCredentials( 'A', userA );
-        UserCredentials credentialsB = createUserCredentials( 'B', userB );
-        
-        int idA = userCredentialsStore.addUserCredentials( credentialsA );
-        int idB = userCredentialsStore.addUserCredentials( credentialsB );
-        
-        assertEquals( credentialsA, userCredentialsStore.getUserCredentials( idA ) );
-        assertEquals( credentialsB, userCredentialsStore.getUserCredentials( idB ) );
     }
 }

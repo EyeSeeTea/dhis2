@@ -31,7 +31,7 @@ package org.hisp.dhis.attribute;
 import java.util.Set;
 
 /**
- * @author mortenoh
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 public interface AttributeService
 {
@@ -170,6 +170,13 @@ public interface AttributeService
      * @return a set of attributes which are associated with user groups.
      */
     Set<Attribute> getUserGroupAttributes();
+
+    /**
+     * Gets attributes which are associated with programs.
+     *
+     * @return a set of attributes which are associated with programs.
+     */
+    Set<Attribute> getProgramAttributes();
 
     /**
      * Gets the number of attributes.

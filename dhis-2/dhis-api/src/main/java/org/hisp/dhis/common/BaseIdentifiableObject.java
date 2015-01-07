@@ -28,6 +28,27 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import org.apache.commons.lang.Validate;
+import org.hisp.dhis.acl.Access;
+import org.hisp.dhis.acl.AccessStringHelper;
+import org.hisp.dhis.common.annotation.Description;
+import org.hisp.dhis.common.view.DimensionalView;
+import org.hisp.dhis.common.view.SharingBasicView;
+import org.hisp.dhis.common.view.SharingDetailedView;
+import org.hisp.dhis.common.view.SharingExportView;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.annotation.Property;
+import org.hisp.dhis.schema.annotation.PropertyRange;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.user.UserGroupAccess;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
@@ -35,22 +56,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.apache.commons.lang.Validate;
-import org.hisp.dhis.acl.Access;
-import org.hisp.dhis.common.annotation.Description;
-import org.hisp.dhis.common.view.DimensionalView;
-import org.hisp.dhis.common.view.SharingBasicView;
-import org.hisp.dhis.common.view.SharingDetailedView;
-import org.hisp.dhis.common.view.SharingExportView;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserGroupAccess;
-
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * @author Bob Jolliffe
@@ -186,6 +191,8 @@ public class BaseIdentifiableObject
     @JsonProperty( value = "id" )
     @JacksonXmlProperty( localName = "id", isAttribute = true )
     @Description( "The Unique Identifier for this Object." )
+    @Property( PropertyType.IDENTIFIER )
+    @PropertyRange( min = 11, max = 11 )
     public String getUid()
     {
         return uid;
@@ -200,6 +207,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
     @Description( "The unique code for this Object." )
+    @Property( PropertyType.IDENTIFIER )
     public String getCode()
     {
         return code;
@@ -214,6 +222,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JacksonXmlProperty( isAttribute = true )
     @Description( "The name of this Object. Required and unique." )
+    @PropertyRange( min = 2 )
     public String getName()
     {
         return name;
@@ -274,6 +283,7 @@ public class BaseIdentifiableObject
     @JsonProperty
     @JsonView( { SharingBasicView.class, SharingDetailedView.class, SharingExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 8, max = 8 )
     public String getPublicAccess()
     {
         return publicAccess;
@@ -441,6 +451,23 @@ public class BaseIdentifiableObject
     }
 
     /**
+     * Clear out all sharing properties.
+     *
+     * @param clearUser Clear out user property
+     */
+    public void clearSharing( boolean clearUser )
+    {
+        if ( clearUser )
+        {
+            user = null;
+        }
+
+        publicAccess = AccessStringHelper.DEFAULT;
+        externalAccess = false;
+        userGroupAccesses.clear();
+    }
+
+    /**
      * Get a map of uids to internal identifiers
      *
      * @param objects the IdentifiableObjects to put in the map
@@ -518,11 +545,27 @@ public class BaseIdentifiableObject
     {
         Validate.notNull( other );
 
-        this.uid = other.getUid() == null ? this.uid : other.getUid();
-        this.name = other.getName() == null ? this.name : other.getName();
-        this.code = other.getCode() == null ? this.code : other.getCode();
-        this.lastUpdated = other.getLastUpdated() == null ? this.lastUpdated : other.getLastUpdated();
-        this.created = other.getCreated() == null ? this.created : other.getCreated();
-        this.user = other.getUser() == null ? this.user : other.getUser();
+        uid = other.getUid() == null ? uid : other.getUid();
+        name = other.getName() == null ? name : other.getName();
+        code = other.getCode() == null ? code : other.getCode();
+        lastUpdated = other.getLastUpdated() == null ? lastUpdated : other.getLastUpdated();
+        created = other.getCreated() == null ? created : other.getCreated();
+
+        // TODO leave this in? we might have sub-classes that have user which is not sharing related
+        user = other.getUser() == null ? user : other.getUser();
+    }
+
+    @Override
+    public void mergeSharingWith( IdentifiableObject other )
+    {
+        Validate.notNull( other );
+
+        // sharing
+        user = other.getUser() == null ? user : other.getUser();
+        publicAccess = other.getPublicAccess() == null ? publicAccess : other.getPublicAccess();
+        externalAccess = other.getExternalAccess();
+
+        userGroupAccesses.clear();
+        userGroupAccesses.addAll( other.getUserGroupAccesses() );
     }
 }

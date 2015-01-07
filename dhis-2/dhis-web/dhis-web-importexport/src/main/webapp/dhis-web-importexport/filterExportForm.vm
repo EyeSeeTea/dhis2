@@ -8,17 +8,14 @@
     var i18n_available_categories = '$encoder.jsEscape( $i18n.getString( "available_categories" ), "'" )';
     var i18n_selected_categories = '$encoder.jsEscape( $i18n.getString( "selected_categories" ), "'" )';
 
+    var i18n_available_category_combos = '$encoder.jsEscape( $i18n.getString( "available_category_combos" ), "'" )';
+    var i18n_selected_category_combos = '$encoder.jsEscape( $i18n.getString( "selected_category_combos" ), "'" )';
+
     var i18n_available_charts = '$encoder.jsEscape( $i18n.getString( "available_charts" ), "'" )';
     var i18n_selected_charts = '$encoder.jsEscape( $i18n.getString( "selected_charts" ), "'" )';
 
-    var i18n_available_concepts = '$encoder.jsEscape( $i18n.getString( "available_concepts" ), "'" )';
-    var i18n_selected_concepts = '$encoder.jsEscape( $i18n.getString( "selected_concepts" ), "'" )';
-
     var i18n_available_constants = '$encoder.jsEscape( $i18n.getString( "available_constants" ), "'" )';
     var i18n_selected_constants = '$encoder.jsEscape( $i18n.getString( "selected_constants" ), "'" )';
-
-    var i18n_available_dataDictionaries = '$encoder.jsEscape( $i18n.getString( "available_dataDictionaries" ), "'" )';
-    var i18n_selected_dataDictionaries = '$encoder.jsEscape( $i18n.getString( "selected_dataDictionaries" ), "'" )';
 
     var i18n_available_dataElementGroupSets = '$encoder.jsEscape( $i18n.getString( "available_dataElementGroupSets" ), "'" )';
     var i18n_selected_dataElementGroupSets = '$encoder.jsEscape( $i18n.getString( "selected_dataElementGroupSets" ), "'" )';
@@ -105,10 +102,10 @@
 
 #if ($command == "addNew")
     <h3>$i18n.getString( "create_new_filter" )</h3>
-#elseif($command == "update")
-    <h3>$i18n.getString( "edit_filter" )</h3>
 #elseif($command == "addAdHoc")
     <h3>$i18n.getString( "ad_hoc_export" )</h3>
+#elseif( $filter)
+	 <h3>$i18n.getString( "edit_filter" )</h3>
 #end
 
 <!-- FILTER FORM -->
@@ -116,11 +113,12 @@
     <input type="hidden" id="jsonFilter" name="jsonFilter" value='$filter.jsonFilter'/>
     #if ($command == "addNew" || $command == "addAdHoc")
         <input type="hidden" id="uid" name="uid" value=""/>
-    #elseif ($command == "update")
-        <input type="hidden" id="uid" name="uid" value="$filter.uid"/>
     #end
-
-    #if ($command == "addNew" || $command == "update")
+	
+    #if ($command == "addNew" || ( $command != "addAdHoc" && $filter ) )
+		 <input type="hidden" id="jsonFilter" name="jsonFilter" value='$!filter.jsonFilter'/>
+		<input type="hidden" id="uid" name="uid" value="$!filter.uid"/>
+	
         <div>
             <table id="detailsList" style="width: 400px;">
                 <tr>
@@ -151,29 +149,24 @@
     <div id="mainDivAttributes" style="margin: 5px;"></div>
 
     <!-- CATEGORIES SELECTION -->
-    <h6 id="headingDimensions" style="font-size: 10pt;"><label>$i18n.getString( "categories" )</label></h6>
+    <h6 id="headingCategories" style="font-size: 10pt;"><label>$i18n.getString( "categories" )</label></h6>
 
-    <div id="mainDivDimensions" style="margin: 5px;"></div>
+    <div id="mainDivCategories" style="margin: 5px;"></div>
+
+    <!-- CATEGORY COMBOS SELECTION -->
+    <h6 id="headingCategoryCombos" style="font-size: 10pt;"><label>$i18n.getString( "category_combos" )</label></h6>
+
+    <div id="mainDivCategoryCombos" style="margin: 5px;"></div>
 
     <!-- CHARTS SELECTION -->
     <h6 id="headingCharts" style="font-size: 10pt;"><label>$i18n.getString( "charts" )</label></h6>
 
     <div id="mainDivCharts" style="margin: 5px;"></div>
 
-    <!-- CONCEPTS SELECTION -->
-    <h6 id="headingConcepts" style="font-size: 10pt;"><label>$i18n.getString( "concepts" )</label></h6>
-
-    <div id="mainDivConcepts" style="margin: 5px;"></div>
-
     <!-- CONSTANTS SELECTION -->
     <h6 id="headingConstants" style="font-size: 10pt;"><label>$i18n.getString( "constants" )</label></h6>
 
     <div id="mainDivConstants" style="margin: 5px;"></div>
-
-    <!-- DATA DICTIONARIES SELECTION -->
-    <h6 id="headingDataDictionaries" style="font-size: 10pt;"><label>$i18n.getString( "data_dictionaries" )</label></h6>
-
-    <div id="mainDivDataDictionaries" style="margin: 5px;"></div>
 
     <!-- DATA ELEMENT GROUP SETS SELECTION -->
     <h6 id="headingDataElementGroupSets" style="font-size: 10pt;"><label>$i18n.getString( "data_element_group_sets" )</label></h6>
@@ -311,16 +304,16 @@
                     <input type="button" value="$i18n.getString( 'add_new' )" onclick="saveFilter();" style="width:125px" />
                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
-            #elseif ($command == "update")
-                <td colspan="2">
-                    <input type="button" value="$i18n.getString( 'save' )" onclick="updateFilter();" style="width:125px" />
-                    <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
-                </td>
             #elseif($command == "addAdHoc")
                 <td colspan="2">
                     <input type="button" value="$i18n.getString( 'export' )" onclick="startExport();" style="width:125px" />
                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.history.back();" style="width:125px" />
                 </td>
+			 #elseif ($filter)
+                 <td colspan="2">
+                     <input type="button" value="$i18n.getString( 'save' )" onclick="updateFilter();" style="width:125px" />
+                     <input type="button" value="$i18n.getString( 'cancel' )" onclick="window.location.href = 'dxf2FilteredMetaDataExport.action';" style="width:125px" />
+                 </td>
             #end
         </tr>
     </table>

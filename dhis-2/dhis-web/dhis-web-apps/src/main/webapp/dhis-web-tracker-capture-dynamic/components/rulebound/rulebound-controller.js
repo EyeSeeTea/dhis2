@@ -1,13 +1,15 @@
 trackerCapture.controller('RuleBoundController',
         function(
                 $rootScope,
-                $scope) {
+                $scope,
+                $log) {
 
     
-    var widget = $scope.$parent.$parent.biggerWidget ? $scope.$parent.$parent.biggerWidget
+    $scope.widget = $scope.$parent.$parent.biggerWidget ? $scope.$parent.$parent.biggerWidget
     : $scope.$parent.$parent.smallerWidget ? $scope.$parent.$parent.smallerWidget : null;
-    $scope.widgetTitle = widget.title;
-    $scope.widgetCode = widget.code;
+    $scope.widgetTitle = $scope.widget.title;
+    $scope.widgetCode = $scope.widget.code;
+    
     
     $scope.displayTextEffects = {};
     $scope.collectDataEffects = {};
@@ -20,14 +22,14 @@ trackerCapture.controller('RuleBoundController',
             if(effect.location == $scope.widgetCode){
                 //This effect is affecting the local widget
                 
-                if(effect.action = "displaytext") {
+                if(effect.action == "displaytext") {
                     //this action is display text. Make sure the displaytext is
                     //added to the local list of displayed texts
                     if(!angular.isObject($scope.displayTextEffects[effect.id])){
                         $scope.displayTextEffects[effect.id] = effect;
                     }
-                } else if(effect.action = "collectdata") {
-                    //TODO: WIP
+                } else {
+                    $log.warn("action: '" + effect.action + "' not supported by rulebound-controller.js")
                 }
             }
         });

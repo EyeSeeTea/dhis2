@@ -1,4 +1,4 @@
-package org.hisp.dhis.dxf2.webmessage.responses;
+package org.hisp.dhis.schema.annotation;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -28,35 +28,17 @@ package org.hisp.dhis.dxf2.webmessage.responses;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import org.hisp.dhis.common.DxfNamespaces;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JsonPropertyOrder( {
-    "message"
-} )
-public class ValidationViolation
+@Target( { ElementType.FIELD, ElementType.METHOD } )
+@Retention( RetentionPolicy.RUNTIME )
+public @interface Property
 {
-    private String message;
-
-    public ValidationViolation( String message )
-    {
-        this.message = message;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getMessage()
-    {
-        return message;
-    }
-
-    public void setMessage( String message )
-    {
-        this.message = message;
-    }
+    org.hisp.dhis.schema.PropertyType value() default org.hisp.dhis.schema.PropertyType.TEXT;
 }

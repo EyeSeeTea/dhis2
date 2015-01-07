@@ -28,12 +28,16 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Collection;
 import java.util.List;
 
+import org.hisp.dhis.acl.AclService;
+import org.hisp.dhis.common.GenericIdentifiableObjectStore;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * @author Lars Helge Overland
+ */
 @Transactional
 public class DefaultUserGroupService
     implements UserGroupService
@@ -49,14 +53,28 @@ public class DefaultUserGroupService
         this.userGroupStore = userGroupStore;
     }
 
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    private AclService aclService;
+
+    public void setAclService( AclService aclService )
+    {
+        this.aclService = aclService;
+    }
+    
     // -------------------------------------------------------------------------
     // UserGroup
     // -------------------------------------------------------------------------
 
     @Override
-    public void addUserGroup( UserGroup userGroup )
+    public int addUserGroup( UserGroup userGroup )
     {
-        userGroupStore.save( userGroup );
+        return userGroupStore.save( userGroup );
     }
 
     @Override
@@ -87,6 +105,54 @@ public class DefaultUserGroupService
     public UserGroup getUserGroup( String uid )
     {
         return userGroupStore.getByUid( uid );
+    }
+
+    @Override
+    public boolean canAddOrRemoveMember( String uid )
+    {
+        User currentUser = currentUserService.getCurrentUser();
+        
+        UserGroup userGroup = getUserGroup( uid );
+        
+        if ( userGroup == null || currentUser == null || currentUser.getUserCredentials() == null )
+        {
+            return false;
+        }
+        
+        boolean canUpdate = aclService.canUpdate( currentUser, userGroup );
+        boolean canAddMember = currentUser.getUserCredentials().isAuthorized( UserGroup.AUTH_ADD_MEMBERS_TO_READ_ONLY_USER_GROUPS );
+        
+        return canUpdate || canAddMember;
+    }
+    
+    @Override
+    public void addUserToGroups( User user, Collection<String> uids )
+    {        
+        for ( String uid : uids )
+        {
+            if ( canAddOrRemoveMember( uid ) )
+            {
+                UserGroup userGroup = getUserGroup( uid );
+                user.getGroups().add( userGroup );
+                userGroup.getMembers().add( user );
+                userGroupStore.updateNoAcl( userGroup );
+            }
+        }
+    }
+
+    @Override
+    public void removeUserFromGroups( User user, Collection<String> uids )
+    {
+        for ( String uid : uids )
+        {
+            if ( canAddOrRemoveMember( uid ) )
+            {
+                UserGroup userGroup = getUserGroup( uid );
+                user.getGroups().remove( userGroup );
+                userGroup.getMembers().remove( user );
+                userGroupStore.updateNoAcl( userGroup );
+            }
+        }        
     }
 
     @Override

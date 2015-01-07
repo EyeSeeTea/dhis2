@@ -28,7 +28,6 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -47,6 +46,9 @@ import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
 import org.hisp.dhis.dataelement.DataElementCategory;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.annotation.Property;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -134,6 +136,11 @@ public class UserCredentials
      * Indicates whether this user was originally self registered.
      */
     private boolean selfRegistered;
+    
+    /**
+     * Indicates whether this credentials is currently an invitation.
+     */
+    private boolean invitation;
 
     /**
      * Indicates whether this is user is disabled, which means the user cannot
@@ -253,11 +260,11 @@ public class UserCredentials
      * of this user credentials, or this user credentials must have the ALL
      * authority.
      *
-     * @param group                          the user authority group.
+     * @param group the user authority group.
      * @param canGrantOwnUserAuthorityGroups indicates whether this users can grant
-     *                                       its own authoritiy groups to others.
+     *        its own authority groups to others.
      */
-    public boolean canIssue( UserAuthorityGroup group, boolean canGrantOwnUserAuthorityGroups )
+    public boolean canIssueUserRole( UserAuthorityGroup group, boolean canGrantOwnUserAuthorityGroups )
     {
         if ( group == null )
         {
@@ -280,13 +287,34 @@ public class UserCredentials
     }
 
     /**
+     * Indicates whether this user credentials can issue all of the user authority
+     * groups in the given collection.
+     *
+     * @param groups the collection of user authority groups.
+     * @param canGrantOwnUserAuthorityGroups indicates whether this users can grant
+     *        its own authority groups to others.
+     */
+    public boolean canIssueUserRoles( Collection<UserAuthorityGroup> groups, boolean canGrantOwnUserAuthorityGroups )
+    {
+        for ( UserAuthorityGroup group : groups )
+        {
+            if ( !canIssueUserRole( group, canGrantOwnUserAuthorityGroups ) )
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Indicates whether this user credentials can modify the given user
      * credentials. This user credentials must have the ALL authority or possess
      * all user authorities of the other user credentials to do so.
      *
      * @param other the user credentials to modify.
      */
-    public boolean canModify( UserCredentials other )
+    public boolean canModifyUser( UserCredentials other )
     {
         if ( other == null )
         {
@@ -301,27 +329,6 @@ public class UserCredentials
         }
 
         return authorities.containsAll( other.getAllAuthorities() );
-    }
-
-    /**
-     * Indicates whether this user credentials can issue all of the user authority
-     * groups in the given collection.
-     *
-     * @param groups                         the collection of user authority groups.
-     * @param canGrantOwnUserAuthorityGroups indicates whether this users can grant
-     *                                       its own authoritiy groups to others.
-     */
-    public boolean canIssueAll( Collection<UserAuthorityGroup> groups, boolean canGrantOwnUserAuthorityGroups )
-    {
-        for ( UserAuthorityGroup group : groups )
-        {
-            if ( !canIssue( group, canGrantOwnUserAuthorityGroups ) )
-            {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     /**
@@ -452,6 +459,8 @@ public class UserCredentials
 
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @Property( PropertyType.PASSWORD )
+    @PropertyRange( min = 8, max = 35 )
     public void setPassword( String password )
     {
         this.password = password;
@@ -600,6 +609,19 @@ public class UserCredentials
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isInvitation()
+    {
+        return invitation;
+    }
+
+    public void setInvitation( boolean invitation )
+    {
+        this.invitation = invitation;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isDisabled()
     {
         return disabled;
@@ -619,19 +641,25 @@ public class UserCredentials
         {
             UserCredentials userCredentials = (UserCredentials) other;
 
+            username = userCredentials.getUsername();
             openId = userCredentials.getOpenId();
-            disabled = userCredentials.isDisabled();
-            selfRegistered = userCredentials.isSelfRegistered();
             password = StringUtils.isEmpty( userCredentials.getPassword() ) ? password : userCredentials.getPassword();
-
+            passwordLastUpdated = userCredentials.getPasswordLastUpdated();
+            
+            userAuthorityGroups.clear();
+            userAuthorityGroups.addAll( userCredentials.getUserAuthorityGroups() );
+            
             catDimensionConstraints.clear();
             catDimensionConstraints.addAll( userCredentials.getCatDimensionConstraints() );
 
             cogsDimensionConstraints.clear();
             cogsDimensionConstraints.addAll( userCredentials.getCogsDimensionConstraints() );
 
-            userAuthorityGroups.clear();
-            userAuthorityGroups.addAll( userCredentials.getUserAuthorityGroups() );
+            lastLogin = userCredentials.getLastLogin();
+            restoreToken = userCredentials.getRestoreToken();
+            restoreExpiry = userCredentials.getRestoreExpiry();
+            selfRegistered = userCredentials.isSelfRegistered();
+            disabled = userCredentials.isDisabled();
         }
     }
 

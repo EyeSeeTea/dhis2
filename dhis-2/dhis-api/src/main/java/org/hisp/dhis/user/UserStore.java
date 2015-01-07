@@ -28,10 +28,9 @@ package org.hisp.dhis.user;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Collection;
+import java.util.List;
 
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 
 /**
  * @author Nguyen Hong Duc
@@ -42,38 +41,18 @@ public interface UserStore
     String ID = UserStore.class.getName();
 
     /**
-     * Returns a Collection of the Users which are not associated with any
-     * OrganisationUnits.
+     * Returns a list of users based on the given query parameters.
      * 
-     * @return a Collection of Users.
+     * @param params the user query parameters.
+     * @return a List of users.
      */
-    Collection<User> getUsersWithoutOrganisationUnit();
+    List<User> getUsers( UserQueryParams params );
 
     /**
-     * Returns a Collection of the Users which are associated with
-     * OrganisationUnits.
+     * Returns the number of users based on the given query parameters.
      * 
-     * @param orgunits a Collection of the organization units.
-     * 
-     * @return a Collection of Users.
+     * @param params the user query parameters.
+     * @return number of users.
      */
-    Collection<User> getUsersByOrganisationUnits( Collection<OrganisationUnit> orgunits );
-
-    /**
-     * Returns a Collection of Users which are having given Phone number.
-     * 
-     * @param phoneNumber
-     * @return a Collection of Users.
-     */
-    Collection<User> getUsersByPhoneNumber( String phoneNumber );
-
-    /**
-     * Removes all user settings associated with the given user.
-     * 
-     * @param user the user.
-     */
-    void removeUserSettings( User user );
-
-    Collection<User> getUsersByName( String name );
-
+    int getUserCount( UserQueryParams params );
 }

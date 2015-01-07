@@ -117,6 +117,9 @@ public class DefaultSecurityService
 
     @Autowired
     private CurrentUserService currentUserService;
+    
+    @Autowired
+    private UserSettingService userSettingService;
 
     @Autowired
     private AclService aclService;
@@ -144,7 +147,8 @@ public class DefaultSecurityService
 
         user.setSurname( "(TBD)" );
         user.setFirstName( "(TBD)" );
-        user.getUserCredentials().setPassword( passwordManager.encode( rawPassword ) );
+        user.getUserCredentials().setInvitation( true );
+        userService.encodeAndSetPassword( user, rawPassword );
 
         return true;
     }
@@ -154,31 +158,48 @@ public class DefaultSecurityService
     {
         if ( !systemSettingManager.emailEnabled() )
         {
-            log.info( "Could not send restore/invite message as email is not configured" );
+            log.warn( "Could not send restore/invite message as email is not configured" );
             return "email_not_configured_for_system";
         }
 
         if ( credentials == null || credentials.getUser() == null )
         {
-            log.info( "Could not send restore/invite message as user does not exist: " + credentials );
+            log.warn( "Could not send restore/invite message as user is null: " + credentials );
             return "no_user_credentials";
         }
 
         if ( credentials.getUser().getEmail() == null || !ValidationUtils.emailIsValid( credentials.getUser().getEmail() ) )
         {
-            log.info( "Could not send restore/invite message as user has no email or email is invalid" );
+            log.warn( "Could not send restore/invite message as user has no email or email is invalid" );
             return "user_does_not_have_valid_email";
         }
 
         if ( credentials.hasAnyAuthority( Arrays.asList( UserAuthorityGroup.CRITICAL_AUTHS ) ) )
         {
-            log.info( "Not allowed to restore/invite users with critical authorities" );
+            log.warn( "Not allowed to restore/invite users with critical authorities" );
             return "user_has_critical_authorities";
         }
 
         return null;
     }
 
+    public String validateInvite( UserCredentials credentials )
+    {
+        if ( credentials == null )
+        {
+            log.warn( "Could not send invite message as user does is null: " + credentials );
+            return "no_user_credentials";
+        }
+        
+        if ( credentials.getUsername() != null && userService.getUserCredentialsByUsername( credentials.getUsername() ) != null )
+        {
+            log.warn( "Could not send invite message as username is already taken: " + credentials );
+            return "username_taken";
+        }
+        
+        return validateRestore( credentials );
+    }
+    
     @Override
     public boolean sendRestoreMessage( UserCredentials credentials, String rootPath, RestoreOptions restoreOptions )
     {
@@ -214,7 +235,7 @@ public class DefaultSecurityService
         vars.put( "username", credentials.getUsername() );
 
         User user = credentials.getUser();
-        Locale locale = (Locale) userService.getUserSettingValue( user, UserSettingService.KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
+        Locale locale = (Locale) userSettingService.getUserSettingValue( user, UserSettingService.KEY_UI_LOCALE, LocaleManager.DHIS_STANDARD_LOCALE );
 
         I18n i18n = i18nManager.getI18n( locale );
         vars.put( "i18n" , i18n );
@@ -280,14 +301,12 @@ public class DefaultSecurityService
             return false;
         }
 
-        newPassword = passwordManager.encode( newPassword );
-
-        credentials.setPassword( newPassword );
-
         credentials.setRestoreCode( null );
         credentials.setRestoreToken( null );
         credentials.setRestoreExpiry( null );
+        credentials.setInvitation( false );
 
+        userService.encodeAndSetPassword( credentials, newPassword );
         userService.updateUserCredentials( credentials );
 
         return true;

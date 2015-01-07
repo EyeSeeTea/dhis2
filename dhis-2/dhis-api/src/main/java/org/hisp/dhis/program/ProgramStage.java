@@ -42,6 +42,7 @@ import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataentryform.DataEntryForm;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceReminder;
 
 import java.util.ArrayList;
@@ -177,7 +178,7 @@ public class ProgramStage
         this.remindCompleted = remindCompleted;
     }
 
-    @JsonProperty( value = "trackedEntityInstanceReminders" )
+    @JsonProperty( "trackedEntityInstanceReminders" )
     @JsonView( { DetailedView.class } )
     @JacksonXmlElementWrapper( localName = "trackedEntityInstanceReminders", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "trackedEntityInstanceReminder", namespace = DxfNamespaces.DXF_2_0 )
@@ -207,6 +208,7 @@ public class ProgramStage
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getDescription()
     {
         return description;
@@ -217,7 +219,7 @@ public class ProgramStage
         this.description = description;
     }
 
-    @JsonProperty( value = "programStageSections" )
+    @JsonProperty( "programStageSections" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlElementWrapper( localName = "programStageSections", namespace = DxfNamespaces.DXF_2_0 )
     @JacksonXmlProperty( localName = "programStageSection", namespace = DxfNamespaces.DXF_2_0 )
@@ -301,6 +303,7 @@ public class ProgramStage
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getReportDateDescription()
     {
         return reportDateDescription;

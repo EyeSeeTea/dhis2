@@ -34,6 +34,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
+import org.apache.commons.collections.CollectionUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -41,8 +43,11 @@ import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.schema.annotation.PropertyRange;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -54,9 +59,9 @@ public class UserAuthorityGroup
 {
     public static final String AUTHORITY_ALL = "ALL";
 
-    public static final String[] CRITICAL_AUTHS = { "ALL", "F_SCHEDULING_ADMIN",
-        "F_PERFORM_MAINTENANCE", "F_MERGE_ORGANISATION_UNITS", "F_ELIMINATE_DUPLICATE_DATA_ELEMENTS",
-        "F_SQLVIEW_MANAGEMENT", "F_SYSTEM_SETTING", "F_USERROLE_LIST", "F_USERROLE_DELETE", "F_USERROLE_PUBLIC_ADD" };
+    public static final String[] CRITICAL_AUTHS = { "ALL", "F_SCHEDULING_ADMIN", "F_SYSTEM_SETTING",
+        "F_SQLVIEW_PUBLIC_ADD", "F_SQLVIEW_PRIVATE_ADD", "F_SQLVIEW_DELETE", "F_SQLVIEW_EXECUTE", "F_SQLVIEW_MANAGEMENT",
+        "F_USERROLE_PUBLIC_ADD", "F_USERROLE_PRIVATE_ADD", "F_USERROLE_DELETE", "F_USERROLE_LIST" };
 
     /**
      * Required and unique.
@@ -100,6 +105,11 @@ public class UserAuthorityGroup
         return authorities != null && authorities.contains( AUTHORITY_ALL );
     }
 
+    public boolean hasCriticalAuthorities()
+    {
+        return authorities != null && CollectionUtils.containsAny( authorities, Sets.newHashSet( CRITICAL_AUTHS ) );
+    }
+
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -113,6 +123,7 @@ public class UserAuthorityGroup
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    @PropertyRange( min = 2 )
     public String getDescription()
     {
         return description;
@@ -145,6 +156,25 @@ public class UserAuthorityGroup
     public void setMembers( Set<UserCredentials> members )
     {
         this.members = members;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class } )
+    @JacksonXmlElementWrapper( localName = "users", namespace = DxfNamespaces.DXF_2_0 )
+    @JacksonXmlProperty( localName = "user", namespace = DxfNamespaces.DXF_2_0 )
+    public List<User> getUsers()
+    {
+        List<User> users = new ArrayList<>();
+
+        for ( UserCredentials userCredentials : members )
+        {
+            if ( userCredentials.getUser() != null )
+            {
+                users.add( userCredentials.getUser() );
+            }
+        }
+
+        return users;
     }
 
     @JsonProperty
