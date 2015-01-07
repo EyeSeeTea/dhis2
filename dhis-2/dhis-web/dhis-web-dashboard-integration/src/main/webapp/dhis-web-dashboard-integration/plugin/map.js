@@ -1566,7 +1566,7 @@ Ext.onReady(function () {
             olmap.buttonControls.push(control);
 
             el.addListener('mouseover', function(e) {
-                var layers = gis.util.map.getRenderedVectorLayers(),
+                var layers = gis.util.map.getRenderedVectorLayers().reverse(),
                     xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
                     html = '';
 
@@ -1584,7 +1584,6 @@ Ext.onReady(function () {
                     title: 'Legend',
                     cls: 'gis-plugin',
                     bodyStyle: 'background-color: #fff; padding: 3px',
-                    //html: layers[0].core.updateLegend().innerHTML,
                     html: html,
                     shadow: false,
                     listeners: {
@@ -1592,7 +1591,7 @@ Ext.onReady(function () {
                             this.getEl().setStyle('opacity', 0);
 
                             this.getEl().on('blur', function() {
-                                //window.destroy();
+                                window.destroy();
                             });
                         },
                         show: function() {
@@ -1606,7 +1605,7 @@ Ext.onReady(function () {
 
                 window.showAt(xy[0], xy[1], Ext.create('Ext.fx.Anim', {
                     target: window,
-                    duration: 400,
+                    duration: 200,
                     from: {
                         opacity: 0
                     },
