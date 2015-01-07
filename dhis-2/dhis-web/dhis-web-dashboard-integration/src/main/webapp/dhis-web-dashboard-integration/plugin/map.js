@@ -1565,28 +1565,38 @@ Ext.onReady(function () {
 
             olmap.buttonControls.push(control);
 
-            el.addListener('click', function(e) {
+            el.addListener('mouseover', function(e) {
                 var layers = gis.util.map.getRenderedVectorLayers(),
-                    xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY();
+                    xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
+                    html = '';
+
+                for (var i = 0, layer; i < layers.length; i++) {
+                    layer = layers[i];
+
+                    html += '<div style="font-size:10px; font-weight:bold">' + layer.name + '</div>' + layer.core.updateLegend().innerHTML + (i < layers.length - 1 ? '<div style="padding:5px"></div>' : '');
+                }
 
                 if (window && window.destroy) {
                     window.destroy();
-                    window = null;
                 }
 
                 window = Ext.create('Ext.window.Window', {
                     title: 'Legend',
                     cls: 'gis-plugin',
                     bodyStyle: 'background-color: #fff; padding: 3px',
-                    html: layers[0].core.updateLegend().innerHTML,
+                    //html: layers[0].core.updateLegend().innerHTML,
+                    html: html,
                     shadow: false,
                     listeners: {
                         render: function() {
                             this.getEl().setStyle('opacity', 0);
 
                             this.getEl().on('blur', function() {
-                                window.destroy();
+                                //window.destroy();
                             });
+                        },
+                        show: function() {
+                            this.setWidth(this.getWidth());
                         },
                         destroy: function() {
                             window = null;
@@ -6382,8 +6392,7 @@ Ext.onReady(function () {
                     child.style.fontSize = style.fontSize;
                     child.style.lineHeight = style.dataLineHeight;
                     child.style.paddingBottom = style.dataPaddingBottom;
-                    child.innerHTML += response.metaData.names[id] || name || id;
-                    child.innerHTML += "<br/>";
+                    child.innerHTML += '<div style="color:#222; font-size:10px !important">' + (response.metaData.names[id] || name || id) + '</div>';
 
                     // period
                     id = view.filters[0].items[0].id;
@@ -6397,21 +6406,24 @@ Ext.onReady(function () {
 
                     // legends
                     if (view.legendSet) {
+                        var divStyle;
+
                         for (var i = 0; i < this.classification.bins.length; i++) {
                             child = document.createElement("div");
                             child.style.fontSize = style.fontSize;
                             child.style.backgroundColor = this.colorInterpolation[i].toHexString();
                             child.style.width = style.colorWidth;
-                            child.style.height = view.legendSet.names[i] ? '25px' : style.colorHeight;
+                            child.style.height = view.legendSet.names[i] ? '22px' : style.colorHeight;
                             child.style.cssFloat = 'left';
                             child.style.marginRight = style.colorMarginRight;
                             element.appendChild(child);
 
                             child = document.createElement("div");
-                            child.style.height = view.legendSet.names[i] ? '25px' : style.colorHeight;
+                            child.style.height = view.legendSet.names[i] ? '22px' : style.colorHeight;
                             child.style.fontSize = style.fontSize;
                             child.style.lineHeight = view.legendSet.names[i] ? "12px" : "7px";
-                            child.innerHTML = '<b style="color:#222; font-size:10px !important">' + (view.legendSet.names[i] || '') + '</b><br/>' + this.classification.bins[i].label;
+                            child.innerHTML = '<div style="color:#222; font-size:10px !important; height:11px; line-height:12px; font-weight:bold;">' + (view.legendSet.names[i] || '') + '</div>';
+                            child.innerHTML += '<div style="color:#222; font-size:10px !important; height:11px; line-height:12px">' + this.classification.bins[i].label + '</div>';
                             element.appendChild(child);
 
                             child = document.createElement("div");
@@ -6470,11 +6482,10 @@ Ext.onReady(function () {
         execute;
 
     GIS.i18n = {
-        facility_layer_legend: 'Facility layer',
-        thematic_layer_1_legend: 'Thematic layer 1',
-        thematic_layer_2_legend: 'Thematic layer 2',
-        thematic_layer_3_legend: 'Thematic layer 3',
-        thematic_layer_4_legend: 'Thematic layer 4',
+        event_layer: 'Event layer',
+        boundary_layer: 'Boundary layer',
+        facility_layer: 'Facility layer',
+        thematic_layer: 'Thematic layer',
         measure_distance: 'Measure distance'
     };
 
