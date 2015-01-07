@@ -1478,9 +1478,9 @@ Ext.onReady(function () {
     GIS.core.getOLMap = function (gis) {
         var olmap,
             addControl,
-	    logoName = gis.dashboard ? 'google-logo-small' : 'google-logo';
+            logoName = gis.dashboard ? 'google-logo-small' : 'google-logo';
 
-        addControl = function (name, fn) {
+        addControl = function(name, fn) {
             var button,
                 panel;
 
@@ -1502,27 +1502,27 @@ Ext.onReady(function () {
             panel.div.className += ' ' + name;
             panel.div.childNodes[0].className += ' ' + name + 'Button';
 
-	    return panel;
+            return panel;
         };
 
         olmap = new OpenLayers.Map({
             controls: [
-		new OpenLayers.Control.Navigation({
+                new OpenLayers.Control.Navigation({
                     zoomWheelEnabled: true,
                     documentDrag: true
                 }),
-		new OpenLayers.Control.MousePosition({
+                new OpenLayers.Control.MousePosition({
                     prefix: '<span id="mouseposition" class="el-fontsize-10"><span class="text-mouseposition-lonlat">LON </span>',
                     separator: '<span class="text-mouseposition-lonlat">,&nbsp;LAT </span>',
                     suffix: '<div class="' + logoName + '" name="http://www.google.com/intl/en-US_US/help/terms_maps.html" onclick="window.open(Ext.get(this).dom.attributes.name.nodeValue);"></div></span>'
                 }),
-		new OpenLayers.Control.Permalink(),
-		new OpenLayers.Control.ScaleLine({
+                new OpenLayers.Control.Permalink(),
+                new OpenLayers.Control.ScaleLine({
                     geodesic: true,
                     maxWidth: 170,
                     minWidth: 100
                 })
-   ],
+            ],
             displayProjection: new OpenLayers.Projection('EPSG:4326'),
             //maxExtent: new OpenLayers.Bounds(-1160037508, -1160037508, 1160037508, 1160037508),
             mouseMove: {}, // Track all mouse moves
@@ -1539,7 +1539,7 @@ Ext.onReady(function () {
             gis.util.map.zoomToVisibleExtent(this);
         };
 
-        olmap.closeAllLayers = function () {
+        olmap.closeAllLayers = function() {
             gis.layer.event.core.reset();
             gis.layer.facility.core.reset();
             gis.layer.boundary.core.reset();
@@ -1549,15 +1549,66 @@ Ext.onReady(function () {
             gis.layer.thematic4.core.reset();
         };
 
-        addControl('zoomIn' + (gis.dashboard ? '-vertical' : ''), olmap.zoomIn);
-        addControl('zoomOut' + (gis.dashboard ? '-vertical' : ''), olmap.zoomOut);
-        addControl('zoomVisible' + (gis.dashboard ? '-vertical' : ''), olmap.zoomToVisibleExtent);
-        addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
-            GIS.core.MeasureWindow(gis).show();
-        });
+        olmap.buttonControls = [];
 
-	olmap.addButtonControl = addControl;
-	
+        olmap.buttonControls.push(addControl('zoomIn' + (gis.dashboard ? '-vertical' : ''), olmap.zoomIn));
+        olmap.buttonControls.push(addControl('zoomOut' + (gis.dashboard ? '-vertical' : ''), olmap.zoomOut));
+        olmap.buttonControls.push(addControl('zoomVisible' + (gis.dashboard ? '-vertical' : ''), olmap.zoomToVisibleExtent));
+        olmap.buttonControls.push(addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
+            GIS.core.MeasureWindow(gis).show();
+        }));
+
+        if (gis.dashboard) {
+            var control = addControl('legend-vertical', function() {}),
+                el = Ext.get(control.div),
+                window;
+
+            olmap.buttonControls.push(control);
+
+            el.addListener('click', function(e) {
+                var layers = gis.util.map.getRenderedVectorLayers(),
+                    xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY();
+
+                if (window && window.destroy) {
+                    window.destroy();
+                    window = null;
+                }
+
+                window = Ext.create('Ext.window.Window', {
+                    title: 'Legend',
+                    cls: 'gis-plugin',
+                    bodyStyle: 'background-color: #fff; padding: 3px',
+                    html: layers[0].core.updateLegend().innerHTML,
+                    shadow: false,
+                    listeners: {
+                        render: function() {
+                            this.getEl().setStyle('opacity', 0);
+
+                            this.getEl().on('blur', function() {
+                                window.destroy();
+                            });
+                        },
+                        destroy: function() {
+                            window = null;
+                        }
+                    }
+                });
+
+                window.showAt(xy[0], xy[1], Ext.create('Ext.fx.Anim', {
+                    target: window,
+                    duration: 400,
+                    from: {
+                        opacity: 0
+                    },
+                    to: {
+                        opacity: 1
+                    }
+                }));
+            });
+        }
+
+        olmap.addButtonControl = addControl;
+
         return olmap;
     };
 
@@ -3887,12 +3938,12 @@ Ext.onReady(function () {
             layers = [],
             gis = {};
 
-	gis.plugin = init.plugin;
-	gis.el = init.el;
-	gis.dashboard = init.dashboard;
-	gis.crossDomain = init.crossDomain;
-	gis.skipMask = init.skipMask;
-	gis.skipFade = init.skipFade;
+        gis.plugin = init.plugin;
+        gis.el = init.el;
+        gis.dashboard = init.dashboard;
+        gis.crossDomain = init.crossDomain;
+        gis.skipMask = init.skipMask;
+        gis.skipFade = init.skipFade;
 
         // conf
         (function () {
@@ -6718,12 +6769,11 @@ Ext.onReady(function () {
         css += '.x-panel-header-default-top{-moz-box-shadow:#efeded 0 1px 0px 0 inset;-webkit-box-shadow:#efeded 0 1px 0px 0 inset;-o-box-shadow:#efeded 0 1px 0px 0 inset;box-shadow:#efeded 0 1px 0px 0 inset} \n';
         css += '.x-tip-header a,.x-tip-body a,.x-form-invalid-tip-body a{color:#2a2a2a} \n';
         css += '.x-toolbar-footer .x-box-inner{border-width:0} \n';
+        css += '.x-window-default{-moz-border-radius-topleft:5px; -webkit-border-top-left-radius:5px; -o-border-top-left-radius:5px; -ms-border-top-left-radius:5px; -khtml-border-top-left-radius:5px; border-top-left-radius:5px; -moz-border-radius-topright:5px; -webkit-border-top-right-radius:5px; -o-border-top-right-radius:5px; -ms-border-top-right-radius:5px; -khtml-border-top-right-radius:5px; border-top-right-radius:5px; -moz-border-radius-bottomright:5px; -webkit-border-bottom-right-radius:5px; -o-border-bottom-right-radius:5px; -ms-border-bottom-right-radius:5px; -khtml-border-bottom-right-radius:5px; border-bottom-right-radius:5px; -moz-border-radius-bottomleft:5px; -webkit-border-bottom-left-radius:5px; -o-border-bottom-left-radius:5px; -ms-border-bottom-left-radius:5px; -khtml-border-bottom-left-radius:5px; border-bottom-left-radius:5px; -moz-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; -webkit-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; -o-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; padding:4px 4px 4px 4px; border-color:#a9a9a9; border-width:1px; border-style:solid; background-color:#e8e8e8; } \n';
         css += '.x-window{outline:none} \n';
         css += '.x-window .x-window-wrap .x-window-body{overflow:hidden} \n';
-        css += '.x-window-body{position:relative;border-style:solid} \n';
-        css += '.x-window-default{border-color:#a9a9a9;-moz-border-radius:5px 5px;-webkit-border-radius:5px 5px;-o-border-radius:5px 5px;-ms-border-radius:5px 5px;-khtml-border-radius:5px 5px;border-radius:5px 5px;-moz-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset;-webkit-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset;-o-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset;box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset} \n';
-        css += '.x-window-default{-moz-border-radius-topleft:5px;-webkit-border-top-left-radius:5px;-o-border-top-left-radius:5px;-ms-border-top-left-radius:5px;-khtml-border-top-left-radius:5px;border-top-left-radius:5px;-moz-border-radius-topright:5px;-webkit-border-top-right-radius:5px;-o-border-top-right-radius:5px;-ms-border-top-right-radius:5px;-khtml-border-top-right-radius:5px;border-top-right-radius:5px;-moz-border-radius-bottomright:5px;-webkit-border-bottom-right-radius:5px;-o-border-bottom-right-radius:5px;-ms-border-bottom-right-radius:5px;-khtml-border-bottom-right-radius:5px;border-bottom-right-radius:5px;-moz-border-radius-bottomleft:5px;-webkit-border-bottom-left-radius:5px;-o-border-bottom-left-radius:5px;-ms-border-bottom-left-radius:5px;-khtml-border-bottom-left-radius:5px;border-bottom-left-radius:5px;padding:4px 4px 4px 4px;border-width:1px;border-style:solid;background-color:#e8e8e8} \n';
         css += '.x-window-body-default{border-color:#bcb1b0;border-width:1px;background:#e0e0e0;color:black} \n';
+        css += '.x-window-body{position:relative;border-style:solid} \n';
         css += '.x-message-box .x-window-body{background-color:#e8e8e8;border:none} \n';
         css += '.x-tab-bar-bottom .x-tab-bar-body .x-box-inner{position:relative;top:-1px} \n';
         css += '.x-tab-bar-bottom .x-tab-bar-body-default-plain .x-box-inner{position:relative;top:-1px} \n';
@@ -6772,19 +6822,20 @@ Ext.onReady(function () {
         css += '.olControlPanel.zoomIn { right: 72px; } \n';
         css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPanel.zoomOut { right: 48px; } \n';
-        css += '.olControlPanel.zoomVisible { right: 24px; } \n';	
+        css += '.olControlPanel.zoomVisible { right: 24px; } \n';
         css += '.olControlPanel.zoomIn-vertical { right: 1px; } \n';
-	css += '.olControlPanel.zoomOut-vertical { top: 24px; right: 1px; } \n';
+        css += '.olControlPanel.zoomOut-vertical { top: 24px; right: 1px; } \n';
         css += '.olControlPanel.zoomVisible-vertical { top: 48px; right: 1px; } \n';
-	css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
-	css += '.olControlPanel.measure-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
+        css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
+        css += '.olControlPanel.legend-vertical { top: 96px; right: 1px; } \n';
+        css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
         css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
         css += '.text-mouseposition-lonlat { color: #555; } \n';
         css += '.olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n';
         css += '.google-logo { background: url("images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
-	css += '.google-logo-small { background: url("images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo-small { background: url("images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
         css += '.olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n';
         css += '.olControlScaleLineBottom { display: none; } \n';
         css += '.olControlScaleLineTop { font-weight: bold; } \n';
