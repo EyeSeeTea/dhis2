@@ -12,11 +12,11 @@
             <div id="checkboxDropdown">
                 <div></div>
                 <ul>
-                    <li data-action="messageOperations.removeMessages">Delete</li>
-                    <li data-action="messageOperations.markMessagesRead">Mark read</li>
-                    <li data-action="messageOperations.markMessagesUnread">Mark unread</li>
-                    <li data-action="messageOperations.markMessagesFollowup">Mark for follow up</li>
-                    <li data-action="messageOperations.unmarkMessagesFollowup">Clear follow up</li>
+                    <li data-action="messageOperations.removeMessages">$i18n.getString( "delete" )</li>
+                    <li data-action="messageOperations.markMessagesRead">$i18n.getString( "mark_read")</li>
+                    <li data-action="messageOperations.markMessagesUnread">$i18n.getString( "mark_unread" )</li>
+                    <li data-action="messageOperations.markMessagesFollowup">$i18n.getString( "mark_followup")</li>
+                    <li data-action="messageOperations.unmarkMessagesFollowup">$i18n.getString( "clear_followup" )</li>
                 </ul>
             </div>
         </li>
