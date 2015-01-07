@@ -28,12 +28,8 @@ package org.hisp.dhis.message.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hibernate.Criteria;
 import org.hibernate.Query;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
-import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.message.MessageConversation;
@@ -137,7 +133,9 @@ public class HibernateMessageConversationStore
     @SuppressWarnings( "unchecked" )
     public Collection<MessageConversation> getMessageConversations( String[] uids )
     {
-        return getSharingCriteria().add( Restrictions.in( "uid", Arrays.asList( uids ) ) ).list();
+        return getSharingCriteria()
+            .add( Restrictions.in( "uid", uids ) )
+            .list();
     }
 
     @Override
@@ -259,36 +257,5 @@ public class HibernateMessageConversationStore
         } );
 
         return recipients;
-    }
-
-    // -------------------------------------------------------------------------
-    // Supportive methods
-    // -------------------------------------------------------------------------
-
-    private String prepareArrayParameters( String[] parameterArray )
-    {
-        if( parameterArray.length < 1 )
-        {
-            return null;
-        }
-
-        String params = "";
-
-        for ( int i = 0 ; i < parameterArray.length; i++ )
-        {
-            if( !CodeGenerator.isValidCode( parameterArray[i] ) )
-            {
-                continue;
-            }
-
-            if( i > 0 )
-            {
-                params += ",";
-            }
-
-            params += "'" + parameterArray[i] + "'";
-        }
-
-        return params;
     }
 }

@@ -110,39 +110,32 @@ var messageOperations = ( function() {
     //
 
     var removeMessages = function( messages ) {
-        if( typeof messages === "undefined" || messages.length < 1 )
-        {
+        if( typeof messages === "undefined" || messages.length < 1 ) {
             return;
         }
 
         var confirmed = window.confirm( i18n_confirm_delete_all_selected_messages );
 
-        if( confirmed )
-        {
+        if( confirmed ) {
             setHeaderWaitMessage( i18n_deleting );
 
-            $.ajax(
-                {
+            $.ajax( {
                     url: "../api/messageConversations?" + $.param( { mc: messages }, true ),
                     contentType: "application/json",
                     dataType: "json",
                     type: "DELETE",
-                    success: function( response )
-                    {
-                        for( var i = 0; i < response.removed.length; i++ )
-                        {
+                    success: function( response ) {
+                        for( var i = 0; i < response.removed.length; i++ ) {
                             $( "#messages" ).find( "[name='" + response.removed[i] + "']" ).remove();
                         }
                         setHeaderDelayMessage( i18n_messages_were_deleted );
                     },
-                    error: function( response )
-                    {
+                    error: function( response ) {
                         showErrorMessage( response.message, 3 );
                     }
-                } );
+            } );
         }
     };
-
 
     var propertyRegExp = new RegExp( "[read|unread|followup|unfollowup]" );
 
@@ -198,8 +191,7 @@ var messageOperations = ( function() {
         }
     };
 
-    var toggleMessagesRead = function( messageUids )
-    {
+    var toggleMessagesRead = function( messageUids ) {
         var messages = $( "#messages" );
 
         for( var i = 0; i < messageUids.length; i++ ) {
@@ -214,19 +206,15 @@ var messageOperations = ( function() {
         unmarkMessagesFollowup: function( messages ) {
             return markMessages( messages, "unfollowup" );
         },
-
         markMessagesFollowup: function( messages) {
             return markMessages( messages, "followup" );
         },
-
         markMessagesRead: function( messages ) {
             return markMessages( messages, "read" );
         },
-
         markMessagesUnread: function( messages ) {
             return markMessages( messages, "unread" );
         },
-
         removeMessages: removeMessages
     };
 })( window );

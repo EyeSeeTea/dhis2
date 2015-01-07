@@ -392,12 +392,12 @@ public class MessageConversationController
 
         if ( !canModifyUserConversation( currentUser, user ) )
         {
-            throw new UpdateAccessDeniedException( "Not authorize to modify this object." );
+            throw new UpdateAccessDeniedException( "Not authorized to modify this object." );
         }
 
         Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
-        if( messageConversations.isEmpty() )
+        if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs" ) );
@@ -409,7 +409,7 @@ public class MessageConversationController
 
         for ( org.hisp.dhis.message.MessageConversation conversation : messageConversations )
         {
-            if( !conversation.isFollowUp() )
+            if ( !conversation.isFollowUp() )
             {
                 conversation.toggleFollowUp( user );
                 messageService.updateMessageConversation( conversation );
@@ -449,7 +449,7 @@ public class MessageConversationController
 
         Collection<org.hisp.dhis.message.MessageConversation> messageConversations = messageService.getMessageConversations( user, uids );
 
-        if( messageConversations.isEmpty() )
+        if ( messageConversations.isEmpty() )
         {
             response.setStatus( HttpServletResponse.SC_NOT_FOUND );
             responseNode.addChild( new SimpleNode( "message", "No MessageConversations found for the given UIDs" ) );
