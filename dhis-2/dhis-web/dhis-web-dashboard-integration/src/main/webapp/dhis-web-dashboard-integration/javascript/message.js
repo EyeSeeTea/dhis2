@@ -150,7 +150,7 @@ var messageOperations = ( function() {
             return;
         }
 
-        if( !_.isString( property ) || !propertyRegExp.test() ) {
+        if( !_.isString( property ) || !propertyRegExp.test( property ) ) {
             throw "Property string must be set.";
         }
 

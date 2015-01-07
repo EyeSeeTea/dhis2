@@ -36,13 +36,15 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.analytics.Partitions;
+import org.hisp.dhis.calendar.Calendar;
+import org.hisp.dhis.calendar.DateTimeUnit;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.NameableObject;
-import org.hisp.dhis.period.Cal;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
 import org.hisp.dhis.system.util.UniqueArrayList;
+import org.joda.time.DateTime;
 
 /**
  * @author Lars Helge Overland
@@ -53,19 +55,29 @@ public class PartitionUtils
 
     private static final String SEP = "_";
 
-    public static List<Period> getPeriods( Date earliest, Date latest )
+    public static Period getPeriod( Integer year )
     {
-        List<Period> periods = new ArrayList<>();
+        DateTime time = new DateTime( year, 1, 1, 0, 0 );
 
-        Period period = PERIODTYPE.createPeriod( earliest );
+        return PERIODTYPE.createPeriod( time.toDate() );
+    }
 
-        while ( period != null && period.getStartDate().before( latest ) )
+    public static Date getEarliestDate( Integer lastYears )
+    {
+        Date earliest = null;
+
+        if ( lastYears != null )
         {
-            periods.add( period );
-            period = PERIODTYPE.getNextPeriod( period );
+            Calendar calendar = PeriodType.getCalendar();
+            DateTimeUnit dateTimeUnit = calendar.today();
+            dateTimeUnit = calendar.minusYears( dateTimeUnit, lastYears - 1 );
+            dateTimeUnit.setMonth( 1 );
+            dateTimeUnit.setDay( 1 );
+
+            earliest = dateTimeUnit.toJdkDate();
         }
 
-        return periods;
+        return earliest;
     }
 
     //TODO optimize by including required filter periods only
@@ -129,21 +141,5 @@ public class PartitionUtils
         }
 
         return map;
-    }
-
-    /**
-     * Returns the year of the given date.
-     */
-    public static int year( Date date )
-    {
-        return new Cal( date ).getYear();
-    }
-
-    /**
-     * Returns the max date within the year of the given date.
-     */
-    public static Date maxOfYear( Date date )
-    {
-        return new Cal( year( date ), 12, 31, true ).time();
     }
 }
