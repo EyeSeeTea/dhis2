@@ -830,7 +830,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         actions: [{ id:"LOQmKfnYqvf",
                                     action:"displaytext",
                                     location:"con",
-                                    content:"The diastolic blood pressure is greater than or equal to 70 in the first stage"}],
+                                    content:"The diastolic blood pressure is greater than or equal to 70 in the first stage",
+                                    data:null
+                                }
+                            ],
                         triggers: ["tracker_data_changed"] 
                     } 
                 },
@@ -844,13 +847,15 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                     id:"LAQmKfnYqvf",
                                     action:"displaytext",
                                     location:"con",
-                                    content:"Systolic higher than diastolic in first stage"
+                                    content:"Systolic higher than diastolic in first stage",
+                                    data:null
                                 },
                                 {
                                     id:"PLTmKfnYqvf",
                                     action:"displaytext",
                                     location:"rem",
-                                    content:"I repeat, in summary for the first stage, the systolic blood pressure is higher than the diastolic."
+                                    content:"I repeat, in summary for the first stage, the systolic blood pressure is higher than the diastolic.",
+                                    data:null
                                 }
                             ],
                         triggers: [] 
@@ -863,7 +868,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         actions: [{ id:"LermKfnYqvf",
                                     action:"displaytext",
                                     location:"con",
-                                    content:"Malaria bednet info not given as part of this visit"}],
+                                    content:"Malaria bednet info not given as part of this visit",
+                                    data:null
+                                }],
                         triggers: [] 
                     }
                 },
@@ -874,7 +881,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         actions: [{ id:"LermKfnYqvf",
                                     action:"displaytext",
                                     location:"con",
-                                    content:"Malaria bednet info was given in the most recent visist"}],
+                                    content:"Malaria bednet info was given in the most recent visit",
+                                    data:null
+                                    }],
                         triggers: [] 
                     }
                 },
@@ -887,13 +896,38 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                         id:"sAQmKddYqvf",
                                         action:"displaytext",
                                         location:"rem",
-                                        content:"Remember to add diastolic blood pressure"
+                                        content:"Remember to add diastolic blood pressure",
+                                        data:null
                                     },
                                     {
                                         id:"PsTmKfnttvf",
                                         action:"hidefield",
                                         location:null,
-                                        content:"M4HEOoEFTAT"
+                                        content:"M4HEOoEFTAT",
+                                        data:null
+                                    }
+                                ],
+                            triggers: [] 
+                        } 
+                    },
+                    {
+                        ruleId:"TsQsdqeeqet",
+                        ruleContent: {
+                            condition: "$plurality !== 0",
+                            actions: [
+                                    {
+                                        id:"srQmKdfYevf",
+                                        action:"displaykeydata",
+                                        location:"con",
+                                        content:"Plurality",
+                                        data:"$plurality"
+                                    },
+                                    {
+                                        id:"srQmKdfrrvf",
+                                        action:"displaykeydata",
+                                        location:"con",
+                                        content:"Name",
+                                        data:"Hard Coded"
                                     }
                                 ],
                             triggers: [] 
@@ -948,6 +982,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     defaultvalue:false,
                     type: "dataelement_current_event",
                     dataelement_uID: "ytV9rX4ADnn",
+                    programstage_uID: "",
+                    program_uID: "WSGAb5XwJ3Y"
+                },
+                var5: {
+                    variablename:"$plurality",
+                    defaultvalue:0,
+                    type:"dataelement_newest_event_program",
+                    dataelement_uID:"WpQmKfbYqvt",
                     programstage_uID: "",
                     program_uID: "WSGAb5XwJ3Y"
                 }
@@ -1503,6 +1545,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         executeRules: function($scope) {
             //Get all fieldCodes and resolve values
             var variables = VariableService.getVariables($scope);
+            //Make a variables hash to allow direct lookup:
+            var variablesHash = {};
+            angular.forEach(variables, function(variable) {
+                variablesHash[variable.variablename] = variable.variablevalue;
+            });
+            
             
             //Get all rules that has the trigger "TrackerDataChanged"
             var rules = TrackerRulesFactory.getProgramRules();
@@ -1536,8 +1584,21 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                 location:action.location, 
                                 action:action.action,
                                 content:action.content,
+                                data:action.data,
                                 ineffect:false
                             };
+                        }
+                        
+                        //In case the rule is effective and contains specific data, 
+                        //the effect be refreshed from the variables list.
+                        //If the rule is not effective we can skip this step
+                        if(ruleEffective && action.data !== null)
+                        {
+                            if(angular.isDefined(variablesHash[action.data]))
+                            {
+                                $rootScope.ruleeffects[action.id].data =
+                                    variablesHash[action.data];
+                            }
                         }
                         
                         if($rootScope.ruleeffects[action.id].ineffect != ruleEffective)

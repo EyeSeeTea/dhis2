@@ -9,11 +9,21 @@
             <a class="small-horizonal-spacing" href ng-click="removeWidget(this.widget)" title="{{'remove'| translate}}"><i class="fa fa-times-circle"></i></a>            
         </span>        
     </div>    
-    <div ng-show="this.widget.expand" class="panel-body dashboard-element-container">
-        <div class="row" ng-repeat="(key,item) in displayTextEffects">
-            <div class="col-sm-6" ng-show="item.ineffect">
-                {{item.content| translate}}
+    <div ng-show="this.widget.expand" class="dashboard-element-container">
+        <div class="panel-body" ng-if="showKeyDataSection">   
+            <div ng-repeat="(key,item) in displayKeyDataEffects" ng-show="item.ineffect"  class="info-container">
+                <div class="info-container-heading">{{item.content}}</div>
+                <div class="info-container-text">{{item.data}}</div>          
             </div>
-        </div>        
+        </div>   
+        <table class="table table-striped dashboard-element-container" ng-if="showTextSection">
+            <tr ng-repeat="(key,item) in displayTextEffects" ng-if="item.ineffect">
+                <td>
+                    <div>
+                        {{item.content| translate}}
+                    </div>
+                </td>
+            </tr>
+        </table>
     </div>
 </div>

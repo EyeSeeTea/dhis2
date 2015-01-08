@@ -12,10 +12,12 @@ trackerCapture.controller('RuleBoundController',
     
     
     $scope.displayTextEffects = {};
-    $scope.collectDataEffects = {};
+    $scope.displayKeyDataEffects = {};
     
     //listen for the selected items
     $scope.$on('ruleeffectsupdated', function(event, args) {
+        var textInEffect = false;
+        var keyDataInEffect = false;
         
         //Bind non-bound rule effects, if any.
         angular.forEach($rootScope.ruleeffects, function(effect) {
@@ -28,10 +30,29 @@ trackerCapture.controller('RuleBoundController',
                     if(!angular.isObject($scope.displayTextEffects[effect.id])){
                         $scope.displayTextEffects[effect.id] = effect;
                     }
+                    if(effect.ineffect)
+                    {
+                        textInEffect = true;
+                    }
+                } 
+                else if(effect.action == "displaykeydata") {
+                    //this action is display text. Make sure the displaytext is
+                    //added to the local list of displayed texts
+                    if(!angular.isObject($scope.displayTextEffects[effect.id])){
+                        $scope.displayKeyDataEffects[effect.id] = effect;
+                    }
+                    if(effect.ineffect)
+                    {
+                        keyDataInEffect = true;
+                    }
                 } else {
                     $log.warn("action: '" + effect.action + "' not supported by rulebound-controller.js")
                 }
             }
         });
+        
+        $scope.showKeyDataSection = keyDataInEffect;
+        $scope.showTextSection = textInEffect;
+        
     });     
 });
