@@ -13,7 +13,7 @@
                 </th>
             </tr>
         </thead>
-        <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements" ng-hide="isHidden(prStDe.dataElement.id)">
+        <tr class="col-md-12" ng-repeat="prStDe in currentStage.programStageDataElements" ng-if="!isHidden(prStDe.dataElement.id)">
             <td class="col-md-5">
                 {{prStDe.dataElement.formName ? prStDe.dataElement.formName : prStDe.dataElement.name}}
             </td>
@@ -146,7 +146,7 @@
                         </tr>                        
                     </thead>
                     <tbody id="list">       
-                        <tr class="col-md-12" ng-repeat="de in section.programStageDataElements"  ng-hide="isHidden(de.dataElement.id)">
+                        <tr class="col-md-12" ng-repeat="de in section.programStageDataElements"  ng-if="!isHidden(de.dataElement.id)">
                             <td class="col-md-5">
                                 {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
                             </td>
