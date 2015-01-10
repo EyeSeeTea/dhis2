@@ -911,19 +911,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         } 
                     },
                     {
-                        ruleId:"TsQsdqeeqet",
+                        ruleId:"TsQsdqerqet",
                         ruleContent: {
-                            condition: "$plurality !== 0",
+                            condition: "true",
                             actions: [
                                     {
-                                        id:"srQmKdfYevf",
-                                        action:"displaykeydata",
-                                        location:"con",
-                                        content:"Plurality",
-                                        data:"$plurality"
-                                    },
-                                    {
-                                        id:"srQmKdfrrvf",
+                                        id:"srQeKdfYevf",
                                         action:"displaykeydata",
                                         location:"con",
                                         content:"Name",
@@ -931,6 +924,38 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                                     }
                                 ],
                             triggers: [] 
+                        } 
+                    },
+                    {
+                        ruleId:"TsQsdqteqet",
+                        ruleContent: {
+                            condition: "$gestationalage !== 0",
+                            actions: [
+                                    {
+                                        id:"srQmtdfwrvf",
+                                        action:"displaykeydata",
+                                        location:"con",
+                                        content:"Gest. Age",
+                                        data:"$gestationalage"
+                                    }
+                                ],
+                            triggers: [] 
+                        } 
+                    },
+                    {
+                        ruleId:"TsQwdqeeqet",
+                        ruleContent: {
+                            condition: "$plurality !== 0",
+                            actions: [
+                                    {
+                                        id:"srQmKdfYwvf",
+                                        action:"displaykeydata",
+                                        location:"con",
+                                        content:"Plurality",
+                                        data:"$plurality"
+                                    }
+                                ],
+                            triggers: []
                         } 
                     }];
             
@@ -952,47 +977,25 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TrackerFieldCodeFactory', function(){
     return{
         getUserDefinedProgramFieldCodes : function(programUid){
-            return {
-                var1: {
-                    variablename: "$diastolicFirstStage",
-                    defaultvalue:0,
-                    type: "dataelement_newest_event_program_stage",
-                    dataelement_uID: "dyYdfamSY2Z",
-                    programstage_uID: "WZbXY0S00lP",
-                    program_uID: "WSGAb5XwJ3Y"
-                },
-                var2: {
-                    variablename: "$systolicFirstStage",
-                    defaultvalue:0,
-                    type: "dataelement_newest_event_program_stage",
-                    dataelement_uID: "M4HEOoEFTAT",
-                    programstage_uID: "WZbXY0S00lP",
-                    program_uID: "WSGAb5XwJ3Y"
-                },
-                var3: {
-                    variablename: "$malariaBedNetLatest",
-                    defaultvalue:false,
-                    type: "dataelement_newest_event_program",
-                    dataelement_uID: "ytV9rX4ADnn",
-                    programstage_uID: "",
-                    program_uID: "WSGAb5XwJ3Y"
-                },
-                var4: {
-                    variablename: "$malariaBedNetCurrent",
-                    defaultvalue:false,
-                    type: "dataelement_current_event",
-                    dataelement_uID: "ytV9rX4ADnn",
-                    programstage_uID: "",
-                    program_uID: "WSGAb5XwJ3Y"
-                },
-                var5: {
-                    variablename:"$plurality",
-                    defaultvalue:0,
-                    type:"dataelement_newest_event_program",
-                    dataelement_uID:"WpQmKfbYqvt",
-                    programstage_uID: "",
-                    program_uID: "WSGAb5XwJ3Y"
-                }
+            if(programUid === "WSGAb5XwJ3Y")
+            {
+                return[ 
+                    //The codes below this line is generated by an excel tool.
+                    //Paste from here:
+                    
+                    {variablename:'$diastolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'dyYdfamSY2Z',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
+                    {variablename:'$systolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'M4HEOoEFTAT',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
+                    {variablename:'$malariaBedNetLatest',defaultvalue:'false',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
+                    {variablename:'$malariaBedNetCurrent',defaultvalue:'false',type:'dataelement_current_event',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
+                    {variablename:'$plurality',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
+                    {variablename:'$gestationalage',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'BVxtFTS94xK',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'}
+                    
+                    //...to here
+                ];
+            }
+            else
+            {
+                return null;
             }
         }
     };
