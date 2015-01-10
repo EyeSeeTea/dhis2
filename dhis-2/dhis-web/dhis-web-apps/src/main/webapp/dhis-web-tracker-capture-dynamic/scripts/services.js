@@ -823,141 +823,23 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getProgramRules : function(programUid){
             //Will be fetched from server
             var rules = [
-                {
-                    ruleId:"otQmefterrt",
-                    ruleContent: {
-                        condition: "($diastolicFirstStage >= 70)",
-                        actions: [{ id:"LOQmKfnYqvf",
-                                    action:"displaytext",
-                                    location:"con",
-                                    content:"The diastolic blood pressure is greater than or equal to 70 in the first stage",
-                                    data:null
-                                }
-                            ],
-                        triggers: ["tracker_data_changed"] 
-                    } 
-                },
-                {
-                    ruleId:"TtQmKftYqrt",
-                    ruleContent: {
-                        condition: "($systolicFirstStage > $diastolicFirstStage)",
-                        actions: [
-                            
-                                {
-                                    id:"LAQmKfnYqvf",
-                                    action:"displaytext",
-                                    location:"con",
-                                    content:"Systolic higher than diastolic in first stage",
-                                    data:null
-                                },
-                                {
-                                    id:"PLTmKfnYqvf",
-                                    action:"displaytext",
-                                    location:"rem",
-                                    content:"I repeat, in summary for the first stage, the systolic blood pressure is higher than the diastolic.",
-                                    data:null
-                                }
-                            ],
-                        triggers: [] 
-                    } 
-                },
-                {
-                    ruleId:"LpQmKklYqxx",
-                    ruleContent: {
-                        condition: "($malariaBedNetCurrent === true)",
-                        actions: [{ id:"LermKfnYqvf",
-                                    action:"displaytext",
-                                    location:"con",
-                                    content:"Malaria bednet info not given as part of this visit",
-                                    data:null
-                                }],
-                        triggers: [] 
-                    }
-                },
-                {
-                    ruleId:"LpjkKklYyyx",
-                    ruleContent: {
-                        condition: "($malariaBedNetLatest === false)",
-                        actions: [{ id:"LermKfnYqvf",
-                                    action:"displaytext",
-                                    location:"con",
-                                    content:"Malaria bednet info was given in the most recent visit",
-                                    data:null
-                                    }],
-                        triggers: [] 
-                    }
-                },
-                {
-                        ruleId:"TsQsdqtYqqt",
-                        ruleContent: {
-                            condition: "($diastolicFirstStage === 0)",
-                            actions: [
-                                    {
-                                        id:"sAQmKddYqvf",
-                                        action:"displaytext",
-                                        location:"rem",
-                                        content:"Remember to add diastolic blood pressure",
-                                        data:null
-                                    },
-                                    {
-                                        id:"PsTmKfnttvf",
-                                        action:"hidefield",
-                                        location:null,
-                                        content:"M4HEOoEFTAT",
-                                        data:null
-                                    }
-                                ],
-                            triggers: [] 
-                        } 
-                    },
-                    {
-                        ruleId:"TsQsdqerqet",
-                        ruleContent: {
-                            condition: "true",
-                            actions: [
-                                    {
-                                        id:"srQeKdfYevf",
-                                        action:"displaykeydata",
-                                        location:"con",
-                                        content:"Name",
-                                        data:"Hard Coded"
-                                    }
-                                ],
-                            triggers: [] 
-                        } 
-                    },
-                    {
-                        ruleId:"TsQsdqteqet",
-                        ruleContent: {
-                            condition: "$gestationalage !== 0",
-                            actions: [
-                                    {
-                                        id:"srQmtdfwrvf",
-                                        action:"displaykeydata",
-                                        location:"con",
-                                        content:"Gest. Age",
-                                        data:"$gestationalage"
-                                    }
-                                ],
-                            triggers: [] 
-                        } 
-                    },
-                    {
-                        ruleId:"TsQwdqeeqet",
-                        ruleContent: {
-                            condition: "$plurality !== 0",
-                            actions: [
-                                    {
-                                        id:"srQmKdfYwvf",
-                                        action:"displaykeydata",
-                                        location:"con",
-                                        content:"Plurality",
-                                        data:"$plurality"
-                                    }
-                                ],
-                            triggers: []
-                        } 
-                    }];
+                //The below rules is generated by an excel tool.
+                //Paste from here:
+                
+{rule_uID:'rule104128t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'($diastolicFirstStage >= 70)',actions:[{action_uID:'actn104193e',action:'displaytext',location:'con',content:'The diastolic blood pressure is greater than or equal to 70 in the first stage               ',data:null}]},
+{rule_uID:'rule105144t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'($systolicFirstStage > $diastolicFirstStage)',actions:[{action_uID:'actn105145e',action:'displaytext',location:'con',content:'Systolic higher than diastolic in first stage',data:null},
+{action_uID:'actn106199e',action:'displaytext',location:'rem',content:'I repeat, in summary for the first stage, the systolic blood pressure is higher than the diastolic.',data:null}]},
+{rule_uID:'rule107130t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$malariaBedNetCurrent === true',actions:[{action_uID:'actn107151e',action:'displaytext',location:'rem',content:'Malaria bednet info not given as part of this visit',data:null}]},
+{rule_uID:'rule108130t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$malariaBedNetLatest === false',actions:[{action_uID:'actn108154e',action:'displaytext',location:'con',content:'Malaria bednet info was given in the most recent visit',data:null}]},
+{rule_uID:'rule109128t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'($diastolicFirstStage === 0)',actions:[{action_uID:'actn109140e',action:'displaytext',location:'con',content:'Remember to add diastolic blood pressure',data:null},
+{action_uID:'actn110111e',action:'hidefield',location:null,content:'M4HEOoEFTAT',data:null}]},
+{rule_uID:'rule111104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'true',actions:[{action_uID:'actn111104e',action:'displaykeydata',location:'con',content:'Name',data:'Hard Coded'}]},
+{rule_uID:'rule112121t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$gestationalage !== 0',actions:[{action_uID:'actn112109e',action:'displaykeydata',location:'con',content:'Gest. Age',data:'$gestationalage'}]},
+{rule_uID:'rule113116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality !== 0',actions:[{action_uID:'actn113109e',action:'displaykeydata',location:'con',content:'Plurality',data:'$plurality'}]}
+
+                //...to here
+                
+            ];
             
             //Go through all rules and replace operators for javascript:
             /*
@@ -983,12 +865,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //The codes below this line is generated by an excel tool.
                     //Paste from here:
                     
-                    {variablename:'$diastolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'dyYdfamSY2Z',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
-                    {variablename:'$systolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'M4HEOoEFTAT',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
-                    {variablename:'$malariaBedNetLatest',defaultvalue:'false',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
-                    {variablename:'$malariaBedNetCurrent',defaultvalue:'false',type:'dataelement_current_event',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
-                    {variablename:'$plurality',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'},
-                    {variablename:'$gestationalage',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'BVxtFTS94xK',programstage_uID:'null',program_uID:'WSGAb5XwJ3Y'}
+                    {variable_uID:'var102120vv',variablename:'$diastolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'dyYdfamSY2Z',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
+                    {variable_uID:'var103119vv',variablename:'$systolicFirstStage',defaultvalue:'0',type:'dataelement_newest_event_program_stage',dataelement_uID:'M4HEOoEFTAT',programstage_uID:'WZbXY0S00lP',program_uID:'WSGAb5XwJ3Y'},
+                    {variable_uID:'var104120vv',variablename:'$malariaBedNetLatest',defaultvalue:'false',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:null,program_uID:'WSGAb5XwJ3Y'},
+                    {variable_uID:'var105121vv',variablename:'$malariaBedNetCurrent',defaultvalue:'false',type:'dataelement_current_event',dataelement_uID:'ytV9rX4ADnn',programstage_uID:null,program_uID:'WSGAb5XwJ3Y'},
+                    {variable_uID:'var106110vv',variablename:'$plurality',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'ytV9rX4ADnn',programstage_uID:null,program_uID:'WSGAb5XwJ3Y'},
+                    {variable_uID:'var107115vv',variablename:'$gestationalage',defaultvalue:'0',type:'dataelement_newest_event_program',dataelement_uID:'BVxtFTS94xK',programstage_uID:null,program_uID:'WSGAb5XwJ3Y'}
                     
                     //...to here
                 ];
@@ -1010,7 +892,6 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             return [
                 {title: 'enrollment', type:'enrollment', show: false, expand: true, horizontalplacement:"left", index:0},
                 {title: 'dataentry', type: 'dataentry', show: true, expand: true, horizontalplacement:"left", index:1},
-                {title: 'Dependencies', type:'rulebound', code:"dep", show: true, expand: true, horizontalplacement:"left", index:2},
                 {title: 'report', type: 'report', show: false, expand: true, horizontalplacement:"left", index:3},
                 {title: 'current_selections', type: 'current_selections', show: false, expand: true, horizontalplacement:"right", index:0},
                 {title: 'profile', type: 'profile', show: false, expand: true, horizontalplacement:"right", index:1},
@@ -1556,6 +1437,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             
             //Get all rules that has the trigger "TrackerDataChanged"
+            //TODO: Only get the rules that is effective for this program and program stage
             var rules = TrackerRulesFactory.getProgramRules();
             
             if(angular.isObject(rules) && angular.isArray(rules)){
@@ -1568,7 +1450,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 var updatedEffectsExits = false;
                 
                 angular.forEach(rules, function(rule) {
-                    var expression = rule.ruleContent.condition;
+                    var expression = rule.condition;
                     //Go through and populate variables with actual values
                     angular.forEach(variables, function(variable) {
                         expression = expression.replace(variable.variablename,
@@ -1579,11 +1461,11 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //determine if expression is true, and actions should be effectuated
                     var ruleEffective = eval(expression);
                     
-                    angular.forEach(rule.ruleContent.actions, function(action){
+                    angular.forEach(rule.actions, function(action){
                         //In case the effect-hash is not populated, add entries
-                        if(angular.isUndefined( $rootScope.ruleeffects[action.id] )){
-                            $rootScope.ruleeffects[action.id] =  {
-                                id:action.id,
+                        if(angular.isUndefined( $rootScope.ruleeffects[action.action_uID] )){
+                            $rootScope.ruleeffects[action.action_uID] =  {
+                                id:action.action_uID,
                                 location:action.location, 
                                 action:action.action,
                                 content:action.content,
@@ -1599,16 +1481,16 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         {
                             if(angular.isDefined(variablesHash[action.data]))
                             {
-                                $rootScope.ruleeffects[action.id].data =
+                                $rootScope.ruleeffects[action.action_uID].data =
                                     variablesHash[action.data];
                             }
                         }
                         
-                        if($rootScope.ruleeffects[action.id].ineffect != ruleEffective)
+                        if($rootScope.ruleeffects[action.action_uID].ineffect != ruleEffective)
                         {
                             //There is a change in the rule outcome, we need to update the effect object.
                             updatedEffectsExits = true;
-                            $rootScope.ruleeffects[action.id].ineffect = ruleEffective;
+                            $rootScope.ruleeffects[action.action_uID].ineffect = ruleEffective;
                         }
                     });
 
