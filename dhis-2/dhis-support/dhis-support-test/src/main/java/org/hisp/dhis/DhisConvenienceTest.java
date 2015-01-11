@@ -148,7 +148,7 @@ public abstract class DhisConvenienceTest
 
     static
     {
-        DateTime dateTime = new DateTime(1970, 1, 1, 0, 0);
+        DateTime dateTime = new DateTime( 1970, 1, 1, 0, 0 );
         date = dateTime.toDate();
     }
 
@@ -698,7 +698,6 @@ public abstract class DhisConvenienceTest
         unit.setCode( "OrganisationUnitCode" + uniqueCharacter );
         unit.setOpeningDate( date );
         unit.setClosedDate( date );
-        unit.setActive( true );
         unit.setComment( "Comment" + uniqueCharacter );
 
         return unit;

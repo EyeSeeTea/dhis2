@@ -28,7 +28,13 @@ package org.hisp.dhis.message.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.List;
+
 import org.hibernate.Query;
+import org.hibernate.criterion.Restrictions;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.jdbc.StatementBuilder;
 import org.hisp.dhis.message.MessageConversation;
@@ -37,11 +43,6 @@ import org.hisp.dhis.message.UserMessage;
 import org.hisp.dhis.system.util.SqlHelper;
 import org.hisp.dhis.user.User;
 import org.springframework.jdbc.core.RowMapper;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Lars Helge Overland
@@ -128,15 +129,12 @@ public class HibernateMessageConversationStore
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Collection<MessageConversation> getMessageConversations( String[] messageConversationUids )
+    @SuppressWarnings( "unchecked" )
+    public Collection<MessageConversation> getMessageConversations( String[] uids )
     {
-        String hql = ( "FROM MessageConversation where uid in :messageConversationUids" );
-
-        Query query = getQuery( hql );
-        query.setParameterList( "messageConversationUids", messageConversationUids );
-
-        return query.list();
+        return getSharingCriteria()
+            .add( Restrictions.in( "uid", uids ) )
+            .list();
     }
 
     @Override

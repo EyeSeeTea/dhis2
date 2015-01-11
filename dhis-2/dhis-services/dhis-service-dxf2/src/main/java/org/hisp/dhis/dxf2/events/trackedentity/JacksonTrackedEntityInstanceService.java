@@ -28,18 +28,21 @@ package org.hisp.dhis.dxf2.events.trackedentity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-
-import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
-import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StreamUtils;
-
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
+import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.importexport.ImportStrategy;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -94,50 +97,86 @@ public class JacksonTrackedEntityInstanceService extends AbstractTrackedEntityIn
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries addTrackedEntityInstanceXml( InputStream inputStream ) throws IOException
+    public ImportSummaries addTrackedEntityInstanceXml( InputStream inputStream, ImportStrategy strategy ) throws IOException
     {
-        ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+        List<TrackedEntityInstance> trackedEntityInstances = new ArrayList<>();
 
         try
         {
-            TrackedEntityInstances trackedEntityInstances = fromXml( input, TrackedEntityInstances.class );
-
-            for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances.getTrackedEntityInstances() )
-            {
-                trackedEntityInstance.setTrackedEntityInstance( null );
-                importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
-            }
+            TrackedEntityInstances fromXml = fromXml( input, TrackedEntityInstances.class );
+            trackedEntityInstances.addAll( fromXml.getTrackedEntityInstances() );
         }
         catch ( Exception ex )
         {
-            TrackedEntityInstance trackedEntityInstance = fromXml( input, TrackedEntityInstance.class );
-            trackedEntityInstance.setTrackedEntityInstance( null );
-            importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
+            TrackedEntityInstance fromXml = fromXml( input, TrackedEntityInstance.class );
+            trackedEntityInstances.add( fromXml );
         }
 
-        return importSummaries;
+        return addTrackedEntityInstance( trackedEntityInstances, strategy );
     }
 
     @Override
-    public ImportSummaries addTrackedEntityInstanceJson( InputStream inputStream ) throws IOException
+    public ImportSummaries addTrackedEntityInstanceJson( InputStream inputStream, ImportStrategy strategy ) throws IOException
     {
-        ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
+        List<TrackedEntityInstance> trackedEntityInstances = new ArrayList<>();
 
         try
         {
-            TrackedEntityInstances trackedEntityInstances = fromJson( input, TrackedEntityInstances.class );
-
-            for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances.getTrackedEntityInstances() )
-            {
-                importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
-            }
+            TrackedEntityInstances fromJson = fromJson( input, TrackedEntityInstances.class );
+            trackedEntityInstances.addAll( fromJson.getTrackedEntityInstances() );
         }
         catch ( Exception ex )
         {
-            TrackedEntityInstance trackedEntityInstance = fromJson( input, TrackedEntityInstance.class );
+            TrackedEntityInstance fromJson = fromJson( input, TrackedEntityInstance.class );
+            trackedEntityInstances.add( fromJson );
+        }
+
+        return addTrackedEntityInstance( trackedEntityInstances, strategy );
+    }
+
+    private ImportSummaries addTrackedEntityInstance( List<TrackedEntityInstance> trackedEntityInstances, ImportStrategy strategy )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+
+        TrackedEntityInstances create = new TrackedEntityInstances();
+        TrackedEntityInstances update = new TrackedEntityInstances();
+
+        if ( strategy.isCreate() )
+        {
+            create.getTrackedEntityInstances().addAll( trackedEntityInstances );
+        }
+        else if ( strategy.isCreateAndUpdate() )
+        {
+            for ( TrackedEntityInstance trackedEntityInstance : trackedEntityInstances )
+            {
+                if ( StringUtils.isEmpty( trackedEntityInstance.getTrackedEntityInstance() ) )
+                {
+                    create.getTrackedEntityInstances().add( trackedEntityInstance );
+                }
+                else
+                {
+                    if ( teiService.getTrackedEntityInstance( trackedEntityInstance.getTrackedEntityInstance() ) == null )
+                    {
+                        create.getTrackedEntityInstances().add( trackedEntityInstance );
+                    }
+                    else
+                    {
+                        update.getTrackedEntityInstances().add( trackedEntityInstance );
+                    }
+                }
+            }
+        }
+
+        for ( TrackedEntityInstance trackedEntityInstance : create.getTrackedEntityInstances() )
+        {
             importSummaries.addImportSummary( addTrackedEntityInstance( trackedEntityInstance ) );
+        }
+
+        for ( TrackedEntityInstance trackedEntityInstance : update.getTrackedEntityInstances() )
+        {
+            importSummaries.addImportSummary( updateTrackedEntityInstance( trackedEntityInstance ) );
         }
 
         return importSummaries;
