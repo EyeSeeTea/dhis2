@@ -1620,9 +1620,9 @@ Ext.onReady(function () {
         olmap.buttonControls.push(addControl('zoomIn' + (gis.dashboard ? '-vertical' : ''), olmap.zoomIn));
         olmap.buttonControls.push(addControl('zoomOut' + (gis.dashboard ? '-vertical' : ''), olmap.zoomOut));
         olmap.buttonControls.push(addControl('zoomVisible' + (gis.dashboard ? '-vertical' : ''), olmap.zoomToVisibleExtent));
-        olmap.buttonControls.push(addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
-            GIS.core.MeasureWindow(gis).show();
-        }));
+        //olmap.buttonControls.push(addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
+            //GIS.core.MeasureWindow(gis).show();
+        //}));
 
         legendControl = addControl('legend' + (gis.dashboard ? '-vertical' : ''), function() {});
         olmap.buttonControls.push(legendControl);
@@ -2422,12 +2422,12 @@ Ext.onReady(function () {
         });
 
         window = Ext.create('Ext.window.Window', {
-            title: GIS.i18n.measure_distance,
+            title: '<span style="font-weight:bold; color:#333">' + GIS.i18n.measure_distance + '</span>',
             layout: 'fit',
             cls: 'gis-container-default gis-plugin',
             bodyStyle: 'text-align: center',
-            width: 130,
-            minWidth: 130,
+            width: 150,
+            height: 70,
             resizable: false,
             items: label,
             listeners: {
@@ -2435,6 +2435,7 @@ Ext.onReady(function () {
                     var x = gis.viewport.eastRegion.getPosition()[0] - this.getWidth() - 3,
                         y = gis.viewport.centerRegion.getPosition()[1] + 26;
                     this.setPosition(x, y);
+                    this.setHeight(40);
                 },
                 destroy: function () {
                     control.deactivate();
@@ -6854,8 +6855,8 @@ Ext.onReady(function () {
         css += '.olControlPanel.zoomIn-vertical { right: 1px; } \n';
         css += '.olControlPanel.zoomOut-vertical { top: 24px; right: 1px; } \n';
         css += '.olControlPanel.zoomVisible-vertical { top: 48px; right: 1px; } \n';
-        css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
-        css += '.olControlPanel.legend-vertical { top: 96px; right: 1px; } \n';
+        //css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
+        css += '.olControlPanel.legend-vertical { top: 72px; right: 1px; } \n';
         css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
         css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
@@ -7052,7 +7053,7 @@ Ext.onReady(function () {
                     'zoomOut-verticalButton': 'zoomout_24.png',
                     'zoomVisible-verticalButton': 'zoomvisible_24.png',
                     'measure-verticalButton': 'measure_24.png',
-                    'legend-verticalButton': 'measure_24.png'
+                    'legend-verticalButton': 'legend_24.png'
                 };
 
             for (var i = 0, cls, elArray; i < clsArray.length; i++) {
