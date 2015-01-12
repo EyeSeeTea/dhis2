@@ -1475,10 +1475,12 @@ Ext.onReady(function () {
         logg: []
     };
 
-    GIS.core.getOLMap = function (gis) {
+    GIS.core.getOLMap = function(gis) {
         var olmap,
             addControl,
-            logoName = gis.dashboard ? 'google-logo-small' : 'google-logo';
+            logoName = gis.dashboard ? 'google-logo-small' : 'google-logo',
+            legendControl,
+            isAddLegendListener = true;
 
         addControl = function(name, fn) {
             var button,
@@ -1531,8 +1533,62 @@ Ext.onReady(function () {
 
         // Map events
         olmap.events.register('mousemove', null, function (e) {
+
+            // track mouse
             gis.olmap.mouseMove.x = e.clientX;
             gis.olmap.mouseMove.y = e.clientY;
+
+            // legend listener
+            if (isAddLegendListener && gis.dashboard) {
+                isAddLegendListener = false;
+
+                var el = Ext.get(legendControl.div),
+                    img = el.first().first(),
+                    window;
+
+                img.on('mouseenter', function() {
+                    if (window) {
+                        window.show();
+                    }
+                    else {
+                        var layers = gis.util.map.getRenderedVectorLayers().reverse(),
+                            xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
+                            html = '';
+
+                        for (var i = 0, layer; i < layers.length; i++) {
+                            layer = layers[i];
+
+                            html += '<div style="font-size:10px; font-weight:bold">' + layer.name + '</div>' + layer.core.updateLegend().innerHTML + (i < layers.length - 1 ? '<div style="padding:5px"></div>' : '');
+                        }
+
+                        if (window) {
+                            window.show();
+                        }
+                        else {
+                            window = Ext.create('Ext.window.Window', {
+                                title: 'Legend',
+                                cls: 'gis-plugin',
+                                bodyStyle: 'background-color: #fff; padding: 3px',
+                                shadow: false,
+                                listeners: {
+                                    show: function() {
+                                        this.update(html);
+                                        this.setWidth(150);
+                                    }
+                                }
+                            });
+
+                            window.showAt(xy[0], xy[1] + 120);
+                        }
+                    }
+                });
+
+                img.on('mouseleave', function() {
+                    if (window && window.hide) {
+                        window.hide();
+                    }
+                });
+            }
         });
 
         olmap.zoomToVisibleExtent = function () {
@@ -1557,64 +1613,8 @@ Ext.onReady(function () {
         olmap.buttonControls.push(addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
             GIS.core.MeasureWindow(gis).show();
         }));
-
-        if (gis.dashboard) {
-            var control = addControl('legend-vertical', function() {}),
-                el = Ext.get(control.div),
-                window;
-
-            olmap.buttonControls.push(control);
-
-            el.addListener('mouseover', function(e) {
-                var layers = gis.util.map.getRenderedVectorLayers().reverse(),
-                    xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
-                    html = '';
-
-                for (var i = 0, layer; i < layers.length; i++) {
-                    layer = layers[i];
-
-                    html += '<div style="font-size:10px; font-weight:bold">' + layer.name + '</div>' + layer.core.updateLegend().innerHTML + (i < layers.length - 1 ? '<div style="padding:5px"></div>' : '');
-                }
-
-                if (window && window.destroy) {
-                    window.destroy();
-                }
-
-                window = Ext.create('Ext.window.Window', {
-                    title: 'Legend',
-                    cls: 'gis-plugin',
-                    bodyStyle: 'background-color: #fff; padding: 3px',
-                    html: html,
-                    shadow: false,
-                    listeners: {
-                        render: function() {
-                            this.getEl().setStyle('opacity', 0);
-
-                            this.getEl().on('blur', function() {
-                                window.destroy();
-                            });
-                        },
-                        show: function() {
-                            this.setWidth(this.getWidth());
-                        },
-                        destroy: function() {
-                            window = null;
-                        }
-                    }
-                });
-
-                window.showAt(xy[0], xy[1], Ext.create('Ext.fx.Anim', {
-                    target: window,
-                    duration: 200,
-                    from: {
-                        opacity: 0
-                    },
-                    to: {
-                        opacity: 1
-                    }
-                }));
-            });
-        }
+        legendControl = addControl('legend' + (gis.dashboard ? '-vertical' : ''), function() {});
+        olmap.buttonControls.push(legendControl);
 
         olmap.addButtonControl = addControl;
 
@@ -7027,28 +7027,28 @@ Ext.onReady(function () {
 
         afterRender = function (vp) {
 
-	    // map buttons
-	    var clsArray = ['zoomIn-verticalButton', 'zoomOut-verticalButton', 'zoomVisible-verticalButton', 'measure-verticalButton', 'legend-verticalButton'],
-		map = {
-		    'zoomIn-verticalButton': 'zoomin_24.png',
-		    'zoomOut-verticalButton': 'zoomout_24.png',
-		    'zoomVisible-verticalButton': 'zoomvisible_24.png',
-		    'measure-verticalButton': 'measure_24.png',
-		    'legend-verticalButton': 'legend_24.png'
-		};
+            // map buttons
+            var clsArray = ['zoomIn-verticalButton', 'zoomOut-verticalButton', 'zoomVisible-verticalButton', 'measure-verticalButton', 'legend-verticalButton'],
+                map = {
+                    'zoomIn-verticalButton': 'zoomin_24.png',
+                    'zoomOut-verticalButton': 'zoomout_24.png',
+                    'zoomVisible-verticalButton': 'zoomvisible_24.png',
+                    'measure-verticalButton': 'measure_24.png',
+                    'legend-verticalButton': 'measure_24.png'
+                };
 
-	    for (var i = 0, cls, elArray; i < clsArray.length; i++) {
-		cls = clsArray[i];
-		elArray = Ext.query('.' + cls);
+            for (var i = 0, cls, elArray; i < clsArray.length; i++) {
+                cls = clsArray[i];
+                elArray = Ext.query('.' + cls);
 
-		for (var j = 0, el; j < elArray.length; j++) {
-		    el = elArray[j];
+                for (var j = 0, el; j < elArray.length; j++) {
+                    el = elArray[j];
 
-		    if (el) {
-			el.innerHTML = '<img src="images/' + map[cls] + '" />';
-		    }
-		}
-	    }
+                    if (el) {
+                        el.innerHTML = '<img src="images/' + map[cls] + '" />';
+                    }
+                }
+            }
 
             // base layer
             if (Ext.isDefined(gis.map.baseLayer)) {
