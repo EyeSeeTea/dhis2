@@ -1553,13 +1553,15 @@ Ext.onReady(function () {
                     else {
                         var layers = gis.util.map.getRenderedVectorLayers().reverse(),
                             xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
-                            html = '';
+                            html = '<div id="legendWrapper">';
 
                         for (var i = 0, layer; i < layers.length; i++) {
                             layer = layers[i];
 
                             html += '<div style="font-size:10px; font-weight:bold">' + layer.name + '</div>' + layer.core.updateLegend().innerHTML + (i < layers.length - 1 ? '<div style="padding:5px"></div>' : '');
                         }
+
+                        html += '</div>';
 
                         if (window) {
                             window.show();
@@ -1569,17 +1571,24 @@ Ext.onReady(function () {
                                 title: 'Legend',
                                 cls: 'gis-plugin',
                                 bodyStyle: 'background-color: #fff; padding: 3px',
+                                width: 100,
+                                height: 100,
+                                html: html,
+                                preventHeader: true,
                                 shadow: false,
                                 listeners: {
                                     show: function() {
-                                        this.update(html);
-                                        this.setWidth(150);
+                                        var el = this.getEl(),
+                                            legendEl = el.first().first();
+
+                                        el.setStyle('opacity', 0.92);
+
+                                        this.setHeight(legendEl.getHeight() + 8);
+
                                         this.setPosition(xy[0] - this.getWidth(), xy[1]);
                                     }
                                 }
                             });
-
-                            //window.showAt(xy[0], xy[1] + 120);
                         }
                     }
                 });
@@ -1614,6 +1623,7 @@ Ext.onReady(function () {
         olmap.buttonControls.push(addControl('measure' + (gis.dashboard ? '-vertical' : ''), function () {
             GIS.core.MeasureWindow(gis).show();
         }));
+
         legendControl = addControl('legend' + (gis.dashboard ? '-vertical' : ''), function() {});
         olmap.buttonControls.push(legendControl);
 
@@ -6782,6 +6792,8 @@ Ext.onReady(function () {
         css += '.x-toolbar-footer .x-box-inner{border-width:0} \n';
         css += '.x-window-default{-moz-border-radius-topleft:5px; -webkit-border-top-left-radius:5px; -o-border-top-left-radius:5px; -ms-border-top-left-radius:5px; -khtml-border-top-left-radius:5px; border-top-left-radius:5px; -moz-border-radius-topright:5px; -webkit-border-top-right-radius:5px; -o-border-top-right-radius:5px; -ms-border-top-right-radius:5px; -khtml-border-top-right-radius:5px; border-top-right-radius:5px; -moz-border-radius-bottomright:5px; -webkit-border-bottom-right-radius:5px; -o-border-bottom-right-radius:5px; -ms-border-bottom-right-radius:5px; -khtml-border-bottom-right-radius:5px; border-bottom-right-radius:5px; -moz-border-radius-bottomleft:5px; -webkit-border-bottom-left-radius:5px; -o-border-bottom-left-radius:5px; -ms-border-bottom-left-radius:5px; -khtml-border-bottom-left-radius:5px; border-bottom-left-radius:5px; -moz-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; -webkit-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; -o-box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; box-shadow:#ebe7e7 0 1px 0px 0 inset, #ebe7e7 0 -1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; padding:4px 4px 4px 4px; border-color:#a9a9a9; border-width:1px; border-style:solid; background-color:#e8e8e8; } \n';
         css += '.x-window{outline:none} \n';
+        css += '.x-window-header-default { border-color: #a9a9a9; zoom: 1; } \n';
+        css += '.x-window-header-default-top { box-shadow: #ebe7e7 0 1px 0px 0 inset, #ebe7e7 -1px 0 0px 0 inset, #ebe7e7 1px 0 0px 0 inset; border-bottom-left-radius: 0; padding: 5px 5px 0 5px; border-width: 1px; border-style: solid; background-color: #e8e8e8; } \n';
         css += '.x-window .x-window-wrap .x-window-body{overflow:hidden} \n';
         css += '.x-window-body-default{border-color:#bcb1b0;border-width:1px;background:#e0e0e0;color:black} \n';
         css += '.x-window-body{position:relative;border-style:solid} \n';
@@ -6807,8 +6819,13 @@ Ext.onReady(function () {
         css += '.x-html html,.x-html address,.x-html blockquote,.x-html body,.x-html dd,.x-html div,.x-html dl,.x-html dt,.x-html fieldset,.x-html form,.x-html frame,.x-html frameset,.x-html h1,.x-html h2,.x-html h3,.x-html h4,.x-html h5,.x-html h6,.x-html noframes,.x-html ol,.x-html p,.x-html ul,.x-html center,.x-html dir,.x-html hr,.x-html menu,.x-html pre{display:block} \n';
         css += '.x-html :before,.x-html :after{white-space:pre-line} \n';
         css += '.x-html :link,.x-html :visited{text-decoration:underline} \n';
+        css += '.x-panel-header-draggable,.x-panel-header-draggable .x-panel-header-text,.x-window-header-draggable,.x-window-header-draggable .x-window-header-text,.x-tip-header-draggable .x-tip-header-text { cursor:move; } \n';
+        css += '.x-panel-header-vertical,.x-panel-header-vertical .x-panel-header-body,.x-btn-group-header-vertical,.x-btn-group-header-vertical .x-btn-group-header-body,.x-window-header-vertical,.x-window-header-vertical .x-window-header-body,.x-html button,.x-html textarea,.x-html input,.x-html select { display:inline-block; } \n';
+        css += '.x-window-header-text { user-select:none; -o-user-select:none; -ms-user-select:none; -moz-user-select:0; -webkit-user-select:none; cursor:default; white-space:nowrap; display:block; } \n';
 
-	// needs parent class to avoid conflict
+
+
+        // needs parent class to avoid conflict
         css += '.x-border-box .gis-plugin *{box-sizing:border-box;-moz-box-sizing:border-box;-ms-box-sizing:border-box;-webkit-box-sizing:border-box} \n';
 
         // gis
