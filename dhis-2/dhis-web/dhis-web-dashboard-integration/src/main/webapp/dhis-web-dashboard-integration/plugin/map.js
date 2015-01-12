@@ -1546,8 +1546,8 @@ Ext.onReady(function () {
                     img = el.first().first(),
                     window;
 
-                img.on('mouseenter', function() {
-                    if (window) {
+                img.on('mousemove', function() {
+                    if (window && !window.isVisible()) {
                         window.show();
                     }
                     else {
@@ -1574,11 +1574,12 @@ Ext.onReady(function () {
                                     show: function() {
                                         this.update(html);
                                         this.setWidth(150);
+                                        this.setPosition(xy[0] - this.getWidth(), xy[1]);
                                     }
                                 }
                             });
 
-                            window.showAt(xy[0], xy[1] + 120);
+                            //window.showAt(xy[0], xy[1] + 120);
                         }
                     }
                 });
