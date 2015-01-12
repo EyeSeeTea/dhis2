@@ -1550,7 +1550,7 @@ Ext.onReady(function () {
                     if (window && !window.isVisible()) {
                         window.show();
                     }
-                    else {
+                    else if (!window) {
                         var layers = gis.util.map.getRenderedVectorLayers().reverse(),
                             xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
                             html = '<div id="legendWrapper">';
@@ -1563,33 +1563,28 @@ Ext.onReady(function () {
 
                         html += '</div>';
 
-                        if (window) {
-                            window.show();
-                        }
-                        else {
-                            window = Ext.create('Ext.window.Window', {
-                                title: 'Legend',
-                                cls: 'gis-plugin',
-                                bodyStyle: 'background-color: #fff; padding: 3px',
-                                width: 100,
-                                height: 100,
-                                html: html,
-                                preventHeader: true,
-                                shadow: false,
-                                listeners: {
-                                    show: function() {
-                                        var el = this.getEl(),
-                                            legendEl = el.first().first();
+                        window = Ext.create('Ext.window.Window', {
+                            title: 'Legend',
+                            cls: 'gis-plugin',
+                            bodyStyle: 'background-color: #fff; padding: 3px',
+                            width: 100,
+                            height: 100,
+                            html: html,
+                            preventHeader: true,
+                            shadow: false,
+                            listeners: {
+                                show: function() {
+                                    var el = this.getEl(),
+                                        legendEl = el.first().first();
 
-                                        el.setStyle('opacity', 0.92);
+                                    el.setStyle('opacity', 0.92);
 
-                                        this.setHeight(legendEl.getHeight() + 8);
+                                    this.setHeight(legendEl.getHeight() + 8);
 
-                                        this.setPosition(xy[0] - this.getWidth(), xy[1] - 1);
-                                    }
+                                    this.setPosition(xy[0] - this.getWidth(), xy[1] - 1);
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
                 });
 
@@ -6417,8 +6412,6 @@ Ext.onReady(function () {
 
                     // legends
                     if (view.legendSet) {
-                        var divStyle;
-
                         for (var i = 0; i < this.classification.bins.length; i++) {
                             child = document.createElement("div");
                             child.style.fontSize = style.fontSize;
@@ -6441,7 +6434,8 @@ Ext.onReady(function () {
                             child.style.clear = "left";
                             element.appendChild(child);
                         }
-                    } else {
+                    }
+                    else {
                         for (var i = 0; i < this.classification.bins.length; i++) {
                             child = document.createElement("div");
                             child.style.backgroundColor = this.colorInterpolation[i].toHexString();
