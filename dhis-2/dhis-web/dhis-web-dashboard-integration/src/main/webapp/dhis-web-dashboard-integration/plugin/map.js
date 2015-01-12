@@ -1585,7 +1585,7 @@ Ext.onReady(function () {
 
                                         this.setHeight(legendEl.getHeight() + 8);
 
-                                        this.setPosition(xy[0] - this.getWidth(), xy[1]);
+                                        this.setPosition(xy[0] - this.getWidth(), xy[1] - 1);
                                     }
                                 }
                             });
