@@ -157,7 +157,7 @@ Ext.onReady(function() {
 
             label = me.add('label', surface.add({
                 type: 'text',
-                x: 20,
+                x: 14,
                 y: 0,
                 zIndex: z || 0,
                 font: legend.labelFont,
@@ -165,9 +165,8 @@ Ext.onReady(function() {
                 text: getSeriesProp('title') || getSeriesProp('yField')
             }));
 
-
             if (seriesType === 'line' || seriesType === 'scatter') {
-                if(seriesType === 'line') {
+                if (seriesType === 'line') {
                     me.add('line', surface.add({
                         type: 'path',
                         path: 'M0.5,0.5L16.5,0.5',
@@ -195,12 +194,11 @@ Ext.onReady(function() {
                     }));
                 }
             }
-
             else {
                 me.add('box', surface.add({
                     type: 'rect',
                     zIndex: z,
-                    x: 0,
+                    x: 6,
                     y: 0,
                     width: labelMarkerSize,
                     height: labelMarkerSize,
@@ -2716,7 +2714,6 @@ Ext.onReady(function() {
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding,
-                        itemSpacing: 5,
                         labelFont: labelFont,
                         labelColor: labelColor,
                         labelMarkerSize: xLayout.legendStyle.labelMarkerSize
@@ -2825,7 +2822,7 @@ Ext.onReady(function() {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: ns.dashboard ? 15 : 35,
+                            insetPadding: ns.dashboard ? 17 : 35,
                             insetPaddingObject: {
                                 top: 10,
                                 right: 2,
@@ -3202,12 +3199,14 @@ Ext.onReady(function() {
                     // chart
                     chart = getDefaultChart({
                         store: store,
-                        series: series
+                        series: series,
+                        insetPaddingObject: {
+                            top: 15,
+                            right: 2,
+                            bottom: 13,
+                            left: 7
+                        }
                     });
-
-                    //chart.legend.position = 'right';
-                    //chart.legend.isVertical = true;
-                    //chart.insetPadding = ns.dashboard ? 25 : 40;
 
                     return chart;
                 };

@@ -447,7 +447,7 @@ dhis2.db.renderDashboard = function( id )
                         legendStyle: {
                             labelMaxLength: 10,
                             labelFont: 'normal 10px arial,sans-serif',
-                            labelColor: 'blue',
+                            labelColor: '#222',
                             labelMarkerSize: 10,
                             titleFont: 'bold 12px arial,sans-serif',
                             titleColor: '#333'
