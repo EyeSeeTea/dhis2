@@ -2641,11 +2641,10 @@ Ext.onReady(function() {
                 };
 
                 getDefaultLegend = function(store, chartConfig) {
-                    var itemLength = 30,
+                    var itemLength = 14,
                         charLength = 6,
                         numberOfItems = 0,
                         numberOfChars = 0,
-                        str = '',
                         width,
                         isVertical = false,
                         labelFont = '11px ' + conf.chart.style.fontFamily,
@@ -2657,8 +2656,9 @@ Ext.onReady(function() {
 
                     if (xLayout.type === conf.finals.chart.pie) {
                         numberOfItems = store.getCount();
+
                         store.each(function(r) {
-                            str += r.data[store.domainFields[0]];
+                            numberOfChars += r.data[store.domainFields[0]].length;
                         });
                     }
                     else {
@@ -2679,7 +2679,6 @@ Ext.onReady(function() {
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
 
                     if (width > ns.app.centerRegion.getWidth() - 10) {
-                        isVertical = true;
                         position = 'right';
                     }
 
@@ -2705,7 +2704,7 @@ Ext.onReady(function() {
 
                     // padding
                     if (position === 'right') {
-                        padding = 5;
+                        padding = 3;
                     }
 
                     return Ext.create('Ext.chart.Legend', {
@@ -2826,7 +2825,7 @@ Ext.onReady(function() {
                             insetPadding: ns.dashboard ? 17 : 35,
                             insetPaddingObject: {
                                 top: 10,
-                                right: 2,
+                                right: 3,
                                 bottom: 2,
                                 left: 7
                             },
@@ -2840,7 +2839,8 @@ Ext.onReady(function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPaddingObject.right = ns.dashboard ? defaultConfig.insetPaddingObject.right : 40;
+                            defaultConfig.insetPaddingObject.top = ns.dashboard ? 20 : 40;
+                            defaultConfig.insetPaddingObject.right = ns.dashboard ? 5 : 40;
                         }
                     }
 
