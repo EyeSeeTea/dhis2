@@ -133,6 +133,60 @@ Ext.onReady(function() {
         }
     });
 
+    Ext.override(Ext.chart.Legend, {
+        updatePosition: function() {
+            var me = this,
+                x, y,
+                legendWidth = me.width,
+                legendHeight = me.height,
+                padding = me.padding,
+                chart = me.chart,
+                chartBBox = chart.chartBBox,
+                insets = chart.insetPadding,
+                chartWidth = chartBBox.width - (insets * 2),
+                chartHeight = chartBBox.height - (insets * 2),
+                chartX = chartBBox.x + insets,
+                chartY = chartBBox.y + insets,
+                surface = chart.surface,
+                mfloor = Math.floor;
+
+            if (me.isDisplayed()) {
+                // Find the position based on the dimensions
+                switch(me.position) {
+                    case "left":
+                        x = insets;
+                        y = mfloor(chartY + chartHeight / 2 - legendHeight / 2);
+                        break;
+                    case "right":
+                        x = mfloor(surface.width - legendWidth) - insets;
+                        y = mfloor(chartY + chartHeight / 2 - legendHeight / 2);
+                        break;
+                    case "top":
+//console.log(chart.items[0].text, chartX, chartWidth, chartBBox, legendWidth);
+                        x = mfloor((chartX + chartBBox.width) / 2 - legendWidth / 2);
+                        y = insets;
+                        break;
+                    case "bottom":
+                        x = mfloor(chartX + chartWidth / 2 - legendWidth / 2);
+                        y = mfloor(surface.height - legendHeight) - insets;
+                        break;
+                    default:
+                        x = mfloor(me.origX) + insets;
+                        y = mfloor(me.origY) + insets;
+                }
+                me.x = x;
+                me.y = y;
+
+                // Update the position of each item
+                Ext.each(me.items, function(item) {
+                    item.updatePosition();
+                });
+                // Update the position of the outer box
+                me.boxSprite.setAttributes(me.getBBox(), true);
+            }
+        }
+    });
+
     Ext.override(Ext.chart.LegendItem, {
         createLegend: function(config) {
             var me = this,
@@ -2680,31 +2734,22 @@ Ext.onReady(function() {
                         positions = ['top', 'right', 'bottom', 'left'],
                         series = chartConfig.series;
 
-                    //if (xLayout.type === conf.finals.chart.pie) {
-                        //numberOfItems = store.getCount();
+                    for (var i = 0, title; i < series.length; i++) {
+                        title = series[i].title;
 
-                        //store.each(function(r) {
-                            //numberOfChars += r.data[store.domainFields[0]].length;
-                        //});
-                    //}
-                    //else {
-                        for (var i = 0, title; i < series.length; i++) {
-                            title = series[i].title;
-
-                            if (Ext.isString(title)) {
-                                numberOfItems += 1;
-                                numberOfChars += title.length;
-                            }
-                            else if (Ext.isArray(title)) {
-                                numberOfItems += title.length;
-                                numberOfChars += title.toString().split(',').join('').length;
-                            }
+                        if (Ext.isString(title)) {
+                            numberOfItems += 1;
+                            numberOfChars += title.length;
                         }
-                    //}
+                        else if (Ext.isArray(title)) {
+                            numberOfItems += title.length;
+                            numberOfChars += title.toString().split(',').join('').length;
+                        }
+                    }
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-console.log(xLayout.type, width, ns.app.centerRegion.getWidth());
-                    if (width > ns.app.centerRegion.getWidth() - 10) {
+
+                    if (width > ns.app.centerRegion.getWidth() - 6) {
                         position = 'right';
                     }
 
