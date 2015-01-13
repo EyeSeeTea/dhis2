@@ -157,7 +157,7 @@ Ext.onReady(function() {
 
             label = me.add('label', surface.add({
                 type: 'text',
-                x: 14,
+                x: 0,
                 y: 0,
                 zIndex: z || 0,
                 font: legend.labelFont,
@@ -2714,6 +2714,7 @@ Ext.onReady(function() {
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
                         padding: padding,
+                        itemSpacing: 3,
                         labelFont: labelFont,
                         labelColor: labelColor,
                         labelMarkerSize: xLayout.legendStyle.labelMarkerSize
