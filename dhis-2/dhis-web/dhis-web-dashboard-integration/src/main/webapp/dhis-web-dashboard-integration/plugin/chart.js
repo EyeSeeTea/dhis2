@@ -376,7 +376,7 @@ Ext.onReady(function() {
                 }
 
                 var moveLabels = labelConf.rotate && labelConf.rotate.degrees && !Ext.Array.contains([0,90,180,270,360], labelConf.rotate.degrees),
-                    adjust = Math.floor((textLabel.text.length - 12) * -1 * 0.7),
+                    adjust = Math.floor((textLabel.text.length - 12) * -1 * 0.75),
                     newX = moveLabels ? point[0] - textLabel._bbox.width + adjust: x;
 
                 textLabel.setAttributes({
