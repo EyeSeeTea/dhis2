@@ -437,7 +437,6 @@ dhis2.db.renderDashboard = function( id )
                         dashboard: true,
                         crossDomain: false,
                         skipMask: true,
-                        hideTitle: true,
                         domainAxisStyle: {
                             labelRotation: 45,
                             labelFont: '10px arial,sans-serif'
@@ -447,8 +446,10 @@ dhis2.db.renderDashboard = function( id )
                         },
                         legendStyle: {
                             labelMaxLength: 10,
-                            labelFont: 'normal 11px arial,sans-serif',
-                            titleFont: 'bold 13px arial,sans-serif',
+                            labelFont: 'normal 10px arial,sans-serif',
+                            labelColor: 'blue',
+                            labelMarkerSize: 10,
+                            titleFont: 'bold 12px arial,sans-serif',
                             titleColor: '#333'
                         },
                         seriesStyle: {

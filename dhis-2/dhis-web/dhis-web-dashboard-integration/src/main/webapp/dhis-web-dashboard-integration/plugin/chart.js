@@ -133,6 +133,149 @@ Ext.onReady(function() {
         }
     });
 
+    Ext.override(Ext.chart.LegendItem, {
+        createLegend: function(config) {
+            var me = this,
+                index = config.yFieldIndex,
+                series = me.series,
+                seriesType = series.type,
+                idx = me.yFieldIndex,
+                legend = me.legend,
+                surface = me.surface,
+                refX = legend.x + me.x,
+                refY = legend.y + me.y,
+                bbox, z = me.zIndex,
+                markerConfig, label, mask,
+                radius, toggle = false,
+                seriesStyle = Ext.apply(series.seriesStyle, series.style),
+                labelMarkerSize = legend.labelMarkerSize || 12;
+
+            function getSeriesProp(name) {
+                var val = series[name];
+                return (Ext.isArray(val) ? val[idx] : val);
+            }
+
+            label = me.add('label', surface.add({
+                type: 'text',
+                x: 20,
+                y: 0,
+                zIndex: z || 0,
+                font: legend.labelFont,
+                fill: legend.labelColor || '#000',
+                text: getSeriesProp('title') || getSeriesProp('yField')
+            }));
+
+
+            if (seriesType === 'line' || seriesType === 'scatter') {
+                if(seriesType === 'line') {
+                    me.add('line', surface.add({
+                        type: 'path',
+                        path: 'M0.5,0.5L16.5,0.5',
+                        zIndex: z,
+                        "stroke-width": series.lineWidth,
+                        "stroke-linejoin": "round",
+                        "stroke-dasharray": series.dash,
+                        stroke: seriesStyle.stroke || '#000',
+                        style: {
+                            cursor: 'pointer'
+                        }
+                    }));
+                }
+                if (series.showMarkers || seriesType === 'scatter') {
+                    markerConfig = Ext.apply(series.markerStyle, series.markerConfig || {});
+                    me.add('marker', Ext.chart.Shape[markerConfig.type](surface, {
+                        fill: markerConfig.fill,
+                        x: 8.5,
+                        y: 0.5,
+                        zIndex: z,
+                        radius: markerConfig.radius || markerConfig.size,
+                        style: {
+                            cursor: 'pointer'
+                        }
+                    }));
+                }
+            }
+
+            else {
+                me.add('box', surface.add({
+                    type: 'rect',
+                    zIndex: z,
+                    x: 0,
+                    y: 0,
+                    width: labelMarkerSize,
+                    height: labelMarkerSize,
+                    fill: series.getLegendColor(index),
+                    style: {
+                        cursor: 'pointer'
+                    }
+                }));
+            }
+
+            me.setAttributes({
+                hidden: false
+            }, true);
+
+            bbox = me.getBBox();
+
+            mask = me.add('mask', surface.add({
+                type: 'rect',
+                x: bbox.x,
+                y: bbox.y,
+                width: bbox.width || 20,
+                height: bbox.height || 20,
+                zIndex: (z || 0) + 1000,
+                fill: '#f00',
+                opacity: 0,
+                style: {
+                    'cursor': 'pointer'
+                }
+            }));
+
+
+            me.on('mouseover', function() {
+                label.setStyle({
+                    'font-weight': 'bold'
+                });
+                mask.setStyle({
+                    'cursor': 'pointer'
+                });
+                series._index = index;
+                series.highlightItem();
+            }, me);
+
+            me.on('mouseout', function() {
+                label.setStyle({
+                    'font-weight': 'normal'
+                });
+                series._index = index;
+                series.unHighlightItem();
+            }, me);
+
+            if (!series.visibleInLegend(index)) {
+                toggle = true;
+                label.setAttributes({
+                   opacity: 0.5
+                }, true);
+            }
+
+            me.on('mousedown', function() {
+                if (!toggle) {
+                    series.hideAll();
+                    label.setAttributes({
+                        opacity: 0.5
+                    }, true);
+                } else {
+                    series.showAll();
+                    label.setAttributes({
+                        opacity: 1
+                    }, true);
+                }
+                toggle = !toggle;
+            }, me);
+            me.updatePosition({x:0, y:0});
+        }
+    });
+
 	// namespace
 	DV = {};
 
@@ -2508,6 +2651,7 @@ Ext.onReady(function() {
                         width,
                         isVertical = false,
                         labelFont = '11px ' + conf.chart.style.fontFamily,
+                        labelColor = 'black';
                         position = 'top',
                         padding = 0,
                         positions = ['top', 'right', 'bottom', 'left'],
@@ -2545,6 +2689,8 @@ Ext.onReady(function() {
                     if (Ext.isObject(xLayout.legendStyle)) {
                         var style = xLayout.legendStyle;
 
+                        labelColor = style.labelColor || labelColor;
+
                         if (Ext.Array.contains(positions, style.position)) {
                             position = style.position;
                         }
@@ -2555,7 +2701,7 @@ Ext.onReady(function() {
                         else {
                             labelFont = style.labelFontWeight ? style.labelFontWeight + ' ' : 'normal ';
                             labelFont += style.labelFontSize ? parseFloat(style.labelFontSize) + 'px ' : '11px ';
-                            labelFont +=  style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
+                            labelFont += style.labelFontFamily ? style.labelFontFamily : conf.chart.style.fontFamily;
                         }
                     }
 
@@ -2567,10 +2713,13 @@ Ext.onReady(function() {
                     return Ext.create('Ext.chart.Legend', {
                         position: position,
                         isVertical: isVertical,
-                        labelFont: labelFont,
                         boxStroke: '#ffffff',
                         boxStrokeWidth: 0,
-                        padding: padding
+                        padding: padding,
+                        itemSpacing: 5,
+                        labelFont: labelFont,
+                        labelColor: labelColor,
+                        labelMarkerSize: xLayout.legendStyle.labelMarkerSize
                     });
                 };
 
@@ -2708,6 +2857,7 @@ Ext.onReady(function() {
 
                     Ext.apply(defaultConfig, config);
 
+                    // chart
                     chart = Ext.create('Ext.chart.Chart', defaultConfig);
 
                     chart.setChartSize = getDefaultChartSizeHandler();
@@ -2980,7 +3130,7 @@ Ext.onReady(function() {
                             field: conf.finals.data.domain
                         };
 
-                    // Label
+                    // label
                     if (xLayout.showValues) {
                         var labelFont = conf.chart.style.fontFamily,
                             labelColor;
@@ -3011,7 +3161,7 @@ Ext.onReady(function() {
                         };
                     }
 
-                    // Series
+                    // series
                     series = [{
                         type: 'pie',
                         field: store.rangeFields[0],
@@ -3037,7 +3187,7 @@ Ext.onReady(function() {
                         shadowAttributes: false
                     }];
 
-                    // Theme
+                    // theme
                     colors = conf.chart.theme.dv1.slice(0, xResponse.nameHeaderMap[xLayout.rowDimensionNames[0]].ids.length);
 
                     Ext.chart.theme.dv1 = Ext.extend(Ext.chart.theme.Base, {
@@ -3049,7 +3199,7 @@ Ext.onReady(function() {
                         }
                     });
 
-                    // Chart
+                    // chart
                     chart = getDefaultChart({
                         store: store,
                         series: series
@@ -3057,7 +3207,7 @@ Ext.onReady(function() {
 
                     //chart.legend.position = 'right';
                     //chart.legend.isVertical = true;
-                    chart.insetPadding = ns.dashboard ? 25 : 40;
+                    //chart.insetPadding = ns.dashboard ? 25 : 40;
 
                     return chart;
                 };
