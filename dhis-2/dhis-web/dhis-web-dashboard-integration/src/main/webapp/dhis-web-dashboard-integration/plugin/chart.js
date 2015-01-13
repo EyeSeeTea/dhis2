@@ -2103,6 +2103,7 @@ Ext.onReady(function() {
                     getDefaultNumericAxis,
                     getDefaultCategoryAxis,
                     getDefaultSeriesTitle,
+                    getPieSeriesTitle,
                     getDefaultSeries,
                     getDefaultTrendLines,
                     getDefaultTargetLine,
@@ -2849,11 +2850,14 @@ Ext.onReady(function() {
                 };
 
                 getDefaultChartSizeHandler = function() {
+                    var width = ns.app.centerRegion.getWidth(),
+                        height = ns.app.centerRegion.getHeight();
+
                     return function() {
-						//this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth() - 15);
-                        this.setHeight(ns.app.centerRegion.getHeight() - 40);
-                        //this.animate = true;
+						this.animate = false;
+                        this.setWidth(ns.dashboard ? width : width - 15);
+                        this.setHeight(ns.dashboard ? height : height - 40);
+                        this.animate = !ns.dashboard;
                     };
                 };
 
@@ -3335,10 +3339,15 @@ Ext.onReady(function() {
                     chart.height = ns.app.centerRegion.getHeight() - 80;
 
                     chart.setChartSize = function() {
-                        //this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth());
-                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
-                        //this.animate = true;
+                        var width = ns.app.centerRegion.getWidth(),
+                            height = ns.app.centerRegion.getHeight();
+
+                        return function() {
+                            this.animate = false;
+                            this.setWidth(ns.dashboard ? width : width);
+                            this.setHeight(ns.dashboard ? height : height - 80);
+                            this.animate = !ns.dashboard;
+                        };
                     };
 
                     return chart;
