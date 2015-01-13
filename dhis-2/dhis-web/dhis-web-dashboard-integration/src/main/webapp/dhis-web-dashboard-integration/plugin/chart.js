@@ -65,6 +65,74 @@ Ext.onReady(function() {
         return /trident/.test(Ext.userAgent);
     }();
 
+    // override
+    Ext.override(Ext.chart.Chart, {
+        insetPaddingObject: {},
+
+        alignAxes: function() {
+            var me = this,
+                axes = me.axes,
+                legend = me.legend,
+                edges = ['top', 'right', 'bottom', 'left'],
+                chartBBox,
+                insetPadding = me.insetPadding,
+                insetPaddingObject = me.insetPaddingObject,
+                insets = {
+                    top: insetPaddingObject.top || insetPadding,
+                    right: insetPaddingObject.right || insetPadding,
+                    bottom: insetPaddingObject.bottom || insetPadding,
+                    left: insetPaddingObject.left || insetPadding
+                };
+
+            function getAxis(edge) {
+                var i = axes.findIndex('position', edge);
+                return (i < 0) ? null : axes.getAt(i);
+            }
+
+
+            Ext.each(edges, function(edge) {
+                var isVertical = (edge === 'left' || edge === 'right'),
+                    axis = getAxis(edge),
+                    bbox;
+
+
+                if (legend !== false) {
+                    if (legend.position === edge) {
+                        bbox = legend.getBBox();
+                        insets[edge] += (isVertical ? bbox.width : bbox.height) + insets[edge];
+                    }
+                }
+
+
+
+                if (axis && axis.bbox) {
+                    bbox = axis.bbox;
+                    insets[edge] += (isVertical ? bbox.width : bbox.height);
+                }
+            });
+
+            chartBBox = {
+                x: insets.left,
+                y: insets.top,
+                width: me.curWidth - insets.left - insets.right,
+                height: me.curHeight - insets.top - insets.bottom
+            };
+            me.chartBBox = chartBBox;
+
+
+
+            axes.each(function(axis) {
+                var pos = axis.position,
+                    isVertical = (pos === 'left' || pos === 'right');
+
+                axis.x = (pos === 'right' ? chartBBox.x + chartBBox.width : chartBBox.x);
+                axis.y = (pos === 'top' ? chartBBox.y : chartBBox.y + chartBBox.height);
+                axis.width = (isVertical ? chartBBox.width : chartBBox.height);
+                axis.length = (isVertical ? chartBBox.height : chartBBox.width);
+            });
+        }
+    });
+
 	// namespace
 	DV = {};
 
@@ -2560,7 +2628,7 @@ Ext.onReady(function() {
                         font: titleFont,
                         fill: titleColor,
                         height: 20,
-                        y: ns.dashboard ? 11 : 20
+                        y: ns.dashboard ? 7 : 20
                     });
                 };
 
@@ -2602,13 +2670,21 @@ Ext.onReady(function() {
                 getDefaultChart = function(config) {
                     var chart,
                         store = config.store || {},
+                        width = ns.app.centerRegion.getWidth(),
+                        height = ns.app.centerRegion.getHeight(),
                         defaultConfig = {
                             //animate: true,
                             animate: false,
                             shadow: false,
-                            insetPadding: ns.dashboard ? 23 : 35,
-                            width: ns.app.centerRegion.getWidth() - 15,
-                            height: ns.app.centerRegion.getHeight() - 40,
+                            insetPadding: ns.dashboard ? 15 : 35,
+                            insetPaddingObject: {
+                                top: 10,
+                                right: 2,
+                                bottom: 2,
+                                left: 7
+                            },
+                            width: ns.dashboard ? width : width - 15,
+                            height: ns.dashboard ? height : height - 40,
                             theme: 'dv1'
                         };
 
@@ -2617,16 +2693,17 @@ Ext.onReady(function() {
                         defaultConfig.legend = getDefaultLegend(store, config);
 
                         if (defaultConfig.legend.position === 'right') {
-                            defaultConfig.insetPadding = ns.dashboard ? 32 : 40;
+                            defaultConfig.insetPaddingObject.right = ns.dashboard ? defaultConfig.insetPaddingObject.right : 40;
                         }
                     }
 
                     // title
-                    if (!xLayout.hideTitle) {
-                        defaultConfig.items = [getDefaultChartTitle(store)];
+                    if (xLayout.hideTitle) {
+                        defaultConfig.insetPadding = ns.dashboard ? 1 : 10;
+                        defaultConfig.insetPaddingObject.top = ns.dashboard ? 3 : 10;
                     }
                     else {
-                        defaultConfig.insetPadding = 10;
+                        defaultConfig.items = [getDefaultChartTitle(store)];
                     }
 
                     Ext.apply(defaultConfig, config);
