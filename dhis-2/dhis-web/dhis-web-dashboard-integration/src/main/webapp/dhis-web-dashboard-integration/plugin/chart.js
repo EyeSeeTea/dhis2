@@ -2001,7 +2001,7 @@ Ext.onReady(function() {
                     columnIds = xLayout.columnDimensionNames[0] ? xLayout.dimensionNameIdsMap[xLayout.columnDimensionNames[0]] : [],
                     failSafeColumnIds = [],
                     failSafeColumnIdMap = {},
-                    createFailSafeIds = function() {
+                    createFailSafeColumnIds = function() {
                         for (var i = 0, uuid; i < columnIds.length; i++) {
                             uuid = Ext.data.IdGenerator.get('uuid').generate();
 
@@ -2486,6 +2486,32 @@ Ext.onReady(function() {
                     return a;
 				};
 
+                getPieSeriesTitle = function(store) {
+                    var a = [];
+
+                    if (Ext.isObject(xLayout.legendStyle) && Ext.isArray(xLayout.legendStyle.labelNames)) {
+                        return xLayout.legendStyle.labelNames;
+                    }
+                    else {
+                        var id = store.domainFields[0],
+                            name;
+
+                        store.each( function(r) {
+                            name = r.data[id];
+
+                            if (Ext.isString(name) && Ext.isObject(xLayout.legendStyle) && Ext.isNumber(xLayout.legendStyle.labelMaxLength)) {
+                                var mxl = parseInt(xLayout.legendStyle.labelMaxLength);
+
+                                name = name.length > mxl ? name.substr(0, mxl) + '..' : name;
+                            }
+
+                            a.push(name);
+                        });
+                    }
+
+                    return a;
+				};
+
                 getDefaultSeries = function(store) {
                     var main = {
                         type: 'column',
@@ -2641,8 +2667,8 @@ Ext.onReady(function() {
                 };
 
                 getDefaultLegend = function(store, chartConfig) {
-                    var itemLength = 14,
-                        charLength = 6,
+                    var itemLength = ns.dashboard ? 24 : 30,
+                        charLength = ns.dashboard ? 4 : 6,
                         numberOfItems = 0,
                         numberOfChars = 0,
                         width,
@@ -2654,14 +2680,14 @@ Ext.onReady(function() {
                         positions = ['top', 'right', 'bottom', 'left'],
                         series = chartConfig.series;
 
-                    if (xLayout.type === conf.finals.chart.pie) {
-                        numberOfItems = store.getCount();
+                    //if (xLayout.type === conf.finals.chart.pie) {
+                        //numberOfItems = store.getCount();
 
-                        store.each(function(r) {
-                            numberOfChars += r.data[store.domainFields[0]].length;
-                        });
-                    }
-                    else {
+                        //store.each(function(r) {
+                            //numberOfChars += r.data[store.domainFields[0]].length;
+                        //});
+                    //}
+                    //else {
                         for (var i = 0, title; i < series.length; i++) {
                             title = series[i].title;
 
@@ -2674,10 +2700,10 @@ Ext.onReady(function() {
                                 numberOfChars += title.toString().split(',').join('').length;
                             }
                         }
-                    }
+                    //}
 
                     width = (numberOfItems * itemLength) + (numberOfChars * charLength);
-
+console.log(xLayout.type, width, ns.app.centerRegion.getWidth());
                     if (width > ns.app.centerRegion.getWidth() - 10) {
                         position = 'right';
                     }
@@ -3182,7 +3208,8 @@ Ext.onReady(function() {
                                 this.update('<div style="text-align:center"><div style="font-size:17px; font-weight:bold">' + item.data[store.rangeFields[0]] + '</div><div style="font-size:10px">' + item.data[conf.finals.data.domain] + '</div></div>');
                             }
                         },
-                        shadowAttributes: false
+                        shadowAttributes: false,
+                        title: getPieSeriesTitle(store)
                     }];
 
                     // theme
