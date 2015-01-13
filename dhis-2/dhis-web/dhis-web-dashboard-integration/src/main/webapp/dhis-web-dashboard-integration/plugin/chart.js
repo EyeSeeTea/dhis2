@@ -162,8 +162,7 @@ Ext.onReady(function() {
                         y = mfloor(chartY + chartHeight / 2 - legendHeight / 2);
                         break;
                     case "top":
-//console.log(chart.items[0].text, chartX, chartWidth, chartBBox, legendWidth);
-                        x = mfloor((chartX + chartBBox.width) / 2 - legendWidth / 2);
+                        x = mfloor((chartX + chartBBox.width) / 2 - legendWidth / 2) - 7;
                         y = insets;
                         break;
                     case "bottom":
