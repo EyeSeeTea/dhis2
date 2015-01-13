@@ -3172,9 +3172,10 @@ Ext.onReady( function() {
                     }
 
                     ids = Ext.Array.clean(ids.concat(filterIds || []));
-
+console.log("ids", ids, "xResponse.metaData.names", xResponse.metaData.names);
                     if (Ext.isArray(ids) && ids.length) {
                         for (var i = 0; i < ids.length; i++) {
+console.log(ids[i]);
                             text += xResponse.metaData.names[ids[i]];
                             text += i < ids.length - 1 ? ', ' : '';
                         }
@@ -3257,6 +3258,7 @@ Ext.onReady( function() {
                         store = config.store || {},
                         width = ns.app.centerRegion.getWidth(),
                         height = ns.app.centerRegion.getHeight(),
+                        isLineBased = Ext.Array.contains(['line', 'area'], xLayout.type),
                         defaultConfig = {
                             //animate: true,
                             animate: false,
@@ -3264,9 +3266,9 @@ Ext.onReady( function() {
                             insetPadding: ns.dashboard ? 17 : 35,
                             insetPaddingObject: {
                                 top: 10,
-                                right: 3,
+                                right: isLineBased ? 5 : 3,
                                 bottom: 2,
-                                left: 7
+                                left: isLineBased ? 15 : 7
                             },
                             width: ns.dashboard ? width : width - 15,
                             height: ns.dashboard ? height : height - 40,
