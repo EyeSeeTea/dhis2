@@ -447,18 +447,18 @@ dhis2.db.resizeItem = function( id )
 
 dhis2.db.setNormalItemWidth = function( id ) {
 	$( "#" + id ).css( "width", dhis2.db.widthNormal + "px" );
-	Ext.get( "plugin-" + id ).viewport.setWidth( dhis2.db.widthNormal );
+	Ext.get( "plugin-" + id ).setViewportWidth( dhis2.db.widthNormal );
 }
 
 dhis2.db.setDoubleItemWidth = function( id ) {
 	$( "#" + id ).css( "width", dhis2.db.widthDouble + "px" );
-	Ext.get( "plugin-" + id ).viewport.setWidth( dhis2.db.widthDouble );
+	Ext.get( "plugin-" + id ).setViewportWidth( dhis2.db.widthDouble );
 }
 
 dhis2.db.setFullItemWidth = function( id ) {
 	var	fullWidth = dhis2.db.getFullWidth();
 	$( "#" + id ).css( "width", fullWidth + "px" );
-	Ext.get( "plugin-" + id ).viewport.setWidth( fullWidth );
+	Ext.get( "plugin-" + id ).setViewportWidth( fullWidth );
 }
 
 dhis2.db.drawWideItems = function()
