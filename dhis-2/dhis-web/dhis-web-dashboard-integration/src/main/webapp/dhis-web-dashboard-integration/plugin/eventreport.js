@@ -3125,9 +3125,6 @@ Ext.onReady( function() {
                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                 init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                // optionSetsConfig
-
-
                 // user-account
                 userAccountConfig = {
                     url: init.contextPath + '/api/me/user-account.' + type,
