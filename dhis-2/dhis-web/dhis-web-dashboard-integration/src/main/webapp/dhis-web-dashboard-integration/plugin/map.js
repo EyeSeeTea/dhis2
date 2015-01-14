@@ -7147,7 +7147,7 @@ Ext.onReady(function () {
             };
 
             if (GIS_GM.ready) {
-                console.log("GM is ready -> skip queue and add layers locally, div: " + config.el);
+                console.log("(Item " + config.el + ") GM is ready -> skip queue, add layers, set as baselayer");
                 gm_fn();
             }
             else {
@@ -7224,7 +7224,7 @@ Ext.onReady(function () {
                         obj = GIS_GM.array[i];
 
                         if (obj) {
-                            console.log("Running obj number " + (i + 1));
+                            console.log("Running queue obj " + (i + 1));
                             obj.fn.call(obj.scope);
                         }
                     }
