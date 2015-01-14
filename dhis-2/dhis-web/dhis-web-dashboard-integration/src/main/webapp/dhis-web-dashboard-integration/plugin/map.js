@@ -7118,6 +7118,7 @@ Ext.onReady(function () {
 
             Ext.get(config.el).setViewportWidth = function(width) {
                 gis.viewport.setWidth(width);
+                gis.viewport.centerRegion.setWidth(width);
             };
 
             gis.olmap.mask = Ext.create('Ext.LoadMask', gis.viewport.centerRegion.getEl(), {

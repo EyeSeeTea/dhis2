@@ -42,7 +42,7 @@ $( document ).ready( function()
 	$( "#interpretationArea" ).autogrow();
 
 	$( document ).click( dhis2.db.hideSearch );
-	
+
 	$( window ).resize( dhis2.db.drawFullWidthItems );
 
 	$( "#searchField" ).focus( function() {
@@ -415,19 +415,19 @@ dhis2.db.getFullWidth = function()
 dhis2.db.resizeItem = function( id )
 {
 	$.getJSON( "../api/dashboardItems/" + id, function( item ) {
-				
+
 		if ( dhis2.db.shapeFullWidth == item.shape ) {
 			var newShape = dhis2.db.shapeNormal;
 			$( "#" + id ).css( "width", dhis2.db.widthNormal + "px" );
-			Ext.get( "plugin-" + id ).viewport.setWidth( dhis2.db.widthNormal );
+			Ext.get( "plugin-" + id ).setViewportWidth( dhis2.db.widthNormal );
 		}
 		else {
 			var newShape = dhis2.db.shapeFullWidth,
 				fullWidth = dhis2.db.getFullWidth();
 			$( "#" + id ).css( "width", fullWidth + "px" );
-			Ext.get( "plugin-" + id ).viewport.setWidth( fullWidth );
+			Ext.get( "plugin-" + id ).setViewportWidth( fullWidth );
 		}
-		
+
 		$.ajax( {
 			url: "../api/dashboardItems/" + id + "/shape/" + newShape,
 			type: "put"
@@ -439,13 +439,13 @@ dhis2.db.drawFullWidthItems = function()
 {
 	if ( undefined !== dhis2.db.current() ) {
 		var url = "../api/dashboards/" + dhis2.db.current() + "?fields=dashboardItems[id,shape]";
-		
+
 		$.getJSON( url, function( dashboard ) {
 			$.each( dashboard.dashboardItems, function( i, item ) {
 				if ( dhis2.db.shapeFullWidth == item.shape ) {
 					var fullWidth = dhis2.db.getFullWidth();
 					$( "#" + item.id ).css( "width", fullWidth + "px" );
-					Ext.get( "plugin-" + item.id ).viewport.setWidth( fullWidth );
+					Ext.get( "plugin-" + item.id ).setViewportWidth( fullWidth );
 				}
 			} );
 		} );
@@ -489,7 +489,7 @@ dhis2.db.renderDashboard = function( id )
 
 				var width = ( dhis2.db.shapeFullWidth == dashboardItem.shape ) ? fullWidth : dhis2.db.widthNormal;
 				var style = "width:" + width + "px";
-				
+
 				if ( "chart" == dashboardItem.type )
 				{
 				    $d.append( $.tmpl( dhis2.db.tmpl.chartItem, { "itemId": dashboardItem.id, "id": dashboardItem.chart.id, "name": dashboardItem.chart.name, "style": style,
