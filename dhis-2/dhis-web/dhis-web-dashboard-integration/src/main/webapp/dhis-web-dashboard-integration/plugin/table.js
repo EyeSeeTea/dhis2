@@ -579,9 +579,9 @@ Ext.onReady( function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-
+                    
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
+                        init.alert('No values found');
 						return;
 					}
 
@@ -3064,6 +3064,8 @@ Ext.onReady( function() {
         css += '.pointer { cursor: pointer; } \n';
         css += '.td-sortable { background-image: url("' + arrowUrl + '"); background-repeat: no-repeat; background-position: right center; padding-right: 15px !important; } \n';
 
+        css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
+
         Ext.util.CSS.createStyleSheet(css);
     };
 
@@ -3394,14 +3396,23 @@ Ext.onReady( function() {
 				return;
 			}
 
+            // css
             applyCss(config);
 
+            // config
             init.plugin = true;
             init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
             init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
             init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
+            // alert
+            init.alert = function(text) {
+                Ext.get(config.el).setStyle('opacity', 1);
+                Ext.get(config.el).update('<div class="ns-plugin-alert">' + text + '</div>');
+            };
+
+            // init
 			ns.core = PT.getCore(Ext.clone(init));
 			extendInstance(ns);
 
