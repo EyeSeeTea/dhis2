@@ -290,7 +290,7 @@ Ext.onReady( function() {
 				}();
 			};
 
-			api.layout.Layout = function(config) {
+			api.layout.Layout = function(config, applyConfig) {
 				var config = Ext.clone(config),
 					layout = {},
 					getValidatedDimensionArray,
@@ -520,7 +520,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return Ext.apply(layout, applyConfig);
+                    return Ext.apply(layout, applyConfig);
 				}();
 			};
 
@@ -579,9 +579,9 @@ Ext.onReady( function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-
+                    
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
-						alert('No values found');
+						init.alert('No values found');
 						return;
 					}
 
@@ -2972,7 +2972,10 @@ Ext.onReady( function() {
 					rows = xResponse.rows,
                     names = xResponse.metaData.names,
                     optionNames = xResponse.metaData.optionNames,
-                    pager = xResponse.metaData.pager,
+                    pager = xResponse.metaData.pager || {
+                        page: 1,
+                        pageSize: 50
+                    },
                     count = pager.page * pager.pageSize - pager.pageSize
 					tableCls = 'pivot',
 					html = '';
@@ -3094,13 +3097,14 @@ Ext.onReady( function() {
         applyCss,
 		execute;
 
-	getInit = function(contextPath) {
+	getInit = function(config) {
 		var isInit = false,
 			requests = [],
 			callbackCount = 0,
+            type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
 			fn;
 
-        init.contextPath = contextPath;
+        init.contextPath = config.url;
 
 		fn = function() {
 			if (++callbackCount === requests.length) {
@@ -3154,9 +3158,9 @@ Ext.onReady( function() {
                             init.namePropertyUrl = namePropertyUrl;
 
                             // dhis2
-                            dhis2.util.namespace('dhis2.ev');
+                            dhis2.util.namespace('dhis2.er');
 
-                            dhis2.ev.store = dhis2.ev.store || new dhis2.storage.Store({
+                            dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
                                 name: 'dhis2',
                                 adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
                                 objectStores: ['optionSets']
@@ -3167,7 +3171,7 @@ Ext.onReady( function() {
                                 disableCashing: false,
                                 success: function(r) {
                                     var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
-                                        store = dhis2.ev.store,
+                                        store = dhis2.er.store,
                                         ids = [],
                                         url = '',
                                         callbacks = 0,
@@ -3358,6 +3362,9 @@ Ext.onReady( function() {
         css += '.pointer { cursor: pointer; } \n';
         css += '.td-sortable { background-image: url("' + arrowUrl + '"); background-repeat: no-repeat; background-position: right center; padding-right: 15px !important; } \n';
 
+        // alert
+        css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
+        
         Ext.util.CSS.createStyleSheet(css);
     };
 
@@ -3484,6 +3491,12 @@ Ext.onReady( function() {
                 success = function(r) {
                     var layout = api.layout.Layout((r.responseText ? Ext.decode(r.responseText) : r), obj);
 
+                    // paging
+                    layout.paging = {
+                        page: 1,
+                        pageSize: 50
+                    };
+
                     if (layout) {
                         web.report.getData(layout, true);
                     }
@@ -3507,7 +3520,7 @@ Ext.onReady( function() {
                 }
 			};
 
-			web.report.getData = function(view, isUpdateGui) {
+			web.report.getData = function(layout, isUpdateGui) {
 				var xLayout,
 					paramString,
                     success,
@@ -3546,7 +3559,7 @@ Ext.onReady( function() {
 
                     ns.app.paramString = paramString;
 
-                    web.report.createReport(view, response, isUpdateGui);
+                    web.report.createReport(layout, response, isUpdateGui);
                 };
 
                 failure = function(r) {
@@ -3729,7 +3742,9 @@ Ext.onReady( function() {
                             //table = web.report.query.getHtml(layout, xResponse);
                         //}
 
-                        ns.app.centerRegion.removeAll(true);
+                        if (ns.app.centerRegion.removeAll) {
+                            ns.app.centerRegion.removeAll(true);
+                        }
                         ns.app.centerRegion.update(table.html);
 
                         Ext.defer( function() {
@@ -3807,13 +3822,26 @@ Ext.onReady( function() {
 				return;
 			}
 
+            // css
             applyCss(config);
 
-			ns.core = ER.getCore(Ext.clone(init));
-            ns.core.init.el = config.el;
-            Ext.get(ns.core.init.el).setStyle('opacity', 0);
-			extendInstance(ns);
+            // config
+            init.plugin = true;
+            init.dashboard = Ext.isBoolean(config.dashboard) ? config.dashboard : false;
+            init.crossDomain = Ext.isBoolean(config.crossDomain) ? config.crossDomain : true;
+            init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
+            init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
+            // alert
+            init.alert = function(text) {
+                Ext.get(config.el).setStyle('opacity', 1);
+                Ext.get(config.el).update('<div class="ns-plugin-alert">' + text + '</div>');
+            };            
+
+            // init
+			ns.core = ER.getCore(Ext.clone(init));
+			extendInstance(ns);
+            
 			ns.app.viewport = createViewport();
 			ns.app.centerRegion = ns.app.viewport.centerRegion;
 
@@ -3821,8 +3849,8 @@ Ext.onReady( function() {
                 ns.app.centerRegion.setWidth(width);
             };
 
-			if (config.id) {
-				ns.core.web.report.loadReport(config.id);
+			if (config && config.id) {
+				ns.core.web.report.loadReport(config);
 			}
 			else {
 				layout = ns.core.api.layout.Layout(config);
@@ -3849,7 +3877,7 @@ Ext.onReady( function() {
 
 			if (!isInitStarted) {
 				isInitStarted = true;
-				getInit(config.url);
+				getInit(config);
 			}
 		}
 	};

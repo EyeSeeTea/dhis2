@@ -3950,14 +3950,14 @@ Ext.onReady( function() {
 	getInit = function(config) {
 		var isInit = false,
 			requests = [],
-			callbacks = 0,
+			callbackCount = 0,
             type = config.plugin && config.crossDomain ? 'jsonp' : 'json',
 			fn;
 
         init.contextPath = config.url;
 
 		fn = function() {
-			if (++callbacks === requests.length) {
+			if (++callbackCount === requests.length) {
 				isInitComplete = true;
 
 				for (var i = 0; i < configs.length; i++) {
