@@ -3033,7 +3033,7 @@ Ext.onReady( function() {
         css += 'table.pivot { border-collapse: collapse; border-spacing: 0px; border: 0 none; } \n';
         css += '.pivot td { font-family: arial, sans-serif, helvetica neue, helvetica !important; padding: 5px; border: 1px solid #b2b2b2; } \n';
         css += '.pivot-dim { background-color: #dae6f8; text-align: center; } \n';
-        css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; } \n';
+        css += '.pivot-dim.highlighted { background-color: #c5d8f6; } \n';
         css += '.pivot-dim-subtotal { background-color: #cad6e8; text-align: center; } \n';
         css += '.pivot-dim-total { background-color: #bac6d8; text-align: center; } \n';
         css += '.pivot-dim-total.highlighted { background-color: #adb8c9; } \n';
@@ -3049,9 +3049,9 @@ Ext.onReady( function() {
         css += '.pivot-transparent-column { background-color: #fff; border-top-color: #fff !important; border-right-color: #fff !important; } \n';
         css += '.pivot-transparent-row { background-color: #fff; border-bottom-color: #fff !important; border-left-color: #fff !important; } \n';
 
-        css += '.x-mask-msg { padding: 0; \n	border: 0 none; background-image: none; background-color: transparent; } \n';
+        css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
         css += '.x-mask-msg div { background-position: 11px center; } \n';
-        css += '.x-mask-msg .x-mask-loading { border: 0 none; \n	background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+        css += '.x-mask-msg .x-mask-loading { border: 0 none; background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
         css += '.x-mask { opacity: 0 } \n';
 
         css += '.pivot td.legend { padding: 0; } \n';

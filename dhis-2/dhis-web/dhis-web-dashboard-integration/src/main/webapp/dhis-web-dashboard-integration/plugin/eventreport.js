@@ -173,14 +173,18 @@ Ext.onReady( function() {
 					'space': ' '
 				},
 				displayDensity: {
-					'compact': '3px',
-					'normal': '5px',
-					'comfortable': '10px',
+                    'xcompact': '2px',
+					'compact': '4px',
+					'normal': '6px',
+					'comfortable': '8px',
+                    'xcomfortable': '10px'
 				},
 				fontSize: {
+					'xsmall': '9px',
 					'small': '10px',
 					'normal': '11px',
-					'large': '13px'
+					'large': '12px',
+					'xlarge': '14px'
 				}
 			};
 
@@ -2978,6 +2982,8 @@ Ext.onReady( function() {
                     },
                     count = pager.page * pager.pageSize - pager.pageSize
 					tableCls = 'pivot',
+                    fontSize = conf.report.fontSize[layout.fontSize],
+                    displayDensity = conf.report.displayDensity[layout.displayDensity],
 					html = '';
 
 				xResponse.sortableIdObjects = [];
@@ -2986,14 +2992,14 @@ Ext.onReady( function() {
 				tableCls += layout.fontSize ? ' ' + layout.fontSize : '';
 
 				html += '<table class="' + tableCls + '"><tr>';
-                html += '<td class="pivot-dim pivot-dim-subtotal">' + '#' + '</td>';
+                html += '<td class="pivot-dim pivot-dim-subtotal" style="font-size:' + fontSize + '; padding:' + displayDensity + '">' + '#' + '</td>';
 
 				// get header indexes
 				for (var i = 0, header, uuid; i < dimensionHeaders.length; i++) {
 					header = dimensionHeaders[i];
 					uuid = Ext.data.IdGenerator.get('uuid').generate();
 
-					html += '<td id="' + uuid + '" class="pivot-dim td-sortable">' + header.column + '</td>';
+					html += '<td id="' + uuid + '" class="pivot-dim td-sortable" style="font-size:' + fontSize + '; padding:' + displayDensity + '">' + header.column + '</td>';
 
 					xResponse.sortableIdObjects.push({
 						id: header.name,
@@ -3007,7 +3013,7 @@ Ext.onReady( function() {
 				for (var i = 0, row; i < rows.length; i++) {
 					row = rows[i];
 					html += '<tr>';
-                    html += '<td class="pivot-value align-right">' + (count + (i + 1)) + '</td>';
+                    html += '<td class="pivot-value align-right" style="font-size:' + fontSize + '; padding:' + displayDensity + '">' + (count + (i + 1)) + '</td>';
 
 					for (var j = 0, str, header, name; j < dimensionHeaders.length; j++) {
 						header = dimensionHeaders[j];
@@ -3027,7 +3033,7 @@ Ext.onReady( function() {
 							//}
 						//}
 
-						html += '<td class="pivot-value align-left">' + name + '</td>';
+						html += '<td class="pivot-value align-left" style="font-size:' + fontSize + '; padding:' + displayDensity + '">' + name + '</td>';
 					}
 
 					html += '</tr>';
@@ -3329,9 +3335,9 @@ Ext.onReady( function() {
         css += '.td-hidden { display: none; } \n';
         css += '.td-collapsed { display: none; } \n';
         css += 'table.pivot { border-collapse: collapse; border-spacing: 0px; border: 0 none; } \n';
-        css += '.pivot td { padding: 5px; border: \n 1px solid #b2b2b2; } \n';
+        css += '.pivot td { font-family: arial, sans-serif, helvetica neue, helvetica !important; padding: 5px; border: 1px solid #b2b2b2; } \n';
         css += '.pivot-dim { background-color: #dae6f8; text-align: center; } \n';
-        css += '.pivot-dim.highlighted {	background-color: #c5d8f6; } \n';
+        css += '.pivot-dim.highlighted { background-color: #c5d8f6; } \n';
         css += '.pivot-dim-subtotal { background-color: #cad6e8; text-align: center; } \n';
         css += '.pivot-dim-total { background-color: #bac6d8; text-align: center; } \n';
         css += '.pivot-dim-total.highlighted { background-color: #adb8c9; } \n';
@@ -3347,9 +3353,9 @@ Ext.onReady( function() {
         css += '.pivot-transparent-column { background-color: #fff; border-top-color: #fff !important; border-right-color: #fff !important; } \n';
         css += '.pivot-transparent-row { background-color: #fff; border-bottom-color: #fff !important; border-left-color: #fff !important; } \n';
 
-        css += '.x-mask-msg { padding: 0;	border: 0 none; background-image: none; background-color: transparent; } \n';
+        css += '.x-mask-msg { padding: 0; border: 0 none; background-image: none; background-color: transparent; } \n';
         css += '.x-mask-msg div { background-position: 11px center; } \n';
-        css += '.x-mask-msg .x-mask-loading { border: 0 none;	background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
+        css += '.x-mask-msg .x-mask-loading { border: 0 none; background-color: #000; color: #fff; border-radius: 2px; padding: 12px 14px 12px 30px; opacity: 0.65; } \n';
         css += '.x-mask { opacity: 0 } \n';
 
         css += '.pivot td.legend { padding: 0; } \n';
