@@ -1055,7 +1055,7 @@ Ext.onReady( function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-                    
+
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						init.alert('No values found');
 						return;
@@ -3768,18 +3768,14 @@ Ext.onReady( function() {
                         store: store,
                         axes: axes,
                         series: series,
-                        theme: 'Category2'
+                        theme: 'Category2',
+                        insetPaddingObject: {
+                            top: 20,
+                            right: 2,
+                            bottom: 15,
+                            left: 7
+                        }
                     });
-
-                    chart.insetPadding = 40;
-                    chart.height = ns.app.centerRegion.getHeight() - 80;
-
-                    chart.setChartSize = function() {
-                        //this.animate = false;
-                        this.setWidth(ns.app.centerRegion.getWidth());
-                        this.setHeight(ns.app.centerRegion.getHeight() - 80);
-                        //this.animate = true;
-                    };
 
                     return chart;
                 };

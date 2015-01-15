@@ -1089,7 +1089,7 @@ Ext.onReady(function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-                    
+
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
                         init.alert('No values found');
 						return;
@@ -3699,7 +3699,7 @@ Ext.onReady(function() {
 
         // alert
         css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
-        
+
         Ext.util.CSS.createStyleSheet(css);
     };
 
