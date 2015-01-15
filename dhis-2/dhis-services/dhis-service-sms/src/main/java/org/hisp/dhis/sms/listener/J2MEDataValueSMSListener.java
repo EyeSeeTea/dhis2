@@ -1,4 +1,4 @@
-package org.hisp.dhis.sms;
+package org.hisp.dhis.sms.listener;
 
 /*
  * Copyright (c) 2004-2014, University of Oslo
@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
@@ -55,13 +56,15 @@ import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.period.QuarterlyPeriodType;
 import org.hisp.dhis.period.WeeklyPeriodType;
 import org.hisp.dhis.period.YearlyPeriodType;
+import org.hisp.dhis.sms.SmsSender;
+import org.hisp.dhis.sms.command.SMSCommand;
+import org.hisp.dhis.sms.command.SMSCommandService;
+import org.hisp.dhis.sms.command.code.SMSCode;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
-import org.hisp.dhis.smscommand.SMSCode;
-import org.hisp.dhis.smscommand.SMSCommand;
-import org.hisp.dhis.smscommand.SMSCommandService;
+import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
@@ -88,7 +91,8 @@ public class J2MEDataValueSMSListener
     {
         String message = sms.getText();
         String commandString = null;
-        if ( message.indexOf( " " ) > 0 )
+        
+        if ( message.indexOf( TextUtils.SPACE ) > 0 )
         {
             commandString = message.substring( 0, message.indexOf( " " ) );
             message = message.substring( commandString.length() );
@@ -252,7 +256,6 @@ public class J2MEDataValueSMSListener
                 dataValueService.updateDataValue( dv );
             }
         }
-
     }
 
     private OrganisationUnit selectOrganisationUnit( Collection<OrganisationUnit> orgUnits,
@@ -276,6 +279,7 @@ public class J2MEDataValueSMSListener
         if ( orgUnit == null && orgUnits.size() > 1 )
         {
             String messageListingOrgUnits = smsCommand.getMoreThanOneOrgUnitMessage();
+            
             for ( Iterator<OrganisationUnit> i = orgUnits.iterator(); i.hasNext(); )
             {
                 OrganisationUnit o = i.next();
@@ -295,6 +299,7 @@ public class J2MEDataValueSMSListener
     {
         Collection<OrganisationUnit> orgUnits = new ArrayList<>();
         Collection<User> users = userService.getUsersByPhoneNumber( sender );
+        
         for ( User u : users )
         {
             if ( u.getOrganisationUnits() != null )
@@ -310,6 +315,7 @@ public class J2MEDataValueSMSListener
     {
         OrganisationUnit orgunit = null;
         User user = null;
+        
         for ( User u : userService.getUsersByPhoneNumber( sender ) )
         {
             OrganisationUnit ou = u.getOrganisationUnit();
@@ -369,7 +375,6 @@ public class J2MEDataValueSMSListener
 
         for ( SMSCode code : command.getCodes() )
         {
-
             DataElementCategoryOptionCombo optionCombo = dataElementCategoryService
                 .getDataElementCategoryOptionCombo( code.getOptionId() );
 
@@ -383,6 +388,7 @@ public class J2MEDataValueSMSListener
             else if ( dv != null )
             {
                 String value = dv.getValue();
+                
                 if ( StringUtils.equals( dv.getDataElement().getType(), DataElement.VALUE_TYPE_BOOL ) )
                 {
                     if ( "true".equals( value ) )
@@ -394,6 +400,7 @@ public class J2MEDataValueSMSListener
                         value = "No";
                     }
                 }
+                
                 reportBack += code.getCode() + "=" + value + " ";
             }
         }
@@ -439,6 +446,7 @@ public class J2MEDataValueSMSListener
             String pattern = "yyyy-MM-dd";
             SimpleDateFormat formatter = new SimpleDateFormat( pattern );
             Date date;
+            
             try
             {
                 date = formatter.parse( periodName );
@@ -448,6 +456,7 @@ public class J2MEDataValueSMSListener
                 throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName()
                     + " and name " + periodName, e );
             }
+            
             return periodType.createPeriod( date );
         }
 
@@ -512,8 +521,7 @@ public class J2MEDataValueSMSListener
 
         }
 
-        throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name "
-            + periodName );
+        throw new IllegalArgumentException( "Couldn't make a period of type " + periodType.getName() + " and name " + periodName );
     }
 
     public DataValueService getDataValueService()
