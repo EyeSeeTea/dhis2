@@ -3064,6 +3064,7 @@ Ext.onReady( function() {
         css += '.pointer { cursor: pointer; } \n';
         css += '.td-sortable { background-image: url("' + arrowUrl + '"); background-repeat: no-repeat; background-position: right center; padding-right: 15px !important; } \n';
 
+        // alert
         css += '.ns-plugin-alert { width: 90%; padding: 5%; color: #777 } \n';
 
         Ext.util.CSS.createStyleSheet(css);
