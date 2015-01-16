@@ -64,7 +64,7 @@ import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
-import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -290,17 +290,26 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return false;
         }
 
-        List<ValidationViolation> validate = schemaValidator.validate( object );
+        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
 
-        if ( !validate.isEmpty() )
+        /* disabled for 2.18 release
+        if ( !validationViolations.isEmpty() )
         {
+            System.err.println( "violations: " + validationViolations );
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+
             return false;
         }
+        */
 
         // make sure that the internalId is 0, so that the system will generate a ID
         object.setId( 0 );
-        // object.setUser( user );
-        // object.setUser( null );
+
+        if ( !options.isSharing() )
+        {
+            object.clearSharing( true );
+        }
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
         nonIdentifiableObjects.extract( object );
@@ -398,12 +407,18 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return true;
         }
 
-        List<ValidationViolation> validate = schemaValidator.validate( object );
+        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
 
-        if ( !validate.isEmpty() )
+        /* disabled for 2.18 release
+        if ( !validationViolations.isEmpty() )
         {
+            System.err.println( "violations: " + validationViolations );
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+
             return false;
         }
+        */
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
         nonIdentifiableObjects.extract( object );
@@ -429,7 +444,17 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         reattachFields( object, fields, user );
 
-        persistedObject.mergeWith( object );
+        if ( !options.isSharing() )
+        {
+            User persistedObjectUser = persistedObject.getUser();
+            persistedObject.mergeWith( object );
+            persistedObject.setUser( persistedObjectUser );
+        }
+        else
+        {
+            persistedObject.mergeWith( object );
+            persistedObject.mergeSharingWith( object );
+        }
 
         updatePeriodTypes( persistedObject );
 
@@ -446,7 +471,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             {
                 Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
 
-                if ( userCredentials != null && userCredentials.getPassword() != null )
+                if ( userCredentials.getPassword() != null )
                 {
                     userService.encodeAndSetPassword( userCredentials, userCredentials.getPassword() );
                 }

@@ -98,6 +98,15 @@ public class DefaultSchemaValidator implements SchemaValidator
 
         String value = (String) object;
 
+        // check column max length
+        if ( value.length() > property.getLength() )
+        {
+            validationViolations.add( new ValidationViolation( property.getName(), "Maximum length for property is "
+                + property.getLength() + ", length is " + value.length(), value ) );
+
+            return validationViolations;
+        }
+
         if ( value.length() < property.getMin() || value.length() > property.getMax() )
         {
             validationViolations.add( new ValidationViolation( property.getName(), "Allowed range for length ["
@@ -121,7 +130,7 @@ public class DefaultSchemaValidator implements SchemaValidator
 
         if ( PropertyType.COLOR == property.getPropertyType() && !ValidationUtils.isValidHexColor( value ) )
         {
-            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid color (in hex format).", value ) );
+            validationViolations.add( new ValidationViolation( property.getName(), "Not a valid hex color.", value ) );
         }
 
         /* TODO add proper validation for both Points and Polygons, ValidationUtils only supports points at this time
