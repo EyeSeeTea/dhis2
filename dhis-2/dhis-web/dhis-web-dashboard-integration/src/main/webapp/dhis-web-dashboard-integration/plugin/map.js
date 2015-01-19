@@ -2496,7 +2496,8 @@ Ext.onReady(function () {
 
                 if (Ext.Array.contains([403], r.status)) {
                     alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
-                } else {
+                }
+                else {
                     alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
                 }
             };
@@ -2562,12 +2563,20 @@ Ext.onReady(function () {
         afterLoad = function () {
             register = [];
 
+            // title
+            if (gis.viewport.northRegion && gis.map && gis.map.name) {
+                gis.viewport.northRegion.update(gis.map.name);
+            }
+
+            // zoom
             if (gis.el) {
                 gis.olmap.zoomToVisibleExtent();
-            } else {
+            }
+            else {
                 if (gis.map.longitude && gis.map.latitude && gis.map.zoom) {
                     gis.olmap.setCenter(new OpenLayers.LonLat(gis.map.longitude, gis.map.latitude), gis.map.zoom);
-                } else {
+                }
+                else {
                     gis.olmap.zoomToVisibleExtent();
                 }
             }
@@ -3877,49 +3886,51 @@ Ext.onReady(function () {
             }
         };
 
-        afterLoad = function (view) {
+        afterLoad = function(view) {
 
-            // Legend
+            // legend
             gis.viewport.eastRegion.doLayout();
 
             if (layer.legendPanel) {
                 layer.legendPanel.expand();
             }
 
-            // Layer
+            // layer
             layer.setLayerOpacity(view.opacity);
 
             if (layer.item) {
                 layer.item.setValue(true);
             }
 
-            // Filter
+            // filter
             if (layer.filterWindow && layer.filterWindow.isVisible()) {
                 layer.filterWindow.filter();
             }
 
-            // Gui
+            // gui
             if (loader.updateGui && Ext.isObject(layer.widget)) {
                 layer.widget.setGui(view);
             }
 
-            // Zoom
+            // zoom
             if (loader.zoomToVisibleExtent) {
                 olmap.zoomToVisibleExtent();
             }
 
-            // Mask
+            // mask
             if (loader.hideMask) {
                 if (gis.olmap.mask && !gis.skipMask) {
                     gis.olmap.mask.hide();
                 }
             }
 
-            // Map callback
+            // map callback
             if (loader.callBack) {
                 loader.callBack(layer);
-            } else {
+            }
+            else {
                 gis.map = null;
+
                 if (gis.viewport.shareButton) {
                     gis.viewport.shareButton.enable();
                 }
@@ -6965,7 +6976,7 @@ Ext.onReady(function () {
                     width: el.getWidth(),
                     height: 19,
                     bodyStyle: 'background-color: #fff; border: 0 none; font: bold 12px LiberationSans, arial, sans-serif; color: #333; text-align: center; line-height: 14px;',
-                    html: 'This is the map title'
+                    html: ''
                 }));
             }
 
