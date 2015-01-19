@@ -1784,7 +1784,8 @@ Ext.onReady(function () {
                 menu,
                 selectHandlers,
                 isPoint = feature.geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname,
-                att = feature.attributes;
+                att = feature.attributes,
+                body = Ext.get(document.body);
 
             // Relocate
             showRelocate = function () {
@@ -1805,7 +1806,7 @@ Ext.onReady(function () {
                         cls: 'gis-container-inner'
                     },
                     bbar: [
-      '->',
+                        '->',
                         {
                             xtype: 'button',
                             hideLabel: true,
@@ -1815,8 +1816,8 @@ Ext.onReady(function () {
                                 gis.olmap.relocate.window.destroy();
                                 gis.olmap.getViewport().style.cursor = 'auto';
                             }
-      }
-     ],
+                        }
+                    ],
                     listeners: {
                         close: function () {
                             gis.olmap.relocate.active = false;
@@ -2123,8 +2124,8 @@ Ext.onReady(function () {
                         {
                             id: 'LEVEL-' + level
                         }
-     ]
-    }];
+                    ]
+                }];
 
                 if (view) {
                     loader = layer.core.getLoader();
@@ -2248,7 +2249,7 @@ Ext.onReady(function () {
                 items: menuItems
             });
 
-            menu.showAt([gis.olmap.mouseMove.x, gis.olmap.mouseMove.y]);
+            menu.showAt([gis.olmap.mouseMove.x + (body.dom.scrollLeft || 0), gis.olmap.mouseMove.y + (body.dom.scrollTop || 0)]);
         };
 
         options = {
