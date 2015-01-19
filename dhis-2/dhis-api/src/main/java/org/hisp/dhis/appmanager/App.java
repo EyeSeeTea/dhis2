@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -100,6 +100,19 @@ public class App
         
         return null;
     }
+    
+    /**
+     * Alias for folder name.
+     */
+    @JsonProperty
+    public String getKey()
+    {
+        return folderName;
+    }
+
+    // -------------------------------------------------------------------------
+    // Get and set methods
+    // -------------------------------------------------------------------------
     
     public String getVersion()
     {

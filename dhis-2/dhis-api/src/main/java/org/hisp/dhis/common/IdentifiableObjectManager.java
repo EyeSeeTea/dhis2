@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,8 @@ public interface IdentifiableObjectManager
     final String ID = IdentifiableObjectManager.class.getName();
 
     void save( IdentifiableObject object );
+
+    void save( IdentifiableObject object, boolean clearSharing );
 
     void update( IdentifiableObject object );
 

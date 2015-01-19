@@ -3077,7 +3077,10 @@ Ext.onReady(function () {
 
             // Legend
             gis.viewport.eastRegion.doLayout();
-            layer.legendPanel.expand();
+
+            if (layer.legendPanel) {
+                layer.legendPanel.expand();
+            }
 
             // Layer
             if (layer.item) {
@@ -3876,7 +3879,10 @@ Ext.onReady(function () {
 
             // Legend
             gis.viewport.eastRegion.doLayout();
-            layer.legendPanel.expand();
+
+            if (layer.legendPanel) {
+                layer.legendPanel.expand();
+            }
 
             // Layer
             layer.setLayerOpacity(view.opacity);
@@ -5733,9 +5739,11 @@ Ext.onReady(function () {
             reset: function () {
                 this.layer.destroyFeatures();
 
-                // Legend
-                this.layer.legendPanel.update('');
-                this.layer.legendPanel.collapse();
+                // legend
+                if (this.layer.legendPanel) {
+                    this.layer.legendPanel.update('');
+                    this.layer.legendPanel.collapse();
+                }
 
                 if (this.layer.widget) {
                     this.layer.widget.reset();
@@ -5810,7 +5818,9 @@ Ext.onReady(function () {
                     element.appendChild(child);
                 }
 
-                this.layer.legendPanel.update(element.outerHTML);
+                if (this.layer.legendPanel) {
+                    this.layer.legendPanel.update(element.outerHTML);
+                }
             },
 
             CLASS_NAME: "mapfish.GeoStat.Facility"
@@ -6232,11 +6242,13 @@ Ext.onReady(function () {
                     this.layer.destroyFeatures();
                     this.featureStore.loadFeatures(this.layer.features.slice(0));
 
-                    // Legend
-                    this.layer.legendPanel.update('');
-                    this.layer.legendPanel.collapse();
+                    // legend
+                    if (this.layer.legendPanel) {
+                        this.layer.legendPanel.update('');
+                        this.layer.legendPanel.collapse();
+                    }
 
-                    // Widget
+                    // widget
                     if (this.layer.widget) {
                         this.layer.widget.reset();
                     }
@@ -6458,9 +6470,11 @@ Ext.onReady(function () {
                         }
                     }
 
-                    this.layer.legendPanel.update(element.outerHTML);
+                    if (this.layer.legendPanel) {
+                        this.layer.legendPanel.update(element.outerHTML);
+                    }
 
-		    return element;
+                    return element;
                 },
 
                 CLASS_NAME: "mapfish.GeoStat." + name
@@ -6716,7 +6730,7 @@ Ext.onReady(function () {
 
     applyCss = function () {
         var css = '';
-        
+
         // needs parent class to avoid conflict
         css += '.x-border-box .gis-plugin * {box-sizing:border-box;-moz-box-sizing:border-box;-ms-box-sizing:border-box;-webkit-box-sizing:border-box} \n';
 
@@ -6850,11 +6864,11 @@ Ext.onReady(function () {
         css += '.olControlPanel.zoomIn .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPanel.zoomOut { right: 48px; } \n';
         css += '.olControlPanel.zoomVisible { right: 24px; } \n';
-        css += '.olControlPanel.zoomIn-vertical { right: 1px; } \n';
-        css += '.olControlPanel.zoomOut-vertical { top: 24px; right: 1px; } \n';
-        css += '.olControlPanel.zoomVisible-vertical { top: 48px; right: 1px; } \n';
+        css += '.olControlPanel.zoomIn-vertical { } \n';
+        css += '.olControlPanel.zoomOut-vertical { top: 24px; } \n';
+        css += '.olControlPanel.zoomVisible-vertical { top: 48px; } \n';
         //css += '.olControlPanel.measure-vertical { top: 72px; right: 1px; } \n';
-        css += '.olControlPanel.legend-vertical { top: 72px; right: 1px; } \n';
+        css += '.olControlPanel.legend-vertical { top: 72px; } \n';
         css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
         css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
@@ -6934,105 +6948,117 @@ Ext.onReady(function () {
 
         createViewport = function () {
             var viewport,
-                eastRegion,
+                items = [],
+                northRegion,
                 centerRegion,
+                eastRegion,
                 el = Ext.get(gis.el),
                 eastWidth = gis.map.hideLegend ? 0 : (gis.plugin ? 120 : 200),
                 trash = [];
+
+            // north
+            if (gis.dashboard) {
+                items.push(northRegion = Ext.create('Ext.panel.Panel', {
+                    region: 'north',
+                    width: el.getWidth(),
+                    height: 19,
+                    bodyStyle: 'background-color: #fff; border: 0 none; font: bold 12px LiberationSans, arial, sans-serif; color: #333; text-align: center; line-height: 14px;',
+                    html: 'This is the map title'
+                }));
+            }
+
+            // center
+            items.push(centerRegion = new GeoExt.MapPanel({
+                region: 'center',
+                map: gis.olmap,
+                bodyStyle: 'border: 1px solid #d0d0d0',
+                width: el.getWidth() - eastWidth,
+                height: el.getHeight()
+            }));
+
+            // east
+            if (gis.dashboard) {
+                items.push(eastRegion = Ext.create('Ext.panel.Panel', {
+                    width: 0,
+                    height: 0
+                }));
+            }
+            else {
+                items.push(eastRegion = Ext.create('Ext.panel.Panel', {
+                    region: 'east',
+                    layout: 'anchor',
+                    bodyStyle: 'border-top:0 none; border-bottom:0 none',
+                    width: eastWidth,
+                    preventHeader: true,
+                    defaults: {
+                        bodyStyle: 'padding: 6px; border: 0 none',
+                        collapsible: true,
+                        collapsed: true,
+                        animCollapse: false
+                    },
+                    items: [
+                        {
+                            title: GIS.i18n.thematic_layer_1_legend,
+                            cls: 'gis-panel-legend',
+                            bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+                            listeners: {
+                                added: function () {
+                                    gis.layer.thematic1.legendPanel = this;
+                                }
+                            }
+                        },
+                        {
+                            title: GIS.i18n.thematic_layer_2_legend,
+                            cls: 'gis-panel-legend',
+                            bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+                            listeners: {
+                                added: function () {
+                                    gis.layer.thematic2.legendPanel = this;
+                                }
+                            }
+                        },
+                        {
+                            title: GIS.i18n.thematic_layer_3_legend,
+                            cls: 'gis-panel-legend',
+                            bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+                            listeners: {
+                                added: function () {
+                                    gis.layer.thematic3.legendPanel = this;
+                                }
+                            }
+                        },
+                        {
+                            title: GIS.i18n.thematic_layer_4_legend,
+                            cls: 'gis-panel-legend',
+                            bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+                            listeners: {
+                                added: function () {
+                                    gis.layer.thematic4.legendPanel = this;
+                                }
+                            }
+                        },
+                        {
+                            title: GIS.i18n.facility_layer_legend,
+                            cls: 'gis-panel-legend',
+                            bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
+                            listeners: {
+                                added: function () {
+                                    gis.layer.facility.legendPanel = this;
+                                }
+                            }
+                        }
+                    ]
+                }));
+            }
 
             viewport = Ext.create('Ext.panel.Panel', {
                 renderTo: el,
                 width: el.getWidth(),
                 height: el.getHeight(),
                 cls: 'gis-plugin',
-                layout: {
-                    type: 'hbox',
-                    align: 'stretch'
-                },
-                items: [
-                    {
-                        xtype: 'gx_mappanel',
-                        map: gis.olmap,
-                        bodyStyle: 'border:0 none',
-                        width: el.getWidth() - eastWidth,
-                        height: el.getHeight(),
-                        listeners: {
-                            added: function () {
-                                centerRegion = this;
-                            }
-                        }
-                    },
-                    {
-                        xtype: 'panel',
-                        layout: 'anchor',
-                        bodyStyle: 'border-top:0 none; border-bottom:0 none',
-                        width: eastWidth,
-                        preventHeader: true,
-                        defaults: {
-                            bodyStyle: 'padding: 6px; border: 0 none',
-                            collapsible: true,
-                            collapsed: true,
-                            animCollapse: false
-                        },
-                        items: [
-                            {
-                                title: GIS.i18n.thematic_layer_1_legend,
-                                cls: 'gis-panel-legend',
-                                bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
-                                listeners: {
-                                    added: function () {
-                                        gis.layer.thematic1.legendPanel = this;
-                                    }
-                                }
-                            },
-                            {
-                                title: GIS.i18n.thematic_layer_2_legend,
-                                cls: 'gis-panel-legend',
-                                bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
-                                listeners: {
-                                    added: function () {
-                                        gis.layer.thematic2.legendPanel = this;
-                                    }
-                                }
-                            },
-                            {
-                                title: GIS.i18n.thematic_layer_3_legend,
-                                cls: 'gis-panel-legend',
-                                bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
-                                listeners: {
-                                    added: function () {
-                                        gis.layer.thematic3.legendPanel = this;
-                                    }
-                                }
-                            },
-                            {
-                                title: GIS.i18n.thematic_layer_4_legend,
-                                cls: 'gis-panel-legend',
-                                bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
-                                listeners: {
-                                    added: function () {
-                                        gis.layer.thematic4.legendPanel = this;
-                                    }
-                                }
-                            },
-                            {
-                                title: GIS.i18n.facility_layer_legend,
-                                cls: 'gis-panel-legend',
-                                bodyStyle: 'padding:3px 0 4px 5px; border-width:1px 0 1px 0; border-color:#d0d0d0;',
-                                listeners: {
-                                    added: function () {
-                                        gis.layer.facility.legendPanel = this;
-                                    }
-                                }
-                            }
-                        ],
-                        listeners: {
-                            added: function () {
-                                eastRegion = this;
-                            }
-                        }
-                    }
-                ],
+                layout: 'border',
+                bodyStyle: 'border: 0 none',
+                items: items,
                 listeners: {
                     afterrender: function () {
                         afterRender();
@@ -7040,6 +7066,7 @@ Ext.onReady(function () {
                 }
             });
 
+            viewport.northRegion = northRegion;
             viewport.centerRegion = centerRegion;
             viewport.eastRegion = eastRegion;
 
@@ -7113,7 +7140,7 @@ Ext.onReady(function () {
             init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
             // alert
-            //init.alert = function(text) {                
+            //init.alert = function(text) {
                 //Ext.get(config.el).setStyle('opacity', 1);
                 //Ext.get(config.el).update('<div class="ns-plugin-alert">' + text + '</div>');
             //};

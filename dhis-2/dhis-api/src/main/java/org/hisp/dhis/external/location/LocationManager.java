@@ -1,7 +1,7 @@
 package org.hisp.dhis.external.location;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -157,6 +157,13 @@ public interface LocationManager
      * thrown if the external directory location is not set.
      */
     File getExternalDirectory()
+        throws LocationManagerException;
+
+    /**
+     * Gets the external configuration directory. A LocationManagerException is 
+     * thrown if the external directory location is not set.
+     */
+    String getExternalDirectoryPath()
         throws LocationManagerException;
     
     /**

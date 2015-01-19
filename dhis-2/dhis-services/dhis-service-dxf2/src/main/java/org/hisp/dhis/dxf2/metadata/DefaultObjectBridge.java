@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -288,11 +288,17 @@ public class DefaultObjectBridge
     @Override
     public void saveObject( Object object )
     {
+        saveObject( object, true );
+    }
+
+    @Override
+    public void saveObject( Object object, boolean clearSharing )
+    {
         if ( _typeSupported( object.getClass() ) && IdentifiableObject.class.isInstance( object ) )
         {
             if ( writeEnabled )
             {
-                manager.save( (IdentifiableObject) object );
+                manager.save( (IdentifiableObject) object, clearSharing );
             }
 
             _updateInternalMaps( object, false );

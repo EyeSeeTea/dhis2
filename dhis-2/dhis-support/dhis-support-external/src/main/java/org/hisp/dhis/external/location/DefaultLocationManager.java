@@ -1,7 +1,7 @@
 package org.hisp.dhis.external.location;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -270,6 +270,18 @@ public class DefaultLocationManager
         }
         
         return new File( externalDir );
+    }
+
+    @Override
+    public String getExternalDirectoryPath()
+        throws LocationManagerException
+    {
+        if ( externalDir == null )
+        {
+            throw new LocationManagerException( "External directory not set" );
+        }
+        
+        return externalDir;
     }
 
     @Override

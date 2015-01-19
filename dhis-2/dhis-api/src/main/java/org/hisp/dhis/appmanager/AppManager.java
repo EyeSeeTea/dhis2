@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@ public interface AppManager
     final String KEY_APP_BASE_URL = "appBaseUrl";
     final String KEY_APP_STORE_URL = "appStoreUrl";
     final String DEFAULT_APP_STORE_URL = "http://www.dhis2.org/appstore";
+    final String APPS_DIR = "/apps";
+    final String APPS_API_PATH = "/api/apps";
 
     /**
      * Returns a list of all the installed apps at @see getAppFolderPath

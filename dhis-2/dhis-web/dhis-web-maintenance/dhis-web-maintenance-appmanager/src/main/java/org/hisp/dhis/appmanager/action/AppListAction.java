@@ -1,7 +1,7 @@
 package org.hisp.dhis.appmanager.action;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,9 +61,6 @@ public class AppListAction
         return appList;
     }
 
-    //TODO create settings to set for external server like Apache2/nginx
-    //TODO Should be a per-app setting
-    
     private String appBaseUrl;
 
     public String getAppBaseUrl()

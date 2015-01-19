@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.user;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -261,7 +261,7 @@ public class UserController
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     @PreAuthorize( "hasRole('ALL')" )
     @RequestMapping( value = "/{uid}/replica", method = RequestMethod.POST )
     public void replicateUser( @PathVariable String uid, 
@@ -280,7 +280,7 @@ public class UserController
             return;
         }
         
-        Map<String, String> auth = renderService.fromJson( request.getInputStream(),Map.class );
+        Map<String, String> auth = renderService.fromJson( request.getInputStream(), Map.class );
 
         String username = StringUtils.trimToNull( auth != null ? auth.get( KEY_USERNAME ) : null );
         String password = StringUtils.trimToNull( auth != null ? auth.get( KEY_PASSWORD ) : null );

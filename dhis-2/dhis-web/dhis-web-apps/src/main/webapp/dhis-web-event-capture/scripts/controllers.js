@@ -256,7 +256,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                                             val = DateUtils.formatFromApiToUser(val);                                               
                                         }
                                         if( $scope.prStDes[dataValue.dataElement].dataElement.type === 'trueOnly'){
-                                            if(val == 'true'){
+                                            if(val === 'true'){
                                                 val = true;
                                             }
                                             else{
@@ -279,6 +279,10 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
 
                     if($scope.noteExists && !GridColumnService.columnExists($scope.eventGridColumns, 'comment')){
                         $scope.eventGridColumns.push({name: 'comment', id: 'comment', type: 'string', compulsory: false, showFilter: false, show: true});
+                    }
+                    
+                    if(!$scope.sortHeader.id){
+                        $scope.sortEventGrid({name: $scope.selectedProgramStage.reportDateDescription ? $scope.selectedProgramStage.reportDateDescription : 'incident_date', id: 'event_date', type: 'date', compulsory: false, showFilter: false, show: true});
                     }
                 }                
                 $scope.eventFetched = true;
@@ -527,17 +531,18 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 
                 $scope.eventLength++;
                 
-                //decide whether to stay in the current screen or not.
-                if(!addingAnotherEvent){
-                    $scope.eventRegistration = false;
-                    $scope.editingEventInFull = false;
-                    $scope.editingEventInGrid = false;  
-                }
-
-                //reset form                
+                $scope.eventRegistration = false;
+                $scope.editingEventInFull = false;
+                $scope.editingEventInGrid = false;  
+                    
+                //reset form              
+                $scope.currentEvent = {};
                 $scope.currentEvent = angular.copy($scope.newDhis2Event); 
+                               
                 $scope.note = {};
                 $scope.outerForm.submitted = false;
+                $scope.outerForm.$setPristine();
+                $scope.outerForm.$setValidity();
                 $scope.disableSaveAndAddNew = false;
                 
                 //this is to hide typeAheadPopUps - shouldn't be an issue in 
@@ -545,6 +550,11 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
                 $timeout(function() {
                     angular.element('#hideTypeAheadPopUp').trigger('click');
                 }, 10);
+                
+                //decide whether to stay in the current screen or not.
+                if(addingAnotherEvent){
+                    $scope.showEventRegistration();
+                }
             }
         });
     }; 
@@ -773,7 +783,6 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
     };
     
     $scope.isFormInvalid = function(){
-        
         if($scope.outerForm.submitted){
             return $scope.outerForm.$invalid;
         }
@@ -801,7 +810,7 @@ var eventCaptureControllers = angular.module('eventCaptureControllers', [])
         return formIsInvalid;
     };
     
-    $scope.getErrorMessage = function(deId){
-        return ErrorMessageService.get(deId);
+    $scope.getErrorMessage = function(id){
+        return ErrorMessageService.get(id);
     };
 });

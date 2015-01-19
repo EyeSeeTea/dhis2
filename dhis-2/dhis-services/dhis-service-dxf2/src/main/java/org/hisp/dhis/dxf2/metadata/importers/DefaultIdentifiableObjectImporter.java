@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata.importers;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -336,7 +336,8 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         log.debug( "Trying to save new object => " + ImportUtils.getDisplayName( object ) + " (" + object.getClass().getSimpleName() + ")" +
             "" );
-        objectBridge.saveObject( object );
+
+        objectBridge.saveObject( object, !options.isSharing() );
 
         updatePeriodTypes( object );
         reattachCollectionFields( object, collectionFields, user );
