@@ -1627,7 +1627,7 @@ Ext.onReady(function () {
         return olmap;
     };
 
-    GIS.core.getLayers = function (gis) {
+    GIS.core.getLayers = function(gis) {
         var layers = {},
             createSelectionHandlers,
             layerNumbers = ['1', '2', '3', '4'];
@@ -1715,7 +1715,7 @@ Ext.onReady(function () {
         return layers;
     };
 
-    GIS.core.createSelectHandlers = function (gis, layer) {
+    GIS.core.createSelectHandlers = function(gis, layer) {
         var isRelocate = !!GIS.app ? !!gis.init.user.isAdmin : false,
             options = {},
             infrastructuralPeriod,
@@ -1761,10 +1761,11 @@ Ext.onReady(function () {
             defaultHoverWindow.show();
             gis.viewport.centerRegion.trash.push(defaultHoverWindow);
 
-            var eastX = gis.viewport.eastRegion.getPosition()[0],
-                centerX = gis.viewport.centerRegion.getPosition()[0],
-                centerRegionCenterX = centerX + ((eastX - centerX) / 2),
-                centerRegionY = gis.viewport.centerRegion.getPosition()[1] + (gis.plugin ? 0 : 32),
+            //var eastX = gis.viewport.eastRegion.getPosition()[0],
+            var cr = gis.viewport.centerRegion,
+                centerX = cr.getPosition()[0],
+                centerRegionCenterX = centerX + (cr.getWidth() / 2),
+                centerRegionY = cr.getPosition()[1] + (gis.plugin ? 0 : 32),
 
                 x = centerRegionCenterX - (defaultHoverWindow.getWidth() / 2),
                 y = centerRegionY;
@@ -2315,7 +2316,7 @@ Ext.onReady(function () {
         selectHandlers.activate();
     };
 
-    GIS.core.StyleMap = function (labelConfig) {
+    GIS.core.StyleMap = function(labelConfig) {
         var defaults = {
                 fillOpacity: 1,
                 strokeColor: '#fff',
@@ -2349,7 +2350,7 @@ Ext.onReady(function () {
         });
     };
 
-    GIS.core.VectorLayer = function (gis, id, name, config) {
+    GIS.core.VectorLayer = function(gis, id, name, config) {
         var layer = new OpenLayers.Layer.Vector(name, {
             strategies: [
     new OpenLayers.Strategy.Refresh({
@@ -2375,7 +2376,7 @@ Ext.onReady(function () {
         return layer;
     };
 
-    GIS.core.MeasureWindow = function (gis) {
+    GIS.core.MeasureWindow = function(gis) {
         var window,
             label,
             handleMeasurements,
@@ -2443,7 +2444,7 @@ Ext.onReady(function () {
         return window;
     };
 
-    GIS.core.MapLoader = function (gis) {
+    GIS.core.MapLoader = function(gis) {
         var getMap,
             setMap,
             afterLoad,
@@ -2451,7 +2452,7 @@ Ext.onReady(function () {
             register = [],
             loader;
 
-        getMap = function () {
+        getMap = function() {
             var type = gis.plugin && gis.crossDomain ? 'jsonp' : 'json',
                 success,
                 failure,
@@ -2511,7 +2512,7 @@ Ext.onReady(function () {
             }
         };
 
-        setMap = function () {
+        setMap = function() {
             var views = gis.map.mapViews,
                 loader;
 
