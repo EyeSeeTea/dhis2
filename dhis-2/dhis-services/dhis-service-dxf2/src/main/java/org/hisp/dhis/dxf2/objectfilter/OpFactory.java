@@ -30,16 +30,19 @@ package org.hisp.dhis.dxf2.objectfilter;
 
 import com.google.common.collect.Maps;
 import org.hisp.dhis.dxf2.objectfilter.ops.EmptyCollectionOp;
+import org.hisp.dhis.dxf2.objectfilter.ops.EndsWithOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.EqOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.GtOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.GteOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.LikeOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.LtOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.LteOp;
+import org.hisp.dhis.dxf2.objectfilter.ops.NLikeOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.NeqOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.NnullOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.NullOp;
 import org.hisp.dhis.dxf2.objectfilter.ops.Op;
+import org.hisp.dhis.dxf2.objectfilter.ops.StartsWithOp;
 
 import java.util.Map;
 
@@ -55,6 +58,9 @@ public class OpFactory
         register( "eq", EqOp.class );
         register( "neq", NeqOp.class );
         register( "like", LikeOp.class );
+        register( "nlike", NLikeOp.class );
+        register( "startsWith", StartsWithOp.class );
+        register( "endsWith", EndsWithOp.class );
         register( "gt", GtOp.class );
         register( "gte", GteOp.class );
         register( "lt", LtOp.class );
@@ -82,10 +88,7 @@ public class OpFactory
         {
             return opClass.newInstance();
         }
-        catch ( InstantiationException ignored )
-        {
-        }
-        catch ( IllegalAccessException ignored )
+        catch ( InstantiationException | IllegalAccessException ignored )
         {
         }
 
