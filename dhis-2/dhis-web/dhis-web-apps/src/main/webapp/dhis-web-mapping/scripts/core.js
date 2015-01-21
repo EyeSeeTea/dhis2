@@ -2585,7 +2585,7 @@ Ext.onReady( function() {
 
 		return layer;
 	};
-    
+
 	GIS.core.getInstance = function(init) {
 		var conf = {},
 			util = {},
