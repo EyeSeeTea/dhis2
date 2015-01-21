@@ -4393,6 +4393,28 @@ Ext.onReady(function () {
                 return features;
             };
 
+			util.map.getPointsByFeatures = function(features) {
+				var a = [];
+				for (var i = 0; i < features.length; i++) {
+					if (features[i].geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname) {
+						a.push(features[i]);
+					}
+				}
+				return a;
+			};
+
+			util.map.getLonLatsByPoints = function(points) {
+				var lonLat,
+					point,
+					a = [];
+				for (var i = 0; i < points.length; i++) {
+					point = points[i];
+					lonLat = new OpenLayers.LonLat(point.geometry.x, point.geometry.y);
+					a.push(lonLat);
+				}
+				return a;
+			};
+
             util.geojson = {};
 
             util.geojson.decode = function (organisationUnits, levelOrder) {
