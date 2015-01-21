@@ -3181,7 +3181,7 @@ Ext.onReady( function() {
                                         ids = [],
                                         url = '',
                                         callbacks = 0,
-                                        checkOptionSet,
+                                        registerOptionSet,
                                         updateStore,
                                         optionSetConfig;
 
