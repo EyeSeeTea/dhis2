@@ -4463,7 +4463,9 @@ Ext.onReady( function() {
 			init.el = config.el;
 
             if (!ns.skipFade) {
-                Ext.get(init.el).setStyle('opacity', 0);
+                if (init.el && Ext.get(init.el)) {
+                    Ext.get(init.el).setStyle('opacity', 0);
+                }
             }
 
 			// report
