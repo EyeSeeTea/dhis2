@@ -3348,7 +3348,7 @@ Ext.onReady( function() {
 
                 // fade
                 if (!ns.skipFade) {
-                    Ext.defer(function() {,
+                    Ext.defer(function() {
                         var el = Ext.get(init.el);
 
                         if (el) {
