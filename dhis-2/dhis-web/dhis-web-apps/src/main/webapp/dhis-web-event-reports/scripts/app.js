@@ -500,7 +500,7 @@ Ext.onReady( function() {
                 }
 
                 return records;
-            },                    
+            },
             initComponent: function() {
                 var container = this,
                     idProperty = 'code',
@@ -679,7 +679,7 @@ Ext.onReady( function() {
                     setOptionValues: function(codeArray) {
                         var me = this,
                             records = [];
-                        
+
                         dhis2.er.store.get('optionSets', container.dataElement.optionSet.id).done( function(obj) {
                             if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
                                 records = container.getRecordsByCode(obj.options, codeArray);
