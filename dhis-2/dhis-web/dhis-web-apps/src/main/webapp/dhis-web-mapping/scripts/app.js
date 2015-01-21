@@ -1577,7 +1577,7 @@ Ext.onReady( function() {
                 });
 
                 this.searchStore = Ext.create('Ext.data.Store', {
-					fields: [idProperty, 'name'],
+					fields: [idProperty, nameProperty],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
 						var store = this;
@@ -1676,7 +1676,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
+					fields: [idProperty, nameProperty],
                     listeners: {
                         add: function() {
                             container.valueCmp.select(this.getRange());
