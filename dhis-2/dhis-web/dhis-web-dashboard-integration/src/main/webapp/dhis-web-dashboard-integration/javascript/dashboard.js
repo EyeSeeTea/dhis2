@@ -31,9 +31,8 @@ dhis2.db.shapeNormal = "normal";
 dhis2.db.shapeDoubleWidth = "double_width";
 dhis2.db.shapeFullWidth = "full_width";
 dhis2.db.widthNormal = 408;
-dhis2.db.widthDouble = 849;
+dhis2.db.widthDouble = 847;
 dhis2.db.visualItemTypes = ["chart", "eventChart", "map", "reportTable", "eventReport"];
-
 dhis2.db.itemContentHeight = 308;
 dhis2.db.itemScrollbarWidth = /\bchrome\b/.test(navigator.userAgent.toLowerCase()) ? 8 : 17;
 
@@ -137,7 +136,7 @@ dhis2.db.tmpl = {
         "</div></li>"
 };
 
-dhis2.db.dashboardReady = function( id )
+dhis2.db.dashboardReady = function()
 {
 	$( ".item" ).draggable( {
 	    containment: "#contentDiv",
@@ -162,6 +161,28 @@ dhis2.db.dashboardReady = function( id )
 		accept: ".item",
 		over: dhis2.db.lastDropOver,
 		out: dhis2.db.lastDropOut
+	} );
+}
+
+dhis2.db.addDragDrop = function( id )
+{
+	$( "#" + id ).draggable( {
+	    containment: "#contentDiv",
+	    helper: "clone",
+	    stack: ".item",
+	    revert: "invalid",
+	    start: dhis2.db.dragStart,
+	    stop: dhis2.db.dragStop
+	} );
+
+	$( "#" + id ).droppable( {
+		accept: ".item",
+		over: dhis2.db.dropOver
+	} );
+
+	$( "#drop-" + id ).droppable( {
+		accept: ".item",
+		drop: dhis2.db.dropItem
 	} );
 }
 
@@ -413,9 +434,9 @@ dhis2.db.clearDashboard = function()
 dhis2.db.getFullWidth = function()
 {
 	var viewPortWidth = $( window ).width(),
-		spacing = 33,
+		spacing = 31,
 		itemWidth = 408,
-		items = Math.floor( ( viewPortWidth + spacing ) / ( itemWidth + spacing ) ),
+		items = Math.floor( ( viewPortWidth - spacing ) / ( itemWidth + spacing ) ),
 		fullWidth = ( items * itemWidth ) + ( ( items - 1 ) * spacing );
 
 	return fullWidth;
@@ -475,17 +496,19 @@ dhis2.db.drawWideItems = function()
 {
 	if ( undefined !== dhis2.db.current() ) {
 		var url = "../api/dashboards/" + dhis2.db.current() + "?fields=dashboardItems[id,shape]",
-			viewPortWidth = $( window ).width();
+			viewPortWidth = $( window ).width(),
+			marginAndSpacing = 60,
+			realWidth = ( viewPortWidth - marginAndSpacing );
 
 		$.getJSON( url, function( dashboard ) {
 			$.each( dashboard.dashboardItems, function( i, item ) {
 				if ( dhis2.db.shapeFullWidth == item.shape ) {
 					dhis2.db.setFullItemWidth( item.id );
 				}
-				else if ( viewPortWidth <= dhis2.db.widthDouble && dhis2.db.shapeDoubleWidth == item.shape ) {
+				else if ( realWidth <= dhis2.db.widthDouble && dhis2.db.shapeDoubleWidth == item.shape ) {
 					dhis2.db.setNormalItemWidth( item.id );
 				}
-				else if ( viewPortWidth > dhis2.db.widthDouble && dhis2.db.shapeDoubleWidth == item.shape ) {
+				else if ( realWidth > dhis2.db.widthDouble && dhis2.db.shapeDoubleWidth == item.shape ) {
 					dhis2.db.setDoubleItemWidth( item.id );
 				}
 			} );
@@ -542,7 +565,7 @@ dhis2.db.renderDashboard = function( id )
 		    $d.append( $.tmpl( dhis2.db.tmpl.dashboardIntro, { "i18n_add": i18n_add_stuff_by_searching, "i18n_arrange": i18n_arrange_dashboard_by_dragging_and_dropping } ) );
 		}
 
-		dhis2.db.dashboardReady( id );
+		dhis2.db.dashboardReady();
     } );
 }
 
@@ -803,6 +826,7 @@ dhis2.db.addItemContent = function( type, id )
 		    			if ( item && $.inArray( item.type, dhis2.db.visualItemTypes ) != -1 ) {
 		    				$d = $( "#contentList" );
 		    				dhis2.db.renderItems( $d, item, undefined, true );
+		    				dhis2.db.addDragDrop( item.id );
 		    			}
 		    			else {
 		    				dhis2.db.renderDashboard( dhis2.db.current() );
