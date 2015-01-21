@@ -2418,7 +2418,6 @@ Ext.onReady(function() {
                                 }
 
                                 trendLineFields.push(regressionKey);
-                                //xResponse.metaData.names[regressionKey] = DV.i18n.trend + ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')';
                                 xResponse.metaData.names[regressionKey] = DV.i18n.trend + (ns.dashboard ? '' : ' (' + xResponse.metaData.names[failSafeColumnIds[i]] + ')');
                             }
                         }
