@@ -5834,6 +5834,8 @@ Ext.onReady(function () {
                 if (this.layer.legendPanel) {
                     this.layer.legendPanel.update(element.outerHTML);
                 }
+
+                return element;
             },
 
             CLASS_NAME: "mapfish.GeoStat.Facility"
