@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataapproval;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,26 +28,18 @@ package org.hisp.dhis.dataapproval;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * @author Jim Grace
+ * @author Lars Helge Overland
  */
-public class DataApprovalDeletionHandler
+public class DataElementCategoryDimensionDeletionHandler
     extends DeletionHandler
 {
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
+    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
-    {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     // -------------------------------------------------------------------------
     // DeletionHandler implementation
@@ -56,21 +48,21 @@ public class DataApprovalDeletionHandler
     @Override
     public String getClassName()
     {
-        return DataApproval.class.getSimpleName();
+        return DataElementCategoryDimension.class.getSimpleName();
     }
-
+    
     @Override
-    public String allowDeleteDataApprovalLevel( DataApprovalLevel dataApprovalLevel )
+    public String allowDeleteDataElementCategoryOption( DataElementCategoryOption categoryOption )
     {
-        String sql = "select count(*) from dataapproval where dataapprovallevelid=" + dataApprovalLevel.getId();
-
+        String sql = "select count(*) from categorydimension_items where categoryoptionid = " + categoryOption.getId();
+        
         return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? null : ERROR;
     }
-
+    
     @Override
-    public String allowDeleteDataElementCategoryOptionCombo( DataElementCategoryOptionCombo optionCombo )
+    public String allowDeleteDataElementCategory( DataElementCategory category )
     {
-        String sql = "select count(*) from dataapproval where attributeoptioncomboid=" + optionCombo.getId();
+        String sql = "select count(*) from categorydimension where categoryid = " + category.getId();
         
         return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? null : ERROR;
     }
