@@ -190,9 +190,9 @@ public class CurrentUserController
     @RequestMapping( value = "/dashboards", produces = { "application/json", "text/*" } )
     public void getDashboards( HttpServletResponse response ) throws NotAuthenticatedException, IOException
     {
-        User currentUser = currentUserService.getCurrentUser();
+        User user = currentUserService.getCurrentUser();
 
-        if ( currentUser == null )
+        if ( user == null )
         {
             throw new NotAuthenticatedException();
         }
@@ -201,11 +201,11 @@ public class CurrentUserController
 
         for ( org.hisp.dhis.dashboard.Dashboard dashboard : dashboards )
         {
-            dashboard.setAccess( aclService.getAccess( dashboard ) );
+            dashboard.setAccess( aclService.getAccess( dashboard, user ) );
 
             for ( DashboardItem dashboardItem : dashboard.getItems() )
             {
-                dashboardItem.setAccess( aclService.getAccess( dashboardItem ) );
+                dashboardItem.setAccess( aclService.getAccess( dashboardItem, user ) );
             }
         }
 
@@ -216,9 +216,9 @@ public class CurrentUserController
     @RequestMapping( value = "/inbox", produces = { "application/json", "text/*" } )
     public void getInbox( HttpServletResponse response ) throws Exception
     {
-        User currentUser = currentUserService.getCurrentUser();
+        User user = currentUserService.getCurrentUser();
 
-        if ( currentUser == null )
+        if ( user == null )
         {
             throw new NotAuthenticatedException();
         }
@@ -229,12 +229,12 @@ public class CurrentUserController
 
         for ( org.hisp.dhis.message.MessageConversation messageConversation : inbox.getMessageConversations() )
         {
-            messageConversation.setAccess( aclService.getAccess( messageConversation ) );
+            messageConversation.setAccess( aclService.getAccess( messageConversation, user ) );
         }
 
         for ( Interpretation interpretation : inbox.getInterpretations() )
         {
-            interpretation.setAccess( aclService.getAccess( interpretation ) );
+            interpretation.setAccess( aclService.getAccess( interpretation, user ) );
         }
 
         response.setContentType( MediaType.APPLICATION_JSON_VALUE );
@@ -244,9 +244,9 @@ public class CurrentUserController
     @RequestMapping( value = "/inbox/messageConversations", produces = { "application/json", "text/*" } )
     public void getInboxMessageConversations( HttpServletResponse response ) throws Exception
     {
-        User currentUser = currentUserService.getCurrentUser();
+        User user = currentUserService.getCurrentUser();
 
-        if ( currentUser == null )
+        if ( user == null )
         {
             throw new NotAuthenticatedException();
         }
@@ -257,7 +257,7 @@ public class CurrentUserController
 
         for ( org.hisp.dhis.message.MessageConversation messageConversation : messageConversations )
         {
-            messageConversation.setAccess( aclService.getAccess( messageConversation ) );
+            messageConversation.setAccess( aclService.getAccess( messageConversation, user ) );
         }
 
         renderService.toJson( response.getOutputStream(), messageConversations );
@@ -266,9 +266,9 @@ public class CurrentUserController
     @RequestMapping( value = "/inbox/interpretations", produces = { "application/json", "text/*" } )
     public void getInboxInterpretations( HttpServletResponse response ) throws Exception
     {
-        User currentUser = currentUserService.getCurrentUser();
+        User user = currentUserService.getCurrentUser();
 
-        if ( currentUser == null )
+        if ( user == null )
         {
             throw new NotAuthenticatedException();
         }
@@ -278,7 +278,7 @@ public class CurrentUserController
 
         for ( Interpretation interpretation : interpretations )
         {
-            interpretation.setAccess( aclService.getAccess( interpretation ) );
+            interpretation.setAccess( aclService.getAccess( interpretation, user ) );
         }
 
         renderService.toJson( response.getOutputStream(), interpretations );
