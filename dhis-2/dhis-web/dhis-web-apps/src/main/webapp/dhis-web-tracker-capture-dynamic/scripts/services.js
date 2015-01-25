@@ -829,13 +829,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {rule_uID:'rule104104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'true',actions:[{action_uID:'actn104109e',action:'displaykeydata',location:'kdt',content:'Unique ID',data:'$uniqueId'}]},
 {rule_uID:'rule105104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'true',actions:[{action_uID:'actn105104e',action:'displaykeydata',location:'kdt',content:'Name',data:'$name'}]},
 {rule_uID:'rule106104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'true',actions:[{action_uID:'actn106104e',action:'displaykeydata',location:'kdt',content:'Born',data:'$born'}]},
-{rule_uID:'rule107116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 2',actions:[{action_uID:'actn107105e',action:'displaytext',location:'con',content:'Twins',data:null}]},
-{rule_uID:'rule108116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 3',actions:[{action_uID:'actn108108e',action:'displaytext',location:'con',content:'Triplets',data:null}]},
-{rule_uID:'rule109116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 4',actions:[{action_uID:'actn109111e',action:'displaytext',location:'con',content:'Quadruplets',data:null}]},
-{rule_uID:'rule110116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 5',actions:[{action_uID:'actn110112e',action:'displaytext',location:null,content:'Five fetuses',data:null}]},
-{rule_uID:'rule111116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 6',actions:[{action_uID:'actn111111e',action:'displaytext',location:'con',content:'Six fetuses',data:null}]},
-{rule_uID:'rule112114t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality > 0',actions:[{action_uID:'actn112109e',action:'displaykeydata',location:'con',content:'Plurality',data:'$plurality'}]},
-{rule_uID:'rule113114t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$smoking === 1',actions:[{action_uID:'actn113114e',action:'displaytext',location:'con',content:'Current smoker',data:null}]}
+{rule_uID:'rule107116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 1',actions:[{action_uID:'actn107109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Singleton'}]},
+{rule_uID:'rule108116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 2',actions:[{action_uID:'actn108109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Twins'},
+{action_uID:'actn109105e',action:'displaytext',location:'con',content:'Twins',data:null}]},
+{rule_uID:'rule110116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 3',actions:[{action_uID:'actn110109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Triplets'},
+{action_uID:'actn111108e',action:'displaytext',location:'con',content:'Triplets',data:null}]},
+{rule_uID:'rule112116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 4',actions:[{action_uID:'actn112109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Quadruplets'},
+{action_uID:'actn113111e',action:'displaytext',location:'con',content:'Quadruplets',data:null}]},
+{rule_uID:'rule114116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 5',actions:[{action_uID:'actn114109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Five fetuses'},
+{action_uID:'actn115112e',action:'displaytext',location:'con',content:'Five fetuses',data:null}]},
+{rule_uID:'rule116116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$plurality === 6',actions:[{action_uID:'actn116109e',action:'displaykeydata',location:'con',content:'Plurality',data:'Six fetuses'},
+{action_uID:'actn117111e',action:'displaytext',location:'con',content:'Six fetuses',data:null}]},
+{rule_uID:'rule118108t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'$smoking',actions:[{action_uID:'actn118114e',action:'displaytext',location:'con',content:'Current smoker',data:null}]},
+{rule_uID:'rule119104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',programstage_uID:null,condition:'true',actions:[{action_uID:'actn119100e',action:'assignvariable',location:null,content:'',data:'$severeanaemia'}]}
 
                 //...to here
                 

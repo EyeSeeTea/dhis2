@@ -365,14 +365,23 @@ trackerCapture.controller('DataEntryController',
         angular.forEach($scope.currentEvent.dataValues, function(dataValue){
             var val = dataValue.value;
             var de = $scope.currentStage.programStageDataElements[dataValue.dataElement];
-            if(val){                
-                if( de && de.type === 'int'){
-                    val = parseInt(val);
+            if(val){  
+                if( angular.isDefined(de.type))
+                {
+                    if( de && de.type === 'int'){
+                        val = parseInt(val);
+                    }
+                    if(de.type === 'date'){
+                        val = DateUtils.formatFromApiToUser(val);
+                    }
                 }
-                if(de.type === 'date'){
-                    val = DateUtils.formatFromApiToUser(val);
+                else
+                {
+                    $log.warn("no type defined on dataelement");
                 }
-            }    
+            }
+                    
+                
             $scope.currentEvent[dataValue.dataElement] = val;
             if(dataValue.providedElsewhere){
                 $scope.currentEvent.providedElsewhere[dataValue.dataElement] = dataValue.providedElsewhere;
