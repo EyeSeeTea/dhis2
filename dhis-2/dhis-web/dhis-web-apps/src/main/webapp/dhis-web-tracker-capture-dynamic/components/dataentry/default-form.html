@@ -149,6 +149,7 @@
                         <tr class="col-md-12" ng-repeat="de in section.programStageDataElements"  ng-if="!isHidden(de.dataElement.id)">
                             <td class="col-md-5">
                                 {{prStDes[de.dataElement.id].dataElement.formName ? prStDes[de.dataElement.id].dataElement.formName : prStDes[de.dataElement.id].dataElement.name}}
+                                <a ng-click="" title="More information"><span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span></a>
                             </td>
                             <td class="col-md-5">
                                 <ng-form name="dataEntryInnerForm">

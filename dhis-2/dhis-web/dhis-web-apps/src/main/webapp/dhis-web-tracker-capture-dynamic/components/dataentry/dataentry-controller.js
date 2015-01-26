@@ -1,6 +1,7 @@
 trackerCapture.controller('DataEntryController',
         function($rootScope,
                 $scope,
+                $log,
                 DateUtils,
                 EventUtils,
                 orderByFilter,
@@ -366,7 +367,7 @@ trackerCapture.controller('DataEntryController',
             var val = dataValue.value;
             var de = $scope.currentStage.programStageDataElements[dataValue.dataElement];
             if(val){  
-                if( angular.isDefined(de.type))
+                if( angular.isDefined(de))
                 {
                     if( de && de.type === 'int'){
                         val = parseInt(val);
@@ -377,7 +378,7 @@ trackerCapture.controller('DataEntryController',
                 }
                 else
                 {
-                    $log.warn("no type defined on dataelement");
+                    $log.warn("dataelement not defined: " + dataValue.dataElement);
                 }
             }
                     
