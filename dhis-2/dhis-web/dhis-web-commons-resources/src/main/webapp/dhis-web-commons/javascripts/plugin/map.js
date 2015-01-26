@@ -1552,9 +1552,8 @@ Ext.onReady(function() {
                     }
                     else if (!window) {
                         var layers = gis.util.map.getRenderedVectorLayers().reverse(),
-                            xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
                             html = '<div id="legendWrapper">';
-
+                            
                         for (var i = 0, layer; i < layers.length; i++) {
                             layer = layers[i];
 
@@ -1575,11 +1574,12 @@ Ext.onReady(function() {
                             listeners: {
                                 show: function() {
                                     var el = this.getEl(),
-                                        legendEl = el.first().first();
+                                        legendEl = el.first().first(),
+                                        xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY();                                        
 
                                     el.setStyle('opacity', 0.92);
-
-                                    this.setHeight(legendEl.getHeight() + 8);
+                                    
+                                    this.setHeight(legendEl.getHeight() + 8 + 9);
 
                                     this.setPosition(xy[0] - this.getWidth(), xy[1] - 1);
                                 }
@@ -6828,7 +6828,7 @@ Ext.onReady(function() {
         css += '.x-frame-shadow *{padding:0;border:0;margin:0;clear:none;zoom:1} \n';
         css += '.x-mask{z-index:100;position:absolute;top:0;left:0;filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);opacity:0.5;width:100%;height:100%;zoom:1;background:#cccccc} \n';
         css += '.x-mask-msg{z-index:20001;position:absolute;top:0;left:0;padding:2px;border:1px solid;border-color:#d0d0d0;background-image:none;background-color:#e0e0e0} \n';
-        css += '.x-mask-msg div{padding:5px 10px 5px 25px;background-image:url("images/loading.gif");background-repeat:no-repeat;background-position:5px center;cursor:wait;border:1px solid #b3b3b3;background-color:#eeeeee;color:#222222;font:normal 11px tahoma, arial, verdana, sans-serif} \n';
+        css += '.x-mask-msg div{padding:5px 10px 5px 25px;background-image:url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/loading.gif");background-repeat:no-repeat;background-position:5px center;cursor:wait;border:1px solid #b3b3b3;background-color:#eeeeee;color:#222222;font:normal 11px tahoma, arial, verdana, sans-serif} \n';
         css += '.x-btn *{cursor:pointer;cursor:hand} \n';
         css += '.x-btn em a{text-decoration:none;display:inline-block;color:inherit} \n';
         css += '.x-btn-disabled span{filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);opacity:0.5} \n';
@@ -6948,12 +6948,12 @@ Ext.onReady(function() {
         css += '.olControlPanel.legend-vertical { top: 72px; } \n';
         css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
-        css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
+        css += '.olControlMousePosition { background: #fff !important; line-height: 14px; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.1px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
         css += '.text-mouseposition-lonlat { color: #555; } \n';
         css += '.olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n';
-        css += '.google-logo { background: url("images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
-        css += '.google-logo-small { background: url("images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo-small { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
         css += '.olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n';
         css += '.olControlScaleLineBottom { display: none; } \n';
         css += '.olControlScaleLineTop { font-weight: bold; } \n';
@@ -6978,8 +6978,8 @@ Ext.onReady(function() {
         css += '.gis-menu-item-icon-drill, .gis-menu-item-icon-float { left: 6px; } \n';
         css += '.gis-menu-item-first.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-top-left-radius: 2px; border-top-right-radius: 2px; } \n';
         css += '.gis-menu-item-last.x-menu-item-active .x-menu-item-link { border-radius: 0; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; } \n';
-        css += '.gis-menu-item-icon-drill { \n background: url("images/drill_16.png") no-repeat; } \n';
-        css += '.gis-menu-item-icon-float { background: url("images/float_16.png") no-repeat; } \n';
+        css += '.gis-menu-item-icon-drill { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/drill_16.png") no-repeat; } \n';
+        css += '.gis-menu-item-icon-float { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/float_16.png") no-repeat; } \n';
         css += '.x-color-picker a { padding: 0; } \n';
         css += '.x-color-picker em span { width: 14px; height: 14px; } \n';
         css += '.gis-panel-legend .x-panel-header { height: 23px; background: #f1f1f1; padding: 4px 4px 0 5px} \n';
@@ -7214,7 +7214,7 @@ Ext.onReady(function() {
                     el = elArray[j];
 
                     if (el) {
-                        el.innerHTML = '<img src="images/' + map[cls] + '" />';
+                        el.innerHTML = '<img src="' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/' + map[cls] + '" />';
                     }
                 }
             }
