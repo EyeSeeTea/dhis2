@@ -1,7 +1,7 @@
 package org.hisp.dhis.web.ohie.fred.webapi.v1.utils;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -61,7 +61,6 @@ public class OrganisationUnitToFacilityConverter implements Converter<Organisati
         Facility facility = new Facility();
         facility.setUuid( organisationUnit.getUuid() );
         facility.setName( organisationUnit.getDisplayName() );
-        facility.setActive( organisationUnit.isActive() );
         facility.setCreatedAt( organisationUnit.getCreated() );
         facility.setUpdatedAt( organisationUnit.getLastUpdated() );
 

@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# 2.18-SNAPSHOT.0
+# 2.19
 
 NETWORK:
 *
@@ -120,8 +120,7 @@ scripts/services.js
 scripts/filters.js
 scripts/directives.js
 scripts/controllers.js        
-scripts/notes-controller.js        
-scripts/orgunitTreeSearch.js
+scripts/notes-controller.js 
 
 views/column-modal.html
 views/ec-custom-form.html

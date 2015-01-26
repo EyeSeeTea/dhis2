@@ -1,7 +1,7 @@
 package org.hisp.dhis.node.serializers;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ package org.hisp.dhis.node.serializers;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 import com.google.common.collect.Lists;
@@ -53,7 +53,7 @@ import java.util.TimeZone;
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
 @Component
-@Scope(value = "prototype", proxyMode = ScopedProxyMode.INTERFACES)
+@Scope( value = "prototype", proxyMode = ScopedProxyMode.INTERFACES )
 public class StAXNodeSerializer extends AbstractNodeSerializer
 {
     public static final String CONTENT_TYPE = "application/xml";
@@ -109,17 +109,26 @@ public class StAXNodeSerializer extends AbstractNodeSerializer
     @Override
     protected void startWriteSimpleNode( SimpleNode simpleNode ) throws Exception
     {
-        String value = String.format( "%s", simpleNode.getValue() );
+        String value;
 
-        if ( Date.class.isAssignableFrom( simpleNode.getValue().getClass() ) )
+        if ( simpleNode.getValue() != null && Date.class.isAssignableFrom( simpleNode.getValue().getClass() ) )
         {
             SimpleDateFormat dateFormat = new SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSSZ" );
-            dateFormat.setTimeZone( TimeZone.getTimeZone("UTC") );
+            dateFormat.setTimeZone( TimeZone.getTimeZone( "UTC" ) );
             value = dateFormat.format( (Date) simpleNode.getValue() );
+        }
+        else
+        {
+            value = String.valueOf( simpleNode.getValue() );
         }
 
         if ( simpleNode.isAttribute() )
         {
+            if ( value == null )
+            {
+                return;
+            }
+
             if ( !StringUtils.isEmpty( simpleNode.getNamespace() ) )
             {
                 writer.writeAttribute( simpleNode.getNamespace(), simpleNode.getName(), value );
@@ -132,7 +141,11 @@ public class StAXNodeSerializer extends AbstractNodeSerializer
         else
         {
             writeStartElement( simpleNode );
-            writer.writeCharacters( value );
+
+            if ( value != null )
+            {
+                writer.writeCharacters( value );
+            }
         }
     }
 

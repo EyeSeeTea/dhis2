@@ -1,7 +1,7 @@
 package org.hisp.dhis.maintenance;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,4 +48,9 @@ public interface MaintenanceService
      * Deletes periods which do not have data values associated with them.
      */
     void prunePeriods();
+    
+    /**
+     * Deletes user accounts representing expired account invitations.
+     */
+    void removeExpiredInvitations();
 }

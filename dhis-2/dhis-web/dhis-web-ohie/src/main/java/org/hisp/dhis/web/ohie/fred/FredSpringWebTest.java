@@ -1,7 +1,7 @@
 package org.hisp.dhis.web.ohie.fred;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -150,7 +150,6 @@ public abstract class FredSpringWebTest
         organisationUnit.setShortName( organisationUnit.getName() );
         organisationUnit.setCreated( new Date() );
         organisationUnit.setLastUpdated( organisationUnit.getCreated() );
-        organisationUnit.setActive( true );
         organisationUnit.setLevel( 1 );
 
         return organisationUnit;

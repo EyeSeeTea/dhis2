@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ import org.hisp.dhis.dashboard.DashboardSearchResult;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.dxf2.utils.JacksonUtils;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
+import org.hisp.dhis.schema.descriptors.DashboardItemSchemaDescriptor;
 import org.hisp.dhis.schema.descriptors.DashboardSchemaDescriptor;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
@@ -92,13 +93,13 @@ public class DashboardController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    public void putJsonObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void putJsonObject( @PathVariable( "uid" ) String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        Dashboard dashboard = dashboardService.getDashboard( pvUid );
+        Dashboard dashboard = dashboardService.getDashboard( uid );
 
         if ( dashboard == null )
         {
-            ContextUtils.notFoundResponse( response, "Dashboard does not exist: " + pvUid );
+            ContextUtils.notFoundResponse( response, "Dashboard does not exist: " + uid );
             return;
         }
 
@@ -111,14 +112,14 @@ public class DashboardController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE )
-    public void deleteObject( @PathVariable( "uid" ) String pvUid, HttpServletRequest request, HttpServletResponse response )
+    public void deleteObject( @PathVariable( "uid" ) String uid, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
-        List<Dashboard> objects = getEntity( pvUid );
+        List<Dashboard> objects = getEntity( uid );
 
         if ( objects.isEmpty() )
         {
-            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + pvUid );
+            ContextUtils.conflictResponse( response, getEntityName() + " does not exist: " + uid );
             return;
         }
 
@@ -156,15 +157,15 @@ public class DashboardController
     public void postJsonItemContent( HttpServletResponse response, HttpServletRequest request,
         @PathVariable String dashboardUid, @RequestParam String type, @RequestParam( "id" ) String contentUid ) throws Exception
     {
-        boolean result = dashboardService.addItemContent( dashboardUid, type, contentUid );
+        DashboardItem item = dashboardService.addItemContent( dashboardUid, type, contentUid );
 
-        if ( !result )
+        if ( item == null )
         {
             ContextUtils.conflictResponse( response, "Max number of dashboard items reached: " + MAX_ITEMS );
         }
         else
         {
-            ContextUtils.okResponse( response, "Dashboard item added" );
+            ContextUtils.createdResponse( response, "Dashboard item added", DashboardItemSchemaDescriptor.API_ENDPOINT + "/" + item.getUid() );
         }
     }
 
@@ -200,8 +201,17 @@ public class DashboardController
             return;
         }
 
-        if ( dashboard.removeItem( itemUid ) )
+        DashboardItem item = dashboardService.getDashboardItem( itemUid );
+
+        if ( item == null )
         {
+            ContextUtils.notFoundResponse( response, "Dashboard item does not exist: " + itemUid );
+            return;
+        }
+
+        if ( dashboard.hasItems() && dashboard.getItems().remove( item ) )
+        {
+            dashboardService.deleteDashboardItem( item );
             dashboardService.updateDashboard( dashboard );
 
             ContextUtils.okResponse( response, "Dashboard item removed" );
@@ -230,9 +240,9 @@ public class DashboardController
 
         if ( item.removeItemContent( contentUid ) )
         {
-            if ( item.getContentCount() == 0 )
+            if ( item.getContentCount() == 0 && dashboard.getItems().remove( item ) )
             {
-                dashboard.removeItem( item.getUid() ); // Remove if empty
+                dashboardService.deleteDashboardItem( item ); // Delete if empty                
             }
 
             dashboardService.updateDashboard( dashboard );

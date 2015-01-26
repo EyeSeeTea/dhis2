@@ -1,7 +1,7 @@
 package org.hisp.dhis.mobile.action.smscommand;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,7 @@ package org.hisp.dhis.mobile.action.smscommand;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.smscommand.SMSCommandService;
+import org.hisp.dhis.sms.command.SMSCommandService;
 
 import com.opensymphony.xwork2.Action;
 

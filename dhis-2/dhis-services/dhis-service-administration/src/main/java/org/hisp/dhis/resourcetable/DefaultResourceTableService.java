@@ -1,7 +1,7 @@
 package org.hisp.dhis.resourcetable;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -520,7 +520,7 @@ public class DefaultResourceTableService
     @Override
     public void createAllSqlViews()
     {
-        List<SqlView> sqlViews = new ArrayList<>( sqlViewService.getAllSqlViews() );
+        List<SqlView> sqlViews = new ArrayList<>( sqlViewService.getAllSqlViewsNoAcl() );
         Collections.sort( sqlViews, IdentifiableObjectNameComparator.INSTANCE );
 
         for ( SqlView sqlView : sqlViews )
@@ -533,7 +533,7 @@ public class DefaultResourceTableService
     @Override
     public void dropAllSqlViews()
     {
-        List<SqlView> views = new ArrayList<>( sqlViewService.getAllSqlViews() );
+        List<SqlView> views = new ArrayList<>( sqlViewService.getAllSqlViewsNoAcl() );
         Collections.sort( views, IdentifiableObjectNameComparator.INSTANCE );
         Collections.reverse( views );
 

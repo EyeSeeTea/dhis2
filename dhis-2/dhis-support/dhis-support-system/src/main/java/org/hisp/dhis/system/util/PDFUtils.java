@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -530,7 +530,6 @@ public class PDFUtils
         }
 
         table.addCell( getItalicCell( i18n.getString( "active" ) ) );
-        table.addCell( getTextCell( i18n.getString( getBoolean().get( unit.isActive() ) ) ) );
 
         if ( nullIfEmpty( unit.getComment() ) != null )
         {

@@ -1,7 +1,7 @@
 package org.hisp.dhis.jdbc.batchhandler;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,6 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setColumn( "description" );
         statementBuilder.setColumn( "openingdate" );
         statementBuilder.setColumn( "closeddate" );
-        statementBuilder.setColumn( "active" );
         statementBuilder.setColumn( "comment" );
         statementBuilder.setColumn( "featuretype" );
         statementBuilder.setColumn( "coordinates" );
@@ -120,7 +119,6 @@ public class OrganisationUnitBatchHandler
         statementBuilder.setValue( unit.getDescription() );
         statementBuilder.setValue( unit.getOpeningDate() );
         statementBuilder.setValue( unit.getClosedDate() );
-        statementBuilder.setValue( unit.isActive() );
         statementBuilder.setValue( unit.getComment() );
         statementBuilder.setValue( unit.getFeatureType() );
         statementBuilder.setValue( unit.getCoordinates() );

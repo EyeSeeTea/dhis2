@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -259,6 +259,19 @@ public class User
         }
         
         return managedGroups;
+    }
+    
+    public boolean hasManagedGroups()
+    {
+        for ( UserGroup group : groups )
+        {
+            if ( group != null && group.getManagedGroups() != null && !group.getManagedGroups().isEmpty() )
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -638,6 +651,9 @@ public class User
 
             organisationUnits.clear();
             organisationUnits.addAll( user.getOrganisationUnits() );
+            
+            dataViewOrganisationUnits.clear();
+            dataViewOrganisationUnits.addAll( user.getDataViewOrganisationUnits() );
         }
     }
 

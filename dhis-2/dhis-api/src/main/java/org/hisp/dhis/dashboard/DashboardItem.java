@@ -1,7 +1,7 @@
 package org.hisp.dhis.dashboard;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+
 import org.hisp.dhis.chart.Chart;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -43,6 +44,7 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.eventchart.EventChart;
+import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
@@ -68,12 +70,17 @@ public class DashboardItem
     public static final String TYPE_EVENT_CHART = "eventChart"; //TODO use enum
     public static final String TYPE_MAP = "map";
     public static final String TYPE_REPORT_TABLE = "reportTable";
+    public static final String TYPE_EVENT_REPORT = "eventReport";
     public static final String TYPE_USERS = "users";
     public static final String TYPE_REPORT_TABLES = "reportTables";
     public static final String TYPE_REPORTS = "reports";
     public static final String TYPE_RESOURCES = "resources";
     public static final String TYPE_MESSAGES = "messages";
 
+    public static final String SHAPE_NORMAL = "normal";
+    public static final String SHAPE_DOUBLE_WIDTH = "double_width";
+    public static final String SHAPE_FULL_WIDTH = "full_width";
+    
     private Chart chart;
 
     private EventChart eventChart;
@@ -81,12 +88,11 @@ public class DashboardItem
     private Map map;
 
     private ReportTable reportTable;
-
+    
+    private EventReport eventReport;
+    
     @Scanned
     private List<User> users = new ArrayList<>();
-
-    @Scanned
-    private List<ReportTable> reportTables = new ArrayList<>();
 
     @Scanned
     private List<Report> reports = new ArrayList<>();
@@ -95,6 +101,8 @@ public class DashboardItem
     private List<Document> resources = new ArrayList<>();
 
     private Boolean messages;
+
+    private String shape;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -134,13 +142,13 @@ public class DashboardItem
         {
             return TYPE_REPORT_TABLE;
         }
+        else if ( eventReport != null )
+        {
+            return TYPE_EVENT_REPORT;
+        }
         else if ( !users.isEmpty() )
         {
             return TYPE_USERS;
-        }
-        else if ( !reportTables.isEmpty() )
-        {
-            return TYPE_REPORT_TABLES;
         }
         else if ( !reports.isEmpty() )
         {
@@ -180,6 +188,10 @@ public class DashboardItem
         {
             return reportTable;
         }
+        else if ( eventReport != null )
+        {
+            return eventReport;
+        }
 
         return null;
     }
@@ -193,10 +205,6 @@ public class DashboardItem
         if ( !users.isEmpty() )
         {
             return users;
-        }
-        else if ( !reportTables.isEmpty() )
-        {
-            return reportTables;
         }
         else if ( !reports.isEmpty() )
         {
@@ -219,8 +227,8 @@ public class DashboardItem
         count += eventChart != null ? 1 : 0;
         count += map != null ? 1 : 0;
         count += reportTable != null ? 1 : 0;
+        count += eventReport != null ? 1 : 0;
         count += users.size();
-        count += reportTables.size();
         count += reports.size();
         count += resources.size();
         count += messages != null ? 1 : 0;
@@ -239,10 +247,6 @@ public class DashboardItem
         if ( !users.isEmpty() )
         {
             return removeContent( uid, users );
-        }
-        else if ( !reportTables.isEmpty() )
-        {
-            return removeContent( uid, reportTables );
         }
         else if ( !reports.isEmpty() )
         {
@@ -330,6 +334,20 @@ public class DashboardItem
         this.reportTable = reportTable;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public EventReport getEventReport()
+    {
+        return eventReport;
+    }
+
+    public void setEventReport( EventReport eventReport )
+    {
+        this.eventReport = eventReport;
+    }
+
     @JsonProperty( "users" )
     @JsonView( { DetailedView.class, ExportView.class } )
     @JsonSerialize( contentAs = BaseIdentifiableObject.class )
@@ -343,21 +361,6 @@ public class DashboardItem
     public void setUsers( List<User> users )
     {
         this.users = users;
-    }
-
-    @JsonProperty( "reportTables" )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JsonSerialize( contentAs = BaseIdentifiableObject.class )
-    @JacksonXmlElementWrapper( localName = "reportTables", namespace = DxfNamespaces.DXF_2_0 )
-    @JacksonXmlProperty( localName = "reportTableItem", namespace = DxfNamespaces.DXF_2_0 )
-    public List<ReportTable> getReportTables()
-    {
-        return reportTables;
-    }
-
-    public void setReportTables( List<ReportTable> reportTables )
-    {
-        this.reportTables = reportTables;
     }
 
     @JsonProperty( "reports" )
@@ -403,6 +406,19 @@ public class DashboardItem
         this.messages = messages;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getShape()
+    {
+        return shape;
+    }
+
+    public void setShape( String shape )
+    {
+        this.shape = shape;
+    }
+
     // -------------------------------------------------------------------------
     // Merge with
     // -------------------------------------------------------------------------
@@ -420,10 +436,10 @@ public class DashboardItem
             map = item.getMap() == null ? map : item.getMap();
             reportTable = item.getReportTable() == null ? reportTable : item.getReportTable();
             users = item.getUsers() == null ? users : item.getUsers();
-            reportTables = item.getReportTables() == null ? reportTables : item.getReportTables();
             reports = item.getReports() == null ? reports : item.getReports();
             resources = item.getResources() == null ? resources : item.getResources();
             messages = item.getMessages() == null ? messages : item.getMessages();
+            shape = item.getShape() == null ? shape : item.getShape();
         }
     }
 }

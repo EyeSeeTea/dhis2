@@ -1,7 +1,7 @@
 package org.hisp.dhis.schema;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,14 +25,12 @@ package org.hisp.dhis.schema;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.hibernate.SessionFactory;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
@@ -42,6 +40,8 @@ import org.hibernate.type.AnyType;
 import org.hibernate.type.AssociationType;
 import org.hibernate.type.CollectionType;
 import org.hibernate.type.EntityType;
+import org.hibernate.type.SingleColumnType;
+import org.hibernate.type.TextType;
 import org.hibernate.type.Type;
 import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.BaseAnalyticalObject;
@@ -55,9 +55,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -127,6 +128,7 @@ public abstract class AbstractPropertyIntrospectorService
         return (LocalSessionFactoryBean) context.getBean( "&sessionFactory" );
     }
 
+    @SuppressWarnings( "unused" )
     protected Map<String, Property> getPropertiesFromHibernate( Class<?> klass )
     {
         ClassMetadata classMetadata = sessionFactory.getClassMetadata( klass );
@@ -167,7 +169,6 @@ public abstract class AbstractPropertyIntrospectorService
 
                 Collection collection = sessionFactoryBean.getConfiguration().getCollectionMapping( collectionType.getRole() );
                 property.setOwner( !collection.isInverse() );
-
             }
             else if ( type.isEntityType() )
             {
@@ -181,15 +182,19 @@ public abstract class AbstractPropertyIntrospectorService
             {
                 AnyType anyType = (AnyType) type;
             }
-            else
+
+            if ( SingleColumnType.class.isInstance( type ) )
             {
                 Column column = (Column) hibernateProperty.getColumnIterator().next();
 
                 property.setUnique( column.isUnique() );
                 property.setRequired( !column.isNullable() );
+                property.setLength( column.getLength() );
 
-                property.setMax( column.getLength() );
-                property.setMin( 0 );
+                if ( TextType.class.isInstance( type ) )
+                {
+                    property.setLength( Integer.MAX_VALUE );
+                }
             }
 
             properties.put( property.getName(), property );

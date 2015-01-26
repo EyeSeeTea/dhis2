@@ -1,7 +1,7 @@
 package org.hisp.dhis.dataadmin.action.maintenance;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,7 @@ import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.datamart.DataMartManager;
 import org.hisp.dhis.maintenance.MaintenanceService;
+import org.hisp.dhis.resourcetable.ResourceTableService;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -63,10 +64,20 @@ public class PerformMaintenanceAction
     
     @Resource(name="org.hisp.dhis.analytics.CompletenessTargetTableService")
     private AnalyticsTableService completenessTargetTableService;
+
+    @Resource(name="org.hisp.dhis.analytics.OrgUnitTargetTableService")
+    private AnalyticsTableService orgUnitTargetTableService;
     
     @Resource(name="org.hisp.dhis.analytics.EventAnalyticsTableService")
     private AnalyticsTableService eventAnalyticsTableService;
     
+    private ResourceTableService resourceTableService;
+    
+    public void setResourceTableService( ResourceTableService resourceTableService )
+    {
+        this.resourceTableService = resourceTableService;
+    }
+
     private MaintenanceService maintenanceService;
 
     public void setMaintenanceService( MaintenanceService maintenanceService )
@@ -155,6 +166,13 @@ public class PerformMaintenanceAction
         this.prunePeriods = prunePeriods;
     }
     
+    private boolean removeExpiredInvitations;
+    
+    public void setRemoveExpiredInvitations( boolean removeExpiredInvitations )
+    {
+        this.removeExpiredInvitations = removeExpiredInvitations;
+    }
+
     private boolean updateCategoryOptionCombos;
 
     public void setUpdateCategoryOptionCombos( boolean updateCategoryOptionCombos )
@@ -174,10 +192,14 @@ public class PerformMaintenanceAction
         
         if ( clearAnalytics )
         {
+            resourceTableService.dropAllSqlViews();
             analyticsTableService.dropTables();
             completenessTableService.dropTables();
             completenessTargetTableService.dropTables();
+            orgUnitTargetTableService.dropTables();
             eventAnalyticsTableService.dropTables();
+            
+            log.info( "'" + username + "': Cleared analytics tables" );
         }
         
         if ( clearDataMart )
@@ -225,6 +247,13 @@ public class PerformMaintenanceAction
             maintenanceService.prunePeriods();
             
             log.info( "'" + username + "': Pruned periods" );
+        }
+        
+        if ( removeExpiredInvitations )
+        {
+            maintenanceService.removeExpiredInvitations();
+            
+            log.info( "'" + username + "': Removed expired invitations" );
         }
         
         if ( updateCategoryOptionCombos )

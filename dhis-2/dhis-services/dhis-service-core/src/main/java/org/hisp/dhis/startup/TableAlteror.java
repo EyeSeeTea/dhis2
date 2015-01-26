@@ -1,7 +1,7 @@
 package org.hisp.dhis.startup;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -162,6 +162,7 @@ public class TableAlteror
         executeSql( "ALTER TABLE report DROP COLUMN usingorgunitgroupsets" );
         executeSql( "ALTER TABLE eventchart DROP COLUMN datatype" );
         executeSql( "ALTER TABLE validationrule DROP COLUMN type" );
+        executeSql( "ALTER TABLE organisationunit DROP COLUMN active" );
 
         executeSql( "DROP INDEX datamart_crosstab" );
 
@@ -425,6 +426,7 @@ public class TableAlteror
         executeSql( "update dataset set approvedata = false where approvedata is null" );
         executeSql( "update dataelement set zeroissignificant = false where zeroissignificant is null" );
         executeSql( "update organisationunit set haspatients = false where haspatients is null" );
+        executeSql( "update organisationunit set openingdate = '1970-01-01' where openingdate is null" );
         executeSql( "update dataset set expirydays = 0 where expirydays is null" );
         executeSql( "update eventchart set hidelegend = false where hidelegend is null" );
         executeSql( "update eventchart set regression = false where regression is null" );
@@ -783,6 +785,8 @@ public class TableAlteror
         // AttributeValue
         executeSql( "UPDATE attributevalue SET created=now() WHERE created IS NULL" );
         executeSql( "UPDATE attributevalue SET lastupdated=now() WHERE lastupdated IS NULL" );
+        
+        executeSql( "update dashboarditem set shape = 'normal' where shape is null" );
 
         upgradeDataValuesWithAttributeOptionCombo();
         upgradeCompleteDataSetRegistrationsWithAttributeOptionCombo();

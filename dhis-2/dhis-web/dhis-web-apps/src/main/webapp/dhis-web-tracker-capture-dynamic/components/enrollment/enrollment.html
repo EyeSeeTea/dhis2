@@ -1,18 +1,18 @@
 <div class="panel panel-info" ng-controller="EnrollmentController">
     <div class="panel-heading handle bold">
         
-        <span ng-class="{'light-blue': true}">{{enrollmentWidget.title| translate}}</span>
+        {{enrollmentWidget.title| translate}}
         <span class="nav-pills" ng-show="selectedProgram && currentEnrollment && currentEnrollment !== selectedEnrollment">
-            | <a href ng-click="loadEnrollmentDetails(currentEnrollment)" title="{{'current'| translate}}"><span ng-class="{'light-blue': !showEnrollmentDiv}">{{'current'| translate}}</span></a>
+            | <a href ng-click="loadEnrollmentDetails(currentEnrollment)" title="{{'current'| translate}}"><span ng-class="{true: 'widget-link-active', false: 'widget-link'} [showEnrollmentDiv]">{{'current'| translate}}</span></a>
         </span>
         <span class="nav-pills" ng-show="selectedProgram && !currentEnrollment">
-            | <a href ng-click="showNewEnrollment()" title="{{'new'| translate}}"><span ng-class="{'light-blue': !showEnrollmentDiv}">{{'new'| translate}}</span></a>
+            | <a href ng-click="showNewEnrollment()" title="{{'new'| translate}}"><span ng-class="{true: 'widget-link-active', false: 'widget-link'} [showEnrollmentDiv]">{{'new'| translate}}</span></a>
         </span>
-        <span class="nav-pills" ng-show="terminatedEnrollments.length > 0 || completedEnrollments.length > 0">
-            | <a href ng-click="showEnrollmentHistory()" title="{{'history'| translate}}"><span ng-class="{'light-blue': !showEnrollmentHistoryDiv}">{{'history'| translate}}</span></a>
+        <span class="nav-pills" ng-show="hasEnrollmentHistory">
+            | <a href ng-click="showEnrollmentHistory()" title="{{'history'| translate}}"><span ng-class="{true: 'widget-link-active', false: 'widget-link'} [showEnrollmentHistoryDiv]">{{'history'| translate}}</span></a>
         </span>       
 
-        <span class="pull-right">
+        <span class="pull-right widget-link">
             <a class="small-horizonal-spacing" href ng-click="expandCollapse(enrollmentWidget)">
                 <span ng-show="enrollmentWidget.expand"><i class="fa fa-chevron-up" title="{{'collapse'| translate}}"></i></span>
                 <span ng-show="!enrollmentWidget.expand"><i class="fa fa-chevron-down" title="{{'expand'| translate}}"></i></span>
@@ -47,13 +47,13 @@
 
                 <button type="button" 
                         class="btn btn-primary"
-                        ng-disabled="selectedEnrollment.status === 'COMPLETED'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
                         ng-click="completeEnrollment()">
                     {{'complete'| translate}}
                 </button>
                 <button type="button" 
                         class="btn btn-warning"
-                        ng-disabled="selectedEnrollment.status === 'COMPLETED'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
                         ng-click="terminateEnrollment()">
                     {{'terminate'| translate}}
                 </button>   
@@ -61,7 +61,7 @@
                 <button type="button"
                         title="{{'unmark_for_followup'| translate}}"
                         class="btn btn-danger horizonal-spacing"
-                        ng-disabled="selectedEnrollment.status === 'COMPLETED'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
                         ng-if="selectedEnrollment.followup"
                         ng-click="markForFollowup()">
                     <i class="fa fa-exclamation-triangle"></i>
@@ -69,7 +69,7 @@
                 <button type="button" 
                         title="{{'mark_for_followup'| translate}}"
                         class="btn btn-default horizonal-spacing"
-                        ng-disabled="selectedEnrollment.status === 'COMPLETED'"
+                        ng-disabled="selectedEnrollment.status !== 'ACTIVE'"
                         ng-if="!selectedEnrollment.followup"
                         ng-click="markForFollowup()">
                     <i class="fa fa-exclamation-triangle"></i>
@@ -220,15 +220,15 @@
                         <th>
                             {{selectedProgram.dateOfEnrollmentDescription}}
                         </th>
-                        <th>
+                        <th ng-if="selectedProgram.displayIncidentDate">
                             {{selectedProgram.dateOfIncidentDescription}}
                         </th>
                     </tr>
-                    <tr ng-click="loadEnrollmentDetails(en)" ng-repeat="en in completedEnrollments" title="{{'details'| translate}}">
+                    <tr ng-click="loadEnrollmentDetails(en)" ng-repeat="en in historicalEnrollments" title="{{'details'| translate}}">
                         <td>
                             {{en.dateOfEnrollment}}
                         </td>
-                        <td>
+                        <td ng-if="selectedProgram.displayIncidentDate">
                             {{en.dateOfIncident}}
                         </td>
                     </tr>

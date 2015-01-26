@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.enrollment;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,12 +33,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
+import org.hisp.dhis.importexport.ImportStrategy;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -93,52 +97,86 @@ public class JacksonEnrollmentService extends AbstractEnrollmentService
     // -------------------------------------------------------------------------
 
     @Override
-    public ImportSummaries addEnrollmentsJson( InputStream inputStream ) throws IOException
+    public ImportSummaries addEnrollmentsJson( InputStream inputStream, ImportStrategy strategy ) throws IOException
     {
-        ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
-        Enrollments enrollments = new Enrollments();
+        List<Enrollment> enrollments = new ArrayList<>();
 
         try
         {
             Enrollments fromJson = fromJson( input, Enrollments.class );
-            enrollments.getEnrollments().addAll( fromJson.getEnrollments() );
+            enrollments.addAll( fromJson.getEnrollments() );
         }
         catch ( Exception ex )
         {
-            Enrollment enrollment = fromJson( input, Enrollment.class );
-            enrollments.getEnrollments().add( enrollment );
+            Enrollment fromJson = fromJson( input, Enrollment.class );
+            enrollments.add( fromJson );
         }
 
-        for ( Enrollment enrollment : enrollments.getEnrollments() )
-        {
-            importSummaries.addImportSummary( addEnrollment( enrollment ) );
-        }
-
-        return importSummaries;
+        return addEnrollments( enrollments, strategy );
     }
 
     @Override
-    public ImportSummaries addEnrollmentsXml( InputStream inputStream ) throws IOException
+    public ImportSummaries addEnrollmentsXml( InputStream inputStream, ImportStrategy strategy ) throws IOException
     {
-        ImportSummaries importSummaries = new ImportSummaries();
         String input = StreamUtils.copyToString( inputStream, Charset.forName( "UTF-8" ) );
-        Enrollments enrollments = new Enrollments();
+        List<Enrollment> enrollments = new ArrayList<>();
 
         try
         {
-            Enrollments fromJson = fromXml( input, Enrollments.class );
-            enrollments.getEnrollments().addAll( fromJson.getEnrollments() );
+            Enrollments fromXml = fromXml( input, Enrollments.class );
+            enrollments.addAll( fromXml.getEnrollments() );
         }
         catch ( Exception ex )
         {
-            Enrollment enrollment = fromXml( input, Enrollment.class );
-            enrollments.getEnrollments().add( enrollment );
+            Enrollment fromXml = fromXml( input, Enrollment.class );
+            enrollments.add( fromXml );
         }
 
-        for ( Enrollment enrollment : enrollments.getEnrollments() )
+        return addEnrollments( enrollments, strategy );
+    }
+
+    private ImportSummaries addEnrollments( List<Enrollment> enrollments, ImportStrategy strategy )
+    {
+        ImportSummaries importSummaries = new ImportSummaries();
+
+        Enrollments create = new Enrollments();
+        Enrollments update = new Enrollments();
+
+        if ( strategy.isCreate() )
+        {
+            create.getEnrollments().addAll( enrollments );
+        }
+        else if ( strategy.isCreateAndUpdate() )
+        {
+            for ( Enrollment enrollment : enrollments )
+            {
+                if ( StringUtils.isEmpty( enrollment.getEnrollment() ) )
+                {
+                    create.getEnrollments().add( enrollment );
+                }
+                else
+                {
+                    if ( programInstanceService.getProgramInstance( enrollment.getEnrollment() ) == null )
+                    {
+                        create.getEnrollments().add( enrollment );
+                    }
+                    else
+                    {
+                        update.getEnrollments().add( enrollment );
+                    }
+                }
+            }
+        }
+
+        for ( Enrollment enrollment : create.getEnrollments() )
         {
             importSummaries.addImportSummary( addEnrollment( enrollment ) );
+        }
+
+        for ( Enrollment enrollment : update.getEnrollments() )
+        {
+            importSummaries.addImportSummary( updateEnrollment( enrollment ) );
         }
 
         return importSummaries;

@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.deletion;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -40,8 +40,10 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * TODO: Add support for failed allow tests on "transitive" deletion handlers which
+ * are called as part of delete methods.
+ * 
  * @author Lars Helge Overland
- * @version $Id$
  */
 public class DefaultDeletionManager
     implements DeletionManager
@@ -102,6 +104,8 @@ public class DefaultDeletionManager
 
                     String message = handler.getClassName() + (hint.isEmpty() ? "" : (" (" + hint + ")"));
 
+                    log.info( "Delete was not allowed by " + currentHandler + ": " + message );
+                    
                     throw new DeleteNotAllowedException( DeleteNotAllowedException.ERROR_ASSOCIATED_BY_OTHER_OBJECTS, message );
                 }
             }

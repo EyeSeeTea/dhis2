@@ -1,7 +1,7 @@
 package org.hisp.dhis.common.hibernate;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,10 +31,12 @@ package org.hisp.dhis.common.hibernate;
 import org.hibernate.Query;
 import org.hisp.dhis.common.AnalyticalObjectStore;
 import org.hisp.dhis.common.BaseAnalyticalObject;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.period.Period;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -70,10 +72,28 @@ public class HibernateAnalyticalObjectStore<T extends BaseAnalyticalObject>
     }
 
     @Override
+    public int countPeriodAnalyticalObject( Period period )
+    {
+        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :period in elements(c.periods)" );
+        query.setEntity( "period", period );
+
+        return ((Long) query.uniqueResult()).intValue();
+    }
+
+    @Override
     public int countOrganisationUnitAnalyticalObject( OrganisationUnit organisationUnit )
     {
         Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :organisationUnit in elements(c.organisationUnits)" );
         query.setEntity( "organisationUnit", organisationUnit );
+
+        return ((Long) query.uniqueResult()).intValue();
+    }
+
+    @Override
+    public int countCategoryOptionGroupAnalyticalObject( CategoryOptionGroup categoryOptionGroup )
+    {
+        Query query = getQuery( "select count(distinct c) from " + clazz.getName() + " c where :categoryOptionGroup in elements(c.categoryOptionGroups)" );
+        query.setEntity( "categoryOptionGroup", categoryOptionGroup );
 
         return ((Long) query.uniqueResult()).intValue();
     }

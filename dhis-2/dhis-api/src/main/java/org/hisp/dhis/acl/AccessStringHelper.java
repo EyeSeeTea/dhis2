@@ -1,7 +1,7 @@
 package org.hisp.dhis.acl;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,6 +133,16 @@ public class AccessStringHelper
     public static boolean canWrite( String access )
     {
         return isEnabled( access, Permission.WRITE );
+    }
+
+    public static boolean canReadAndWrite( String access )
+    {
+        return isEnabled( access, Permission.WRITE ) && isEnabled( access, Permission.READ );
+    }
+
+    public static boolean canReadOrWrite( String access )
+    {
+        return isEnabled( access, Permission.WRITE ) || isEnabled( access, Permission.READ );
     }
 
     public static boolean isEnabled( String access, Permission permission )

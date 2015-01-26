@@ -29,6 +29,7 @@
   <sec:http pattern="/external-static/**" security="none" />
   <sec:http pattern="/favicon.ico" security="none" />
 
+  <!-- Disabled for now, we need to properly handle "Basic Auth" dialog box popping up on browsers
   <sec:http access-decision-manager-ref="accessDecisionManager" use-expressions="true" realm="DHIS2" pattern="/api/**">
     <sec:http-basic />
 
@@ -39,7 +40,7 @@
     </sec:headers>
 
     <sec:custom-filter ref="automaticAccessFilter" before="LOGOUT_FILTER" />
-    <!-- <sec:custom-filter ref="corsFilter" before="BASIC_AUTH_FILTER" /> -->
+    <sec:custom-filter ref="corsFilter" before="BASIC_AUTH_FILTER" />
     <sec:intercept-url pattern="/api/account/username" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/recovery" access="permitAll()" />
     <sec:intercept-url pattern="/api/account/restore" access="permitAll()" />
@@ -47,6 +48,7 @@
     <sec:intercept-url pattern="/api/account" access="permitAll()" />
     <sec:intercept-url pattern="/api/**" access="isAuthenticated()" />
   </sec:http>
+  -->
 
   <sec:http access-decision-manager-ref="accessDecisionManager" use-expressions="true" realm="DHIS2">
     <sec:openid-login user-service-ref="userDetailsService" default-target-url="/" always-use-default-target="false"

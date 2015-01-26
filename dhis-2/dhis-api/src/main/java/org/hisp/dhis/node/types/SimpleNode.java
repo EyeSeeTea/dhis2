@@ -1,7 +1,7 @@
 package org.hisp.dhis.node.types;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,15 +25,13 @@ package org.hisp.dhis.node.types;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeType;
 import org.hisp.dhis.node.exception.InvalidTypeException;
-
-import java.util.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -79,7 +77,7 @@ public class SimpleNode extends AbstractNode
     }
 
     @Override
-    public <T extends Node> T addChild( T child ) throws InvalidTypeException
+    public <T extends Node> T addChild( T child )
     {
         throw new InvalidTypeException();
     }
@@ -88,32 +86,5 @@ public class SimpleNode extends AbstractNode
     public <T extends Node> void addChildren( Iterable<T> children )
     {
         throw new InvalidTypeException();
-    }
-
-    @Override
-    public int hashCode()
-    {
-        return 31 * super.hashCode() + Objects.hash( value, attribute );
-    }
-
-    @Override
-    public boolean equals( Object obj )
-    {
-        if ( this == obj )
-        {
-            return true;
-        }
-        if ( obj == null || getClass() != obj.getClass() )
-        {
-            return false;
-        }
-        if ( !super.equals( obj ) )
-        {
-            return false;
-        }
-
-        final SimpleNode other = (SimpleNode) obj;
-
-        return Objects.equals( this.value, other.value ) && Objects.equals( this.attribute, other.attribute );
     }
 }

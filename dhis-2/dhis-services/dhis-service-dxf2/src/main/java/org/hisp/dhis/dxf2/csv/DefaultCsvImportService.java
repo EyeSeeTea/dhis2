@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.csv;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -297,8 +297,7 @@ public class DefaultCsvImportService
                 object.setDescription( getSafe( values, 5, null, null ) );
                 object.setUuid( getSafe( values, 6, null, 36 ) );
                 object.setOpeningDate( getMediumDate( getSafe( values, 7, "1970-01-01", null ) ) );
-                object.setClosedDate( getMediumDate( getSafe( values, 8, "1970-01-01", null ) ) );
-                object.setActive( true );
+                object.setClosedDate( getMediumDate( getSafe( values, 8, null, null ) ) );
                 object.setComment( getSafe( values, 9, null, null ) );
                 object.setFeatureType( getSafe( values, 10, null, 50 ) );
                 object.setCoordinates( getSafe( values, 11, null, null ) );

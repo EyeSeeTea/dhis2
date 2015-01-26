@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.fieldfilter;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,7 +25,7 @@ package org.hisp.dhis.dxf2.fieldfilter;
  * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 import com.google.common.base.Joiner;
@@ -241,7 +241,8 @@ public class DefaultFieldFilterService implements FieldFilterService
                     {
                         for ( Object collectionObject : collection )
                         {
-                            child.addChild( new SimpleNode( property.getName(), collectionObject ) );
+                            SimpleNode simpleNode = child.addChild( new SimpleNode( property.getName(), collectionObject ) );
+                            simpleNode.setProperty( property );
                         }
                     }
                 }
@@ -291,6 +292,7 @@ public class DefaultFieldFilterService implements FieldFilterService
             if ( child != null )
             {
                 child.setName( fieldKey );
+                child.setProperty( property );
 
                 // TODO fix ugly hack, will be replaced by custom field serializer/deserializer
                 if ( child.isSimple() && PeriodType.class.isInstance( (((SimpleNode) child).getValue()) ) )
@@ -449,6 +451,7 @@ public class DefaultFieldFilterService implements FieldFilterService
 
         ComplexNode complexNode = new ComplexNode( currentProperty.getName() );
         complexNode.setNamespace( currentProperty.getNamespace() );
+        complexNode.setProperty( currentProperty );
 
         Schema schema;
 
@@ -476,6 +479,7 @@ public class DefaultFieldFilterService implements FieldFilterService
             SimpleNode simpleNode = new SimpleNode( field, returnValue );
             simpleNode.setAttribute( property.isAttribute() );
             simpleNode.setNamespace( property.getNamespace() );
+            simpleNode.setProperty( property );
 
             complexNode.addChild( simpleNode );
         }

@@ -21,12 +21,12 @@ trackerCapture.controller('EnrollmentController',
     //listen for the selected items
     $scope.$on('selectedItems', function(event, args) {   
         $scope.enrollments = [];
-        $scope.cancelledEnrollments = [];
-        $scope.completedEnrollments = [];
+        $scope.historicalEnrollments = [];
         $scope.showEnrollmentDiv = false;
         $scope.showEnrollmentHistoryDiv = false;
         $scope.hasEnrollmentHistory = false;
         $scope.selectedEnrollment = null;
+        $scope.currentEnrollment = null;
         var selectedEnrollment = null;
         $scope.newEnrollment = {};
         
@@ -63,12 +63,8 @@ trackerCapture.controller('EnrollmentController',
                         selectedEnrollment = enrollment;
                         $scope.currentEnrollment = enrollment;
                     }
-                    if(enrollment.status === 'CANCELLED'){//check for cancelled ones
-                        $scope.cancelledEnrollments.push(enrollment);
-                        $scope.hasEnrollmentHistory = true;
-                    }
-                    if(enrollment.status === 'COMPLETED'){//check for completed ones
-                        $scope.completedEnrollments.push(enrollment);
+                    if(enrollment.status === 'CANCELLED' || enrollment.status === 'COMPLETED'){
+                        $scope.historicalEnrollments.push(enrollment);
                         $scope.hasEnrollmentHistory = true;
                     }
                 }
@@ -107,7 +103,7 @@ trackerCapture.controller('EnrollmentController',
                     if(!exists){
                         $scope.attributesForEnrollment.push(atts[i]);
                     }
-                }                
+                }
             });                
         }
         
@@ -121,10 +117,14 @@ trackerCapture.controller('EnrollmentController',
        
         $scope.showEnrollmentDiv = !$scope.showEnrollmentDiv;
         
-        if($scope.showEnrollmentDiv){
-            
+        if($scope.showEnrollmentDiv){            
             $scope.showEnrollmentHistoryDiv = false;
-            $scope.selectedEnrollment = null;                        
+            
+            //load new enrollment details
+            $scope.selectedEnrollment = null;            
+            $scope.loadEnrollmentDetails($scope.selectedEnrollment);
+            
+            //check custom form for enrollment
             $scope.selectedProgram.hasCustomForm = false;
             $scope.registrationForm = '';
             TEFormService.getByProgram($scope.selectedProgram.id).then(function(teForm){
@@ -248,7 +248,7 @@ trackerCapture.controller('EnrollmentController',
         ModalService.showModal({}, modalOptions).then(function(result){            
             EnrollmentService.cancel($scope.selectedEnrollment).then(function(data){                
                 $scope.selectedEnrollment.status = 'CANCELLED';
-                $scope.loadEnrollmentDetails();                
+                $scope.loadEnrollmentDetails($scope.selectedEnrollment.status);                
             });
         });
     };
@@ -265,11 +265,11 @@ trackerCapture.controller('EnrollmentController',
         ModalService.showModal({}, modalOptions).then(function(result){            
             EnrollmentService.complete($scope.selectedEnrollment).then(function(data){                
                 $scope.selectedEnrollment.status = 'COMPLETED';
-                $scope.loadEnrollmentDetails();                
+                $scope.loadEnrollmentDetails($scope.selectedEnrollment);                
             });
         });
     };
-        
+            
     $scope.autoGenerateEvents = function(){
         if($scope.selectedTei && $scope.selectedProgram && $scope.selectedOrgUnit && $scope.selectedEnrollment){            
             var dhis2Events = {events: []};

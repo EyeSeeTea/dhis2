@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ public class TextUtils
 {
     public static final TextUtils INSTANCE = new TextUtils();
     public static final String EMPTY = "";
-    public static final String SPACE = "";
+    public static final String SPACE = " ";
     public static final String SEP = "-";
     public static final String LN = System.getProperty( "line.separator" );
     

@@ -1,7 +1,7 @@
 package org.hisp.dhis.reporttable.impl;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,12 +37,14 @@ import java.util.Map;
 import org.hisp.dhis.analytics.AnalyticsService;
 import org.hisp.dhis.common.AnalyticalObjectStore;
 import org.hisp.dhis.common.Grid;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.indicator.Indicator;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.period.Period;
 import org.hisp.dhis.report.ReportService;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.reporttable.ReportTableService;
@@ -258,10 +260,22 @@ public class DefaultReportTableService
     {
         return reportTableStore.countDataElementAnalyticalObject( dataElement );
     }
+
+    @Override
+    public int countPeriodReportTables( Period period )
+    {
+        return reportTableStore.countPeriodAnalyticalObject( period );
+    }
     
     @Override
     public int countOrganisationUnitReportTables( OrganisationUnit organisationUnit )
     {
         return reportTableStore.countOrganisationUnitAnalyticalObject( organisationUnit );
+    }
+    
+    @Override
+    public int countCategoryOptionGroups( CategoryOptionGroup categoryOptionGroup )
+    {
+        return reportTableStore.countCategoryOptionGroupAnalyticalObject( categoryOptionGroup );
     }
 }

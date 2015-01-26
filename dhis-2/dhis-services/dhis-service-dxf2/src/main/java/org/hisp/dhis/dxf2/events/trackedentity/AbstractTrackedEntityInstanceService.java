@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.events.trackedentity;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,31 +70,31 @@ public abstract class AbstractTrackedEntityInstanceService
     // -------------------------------------------------------------------------
 
     @Autowired
-    private org.hisp.dhis.trackedentity.TrackedEntityInstanceService teiService;
+    protected org.hisp.dhis.trackedentity.TrackedEntityInstanceService teiService;
 
     @Autowired
-    private TrackedEntityAttributeValueService attributeValueService;
+    protected TrackedEntityAttributeValueService attributeValueService;
 
     @Autowired
-    private TrackedEntityAttributeService trackedEntityAttributeService;
+    protected TrackedEntityAttributeService trackedEntityAttributeService;
 
     @Autowired
-    private RelationshipService relationshipService;
+    protected RelationshipService relationshipService;
 
     @Autowired
-    private TrackedEntityService trackedEntityService;
+    protected TrackedEntityService trackedEntityService;
 
     @Autowired
-    private TrackedEntityAttributeValueService trackedEntityAttributeValueService;
+    protected TrackedEntityAttributeValueService trackedEntityAttributeValueService;
 
     @Autowired
-    private org.hisp.dhis.trackedentity.TrackedEntityInstanceService entityInstanceService;
+    protected org.hisp.dhis.trackedentity.TrackedEntityInstanceService entityInstanceService;
 
     @Autowired
-    private IdentifiableObjectManager manager;
+    protected IdentifiableObjectManager manager;
 
     @Autowired
-    private UserService userService;
+    protected UserService userService;
 
     // -------------------------------------------------------------------------
     // READ

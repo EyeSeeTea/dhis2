@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.filter;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,7 @@ public class AggregatableDataElementFilter
         types = new HashSet<>();
         types.add( DataElement.VALUE_TYPE_BOOL );
         types.add( DataElement.VALUE_TYPE_INT );
+        types.add( DataElement.VALUE_TYPE_STRING );
     }
 
     @Override

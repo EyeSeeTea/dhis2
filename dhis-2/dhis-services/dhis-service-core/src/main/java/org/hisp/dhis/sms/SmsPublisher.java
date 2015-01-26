@@ -1,7 +1,7 @@
 package org.hisp.dhis.sms;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -127,6 +127,7 @@ public class SmsPublisher
                 catch ( Exception e )
                 {
                     log.error( e );
+                    e.printStackTrace();
                     smsSender.sendMessage( e.getMessage(), message.getOriginator() );
                     message.setStatus( SmsMessageStatus.FAILED );
                 }
@@ -154,7 +155,7 @@ public class SmsPublisher
         return listeners;
     }
 
-    @Autowired
+    @Autowired(required=false)
     public void setListeners( List<IncomingSmsListener> listeners )
     {
         this.listeners = listeners;

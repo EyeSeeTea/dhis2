@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.objectfilter.ops;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,13 @@ public class EqOp extends Op
         {
             Date s1 = getValue( Date.class );
             Date s2 = (Date) object;
+
+            return (s1 != null && s2.equals( s1 )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
+        }
+        else if ( Enum.class.isInstance( object ) )
+        {
+            String s1 = getValue();
+            String s2 = String.valueOf( object );
 
             return (s1 != null && s2.equals( s1 )) ? OpStatus.INCLUDE : OpStatus.EXCLUDE;
         }

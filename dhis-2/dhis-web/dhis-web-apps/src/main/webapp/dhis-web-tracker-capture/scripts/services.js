@@ -295,7 +295,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             });
             return promise;
         },
-        update: function( enrollment){
+        update: function( enrollment ){
             var promise = $http.put( '../api/enrollments/' + enrollment.enrollment , enrollment).then(function(response){
                 return response.data;
             });
@@ -312,7 +312,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 return response.data;               
             });
             return promise;           
-        }        
+        }
     };   
 })
 
@@ -380,21 +380,31 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         attsById[att.id] = att;
                     });
 
-                    angular.forEach(tei.attributes, function(att){                        
-                        var val = att.value;
-                        if(val){
-                            if(att.type === 'date'){
-                                val = DateUtils.formatFromApiToUser(val);
+                    angular.forEach(tei.attributes, function(att){
+                        if(att.type === 'trueOnly'){
+                            if(att.value === 'true'){
+                                att.value = true;
                             }
-                            if(att.type === 'optionSet' && 
-                                    attsById[att.attribute] && 
-                                    attsById[att.attribute].optionSet && 
-                                    attsById[att.attribute].optionSet.id && 
-                                    optionSets[attsById[att.attribute].optionSet.id]){   
-                                val = OptionSetService.getName(optionSets[attsById[att.attribute].optionSet.id].options, val);                                
+                            else{
+                                att.value = '';
                             }
-                            att.value = val;
-                        }                        
+                        }
+                        else{
+                            var val = att.value;
+                            if(val){
+                                if(att.type === 'date'){
+                                    val = DateUtils.formatFromApiToUser(val);
+                                }
+                                if(att.type === 'optionSet' && 
+                                        attsById[att.attribute] && 
+                                        attsById[att.attribute].optionSet && 
+                                        attsById[att.attribute].optionSet.id && 
+                                        optionSets[attsById[att.attribute].optionSet.id]){   
+                                    val = OptionSetService.getName(optionSets[attsById[att.attribute].optionSet.id].options, val);                                
+                                }
+                                att.value = val;
+                            }
+                        }                                                
                     });                    
                 });    
                 return tei;
@@ -413,12 +423,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
                 angular.forEach(tei.attributes, function(att){                        
                     
-                    if(att.type === 'trueOnly'){ 
-                        if(!att.value){
-                            att.value = '';
+                    if(att.type === 'trueOnly'){
+                        if(att.value){
+                            att.value = 'true';
                         }
                         else{
-                            att.value = true;
+                            att.value = '';
                         }
                     }            
                     else{
@@ -468,6 +478,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             if(paging){
                 var pgSize = pager ? pager.pageSize : 50;
                 var pg = pager ? pager.page : 1;
+                pgSize = pgSize > 1 ? pgSize  : 1;
+                pg = pg > 1 ? pg : 1;
                 url = url + '&pageSize=' + pgSize + '&page=' + pg;
             }
             else{
@@ -534,10 +546,10 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             angular.forEach(attributes, function(att){
                 if(att.valueType === 'trueOnly'){
                     if(att.value){
-                        registrationAttributes.push({attribute: att.id, value: ''});
+                        registrationAttributes.push({attribute: att.id, value: 'true'});
                     }
                     else{
-                        registrationAttributes.push({attribute: att.id, value: 'true'});
+                        registrationAttributes.push({attribute: att.id, value: ''});
                     }
                     
                     formEmpty = false;
@@ -568,12 +580,12 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             var formEmpty = true;
             angular.forEach(attributes, function(att){            
                 if(att.valueType === 'trueOnly'){ 
-                    if(!tei[att.id]){
-                        registrationAttributes.push({attribute: att.id, value: ''});
+                    if(tei[att.id]){
+                        registrationAttributes.push({attribute: att.id, value: 'true'});
                         formEmpty = false;                    
                     }
                     else{
-                        registrationAttributes.push({attribute: att.id, value: 'true'});
+                        registrationAttributes.push({attribute: att.id, value: ''});
                         formEmpty = false;
                     }
                 }            
@@ -795,6 +807,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
         getEventReport: function(orgUnit, ouMode, program, startDate, endDate, programStatus, eventStatus, pager){ 
             var pgSize = pager ? pager.pageSize : 50;
         	var pg = pager ? pager.page : 1;
+            pgSize = pgSize > 1 ? pgSize  : 1;
+            pg = pg > 1 ? pg : 1; 
             var url = '../api/events/eventRows.json?' + 'orgUnit=' + orgUnit + '&ouMode='+ ouMode + '&program=' + program + '&programStatus=' + programStatus + '&eventStatus='+ eventStatus + '&pageSize=' + pgSize + '&page=' + pg;
             if(startDate && endDate){
                 url = url + '&startDate=' + startDate + '&endDate=' + endDate ;
@@ -1097,9 +1111,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };
 })
 
-.service('EventUtils', function(DateUtils, CalendarService, OrgUnitService, $filter, orderByFilter){
+.service('EventUtils', function(DateUtils, CalendarService, OptionSetService, OrgUnitService, $filter, orderByFilter){
     return {
-        createDummyEvent: function(events, programStage, orgUnit, enrollment){            
+        createDummyEvent: function(events, programStage, orgUnit, enrollment){
             var today = DateUtils.getToday();    
             var dueDate = this.getEventDueDate(events, programStage, enrollment);
             var dummyEvent = {programStage: programStage.id, 
@@ -1109,7 +1123,13 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                               sortingDate: dueDate,
                               name: programStage.name,
                               reportDateDescription: programStage.reportDateDescription,
+                              enrollmentStatus: 'ACTIVE',
                               status: 'SCHEDULED'};
+            
+            if(programStage.captureCoordinates){
+                dummyEvent.coordinate = {};
+            }
+            
             dummyEvent.statusColor = 'alert alert-warning';//'stage-on-time';
             if(moment(today).isAfter(dummyEvent.dueDate)){
                 dummyEvent.statusColor = 'alert alert-danger';//'stage-overdue';
@@ -1193,7 +1213,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 }); 
             }
         },
-        reconstruct: function(dhis2Event, programStage){
+        reconstruct: function(dhis2Event, programStage, optionSets){
             
             var e = {dataValues: [], 
                     event: dhis2Event.event, 
@@ -1202,19 +1222,45 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     orgUnit: dhis2Event.orgUnit, 
                     trackedEntityInstance: dhis2Event.trackedEntityInstance,
                     status: dhis2Event.status,
-                    dueDate: dhis2Event.dueDate
+                    dueDate: DateUtils.formatFromUserToApi(dhis2Event.dueDate)
                 };
                 
             angular.forEach(programStage.programStageDataElements, function(prStDe){
-                if(dhis2Event[prStDe.dataElement.id]){
-                    var val = {value: dhis2Event[prStDe.dataElement.id], dataElement: prStDe.dataElement.id};
+                if(dhis2Event[prStDe.dataElement.id]){                    
+                    var value = dhis2Event[prStDe.dataElement.id];
+                    
+                    if( value && prStDe.dataElement.type === 'string' && prStDe.dataElement.optionSet && optionSets[prStDe.dataElement.optionSet.id]){
+                        value = OptionSetService.getCode(optionSets[prStDe.dataElement.optionSet.id].options, value);
+                    }                    
+                    if( value && prStDe.dataElement.type === 'date'){
+                        value = DateUtils.formatFromUserToApi(value);
+                    }
+                    if( prStDe.dataElement.type === 'trueOnly' ){
+                        if(value){
+                            value = 'true';
+                        }
+                        else{
+                            value = '';
+                        }
+                    }
+                    
+                    var val = {value: value, dataElement: prStDe.dataElement.id};
                     if(dhis2Event.providedElsewhere[prStDe.dataElement.id]){
                         val.providedElsewhere = dhis2Event.providedElsewhere[prStDe.dataElement.id];
                     }
                     e.dataValues.push(val);
                 }                                
             });
-                     
+            
+            if(programStage.captureCoordinates){
+                e.coordinate = {latitude: dhis2Event.coordinate.latitude ? dhis2Event.coordinate.latitude : 0,
+                                longitude: dhis2Event.coordinate.longitude ? dhis2Event.coordinate.longitude : 0};
+            }
+            
+            if(dhis2Event.eventDate){
+                e.eventDate = DateUtils.formatFromUserToApi(dhis2Event.eventDate);
+            }
+            
             return e;
         }
     }; 

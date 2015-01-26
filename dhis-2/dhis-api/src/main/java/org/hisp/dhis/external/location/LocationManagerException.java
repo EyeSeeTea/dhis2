@@ -1,7 +1,7 @@
 package org.hisp.dhis.external.location;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@ package org.hisp.dhis.external.location;
  * @version $Id$
  */
 public class LocationManagerException
-    extends Exception
+    extends RuntimeException
 {
     /**
      * Determines if a de-serialized file is compatible with this class.

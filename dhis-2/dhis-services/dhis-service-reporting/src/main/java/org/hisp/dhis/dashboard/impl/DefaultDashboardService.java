@@ -1,7 +1,7 @@
 package org.hisp.dhis.dashboard.impl;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,13 +38,17 @@ import org.hisp.dhis.dashboard.DashboardSearchResult;
 import org.hisp.dhis.dashboard.DashboardService;
 import org.hisp.dhis.document.Document;
 import org.hisp.dhis.eventchart.EventChart;
+import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.mapping.Map;
 import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
+import org.hisp.dhis.system.util.TextUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -88,6 +92,10 @@ public class DefaultDashboardService
     // DashboardService implementation
     // -------------------------------------------------------------------------
 
+    // -------------------------------------------------------------------------
+    // Dashboard
+    // -------------------------------------------------------------------------
+
     @Override
     public DashboardSearchResult search( String query )
     {
@@ -97,56 +105,61 @@ public class DefaultDashboardService
     @Override
     public DashboardSearchResult search( String query, Set<String> maxTypes )
     {
+        Set<String> words = Sets.newHashSet( query.split( TextUtils.SPACE ) );
+        
         DashboardSearchResult result = new DashboardSearchResult();
 
         result.setUsers( userService.getAllUsersBetweenByName( query, 0, getMax( TYPE_USERS, maxTypes ) ) );
-        result.setCharts( objectManager.getBetweenLikeName( Chart.class, query, 0, getMax( TYPE_CHART, maxTypes ) ) );
-        result.setEventCharts( objectManager.getBetweenLikeName( EventChart.class, query, 0, getMax( TYPE_EVENT_CHART, maxTypes ) ) );
-        result.setMaps( objectManager.getBetweenLikeName( Map.class, query, 0, getMax( TYPE_MAP, maxTypes ) ) );
-        result.setReportTables( objectManager.getBetweenLikeName( ReportTable.class, query, 0, getMax( TYPE_REPORT_TABLE, maxTypes ) ) );
-        result.setReports( objectManager.getBetweenLikeName( Report.class, query, 0, getMax( TYPE_REPORTS, maxTypes ) ) );
-        result.setResources( objectManager.getBetweenLikeName( Document.class, query, 0, getMax( TYPE_RESOURCES, maxTypes ) ) );
+        result.setCharts( objectManager.getBetweenLikeName( Chart.class, words, 0, getMax( TYPE_CHART, maxTypes ) ) );
+        result.setEventCharts( objectManager.getBetweenLikeName( EventChart.class, words, 0, getMax( TYPE_EVENT_CHART, maxTypes ) ) );
+        result.setMaps( objectManager.getBetweenLikeName( Map.class, words, 0, getMax( TYPE_MAP, maxTypes ) ) );
+        result.setReportTables( objectManager.getBetweenLikeName( ReportTable.class, words, 0, getMax( TYPE_REPORT_TABLE, maxTypes ) ) );
+        result.setEventReports( objectManager.getBetweenLikeName( EventReport.class, words, 0, getMax( TYPE_EVENT_REPORT, maxTypes ) ) );
+        result.setReports( objectManager.getBetweenLikeName( Report.class, words, 0, getMax( TYPE_REPORTS, maxTypes ) ) );
+        result.setResources( objectManager.getBetweenLikeName( Document.class, words, 0, getMax( TYPE_RESOURCES, maxTypes ) ) );
 
         return result;
     }
 
     @Override
-    public boolean addItemContent( String dashboardUid, String type, String contentUid )
+    public DashboardItem addItemContent( String dashboardUid, String type, String contentUid )
     {
         Dashboard dashboard = getDashboard( dashboardUid );
 
         if ( dashboard == null )
         {
-            return false;
+            return null;
         }
-
+        
+        DashboardItem item = new DashboardItem();
+        
         if ( TYPE_CHART.equals( type ) )
-        {
-            DashboardItem item = new DashboardItem();
+        {            
             item.setChart( objectManager.get( Chart.class, contentUid ) );
             dashboard.getItems().add( 0, item );
         }
         else if ( TYPE_EVENT_CHART.equals( type ) )
         {
-            DashboardItem item = new DashboardItem();
             item.setEventChart( objectManager.get( EventChart.class, contentUid ) );
             dashboard.getItems().add( 0, item );
         }
         else if ( TYPE_MAP.equals( type ) )
         {
-            DashboardItem item = new DashboardItem();
             item.setMap( objectManager.get( Map.class, contentUid ) );
             dashboard.getItems().add( 0, item );
         }
         else if ( TYPE_REPORT_TABLE.equals( type ) )
         {
-            DashboardItem item = new DashboardItem();
             item.setReportTable( objectManager.get( ReportTable.class, contentUid ) );
+            dashboard.getItems().add( 0, item );
+        }
+        else if ( TYPE_EVENT_REPORT.equals( type ) )
+        {
+            item.setEventReport( objectManager.get( EventReport.class, contentUid ) );
             dashboard.getItems().add( 0, item );
         }
         else if ( TYPE_MESSAGES.equals( type ) )
         {
-            DashboardItem item = new DashboardItem();
             item.setMessages( true );
             dashboard.getItems().add( 0, item );
         }
@@ -154,15 +167,11 @@ public class DefaultDashboardService
         {
             DashboardItem availableItem = dashboard.getAvailableItemByType( type );
 
-            DashboardItem item = availableItem == null ? new DashboardItem() : availableItem;
+            item = availableItem == null ? new DashboardItem() : availableItem;
 
             if ( TYPE_USERS.equals( type ) )
             {
                 item.getUsers().add( objectManager.get( User.class, contentUid ) );
-            }
-            else if ( TYPE_REPORT_TABLES.equals( type ) )
-            {
-                item.getReportTables().add( objectManager.get( ReportTable.class, contentUid ) );
             }
             else if ( TYPE_REPORTS.equals( type ) )
             {
@@ -181,12 +190,12 @@ public class DefaultDashboardService
 
         if ( dashboard.getItemCount() > Dashboard.MAX_ITEMS )
         {
-            return false;
+            return null;
         }
 
         updateDashboard( dashboard );
 
-        return true;
+        return item;
     }
 
     @Override
@@ -223,15 +232,15 @@ public class DefaultDashboardService
         {
             item.setReportTable( objectManager.get( ReportTable.class, item.getReportTable().getUid() ) );
         }
+        
+        if ( item.getEventReport() != null )
+        {
+            item.setEventReport( objectManager.get( EventReport.class, item.getEventReport().getUid() ) );
+        }
 
         if ( item.getUsers() != null )
         {
             item.setUsers( objectManager.getByUid( User.class, getUids( item.getUsers() ) ) );
-        }
-
-        if ( item.getReportTables() != null )
-        {
-            item.setReportTables( objectManager.getByUid( ReportTable.class, getUids( item.getReportTables() ) ) );
         }
 
         if ( item.getReports() != null )
@@ -280,6 +289,28 @@ public class DefaultDashboardService
         return dashboardStore.getByUid( uid );
     }
 
+    // -------------------------------------------------------------------------
+    // DashboardItem
+    // -------------------------------------------------------------------------
+
+    @Override
+    public void updateDashboardItem( DashboardItem item )
+    {
+        dashboardItemStore.update( item );
+    }
+    
+    @Override
+    public DashboardItem getDashboardItem( String uid )
+    {
+        return dashboardItemStore.getByUid( uid );
+    }
+
+    @Override
+    public void deleteDashboardItem( DashboardItem item )
+    {
+        dashboardItemStore.delete( item );
+    }
+    
     @Override
     public int countMapDashboardItems( Map map )
     {

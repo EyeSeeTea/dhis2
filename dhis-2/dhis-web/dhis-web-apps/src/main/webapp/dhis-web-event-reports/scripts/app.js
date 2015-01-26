@@ -18,7 +18,6 @@ Ext.onReady( function() {
 		};
 
 	// set app config
-
 	(function() {
 
 		// ext configuration
@@ -62,6 +61,42 @@ Ext.onReady( function() {
                 me.wasScrolled = false; // change flag to initial value
             }
 
+        });
+
+        Ext.override(Ext.data.TreeStore, {
+            load: function(options) {
+                options = options || {};
+                options.params = options.params || {};
+
+                var me = this,
+                    node = options.node || me.tree.getRootNode(),
+                    root;
+
+                // If there is not a node it means the user hasnt defined a rootnode yet. In this case lets just
+                // create one for them.
+                if (!node) {
+                    node = me.setRootNode({
+                        expanded: true
+                    });
+                }
+
+                if (me.clearOnLoad) {
+                    node.removeAll(true);
+                }
+
+                options.records = [node];
+
+                Ext.applyIf(options, {
+                    node: node
+                });
+                //options.params[me.nodeParam] = node ? node.getId() : 'root';
+
+                if (node) {
+                    node.set('loading', true);
+                }
+
+                return me.callParent([options]);
+            }
         });
 
 		// right click handler
@@ -453,6 +488,19 @@ Ext.onReady( function() {
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
+            getRecordsByCode: function(options, codeArray) {
+                var records = [];
+
+                for (var i = 0; i < options.length; i++) {
+                    for (var j = 0; j < codeArray.length; j++) {
+                        if (options[i].code === codeArray[j]) {
+                            records.push(options[i]);
+                        }
+                    }
+                }
+
+                return records;
+            },
             initComponent: function() {
                 var container = this,
                     idProperty = 'code',
@@ -602,7 +650,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
+					fields: [idProperty, nameProperty],
                     listeners: {
                         add: function() {
                             container.valueCmp.select(this.getRange());
@@ -628,20 +676,20 @@ Ext.onReady( function() {
                         minWidth: 266,
                         cls: 'optionselector'
                     },
-                    setOptionValues: function(optionArray) {
-                        var options = [];
+                    setOptionValues: function(codeArray) {
+                        var me = this,
+                            records = [];
 
-                        for (var i = 0; i < optionArray.length; i++) {
-                            options.push({
-                                code: optionArray[i],
-                                name: optionArray[i]
-                            });
-                        }
+                        dhis2.er.store.get('optionSets', container.dataElement.optionSet.id).done( function(obj) {
+                            if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
+                                records = container.getRecordsByCode(obj.options, codeArray);
 
-                        container.valueStore.removeAll();
-                        container.valueStore.loadData(options);
+                                container.valueStore.removeAll();
+                                container.valueStore.loadData(records);
 
-                        this.setValue(options);
+                                me.setValue(records);
+                            }
+                        });
                     },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
@@ -2336,7 +2384,7 @@ Ext.onReady( function() {
 
 					if (id && name) {
 						Ext.Ajax.request({
-                            url: init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','),
+                            url: ns.core.init.contextPath + '/api/eventReports/' + id + '.json?fields=' + ns.core.conf.url.analysisFields.join(','),
 							method: 'GET',
 							failure: function(r) {
 								ns.core.web.mask.show();

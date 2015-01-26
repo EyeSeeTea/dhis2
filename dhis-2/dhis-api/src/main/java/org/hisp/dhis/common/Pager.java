@@ -1,7 +1,7 @@
 package org.hisp.dhis.common;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -74,8 +74,8 @@ public class Pager
     public Pager( int page, int total, int pageSize )
     {
         this.page = page;
-        this.total = total;
-        this.pageSize = pageSize;
+        this.total = total >= 0 ? total : 0;
+        this.pageSize = pageSize > 0 ? pageSize : 1;
 
         if ( this.page > getPageCount() )
         {

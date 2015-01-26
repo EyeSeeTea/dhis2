@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -151,7 +151,6 @@ public class ExcelUtils
         sheet.addCell( new Label( column++, row, unit.getCode(), FORMAT_TEXT ) );
         sheet.addCell( new Label( column++, row, unit.getOpeningDate() != null ? i18nFormat.formatDate( unit.getOpeningDate() ) : "", FORMAT_TEXT ) );
         sheet.addCell( new Label( column++, row, unit.getClosedDate() != null ? i18nFormat.formatDate( unit.getClosedDate() ) : "", FORMAT_TEXT ) );
-        sheet.addCell( new Label( column++, row, i18n.getString( getBoolean().get( unit.isActive() ) ), FORMAT_TEXT ) );
         sheet.addCell( new Label( column++, row, unit.getComment(), FORMAT_TEXT ) );
     }
 

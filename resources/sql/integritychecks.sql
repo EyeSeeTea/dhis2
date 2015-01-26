@@ -105,6 +105,17 @@ create index aggregateddatavalue_index on aggregateddatavalue (dataelementid, pe
 create index aggregatedindicatorvalue_index on aggregatedindicatorvalue (indicatorid, periodid, organisationunitid, value);
 create index aggregateddatasetcompleteness_index on aggregateddatasetcompleteness  (datasetid, periodid, organisationunitid, value);
 
+-- Get missing items in a list / missing options in a category by looking at the sort_order and the max sort_order value
+
+select * from (
+select generate_series
+from generate_series(1,1634)
+) s
+left join categories_categoryoptions cco on (
+  s.generate_series=cco.sort_order
+  and cco.categoryid=492298)
+where cco.sort_order is null;
+
 -- Get category option combos from data values which are not part of the category combo of the data element
 
 select distinct de.name as data_element, dv.dataelementid, de_cc.name as data_element_category_combo, oc_cc.name as option_combo_category_combo, con.categoryoptioncomboname, dv.categoryoptioncomboid
@@ -127,7 +138,7 @@ select * from categoryoptioncombo where categoryoptioncomboid not in (select dis
 
 select * from categoryoptioncombo where categoryoptioncomboid not in (select distinct categoryoptioncomboid from categorycombos_optioncombos);
 
--- Get category options without category option combos
+-- Get category options without category option combos (be careful when deleting from categories_categoryoptions to avoid missing indexes)
 
 select * from dataelementcategoryoption where categoryoptionid not in (select distinct categoryoptionid from categoryoptioncombos_categoryoptions);
 
@@ -150,6 +161,14 @@ select * from categorycombo where categorycomboid not in (select distinct catego
 -- Get category options with more than one membership for a category 
 
 select categoryid, categoryoptionid, count(*) from categories_categoryoptions group by categoryid, categoryoptionid having count(*) > 1;
+
+-- Get category combos with categories which share the same category options
+
+select cc.name as cc_name, co.name as co_name from categorycombo cc 
+inner join categorycombos_categories ccc on cc.categorycomboid=ccc.categorycomboid
+inner join categories_categoryoptions cco on ccc.categoryid=cco.categoryid
+inner join dataelementcategoryoption co on cco.categoryoptionid=co.categoryoptionid
+group by cc_name, co_name having count(*) > 1;
 
 -- Get categories with more than one membership for a category combination
 

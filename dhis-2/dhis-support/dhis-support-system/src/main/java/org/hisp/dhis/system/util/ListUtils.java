@@ -1,7 +1,7 @@
 package org.hisp.dhis.system.util;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -289,5 +289,25 @@ public class ListUtils
         }
         
         return union;
+    }
+    
+    /**
+     * Returns a contiguous list of Integers starting on and including a, ending
+     * on and excluding b.
+     * 
+     * @param a start, inclusive.
+     * @param b end, exclusive.
+     * @return a list of Integers.
+     */
+    public static List<Integer> getClosedOpenList( int a, int b )
+    {
+        List<Integer> list = new ArrayList<Integer>();
+        
+        for ( int i = a; i < b; i++ )
+        {
+            list.add( i );
+        }
+        
+        return list;
     }
 }

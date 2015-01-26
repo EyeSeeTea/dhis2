@@ -4,6 +4,36 @@
 
 var d2Directives = angular.module('d2Directives', [])
 
+
+.directive('d2OuSearch', function() {
+    
+    return {
+        restrict: 'E',
+        template: '<div style="margin-top:20px">\n\
+                    <img id="searchIcon" src="../images/search.png" style="cursor: pointer" title="{{ \'locate_organisation_unit_by_name\' | translate}}">\n\
+                    <span id="searchSpan" style="width:100%;display:none;">\n\
+                        <input type="text" id="searchField" name="key"/>\n\
+                        <input type="button" value="{{\'find\' | translate}}" onclick="selection.findByName()"/>\n\
+                    </span>\n\
+                  </div>',
+        link: function (scope, element, attrs) {
+            
+            $("#searchIcon").click(function() {
+                $("#searchSpan").toggle();
+                $("#searchField").focus();
+            });
+
+            $("#searchField").autocomplete({
+                source: "../dhis-web-commons/ouwt/getOrganisationUnitsByName.action",
+                select: function(event, ui) {
+                    $("#searchField").val(ui.item.value);
+                    selection.findByName();
+                }
+            });
+        }
+    };
+})
+
 .directive('inputValidator', function() {
     
     return {
@@ -84,7 +114,7 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('d2NumberValidation', function() {
+.directive('d2NumberValidation', function(ErrorMessageService, $translate) {
     
     return {
         require: 'ngModel',
@@ -115,18 +145,46 @@ var d2Directives = angular.module('d2Directives', [])
                 return isValid;
             }
             
-            var fieldName = element.attr('name');
+            var errorMessages = ErrorMessageService.getErrorMessages();
+            var fieldName = attrs.inputFieldId;
             var numberType = attrs.numberType;
+            var isRequired = attrs.ngRequired === 'true';
             
             ctrl.$parsers.unshift(function(value) {
             	if(value){
-                    var isValid = checkValidity(numberType, value);
+                    var isValid = checkValidity(numberType, value);                    
+                    if(!isValid){
+                        errorMessages[fieldName] = $translate('value_must_be_' + numberType);
+                    }
+                    else{
+                        if(isRequired){
+                            errorMessages[fieldName] = $translate('required');
+                        }
+                        else{
+                            errorMessages[fieldName] = "";
+                        }
+                    }
+                    
+                    ErrorMessageService.setErrorMessages(errorMessages);
                 	ctrl.$setValidity(fieldName, isValid);
-                	return isValid ? value : undefined;
+                    return value;
                 }
+                
+                if(value === ''){
+                    if(isRequired){
+                        errorMessages[fieldName] = $translate('required');
+                    }
+                    else{
+                        ctrl.$setValidity(fieldName, true);
+                        errorMessages[fieldName] = "";
+                    }
+                    
+                    ErrorMessageService.setErrorMessages(errorMessages);
+                    return undefined;
+                }              
             });
            
-            ctrl.$formatters.unshift(function(value) {
+            ctrl.$formatters.unshift(function(value) {                
                 if(value){
                     var isValid = checkValidity(numberType, value);
                     ctrl.$setValidity(fieldName, isValid);
@@ -143,8 +201,7 @@ var d2Directives = angular.module('d2Directives', [])
         require: ['typeahead', 'ngModel'],
         link: function (scope, element, attr, ctrls) {
             element.bind('focus', function () {
-                ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
-                
+                ctrls[0].getMatchesAsync(ctrls[1].$viewValue);                
                 scope.$watch(attr.ngModel, function(value) {
                     if(value === '' || angular.isUndefined(value)){
                         ctrls[0].getMatchesAsync(ctrls[1].$viewValue);
@@ -162,7 +219,7 @@ var d2Directives = angular.module('d2Directives', [])
         restrict: 'A',
         link: function (scope, element, attrs, ctrl) {
             element.bind('blur', function () {                
-                if(ctrl.$viewValue && !ctrl.$modelValue){
+                if(ctrl.$viewValue && !ctrl.$modelValue){                    
                     ctrl.$setViewValue();
                     ctrl.$render();
                 }                
@@ -385,7 +442,7 @@ var d2Directives = angular.module('d2Directives', [])
         restrict: 'E',
         link: function(scope, elm, attrs){            
              scope.$watch('customForm', function(){
-                 elm.html(scope.customForm);
+                 elm.html(scope.customForm.htmlCode);
                  $compile(elm.contents())(scope);
              });
         }
@@ -444,12 +501,15 @@ var d2Directives = angular.module('d2Directives', [])
     };
 })
 
-.directive('d2Date', function(DateUtils, CalendarService, storage, $parse) {
+.directive('d2Date', function(DateUtils, CalendarService, ErrorMessageService, $translate, $parse) {
     return {
         restrict: 'A',
         require: 'ngModel',        
         link: function(scope, element, attrs, ctrl) {    
             
+            var errorMessages = ErrorMessageService.getErrorMessages();
+            var fieldName = attrs.inputFieldId;
+            var isRequired = attrs.ngRequired === 'true';
             var calendarSetting = CalendarService.getSetting();            
             var dateFormat = 'yyyy-mm-dd';
             if(calendarSetting.keyDateFormat === 'dd-MM-yyyy'){
@@ -471,21 +531,50 @@ var d2Directives = angular.module('d2Directives', [])
                 showAnim: "",
                 renderer: $.calendars.picker.themeRollerRenderer,
                 onSelect: function(date) {
-                    ctrl.$setViewValue(date);
-                    $(this).change();                    
-                    scope.$apply();
+                    $(this).change();
                 }
             })
-            .change(function() {
-            	var rawDate = this.value;
-                var convertedDate = DateUtils.format(this.value);
+            .change(function() {                
+                if(this.value){                    
+                    var rawDate = this.value;
+                    var convertedDate = DateUtils.format(this.value);
+
+                    var isValid = rawDate == convertedDate;
+                    
+                    if(!isValid){
+                        errorMessages[fieldName] = $translate('date_required');
+                    }
+                    else{
+                        if(isRequired){
+                            errorMessages[fieldName] = $translate('required');
+                        }
+                        else{
+                            errorMessages[fieldName] = "";
+                        }
+                        if(maxDate === 0){                    
+                            isValid = !moment(convertedDate, calendarSetting.momentFormat).isAfter(DateUtils.getToday());
+                            if(!isValid){
+                                errorMessages[fieldName] = $translate('future_date_not_allowed');                            
+                            }                           
+                        }
+                    }                                        
+                    ctrl.$setViewValue(this.value);
+                    ctrl.$setValidity(fieldName, isValid);
+                }
+                else{
+                    if(!isRequired){
+                        ctrl.$setViewValue(this.value);
+                        ctrl.$setValidity(fieldName, !isRequired);
+                        errorMessages[fieldName] = "";
+                    }
+                    else{
+                        errorMessages[fieldName] = $translate('required');                        
+                    }
+                }
                 
-                var isValid = rawDate == convertedDate;                
-                var fieldName = element.attr('name');
-                
-                ctrl.$setViewValue(isValid ? this.value : undefined);                                   
-                ctrl.$setValidity(fieldName, isValid);	            
-	            scope.$apply();
+                ErrorMessageService.setErrorMessages(errorMessages);
+                this.focus();
+                scope.$apply();
             });    
         }      
     };   

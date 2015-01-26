@@ -1,7 +1,7 @@
 package org.hisp.dhis.chart;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,6 +33,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataset.DataSet;
@@ -117,5 +118,9 @@ public interface ChartService
 
     int countDataElementCharts( DataElement dataElement );
     
+    int countPeriodCharts( Period period );
+    
     int countOrganisationUnitCharts( OrganisationUnit organisationUnit );
+    
+    int countCategoryOptionGroups( CategoryOptionGroup categoryOptionGroup );
 }

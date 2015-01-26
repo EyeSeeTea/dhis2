@@ -1,7 +1,7 @@
 package org.hisp.dhis.user.hibernate;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -133,7 +133,11 @@ public class HibernateUserStore
         
         if ( UserInvitationStatus.EXPIRED.equals( params.getInvitationStatus() ) )
         {
-            hql += hlp.whereAnd() + " uc.invitation = true and uc.restoreExpiry < current_timestamp() ";
+            hql += hlp.whereAnd() + " uc.invitation = true " +
+                "and uc.restoreToken is not null " +
+                "and uc.restoreCode is not null " +
+                "and uc.restoreExpiry is not null " +
+                "and uc.restoreExpiry < current_timestamp() ";
         }
                 
         if ( params.getOrganisationUnit() != null )

@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -136,7 +136,7 @@ public class UserCredentials
      * Indicates whether this user was originally self registered.
      */
     private boolean selfRegistered;
-    
+
     /**
      * Indicates whether this credentials is currently an invitation.
      */
@@ -187,6 +187,23 @@ public class UserCredentials
         }
 
         return authorities;
+    }
+    
+    /**
+     * Indicates whether this user credentials has at least one authority through
+     * its user authority groups.
+     */
+    public boolean hasAuthorities()
+    {
+        for ( UserAuthorityGroup group : userAuthorityGroups )
+        {
+            if ( group != null && group.getAuthorities() != null && !group.getAuthorities().isEmpty() )
+            {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -260,9 +277,9 @@ public class UserCredentials
      * of this user credentials, or this user credentials must have the ALL
      * authority.
      *
-     * @param group the user authority group.
+     * @param group                          the user authority group.
      * @param canGrantOwnUserAuthorityGroups indicates whether this users can grant
-     *        its own authority groups to others.
+     *                                       its own authority groups to others.
      */
     public boolean canIssueUserRole( UserAuthorityGroup group, boolean canGrantOwnUserAuthorityGroups )
     {
@@ -290,9 +307,9 @@ public class UserCredentials
      * Indicates whether this user credentials can issue all of the user authority
      * groups in the given collection.
      *
-     * @param groups the collection of user authority groups.
+     * @param groups                         the collection of user authority groups.
      * @param canGrantOwnUserAuthorityGroups indicates whether this users can grant
-     *        its own authority groups to others.
+     *                                       its own authority groups to others.
      */
     public boolean canIssueUserRoles( Collection<UserAuthorityGroup> groups, boolean canGrantOwnUserAuthorityGroups )
     {
@@ -401,7 +418,15 @@ public class UserCredentials
     }
 
     /**
-     * Indicates whether this user has dimension constraints.
+     * Indicates whether this user credentials has user authority groups.
+     */
+    public boolean hasUserAuthorityGroups()
+    {
+        return userAuthorityGroups != null && !userAuthorityGroups.isEmpty();
+    }
+    
+    /**
+     * Indicates whether this user credentials has dimension constraints.
      */
     public boolean hasDimensionConstraints()
     {
@@ -451,6 +476,16 @@ public class UserCredentials
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
+
+    @Override
+    @JsonProperty
+    @JsonView( DetailedView.class )
+    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public User getUser()
+    {
+        return super.getUser();
+    }
 
     public String getPassword()
     {
@@ -645,10 +680,10 @@ public class UserCredentials
             openId = userCredentials.getOpenId();
             password = StringUtils.isEmpty( userCredentials.getPassword() ) ? password : userCredentials.getPassword();
             passwordLastUpdated = userCredentials.getPasswordLastUpdated();
-            
+
             userAuthorityGroups.clear();
             userAuthorityGroups.addAll( userCredentials.getUserAuthorityGroups() );
-            
+
             catDimensionConstraints.clear();
             catDimensionConstraints.addAll( userCredentials.getCatDimensionConstraints() );
 

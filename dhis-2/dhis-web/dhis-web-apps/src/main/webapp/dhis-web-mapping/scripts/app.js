@@ -49,6 +49,42 @@ Ext.onReady( function() {
 
         });
 
+        Ext.override(Ext.data.TreeStore, {
+            load: function(options) {
+                options = options || {};
+                options.params = options.params || {};
+
+                var me = this,
+                    node = options.node || me.tree.getRootNode(),
+                    root;
+
+                // If there is not a node it means the user hasnt defined a rootnode yet. In this case lets just
+                // create one for them.
+                if (!node) {
+                    node = me.setRootNode({
+                        expanded: true
+                    });
+                }
+
+                if (me.clearOnLoad) {
+                    node.removeAll(true);
+                }
+
+                options.records = [node];
+
+                Ext.applyIf(options, {
+                    node: node
+                });
+                //options.params[me.nodeParam] = node ? node.getId() : 'root';
+
+                if (node) {
+                    node.set('loading', true);
+                }
+
+                return me.callParent([options]);
+            }
+        });
+
 		// right click handler
 		document.body.oncontextmenu = function() {
 			return false;
@@ -70,28 +106,6 @@ Ext.onReady( function() {
 				var a = [];
 				for (var i = 0; i < layers.length; i++) {
 					a = a.concat(layers[i].features);
-				}
-				return a;
-			};
-
-			util.map.getPointsByFeatures = function(features) {
-				var a = [];
-				for (var i = 0; i < features.length; i++) {
-					if (features[i].geometry.CLASS_NAME === gis.conf.finals.openLayers.point_classname) {
-						a.push(features[i]);
-					}
-				}
-				return a;
-			};
-
-			util.map.getLonLatsByPoints = function(points) {
-				var lonLat,
-					point,
-					a = [];
-				for (var i = 0; i < points.length; i++) {
-					point = points[i];
-					lonLat = new OpenLayers.LonLat(point.geometry.x, point.geometry.y);
-					a.push(lonLat);
 				}
 				return a;
 			};
@@ -1498,6 +1512,19 @@ Ext.onReady( function() {
 					this.valueCmp.setOptionValues(a[1].split(';'));
 				}
             },
+            getRecordsByCode: function(options, codeArray) {
+                var records = [];
+
+                for (var i = 0; i < options.length; i++) {
+                    for (var j = 0; j < codeArray.length; j++) {
+                        if (options[i].code === codeArray[j]) {
+                            records.push(options[i]);
+                        }
+                    }
+                }
+
+                return records;
+            },
             initComponent: function() {
                 var container = this,
                     idProperty = 'code',
@@ -1528,7 +1555,7 @@ Ext.onReady( function() {
                 });
 
                 this.searchStore = Ext.create('Ext.data.Store', {
-					fields: [idProperty, 'name'],
+					fields: [idProperty, nameProperty],
 					data: [],
 					loadOptionSet: function(optionSetId, key, pageSize) {
 						var store = this;
@@ -1627,7 +1654,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueStore = Ext.create('Ext.data.Store', {
-					fields: ['id', 'name'],
+					fields: [idProperty, nameProperty],
                     listeners: {
                         add: function() {
                             container.valueCmp.select(this.getRange());
@@ -1652,20 +1679,20 @@ Ext.onReady( function() {
                     listConfig: {
                         cls: 'optionselector'
                     },
-                    setOptionValues: function(optionArray) {
-                        var options = [];
+                    setOptionValues: function(codeArray) {
+                        var me = this,
+                            records = [];
 
-                        for (var i = 0; i < optionArray.length; i++) {
-                            options.push({
-                                code: optionArray[i],
-                                name: optionArray[i]
-                            });
-                        }
+                        dhis2.gis.store.get('optionSets', container.dataElement.optionSet.id).done( function(obj) {
+                            if (Ext.isObject(obj) && Ext.isArray(obj.options) && obj.options.length) {
+                                records = container.getRecordsByCode(obj.options, codeArray);
 
-                        container.valueStore.removeAll();
-                        container.valueStore.loadData(options);
+                                container.valueStore.removeAll();
+                                container.valueStore.loadData(records);
 
-                        this.setValue(options);
+                                me.setValue(records);
+                            }
+                        });
                     },
 					listeners: {
                         change: function(cmp, newVal, oldVal) {
@@ -2631,8 +2658,11 @@ Ext.onReady( function() {
 				handler: function() {
 					var name = nameTextfield.getValue(),
 						layers = gis.util.map.getRenderedVectorLayers(),
+                        centerPoint = function() {
+                            var lonlat = gis.olmap.getCenter();
+                            return new OpenLayers.Geometry.Point(lonlat.lon, lonlat.lat).transform('EPSG:900913', 'EPSG:4326');
+                        }(),
 						layer,
-						lonlat = gis.olmap.getCenter(),
 						views = [],
 						view,
 						map;
@@ -2654,7 +2684,7 @@ Ext.onReady( function() {
 
                         view.hidden = !layer.visibility;
 
-						// Operand
+						// operand
 						if (Ext.isArray(view.columns) && view.columns.length) {
 							for (var j = 0; j < view.columns.length; j++) {
 								for (var k = 0, item; k < view.columns[j].items.length; k++) {
@@ -2675,8 +2705,8 @@ Ext.onReady( function() {
 
 					map = {
 						name: name,
-						longitude: lonlat.lon,
-						latitude: lonlat.lat,
+						longitude: centerPoint.x,
+						latitude: centerPoint.y,
 						zoom: gis.olmap.getZoom(),
 						mapViews: views,
 						user: {
@@ -3999,49 +4029,6 @@ Ext.onReady( function() {
 
 		return;
     };
-
-	GIS.app.CircleLayer = function(features, radius) {
-		var points = gis.util.map.getPointsByFeatures(features),
-			lonLats = gis.util.map.getLonLatsByPoints(points),
-			controls = [],
-			control,
-			layer = new OpenLayers.Layer.Vector(),
-			deactivateControls,
-			createCircles,
-			params = {};
-
-		radius = radius && Ext.isNumber(parseInt(radius)) ? parseInt(radius) : 5;
-
-		deactivateControls = function() {
-			for (var i = 0; i < controls.length; i++) {
-				controls[i].deactivate();
-			}
-		};
-
-		createCircles = function() {
-			if (lonLats.length) {
-				for (var i = 0; i < lonLats.length; i++) {
-					control = new OpenLayers.Control.Circle({
-						layer: layer
-					});
-					control.lonLat = lonLats[i];
-					controls.push(control);
-				}
-
-				gis.olmap.addControls(controls);
-
-				for (var i = 0; i < controls.length; i++) {
-					control = controls[i];
-					control.activate();
-					control.updateCircle(control.lonLat, radius);
-				}
-			}
-		}();
-
-		layer.deactivateControls = deactivateControls;
-
-		return layer;
-	};
 
 	GIS.app.LayerWidgetEvent = function(layer) {
 
@@ -8762,6 +8749,7 @@ Ext.onReady( function() {
 			map: gis.olmap,
 			fullSize: true,
 			cmp: [defaultButton],
+            trash: [],
 			toggleCmp: function(show) {
 				for (var i = 0; i < this.cmp.length; i++) {
 					if (show) {
@@ -9030,6 +9018,19 @@ Ext.onReady( function() {
 				}()
 			},
             listeners: {
+                render: function() {
+                    var me = this;
+
+                    me.getEl().on('mouseleave', function() {
+                        for (var i = 0, cmp; i < me.trash.length; i++) {
+                            cmp = me.trash[i];
+
+                            if (cmp && cmp.destroy) {
+                                cmp.destroy();
+                            }
+                        }
+                    });
+                },
                 resize: function() {
                     var width = this.getWidth();
 

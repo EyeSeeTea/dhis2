@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.objectfilter.ops;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,7 +28,6 @@ package org.hisp.dhis.dxf2.objectfilter.ops;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -112,7 +111,7 @@ public abstract class Op
                 {
                     return (T) simpleDateFormat.parse( value );
                 }
-                catch ( ParseException ignored )
+                catch ( Exception ignored )
                 {
                 }
             }

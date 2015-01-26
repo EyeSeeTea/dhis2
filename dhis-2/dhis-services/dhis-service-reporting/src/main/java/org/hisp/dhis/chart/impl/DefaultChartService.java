@@ -1,7 +1,7 @@
 package org.hisp.dhis.chart.impl;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,6 +69,7 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NumericSortWrapper;
+import org.hisp.dhis.dataelement.CategoryOptionGroup;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementOperand;
@@ -1023,10 +1024,22 @@ public class DefaultChartService
     {
         return chartStore.countDataElementAnalyticalObject( dataElement );
     }
+
+    @Override
+    public int countPeriodCharts( Period period )
+    {
+        return chartStore.countPeriodAnalyticalObject( period );
+    }
     
     @Override
     public int countOrganisationUnitCharts( OrganisationUnit organisationUnit )
     {
         return chartStore.countOrganisationUnitAnalyticalObject( organisationUnit );
+    }
+
+    @Override
+    public int countCategoryOptionGroups( CategoryOptionGroup categoryOptionGroup )
+    {
+        return chartStore.countCategoryOptionGroupAnalyticalObject( categoryOptionGroup );
     }
 }

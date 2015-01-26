@@ -1,7 +1,7 @@
 package org.hisp.dhis.user;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,8 @@ package org.hisp.dhis.user;
 import java.util.Date;
 
 import org.hisp.dhis.organisationunit.OrganisationUnit;
+
+import com.google.common.base.MoreObjects;
 
 /**
  * @author Lars Helge Overland
@@ -78,6 +80,30 @@ public class UserQueryParams
         this.user = user;
     }
 
+    // -------------------------------------------------------------------------
+    // toString
+    // -------------------------------------------------------------------------
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this ).
+            add( "query", query ).
+            add( "phone number", phoneNumber ).
+            add( "user", user != null ? user.getUsername() : null ).
+            add( "can manage", canManage ).
+            add( "auth subset", authSubset ).
+            add( "disjoint roles", disjointRoles ).
+            add( "last login", lastLogin ).
+            add( "inactive since", inactiveSince ).
+            add( "inactive months", inactiveMonths ).
+            add( "self registered", selfRegistered ).
+            add( "invitation status", invitationStatus ).
+            add( "organisation unit", organisationUnit != null ? organisationUnit.getUid() : null ).
+            add( "first", first ).
+            add( "max", max ).toString();
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------

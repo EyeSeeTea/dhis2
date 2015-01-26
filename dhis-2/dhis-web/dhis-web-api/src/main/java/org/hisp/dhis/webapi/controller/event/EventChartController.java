@@ -1,7 +1,7 @@
 package org.hisp.dhis.webapi.controller.event;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -161,6 +161,7 @@ public class EventChartController
         @RequestParam( value = "ou", required = false ) String ou,
         @RequestParam( value = "width", defaultValue = "800", required = false ) int width,
         @RequestParam( value = "height", defaultValue = "500", required = false ) int height,
+        @RequestParam( value = "attachment", required = false ) boolean attachment,
         HttpServletResponse response ) throws IOException
     {
         EventChart chart = eventChartService.getEventChart( uid ); // TODO no acl?
@@ -177,7 +178,7 @@ public class EventChartController
 
         String filename = CodecUtils.filenameEncode( chart.getName() ) + ".png";
 
-        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PNG, CacheStrategy.RESPECT_SYSTEM_SETTING, filename, false );
+        contextUtils.configureResponse( response, ContextUtils.CONTENT_TYPE_PNG, CacheStrategy.RESPECT_SYSTEM_SETTING, filename, attachment );
 
         ChartUtilities.writeChartAsPNG( response.getOutputStream(), jFreeChart, width, height );
     }

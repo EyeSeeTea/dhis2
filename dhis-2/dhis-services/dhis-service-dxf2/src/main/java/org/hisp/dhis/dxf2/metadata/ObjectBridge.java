@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,13 @@ public interface ObjectBridge
      * @param object Object to write
      */
     void saveObject( Object object );
+
+    /**
+     * Save object. Will save to persistence layer if {@code writeEnabled} is {@code true}.
+     *
+     * @param object Object to write
+     */
+    void saveObject( Object object, boolean clearSharing );
 
     /**
      * Update object. Will save to persistence layer if {@code writeEnabled} is {@code true}.

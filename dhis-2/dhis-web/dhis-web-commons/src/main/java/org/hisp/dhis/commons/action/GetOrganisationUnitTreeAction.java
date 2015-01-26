@@ -1,7 +1,7 @@
 package org.hisp.dhis.commons.action;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -174,6 +174,21 @@ public class GetOrganisationUnitTreeAction
 
         username = currentUserService.getCurrentUsername();
 
+        Collection<OrganisationUnit> userOrganisationUnits = new ArrayList<>();
+
+        User user = currentUserService.getCurrentUser();
+
+        if ( user != null && user.hasOrganisationUnit() )
+        {
+            userOrganisationUnits = new ArrayList<>( user.getOrganisationUnits() );
+            rootOrganisationUnits = new ArrayList<>( user.getOrganisationUnits() );
+        }
+        else if ( currentUserService.currentUserIsSuper() || user == null )
+        {
+            userOrganisationUnits = new ArrayList<>( organisationUnitService.getRootOrganisationUnits() );
+            rootOrganisationUnits = new ArrayList<>( organisationUnitService.getRootOrganisationUnits() );
+        }
+
         if ( byName != null )
         {
             List<OrganisationUnit> organisationUnitByName = organisationUnitService.getOrganisationUnitByName( byName );
@@ -227,21 +242,6 @@ public class GetOrganisationUnitTreeAction
             }
 
             return "partial";
-        }
-
-        Collection<OrganisationUnit> userOrganisationUnits = new ArrayList<>();
-
-        User user = currentUserService.getCurrentUser();
-
-        if ( user != null && user.hasOrganisationUnit() )
-        {
-            userOrganisationUnits = new ArrayList<>( user.getOrganisationUnits() );
-            rootOrganisationUnits = new ArrayList<>( user.getOrganisationUnits() );
-        }
-        else if ( currentUserService.currentUserIsSuper() || user == null )
-        {
-            userOrganisationUnits = new ArrayList<>( organisationUnitService.getRootOrganisationUnits() );
-            rootOrganisationUnits = new ArrayList<>( organisationUnitService.getRootOrganisationUnits() );
         }
 
         if ( !versionOnly && !rootOrganisationUnits.isEmpty() )

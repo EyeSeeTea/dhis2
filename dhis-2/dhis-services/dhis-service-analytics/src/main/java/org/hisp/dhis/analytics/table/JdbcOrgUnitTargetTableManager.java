@@ -1,7 +1,7 @@
 package org.hisp.dhis.analytics.table;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -55,6 +55,12 @@ public class JdbcOrgUnitTargetTableManager
         return tables;
     }
 
+    @Override
+    public List<AnalyticsTable> getAllTables()
+    {
+        return getTables( null );
+    }
+    
     @Override
     public String validState()
     {

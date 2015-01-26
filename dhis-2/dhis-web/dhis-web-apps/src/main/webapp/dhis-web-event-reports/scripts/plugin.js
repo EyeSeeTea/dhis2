@@ -520,7 +520,7 @@ Ext.onReady( function() {
 						return;
 					}
 
-					return layout;
+					return Ext.apply(layout, applyConfig);
 				}();
 			};
 
@@ -3081,47 +3081,6 @@ Ext.onReady( function() {
 
 	// PLUGIN
 
-		// css
-	css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
-	css += '.td-nobreak { \n white-space: nowrap; \n } \n';
-	css += '.td-hidden { \n display: none; \n } \n';
-	css += '.td-collapsed { \n display: none; \n } \n';
-	css += 'table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n';
-	css += '.pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n';
-	css += '.pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n';
-	css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
-	css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
-	css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
-	css += '.pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n';
-	css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
-	css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
-	css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
-	css += '.pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n';
-	css += '.pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n';
-	css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
-	css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
-    css += '.pivot-dim-label { \n background-color: #cddaed; \n white-space: nowrap; \n text-align: center; \n } \n';
-    css += '.pivot-empty { \n background-color: #cddaed; \n } \n';
-    css += '.pivot-transparent-column { \n background-color: #fff; \n border-top-color: #fff !important; \n border-right-color: #fff !important; \n } \n';
-    css += '.pivot-transparent-row { \n background-color: #fff; \n border-bottom-color: #fff !important; \n border-left-color: #fff !important; \n } \n';
-
-    css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
-	css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
-	css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';
-    css += '.x-mask { opacity: 0 } \n';
-
-	css += '.pivot td.legend { \n padding: 0; \n } \n';
-	css += '.pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n';
-	css += '.pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n';
-	css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
-	css += '.pivot div.number { \n display: table-cell; \n } \n',
-	css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
-
-	css += '.pointer { \n cursor: pointer; \n } \n';
-	css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v217/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
-
-	Ext.util.CSS.createStyleSheet(css);
-
 	ER.plugin = {};
 
 	var init = {
@@ -3132,6 +3091,7 @@ Ext.onReady( function() {
 		isInitStarted = false,
 		isInitComplete = false,
 		getInit,
+        applyCss,
 		execute;
 
 	getInit = function(contextPath) {
@@ -3154,26 +3114,33 @@ Ext.onReady( function() {
 			}
 		};
 
-        // date, calendar
+        // dhis2
         requests.push({
-            url: contextPath + '/api/systemSettings.jsonp?key=keyCalendar&key=keyDateFormat',
+            url: init.contextPath + '/api/systemSettings.' + type + '?key=keyCalendar&key=keyDateFormat',
+            disableCaching: false,
             success: function(r) {
-                var systemSettings = r;
+                var systemSettings = r.responseText ? Ext.decode(r.responseText) : r,
+                    userAccountConfig;
+
                 init.systemInfo.dateFormat = Ext.isString(systemSettings.keyDateFormat) ? systemSettings.keyDateFormat.toLowerCase() : 'yyyy-mm-dd';
                 init.systemInfo.calendar = systemSettings.keyCalendar;
 
-                // user-account
-                Ext.data.JsonP.request({
-                    url: contextPath + '/api/me/user-account.jsonp',
-                    success: function(r) {
-                        init.userAccount = r;
+                // optionSetsConfig
 
-                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
-                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
-                                Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
-                                    Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
-                                        Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
-                                            Ext.Loader.injectScriptElement(contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
+
+                // user-account
+                userAccountConfig = {
+                    url: init.contextPath + '/api/me/user-account.' + type,
+                    disableCaching: false,
+                    success: function(r) {
+                        init.userAccount = r.responseText ? Ext.decode(r.responseText) : r;
+
+                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/jQuery/jquery.min.js', function() {
+                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.util.js', function() {
+                                Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.js', function() {
+                                    Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.idb.js', function() {
+                                        Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.ss.js', function() {
+                                            Ext.Loader.injectScriptElement(init.contextPath + '/dhis-web-commons/javascripts/dhis2/dhis2.storage.memory.js', function() {
 
                                                 // init
                                                 var defaultKeyUiLocale = 'en',
@@ -3181,7 +3148,8 @@ Ext.onReady( function() {
                                                     namePropertyUrl,
                                                     contextPath,
                                                     keyUiLocale,
-                                                    dateFormat;
+                                                    dateFormat,
+                                                    optionSetVersionConfig;
 
                                                 init.userAccount.settings.keyUiLocale = init.userAccount.settings.keyUiLocale || defaultKeyUiLocale;
                                                 init.userAccount.settings.keyAnalysisDisplayProperty = init.userAccount.settings.keyAnalysisDisplayProperty || defaultKeyAnalysisDisplayProperty;
@@ -3196,25 +3164,35 @@ Ext.onReady( function() {
                                                 init.namePropertyUrl = namePropertyUrl;
 
                                                 // dhis2
-                                                dhis2.util.namespace('dhis2.er');
+                                                dhis2.util.namespace('dhis2.ev');
 
-                                                dhis2.er.store = dhis2.er.store || new dhis2.storage.Store({
+                                                dhis2.ev.store = dhis2.ev.store || new dhis2.storage.Store({
                                                     name: 'dhis2',
                                                     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
                                                     objectStores: ['optionSets']
                                                 });
 
-                                                // option sets
-                                                Ext.data.JsonP.request({
-                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,version&paging=false',
+                                                optionSetVersionConfig = {
+                                                    url: contextPath + '/api/optionSets.' + type + '?fields=id,version&paging=false',
+                                                    disableCashing: false,
                                                     success: function(r) {
-                                                        var optionSets = r.optionSets || [],
-                                                            store = dhis2.er.store,
+                                                        var optionSets = (r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets) || [],
+                                                            store = dhis2.ev.store,
                                                             ids = [],
                                                             url = '',
                                                             callbacks = 0,
                                                             checkOptionSet,
-                                                            updateStore;
+                                                            updateStore,
+                                                            optionSetConfig;
+
+                                                        optionSetConfig = {
+                                                            url: contextPath + '/api/optionSets.' + type + '?fields=id,name,version,options[code,name]&paging=false' + url,
+                                                            disableCashing: false,
+                                                            success: function(r) {
+                                                                var sets = r.responseText ? Ext.decode(r.responseText).optionSets : r.optionSets;
+                                                                store.setAll('optionSets', sets).done(fn);
+                                                            }
+                                                        };
 
                                                         updateStore = function() {
                                                             if (++callbacks === optionSets.length) {
@@ -3227,14 +3205,12 @@ Ext.onReady( function() {
                                                                     url += '&filter=id:eq:' + ids[i];
                                                                 }
 
-                                                                Ext.data.JsonP.request({
-                                                                    url: contextPath + '/api/optionSets.jsonp?fields=id,name,version,options[code,name]&paging=false' + url,
-                                                                    success: function(r) {
-                                                                        var sets = r.optionSets;
-
-                                                                        store.setAll('optionSets', sets).done(fn);
-                                                                    }
-                                                                });
+                                                                if (type === 'jsonp') {
+                                                                    Ext.data.JsonP.request(optionSetConfig);
+                                                                }
+                                                                else {
+                                                                    Ext.Ajax.request(optionSetConfig);
+                                                                }
                                                             }
                                                         };
 
@@ -3254,7 +3230,15 @@ Ext.onReady( function() {
                                                             }
                                                         });
                                                     }
-                                                });
+                                                };
+
+                                                // option sets
+                                                if (type === 'jsonp') {
+                                                    Ext.data.JsonP.request(optionSetVersionConfig);
+                                                }
+                                                else {
+                                                    Ext.Ajax.request(optionSetVersionConfig);
+                                                }
                                             });
                                         });
                                     });
@@ -3262,14 +3246,23 @@ Ext.onReady( function() {
                             });
                         });
                     }
-                });
+                };
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(userAccountConfig);
+                }
+                else {
+                    Ext.Ajax.request(userAccountConfig);
+                }
             }
         });
 
+		// user orgunit
 		requests.push({
-			url: contextPath + '/api/organisationUnits.jsonp?userOnly=true&fields=id,name,children[id,name]&paging=false',
+			url: init.contextPath + '/api/organisationUnits.' + type + '?userOnly=true&fields=id,name,children[id,name]&paging=false',
+            disableCaching: false,
 			success: function(r) {
-				var organisationUnits = r.organisationUnits || [],
+				var organisationUnits = (r.responseText ? Ext.decode(r.responseText).organisationUnits : r) || [],
                     ou = [],
                     ouc = [];
 
@@ -3296,20 +3289,69 @@ Ext.onReady( function() {
 			}
 		});
 
-        init.legendSets = [];
-
+        // dimensions
 		requests.push({
-			url: contextPath + '/api/dimensions.jsonp?links=false&paging=false',
+			url: init.contextPath + '/api/dimensions.' + type + '?fields=id,name&paging=false',
+            disableCaching: false,
 			success: function(r) {
-				init.dimensions = r.dimensions;
+				init.dimensions = r.responseText ? Ext.decode(r.responseText).dimensions : r.dimensions;
 				fn();
 			}
 		});
 
+        init.legendSets = [];
+
 		for (var i = 0; i < requests.length; i++) {
-			Ext.data.JsonP.request(requests[i]);
+            if (type === 'jsonp') {
+                Ext.data.JsonP.request(requests[i]);
+            }
+            else {
+                Ext.Ajax.request(requests[i]);
+            }
 		}
 	};
+
+    applyCss = function() {
+        var css = 'table.pivot { \n font-family: arial,sans-serif,ubuntu,consolas; \n } \n';
+        css += '.td-nobreak { \n white-space: nowrap; \n } \n';
+        css += '.td-hidden { \n display: none; \n } \n';
+        css += '.td-collapsed { \n display: none; \n } \n';
+        css += 'table.pivot { \n border-collapse: collapse; \n border-spacing: 0px; \n border: 0 none; \n } \n';
+        css += '.pivot td { \n padding: 5px; \n border: \n 1px solid #b2b2b2; \n } \n';
+        css += '.pivot-dim { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+        css += '.pivot-dim.highlighted { \n	background-color: #c5d8f6; \n } \n';
+        css += '.pivot-dim-subtotal { \n background-color: #cad6e8; \n text-align: center; \n } \n';
+        css += '.pivot-dim-total { \n background-color: #bac6d8; \n text-align: center; \n } \n';
+        css += '.pivot-dim-total.highlighted { \n background-color: #adb8c9; \n } \n';
+        css += '.pivot-dim-empty { \n background-color: #dae6f8; \n text-align: center; \n } \n';
+        css += '.pivot-value { \n background-color: #fff; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-value-subtotal { \n background-color: #f4f4f4; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-value-subtotal-total { \n background-color: #e7e7e7; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-value-total { \n background-color: #e4e4e4; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-value-total-subgrandtotal { \n background-color: #d8d8d8; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-value-grandtotal { \n background-color: #c8c8c8; \n white-space: nowrap; \n text-align: right; \n } \n';
+        css += '.pivot-dim-label { \n background-color: #cddaed; \n white-space: nowrap; \n text-align: center; \n } \n';
+        css += '.pivot-empty { \n background-color: #cddaed; \n } \n';
+        css += '.pivot-transparent-column { \n background-color: #fff; \n border-top-color: #fff !important; \n border-right-color: #fff !important; \n } \n';
+        css += '.pivot-transparent-row { \n background-color: #fff; \n border-bottom-color: #fff !important; \n border-left-color: #fff !important; \n } \n';
+
+        css += '.x-mask-msg { \n padding: 0; \n	border: 0 none; \n background-image: none; \n background-color: transparent; \n } \n';
+        css += '.x-mask-msg div { \n background-position: 11px center; \n } \n';
+        css += '.x-mask-msg .x-mask-loading { \n border: 0 none; \n	background-color: #000; \n color: #fff; \n border-radius: 2px; \n padding: 12px 14px 12px 30px; \n opacity: 0.65; \n } \n';
+        css += '.x-mask { opacity: 0 } \n';
+
+        css += '.pivot td.legend { \n padding: 0; \n } \n';
+        css += '.pivot div.legendCt { \n display: table; \n float: right; \n width: 100%; \n } \n';
+        css += '.pivot div.arrowCt { \n display: table-cell; \n vertical-align: top; \n width: 8px; \n } \n';
+        css += '.pivot div.arrow { \n width: 0; \n height: 0; \n } \n';
+        css += '.pivot div.number { \n display: table-cell; \n } \n',
+        css += '.pivot div.legendColor { \n display: table-cell; \n width: 2px; \n } \n';
+
+        css += '.pointer { \n cursor: pointer; \n } \n';
+        css += '.td-sortable { \n background-image: url("http://dhis2-cdn.org/v217/plugin/images/arrowupdown.png"); \n background-repeat: no-repeat; \n background-position: right center; \n padding-right: 15px !important; \n } \n';
+
+        Ext.util.CSS.createStyleSheet(css);
+    };
 
 	execute = function(config) {
 		var validateConfig,
@@ -3344,7 +3386,28 @@ Ext.onReady( function() {
 				support = ns.core.support,
 				service = ns.core.service,
 				web = ns.core.web,
-                dimConf = conf.finals.dimension;
+                dimConf = conf.finals.dimension,
+                type = ns.plugin && ns.crossDomain ? 'jsonp' : 'json',
+                headerMap = {
+                    json: 'application/json',
+                    jsonp: 'application/javascript'
+                },
+                headers = {
+                    'Content-Type': headerMap[type],
+                    'Accepts': headerMap[type]
+                };
+
+            ns.plugin = init.plugin;
+            ns.dashboard = init.dashboard;
+            ns.crossDomain = init.crossDomain;
+            ns.skipMask = init.skipMask;
+            ns.skipFade = init.skipFade;
+
+			init.el = config.el;
+
+            if (!ns.skipFade) {
+                Ext.get(init.el).setStyle('opacity', 0);
+            }
 
 			// mouse events
 			web.events = web.events || {};
@@ -3400,65 +3463,106 @@ Ext.onReady( function() {
 			// report
 			web.report = web.report || {};
 
-			web.report.loadReport = function(id) {
-				if (!Ext.isString(id)) {
-					alert('Invalid event report id');
-					return;
-				}
+			web.report.loadReport = function(obj) {
+                var success,
+                    failure,
+                    config = {};
 
-				Ext.data.JsonP.request({
-					url: init.contextPath + '/api/eventReports/' + id + '.jsonp?fields=' + conf.url.analysisFields.join(','),
-					failure: function(r) {
-						window.open(init.contextPath + '/api/eventReports/' + id + '.json?fields=' + conf.url.analysisFields.join(','), '_blank');
-					},
-					success: function(r) {
-						var layout = api.layout.Layout(r);
+                if (!(obj && obj.id)) {
+                    console.log('Error, no chart id');
+                    return;
+                }
 
-						if (layout) {
-							web.report.getData(layout, true);
-						}
-					}
-				});
+                success = function(r) {
+                    var layout = api.layout.Layout((r.responseText ? Ext.decode(r.responseText) : r), obj);
+
+                    if (layout) {
+                        web.report.getData(layout, true);
+                    }
+                };
+
+                failure = function(r) {
+                    console.log(obj.id, (r.responseText ? Ext.decode(r.responseText) : r));
+                };
+
+                config.url = init.contextPath + '/api/eventReports/' + obj.id + '.' + type + '?fields=' + conf.url.analysisFields.join(',');
+                config.disableCaching = false;
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.report.getData = function(view, isUpdateGui) {
-				var paramString = web.analytics.getParamString(view, 'jsonp');
+				var xLayout,
+					paramString,
+                    success,
+                    failure,
+                    config = {};
 
-				// show mask
-				web.mask.show(ns.app.centerRegion);
+				if (!layout) {
+					return;
+				}
 
-				Ext.data.JsonP.request({
-					url: ns.core.init.contextPath + paramString,
-					disableCaching: false,
-					scope: this,
-					failure: function(r) {
-						web.mask.hide(ns.app.centerRegion);
+                //xLayout = service.layout.getExtendedLayout(layout);
+				paramString = web.analytics.getParamString(layout, type);
 
-                        console.log(r.status + '\n' + r.statusText + '\n' + r.responseText);
-					},
-					success: function(r) {
-                        var response = api.response.Response(r);
+				// mask
+                if (!ns.skipMask) {
+                    web.mask.show(ns.app.centerRegion);
+                }
 
-                        if (!response) {
-							web.mask.hide(ns.app.centerRegion);
-							return;
-						}
+                success = function(r) {
+                    var response = api.response.Response((r.responseText ? Ext.decode(r.responseText) : r));
 
-                        // add to dimConf, TODO
-                        for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
-                            header = response.headers[i];
-                            map[header.name] = map[header.name] || {
-                                id: header.name,
-                                dimensionName: header.name,
-                                name: header.column
-                            };
-                        }
+                    if (!response && !ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                        return;
+                    }
 
-                        ns.app.paramString = paramString;
+                    // add to dimConf, TODO
+                    for (var i = 0, map = dimConf.objectNameMap, header; i < response.headers.length; i++) {
+                        header = response.headers[i];
+                        map[header.name] = map[header.name] || {
+                            id: header.name,
+                            dimensionName: header.name,
+                            name: header.column
+                        };
+                    }
 
-                        web.report.createReport(view, response, isUpdateGui);
-					}
-				});
+                    ns.app.paramString = paramString;
+
+                    web.report.createReport(view, response, isUpdateGui);
+                };
+
+                failure = function(r) {
+                    if (!ns.skipMask) {
+                        web.mask.hide(ns.app.centerRegion);
+                    }
+
+                    console.log(r);
+                };
+
+                config.url = init.contextPath + paramString;
+                config.disableCaching = false;
+                config.scope = this;
+                config.timeout = 60000;
+                config.headers = headers;
+                config.success = success;
+                config.failure = failure;
+
+                if (type === 'jsonp') {
+                    Ext.data.JsonP.request(config);
+                }
+                else {
+                    Ext.Ajax.request(config);
+                }
 			};
 
 			web.report.createReport = function(layout, response, isUpdateGui) {
@@ -3530,7 +3634,10 @@ Ext.onReady( function() {
 
                         if (table.tdCount > 20000 || (layout.hideEmptyRows && table.tdCount > 10000)) {
                             alert('Table has too many cells. Please reduce the table and try again.');
-                            web.mask.hide(ns.app.centerRegion);
+
+                            if (!ns.skipMask) {
+                                web.mask.hide(ns.app.centerRegion);
+                            }
                             return;
                         }
 
@@ -3543,11 +3650,16 @@ Ext.onReady( function() {
                         //ns.app.centerRegion.removeAll(true);
                         ns.app.centerRegion.update(table.html);
 
-                        Ext.defer( function() {
-                            Ext.get(ns.core.init.el).fadeIn({
-                                duration: 400
+                        // fade
+                        if (!ns.skipFade) {
+                            chart.on('afterrender', function() {
+                                Ext.defer( function() {
+                                    Ext.get(init.el).fadeIn({
+                                        duration: 400
+                                    });
+                                }, 300 );
                             });
-                        }, 300 );
+                        }
 
                         // after render
                         ns.app.layout = layout;
@@ -3563,7 +3675,9 @@ Ext.onReady( function() {
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
                         }
 
-                        web.mask.hide(ns.app.centerRegion);
+                        if (!ns.skipMask) {
+                            web.mask.hide(ns.app.centerRegion);
+                        }
 
                         if (ER.isDebug) {
                             console.log("Number of cells", table.tdCount);
@@ -3625,7 +3739,9 @@ Ext.onReady( function() {
                             web.events.setColumnHeaderMouseHandlers(layout, response, xResponse);
                         }
 
-                        web.mask.hide(ns.app.centerRegion);
+                        if (!ns.skipMask) {
+                            web.mask.hide(ns.app.centerRegion);
+                        }
                     };
 
                     // execute
@@ -3682,6 +3798,8 @@ Ext.onReady( function() {
 			if (!validateConfig(config)) {
 				return;
 			}
+
+            applyCss();
 
 			ns.core = ER.getCore(Ext.clone(init));
             ns.core.init.el = config.el;

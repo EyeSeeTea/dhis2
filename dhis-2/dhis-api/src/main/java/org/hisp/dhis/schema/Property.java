@@ -1,7 +1,7 @@
 package org.hisp.dhis.schema;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -178,12 +178,17 @@ public class Property implements Ordered
     /**
      * Maximum length/size/value of this property.
      */
+    private int length = Integer.MAX_VALUE;
+
+    /**
+     * Minimum length/size/value of this property.
+     */
     private int max = Integer.MAX_VALUE;
 
     /**
      * Minimum length/size/value of this property.
      */
-    private int min;
+    private int min = Integer.MIN_VALUE;
 
     /**
      * Cascading used when doing CRUD operations.
@@ -478,6 +483,18 @@ public class Property implements Ordered
     public void setRequired( boolean required )
     {
         this.required = required;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public int getLength()
+    {
+        return length;
+    }
+
+    public void setLength( int length )
+    {
+        this.length = length;
     }
 
     @JsonProperty

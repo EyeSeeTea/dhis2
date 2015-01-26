@@ -1,7 +1,7 @@
 package org.hisp.dhis.dxf2.metadata.importers;
 
 /*
- * Copyright (c) 2004-2014, University of Oslo
+ * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,10 +58,13 @@ import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandlerUtils;
+import org.hisp.dhis.dxf2.schema.SchemaValidator;
+import org.hisp.dhis.dxf2.schema.ValidationViolation;
 import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -135,6 +138,9 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
     @Autowired
     private SchemaService schemaService;
+
+    @Autowired
+    private SchemaValidator schemaValidator;
 
     @Autowired
     private UserService userService;
@@ -284,10 +290,26 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return false;
         }
 
+        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+
+        /* disabled for 2.18 release
+        if ( !validationViolations.isEmpty() )
+        {
+            System.err.println( "violations: " + validationViolations );
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+
+            return false;
+        }
+        */
+
         // make sure that the internalId is 0, so that the system will generate a ID
         object.setId( 0 );
-        // object.setUser( user );
-        object.setUser( null );
+
+        if ( !options.isSharing() )
+        {
+            object.clearSharing( true );
+        }
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
         nonIdentifiableObjects.extract( object );
@@ -314,9 +336,10 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         log.debug( "Trying to save new object => " + ImportUtils.getDisplayName( object ) + " (" + object.getClass().getSimpleName() + ")" +
             "" );
-        objectBridge.saveObject( object );
 
         updatePeriodTypes( object );
+        objectBridge.saveObject( object, !options.isSharing() );
+
         reattachCollectionFields( object, collectionFields, user );
 
         objectBridge.updateObject( object );
@@ -385,6 +408,19 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             return true;
         }
 
+        List<ValidationViolation> validationViolations = schemaValidator.validate( object );
+
+        /* disabled for 2.18 release
+        if ( !validationViolations.isEmpty() )
+        {
+            System.err.println( "violations: " + validationViolations );
+            summaryType.getImportConflicts().add(
+                new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
+
+            return false;
+        }
+        */
+
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
         nonIdentifiableObjects.extract( object );
         nonIdentifiableObjects.delete( persistedObject );
@@ -409,7 +445,17 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         reattachFields( object, fields, user );
 
-        persistedObject.mergeWith( object );
+        if ( !options.isSharing() )
+        {
+            User persistedObjectUser = persistedObject.getUser();
+            persistedObject.mergeWith( object );
+            persistedObject.setUser( persistedObjectUser );
+        }
+        else
+        {
+            persistedObject.mergeWith( object );
+            persistedObject.mergeSharingWith( object );
+        }
 
         updatePeriodTypes( persistedObject );
 
@@ -426,7 +472,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
             {
                 Map<Field, Collection<Object>> collectionFieldsUserCredentials = detachCollectionFields( userCredentials );
 
-                if ( userCredentials != null && userCredentials.getPassword() != null )
+                if ( userCredentials.getPassword() != null )
                 {
                     userService.encodeAndSetPassword( userCredentials, userCredentials.getPassword() );
                 }

@@ -94,11 +94,12 @@
 
 .item
 {
+  background-color: #fff;
   border: 1px solid #ccc;
-  width: 405px;
-  height: 329px;
+  height: 333px;
+  width: 408px;
   padding: 6px;
-  margin: 0 19px 19px 0;
+  margin: 0 17px 17px 0;
   border-radius: 3px;
   cursor: pointer;
   box-shadow: #ddd 0 1px 2px 0;
@@ -135,10 +136,10 @@
 
 .dropItem
 {
-  width: 405px;
-  height: 328px;
+  width: 408px;
+  height: 333px;
   padding: 6px;
-  margin: 0 19px 19px 0;
+  margin: 0 17px 17px 0;
   border: 1px dashed #9ec5df;
   background-color: #e9f5fb;
   border-radius: 3px;
@@ -154,7 +155,7 @@
 
 .itemHeader
 {
-  margin: 0 0 10px 0;
+  margin: 0 0 5px 0;
   padding: 0 0 3px 0;
   border-bottom: 1px solid #e0e0e0;
   cursor: move;
@@ -192,7 +193,7 @@
 #searchDiv
 {
   position: absolute;
-  left: 411px;
+  left: 330px;
   height: 22px;
   width: 486px;
   border: 1px solid #aaa;
@@ -205,7 +206,7 @@
 {
   position: absolute;
   margin-top: 6px;
-  left: 915px;
+  left: 834px;
 }
 
 #searchField
@@ -223,7 +224,7 @@
 {
   position: absolute;
   margin-top: 29px;
-  left: 411px;
+  left: 330px;
   width: 498px;
   max-height: 518px;
   overflow-y: auto;
@@ -258,6 +259,15 @@
 {
   display: inline-block;
   padding: 9px 3% 7px 3%;
+}
+
+.dragIcon
+{
+  color: #444;
+  margin: 3px 6px 0 6px;
+  float: right;
+  cursor: pointer;
+  font-size: 10px;
 }
 
 .hitHeader
@@ -328,6 +338,19 @@
   display: none; 
   padding: 0; 
   margin: 0;
+}
+
+#chartViewHeader
+{
+  border-bottom: 1px solid #e0e0e0;
+  padding: 2px 5px 5px 3px;
+  margin: 6px 6px;
+}
+
+#chartViewHeader a
+{
+  color: #3162C5;
+  margin-right: 5px;
 }
 
 .gridTable th
