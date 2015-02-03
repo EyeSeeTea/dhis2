@@ -83,24 +83,10 @@ public class BaseDimensionalObject
         this.uid = dimension;
     }
 
-    public BaseDimensionalObject( String dimension, List<? extends NameableObject> items )
-    {
-        this.uid = dimension;
-        this.items = new ArrayList<>( items );
-    }
-
     public BaseDimensionalObject( String dimension, DimensionType dimensionType, List<? extends NameableObject> items )
     {
         this.uid = dimension;
         this.dimensionType = dimensionType;
-        this.items = new ArrayList<>( items );
-    }
-
-    public BaseDimensionalObject( String dimension, DimensionType dimensionType, String dimensionName, List<? extends NameableObject> items )
-    {
-        this.uid = dimension;
-        this.dimensionType = dimensionType;
-        this.dimensionName = dimensionName;
         this.items = new ArrayList<>( items );
     }
 
