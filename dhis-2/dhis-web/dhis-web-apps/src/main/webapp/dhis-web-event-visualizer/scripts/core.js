@@ -656,7 +656,7 @@ Ext.onReady( function() {
 						console.log('Response: no valid headers');
 						return;
 					}
-config.rows = [];
+                    
 					if (!(Ext.isArray(config.rows) && config.rows.length > 0)) {
 						alert('No values found');
 						return;
