@@ -117,10 +117,10 @@ public class ProgramValidationServiceTest
         programService.addProgram( program );
 
         stageA = new ProgramStage( "A", program );
-        int psIdA = programStageService.saveProgramStage( stageA );
+        programStageService.saveProgramStage( stageA );
 
         stageB = new ProgramStage( "B", program );
-        int psIdB = programStageService.saveProgramStage( stageB );
+        programStageService.saveProgramStage( stageB );
 
         Set<ProgramStage> programStages = new HashSet<>();
         programStages.add( stageA );
@@ -131,8 +131,8 @@ public class ProgramValidationServiceTest
         DataElement dataElementA = createDataElement( 'A' );
         DataElement dataElementB = createDataElement( 'B' );
 
-        int deIdA = dataElementService.addDataElement( dataElementA );
-        int deIdB = dataElementService.addDataElement( dataElementB );
+        dataElementService.addDataElement( dataElementA );
+        dataElementService.addDataElement( dataElementB );
 
         stageDataElementA = new ProgramStageDataElement( stageA, dataElementA, false, 1 );
         ProgramStageDataElement stageDataElementB = new ProgramStageDataElement( stageA, dataElementB, false, 2 );
@@ -169,18 +169,18 @@ public class ProgramValidationServiceTest
         dataValueService.saveTrackedEntityDataValue( dataValueD );
 
         ProgramExpression programExpressionA = new ProgramExpression( "["
-            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + psIdA + "."
-            + deIdA + "]", "A" );
+            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + stageA.getUid() + "."
+            + dataElementA.getUid() + "]", "A" );
         ProgramExpression programExpressionB = new ProgramExpression( "["
-            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + psIdA + "."
-            + deIdB + "]", "B" );
+            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + stageA.getUid() + "."
+            + dataElementB.getUid() + "]", "B" );
 
         ProgramExpression programExpressionC = new ProgramExpression( "["
-            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + psIdB + "."
-            + deIdA + "]", "C" );
+            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + stageB.getUid() + "."
+            + dataElementA.getUid() + "]", "C" );
         ProgramExpression programExpressionD = new ProgramExpression( "["
-            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + psIdB + "."
-            + deIdB + "]", "D" );
+            + ProgramExpression.OBJECT_PROGRAM_STAGE_DATAELEMENT + ProgramExpression.SEPARATOR_OBJECT + stageB.getUid() + "."
+            + dataElementB.getUid() + "]", "D" );
 
         validationA = new ProgramValidation( "A", programExpressionA, programExpressionB, program );
         validationA.setOperator( Operator.valueOf( "equal_to" ) );

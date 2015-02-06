@@ -8,7 +8,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets']
+        objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations']
     });
     return{
         currentStore: store
@@ -213,6 +213,44 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
+/* Factory to fetch programValidations */
+.factory('ProgramValidationFactory', function($q, $rootScope, ECStorageService) {  
+    
+    return {        
+        get: function(uid){
+            
+            var def = $q.defer();
+            
+            ECStorageService.currentStore.open().done(function(){
+                ECStorageService.currentStore.get('programValidations', uid).done(function(pv){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(pv);
+                    });
+                });
+            });                        
+            return def.promise;
+        },
+        getByProgram: function(program){
+            var def = $q.defer();
+            var programValidations = [];
+            
+            TCStorageService.currentStore.open().done(function(){
+                TCStorageService.currentStore.getAll('programValidations').done(function(pvs){   
+                    angular.forEach(pvs, function(pv){
+                        if(pv.program.id === program){                            
+                            programValidations.push(pv);                               
+                        }                        
+                    });
+                    $rootScope.$apply(function(){
+                        def.resolve(programValidations);
+                    });
+                });                
+            });            
+            return def.promise;
+        }
+    };        
+})
+
 /*Orgunit service for local db */
 .service('OrgUnitService', function($window, $q){
     
@@ -352,13 +390,23 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TEFormService', function(TCStorageService, $q, $rootScope) {
 
     return {
-        getByProgram: function(programUid){            
+        getByProgram: function(program, attributes){            
             var def = $q.defer();
             
             TCStorageService.currentStore.open().done(function(){
-                TCStorageService.currentStore.get('trackedEntityForms', programUid).done(function(te){                    
+                TCStorageService.currentStore.get('trackedEntityForms', program.id).done(function(teForm){                    
                     $rootScope.$apply(function(){
-                        def.resolve(te);
+                        var trackedEntityForm = teForm;
+                        if(angular.isObject(trackedEntityForm)){
+                            trackedEntityForm.attributes = attributes;
+                            trackedEntityForm.selectIncidentDatesInFuture = program.selectIncidentDatesInFuture;
+                            trackedEntityForm.selectEnrollmentDatesInFuture = program.selectEnrollmentDatesInFuture;
+                            trackedEntityForm.displayIncidentDate = program.displayIncidentDate;
+                            def.resolve(trackedEntityForm);
+                        }
+                        else{
+                            def.resolve(null);
+                        }
                     });
                 });
             });                        
@@ -501,16 +549,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 });
             });
             
-            return def.promise;       
+            return def.promise;
         },
-        register: function(tei){
-            
+        register: function(tei, optionSets){            
             var url = '../api/trackedEntityInstances';
+            var def = $q.defer();
             
-            var promise = $http.post(url, tei).then(function(response){
-                return response.data;
+            this.convertFromUserToApi(tei, optionSets).then(function(formattedTei){
+                $http.post(url, formattedTei).then(function(response){
+                    def.resolve( response.data );
+                });
             });
-            return promise;
+            return def.promise;
         },
         processAttributes: function(selectedTei, selectedProgram, selectedEnrollment){
             var def = $q.defer();            
@@ -692,12 +742,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             //first reset teiAttributes
             for(var j=0; j<teiAttributes.length; j++){
-                teiAttributes[j].show = false;                
-                if(teiAttributes[j].value){                    
-                    if(teiAttributes[j].type === 'number' && !isNaN(parseInt(teiAttributes[j].value))){
-                        teiAttributes[j].value = parseInt(teiAttributes[j].value);                        
-                    }                    
-                }               
+                teiAttributes[j].show = false;
             }
 
             //identify which ones to show
@@ -710,6 +755,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         teiAttributes[j].order = i;
                         teiAttributes[j].mandatory = requiredAttributes[i].mandatory ? requiredAttributes[i].mandatory : false;
                         teiAttributes[j].allowFutureDate = requiredAttributes[i].allowFutureDate ? requiredAttributes[i].allowFutureDate : false;
+                        teiAttributes[j].displayName = requiredAttributes[i].name;
                     }
                 }
 

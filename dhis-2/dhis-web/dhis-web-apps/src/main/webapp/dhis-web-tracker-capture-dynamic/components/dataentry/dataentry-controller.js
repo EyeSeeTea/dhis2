@@ -8,12 +8,12 @@ trackerCapture.controller('DataEntryController',
                 storage,
                 ProgramStageFactory,
                 DHIS2EventFactory,
+                OptionSetService,
                 ModalService,
                 DialogService,
                 CurrentSelection,
-                OptionSetService,
-		CustomFormService,
-                TrackerRulesExecutionService) {
+				TrackerRulesExecutionService,
+				CustomFormService) {
     
     //Data entry form
     $scope.dataEntryOuterForm = {};
@@ -58,7 +58,7 @@ trackerCapture.controller('DataEntryController',
     }; 
     
     //listen for the selected items
-    $scope.$on('dashboardWidgets', function(event, args) {  
+    $scope.$on('dashboardWidgets', function() {        
         $scope.showDataEntryDiv = false;
         $scope.showEventCreationDiv = false;
         $scope.showDummyEventDiv = false;        
@@ -68,7 +68,7 @@ trackerCapture.controller('DataEntryController',
             
         $scope.allowEventCreation = false;
         $scope.repeatableStages = [];        
-        $scope.dhis2Events = null;
+        $scope.dhis2Events = [];
         $rootScope.ruleeffects = {};
         
         var selections = CurrentSelection.get();          
@@ -97,8 +97,8 @@ trackerCapture.controller('DataEntryController',
     });
     
     $scope.getEvents = function(){
-        $scope.dhis2Events = [];
         DHIS2EventFactory.getEventsByProgram($scope.selectedEntity.trackedEntityInstance, $scope.selectedOrgUnit.id, $scope.selectedProgram.id).then(function(events){
+            $scope.dhis2Events = [];
             if(angular.isObject(events)){
                 angular.forEach(events, function(dhis2Event){                    
                     if(dhis2Event.enrollment === $scope.selectedEnrollment.enrollment){

@@ -2592,6 +2592,11 @@ Ext.onReady( function() {
 			proxy: {
 				type: 'ajax',
 				url: ns.core.init.contextPath + '/api/sharing/search',
+                extraParams: {
+                    pageSize: 50
+                },
+                startParam: false,
+				limitParam: false,
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -2701,7 +2706,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=eventChart&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'

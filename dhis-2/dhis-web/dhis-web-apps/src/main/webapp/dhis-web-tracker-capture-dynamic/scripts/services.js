@@ -8,7 +8,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     var store = new dhis2.storage.Store({
         name: "dhis2tc",
         adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-        objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets']
+        objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations']
     });
     return{
         currentStore: store
@@ -213,6 +213,44 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
     };    
 })
 
+/* Factory to fetch programValidations */
+.factory('ProgramValidationFactory', function($q, $rootScope, ECStorageService) {  
+    
+    return {        
+        get: function(uid){
+            
+            var def = $q.defer();
+            
+            ECStorageService.currentStore.open().done(function(){
+                ECStorageService.currentStore.get('programValidations', uid).done(function(pv){                    
+                    $rootScope.$apply(function(){
+                        def.resolve(pv);
+                    });
+                });
+            });                        
+            return def.promise;
+        },
+        getByProgram: function(program){
+            var def = $q.defer();
+            var programValidations = [];
+            
+            TCStorageService.currentStore.open().done(function(){
+                TCStorageService.currentStore.getAll('programValidations').done(function(pvs){   
+                    angular.forEach(pvs, function(pv){
+                        if(pv.program.id === program){                            
+                            programValidations.push(pv);                               
+                        }                        
+                    });
+                    $rootScope.$apply(function(){
+                        def.resolve(programValidations);
+                    });
+                });                
+            });            
+            return def.promise;
+        }
+    };        
+})
+
 /*Orgunit service for local db */
 .service('OrgUnitService', function($window, $q){
     
@@ -352,13 +390,23 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 .factory('TEFormService', function(TCStorageService, $q, $rootScope) {
 
     return {
-        getByProgram: function(programUid){            
+        getByProgram: function(program, attributes){            
             var def = $q.defer();
             
             TCStorageService.currentStore.open().done(function(){
-                TCStorageService.currentStore.get('trackedEntityForms', programUid).done(function(te){                    
+                TCStorageService.currentStore.get('trackedEntityForms', program.id).done(function(teForm){                    
                     $rootScope.$apply(function(){
-                        def.resolve(te);
+                        var trackedEntityForm = teForm;
+                        if(angular.isObject(trackedEntityForm)){
+                            trackedEntityForm.attributes = attributes;
+                            trackedEntityForm.selectIncidentDatesInFuture = program.selectIncidentDatesInFuture;
+                            trackedEntityForm.selectEnrollmentDatesInFuture = program.selectEnrollmentDatesInFuture;
+                            trackedEntityForm.displayIncidentDate = program.displayIncidentDate;
+                            def.resolve(trackedEntityForm);
+                        }
+                        else{
+                            def.resolve(null);
+                        }
                     });
                 });
             });                        
@@ -501,16 +549,18 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                 });
             });
             
-            return def.promise;       
+            return def.promise;
         },
-        register: function(tei){
-            
+        register: function(tei, optionSets){            
             var url = '../api/trackedEntityInstances';
+            var def = $q.defer();
             
-            var promise = $http.post(url, tei).then(function(response){
-                return response.data;
+            this.convertFromUserToApi(tei, optionSets).then(function(formattedTei){
+                $http.post(url, formattedTei).then(function(response){
+                    def.resolve( response.data );
+                });
             });
-            return promise;
+            return def.promise;
         },
         processAttributes: function(selectedTei, selectedProgram, selectedEnrollment){
             var def = $q.defer();            
@@ -692,12 +742,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             //first reset teiAttributes
             for(var j=0; j<teiAttributes.length; j++){
-                teiAttributes[j].show = false;                
-                if(teiAttributes[j].value){                    
-                    if(teiAttributes[j].type === 'number' && !isNaN(parseInt(teiAttributes[j].value))){
-                        teiAttributes[j].value = parseInt(teiAttributes[j].value);                        
-                    }                    
-                }               
+                teiAttributes[j].show = false;
             }
 
             //identify which ones to show
@@ -710,6 +755,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         teiAttributes[j].order = i;
                         teiAttributes[j].mandatory = requiredAttributes[i].mandatory ? requiredAttributes[i].mandatory : false;
                         teiAttributes[j].allowFutureDate = requiredAttributes[i].allowFutureDate ? requiredAttributes[i].allowFutureDate : false;
+                        teiAttributes[j].displayName = requiredAttributes[i].name;
                     }
                 }
 
@@ -858,61 +904,47 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     //The below rules is generated by an excel tool.
                     //Paste from here:
                     
-                    
 {rule_uID:'rule104104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'true',actions:[{action_uID:'actn104109e',action:'displaykeydata',location:'det',content:'Unique ID',data:'$uniqueid'}]},
 {rule_uID:'rule105104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'true',actions:[{action_uID:'actn105104e',action:'displaykeydata',location:'det',content:'Name',data:'$name'}]},
 {rule_uID:'rule106104t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'true',actions:[{action_uID:'actn106104e',action:'displaykeydata',location:'det',content:'Born',data:'$born'}]},
 {rule_uID:'rule107154t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality !== \'\' && $plurality !== \'Not assessed\'',actions:[{action_uID:'actn107109e',action:'displaykeydata',location:'det',content:'Plurality',data:'$plurality'}]},
-{rule_uID:'rule108186t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality !== \'\' && $plurality !== \'Not assessed\' && $plurality !== \'Singleton\'',actions:[{action_uID:'actn108102e',action:'displaytext',location:'con',content:'p:',data:'$plurality'},
-{action_uID:'actn109102e',action:'displaytext',location:'sum',content:'p:',data:'$plurality'},
-{action_uID:'actn110105e',action:'displaytext',location:'sum',content:'Twins',data:null}]},
-{rule_uID:'rule111116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality === 3',actions:[{action_uID:'actn111109e',action:'displaykeydata',location:'det',content:'Plurality',data:'Triplets'},
-{action_uID:'actn112108e',action:'displaytext',location:'con',content:'Triplets',data:null},
-{action_uID:'actn113108e',action:'displaytext',location:'sum',content:'Triplets',data:null}]},
-{rule_uID:'rule114116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality === 4',actions:[{action_uID:'actn114109e',action:'displaykeydata',location:'det',content:'Plurality',data:'Quadruplets'},
-{action_uID:'actn115111e',action:'displaytext',location:'con',content:'Quadruplets',data:null},
-{action_uID:'actn116111e',action:'displaytext',location:'sum',content:'Quadruplets',data:null}]},
-{rule_uID:'rule117116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality === 5',actions:[{action_uID:'actn117109e',action:'displaykeydata',location:'det',content:'Plurality',data:'Five fetuses'},
-{action_uID:'actn118112e',action:'displaytext',location:'con',content:'Five fetuses',data:null},
-{action_uID:'actn119112e',action:'displaytext',location:'sum',content:'Five fetuses',data:null}]},
-{rule_uID:'rule120116t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality === 6',actions:[{action_uID:'actn120109e',action:'displaykeydata',location:'det',content:'Plurality',data:'Six fetuses'},
-{action_uID:'actn121111e',action:'displaytext',location:'con',content:'Six fetuses',data:null},
-{action_uID:'actn122111e',action:'displaytext',location:'sum',content:'Six fetuses',data:null}]},
-{rule_uID:'rule123120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$smoking === \'Yes\'',actions:[{action_uID:'actn123114e',action:'displaytext',location:'con',content:'Current smoker',data:null}]},
-{rule_uID:'rule124120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$gestationalage < 37',actions:[{action_uID:'actn124111e',action:'hidefield',location:null,content:'vPdXnmGWzfy',data:null}]},
-{rule_uID:'rule125177t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'($plurality < 2) && ($diastolicbloodpressure <= 90  || $gestationalage >= 20)',actions:[{action_uID:'actn125111e',action:'hidefield',location:null,content:'OSuxnldV4Ug',data:null}]},
-{rule_uID:'rule126120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$smoking !== \'Yes\'',actions:[{action_uID:'actn126111e',action:'hidefield',location:null,content:'Ok9OQpitjQr',data:null}]},
-{rule_uID:'rule127129t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$systolicbloodpressure >= 160',actions:[{action_uID:'actn127119e',action:'displaytext',location:'sum',content:'Severe hypertension',data:null}]},
-{rule_uID:'rule128161t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$systolicbloodpressure < 160 && $diastolicbloodpressure < 105',actions:[{action_uID:'actn128111e',action:'hidefield',location:null,content:'cKBSkBB3Mt4',data:null}]},
-{rule_uID:'rule129153t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$diastolicbloodpressure < 110 || $gestationalage > 21',actions:[{action_uID:'actn129111e',action:'hidefield',location:null,content:'lcaG1Pnh27I',data:null}]},
-{rule_uID:'rule130115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:'ANCnn',condition:'$hemoglobin > 7',actions:[{action_uID:'actn130111e',action:'hidefield',location:null,content:'vANAXwtLwcT',data:null}]},
-{rule_uID:'rule131242t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'($hemoglobin !== 0 && $hemoglobin > 7 && $hemoglobin < 11) || ($hematocrit !== 0 && $hemoglobin === 0 && $hematocrit > 20 && $hematocrit < 33)',actions:[{action_uID:'actn131115e',action:'assignvariable',location:null,content:'$moderateanemia',data:'true'},
-{action_uID:'actn132115e',action:'displaytext',location:'con',content:'Moderate anemia',data:null},
-{action_uID:'actn133115e',action:'displaytext',location:'sum',content:'Moderate anemia',data:null}]},
-{rule_uID:'rule134265t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'($hemoglobin !== 0 && $hemoglobin <= 7) || ($hematocrit !== 0 && $hemoglobin === 0 && $hematocrit < 20) || ($hemoglobin === 0 && $hematocrit === 0 && $extremepallor)',actions:[{action_uID:'actn134113e',action:'assignvariable',location:null,content:'$severeanemia',data:'true'},
-{action_uID:'actn135113e',action:'displaytext',location:'con',content:'Severe anemia',data:null},
-{action_uID:'actn136113e',action:'displaytext',location:'sum',content:'Severe anemia',data:null}]},
-{rule_uID:'rule137198t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'($moderateanemia === false && $severeanemia === false && ($hemoglobin != 0 ||  $hematocrit != 0) )',actions:[{action_uID:'actn137110e',action:'displaytext',location:'sum',content:'No anaemia',data:null}]},
-{rule_uID:'rule138117t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$hemoglobin >= 11',actions:[{action_uID:'actn138111e',action:'hidefield',location:null,content:'vANAXwtLwcT',data:null}]},
-{rule_uID:'rule139117t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$hematocrit >= 33',actions:[{action_uID:'actn139111e',action:'hidefield',location:null,content:'X8HbdaoS9LN',data:null}]},
-{rule_uID:'rule140125t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$moderateanemia === false',actions:[{action_uID:'actn140111e',action:'hidefield',location:null,content:'RxVNLSeTjto',data:null}]},
-{rule_uID:'rule141123t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$severeanemia === false',actions:[{action_uID:'actn141111e',action:'hidefield',location:null,content:'nB4Ui3ckmUi',data:null}]},
-{rule_uID:'rule142124t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$extremepallor === false',actions:[{action_uID:'actn142111e',action:'hidefield',location:null,content:'EyfTU3ibMmJ',data:null}]},
-{rule_uID:'rule143115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis !== 3',actions:[{action_uID:'actn143111e',action:'hidefield',location:null,content:'OhcR0fpFcWa',data:null}]},
-{rule_uID:'rule144115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 3',actions:[{action_uID:'actn144132e',action:'displaytext',location:'con',content:'Syphilis confirmed with RPR-test',data:null},
-{action_uID:'actn145132e',action:'displaytext',location:'sum',content:'Syphilis confirmed with RPR-test',data:null},
-{action_uID:'actn146154e',action:'displaytext',location:'rem',content:'Syphilis confirmed with RPR-test, prescribe medication',data:null}]},
-{rule_uID:'rule147115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 0',actions:[{action_uID:'actn147188e',action:'displaytext',location:'rem',content:'Counsel on safe sex inclusive correct and consistent use of condoms to prevent infection',data:null}]},
-{rule_uID:'rule148146t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 3 && $antibioticsgiven === false',actions:[{action_uID:'actn148154e',action:'displaytext',location:'rem',content:'Confirmed Syphilis, treatment missing or not performed',data:null}]},
-{rule_uID:'rule149145t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 3 && $antibioticsgiven === true',actions:[{action_uID:'actn149127e',action:'displaytext',location:'sum',content:'Syphilis treatment provided',data:null},
-{action_uID:'actn150127e',action:'displaytext',location:'con',content:'Syphilis treatment provided',data:null}]},
-{rule_uID:'rule151126t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$sleptunderbednet !== true',actions:[{action_uID:'actn151177e',action:'displaytext',location:'rem',content:'Promote use of bednet dipped in insecticide every 6 months to prevent malaria',data:null},
-{action_uID:'actn152181e',action:'displaytext',location:'sum',content:'Use of bednet dipped in insecticide every 6 months to prevent malaria is promoted',data:null}]},
-{rule_uID:'rule153129t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate !== \'\'',actions:[{action_uID:'actn153119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(283 - dhis.daysbetween($eventdate,$ultrasoundbirthdate))'}]},
-{rule_uID:'rule154201t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate === \'\' && $lastmenstrualdate === \'\'  && $clinicalestimatedbirthdate !== \'\'',actions:[{action_uID:'actn154119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(283 - dhis.daysbetween($eventdate,$clinicalestimatedbirthdate))'}]},
-{rule_uID:'rule155160t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate === \'\' && $lastmenstrualdate !== \'\'',actions:[{action_uID:'actn155119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(dhis.daysbetween($lastmenstrualdate,$eventdate))'}]},
-{rule_uID:'rule156126t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:2,programstage_uID:null,condition:'$gestationalagedays !== -1',actions:[{action_uID:'actn156115e',action:'assignvariable',location:null,content:'$gestationalage',data:'dhis.floor($gestationalagedays/7)'}]},
-{rule_uID:'rule157200t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$ultrasoundbirthdate !== \'\' || $lastmenstrualdate !== \'\' || $clinicalestimatedbirthdate !== \'\'',actions:[{action_uID:'actn157115e',action:'displaykeydata',location:'det',content:'Gestational age',data:'$gestationalage'}]}
+{rule_uID:'rule108186t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$plurality !== \'\' && $plurality !== \'Not assessed\' && $plurality !== \'Singleton\'',actions:[{action_uID:'actn108100e',action:'displaytext',location:'con',content:'',data:'$plurality'},
+{action_uID:'actn109100e',action:'displaytext',location:'sum',content:'',data:'$plurality'}]},
+{rule_uID:'rule110120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$smoking === \'Yes\'',actions:[{action_uID:'actn110114e',action:'displaytext',location:'con',content:'Current smoker',data:null}]},
+{rule_uID:'rule111120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$gestationalage < 37',actions:[{action_uID:'actn111111e',action:'hidefield',location:null,content:'vPdXnmGWzfy',data:null}]},
+{rule_uID:'rule112177t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'($plurality < 2) && ($diastolicbloodpressure <= 90  || $gestationalage >= 20)',actions:[{action_uID:'actn112111e',action:'hidefield',location:null,content:'OSuxnldV4Ug',data:null}]},
+{rule_uID:'rule113120t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$smoking !== \'Yes\'',actions:[{action_uID:'actn113111e',action:'hidefield',location:null,content:'Ok9OQpitjQr',data:null}]},
+{rule_uID:'rule114129t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$systolicbloodpressure >= 160',actions:[{action_uID:'actn114119e',action:'displaytext',location:'sum',content:'Severe hypertension',data:null}]},
+{rule_uID:'rule115161t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$systolicbloodpressure < 160 && $diastolicbloodpressure < 105',actions:[{action_uID:'actn115111e',action:'hidefield',location:null,content:'cKBSkBB3Mt4',data:null}]},
+{rule_uID:'rule116153t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$diastolicbloodpressure < 110 || $gestationalage > 21',actions:[{action_uID:'actn116111e',action:'hidefield',location:null,content:'lcaG1Pnh27I',data:null}]},
+{rule_uID:'rule117115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:'ANCnn',condition:'$hemoglobin > 7',actions:[{action_uID:'actn117111e',action:'hidefield',location:null,content:'vANAXwtLwcT',data:null}]},
+{rule_uID:'rule118242t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'($hemoglobin !== 0 && $hemoglobin > 7 && $hemoglobin < 11) || ($hematocrit !== 0 && $hemoglobin === 0 && $hematocrit > 20 && $hematocrit < 33)',actions:[{action_uID:'actn118115e',action:'assignvariable',location:null,content:'$moderateanemia',data:'true'},
+{action_uID:'actn119115e',action:'displaytext',location:'con',content:'Moderate anemia',data:null},
+{action_uID:'actn120115e',action:'displaytext',location:'sum',content:'Moderate anemia',data:null}]},
+{rule_uID:'rule121265t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'($hemoglobin !== 0 && $hemoglobin <= 7) || ($hematocrit !== 0 && $hemoglobin === 0 && $hematocrit < 20) || ($hemoglobin === 0 && $hematocrit === 0 && $extremepallor)',actions:[{action_uID:'actn121113e',action:'assignvariable',location:null,content:'$severeanemia',data:'true'},
+{action_uID:'actn122113e',action:'displaytext',location:'con',content:'Severe anemia',data:null},
+{action_uID:'actn123113e',action:'displaytext',location:'sum',content:'Severe anemia',data:null}]},
+{rule_uID:'rule124198t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'($moderateanemia === false && $severeanemia === false && ($hemoglobin != 0 ||  $hematocrit != 0) )',actions:[{action_uID:'actn124110e',action:'displaytext',location:'sum',content:'No anaemia',data:null}]},
+{rule_uID:'rule125117t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$hemoglobin >= 11',actions:[{action_uID:'actn125111e',action:'hidefield',location:null,content:'vANAXwtLwcT',data:null}]},
+{rule_uID:'rule126117t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$hematocrit >= 33',actions:[{action_uID:'actn126111e',action:'hidefield',location:null,content:'X8HbdaoS9LN',data:null}]},
+{rule_uID:'rule127125t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$moderateanemia === false',actions:[{action_uID:'actn127111e',action:'hidefield',location:null,content:'RxVNLSeTjto',data:null}]},
+{rule_uID:'rule128123t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$severeanemia === false',actions:[{action_uID:'actn128111e',action:'hidefield',location:null,content:'nB4Ui3ckmUi',data:null}]},
+{rule_uID:'rule129124t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$extremepallor === false',actions:[{action_uID:'actn129111e',action:'hidefield',location:null,content:'EyfTU3ibMmJ',data:null}]},
+{rule_uID:'rule130115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis !== 3',actions:[{action_uID:'actn130111e',action:'hidefield',location:null,content:'OhcR0fpFcWa',data:null}]},
+{rule_uID:'rule131115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 3',actions:[{action_uID:'actn131132e',action:'displaytext',location:'con',content:'Syphilis confirmed with RPR-test',data:null},
+{action_uID:'actn132132e',action:'displaytext',location:'sum',content:'Syphilis confirmed with RPR-test',data:null},
+{action_uID:'actn133154e',action:'displaytext',location:'rem',content:'Syphilis confirmed with RPR-test, prescribe medication',data:null}]},
+{rule_uID:'rule134115t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$syphilis === 0',actions:[{action_uID:'actn134188e',action:'displaytext',location:'rem',content:'Counsel on safe sex inclusive correct and consistent use of condoms to prevent infection',data:null},
+{action_uID:'actn135154e',action:'displaytext',location:'rem',content:'Confirmed Syphilis, treatment missing or not performed',data:null},
+{action_uID:'actn136127e',action:'displaytext',location:'sum',content:'Syphilis treatment provided',data:null},
+{action_uID:'actn137127e',action:'displaytext',location:'con',content:'Syphilis treatment provided',data:null}]},
+{rule_uID:'rule138126t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$sleptunderbednet !== true',actions:[{action_uID:'actn138177e',action:'displaytext',location:'rem',content:'Promote use of bednet dipped in insecticide every 6 months to prevent malaria',data:null},
+{action_uID:'actn139181e',action:'displaytext',location:'sum',content:'Use of bednet dipped in insecticide every 6 months to prevent malaria is promoted',data:null}]},
+{rule_uID:'rule140129t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate !== \'\'',actions:[{action_uID:'actn140119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(283 - dhis.daysbetween($eventdate,$ultrasoundbirthdate))'}]},
+{rule_uID:'rule141201t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate === \'\' && $lastmenstrualdate === \'\'  && $clinicalestimatedbirthdate !== \'\'',actions:[{action_uID:'actn141119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(283 - dhis.daysbetween($eventdate,$clinicalestimatedbirthdate))'}]},
+{rule_uID:'rule142160t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:1,programstage_uID:null,condition:'$ultrasoundbirthdate === \'\' && $lastmenstrualdate !== \'\'',actions:[{action_uID:'actn142119e',action:'assignvariable',location:null,content:'$gestationalagedays',data:'(dhis.daysbetween($lastmenstrualdate,$eventdate))'}]},
+{rule_uID:'rule143126t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:2,programstage_uID:null,condition:'$gestationalagedays !== -1',actions:[{action_uID:'actn143115e',action:'assignvariable',location:null,content:'$gestationalage',data:'dhis.floor($gestationalagedays/7)'}]},
+{rule_uID:'rule144200t',trigger:'tracker_data_changed',program_uID:'WSGAb5XwJ3Y',priority:null,programstage_uID:null,condition:'$ultrasoundbirthdate !== \'\' || $lastmenstrualdate !== \'\' || $clinicalestimatedbirthdate !== \'\'',actions:[{action_uID:'actn144115e',action:'displaykeydata',location:'det',content:'Gestational age',data:'$gestationalage'}]}
 
                     //...to here
 
@@ -1440,7 +1472,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 })
 
 /* service for building variables based on the data in users fields */
-.service('VariableService', function(TrackerFieldCodeFactory,DateUtils, $log){
+.service('VariableService', function(TrackerFieldCodeFactory,$filter, $log){
     return {
         getVariables: function($scope) {
             
@@ -1450,10 +1482,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
             
             $scope.pushVariable = function(variablename, variablevalue, variabletype) {
                 //First clean away single or double quotation marks at the start and end of the variable name.
-                //..but only if the variable is a string type.
-                if (typeof variablevalue == 'string' || variablevalue instanceof String){
-                    variablevalue = variablevalue.replace(/'/,"").replace(/'$/,"").replace(/"^/,"").replace(/"$/,"");
-                }
+                variablevalue = $filter('trimquotes')(variablevalue);
                 
                 //Append single quotation marks in case the variable is of text type:
                 if(variabletype === 'text') {
@@ -1488,7 +1517,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         if(!valueFound) {
                             if(event.programStage === fieldCode.programstage_uID) {
                                 if(angular.isDefined(event[fieldCode.dataelement_uID])
-                                        && event[fieldCode.dataelement_uID] != null ){
+                                        && event[fieldCode.dataelement_uID] !== null ){
                                     $scope.pushVariable(fieldCode.variablename, event[fieldCode.dataelement_uID], fieldCode.variabletype );
                                     valueFound = true;
                                 }
@@ -1500,7 +1529,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                     angular.forEach($scope.dhis2Events, function(event) {
                         if(!valueFound) {
                            if(angular.isDefined(event[fieldCode.dataelement_uID])
-                                   && event[fieldCode.dataelement_uID] != null ){
+                                   && event[fieldCode.dataelement_uID] !== null ){
                                 $scope.pushVariable(fieldCode.variablename, event[fieldCode.dataelement_uID], fieldCode.variabletype );
                                 valueFound = true;
                             }
@@ -1512,7 +1541,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                         if(!valueFound) {
                             if(event.programStage === $scope.currentEvent.programStage) {
                                 if(angular.isDefined(event[fieldCode.dataelement_uID])
-                                        && event[fieldCode.dataelement_uID] != null ){
+                                        && event[fieldCode.dataelement_uID] !== null ){
                                     $scope.pushVariable(fieldCode.variablename, event[fieldCode.dataelement_uID], fieldCode.variabletype );
                                     valueFound = true;
                                 }
@@ -1556,7 +1585,7 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 
 
 /* service for executing tracker rules and broadcasting results */
-.service('TrackerRulesExecutionService', function(TrackerRulesFactory,VariableService, $rootScope, $log, orderByFilter){
+.service('TrackerRulesExecutionService', function(TrackerRulesFactory,VariableService, $rootScope, $log, $filter, orderByFilter){
     return {
         executeRules: function($scope) {
             //When debugging rules, the caller should provide a variable for wether or not the rules is being debugged.
@@ -1633,8 +1662,8 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
                             //Special block for dhis.weeksBetween(*,*) - add such a block for all other dhis functions.
                             if(dhisFunction.name === "dhis.daysbetween")
                             {
-                                var firstdate = parameters[0].replace(/^'/,"").replace(/'$/,"").replace(/"^/,"").replace(/"$/,"");
-                                var seconddate = parameters[1].replace(/^'/,"").replace(/'$/,"").replace(/"^/,"").replace(/"$/,"");
+                                var firstdate = $filter('trimquotes')(parameters[0]);
+                                var seconddate = $filter('trimquotes')(parameters[1]);
                                 firstdate = moment(firstdate);
                                 seconddate = moment(seconddate);
                                 //Replace the end evaluation of the dhis function:

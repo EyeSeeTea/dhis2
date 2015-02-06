@@ -6,7 +6,7 @@
         <meta name="description" content="DHIS 2">
         <meta name="keywords" content="DHIS 2">        
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">              
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
         <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/jquery.min.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/jQuery/ui/jquery-ui.min.js"></script>
@@ -74,15 +74,18 @@
         
         <script src="../dhis-web-commons/ouwt/ouwt.js"></script>
         <script src="scripts/tracker-capture.js"></script>
+        <!--<script src="scripts/idb.js"></script>-->
 
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/select2.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angularjs-nvd3-directives.min.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angularLocalStorage.js"></script>
         <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/angular-translate.min.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/directives.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/filters.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/services.js"></script>
-        <script type="text/javascript" src="../dhis-web-commons/javascripts/angular/plugins/dhis2/controllers.js"></script>
+        <!--<script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.angular.directives.js"></script>-->
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.angular.filters.js"></script>
+        <!--<script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.angular.services.js"></script>-->
+        <script type="text/javascript" src="../dhis-web-commons/javascripts/dhis2/dhis2.angular.controllers.js"></script>
+        <script type="text/javascript" src="scripts/d2Services.js"></script>
+        <script type="text/javascript" src="scripts/d2Directives.js"></script>
 
         <script type="text/javascript" src="scripts/app.js"></script>
         <script type="text/javascript" src="scripts/services.js"></script>
@@ -127,15 +130,7 @@
 
     </head>
     <body>
-        <div id="header" ng-controller="HeaderController">
-            <div class="container-heading">
-                <img ng-click="home()" id="headerBanner" src="../dhis-web-commons/css/light_blue/logo_banner.png" style="cursor:pointer" title="{{'dhis2_home'| translate}}">                    
-            </div>            
-            <div id="headerMessage" class="bold"></div>
-            
-            <div d2-menu></div>
-
-        </div>    
+        <d2-header-bar></d2-header-bar>
 
         <div class="container-1" data-ng-view=''></div>    
 

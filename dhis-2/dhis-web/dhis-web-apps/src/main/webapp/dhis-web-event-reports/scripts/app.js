@@ -2952,6 +2952,11 @@ Ext.onReady( function() {
 			proxy: {
 				type: 'ajax',
 				url: ns.core.init.contextPath + '/api/sharing/search',
+                extraParams: {
+                    pageSize: 50
+                },
+                startParam: false,
+				limitParam: false,
 				reader: {
 					type: 'json',
 					root: 'userGroups'
@@ -3061,7 +3066,7 @@ Ext.onReady( function() {
 					text: NS.i18n.save,
 					handler: function() {
 						Ext.Ajax.request({
-							url: ns.core.init.contextPath + '/api/sharing?type=reportTable&id=' + sharing.object.id,
+							url: ns.core.init.contextPath + '/api/sharing?type=eventReport&id=' + sharing.object.id,
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json'
@@ -6362,8 +6367,8 @@ Ext.onReady( function() {
 				});
 			};
 
-			web.report.getData = function(view, isUpdateGui) {
-				var paramString = web.analytics.getParamString(view);
+			web.report.getData = function(layout, isUpdateGui) {
+				var paramString = web.analytics.getParamString(layout);
 
 				// show mask
 				web.mask.show(ns.app.centerRegion);
@@ -6407,7 +6412,7 @@ Ext.onReady( function() {
 
                         ns.app.paramString = paramString;
 
-                        web.report.createReport(view, response, isUpdateGui);
+                        web.report.createReport(layout, response, isUpdateGui);
 					}
 				});
 			};

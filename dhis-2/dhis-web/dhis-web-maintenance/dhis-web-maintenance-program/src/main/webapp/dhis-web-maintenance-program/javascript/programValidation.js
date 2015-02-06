@@ -80,39 +80,20 @@ function getLeftPrgramStageDataElements() {
   clearListById('dataElementId');
 
   var programStage = document.getElementById('leftStage');
-  var programStageId = programStage.options[ programStage.selectedIndex ].value;
+  var programStageId = programStage.options[ programStage.selectedIndex ].id;
+  var programStageUid = programStage.options[ programStage.selectedIndex ].value;
   if( programStageId == '' ) return;
 
   jQuery.getJSON("getTrackedEntityDataElements.action", {
     programStageId: programStageId
   }, function( json ) {
-    jQuery('#dataElementId').append('<option value="[PS:'+programStageId+'.DUE_DATE]">' + i18n_due_date + '</option>');
-    jQuery('#dataElementId').append('<option value="[PS:'+programStageId+'.REPORT_DATE]">' + i18n_report_date + '</option>');
+    jQuery('#dataElementId').append('<option value="[PS:' + programStageUid + '.DUE_DATE]">' + i18n_due_date + '</option>');
+    jQuery('#dataElementId').append('<option value="[PS:' + programStageUid + '.REPORT_DATE]">' + i18n_report_date + '</option>');
     for( i in json.dataElements ) {
-      var id = '[DE:' + programStageId + '.' + json.dataElements[i].id + ']';
+      var id = '[DE:' + programStageUid + '.' + json.dataElements[i].id + ']';
       jQuery('#dataElementId').append('<option value="' + id + '">' + json.dataElements[i].name + '</option>');
     }
   });
-}
-
-function getRightPrgramStageDataElements() {
-  clearListById('rightSideDE');
-
-  var programStage = document.getElementById('rightStage');
-  var programStageId = programStage.options[ programStage.selectedIndex ].value;
-  if( programStageId == '' ) return;
-
-  jQuery.getJSON("getTrackedEntityDataElements.action", {
-    programStageId: programStageId
-  }, function( json ) {
-    jQuery('#dataElementId').append('<option value="DUE_DATE">' + i18n_due_date + '</option>');
-    jQuery('#dataElementId').append('<option value="REPORT_DATE">' + i18n_report_date + '</option>');
-    for( i in json.dataElements ) {
-      var id = '[DE:' + programStageId + '.' + json.dataElements[i].id + ']';
-      jQuery('#rightSideDE').append('<option value="' + id + '">' + json.dataElements[i].name + '</option>');
-    }
-  });
-
 }
 
 //------------------------------------------------------------------------------
@@ -151,19 +132,30 @@ function editRightExpression() {
 
 function insertText( inputAreaName, inputText ) {
   insertTextCommon(inputAreaName, inputText);
-
   getExpressionText();
 }
 
 
 function getExpressionText() {
-  $.postUTF8("getProgramExpressionDescription.action",
-    {
-      programExpression: $('#expression').val()
-    },
-    function( data ) {
-      setInnerHTML("formulaText", data);
-    }, 'html');
+	$.ajax({
+		url: "getProgramExpressionDescription.action",
+		type: "POST",
+		data:{ programExpression: $('#expression').val() },
+		dataType: "json",
+		success: function( json ){
+			setInnerHTML("formulaText", json.message);
+			  if( json.response == "error" ){
+				$("#formulaText").css("color","red");
+				$("#formulaText").addClass("validateError");
+			  }
+			  else{
+				$("#formulaText").css("color","black");
+				$("#formulaText").removeClass("error");
+			  }
+		}
+	});
+
+
 }
 
 var left = true;
@@ -187,20 +179,25 @@ function insertExpression() {
   dialog.dialog("close");
 }
 
-function validateExpression() {
-  if( checkNotEmpty(jQuery("#expression-container [id=description]"), i18n_description_not_null) == false )
+function validateExpression() {	
+  getExpressionText();
+  if( checkValidationRule(jQuery("#expression-container [id=description]"), i18n_description_not_null) == false )
     return;
-  if( checkNotEmpty(jQuery("#expression-container [id=expression]"), i18n_expression_not_null) == false )
+  if( checkValidationRule(jQuery("#expression-container [id=expression]"), i18n_expression_not_null) == false )
     return;
   insertExpression();
 }
 
-function checkNotEmpty( field, message ) {
+function checkValidationRule( field, message ) {
   if( field.val().length == 0 ) {
     setInnerHTML("exp-" + field.attr("name") + "Info", message);
     $('#expression-container [id=' + field.attr("name") + "]").css("background-color", "#ffc5c5");
     return false;
-  } else {
+  } 
+  else if( $("#formulaText").attr("class") == "validateError" ){
+	return false;
+  }
+  else {
     setInnerHTML("exp-" + field.attr("name") + "Info", '');
     $('#expression-container [id=' + field.attr("name") + "]").css("background-color", "#ffffff");
   }

@@ -1552,7 +1552,6 @@ Ext.onReady(function() {
                     }
                     else if (!window) {
                         var layers = gis.util.map.getRenderedVectorLayers().reverse(),
-                            xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY(),
                             html = '<div id="legendWrapper">';
 
                         for (var i = 0, layer; i < layers.length; i++) {
@@ -1575,11 +1574,12 @@ Ext.onReady(function() {
                             listeners: {
                                 show: function() {
                                     var el = this.getEl(),
-                                        legendEl = el.first().first();
+                                        legendEl = el.first().first(),
+                                        xy = Ext.get(olmap.buttonControls[0].div).getAnchorXY();
 
                                     el.setStyle('opacity', 0.92);
 
-                                    this.setHeight(legendEl.getHeight() + 8);
+                                    this.setHeight(legendEl.getHeight() + 8 + 9);
 
                                     this.setPosition(xy[0] - this.getWidth(), xy[1] - 1);
                                 }
@@ -2495,10 +2495,12 @@ Ext.onReady(function() {
                 }
 
                 if (Ext.Array.contains([403], r.status)) {
-                    alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
+                    gis.alert(GIS.i18n.you_do_not_have_access_to_all_items_in_this_favorite);
                 }
                 else {
-                    alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                    if (r.status && r.statusText && r.responseText) {
+                        gis.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                    }
                 }
             };
 
@@ -2522,7 +2524,7 @@ Ext.onReady(function() {
                 if (gis.olmap.mask && !gis.skipMask) {
                     gis.olmap.mask.hide();
                 }
-                alert(GIS.i18n.favorite_outdated_create_new);
+                gis.alert(GIS.i18n.favorite_outdated_create_new);
                 return;
             }
 
@@ -2705,7 +2707,7 @@ Ext.onReady(function() {
                 }
 
                 if (!rows.length) {
-                    alert('No event coordinates found');
+                    gis.alert('No event coordinates found');
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
@@ -2756,7 +2758,9 @@ Ext.onReady(function() {
                     url: gis.init.contextPath + '/api/analytics/events/query/' + view.program.id + '.json' + paramString,
                     disableCaching: false,
                     failure: function(r) {
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        if (r.status && r.statusText && r.responseText) {
+                            gis.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
                     },
                     success: function(r) {
                         success(Ext.decode(r.responseText));
@@ -2960,7 +2964,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
@@ -2968,7 +2972,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -2981,7 +2985,7 @@ Ext.onReady(function() {
                 if (gis.olmap.mask && !gis.skipMask) {
                     gis.olmap.mask.hide();
                 }
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
             if (isJsonp) {
@@ -3246,7 +3250,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
@@ -3254,7 +3258,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -3296,7 +3300,7 @@ Ext.onReady(function() {
                 if (gis.olmap.mask && !gis.skipMask) {
                     gis.olmap.mask.hide();
                 }
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
             if (isJsonp) {
@@ -3474,7 +3478,8 @@ Ext.onReady(function() {
                     }
                     return gis.conf.finals.widget.loadtype_organisationunit;
                 }
-            } else {
+            }
+            else {
                 if (doExecute) {
                     loadOrganisationUnits(view);
                 }
@@ -3504,7 +3509,8 @@ Ext.onReady(function() {
                     }
                     return gis.conf.finals.widget.loadtype_organisationunit;
                 }
-            } else {
+            }
+            else {
                 if (doExecute) {
                     loadData(view);
                 }
@@ -3532,7 +3538,8 @@ Ext.onReady(function() {
                     }
                     return gis.conf.finals.widget.loadtype_organisationunit;
                 }
-            } else {
+            }
+            else {
                 if (doExecute) {
                     loadData(view);
                 }
@@ -3595,7 +3602,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.invalid_coordinates);
+                    gis.alert(GIS.i18n.invalid_coordinates);
                     return;
                 }
 
@@ -3603,7 +3610,7 @@ Ext.onReady(function() {
                     if (gis.olmap.mask && !gis.skipMask) {
                         gis.olmap.mask.hide();
                     }
-                    alert(GIS.i18n.no_valid_coordinates_found);
+                    gis.alert(GIS.i18n.no_valid_coordinates_found);
                     return;
                 }
 
@@ -3616,7 +3623,7 @@ Ext.onReady(function() {
                 if (gis.olmap.mask && !gis.skipMask) {
                     gis.olmap.mask.hide();
                 }
-                alert(GIS.i18n.coordinates_could_not_be_loaded);
+                gis.alert(GIS.i18n.coordinates_could_not_be_loaded);
             };
 
             if (isJsonp) {
@@ -3754,12 +3761,15 @@ Ext.onReady(function() {
                         success(r);
                     }
                 });
-            } else {
+            }
+            else {
                 Ext.Ajax.request({
                     url: gis.init.contextPath + '/api/analytics.json' + paramString,
                     disableCaching: false,
                     failure: function(r) {
-                        alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        if (r.status && r.statusText && r.responseText) {
+                            gis.alert(r.status + '\n' + r.statusText + '\n' + r.responseText);
+                        }
                     },
                     success: function(r) {
                         success(Ext.decode(r.responseText));
@@ -4823,7 +4833,7 @@ Ext.onReady(function() {
                     }
 
                     if (!ouDim) {
-                        alert('No organisation units specified');
+                        gis.alert('No organisation units specified');
                         return;
                     }
 
@@ -4985,12 +4995,12 @@ Ext.onReady(function() {
                     var headers = [];
 
                     if (!(config && Ext.isObject(config))) {
-                        alert('Data response invalid', config);
+                        gis.alert('Data response invalid', config);
                         return false;
                     }
 
                     if (!(config.headers && Ext.isArray(config.headers))) {
-                        alert('Data response invalid', config);
+                        gis.alert('Data response invalid', config);
                         return false;
                     }
 
@@ -5005,7 +5015,7 @@ Ext.onReady(function() {
                     config.headers = headers;
 
                     if (!config.headers.length) {
-                        alert('No valid response headers', config);
+                        gis.alert('No valid response headers', config);
                         return;
                     }
 
@@ -5015,7 +5025,7 @@ Ext.onReady(function() {
                     }
 
                     if (config.headers.length !== config.rows[0].length) {
-                        alert('Data invalid', config);
+                        gis.alert('Data invalid', config);
                         return false;
                     }
 
@@ -6729,7 +6739,7 @@ Ext.onReady(function() {
                         };
 
                         // init
-                        if (config.dashboard) {
+                        if (window['dhis2'] && window['jQuery']) {
                             onScriptReady();
                         }
                         else {
@@ -6782,7 +6792,7 @@ Ext.onReady(function() {
                     init.user.ou = ou;
                     init.user.ouc = ouc;
                 } else {
-                    alert('User is not assigned to any organisation units');
+                    gis.alert('User is not assigned to any organisation units');
                 }
 
                 fn();
@@ -6820,9 +6830,7 @@ Ext.onReady(function() {
         // ext gray
         css += 'table{border-collapse:collapse;border-spacing:0} \n';
         css += 'fieldset,img{border:0} \n';
-        css += 'h1,h2,h3,h4,h5,h6{font-size:100%} \n';
         css += '*:focus{outline:none}';
-        css += '.x-body{color:black;font-size:12px;font-family:tahoma, arial, verdana, sans-serif} \n';
         css += '.x-clear{overflow:hidden;clear:both;height:0;width:0;font-size:0;line-height:0} \n';
         css += '.x-layer{position:absolute;overflow:hidden;zoom:1} \n';
         css += '.x-css-shadow{position:absolute;-moz-border-radius:5px 5px;-webkit-border-radius:5px 5px;-o-border-radius:5px 5px;-ms-border-radius:5px 5px;-khtml-border-radius:5px 5px;border-radius:5px 5px} \n';
@@ -6830,7 +6838,7 @@ Ext.onReady(function() {
         css += '.x-frame-shadow *{padding:0;border:0;margin:0;clear:none;zoom:1} \n';
         css += '.x-mask{z-index:100;position:absolute;top:0;left:0;filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);opacity:0.5;width:100%;height:100%;zoom:1;background:#cccccc} \n';
         css += '.x-mask-msg{z-index:20001;position:absolute;top:0;left:0;padding:2px;border:1px solid;border-color:#d0d0d0;background-image:none;background-color:#e0e0e0} \n';
-        css += '.x-mask-msg div{padding:5px 10px 5px 25px;background-image:url("images/loading.gif");background-repeat:no-repeat;background-position:5px center;cursor:wait;border:1px solid #b3b3b3;background-color:#eeeeee;color:#222222;font:normal 11px tahoma, arial, verdana, sans-serif} \n';
+        css += '.x-mask-msg div{padding:5px 10px 5px 25px;background-image:url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/loading.gif");background-repeat:no-repeat;background-position:5px center;cursor:wait;border:1px solid #b3b3b3;background-color:#eeeeee;color:#222222;font:normal 11px tahoma, arial, verdana, sans-serif} \n';
         css += '.x-btn *{cursor:pointer;cursor:hand} \n';
         css += '.x-btn em a{text-decoration:none;display:inline-block;color:inherit} \n';
         css += '.x-btn-disabled span{filter:progid:DXImageTransform.Microsoft.Alpha(Opacity=50);opacity:0.5} \n';
@@ -6883,7 +6891,6 @@ Ext.onReady(function() {
         css += '.x-panel-default{border-color:#d0d0d0} \n';
         css += '.x-panel-header-default{font-size:11px;line-height:15px;border-color:#d0d0d0;border-width:1px;border-style:solid;background-image:none;background-color:#d7d2d2;background-image:-webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #f0f0f0), color-stop(100%, #d7d7d7));background-image:-webkit-linear-gradient(top, #f0f0f0,#d7d7d7);background-image:-moz-linear-gradient(top, #f0f0f0,#d7d7d7);background-image:-o-linear-gradient(top, #f0f0f0,#d7d7d7);background-image:-ms-linear-gradient(top, #f0f0f0,#d7d7d7);background-image:linear-gradient(top, #f0f0f0,#d7d7d7);-moz-box-shadow:#efeded 0 1px 0px 0 inset;-webkit-box-shadow:#efeded 0 1px 0px 0 inset;-o-box-shadow:#efeded 0 1px 0px 0 inset;box-shadow:#efeded 0 1px 0px 0 inset} \n';
         css += '.x-panel-header-text-default{color:#333333;font-size:11px;font-weight:bold;font-family:tahoma, arial, verdana, sans-serif} \n';
-        css += '.x-panel-body-default{background:white;border-color:#d0d0d0;color:black;border-width:1px;border-style:solid} \n';
         css += '.x-panel-collapsed .x-window-header-default,.x-panel-collapsed .x-panel-header-default{border-color:#d0d0d0} \n';
         css += '.x-panel-collapsed .x-panel-header-default-top{-moz-border-radius-bottomleft:null;-webkit-border-bottom-left-radius:null;-o-border-bottom-left-radius:null;-ms-border-bottom-left-radius:null;-khtml-border-bottom-left-radius:null;border-bottom-left-radius:null;-moz-border-radius-bottomright:null;-webkit-border-bottom-right-radius:null;-o-border-bottom-right-radius:null;-ms-border-bottom-right-radius:null;-khtml-border-bottom-right-radius:null;border-bottom-right-radius:null} \n';
         css += '.x-panel-header-default-top{-moz-box-shadow:#efeded 0 1px 0px 0 inset;-webkit-box-shadow:#efeded 0 1px 0px 0 inset;-o-box-shadow:#efeded 0 1px 0px 0 inset;box-shadow:#efeded 0 1px 0px 0 inset} \n';
@@ -6921,13 +6928,11 @@ Ext.onReady(function() {
         css += '.x-panel-header-draggable,.x-panel-header-draggable .x-panel-header-text,.x-window-header-draggable,.x-window-header-draggable .x-window-header-text,.x-tip-header-draggable .x-tip-header-text { cursor:move; } \n';
         css += '.x-panel-header-vertical,.x-panel-header-vertical .x-panel-header-body,.x-btn-group-header-vertical,.x-btn-group-header-vertical .x-btn-group-header-body,.x-window-header-vertical,.x-window-header-vertical .x-window-header-body,.x-html button,.x-html textarea,.x-html input,.x-html select { display:inline-block; } \n';
         css += '.x-window-header-text { user-select:none; -o-user-select:none; -ms-user-select:none; -moz-user-select:0; -webkit-user-select:none; cursor:default; white-space:nowrap; display:block; } \n';
-
-        // gis
         css += '.x-box-inner { zoom: 1; } \n';
         css += '.x-panel-default { border-color: #d0d0d0; } \n';
         css += '.x-panel { overflow: hidden; } \n';
         css += '.x-panel-body { overflow: hidden; position: relative; } \n';
-        css += '.x-panel-body-default { background: white; border-color: #d0d0d0; color: black; border-width: 1px; border-style: solid; } \n';
+        //css += '.x-panel-body-default { background: white; border-color: #d0d0d0; color: black; border-width: 1px; border-style: solid; } \n';
         css += '.x-panel-body, .x-window-body * { font-size: 11px; } \n';
         css += '.x-panel-header-default { line-height: 15px; border-color: #d0d0d0; border-width: 1px; border-style: solid; } \n';
         css += '.x-panel-header { height: 30px; padding: 7px 4px 4px 7px; border: 0 none; } \n';
@@ -6937,6 +6942,8 @@ Ext.onReady(function() {
         css += '.x-unselectable { -webkit-user-select: none; cursor: default; } \n';
         css += '.x-docked { position: absolute; z-index: 1; } \n';
         css += '.x-docked-top { border-bottom-width: 0 !important; } \n';
+
+        // gis
         css += '.gis-container-default .x-window-body { padding: 5px; background: #fff; } \n';
         css += '.olControlPanel { position: absolute; top: 0; right: 0; border: 0 none; } \n';
         css += '.olControlButtonItemActive { background: #556; color: #fff; width: 24px; height: 24px; opacity: 0.75; filter: alpha(opacity=75); -ms-filter: "alpha(opacity=75)"; cursor: pointer; cursor: hand; text-align: center; font-size: 21px !important; text-shadow: 0 0 1px #ddd; } \n';
@@ -6951,12 +6958,12 @@ Ext.onReady(function() {
         css += '.olControlPanel.legend-vertical { top: 72px; } \n';
         css += '.olControlPanel.legend-vertical .olControlButtonItemActive { border-bottom-left-radius: 2px; } \n';
         css += '.olControlPermalink { display: none !important; } \n';
-        css += '.olControlMousePosition { background: #fff !important; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.2px; -webkit-text-stroke-color: #555; } \n';
+        css += '.olControlMousePosition { background: #fff !important; line-height: 14px; opacity: 0.8 !important; filter: alpha(opacity=80) !important; -ms-filter: "alpha(opacity=80)" !important; right: 0 !important; bottom: 0 !important; border-top-left-radius: 2px !important; padding: 2px 2px 1px 5px !important; color: #000 !important; -webkit-text-stroke-width: 0.1px; -webkit-text-stroke-color: #555; } \n';
         css += '.olControlMousePosition * { font-size: 10px !important; } \n';
         css += '.text-mouseposition-lonlat { color: #555; } \n';
         css += '.olLayerGoogleCopyright, .olLayerGoogleV3.olLayerGooglePoweredBy { display: none; } \n';
-        css += '.google-logo { background: url("images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
-        css += '.google-logo-small { background: url("images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/google-logo.png") no-repeat; width: 40px; height: 13px; margin-left: 6px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
+        css += '.google-logo-small { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/google-logo-small.png") no-repeat; width: 13px; height: 13px; margin-left: 4px; display: inline-block; vertical-align: bottom; cursor: pointer; cursor: hand; } \n';
         css += '.olControlScaleLine { left: 5px !important; bottom: 5px !important; } \n';
         css += '.olControlScaleLineBottom { display: none; } \n';
         css += '.olControlScaleLineTop { font-weight: bold; } \n';
@@ -6981,8 +6988,8 @@ Ext.onReady(function() {
         css += '.gis-menu-item-icon-drill, .gis-menu-item-icon-float { left: 6px; } \n';
         css += '.gis-menu-item-first.x-menu-item-active .x-menu-item-link {	border-radius: 0; border-top-left-radius: 2px; border-top-right-radius: 2px; } \n';
         css += '.gis-menu-item-last.x-menu-item-active .x-menu-item-link { border-radius: 0; border-bottom-left-radius: 2px; border-bottom-right-radius: 2px; } \n';
-        css += '.gis-menu-item-icon-drill { \n background: url("images/drill_16.png") no-repeat; } \n';
-        css += '.gis-menu-item-icon-float { background: url("images/float_16.png") no-repeat; } \n';
+        css += '.gis-menu-item-icon-drill { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/drill_16.png") no-repeat; } \n';
+        css += '.gis-menu-item-icon-float { background: url("' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/float_16.png") no-repeat; } \n';
         css += '.x-color-picker a { padding: 0; } \n';
         css += '.x-color-picker em span { width: 14px; height: 14px; } \n';
         css += '.gis-panel-legend .x-panel-header { height: 23px; background: #f1f1f1; padding: 4px 4px 0 5px} \n';
@@ -7000,11 +7007,14 @@ Ext.onReady(function() {
             createViewport,
             afterRender,
             initialize,
-            gis;
+            gis = {
+                core: {},
+                app: {}
+            };
 
         validateConfig = function() {
             if (!Ext.isString(config.url)) {
-                alert('Invalid url (' + config.el + ')');
+                gis.alert('Invalid url (' + config.el + ')');
                 return;
             }
 
@@ -7013,14 +7023,14 @@ Ext.onReady(function() {
             }
 
             if (!Ext.isString(config.el)) {
-                alert('Invalid html element id (' + config.el + ')');
+                gis.alert('Invalid html element id (' + config.el + ')');
                 return;
             }
 
             config.id = config.id || config.uid;
 
             if (config.id && !Ext.isString(config.id)) {
-                alert('Invalid map id (' + config.el + ')');
+                gis.alert('Invalid map id (' + config.el + ')');
                 return;
             }
 
@@ -7067,6 +7077,8 @@ Ext.onReady(function() {
                 centerRegion,
                 eastRegion,
                 el = Ext.get(gis.el),
+                elWidth = el ? el.getWidth() : 0,
+                elHeight = el ? el.getHeight() : 0,
                 eastWidth = gis.map.hideLegend ? 0 : (gis.plugin ? 120 : 200),
                 trash = [];
 
@@ -7074,7 +7086,7 @@ Ext.onReady(function() {
             if (gis.dashboard) {
                 items.push(northRegion = Ext.create('Ext.panel.Panel', {
                     region: 'north',
-                    width: el.getWidth(),
+                    width: elWidth,
                     height: 19,
                     bodyStyle: 'background-color: #fff; border: 0 none; font: bold 12px LiberationSans, arial, sans-serif; color: #333; text-align: center; line-height: 14px; letter-spacing: -0.1px',
                     html: ''
@@ -7086,7 +7098,7 @@ Ext.onReady(function() {
                 region: 'center',
                 map: gis.olmap,
                 bodyStyle: 'border: 1px solid #d0d0d0',
-                width: el.getWidth() - eastWidth
+                width: elWidth - eastWidth
             }));
 
             // east
@@ -7166,8 +7178,8 @@ Ext.onReady(function() {
 
             viewport = Ext.create('Ext.panel.Panel', {
                 renderTo: el,
-                width: el.getWidth(),
-                height: el.getHeight(),
+                width: elWidth,
+                height: elHeight,
                 cls: 'gis-plugin',
                 layout: 'border',
                 bodyStyle: 'border: 0 none',
@@ -7184,15 +7196,18 @@ Ext.onReady(function() {
             viewport.eastRegion = eastRegion;
 
             viewport.centerRegion.trash = trash;
-            viewport.centerRegion.getEl().on('mouseleave', function() {
-                for (var i = 0, cmp; i < trash.length; i++) {
-                    cmp = viewport.centerRegion.trash[i];
 
-                    if (cmp && cmp.destroy) {
-                        cmp.destroy();
+            if (viewport.centerRegion.getEl()) {
+                viewport.centerRegion.getEl().on('mouseleave', function() {
+                    for (var i = 0, cmp; i < trash.length; i++) {
+                        cmp = viewport.centerRegion.trash[i];
+
+                        if (cmp && cmp.destroy) {
+                            cmp.destroy();
+                        }
                     }
-                }
-            });
+                });
+            }
 
             return viewport;
         };
@@ -7217,7 +7232,7 @@ Ext.onReady(function() {
                     el = elArray[j];
 
                     if (el) {
-                        el.innerHTML = '<img src="images/' + map[cls] + '" />';
+                        el.innerHTML = '<img src="' + init.contextPath + '/dhis-web-commons/javascripts/plugin/images/' + map[cls] + '" />';
                     }
                 }
             }
@@ -7254,13 +7269,22 @@ Ext.onReady(function() {
             init.skipMask = Ext.isBoolean(config.skipMask) ? config.skipMask : false;
             init.skipFade = Ext.isBoolean(config.skipFade) ? config.skipFade : false;
 
-            // alert
-            //init.alert = function(text) {
-                //Ext.get(config.el).setStyle('opacity', 1);
-                //Ext.get(config.el).update('<div class="ns-plugin-alert">' + text + '</div>');
-            //};
-
+            // instance
             gis = GIS.core.getInstance(init);
+
+            // alerts
+            gis.alert = function(text, isLog) {
+                if (isLog) {
+                    console.log(text);
+                }
+                else {
+                    if (text) {
+                        alert(text);
+                    }
+                }
+            };
+
+            // extend instance
             extendInstance(gis);
 
             // google maps
@@ -7338,9 +7362,11 @@ Ext.onReady(function() {
                 };
             }
 
-            gis.olmap.mask = Ext.create('Ext.LoadMask', gis.viewport.centerRegion.getEl(), {
-                msg: 'Loading'
-            });
+            if (gis.viewport.centerRegion.getEl()) {
+                gis.olmap.mask = Ext.create('Ext.LoadMask', gis.viewport.centerRegion.getEl(), {
+                    msg: 'Loading'
+                });
+            }
 
             GIS.core.MapLoader(gis).load();
         }();

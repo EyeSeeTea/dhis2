@@ -38,6 +38,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -215,10 +216,17 @@ public class DataElementCategoryCombo
         return name.toString();
     }
 
-    //TODO update category option -> category option combo association
     public void generateOptionCombos()
     {
         this.optionCombos = new HashSet<>( generateOptionCombosList() );
+
+        for ( DataElementCategoryOptionCombo optionCombo : optionCombos )
+        {
+            for ( DataElementCategoryOption categoryOption : optionCombo.getCategoryOptions() )
+            {
+                categoryOption.addCategoryOptionCombo( optionCombo );
+            }
+        }
     }
 
     public boolean hasOptionCombos()
@@ -316,9 +324,9 @@ public class DataElementCategoryCombo
     }
 
     @Override
-    public void mergeWith( IdentifiableObject other )
+    public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
-        super.mergeWith( other );
+        super.mergeWith( other, strategy );
 
         if ( other.getClass().isInstance( this ) )
         {
