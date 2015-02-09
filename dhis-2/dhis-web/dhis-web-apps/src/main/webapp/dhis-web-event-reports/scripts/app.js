@@ -395,7 +395,9 @@ Ext.onReady( function() {
 				return record;
             },
             setRecord: function(record) {
-                this.valueCmp.setValue(record.filter);
+				if (record.filter) {
+					this.valueCmp.setValue(record.filter.split(':')[1]);
+                }
             },
             initComponent: function() {
                 var container = this;
@@ -3816,7 +3818,7 @@ Ext.onReady( function() {
 			index = index || dataElementSelected.items.items.length;
 
 			getUxType = function(element) {
-                
+
 				if (Ext.isObject(element.optionSet) && Ext.isString(element.optionSet.id)) {
 					return 'Ext.ux.panel.OrganisationUnitGroupSetContainer';
 				}
