@@ -394,7 +394,9 @@ Ext.onReady( function() {
 				return record;
             },
             setRecord: function(record) {
-                this.valueCmp.setValue(record.filter);
+				if (record.filter) {
+					this.valueCmp.setValue(record.filter.split(':')[1]);
+                }
             },
             initComponent: function() {
                 var container = this;
