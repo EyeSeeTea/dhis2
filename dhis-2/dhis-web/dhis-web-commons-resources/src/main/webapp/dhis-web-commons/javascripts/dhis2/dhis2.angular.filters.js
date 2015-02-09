@@ -89,7 +89,7 @@ var d2Filters = angular.module('d2Filters', [])
 /* trim away all single and double quotes in the start and end of a string*/
 .filter('trimquotes', function() {
     return function(input) {
-        if (!input || typeof input !== 'string' || !(input instanceof String)) {
+        if (!input || (typeof input !== 'string' && !(input instanceof String))) {
             return input;
         }
         
