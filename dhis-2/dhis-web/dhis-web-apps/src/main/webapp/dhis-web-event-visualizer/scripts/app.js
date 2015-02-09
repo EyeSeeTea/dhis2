@@ -412,12 +412,12 @@ Ext.onReady( function() {
                     editable: false,
                     width: operatorCmpWidth + valueCmpWidth,
                     style: 'margin-bottom:0',
-                    value: 'false',
+                    value: 'true',
                     store: {
                         fields: ['id', 'name'],
                         data: [
-                            {id: 'true', name: 'Yes'},
-                            {id: 'false', name: 'No'}
+                            {id: 'true', name: EV.i18n.yes},
+                            {id: 'false', name: EV.i18n.no}
                         ]
                     }
                 });
@@ -3469,6 +3469,10 @@ Ext.onReady( function() {
 					return 'Ext.ux.panel.DataElementDateContainer';
 				}
 
+				if (element.type === 'bool' || element.type === 'trueOnly') {
+					return 'Ext.ux.panel.DataElementBooleanContainer';
+				}
+
 				return 'Ext.ux.panel.DataElementIntegerContainer';
 			};
 
@@ -3505,7 +3509,7 @@ Ext.onReady( function() {
 				allElements = [],
                 fixedFilterElementIds = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
-                includeKeys = ['int', 'number', 'boolean', 'bool'],
+                includeKeys = ['int', 'number', 'bool', 'boolean', 'trueOnly'],
                 ignoreKeys = ['pe', 'ou'],
                 recordMap = {
 					'pe': {id: 'pe', name: 'Periods'},
@@ -3573,7 +3577,7 @@ Ext.onReady( function() {
                 if (layout) {
                     ux.setRecord(element);
                 }
-
+                
                 store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.colStore : aggWindow.fixedFilterStore;
 
                 if (store === aggWindow.fixedFilterStore) {
