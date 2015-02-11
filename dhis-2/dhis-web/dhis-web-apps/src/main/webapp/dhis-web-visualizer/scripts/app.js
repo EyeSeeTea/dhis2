@@ -5865,7 +5865,7 @@ Ext.onReady( function() {
 									},
 									'-',
 									{
-										text: NS.i18n.open_this_chart_as_pivot_table + '&nbsp;&nbsp;',
+										text: NS.i18n.open_this_chart_as_table + '&nbsp;&nbsp;',
 										cls: 'ns-menu-item-noicon',
 										disabled: !(NS.isSessionStorage && ns.app.layout),
 										listeners: {
