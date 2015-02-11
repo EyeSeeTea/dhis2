@@ -392,6 +392,11 @@ input[type=date]::-webkit-inner-spin-button, input[type=date]::-webkit-outer-spi
     border-top-left-radius: 3px;
 }
 
+//Necessary to override the .panel-group .panel { overflow: hidden; } in bootstrap.
+.panel-group .panel {
+   overflow: visible;
+}
+
 /*----------------------------------------------------------------------------*/
 /* Tracked entity
 /*----------------------------------------------------------------------------*/
