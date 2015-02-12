@@ -32,14 +32,12 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.hisp.dhis.common.GenericIdentifiableObjectStore;
 import org.hisp.dhis.common.Grid;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Dang Duy Hieu
- * @version $Id DefaultSqlViewService.java July 06, 2010$
  */
 @Transactional
 public class DefaultSqlViewService
@@ -49,18 +47,11 @@ public class DefaultSqlViewService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private GenericIdentifiableObjectStore<SqlView> sqlViewStore;
+    private SqlViewStore sqlViewStore;
 
-    public void setSqlViewStore( GenericIdentifiableObjectStore<SqlView> sqlViewStore )
+    public void setSqlViewStore( SqlViewStore sqlViewStore )
     {
         this.sqlViewStore = sqlViewStore;
-    }
-
-    private SqlViewExpandStore sqlViewExpandStore;
-
-    public void setSqlViewExpandStore( SqlViewExpandStore sqlViewExpandStore )
-    {
-        this.sqlViewExpandStore = sqlViewExpandStore;
     }
 
     // -------------------------------------------------------------------------
@@ -148,13 +139,13 @@ public class DefaultSqlViewService
     @Override
     public boolean viewTableExists( String viewTableName )
     {
-        return sqlViewExpandStore.viewTableExists( viewTableName );
+        return sqlViewStore.viewTableExists( viewTableName );
     }
 
     @Override
     public String createViewTable( SqlView sqlViewInstance )
     {
-        return sqlViewExpandStore.createViewTable( sqlViewInstance );
+        return sqlViewStore.createViewTable( sqlViewInstance );
     }
 
     @Override
@@ -167,11 +158,11 @@ public class DefaultSqlViewService
         {
             final String sql = substituteSql( sqlView.getSqlQuery(), variables );
             
-            sqlViewExpandStore.executeQuery( grid, sql );
+            sqlViewStore.executeQuery( grid, sql );
         }
         else
         {
-            sqlViewExpandStore.setUpDataSqlViewTable( grid, sqlView.getViewName(), criteria );
+            sqlViewStore.setUpDataSqlViewTable( grid, sqlView.getViewName(), criteria );
         }
         
         return grid;
@@ -205,12 +196,12 @@ public class DefaultSqlViewService
     @Override
     public String testSqlGrammar( String sql )
     {
-        return sqlViewExpandStore.testSqlGrammar( sql );
+        return sqlViewStore.testSqlGrammar( sql );
     }
 
     @Override
     public void dropViewTable( String sqlViewTableName )
     {
-        sqlViewExpandStore.dropViewTable( sqlViewTableName );
+        sqlViewStore.dropViewTable( sqlViewTableName );
     }
 }
