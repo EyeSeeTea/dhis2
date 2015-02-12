@@ -128,9 +128,15 @@ public class JdbcSqlViewExpandStore
             }
         }
 
-        log.info( "Get view SQL: " + sql );
+        executeQuery( grid, sql );
+    }
 
+    @Override
+    public void executeQuery( Grid grid, String sql )
+    {
         SqlRowSet rs = jdbcTemplate.queryForRowSet( sql );
+
+        log.info( "Get view SQL: " + sql );
 
         grid.addHeaders( rs );
         grid.addRows( rs );
@@ -156,7 +162,7 @@ public class JdbcSqlViewExpandStore
             return ex.getCause().getMessage();
         }
 
-        return "";
+        return null;
     }
 
     @Override

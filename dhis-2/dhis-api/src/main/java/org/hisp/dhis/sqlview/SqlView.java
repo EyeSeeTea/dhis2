@@ -28,10 +28,11 @@ package org.hisp.dhis.sqlview;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -41,10 +42,11 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.schema.annotation.PropertyRange;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import com.google.common.collect.Sets;
 
 /**
  * @author Dang Duy Hieu
@@ -57,6 +59,9 @@ public class SqlView
 
     private static final String CRITERIA_SEP = ":";
 
+    public static final Set<String> PROTECTED_TABLES = Sets.newHashSet( "users", "userinfo", 
+        "trackedentityinstance", "trackedentityattribute", "trackedentityattributevalue", "relationship" );
+    
     // -------------------------------------------------------------------------
     // Variables
     // -------------------------------------------------------------------------
@@ -65,6 +70,8 @@ public class SqlView
 
     private String sqlQuery;
 
+    private boolean query;
+    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -74,10 +81,11 @@ public class SqlView
 
     }
 
-    public SqlView( String name, String sqlQuery )
+    public SqlView( String name, String sqlQuery, boolean query )
     {
         this.name = name;
         this.sqlQuery = sqlQuery;
+        this.query = query;
     }
 
     // -------------------------------------------------------------------------
@@ -126,6 +134,16 @@ public class SqlView
 
         return map;
     }
+    
+    public SqlView cleanSqlQuery()
+    {
+        sqlQuery = sqlQuery.
+            replaceAll( "\\s*;\\s+", ";" ).
+            replaceAll( ";+", ";" ).
+            replaceAll( "\\s+", " " ).trim();
+        
+        return this;
+    }
 
     // -------------------------------------------------------------------------
     // Getters and setters
@@ -158,6 +176,20 @@ public class SqlView
         this.sqlQuery = sqlQuery;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isQuery()
+    {
+        return query;
+    }
+
+    public void setQuery( boolean query )
+    {
+        this.query = query;
+    }
+        
+
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -171,11 +203,13 @@ public class SqlView
             {
                 description = sqlView.getDescription();
                 sqlQuery = sqlView.getSqlQuery();
+                query = sqlView.isQuery();
             }
             else if ( MergeStrategy.MERGE_IF_NOT_NULL.equals( strategy ) )
             {
                 description = sqlView.getDescription() == null ? description : sqlView.getDescription();
                 sqlQuery = sqlView.getSqlQuery() == null ? sqlQuery : sqlView.getSqlQuery();
+                query = sqlView.isQuery();
             }
         }
     }
