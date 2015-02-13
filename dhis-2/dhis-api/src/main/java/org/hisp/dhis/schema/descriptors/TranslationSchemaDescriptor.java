@@ -1,4 +1,4 @@
-package org.hisp.dhis.translation;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,39 +28,30 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
-import java.util.Collection;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.hisp.dhis.translation.Translation;
+import org.springframework.stereotype.Component;
 
 /**
- * @author Kiran Prakash
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "translations", namespace = DxfNamespaces.DXF_2_0 )
-public class Translations
+@Component
+public class TranslationSchemaDescriptor implements SchemaDescriptor
 {
-    private Collection<Translation> translations;
+    public static final String SINGULAR = "translation";
 
-    public Translations()
-    {
-    }
+    public static final String PLURAL = "translations";
 
-    public Translations( Collection<Translation> translations )
-    {
-        this.translations = translations;
-    }
+    public static final String API_ENDPOINT = "/" + PLURAL;
 
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Collection<Translation> getTranslations()
+    @Override
+    public Schema getSchema()
     {
-        return translations;
-    }
+        Schema schema = new Schema( Translation.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setOrder( 3000 );
 
-    public void setTranslations( Collection<Translation> translations )
-    {
-        this.translations = translations;
+        return schema;
     }
 }
