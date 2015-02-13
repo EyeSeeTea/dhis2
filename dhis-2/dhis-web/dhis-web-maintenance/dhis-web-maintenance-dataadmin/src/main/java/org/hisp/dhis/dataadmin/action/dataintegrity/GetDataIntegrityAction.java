@@ -28,7 +28,6 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
@@ -40,7 +39,7 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
+ * @author Halvdan Hoem Grelland
  */
 public class GetDataIntegrityAction
     implements Action
@@ -78,17 +77,6 @@ public class GetDataIntegrityAction
     }
 
     // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
-
-    private DataIntegrityReport integrityReport;
-
-    public DataIntegrityReport getIntegrityReport()
-    {
-        return integrityReport;
-    }
-
-    // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
 
@@ -100,7 +88,7 @@ public class GetDataIntegrityAction
 
         scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
 
-        integrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
+        System.out.println( "Done dataintegrity??" ); // TODO Remove this
 
         return SUCCESS;
     }
