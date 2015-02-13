@@ -36,6 +36,9 @@ http://www.springframework.org/schema/beans http://www.springframework.org/schem
     class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction"
     scope="prototype">
     <property name="dataIntegrityService" ref="org.hisp.dhis.dataintegrity.DataIntegrityService" />
+    <property name="currentUserService" ref="org.hisp.dhis.user.CurrentUserService" />
+    <property name="notifier" ref="notifier" />
+    <property name="scheduler" ref="scheduler" />
   </bean>
 
   <!-- Statistics -->
