@@ -28,29 +28,13 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedMap;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementGroup;
-import org.hisp.dhis.dataelement.DataElementOperand;
+import org.hisp.dhis.dataintegrity.DataIntegrityResult;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.Section;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.indicator.IndicatorGroup;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
-import org.hisp.dhis.period.Period;
-import org.hisp.dhis.validation.ValidationRule;
+import org.hisp.dhis.scheduling.TaskCategory;
+import org.hisp.dhis.scheduling.TaskId;
+import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.system.scheduling.Scheduler;
+import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
 
@@ -61,8 +45,6 @@ import com.opensymphony.xwork2.Action;
 public class GetDataIntegrityAction
     implements Action
 {
-    private static final Log log = LogFactory.getLog( GetDataIntegrityAction.class );
-    
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
@@ -74,162 +56,36 @@ public class GetDataIntegrityAction
         this.dataIntegrityService = dataIntegrityService;
     }
 
+    private CurrentUserService currentUserService;
+
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    private Notifier notifier;
+
+    public void setNotifier( Notifier notifier )
+    {
+        this.notifier = notifier;
+    }
+
+    private Scheduler scheduler;
+
+    public void setScheduler( Scheduler scheduler )
+    {
+        this.scheduler = scheduler;
+    }
+
     // -------------------------------------------------------------------------
     // Output
     // -------------------------------------------------------------------------
 
-    private List<DataElement> dataElementsWithoutDataSet;
+    private DataIntegrityResult result;
 
-    public List<DataElement> getDataElementsWithoutDataSet()
+    public DataIntegrityResult getResult()
     {
-        return dataElementsWithoutDataSet;
-    }
-
-    private List<DataElement> dataElementsWithoutGroups;
-
-    public Collection<DataElement> getDataElementsWithoutGroups()
-    {
-        return dataElementsWithoutGroups;
-    }
-
-    private Map<DataElement, Collection<DataSet>> dataElementsAssignedToDataSetsWithDifferentPeriodTypes;
-
-    public Map<DataElement, Collection<DataSet>> getDataElementsAssignedToDataSetsWithDifferentPeriodTypes()
-    {
-        return dataElementsAssignedToDataSetsWithDifferentPeriodTypes;
-    }
-
-    private SortedMap<DataElement, Collection<DataElementGroup>> dataElementsViolatingExclusiveGroupSets;
-
-    public SortedMap<DataElement, Collection<DataElementGroup>> getDataElementsViolatingExclusiveGroupSets()
-    {
-        return dataElementsViolatingExclusiveGroupSets;
-    }
-    
-    private SortedMap<DataSet, Collection<DataElement>> dataElementsInDataSetNotInForm;
-
-    public SortedMap<DataSet, Collection<DataElement>> getDataElementsInDataSetNotInForm()
-    {
-        return dataElementsInDataSetNotInForm;
-    }
-
-    private Map<DataSet, Set<DataElementOperand>> categoryOptionCombosNotInDataElementCategoryCombo;
-    
-    public Map<DataSet, Set<DataElementOperand>> getCategoryOptionCombosNotInDataElementCategoryCombo()
-    {
-        return categoryOptionCombosNotInDataElementCategoryCombo;
-    }
-
-    private List<DataSet> dataSetsNotAssignedToOrganisationUnits;
-
-    public List<DataSet> getDataSetsNotAssignedToOrganisationUnits()
-    {
-        return dataSetsNotAssignedToOrganisationUnits;
-    }
-
-    private List<Section> sectionsWithInvalidCategoryCombinations;
-    
-    public List<Section> getSectionsWithInvalidCategoryCombinations()
-    {
-        return sectionsWithInvalidCategoryCombinations;
-    }
-
-    private Collection<Collection<Indicator>> indicatorsWithIdenticalFormulas;
-
-    public Collection<Collection<Indicator>> getIndicatorsWithIdenticalFormulas()
-    {
-        return indicatorsWithIdenticalFormulas;
-    }
-
-    private List<Indicator> indicatorsWithoutGroups;
-
-    public List<Indicator> getIndicatorsWithoutGroups()
-    {
-        return indicatorsWithoutGroups;
-    }
-
-    private Map<Indicator, String> invalidIndicatorNumerators;
-
-    public Map<Indicator, String> getInvalidIndicatorNumerators()
-    {
-        return invalidIndicatorNumerators;
-    }
-
-    private Map<Indicator, String> invalidIndicatorDenominators;
-
-    public Map<Indicator, String> getInvalidIndicatorDenominators()
-    {
-        return invalidIndicatorDenominators;
-    }
-
-    private SortedMap<Indicator, Collection<IndicatorGroup>> indicatorsViolatingExclusiveGroupSets;
-
-    public SortedMap<Indicator, Collection<IndicatorGroup>> getIndicatorsViolatingExclusiveGroupSets()
-    {
-        return indicatorsViolatingExclusiveGroupSets;
-    }
-
-    private List<Period> duplicatePeriods;
-    
-    public List<Period> getDuplicatePeriods()
-    {
-        return duplicatePeriods;
-    }
-
-    private List<OrganisationUnit> organisationUnitsWithCyclicReferences;
-
-    public List<OrganisationUnit> getOrganisationUnitsWithCyclicReferences()
-    {
-        return organisationUnitsWithCyclicReferences;
-    }
-
-    private List<OrganisationUnit> orphanedOrganisationUnits;
-
-    public List<OrganisationUnit> getOrphanedOrganisationUnits()
-    {
-        return orphanedOrganisationUnits;
-    }
-
-    private List<OrganisationUnit> organisationUnitsWithoutGroups;
-
-    public List<OrganisationUnit> getOrganisationUnitsWithoutGroups()
-    {
-        return organisationUnitsWithoutGroups;
-    }
-
-    private SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> organisationUnitsViolatingExclusiveGroupSets;
-
-    public SortedMap<OrganisationUnit, Collection<OrganisationUnitGroup>> getOrganisationUnitsViolatingExclusiveGroupSets()
-    {
-        return organisationUnitsViolatingExclusiveGroupSets;
-    }
-
-    private List<OrganisationUnitGroup> organisationUnitGroupsWithoutGroupSets;
-
-    public List<OrganisationUnitGroup> getOrganisationUnitGroupsWithoutGroupSets()
-    {
-        return organisationUnitGroupsWithoutGroupSets;
-    }
-
-    private List<ValidationRule> validationRulesWithoutGroups;
-
-    public List<ValidationRule> getValidationRulesWithoutGroups()
-    {
-        return validationRulesWithoutGroups;
-    }
-
-    private Map<ValidationRule, String> invalidValidationRuleLeftSideExpressions;
-
-    public Map<ValidationRule, String> getInvalidValidationRuleLeftSideExpressions()
-    {
-        return invalidValidationRuleLeftSideExpressions;
-    }
-
-    private Map<ValidationRule, String> invalidValidationRuleRightSideExpressions;
-
-    public Map<ValidationRule, String> getInvalidValidationRuleRightSideExpressions()
-    {
-        return invalidValidationRuleRightSideExpressions;
+        return result;
     }
 
     // -------------------------------------------------------------------------
@@ -239,64 +95,12 @@ public class GetDataIntegrityAction
     @Override
     public String execute()
     {
-        dataElementsWithoutDataSet = new ArrayList<>( dataIntegrityService.getDataElementsWithoutDataSet() );
-        dataElementsWithoutGroups = new ArrayList<>( dataIntegrityService.getDataElementsWithoutGroups() );
-        dataElementsAssignedToDataSetsWithDifferentPeriodTypes = dataIntegrityService.getDataElementsAssignedToDataSetsWithDifferentPeriodTypes();
-        dataElementsViolatingExclusiveGroupSets = dataIntegrityService.getDataElementsViolatingExclusiveGroupSets();
-        dataElementsInDataSetNotInForm = dataIntegrityService.getDataElementsInDataSetNotInForm();
+        TaskId taskId = new TaskId( TaskCategory.DATAINTEGRITY, currentUserService.getCurrentUser() );
+        notifier.clear( taskId );
 
-        log.info( "Checked data elements" );
-        
-        categoryOptionCombosNotInDataElementCategoryCombo = dataIntegrityService.getCategoryOptionCombosNotInDataElementCategoryCombo();
-        
-        log.info( "Checked operands" );
-        
-        dataSetsNotAssignedToOrganisationUnits = new ArrayList<>( dataIntegrityService.getDataSetsNotAssignedToOrganisationUnits() );
-        sectionsWithInvalidCategoryCombinations = new ArrayList<>( dataIntegrityService.getSectionsWithInvalidCategoryCombinations() );
-        
-        log.info( "Checked data sets" );
-        
-        indicatorsWithIdenticalFormulas = dataIntegrityService.getIndicatorsWithIdenticalFormulas();
-        indicatorsWithoutGroups = new ArrayList<>( dataIntegrityService.getIndicatorsWithoutGroups() );
-        invalidIndicatorNumerators = dataIntegrityService.getInvalidIndicatorNumerators();
-        invalidIndicatorDenominators = dataIntegrityService.getInvalidIndicatorDenominators();
-        indicatorsViolatingExclusiveGroupSets = dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets();
+        scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
 
-        log.info( "Checked indicators" );
-        
-        duplicatePeriods = dataIntegrityService.getDuplicatePeriods();
-
-        log.info( "Checked periods" );
-        
-        organisationUnitsWithCyclicReferences = new ArrayList<>( dataIntegrityService
-            .getOrganisationUnitsWithCyclicReferences() );
-        orphanedOrganisationUnits = new ArrayList<>( dataIntegrityService
-            .getOrphanedOrganisationUnits() );
-        organisationUnitsWithoutGroups = new ArrayList<>( dataIntegrityService
-            .getOrganisationUnitsWithoutGroups() );
-        organisationUnitsViolatingExclusiveGroupSets = dataIntegrityService.getOrganisationUnitsViolatingExclusiveGroupSets();
-        organisationUnitGroupsWithoutGroupSets = new ArrayList<>( dataIntegrityService
-            .getOrganisationUnitGroupsWithoutGroupSets() );
-        validationRulesWithoutGroups = new ArrayList<>( dataIntegrityService
-            .getValidationRulesWithoutGroups() );
-        
-        log.info( "Checked organisation units" );
-        
-        invalidValidationRuleLeftSideExpressions = dataIntegrityService.getInvalidValidationRuleLeftSideExpressions();
-        invalidValidationRuleRightSideExpressions = dataIntegrityService.getInvalidValidationRuleRightSideExpressions();
-
-        log.info( "Checked validation rules" );
-        
-        Collections.sort( dataElementsWithoutDataSet, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataElementsWithoutGroups, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataSetsNotAssignedToOrganisationUnits, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( sectionsWithInvalidCategoryCombinations, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( indicatorsWithoutGroups, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( organisationUnitsWithCyclicReferences, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( orphanedOrganisationUnits, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( organisationUnitsWithoutGroups, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( organisationUnitGroupsWithoutGroupSets, IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( validationRulesWithoutGroups, IdentifiableObjectNameComparator.INSTANCE );
+        result = (DataIntegrityResult) notifier.getTaskSummary( taskId );
 
         return SUCCESS;
     }
