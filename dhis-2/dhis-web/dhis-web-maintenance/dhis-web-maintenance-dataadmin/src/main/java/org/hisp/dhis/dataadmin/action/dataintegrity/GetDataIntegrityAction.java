@@ -28,7 +28,7 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.dataintegrity.DataIntegrityResult;
+import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
@@ -81,11 +81,11 @@ public class GetDataIntegrityAction
     // Output
     // -------------------------------------------------------------------------
 
-    private DataIntegrityResult result;
+    private DataIntegrityReport integrityReport;
 
-    public DataIntegrityResult getResult()
+    public DataIntegrityReport getIntegrityReport()
     {
-        return result;
+        return integrityReport;
     }
 
     // -------------------------------------------------------------------------
@@ -100,7 +100,7 @@ public class GetDataIntegrityAction
 
         scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
 
-        result = (DataIntegrityResult) notifier.getTaskSummary( taskId );
+        integrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
 
         return SUCCESS;
     }

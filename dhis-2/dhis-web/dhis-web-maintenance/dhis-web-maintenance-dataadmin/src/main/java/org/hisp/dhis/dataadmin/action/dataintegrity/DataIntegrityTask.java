@@ -31,7 +31,7 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.dataintegrity.DataIntegrityResult;
+import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
@@ -79,69 +79,69 @@ public class DataIntegrityTask implements Runnable
     {
         Timer timer = new SystemTimer().start();
 
-        DataIntegrityResult dataIntegrityResult = new DataIntegrityResult();
+        DataIntegrityReport dataIntegrityReport = new DataIntegrityReport();
 
-        dataIntegrityResult.setDataElementsWithoutDataSet( new ArrayList<>( dataIntegrityService.getDataElementsWithoutDataSet() ) );
+        dataIntegrityReport.setDataElementsWithoutDataSet( new ArrayList<>( dataIntegrityService.getDataElementsWithoutDataSet() ) );
 
-        dataIntegrityResult.setDataElementsWithoutGroups( new ArrayList<>( dataIntegrityService.getDataElementsWithoutGroups() ) );
-        dataIntegrityResult.setDataElementsAssignedToDataSetsWithDifferentPeriodTypes( dataIntegrityService.getDataElementsAssignedToDataSetsWithDifferentPeriodTypes() );
-        dataIntegrityResult.setDataElementsViolatingExclusiveGroupSets( dataIntegrityService.getDataElementsViolatingExclusiveGroupSets() );
-        dataIntegrityResult.setDataElementsInDataSetNotInForm( dataIntegrityService.getDataElementsInDataSetNotInForm() );
+        dataIntegrityReport.setDataElementsWithoutGroups( new ArrayList<>( dataIntegrityService.getDataElementsWithoutGroups() ) );
+        dataIntegrityReport.setDataElementsAssignedToDataSetsWithDifferentPeriodTypes( dataIntegrityService.getDataElementsAssignedToDataSetsWithDifferentPeriodTypes() );
+        dataIntegrityReport.setDataElementsViolatingExclusiveGroupSets( dataIntegrityService.getDataElementsViolatingExclusiveGroupSets() );
+        dataIntegrityReport.setDataElementsInDataSetNotInForm( dataIntegrityService.getDataElementsInDataSetNotInForm() );
 
         log.info( "Checked data elements" );
 
-        dataIntegrityResult.setCategoryOptionCombosNotInDataElementCategoryCombo( dataIntegrityService.getCategoryOptionCombosNotInDataElementCategoryCombo() );
+        dataIntegrityReport.setCategoryOptionCombosNotInDataElementCategoryCombo( dataIntegrityService.getCategoryOptionCombosNotInDataElementCategoryCombo() );
 
         log.info( "Checked operands" );
 
-        dataIntegrityResult.setDataSetsNotAssignedToOrganisationUnits( new ArrayList<>( dataIntegrityService.getDataSetsNotAssignedToOrganisationUnits() ) );
-        dataIntegrityResult.setSectionsWithInvalidCategoryCombinations( new ArrayList<>( dataIntegrityService.getSectionsWithInvalidCategoryCombinations() ) );
+        dataIntegrityReport.setDataSetsNotAssignedToOrganisationUnits( new ArrayList<>( dataIntegrityService.getDataSetsNotAssignedToOrganisationUnits() ) );
+        dataIntegrityReport.setSectionsWithInvalidCategoryCombinations( new ArrayList<>( dataIntegrityService.getSectionsWithInvalidCategoryCombinations() ) );
 
         log.info( "Checked data sets" );
 
-        dataIntegrityResult.setIndicatorsWithIdenticalFormulas( dataIntegrityService.getIndicatorsWithIdenticalFormulas() );
-        dataIntegrityResult.setIndicatorsWithoutGroups( new ArrayList<>( dataIntegrityService.getIndicatorsWithoutGroups() ) );
-        dataIntegrityResult.setInvalidIndicatorNumerators( dataIntegrityService.getInvalidIndicatorNumerators() );
-        dataIntegrityResult.setInvalidIndicatorDenominators( dataIntegrityService.getInvalidIndicatorDenominators() );
-        dataIntegrityResult.setIndicatorsViolatingExclusiveGroupSets( dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets() );
+        dataIntegrityReport.setIndicatorsWithIdenticalFormulas( dataIntegrityService.getIndicatorsWithIdenticalFormulas() );
+        dataIntegrityReport.setIndicatorsWithoutGroups( new ArrayList<>( dataIntegrityService.getIndicatorsWithoutGroups() ) );
+        dataIntegrityReport.setInvalidIndicatorNumerators( dataIntegrityService.getInvalidIndicatorNumerators() );
+        dataIntegrityReport.setInvalidIndicatorDenominators( dataIntegrityService.getInvalidIndicatorDenominators() );
+        dataIntegrityReport.setIndicatorsViolatingExclusiveGroupSets( dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets() );
 
         log.info( "Checked indicators" );
 
-        dataIntegrityResult.setDuplicatePeriods( dataIntegrityService.getDuplicatePeriods() );
+        dataIntegrityReport.setDuplicatePeriods( dataIntegrityService.getDuplicatePeriods() );
 
         log.info( "Checked periods" );
 
-        dataIntegrityResult.setOrganisationUnitsWithCyclicReferences( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithCyclicReferences() ) );
-        dataIntegrityResult.setOrphanedOrganisationUnits( new ArrayList<>( dataIntegrityService.getOrphanedOrganisationUnits() ) );
-        dataIntegrityResult.setOrganisationUnitsWithoutGroups( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithoutGroups() ) );
-        dataIntegrityResult.setOrganisationUnitsViolatingExclusiveGroupSets( dataIntegrityService.getOrganisationUnitsViolatingExclusiveGroupSets() );
-        dataIntegrityResult.setOrganisationUnitGroupsWithoutGroupSets( new ArrayList<>( dataIntegrityService.getOrganisationUnitGroupsWithoutGroupSets() ) );
-        dataIntegrityResult.setValidationRulesWithoutGroups( new ArrayList<>( dataIntegrityService.getValidationRulesWithoutGroups() ) );
+        dataIntegrityReport.setOrganisationUnitsWithCyclicReferences( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithCyclicReferences() ) );
+        dataIntegrityReport.setOrphanedOrganisationUnits( new ArrayList<>( dataIntegrityService.getOrphanedOrganisationUnits() ) );
+        dataIntegrityReport.setOrganisationUnitsWithoutGroups( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithoutGroups() ) );
+        dataIntegrityReport.setOrganisationUnitsViolatingExclusiveGroupSets( dataIntegrityService.getOrganisationUnitsViolatingExclusiveGroupSets() );
+        dataIntegrityReport.setOrganisationUnitGroupsWithoutGroupSets( new ArrayList<>( dataIntegrityService.getOrganisationUnitGroupsWithoutGroupSets() ) );
+        dataIntegrityReport.setValidationRulesWithoutGroups( new ArrayList<>( dataIntegrityService.getValidationRulesWithoutGroups() ) );
 
         log.info( "Checked organisation units" );
 
-        dataIntegrityResult.setInvalidValidationRuleLeftSideExpressions( dataIntegrityService.getInvalidValidationRuleLeftSideExpressions() );
-        dataIntegrityResult.setInvalidValidationRuleRightSideExpressions( dataIntegrityService.getInvalidValidationRuleRightSideExpressions() );
+        dataIntegrityReport.setInvalidValidationRuleLeftSideExpressions( dataIntegrityService.getInvalidValidationRuleLeftSideExpressions() );
+        dataIntegrityReport.setInvalidValidationRuleRightSideExpressions( dataIntegrityService.getInvalidValidationRuleRightSideExpressions() );
 
         log.info( "Checked validation rules" );
 
-        Collections.sort( dataIntegrityResult.getDataElementsWithoutDataSet(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getDataElementsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getDataSetsNotAssignedToOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getSectionsWithInvalidCategoryCombinations(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getIndicatorsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getOrganisationUnitsWithCyclicReferences(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getOrphanedOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getOrganisationUnitsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getOrganisationUnitGroupsWithoutGroupSets(), IdentifiableObjectNameComparator.INSTANCE );
-        Collections.sort( dataIntegrityResult.getValidationRulesWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getDataElementsWithoutDataSet(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getDataElementsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getDataSetsNotAssignedToOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getSectionsWithInvalidCategoryCombinations(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getIndicatorsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getOrganisationUnitsWithCyclicReferences(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getOrphanedOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getOrganisationUnitsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getOrganisationUnitGroupsWithoutGroupSets(), IdentifiableObjectNameComparator.INSTANCE );
+        Collections.sort( dataIntegrityReport.getValidationRulesWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
 
         timer.stop();
 
         if ( taskId != null )
         {
             notifier.notify( taskId, NotificationLevel.INFO, "Data integrity checks completed in " + timer.toString() + ".", true )
-                .addTaskSummary( taskId, dataIntegrityResult );
+                .addTaskSummary( taskId, dataIntegrityReport );
         }
     }
 }
