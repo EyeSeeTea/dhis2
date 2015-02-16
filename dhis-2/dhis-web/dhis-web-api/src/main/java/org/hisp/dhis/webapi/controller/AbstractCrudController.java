@@ -42,11 +42,13 @@ import org.hisp.dhis.dxf2.fieldfilter.FieldFilterService;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
+import org.hisp.dhis.dxf2.metadata.TranslateOptions;
 import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
 import org.hisp.dhis.dxf2.render.RenderService;
 import org.hisp.dhis.hibernate.exception.CreateAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
+import org.hisp.dhis.i18n.I18nService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeUtils;
@@ -125,13 +127,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
     @Autowired
     protected ContextService contextService;
 
+    @Autowired
+    protected I18nService i18nService;
+
     //--------------------------------------------------------------------------
     // GET
     //--------------------------------------------------------------------------
 
     @RequestMapping( method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectList(
-        @RequestParam Map<String, String> rpParameters, HttpServletResponse response, HttpServletRequest request )
+        @RequestParam Map<String, String> rpParameters, TranslateOptions translateOptions, HttpServletResponse response, HttpServletRequest request )
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -148,11 +153,11 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         boolean hasPaging = options.hasPaging();
 
-        List<T> entityList;
+        List<T> entities;
 
         if ( filters.isEmpty() )
         {
-            entityList = getEntityList( metaData, options, filters );
+            entities = getEntityList( metaData, options, filters );
             hasPaging = false;
         }
         else
@@ -186,12 +191,12 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                     Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
                     metaData.setPager( pager );
 
-                    entityList = Lists.newArrayList( manager.getBetweenLikeName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
+                    entities = Lists.newArrayList( manager.getBetweenLikeName( getEntityClass(), name, pager.getOffset(), pager.getPageSize() ) );
                     hasPaging = false;
                 }
                 else
                 {
-                    entityList = Lists.newArrayList( manager.getLikeName( getEntityClass(), name ) );
+                    entities = Lists.newArrayList( manager.getLikeName( getEntityClass(), name ) );
                 }
             }
             else
@@ -207,29 +212,30 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
                     }
                 }
 
-                entityList = getEntityList( metaData, options, filters );
+                entities = getEntityList( metaData, options, filters );
             }
         }
 
         Pager pager = metaData.getPager();
 
-        entityList = objectFilterService.filter( entityList, filters );
+        entities = objectFilterService.filter( entities, filters );
+        translate( entities, translateOptions );
 
         if ( hasPaging )
         {
-            pager = new Pager( options.getPage(), entityList.size(), options.getPageSize() );
-            entityList = PagerUtils.pageCollection( entityList, pager );
+            pager = new Pager( options.getPage(), entities.size(), options.getPageSize() );
+            entities = PagerUtils.pageCollection( entities, pager );
         }
 
-        postProcessEntities( entityList );
-        postProcessEntities( entityList, options, rpParameters );
+        postProcessEntities( entities );
+        postProcessEntities( entities, options, rpParameters );
 
         if ( fields.contains( "access" ) )
         {
             options.getOptions().put( "viewClass", "sharing" );
         }
 
-        handleLinksAndAccess( options, entityList, false );
+        handleLinksAndAccess( options, entities, false );
 
         linkService.generatePagerLinks( pager, getEntityClass() );
 
@@ -241,14 +247,16 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             rootNode.addChild( NodeUtils.createPager( pager ) );
         }
 
-        rootNode.addChild( fieldFilterService.filter( getEntityClass(), entityList, fields ) );
+        rootNode.addChild( fieldFilterService.filter( getEntityClass(), entities, fields ) );
 
         return rootNode;
     }
 
     @RequestMapping( value = "/{uid}", method = RequestMethod.GET )
     public @ResponseBody RootNode getObject(
-        @PathVariable( "uid" ) String pvUid, @RequestParam Map<String, String> rpParameters,
+        @PathVariable( "uid" ) String pvUid,
+        @RequestParam Map<String, String> rpParameters,
+        TranslateOptions translateOptions,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
@@ -259,12 +267,14 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
             fields.add( ":all" );
         }
 
-        return getObjectInternal( pvUid, rpParameters, filters, fields );
+        return getObjectInternal( pvUid, rpParameters, filters, fields, translateOptions );
     }
 
     @RequestMapping( value = "/{uid}/{property}", method = RequestMethod.GET )
     public @ResponseBody RootNode getObjectProperty(
-        @PathVariable( "uid" ) String pvUid, @PathVariable( "property" ) String pvProperty, @RequestParam Map<String, String> rpParameters,
+        @PathVariable( "uid" ) String pvUid, @PathVariable( "property" ) String pvProperty,
+        @RequestParam Map<String, String> rpParameters,
+        TranslateOptions translateOptions,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
@@ -276,7 +286,7 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
 
         String fieldFilter = "[" + Joiner.on( ',' ).join( fields ) + "]";
 
-        return getObjectInternal( pvUid, rpParameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + fieldFilter ) );
+        return getObjectInternal( pvUid, rpParameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + fieldFilter ), translateOptions );
     }
 
     @RequestMapping( value = "/{uid}/{property}", method = { RequestMethod.PUT, RequestMethod.PATCH } )
@@ -328,11 +338,37 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         serialize( request, response, summary );
     }
 
+    protected void translate( List<?> entities, TranslateOptions translateOptions )
+    {
+        if ( translateOptions.isTranslate() )
+        {
+            if ( translateOptions.defaultLocale() )
+            {
+                i18nService.internationalise( entities );
+            }
+            else
+            {
+                i18nService.internationalise( entities, translateOptions.getLocale() );
+            }
+        }
+    }
+
     private RootNode getObjectInternal( String uid, Map<String, String> parameters,
         List<String> filters, List<String> fields ) throws Exception
     {
+        return getObjectInternal( uid, parameters, filters, fields, null );
+    }
+
+    private RootNode getObjectInternal( String uid, Map<String, String> parameters,
+        List<String> filters, List<String> fields, TranslateOptions translateOptions ) throws Exception
+    {
         WebOptions options = new WebOptions( parameters );
         List<T> entities = getEntity( uid, options );
+
+        if ( translateOptions != null )
+        {
+            translate( entities, translateOptions );
+        }
 
         if ( entities.isEmpty() )
         {
@@ -540,9 +576,10 @@ public abstract class AbstractCrudController<T extends IdentifiableObject>
         @PathVariable( "property" ) String pvProperty,
         @PathVariable( "itemId" ) String pvItemId,
         @RequestParam Map<String, String> parameters,
+        TranslateOptions translateOptions,
         HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
-        RootNode rootNode = getObjectInternal( pvUid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ) );
+        RootNode rootNode = getObjectInternal( pvUid, parameters, Lists.<String>newArrayList(), Lists.newArrayList( pvProperty + "[:all]" ), translateOptions );
 
         // TODO optimize this using field filter (collection filtering)
         if ( !rootNode.getChildren().isEmpty() && rootNode.getChildren().get( 0 ).isCollection() )

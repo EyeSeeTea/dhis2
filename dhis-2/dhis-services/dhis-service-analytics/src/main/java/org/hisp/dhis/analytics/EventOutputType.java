@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller;
+package org.hisp.dhis.analytics;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,43 +28,10 @@ package org.hisp.dhis.webapi.controller;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.schema.descriptors.TranslationSchemaDescriptor;
-import org.hisp.dhis.translation.Translation;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
-import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.util.List;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-@Controller
-@RequestMapping( value = TranslationSchemaDescriptor.API_ENDPOINT )
-public class TranslationController extends AbstractCrudController<Translation>
+public enum EventOutputType
 {
-    @Override
-    protected List<Translation> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
-    {
-        List<Translation> entityList;
-
-        if ( options.hasPaging() )
-        {
-            int count = manager.getCount( getEntityClass() );
-
-            Pager pager = new Pager( options.getPage(), count, options.getPageSize() );
-            metaData.setPager( pager );
-
-            entityList = Lists.newArrayList( manager.getBetween( getEntityClass(), pager.getOffset(), pager.getPageSize() ) );
-        }
-        else
-        {
-            entityList = Lists.newArrayList( manager.getAll( getEntityClass() ) );
-        }
-
-        return entityList;
-    }
+    EVENT, ENROLLMENT, TRACKED_ENTITY_INSTANCE;
 }

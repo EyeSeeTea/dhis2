@@ -1,4 +1,4 @@
-package org.hisp.dhis.translation;
+package org.hisp.dhis.dxf2.metadata;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,39 +28,45 @@ package org.hisp.dhis.translation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.springframework.util.StringUtils;
 
-import java.util.Collection;
+import java.util.Locale;
 
 /**
- * @author Kiran Prakash
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@JacksonXmlRootElement( localName = "translations", namespace = DxfNamespaces.DXF_2_0 )
-public class Translations
+public class TranslateOptions
 {
-    private Collection<Translation> translations;
+    private boolean translate;
 
-    public Translations()
+    private String locale;
+
+    public TranslateOptions()
     {
     }
 
-    public Translations( Collection<Translation> translations )
+    public boolean isTranslate()
     {
-        this.translations = translations;
+        return translate || !StringUtils.isEmpty( locale );
     }
 
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Collection<Translation> getTranslations()
+    public void setTranslate( boolean translate )
     {
-        return translations;
+        this.translate = translate;
     }
 
-    public void setTranslations( Collection<Translation> translations )
+    public Locale getLocale()
     {
-        this.translations = translations;
+        return Locale.forLanguageTag( locale );
+    }
+
+    public void setLocale( String locale )
+    {
+        this.locale = locale;
+    }
+
+    public boolean defaultLocale()
+    {
+        return StringUtils.isEmpty( locale );
     }
 }

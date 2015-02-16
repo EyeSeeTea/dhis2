@@ -30,6 +30,7 @@ package org.hisp.dhis.analytics.event;
 
 import java.util.Set;
 
+import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.common.AnalyticalObject;
 import org.hisp.dhis.common.DisplayProperty;
@@ -53,7 +54,7 @@ public interface EventAnalyticsService
      */
     EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate, 
         Set<String> dimension, Set<String> filter, boolean skipMeta, boolean hierarchyMeta, SortOrder sortOrder, 
-        Integer limit, boolean uniqueInstances, DisplayProperty displayProperty, I18nFormat format );
+        Integer limit, EventOutputType outputType, DisplayProperty displayProperty, I18nFormat format );
 
     /**
      * Used for event query.
