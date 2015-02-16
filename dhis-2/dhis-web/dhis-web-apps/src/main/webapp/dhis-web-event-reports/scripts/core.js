@@ -313,7 +313,7 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
-                // countType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
+                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
 
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
@@ -2369,7 +2369,7 @@ Ext.onReady( function() {
 
                             a.push(getEmptyNameTdConfig({
                                 cls: 'pivot-dim-label',
-                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;//&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
+                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;/&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
                             }));
                         }
 
