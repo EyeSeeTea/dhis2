@@ -1071,6 +1071,13 @@ Ext.onReady( function() {
         filterStore = getStore();
         valueStore = getStore();
 
+        // store listeners
+        valueStore.on('add', function(store, records) {
+            if (!value.getValue()) {
+                value.setValue(records[0].data.id);
+            }
+        });
+
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
             fixedFilter.setHeight(fixedFilterHeight);
@@ -1183,7 +1190,6 @@ Ext.onReady( function() {
 			store: filterStore,
 			listeners: {
 				afterrender: function(ms) {
-
 					ms.store.on('add', function() {
 						Ext.defer( function() {
 							ms.boundList.getSelectionModel().deselectAll();
@@ -1195,7 +1201,7 @@ Ext.onReady( function() {
 
         aggregationType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo h22',
-			width: 100,
+			width: 80,
 			height: 22,
 			style: 'margin: 0',
             fieldStyle: 'height: 22px',
@@ -1206,7 +1212,6 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'default', text: NS.i18n.by_data_element},
 					{id: 'count', text: NS.i18n.count},
 					{id: 'sum', text: NS.i18n.sum},
 					{id: 'stddev', text: NS.i18n.stddev},
@@ -1224,8 +1229,24 @@ Ext.onReady( function() {
             fieldStyle: 'height: 24px',
 			queryMode: 'local',
 			valueField: 'id',
+            displayField: 'name',
 			editable: false,
-			store: valueStore
+			store: valueStore,
+            listeners: {
+                select: function(cb, r) {
+                    r = r[0];
+
+                    // remove selected
+                    removeDimension(r.data.id, valueStore);
+
+                    // add unselected
+                    valueStore.each( function(record) {
+                        if (record.data.id !== r.data.id) {
+                            addDimension(record.data, null, valueStore);
+                        }
+                    });
+                }
+            }
 		});
 
 		selectPanel = Ext.create('Ext.panel.Panel', {
@@ -1274,113 +1295,39 @@ Ext.onReady( function() {
                                 ]
                             }
                         }
-
-
-
-
-
-                        //{
-                            //xtype: 'container',
-                            //width: defaultWidth,
-                            //items: [
-                                //{
-                                    //xtype: 'container',
-                                    //layout: 'hbox',
-                                    //items: [
-                                        //{
-                                            //xtype: 'toolbar',
-                                            //height: 26,
-                                            //width: 100,
-                                            //style: 'padding-left: 6px; line-height: 20px',
-                                            //html: 'Value'
-                                        //},
-                                        //aggregationType
-                                    //]
-                                //},
-                                //{
-                                    //xtype: 'panel',
-                                    //bodyStyle: 'border-top: 0 none; padding: 1px',
-                                    //width: defaultWidth,
-                                    //height: 205,
-
-
-                                    //items: value,
-                                    //tbar: {
-                                        //height: 25,
-                                        //style: 'padding: 1px',
-                                        //items: [
-                                            //{
-                                                //xtype: 'label',
-                                                //height: 22,
-                                                //style: 'padding-left: 6px; line-height: 21px',
-                                                //text: 'Value'
-                                            //},
-                                            //'->',
-                                            //aggregationType
-                                        //]
-                                    //}
-                                //}
-                            //]
-                        //}
-
-
-
-
-
-
-
-
-
-                        //{
-                            //xtype: 'panel',
-                            //bodyStyle: 'padding: 1px',
-                            //width: defaultWidth,
-                            //height: 220,
-                            //items: value,
-                            //tbar: {
-                                //height: 25,
-                                //style: 'padding: 1px',
-                                //items: [
-                                    //{
-                                        //xtype: 'label',
-                                        //height: 22,
-                                        //style: 'padding-left: 6px; line-height: 21px',
-                                        //text: 'Value'
-                                    //},
-                                    //'->',
-                                    //aggregationType
-                                //]
-                            //}
-                        //}
 					]
 				}
 			]
 		});
 
-        addDimension = function(record, store) {
+        addDimension = function(record, store, excludedStores) {
             var store = dimensionStoreMap[record.id] || store || filterStore;
 
-            if (!hasDimension(record.id)) {
+            if (!hasDimension(record.id, excludedStores)) {
+                if (store === valueStore && valueStore.getRange().length) {
+                    rowStore.add(record);
+                }
+console.log(record);
                 store.add(record);
             }
         };
 
-        removeDimension = function(dataElementId) {
-            var stores = [colStore, rowStore, filterStore, fixedFilterStore];
+        removeDimension = function(id, excludedStores) {
+            var stores = Ext.Array.difference([colStore, rowStore, filterStore, fixedFilterStore, valueStore], Ext.Array.from(excludedStores));
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
-                index = store.findExact('id', dataElementId);
+                index = store.findExact('id', id);
 
                 if (index != -1) {
                     store.remove(store.getAt(index));
-                    dimensionStoreMap[dataElementId] = store;
+                    dimensionStoreMap[id] = store;
                 }
             }
         };
 
-        hasDimension = function(id) {
-            var stores = [colStore, rowStore, filterStore, fixedFilterStore];
+        hasDimension = function(id, excludedStores) {
+            var stores = Ext.Array.difference([colStore, rowStore, filterStore, fixedFilterStore, valueStore], Ext.Array.from(excludedStores));
 
             for (var i = 0, store, index; i < stores.length; i++) {
                 store = stores[i];
@@ -1413,6 +1360,10 @@ Ext.onReady( function() {
                 map[record.data.id] = fixedFilterStore;
             });
 
+            valueStore.each(function(record) {
+                map[record.data.id] = valueStore;
+            });
+
             return map;
         };
 
@@ -1432,6 +1383,8 @@ Ext.onReady( function() {
 			rowStore.removeAll();
 			fixedFilterStore.removeAll();
 			filterStore.removeAll();
+            valueStore.removeAll();
+            value.clearValue();
 
 			if (!isAll) {
 				colStore.add({id: dimConf.organisationUnit.dimensionName, name: dimConf.organisationUnit.name});
@@ -1453,6 +1406,7 @@ Ext.onReady( function() {
 			rowStore: rowStore,
             fixedFilterStore: fixedFilterStore,
 			filterStore: filterStore,
+            valueStore: valueStore,
             addDimension: addDimension,
             removeDimension: removeDimension,
             hasDimension: hasDimension,
@@ -4012,7 +3966,6 @@ Ext.onReady( function() {
         selectDataElements = function(items, layout) {
             var dataElements = [],
 				allElements = [],
-                fixedFilterElementIds = [],
                 aggWindow = ns.app.aggregateLayoutWindow,
                 queryWindow = ns.app.queryLayoutWindow,
                 includeKeys = ['int', 'number', 'bool', 'boolean', 'trueOnly'],
@@ -4082,11 +4035,7 @@ Ext.onReady( function() {
                     ux.setRecord(element);
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
-
-                if (store === aggWindow.fixedFilterStore) {
-					fixedFilterElementIds.push(element.id);
-				}
+                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.valueStore : aggWindow.fixedFilterStore;
 
                 aggWindow.addDimension(element, store);
                 queryWindow.colStore.add(element);
