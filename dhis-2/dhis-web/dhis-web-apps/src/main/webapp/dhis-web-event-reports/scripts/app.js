@@ -5852,32 +5852,6 @@ Ext.onReady( function() {
 				});
 			}
 
-            if (layoutWindow.valueStore) {
-				layoutWindow.valueStore.each(function(item) {
-					a = map[item.data.id] || [];
-
-					if (a.length) {
-						if (a.length === 1) {
-							filters.push(a[0]);
-						}
-						else {
-							var dim;
-
-							for (var i = 0; i < a.length; i++) {
-								if (!dim) {
-									dim = a[i];
-								}
-								else {
-									dim.filter += ':' + a[i].filter;
-								}
-							}
-
-							filters.push(dim);
-						}
-					}
-				});
-			}
-
 			if (columns.length) {
 				view.columns = columns;
 			}
