@@ -1218,14 +1218,14 @@ Ext.onReady( function() {
 		});
 
 		value = Ext.create('Ext.form.field.ComboBox', {
-			cls: 'ns-combo',
+			cls: 'ns-combo h24',
 			width: defaultWidth - 4,
-			height: defaultHeight,
-			style: 'margin-bottom:' + margin + 'px',
+			height: 24,
+            fieldStyle: 'height: 24px',
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-			store: valueStore,
+			store: valueStore
 		});
 
 		selectPanel = Ext.create('Ext.panel.Panel', {
