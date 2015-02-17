@@ -47,7 +47,13 @@ trackerCapture.controller('DataEntryController',
         //TODO: This function is working, but non-optimalized.
         var hide = false;
         
-        
+        //In case the field contains a value, we cant hide it. 
+        //If we hid a field with a value, it would falsely seem the user was aware that the value was entered in the UI.
+        if($scope.currentEvent[id])
+        {
+           return false; 
+        }
+                
         angular.forEach($rootScope.ruleeffects, function(effect) {
             //in the data entry controller we only care about the "hidefield" actions
             if(effect.action === "hidefield" && effect.content === id) {
@@ -55,6 +61,7 @@ trackerCapture.controller('DataEntryController',
             }
         });
         return hide;
+        
     }; 
     
     //listen for the selected items
