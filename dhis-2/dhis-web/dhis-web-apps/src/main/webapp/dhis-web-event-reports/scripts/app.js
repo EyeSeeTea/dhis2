@@ -1222,7 +1222,7 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-            value: 'count',
+            value: 'AVERAGE',
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
@@ -1322,6 +1322,13 @@ Ext.onReady( function() {
             var store = dimensionStoreMap[record.id] || store || filterStore;
 
             if (!hasDimension(record.id, excludedStores)) {
+
+                // if not applicable for value store
+                if (store === valueStore && !Ext.Array.contains(['int', 'number'], record.type)) {
+                    store = rowStore;
+                }
+
+                // if already value
                 if (store === valueStore && valueStore.getRange().length) {
                     rowStore.add(record);
                 }
@@ -1431,8 +1438,11 @@ Ext.onReady( function() {
             saveState: saveState,
             resetData: resetData,
             reset: reset,
-            getAggregationType: function() {
+            getValueId: function() {
                 return value.getValue();
+            },
+            getAggregationType: function() {
+                return aggregationType.getValue();
             },
 			hideOnBlur: true,
 			items: selectPanel,
@@ -5848,7 +5858,7 @@ Ext.onReady( function() {
 
 					if (a.length) {
 						if (a.length === 1) {
-							rows.push(a[0]);
+							filters.push(a[0]);
 						}
 						else {
 							var dim;
@@ -5862,7 +5872,7 @@ Ext.onReady( function() {
 								}
 							}
 
-							values.push(dim);
+							filters.push(dim);
 						}
 					}
 				});
@@ -5877,9 +5887,9 @@ Ext.onReady( function() {
 			if (filters.length) {
 				view.filters = filters;
 			}
-			if (values.length) {
-				view.values = values;
-			}
+
+            // value
+            view.valueId = layoutWindow.getValueId();
 
             // aggregation type
             view.aggregationType = layoutWindow.getAggregationType();
