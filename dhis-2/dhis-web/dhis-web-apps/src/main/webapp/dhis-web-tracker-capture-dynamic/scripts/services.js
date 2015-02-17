@@ -969,7 +969,14 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {uid:'rule168126t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'!$othersevereallergyexists',actions:[{uid:'actn168111e',action:'hidefield',location:null,content:'zk4Eui7Jhtr',data:null}]},
 {uid:'rule169163t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$otherchronicconditionexists && $otherchroniccondition !== \'\'',actions:[{uid:'actn169119e',action:'displaytext',location:'con',content:'Chronic condition: ',data:'$otherchroniccondition'}]},
 {uid:'rule170161t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$othermedicineallergyexists && $othermedicineallergy !== \'\'',actions:[{uid:'actn170118e',action:'displaytext',location:'con',content:'Medicine allergy: ',data:'$othermedicineallergy'}]},
-{uid:'rule171157t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$othersevereallergyexists && $othersevereallergy !== \'\'',actions:[{uid:'actn171116e',action:'displaytext',location:'con',content:'Severe allergy: ',data:'$othersevereallergy'}]}
+{uid:'rule171157t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$othersevereallergyexists && $othersevereallergy !== \'\'',actions:[{uid:'actn171116e',action:'displaytext',location:'con',content:'Severe allergy: ',data:'$othersevereallergy'}]},
+{uid:'rule172117t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$sleptunderbednet',actions:[{uid:'actn172111e',action:'hidefield',location:null,content:'ytV9rX4ADnn',data:null}]},
+{uid:'rule173179t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$gestationalage < 14 || $gestationalage >= 28 || $malariatreatedsecondtrimester',actions:[{uid:'actn173111e',action:'hidefield',location:null,content:'MHW5v2Iljtw',data:null}]},
+{uid:'rule174153t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$gestationalage < 28 || $malariatreatedthirdtrimester',actions:[{uid:'actn174111e',action:'hidefield',location:null,content:'zsWyjzmBLGz',data:null}]},
+{uid:'rule175130t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$malariatreatedsecondtrimester',actions:[{uid:'actn175151e',action:'displaytext',location:'con',content:'Prophylactic antimalarial provided in 2nd trimester',data:null},
+{uid:'actn176151e',action:'displaytext',location:'sum',content:'Prophylactic antimalarial provided in 2nd trimester',data:null}]},
+{uid:'rule177129t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$malariatreatedthirdtrimester',actions:[{uid:'actn177151e',action:'displaytext',location:'con',content:'Prophylactic antimalarial provided in 3rd trimester',data:null},
+{uid:'actn178151e',action:'displaytext',location:'sum',content:'Prophylactic antimalarial provided in 3rd trimester',data:null}]}
 
                     //...to here
                 ];
@@ -1023,7 +1030,9 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {uid:'var132124vv',name:'othersevereallergyexists',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'ZbDPeYzWsh2',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
 {uid:'var133121vv',name:'otherchroniccondition',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'Mh7nK8UKoZP',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
 {uid:'var134120vv',name:'othermedicineallergy',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'VSmOcdK3v7y',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
-{uid:'var135118vv',name:'othersevereallergy',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'zk4Eui7Jhtr',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'}
+{uid:'var135118vv',name:'othersevereallergy',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'zk4Eui7Jhtr',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var136129vv',name:'malariatreatedsecondtrimester',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'MHW5v2Iljtw',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var137128vv',name:'malariatreatedthirdtrimester',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'zsWyjzmBLGz',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'}
 
 
                     //...to here
