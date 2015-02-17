@@ -1078,6 +1078,19 @@ Ext.onReady( function() {
             }
         });
 
+        valueStore.on('remove', function(store, record) {
+            if (value.getValue() === record.data.id) {
+                value.clearValue();
+            }
+
+            if (store.getRange().length) {
+                var id = store.getRange()[0].data.id;
+
+                value.setValue(id);
+                onValueSelect(id);
+            }
+        });
+
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
             fixedFilter.setHeight(fixedFilterHeight);
@@ -1222,6 +1235,19 @@ Ext.onReady( function() {
 			})
 		});
 
+        onValueSelect = function(id) {
+
+            // remove selected
+            removeDimension(id, valueStore);
+
+            // add unselected
+            valueStore.each( function(record) {
+                if (record.data.id !== id) {
+                    addDimension(record.data, null, valueStore);
+                }
+            });
+        };
+
 		value = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo h24',
 			width: defaultWidth - 4,
@@ -1234,17 +1260,7 @@ Ext.onReady( function() {
 			store: valueStore,
             listeners: {
                 select: function(cb, r) {
-                    r = r[0];
-
-                    // remove selected
-                    removeDimension(r.data.id, valueStore);
-
-                    // add unselected
-                    valueStore.each( function(record) {
-                        if (record.data.id !== r.data.id) {
-                            addDimension(record.data, null, valueStore);
-                        }
-                    });
+                    onValueSelect(r[0].data.id);
                 }
             }
 		});
@@ -1307,7 +1323,7 @@ Ext.onReady( function() {
                 if (store === valueStore && valueStore.getRange().length) {
                     rowStore.add(record);
                 }
-console.log(record);
+
                 store.add(record);
             }
         };
