@@ -1006,6 +1006,7 @@ Ext.onReady( function() {
             fixedFilterStore,
 			filter,
 			filterStore,
+            onValueSelect,
 			value,
             aggregationType,
 
@@ -1225,12 +1226,13 @@ Ext.onReady( function() {
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
-					{id: 'count', text: NS.i18n.count},
-					{id: 'sum', text: NS.i18n.sum},
-					{id: 'stddev', text: NS.i18n.stddev},
-					{id: 'variance', text: NS.i18n.variance},
-					{id: 'min', text: NS.i18n.min},
-					{id: 'max', text: NS.i18n.max}
+					{id: 'AVERAGE', text: NS.i18n.average},
+					{id: 'SUM', text: NS.i18n.sum},
+					{id: 'COUNT', text: NS.i18n.count},
+					{id: 'STDDEV', text: NS.i18n.stddev},
+					{id: 'VARIANCE', text: NS.i18n.variance},
+					{id: 'MIN', text: NS.i18n.min},
+					{id: 'MAX', text: NS.i18n.max}
 				]
 			})
 		});
@@ -1429,6 +1431,9 @@ Ext.onReady( function() {
             saveState: saveState,
             resetData: resetData,
             reset: reset,
+            getAggregationType: function() {
+                return value.getValue();
+            },
 			hideOnBlur: true,
 			items: selectPanel,
 			bbar: [
@@ -5677,6 +5682,7 @@ Ext.onReady( function() {
 				columns = [],
 				rows = [],
 				filters = [],
+                values = [],
 				a;
 
 			view.dataType = dataType;
@@ -5836,7 +5842,31 @@ Ext.onReady( function() {
 				});
 			}
 
-            // view
+            if (layoutWindow.valueStore) {
+				layoutWindow.valueStore.each(function(item) {
+					a = map[item.data.id] || [];
+
+					if (a.length) {
+						if (a.length === 1) {
+							rows.push(a[0]);
+						}
+						else {
+							var dim;
+
+							for (var i = 0; i < a.length; i++) {
+								if (!dim) {
+									dim = a[i];
+								}
+								else {
+									dim.filter += ':' + a[i].filter;
+								}
+							}
+
+							values.push(dim);
+						}
+					}
+				});
+			}
 
 			if (columns.length) {
 				view.columns = columns;
@@ -5847,6 +5877,12 @@ Ext.onReady( function() {
 			if (filters.length) {
 				view.filters = filters;
 			}
+			if (values.length) {
+				view.values = values;
+			}
+
+            // aggregation type
+            view.aggregationType = layoutWindow.getAggregationType();
 
 			return view;
 		};
