@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.webdomain;
+package org.hisp.dhis.query;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,63 +28,92 @@ package org.hisp.dhis.webapi.webdomain;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.common.Options;
+import com.google.common.base.MoreObjects;
+import org.hisp.dhis.schema.Property;
 
-import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class WebOptions
-    extends Options
+public class Order
 {
-    public WebOptions( Map<String, String> options )
+    private boolean ascending;
+
+    private boolean ignoreCase;
+
+    private Property property;
+
+    public Order( Property property, boolean ascending )
     {
-        super( options );
+        this.property = property;
+        this.ascending = ascending;
     }
 
-    //--------------------------------------------------------------------------
-    // Getters for standard web options
-    //--------------------------------------------------------------------------
-
-    public boolean hasLinks( boolean defaultValue )
+    public Order ignoreCase()
     {
-        return stringAsBoolean( options.get( "links" ), defaultValue );
+        this.ignoreCase = true;
+        return this;
     }
 
-    public boolean hasLinks()
+    public boolean isAscending()
     {
-        return stringAsBoolean( options.get( "links" ), true );
+        return ascending;
     }
 
-    public boolean hasPaging()
+    public boolean isIgnoreCase()
     {
-        return stringAsBoolean( options.get( "paging" ), true );
+        return ignoreCase;
     }
 
-    public int getPage()
+    public Property getProperty()
     {
-        return stringAsInt( options.get( "page" ), 1 );
-    }
-    
-    public String getViewClass()
-    {
-        return stringAsString( options.get( "viewClass" ), null );
-    }
-    
-    public String getViewClass( String defaultValue )
-    {
-        return stringAsString( options.get( "viewClass" ), defaultValue );
+        return property;
     }
 
-    public int getPageSize()
+    public static Order asc( Property property )
     {
-        return stringAsInt( options.get( "pageSize" ), Pager.DEFAULT_PAGE_SIZE );
+        return new Order( property, true );
     }
-    
-    public boolean isManage()
+
+    public static Order desc( Property property )
     {
-        return stringAsBoolean( options.get( "manage" ), false );
+        return new Order( property, false );
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return Objects.hash( ascending, ignoreCase, property );
+    }
+
+    @Override
+    public boolean equals( Object obj )
+    {
+        if ( this == obj )
+        {
+            return true;
+        }
+
+        if ( obj == null || getClass() != obj.getClass() )
+        {
+            return false;
+        }
+
+        final Order other = (Order) obj;
+
+        return Objects.equals( this.ascending, other.ascending )
+            && Objects.equals( this.ignoreCase, other.ignoreCase )
+            && Objects.equals( this.property, other.property );
+    }
+
+    @Override
+    public String toString()
+    {
+        return MoreObjects.toStringHelper( this )
+            .add( "ascending", ascending )
+            .add( "ignoreCase", ignoreCase )
+            .add( "property", property != null ? property.getName() : null )
+            .toString();
     }
 }
