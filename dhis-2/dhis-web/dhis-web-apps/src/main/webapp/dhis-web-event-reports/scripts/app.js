@@ -1023,7 +1023,7 @@ Ext.onReady( function() {
 			window,
 
 			margin = 1,
-			defaultWidth = 160,
+			defaultWidth = 200,
 			defaultHeight = 220,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2,
 
@@ -1068,6 +1068,7 @@ Ext.onReady( function() {
 		rowStore = getStore();
         fixedFilterStore = getStore();
         filterStore = getStore();
+        valueStore = getStore();
 
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
@@ -1089,7 +1090,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.column,
+					text: NS.i18n.column_dimensions,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -1113,7 +1114,7 @@ Ext.onReady( function() {
 			cls: 'ns-toolbar-multiselect-leftright',
 			width: defaultWidth,
 			height: defaultHeight,
-			style: 'margin-bottom:0px',
+			style: 'margin-right:' + margin + 'px; margin-bottom:0px',
 			valueField: 'id',
 			displayField: 'name',
 			dragGroup: 'layoutDD',
@@ -1123,7 +1124,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.row,
+					text: NS.i18n.row_dimensions,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -1155,7 +1156,7 @@ Ext.onReady( function() {
 				height: 25,
 				items: {
 					xtype: 'label',
-					text: NS.i18n.filter,
+					text: NS.i18n.report_filter,
 					cls: 'ns-toolbar-multiselect-leftright-label'
 				}
 			},
@@ -1191,6 +1192,37 @@ Ext.onReady( function() {
 			}
 		});
 
+		value = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'ns-combo',
+			width: defaultWidth - 4,
+			height: defaultHeight,
+			style: 'margin-bottom:' + margin + 'px',
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+			store: valueStore,
+		});
+
+        //displayDensity = Ext.create('Ext.form.field.ComboBox', {
+			//cls: 'ns-combo',
+			//width: comboboxWidth,
+			//labelWidth: 130,
+			//fieldLabel: NS.i18n.display_density,
+			//labelStyle: 'color:#333',
+			//queryMode: 'local',
+			//valueField: 'id',
+			//editable: false,
+			//value: 'normal',
+			//store: Ext.create('Ext.data.Store', {
+				//fields: ['id', 'text'],
+				//data: [
+					//{id: 'comfortable', text: NS.i18n.comfortable},
+					//{id: 'normal', text: NS.i18n.normal},
+					//{id: 'compact', text: NS.i18n.compact}
+				//]
+			//})
+		//});
+
 		selectPanel = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border:0 none',
 			items: [
@@ -1211,10 +1243,23 @@ Ext.onReady( function() {
 					]
 				},
 				{
-					layout: 'column',
+					xtype: 'container',
+                    layout: 'column',
 					bodyStyle: 'border:0 none',
 					items: [
-						row
+						row,
+                        {
+                            xtype: 'panel',
+                            bodyStyle: 'padding: 1px',
+                            width: defaultWidth,
+                            height: 220,
+                            items: value,
+                            tbar: {
+                                height: 25,
+                                style: 'line-height: 20px; padding-left: 6px',
+                                html: 'Value'
+                            }
+                        }
 					]
 				}
 			]
