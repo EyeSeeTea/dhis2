@@ -1007,6 +1007,7 @@ Ext.onReady( function() {
 			filter,
 			filterStore,
 			value,
+            aggregationType,
 
 			getStore,
 			getStoreKeys,
@@ -1192,6 +1193,30 @@ Ext.onReady( function() {
 			}
 		});
 
+        aggregationType = Ext.create('Ext.form.field.ComboBox', {
+			cls: 'ns-combo h22',
+			width: 100,
+			height: 22,
+			style: 'margin: 0',
+            fieldStyle: 'height: 22px',
+			queryMode: 'local',
+			valueField: 'id',
+			editable: false,
+            value: 'count',
+			store: Ext.create('Ext.data.Store', {
+				fields: ['id', 'text'],
+				data: [
+					{id: 'default', text: NS.i18n.by_data_element},
+					{id: 'count', text: NS.i18n.count},
+					{id: 'sum', text: NS.i18n.sum},
+					{id: 'stddev', text: NS.i18n.stddev},
+					{id: 'variance', text: NS.i18n.variance},
+					{id: 'min', text: NS.i18n.min},
+					{id: 'max', text: NS.i18n.max}
+				]
+			})
+		});
+
 		value = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo',
 			width: defaultWidth - 4,
@@ -1202,26 +1227,6 @@ Ext.onReady( function() {
 			editable: false,
 			store: valueStore,
 		});
-
-        //displayDensity = Ext.create('Ext.form.field.ComboBox', {
-			//cls: 'ns-combo',
-			//width: comboboxWidth,
-			//labelWidth: 130,
-			//fieldLabel: NS.i18n.display_density,
-			//labelStyle: 'color:#333',
-			//queryMode: 'local',
-			//valueField: 'id',
-			//editable: false,
-			//value: 'normal',
-			//store: Ext.create('Ext.data.Store', {
-				//fields: ['id', 'text'],
-				//data: [
-					//{id: 'comfortable', text: NS.i18n.comfortable},
-					//{id: 'normal', text: NS.i18n.normal},
-					//{id: 'compact', text: NS.i18n.compact}
-				//]
-			//})
-		//});
 
 		selectPanel = Ext.create('Ext.panel.Panel', {
 			bodyStyle: 'border:0 none',
@@ -1256,10 +1261,97 @@ Ext.onReady( function() {
                             items: value,
                             tbar: {
                                 height: 25,
-                                style: 'line-height: 20px; padding-left: 6px',
-                                html: 'Value'
+                                style: 'padding: 1px',
+                                items: [
+                                    {
+                                        xtype: 'label',
+                                        height: 22,
+                                        style: 'padding-left: 6px; line-height: 22px',
+                                        text: 'Value'
+                                    },
+                                    '->',
+                                    aggregationType
+                                ]
                             }
                         }
+
+
+
+
+
+                        //{
+                            //xtype: 'container',
+                            //width: defaultWidth,
+                            //items: [
+                                //{
+                                    //xtype: 'container',
+                                    //layout: 'hbox',
+                                    //items: [
+                                        //{
+                                            //xtype: 'toolbar',
+                                            //height: 26,
+                                            //width: 100,
+                                            //style: 'padding-left: 6px; line-height: 20px',
+                                            //html: 'Value'
+                                        //},
+                                        //aggregationType
+                                    //]
+                                //},
+                                //{
+                                    //xtype: 'panel',
+                                    //bodyStyle: 'border-top: 0 none; padding: 1px',
+                                    //width: defaultWidth,
+                                    //height: 205,
+
+
+                                    //items: value,
+                                    //tbar: {
+                                        //height: 25,
+                                        //style: 'padding: 1px',
+                                        //items: [
+                                            //{
+                                                //xtype: 'label',
+                                                //height: 22,
+                                                //style: 'padding-left: 6px; line-height: 21px',
+                                                //text: 'Value'
+                                            //},
+                                            //'->',
+                                            //aggregationType
+                                        //]
+                                    //}
+                                //}
+                            //]
+                        //}
+
+
+
+
+
+
+
+
+
+                        //{
+                            //xtype: 'panel',
+                            //bodyStyle: 'padding: 1px',
+                            //width: defaultWidth,
+                            //height: 220,
+                            //items: value,
+                            //tbar: {
+                                //height: 25,
+                                //style: 'padding: 1px',
+                                //items: [
+                                    //{
+                                        //xtype: 'label',
+                                        //height: 22,
+                                        //style: 'padding-left: 6px; line-height: 21px',
+                                        //text: 'Value'
+                                    //},
+                                    //'->',
+                                    //aggregationType
+                                //]
+                            //}
+                        //}
 					]
 				}
 			]
