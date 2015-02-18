@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,24 +28,19 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ DeleteProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
  */
-public class GetProgramIndicatorAction
+public class UpdateProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -59,9 +54,6 @@ public class GetProgramIndicatorAction
         this.programIndicatorService = programIndicatorService;
     }
 
-    @Autowired
-    private ConstantService constantService;
-
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
@@ -73,25 +65,60 @@ public class GetProgramIndicatorAction
         this.id = id;
     }
 
-    private ProgramIndicator programIndicator;
+    private String name;
 
-    public ProgramIndicator getProgramIndicator()
+    public void setName( String name )
     {
-        return programIndicator;
+        this.name = name;
+    }
+
+    private String code;
+
+    public void setCode( String code )
+    {
+        this.code = code;
     }
 
     private String description;
 
-    public String getDescription()
+    public void setDescription( String description )
     {
-        return description;
+        this.description = description;
     }
 
-    private List<Constant> constants;
+    private String valueType;
 
-    public List<Constant> getConstants()
+    public void setValueType( String valueType )
     {
-        return constants;
+        this.valueType = valueType;
+    }
+
+    private String expression;
+
+    public void setExpression( String expression )
+    {
+        this.expression = expression;
+    }
+
+    private String rootDate;
+
+    public void setRootDate( String rootDate )
+    {
+        this.rootDate = rootDate;
+    }
+
+    private String shortName;
+
+    public void setShortName( String shortName )
+    {
+        this.shortName = shortName;
+    }
+
+    private Integer programId;
+
+    public Integer getProgramId()
+    {
+        return programId;
     }
 
     // -------------------------------------------------------------------------
@@ -102,14 +129,33 @@ public class GetProgramIndicatorAction
     public String execute()
         throws Exception
     {
-        programIndicator = programIndicatorService.getProgramIndicator( id );
+        code = (code == null && code.trim().length() == 0) ? null : code;
+        expression = expression.trim();
 
-        description = programIndicatorService.getExpressionDescription( programIndicator.getExpression() );
+        if ( valueType.equals( ProgramIndicator.VALUE_TYPE_DATE ) )
+        {
+            Pattern pattern = Pattern.compile( "[(+|-|*|\\)]+" );
+            Matcher matcher = pattern.matcher( expression );
+            if ( matcher.find() && matcher.start() != 0 )
+            {
+                expression = "+" + expression;
+            }
+        }
 
-        constants = new ArrayList<>(constantService.getAllConstants());
-        
-        Collections.sort( constants, IdentifiableObjectNameComparator.INSTANCE );
-        
+        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
+
+        programIndicator.setName( name );
+        programIndicator.setShortName( shortName );
+        programIndicator.setCode( code );
+        programIndicator.setDescription( description );
+        programIndicator.setExpression( expression );
+        programIndicator.setValueType( valueType );
+        programIndicator.setRootDate( rootDate );
+
+        programIndicatorService.updateProgramIndicator( programIndicator );
+
+        programId = programIndicator.getProgram().getId();
+
         return SUCCESS;
     }
 

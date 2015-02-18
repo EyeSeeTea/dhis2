@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,20 +28,24 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18n;
-import org.hisp.dhis.i18n.I18nFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.opensymphony.xwork2.Action;
-import com.sun.imageio.plugins.common.I18N;
 
 /**
  * @author Chau Thu Tran
- * @version $ GetProgramIndicatorDescripttionAction.java May 30, 2013 11:09:04
- *          AM $
+ * @version $ DeleteProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
  */
-public class GetProgramIndicatorDescripttionAction
+public class GetProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -55,29 +59,39 @@ public class GetProgramIndicatorDescripttionAction
         this.programIndicatorService = programIndicatorService;
     }
 
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
-    }
+    @Autowired
+    private ConstantService constantService;
 
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
 
-    private String expression;
+    private Integer id;
 
-    public void setExpression( String expression )
+    public void setId( Integer id )
     {
-        this.expression = expression;
+        this.id = id;
     }
 
-    private String message;
+    private ProgramIndicator programIndicator;
 
-    public String getMessage()
+    public ProgramIndicator getProgramIndicator()
     {
-        return message;
+        return programIndicator;
+    }
+
+    private String description;
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    private List<Constant> constants;
+
+    public List<Constant> getConstants()
+    {
+        return constants;
     }
 
     // -------------------------------------------------------------------------
@@ -88,15 +102,15 @@ public class GetProgramIndicatorDescripttionAction
     public String execute()
         throws Exception
     {
-        String valid = programIndicatorService.expressionIsValid( expression );
-        if ( valid.equals( ProgramIndicator.VALID ) )
-        {
-            message = programIndicatorService.getExpressionDescription( expression );
-            return SUCCESS;
-        }
-       
-        message = i18n.getString( "expression_is_not_well_formed" );
+        programIndicator = programIndicatorService.getProgramIndicator( id );
+
+        description = programIndicatorService.getExpressionDescription( programIndicator.getExpression() );
+
+        constants = new ArrayList<>(constantService.getAllConstants());
         
-        return ERROR;
+        Collections.sort( constants, IdentifiableObjectNameComparator.INSTANCE );
+        
+        return SUCCESS;
     }
+
 }

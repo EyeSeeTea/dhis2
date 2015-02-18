@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,33 +28,22 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.hisp.dhis.program.Program;
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
-import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ AddProgramIndicatorAction.java Apr 16, 2013 3:24:51 PM $
+ * @version $ ValidateProgramIndicatorAction.java Apr 16, 2013 3:29:11 PM $
  */
-public class AddProgramIndicatorAction
+public class ValidateProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
 
     private ProgramIndicatorService programIndicatorService;
 
@@ -67,16 +56,11 @@ public class AddProgramIndicatorAction
     // Setters
     // -------------------------------------------------------------------------
 
-    private Integer programId;
+    private Integer id;
 
-    public void setProgramId( Integer programId )
+    public void setId( Integer id )
     {
-        this.programId = programId;
-    }
-
-    public Integer getProgramId()
-    {
-        return programId;
+        this.id = id;
     }
 
     private String name;
@@ -100,32 +84,18 @@ public class AddProgramIndicatorAction
         this.code = code;
     }
 
-    private String description;
+    private String message;
 
-    public void setDescription( String description )
+    public String getMessage()
     {
-        this.description = description;
+        return message;
     }
 
-    private String valueType;
+    private I18n i18n;
 
-    public void setValueType( String valueType )
+    public void setI18n( I18n i18n )
     {
-        this.valueType = valueType;
-    }
-
-    private String expression;
-
-    public void setExpression( String expression )
-    {
-        this.expression = expression;
-    }
-
-    private String rootDate;
-
-    public void setRootDate( String rootDate )
-    {
-        this.rootDate = rootDate;
+        this.i18n = i18n;
     }
 
     // -------------------------------------------------------------------------
@@ -136,29 +106,36 @@ public class AddProgramIndicatorAction
     public String execute()
         throws Exception
     {
-        code = (code == null && code.trim().length() == 0) ? null : code;
-        expression = expression.trim();
+        ProgramIndicator match = null;
 
-        if ( valueType.equals( ProgramIndicator.VALUE_TYPE_DATE ) )
+        if ( name != null )
         {
-            Pattern pattern = Pattern.compile( "[(+|-|*|\\)]+" );
-            Matcher matcher = pattern.matcher( expression );
-            if ( matcher.find() && matcher.start() != 0 )
-            {
-                expression = "+" + expression;
-            }
+            name = name.trim();
+
+            match = programIndicatorService.getProgramIndicator( name );
+        }
+        else if ( shortName != null )
+        {
+            shortName = shortName.trim();
+
+            match = programIndicatorService.getProgramIndicatorByShortName( shortName );
+        }
+        else if ( code != null )
+        {
+            code = code.trim();
+
+            match = programIndicatorService.getProgramIndicator( code );
         }
 
-        Program program = programService.getProgram( programId );
-        ProgramIndicator programIndicator = new ProgramIndicator( name, description, valueType, expression );
-        programIndicator.setShortName( shortName );
-        programIndicator.setCode( code );
-        programIndicator.setRootDate( rootDate );
-        programIndicator.setProgram( program );
+        if ( match != null && (id == null || match.getId() != id.intValue()) )
+        {
+            message = i18n.getString( "name_exists" );
 
-        programIndicatorService.addProgramIndicator( programIndicator );
+            return ERROR;
+        }
+        
+        message = i18n.getString( "everything_is_ok" );
 
         return SUCCESS;
     }
-
 }
