@@ -61,8 +61,22 @@ trackerCapture.controller('DataEntryController',
             }
         });
         return hide;
-        
     }; 
+    
+    //check if field has an active error message
+    $scope.errorMessage = function(id) { 
+        var error = false;
+        
+        angular.forEach($rootScope.ruleeffects, function(effect) {
+            //in the data entry controller we only care about the "hidefield" actions
+            if(effect.action === "validationerror" && effect.location === id && effect.ineffect) {
+                error = effect.content;
+            }
+        });
+        //No error message 
+        return error;
+    }; 
+    
     
     //listen for the selected items
     $scope.$on('dashboardWidgets', function() {        
@@ -378,6 +392,9 @@ trackerCapture.controller('DataEntryController',
                     else{
                         val = '';
                     }
+                }
+                if(de.type === 'int') {
+                    val = Number(val);
                 }
             }    
             $scope.currentEvent[dataValue.dataElement] = val;

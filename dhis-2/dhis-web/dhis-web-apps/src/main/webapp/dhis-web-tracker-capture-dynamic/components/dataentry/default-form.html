@@ -115,6 +115,10 @@
                                    name="foo"/>
                         </div>
                     </div>
+                    <div class="alert alert-warning alert-dismissible" role="alert" ng-if="errorMessage(prStDe.dataElement.id)">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        {{errorMessage(prStDe.dataElement.id)}}
+                    </div>
                 </ng-form>
                 <span ng-show="dataEntryOuterForm.submitted && dataEntryInnerForm.foo.$invalid" class="error">{{'required'| translate}}</span>
             </td>
