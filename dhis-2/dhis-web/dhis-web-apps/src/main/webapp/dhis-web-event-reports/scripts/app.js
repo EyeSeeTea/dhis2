@@ -6106,13 +6106,19 @@ Ext.onReady( function() {
 			};
 
 			web.window.addHideOnBlurHandler = function(w) {
-				var el = Ext.get(Ext.query('.x-mask')[0]);
+				var masks = Ext.query('.x-mask');
 
-				el.on('click', function() {
-					if (w.hideOnBlur) {
-						w.hide();
-					}
-				});
+                for (var i = 0, el; i < masks.length; i++) {
+                    el = Ext.get(masks[i]);
+console.log(el.getWidth(), Ext.getBody().getWidth());
+                    if (el.getWidth() == Ext.getBody().getWidth()) {
+                        el.on('click', function() {
+                            if (w.hideOnBlur) {
+                                w.hide();
+                            }
+                        });
+                    }
+                }
 
 				w.hasHideOnBlurHandler = true;
 			};
