@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,9 +28,7 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
 
@@ -38,9 +36,10 @@ import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ * @version $ GetProgramIndicatorDescripttionAction.java May 30, 2013 11:09:04
+ *          AM $
  */
-public class UpdateProgramIndicatorAction
+public class GetProgramIndicatorDescriptionAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -54,44 +53,16 @@ public class UpdateProgramIndicatorAction
         this.programIndicatorService = programIndicatorService;
     }
 
+    private I18n i18n;
+
+    public void setI18n( I18n i18n )
+    {
+        this.i18n = i18n;
+    }
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
-
-    private Integer id;
-
-    public void setId( Integer id )
-    {
-        this.id = id;
-    }
-
-    private String name;
-
-    public void setName( String name )
-    {
-        this.name = name;
-    }
-
-    private String code;
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    private String description;
-
-    public void setDescription( String description )
-    {
-        this.description = description;
-    }
-
-    private String valueType;
-
-    public void setValueType( String valueType )
-    {
-        this.valueType = valueType;
-    }
 
     private String expression;
 
@@ -100,25 +71,11 @@ public class UpdateProgramIndicatorAction
         this.expression = expression;
     }
 
-    private String rootDate;
+    private String message;
 
-    public void setRootDate( String rootDate )
+    public String getMessage()
     {
-        this.rootDate = rootDate;
-    }
-
-    private String shortName;
-
-    public void setShortName( String shortName )
-    {
-        this.shortName = shortName;
-    }
-
-    private Integer programId;
-
-    public Integer getProgramId()
-    {
-        return programId;
+        return message;
     }
 
     // -------------------------------------------------------------------------
@@ -129,34 +86,15 @@ public class UpdateProgramIndicatorAction
     public String execute()
         throws Exception
     {
-        code = (code == null && code.trim().length() == 0) ? null : code;
-        expression = expression.trim();
-
-        if ( valueType.equals( ProgramIndicator.VALUE_TYPE_DATE ) )
+        String valid = programIndicatorService.expressionIsValid( expression );
+        if ( valid.equals( ProgramIndicator.VALID ) )
         {
-            Pattern pattern = Pattern.compile( "[(+|-|*|\\)]+" );
-            Matcher matcher = pattern.matcher( expression );
-            if ( matcher.find() && matcher.start() != 0 )
-            {
-                expression = "+" + expression;
-            }
+            message = programIndicatorService.getExpressionDescription( expression );
+            return SUCCESS;
         }
-
-        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
-
-        programIndicator.setName( name );
-        programIndicator.setShortName( shortName );
-        programIndicator.setCode( code );
-        programIndicator.setDescription( description );
-        programIndicator.setExpression( expression );
-        programIndicator.setValueType( valueType );
-        programIndicator.setRootDate( rootDate );
-
-        programIndicatorService.updateProgramIndicator( programIndicator );
-
-        programId = programIndicator.getProgram().getId();
-
-        return SUCCESS;
+       
+        message = i18n.getString( "expression_is_not_well_formed" );
+        
+        return ERROR;
     }
-
 }

@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,17 +28,23 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.i18n.I18n;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
+import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ ValidateProgramIndicatorAction.java Apr 16, 2013 3:29:11 PM $
+ * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
  */
-public class ValidateProgramIndicatorAction
+public class GetProgramIndicatorListAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -52,50 +58,36 @@ public class ValidateProgramIndicatorAction
         this.programIndicatorService = programIndicatorService;
     }
 
+    private ProgramService programService;
+
+    public void setProgramService( ProgramService programService )
+    {
+        this.programService = programService;
+    }
+
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
 
-    private Integer id;
+    private Integer programId;
 
-    public void setId( Integer id )
+    public void setProgramId( Integer programId )
     {
-        this.id = id;
+        this.programId = programId;
     }
 
-    private String name;
+    private List<ProgramIndicator> programIndicators;
 
-    public void setName( String name )
+    public List<ProgramIndicator> getProgramIndicators()
     {
-        this.name = name;
+        return programIndicators;
     }
 
-    private String shortName;
+    private Program program;
 
-    public void setShortName( String shortName )
+    public Program getProgram()
     {
-        this.shortName = shortName;
-    }
-
-    private String code;
-
-    public void setCode( String code )
-    {
-        this.code = code;
-    }
-
-    private String message;
-
-    public String getMessage()
-    {
-        return message;
-    }
-
-    private I18n i18n;
-
-    public void setI18n( I18n i18n )
-    {
-        this.i18n = i18n;
+        return program;
     }
 
     // -------------------------------------------------------------------------
@@ -106,36 +98,13 @@ public class ValidateProgramIndicatorAction
     public String execute()
         throws Exception
     {
-        ProgramIndicator match = null;
+        program = programService.getProgram( programId );
 
-        if ( name != null )
-        {
-            name = name.trim();
+        programIndicators = new ArrayList<>( programIndicatorService.getProgramIndicators( program ) );
 
-            match = programIndicatorService.getProgramIndicator( name );
-        }
-        else if ( shortName != null )
-        {
-            shortName = shortName.trim();
-
-            match = programIndicatorService.getProgramIndicatorByShortName( shortName );
-        }
-        else if ( code != null )
-        {
-            code = code.trim();
-
-            match = programIndicatorService.getProgramIndicator( code );
-        }
-
-        if ( match != null && (id == null || match.getId() != id.intValue()) )
-        {
-            message = i18n.getString( "name_exists" );
-
-            return ERROR;
-        }
-        
-        message = i18n.getString( "everything_is_ok" );
+        Collections.sort( programIndicators, IdentifiableObjectNameComparator.INSTANCE );
 
         return SUCCESS;
     }
+
 }

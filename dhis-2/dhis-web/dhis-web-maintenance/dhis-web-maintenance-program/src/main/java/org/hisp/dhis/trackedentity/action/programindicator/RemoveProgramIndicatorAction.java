@@ -1,4 +1,4 @@
-package org.hisp.dhis.trackedentity.action.programtindicator;
+package org.hisp.dhis.trackedentity.action.programindicator;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,23 +28,16 @@ package org.hisp.dhis.trackedentity.action.programtindicator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramIndicator;
 import org.hisp.dhis.program.ProgramIndicatorService;
-import org.hisp.dhis.program.ProgramService;
 
 import com.opensymphony.xwork2.Action;
 
 /**
  * @author Chau Thu Tran
- * @version $ UpdateProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
+ * @version $ RemoveProgramIndicatorAction Apr 16, 2013 3:24:51 PM $
  */
-public class GetProgramIndicatorListAction
+public class RemoveProgramIndicatorAction
     implements Action
 {
     // -------------------------------------------------------------------------
@@ -58,36 +51,15 @@ public class GetProgramIndicatorListAction
         this.programIndicatorService = programIndicatorService;
     }
 
-    private ProgramService programService;
-
-    public void setProgramService( ProgramService programService )
-    {
-        this.programService = programService;
-    }
-
     // -------------------------------------------------------------------------
     // Setters
     // -------------------------------------------------------------------------
 
-    private Integer programId;
+    private Integer id;
 
-    public void setProgramId( Integer programId )
+    public void setId( Integer id )
     {
-        this.programId = programId;
-    }
-
-    private List<ProgramIndicator> programIndicators;
-
-    public List<ProgramIndicator> getProgramIndicators()
-    {
-        return programIndicators;
-    }
-
-    private Program program;
-
-    public Program getProgram()
-    {
-        return program;
+        this.id = id;
     }
 
     // -------------------------------------------------------------------------
@@ -98,11 +70,9 @@ public class GetProgramIndicatorListAction
     public String execute()
         throws Exception
     {
-        program = programService.getProgram( programId );
+        ProgramIndicator programIndicator = programIndicatorService.getProgramIndicator( id );
 
-        programIndicators = new ArrayList<>( programIndicatorService.getProgramIndicators( program ) );
-
-        Collections.sort( programIndicators, IdentifiableObjectNameComparator.INSTANCE );
+        programIndicatorService.deleteProgramIndicator( programIndicator );
 
         return SUCCESS;
     }
