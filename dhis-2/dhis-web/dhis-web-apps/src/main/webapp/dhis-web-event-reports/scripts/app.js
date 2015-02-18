@@ -1273,7 +1273,7 @@ Ext.onReady( function() {
                 aggregationType.resetData();
             },
             setDefaultDataIf: function() {
-                if (!valueStore.getRange().length) {
+                if (!value.getValue()) {
                     this.setDefaultData();
                 }
             },
@@ -1504,7 +1504,7 @@ Ext.onReady( function() {
 					}
 
                     // value
-                    value.setDefaultData();
+                    value.setDefaultDataIf();
 				},
                 render: function() {
 					reset();
