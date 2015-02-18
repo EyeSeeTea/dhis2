@@ -1082,27 +1082,6 @@ Ext.onReady( function() {
             }
         };
 
-        //valueStore.reset = function() {
-            //this.removeAll();
-            //this.addDefault();
-        //};
-
-        //valueStore.addDefault();
-
-
-        //valueStore.on('remove', function(store, record) {
-            //if (value.getValue() === record.data.id) {
-                //value.clearValue();
-            //}
-
-            //if (store.getRange().length) {
-                //var id = store.getRange()[0].data.id;
-
-                //value.setValue(id);
-                //onValueSelect(id);
-            //}
-        //});
-
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
             fixedFilter.setHeight(fixedFilterHeight);
@@ -1355,19 +1334,8 @@ Ext.onReady( function() {
 
         addDimension = function(record, store, excludedStores) {
             var store = dimensionStoreMap[record.id] || store || filterStore;
-
+console.log(store === colStore, store === rowStore, store === fixedFilterStore, store === filterStore, store === valueStore);
             if (!hasDimension(record.id, excludedStores)) {
-
-                // if not applicable for value store
-                if (store === valueStore && !Ext.Array.contains(['int', 'number'], record.type)) {
-                    store = rowStore;
-                }
-
-                // if already value
-                if (store === valueStore && valueStore.getRange().length) {
-                    rowStore.add(record);
-                }
-
                 store.add(record);
             }
         };
@@ -4118,9 +4086,9 @@ Ext.onReady( function() {
                     ux.setRecord(element);
                 }
 
-                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.valueStore : aggWindow.fixedFilterStore;
+                store = Ext.Array.contains(includeKeys, element.type) || element.optionSet ? aggWindow.rowStore : aggWindow.fixedFilterStore;
 
-                aggWindow.addDimension(element, store);
+                aggWindow.addDimension(element, store, valueStore);
                 queryWindow.colStore.add(element);
 			}
 
