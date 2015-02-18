@@ -1240,10 +1240,14 @@ Ext.onReady( function() {
             else {
                 aggregationType.enable();
 
-                // remove selected
-                removeDimension(id, valueStore); // TODO +remove fra selection
+                // remove ux and layout item
+                if (hasDimension(id, valueStore)) {
+                    ns.app.accordion.getUx(id).removeDataElement();
+                }
 
-                //
+                // remove selected
+                //<ux>.removeDataElement();
+
 
             }
         };
@@ -1334,7 +1338,7 @@ Ext.onReady( function() {
 
         addDimension = function(record, store, excludedStores) {
             var store = dimensionStoreMap[record.id] || store || filterStore;
-console.log(store === colStore, store === rowStore, store === fixedFilterStore, store === filterStore, store === valueStore);
+
             if (!hasDimension(record.id, excludedStores)) {
                 store.add(record);
             }
@@ -3943,6 +3947,17 @@ console.log(store === colStore, store === rowStore, store === fixedFilterStore, 
 
 				return hasDataElement;
 			},
+            getUxById: function(dataElementId) {
+                var ux;
+
+                this.items.each(function(item) {
+					if (item.dataElement.id === dataElementId) {
+						ux = item;
+					}
+				});
+
+                return ux;
+            },
 			removeAllDataElements: function(reset) {
 				var items = this.items.items,
 					len = items.length;
@@ -3999,7 +4014,7 @@ console.log(store === colStore, store === rowStore, store === fixedFilterStore, 
                         dataElementsByStageStore.sort();
                     }
 
-                    ns.app.aggregateLayoutWindow.removeDimension(element.id);
+                    ns.app.aggregateLayoutWindow.removeDimension(element.id, ns.app.aggregateLayoutWindow.valueStore);
                     ns.app.queryLayoutWindow.removeDimension(element.id);
 				}
 			};
@@ -5954,6 +5969,10 @@ console.log(store === colStore, store === rowStore, store === fixedFilterStore, 
 			reset: reset,
 			setGui: setGui,
 			getView: getView,
+
+            getUx: function(id) {
+                return dataElementSelected.getUxById(id);
+            },
 
             listeners: {
                 added: function() {
