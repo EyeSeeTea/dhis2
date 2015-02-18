@@ -1072,25 +1072,36 @@ Ext.onReady( function() {
         filterStore = getStore();
         valueStore = getStore();
 
-        // store listeners
-        valueStore.on('add', function(store, records) {
-            if (!value.getValue()) {
-                value.setValue(records[0].data.id);
+        // store functions
+        valueStore.addDefaultData = function() {
+            if (!this.getById('default')) {
+                this.insert(0, {
+                    id: 'default',
+                    name: 'Number of events'
+                });
             }
-        });
+        };
 
-        valueStore.on('remove', function(store, record) {
-            if (value.getValue() === record.data.id) {
-                value.clearValue();
-            }
+        //valueStore.reset = function() {
+            //this.removeAll();
+            //this.addDefault();
+        //};
 
-            if (store.getRange().length) {
-                var id = store.getRange()[0].data.id;
+        //valueStore.addDefault();
 
-                value.setValue(id);
-                onValueSelect(id);
-            }
-        });
+
+        //valueStore.on('remove', function(store, record) {
+            //if (value.getValue() === record.data.id) {
+                //value.clearValue();
+            //}
+
+            //if (store.getRange().length) {
+                //var id = store.getRange()[0].data.id;
+
+                //value.setValue(id);
+                //onValueSelect(id);
+            //}
+        //});
 
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
@@ -1215,7 +1226,7 @@ Ext.onReady( function() {
 
         aggregationType = Ext.create('Ext.form.field.ComboBox', {
 			cls: 'ns-combo h22',
-			width: 80,
+			width: 70,
 			height: 22,
 			style: 'margin: 0',
             fieldStyle: 'height: 22px',
@@ -1223,6 +1234,7 @@ Ext.onReady( function() {
 			valueField: 'id',
 			editable: false,
             value: 'AVERAGE',
+            disabled: true,
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
@@ -1234,20 +1246,27 @@ Ext.onReady( function() {
 					{id: 'MIN', text: NS.i18n.min},
 					{id: 'MAX', text: NS.i18n.max}
 				]
-			})
+			}),
+            resetData: function() {
+                this.setValue('AVERAGE');
+                this.disable();
+            }
 		});
 
         onValueSelect = function(id) {
 
-            // remove selected
-            removeDimension(id, valueStore);
+            if (id === 'default') {
+                aggregationType.disable();
+            }
+            else {
+                aggregationType.enable();
 
-            // add unselected
-            valueStore.each( function(record) {
-                if (record.data.id !== id) {
-                    addDimension(record.data, null, valueStore);
-                }
-            });
+                // remove selected
+                removeDimension(id, valueStore); // TODO +remove fra selection
+
+                //
+
+            }
         };
 
 		value = Ext.create('Ext.form.field.ComboBox', {
@@ -1260,6 +1279,22 @@ Ext.onReady( function() {
             displayField: 'name',
 			editable: false,
 			store: valueStore,
+            value: 'default',
+            setDefaultData: function() {
+                valueStore.addDefaultData();
+                this.setValue('default');
+                aggregationType.resetData();
+            },
+            setDefaultDataIf: function() {
+                if (!valueStore.getRange().length) {
+                    this.setDefaultData();
+                }
+            },
+            resetData: function() {
+                valueStore.removeAll();
+                this.clearValue();
+                aggregationType.resetData();
+            },
             listeners: {
                 select: function(cb, r) {
                     onValueSelect(r[0].data.id);
@@ -1432,6 +1467,7 @@ Ext.onReady( function() {
             fixedFilterStore: fixedFilterStore,
 			filterStore: filterStore,
             valueStore: valueStore,
+            value: value,
             addDimension: addDimension,
             removeDimension: removeDimension,
             hasDimension: hasDimension,
@@ -1486,6 +1522,9 @@ Ext.onReady( function() {
 							ns.core.web.window.addHideOnBlurHandler(w);
 						}
 					}
+
+                    // value
+                    value.setDefaultData();
 				},
                 render: function() {
 					reset();
@@ -3470,7 +3509,16 @@ Ext.onReady( function() {
                     property: 'name',
                     direction: 'ASC'
                 }
-            ]
+            ],
+            onLoadData: function() {
+                var layoutWindow = ns.app.aggregateLayoutWindow;
+
+                this.each( function(record) {
+                    if (Ext.Array.contains(['int', 'number'], (record.data.valueType || record.data.type))) {
+                        layoutWindow.valueStore.add(record.data);
+                    }
+                });
+            }
 		});
 
 		organisationUnitGroupStore = Ext.create('Ext.data.Store', {
@@ -3675,10 +3723,12 @@ Ext.onReady( function() {
             var load;
 
             programId = layout ? layout.program.id : programId;
-			stage.clearValue();
 
+            // reset
+			stage.clearValue();
 			dataElementsByStageStore.removeAll();
 			dataElementSelected.removeAllDataElements(true);
+            ns.app.aggregateLayoutWindow.value.resetData();
 
             load = function(stages) {
                 stage.enable();
@@ -3768,6 +3818,7 @@ Ext.onReady( function() {
 		onStageSelect = function(stageId, layout) {
             if (!layout) {
                 dataElementSelected.removeAllDataElements(true);
+                ns.app.aggregateLayoutWindow.value.resetData();
             }
 
 			loadDataElements(stageId, layout);
@@ -3784,6 +3835,7 @@ Ext.onReady( function() {
                     data = Ext.Array.clean([].concat(attributes || [], dataElements || []));
 
 				dataElementsByStageStore.loadData(data);
+                dataElementsByStageStore.onLoadData();
 
                 if (layout) {
                     var dataDimensions = ns.core.service.layout.getDataDimensionsFromLayout(layout),
