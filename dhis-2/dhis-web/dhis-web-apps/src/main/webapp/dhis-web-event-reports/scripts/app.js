@@ -1212,14 +1212,24 @@ Ext.onReady( function() {
 			queryMode: 'local',
 			valueField: 'id',
 			editable: false,
-            value: 'AVERAGE',
             disabled: true,
+            value: 'COUNT',
+            disabledValue: 'COUNT',
+            defaultValue: 'AVERAGE',
+            setDisabled: function() {
+                this.setValue(this.disabledValue);
+                this.disable();
+            },
+            setEnabled: function() {
+                this.setValue(this.defaultValue);
+                this.enable();
+            },
 			store: Ext.create('Ext.data.Store', {
 				fields: ['id', 'text'],
 				data: [
+					{id: 'COUNT', text: NS.i18n.count},
 					{id: 'AVERAGE', text: NS.i18n.average},
 					{id: 'SUM', text: NS.i18n.sum},
-					{id: 'COUNT', text: NS.i18n.count},
 					{id: 'STDDEV', text: NS.i18n.stddev},
 					{id: 'VARIANCE', text: NS.i18n.variance},
 					{id: 'MIN', text: NS.i18n.min},
@@ -1227,28 +1237,21 @@ Ext.onReady( function() {
 				]
 			}),
             resetData: function() {
-                this.setValue('AVERAGE');
-                this.disable();
+                this.setDisabled();
             }
 		});
 
         onValueSelect = function(id) {
-
             if (id === 'default') {
-                aggregationType.disable();
+                aggregationType.setDisabled();
             }
             else {
-                aggregationType.enable();
+                aggregationType.setEnabled();
 
                 // remove ux and layout item
                 if (hasDimension(id, valueStore)) {
                     ns.app.accordion.getUx(id).removeDataElement();
                 }
-
-                // remove selected
-                //<ux>.removeDataElement();
-
-
             }
         };
 
