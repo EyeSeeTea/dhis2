@@ -1025,7 +1025,7 @@ Ext.onReady( function() {
 			window,
 
 			margin = 1,
-			defaultWidth = 200,
+			defaultWidth = 210,
 			defaultHeight = 220,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2,
 
