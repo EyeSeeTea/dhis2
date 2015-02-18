@@ -1029,7 +1029,8 @@ Ext.onReady( function() {
 			defaultHeight = 220,
 			maxHeight = (ns.app.viewport.getHeight() - 100) / 2,
 
-			dataType = 'aggregated_values';
+			dataType = 'aggregated_values',
+            defaultValueId = 'default';
 
 		getStore = function(data) {
 			var config = {};
@@ -1074,10 +1075,10 @@ Ext.onReady( function() {
 
         // store functions
         valueStore.addDefaultData = function() {
-            if (!this.getById('default')) {
+            if (!this.getById(defaultValueId)) {
                 this.insert(0, {
-                    id: 'default',
-                    name: 'Number of events'
+                    id: defaultValueId,
+                    name: NS.i18n.number_of_events
                 });
             }
         };
@@ -1242,7 +1243,7 @@ Ext.onReady( function() {
 		});
 
         onValueSelect = function(id) {
-            if (id === 'default') {
+            if (id === defaultValueId) {
                 aggregationType.setDisabled();
             }
             else {
@@ -1265,10 +1266,10 @@ Ext.onReady( function() {
             displayField: 'name',
 			editable: false,
 			store: valueStore,
-            value: 'default',
+            value: defaultValueId,
             setDefaultData: function() {
                 valueStore.addDefaultData();
-                this.setValue('default');
+                this.setValue(defaultValueId);
                 aggregationType.resetData();
             },
             setDefaultDataIf: function() {
@@ -1449,11 +1450,15 @@ Ext.onReady( function() {
             saveState: saveState,
             resetData: resetData,
             reset: reset,
-            getValueId: function() {
-                return value.getValue();
-            },
-            getAggregationType: function() {
-                return aggregationType.getValue();
+            getValueConfig: function() {
+                var config = {};
+
+                if (value.getValue() !== defaultValueId) {
+                    config.value = value.getValue();
+                    config.aggregationType = aggregationType.getValue();
+                }
+
+                return config;
             },
 			hideOnBlur: true,
 			items: selectPanel,
@@ -5900,11 +5905,8 @@ Ext.onReady( function() {
 				view.filters = filters;
 			}
 
-            // value
-            view.valueId = layoutWindow.getValueId();
-
-            // aggregation type
-            view.aggregationType = layoutWindow.getAggregationType();
+            // value, aggregation type
+            Ext.apply(view, layoutWindow.getValueConfig());
 
 			return view;
 		};
