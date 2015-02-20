@@ -110,11 +110,13 @@ Ext.onReady( function() {
 		// data items
 	(function() {
         var operatorCmpWidth = 70,
-            valueCmpWidth = 306,
+            valueCmpWidth = 270,
             buttonCmpWidth = 20,
-            nameCmpWidth = 400,
+            nameCmpWidth = 441,
+            rangeSetWidth = 100,
             namePadding = '2px 3px',
-            margin = '3px 0 1px';
+            margin = '3px 0 1px',
+            defaultRangeSetId = 'default';
 
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
 			extend: 'Ext.container.Container',
@@ -147,8 +149,29 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    //width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    height: 18,
+                    text: 'Duplicate',
+                    //width: buttonCmpWidth,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    height: 18,
+                    text: 'Remove',
+                    //width: buttonCmpWidth,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -177,28 +200,87 @@ Ext.onReady( function() {
 					style: 'margin-bottom:0'
                 });
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
+                this.rangeSetCmp = Ext.create('Ext.form.field.ComboBox', {
+                    cls: 'ns-combo h22',
+                    width: rangeSetWidth,
+                    height: 22,
+                    fieldStyle: 'height: 22px',
+                    queryMode: 'local',
+                    valueField: 'id',
+                    displayField: 'name',
+                    editable: false,
+                    storage: {},
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['id', 'name']
+                    }),
+                    listeners: {
+                        added: function(cb) {
+                            cb.store.add({
+                                id: defaultRangeSetId,
+                                name: 'Ungrouped'
+                            });
 
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
+                            cb.setValue(defaultRangeSetId);
+
+                            Ext.Ajax.request({
+                                url: ns.core.init.contextPath + '/api/dataElements/' + container.dataElement.id + '.json?fields=legendSet[id,name]',
+                                success: function(r) {
+                                    r = Ext.decode(r.responseText);
+
+                                    if (Ext.isObject(r) && Ext.isObject(r.legendSet)) {
+                                        cb.store.add(r.legendSet);
+                                    }
+                                }
+                            });
+                        },
+                        select: function(cb, r) {
+                            var ranges;
+
+                            r = r[0];
+
+                            ranges = init.idLegendSetMap[r.data.id].mapLegends;
+
+                            console.log(ranges);
+
+                            //fn = function(ranges) {
+
+
+                            //if (cb.storage[r.data.id]) {
+                                //fn(cb.storage[r.data.id]);
+                            //}
+                            //else {
+                                //Ext.Ajax.request({
+                                    //url: ns.core.init.contextPath + '/api/mapLegendSets/' + r.data.id + '.json?fields=mapLegends[id,name,startValue,endValue]',
+                                    //success: function(r) {
+                                        //r = Ext.decode(r.responseText);
+
+                        }
+
+
+
+
+
+
                     }
                 });
 
                 this.items = [
-                    this.nameCmp,
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
+                    //this.nameCmp,
                     this.operatorCmp,
                     this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    this.rangeSetCmp
+                    //this.addCmp,
+                    //this.removeCmp
                 ];
 
                 this.callParent();
@@ -7813,6 +7895,15 @@ Ext.onReady( function() {
                                                     alert('User is not assigned to any organisation units');
                                                 }
 
+                                                fn();
+                                            }
+                                        });
+
+                                        // legend sets
+                                        requests.push({
+                                            url: contextPath + '/api/mapLegendSets.json?fields=id,name,mapLegends[id,name,startValue,endValue,color]&paging=false',
+                                            success: function(r) {
+                                                init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
                                                 fn();
                                             }
                                         });
