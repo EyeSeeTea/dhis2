@@ -110,10 +110,10 @@ Ext.onReady( function() {
 		// data items
 	(function() {
         var operatorCmpWidth = 70,
-            valueCmpWidth = 270,
+            valueCmpWidth = 255,
             buttonCmpWidth = 20,
             nameCmpWidth = 441,
-            rangeSetWidth = 100,
+            rangeSetWidth = 115,
             namePadding = '2px 3px',
             margin = '3px 0 1px',
             defaultRangeSetId = 'default';
@@ -145,7 +145,10 @@ Ext.onReady( function() {
 				}
 			},
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    idProperty = 'id',
+                    nameProperty = 'name',
+                    displayProperty = 'displayName';
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
@@ -156,6 +159,7 @@ Ext.onReady( function() {
 
                 this.addCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
+                    style: 'padding: 0',
                     height: 18,
                     text: 'Duplicate',
                     //width: buttonCmpWidth,
@@ -166,6 +170,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
+                    style: 'padding: 0',
                     height: 18,
                     text: 'Remove',
                     //width: buttonCmpWidth,
@@ -175,15 +180,15 @@ Ext.onReady( function() {
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
-                    valueField: 'id',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth,
 					style: 'margin-bottom:0',
                     value: 'EQ',
                     store: {
-                        fields: ['id', 'name'],
+                        fields: [idProperty, nameProperty],
                         data: [
                             {id: 'EQ', name: '='},
                             {id: 'GT', name: '>'},
@@ -200,18 +205,146 @@ Ext.onReady( function() {
 					style: 'margin-bottom:0'
                 });
 
+                this.rangeSearchStore = Ext.create('Ext.data.Store', {
+                    fields: [idProperty, nameProperty]
+                });
+
+                // function
+                this.filterSearchStore = function() {
+                    var selected = container.rangeValueCmp.getValue();
+
+                    container.rangeSearchStore.clearFilter();
+
+                    container.rangeSearchStore.filterBy(function(record) {
+                        return !Ext.Array.contains(selected, record.data[idProperty]);
+                    });
+                };
+
+                this.rangeSearchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    width: 90,
+                    style: 'margin-bottom:0',
+                    emptyText: 'Select ranges',
+                    valueField: idProperty,
+                    displayField: displayProperty,
+                    editable: false,
+                    queryMode: 'local',
+                    hidden: true,
+                    store: this.rangeSearchStore,
+                    listConfig: {
+                        minWidth: 346
+                    },
+                    listeners: {
+						select: function() {
+                            var id = Ext.Array.from(this.getValue())[0];
+
+                            // value
+                            if (container.rangeValueStore.findExact(idProperty, id) === -1) {
+                                container.rangeValueStore.add(container.rangeSearchStore.getAt(container.rangeSearchStore.findExact(idProperty, id)).data);
+                            }
+
+                            // search
+                            this.select([]);
+
+                            // filter
+                            container.filterSearchStore();
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
+					}
+                });
+
+                this.rangeValueStore = Ext.create('Ext.data.Store', {
+					fields: [idProperty, nameProperty],
+                    listeners: {
+                        add: function() {
+                            container.rangeValueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.rangeValueCmp.select(this.getRange());
+                        }
+                    }
+                });
+
+                this.rangeValueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    style: 'margin-bottom:0',
+					width: 236,
+                    valueField: idProperty,
+                    displayField: nameProperty,
+                    emptyText: 'No selected items',
+                    editable: false,
+                    hideTrigger: true,
+                    queryMode: 'local',
+                    hidden: true,
+                    store: container.rangeValueStore,
+                    listConfig: {
+                        minWidth: 236,
+                        cls: 'ns-optionselector'
+                    },
+                    setOptionValues: function(records) {
+                        var me = this;
+
+                        container.rangeValueStore.removeAll();
+                        container.rangeValueStore.loadData(records);
+
+                        me.setValue(records);
+                    },
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.rangeValueStore.removeAt(container.rangeValueStore.findExact(idProperty, id));
+                            }
+                        }
+                    }
+                });
+
+                // function
+                this.onRangeSetSelect = function(id) {
+                    var ranges;
+
+                    if (id === defaultRangeSetId) {
+                        container.operatorCmp.show();
+                        container.valueCmp.show();
+                        container.rangeSearchCmp.hide();
+                        container.rangeValueCmp.hide();
+                    }
+                    else {
+                        container.operatorCmp.hide();
+                        container.valueCmp.hide();
+                        container.rangeSearchCmp.show();
+                        container.rangeValueCmp.show();
+
+                        ranges = Ext.clone(ns.core.init.idLegendSetMap[id].mapLegends);
+
+                        // display name
+                        for (var i = 0; i < ranges.length; i++) {
+                            range = ranges[i];
+                            range.displayName = range.name + ' (' + range.startValue + ' - ' + range.endValue + ')';
+                        }
+
+                        container.rangeSearchStore.loadData(ranges);
+                        container.rangeSearchStore.sort('startValue', 'ASC');
+                    }
+                };
+
                 this.rangeSetCmp = Ext.create('Ext.form.field.ComboBox', {
                     cls: 'ns-combo h22',
                     width: rangeSetWidth,
                     height: 22,
                     fieldStyle: 'height: 22px',
                     queryMode: 'local',
-                    valueField: 'id',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     editable: false,
                     storage: {},
                     store: Ext.create('Ext.data.Store', {
-                        fields: ['id', 'name']
+                        fields: [idProperty, nameProperty]
                     }),
                     listeners: {
                         added: function(cb) {
@@ -234,33 +367,9 @@ Ext.onReady( function() {
                             });
                         },
                         select: function(cb, r) {
-                            var ranges;
-
-                            r = r[0];
-
-                            ranges = init.idLegendSetMap[r.data.id].mapLegends;
-
-                            console.log(ranges);
-
-                            //fn = function(ranges) {
-
-
-                            //if (cb.storage[r.data.id]) {
-                                //fn(cb.storage[r.data.id]);
-                            //}
-                            //else {
-                                //Ext.Ajax.request({
-                                    //url: ns.core.init.contextPath + '/api/mapLegendSets/' + r.data.id + '.json?fields=mapLegends[id,name,startValue,endValue]',
-                                    //success: function(r) {
-                                        //r = Ext.decode(r.responseText);
-
+                            var id = Ext.Array.from(r)[0].data.id;
+                            container.onRangeSetSelect(id);
                         }
-
-
-
-
-
-
                     }
                 });
 
@@ -275,7 +384,8 @@ Ext.onReady( function() {
                             this.removeCmp
                         ]
                     },
-                    //this.nameCmp,
+                    this.rangeSearchCmp,
+                    this.rangeValueCmp,
                     this.operatorCmp,
                     this.valueCmp,
                     this.rangeSetCmp
@@ -540,12 +650,6 @@ Ext.onReady( function() {
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
-            addCss: function() {
-                var css = '.optionselector .x-boundlist-selected { background-color: #fff; border-color: #fff } \n';
-                css += '.optionselector .x-boundlist-selected.x-boundlist-item-over { background-color: #ddd; border-color: #ddd } \n';
-
-                Ext.util.CSS.createStyleSheet(css);
-            },
             getRecord: function() {
                 var items = this.valueCmp.getValue(),
 					record = {
@@ -589,8 +693,6 @@ Ext.onReady( function() {
                 var container = this,
                     idProperty = 'code',
                     nameProperty = 'name';
-
-                this.addCss();
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
@@ -758,7 +860,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     listConfig: {
                         minWidth: 266,
-                        cls: 'optionselector'
+                        cls: 'ns-optionselector'
                     },
                     setOptionValues: function(codeArray) {
                         var me = this,

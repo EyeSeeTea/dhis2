@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.system.util;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,16 +28,33 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.concurrent.Callable;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public interface QueryService
+public class CachingMap<K, V>
+    extends HashMap<K, V>
 {
-    Result query( Query query );
-
-    Result query( Query query, ResultTransformer transformer );
-
-    Query getQueryFromUrl( Class<?> klass, List<String> filters, List<Order> orders );
+    public V get( K key, Callable<V> callable )
+    {
+        V value = super.get( key );
+                
+        if ( value == null )
+        {
+            try
+            {
+                value = callable.call();
+                
+                super.put( key, value );
+            }
+            catch ( Exception ex )
+            {
+                throw new RuntimeException( ex );
+            }
+        }
+        
+        return value;
+    }
 }

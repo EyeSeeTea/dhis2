@@ -1,4 +1,4 @@
-package org.hisp.dhis.webapi.controller.validation;
+package org.hisp.dhis.query;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,52 +28,59 @@ package org.hisp.dhis.webapi.controller.validation;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.DataSetService;
-import org.hisp.dhis.query.Order;
-import org.hisp.dhis.schema.descriptors.ValidationRuleSchemaDescriptor;
-import org.hisp.dhis.validation.ValidationRule;
-import org.hisp.dhis.validation.ValidationRuleService;
-import org.hisp.dhis.webapi.controller.AbstractCrudController;
-import org.hisp.dhis.webapi.webdomain.WebMetaData;
-import org.hisp.dhis.webapi.webdomain.WebOptions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterators;
+import org.hisp.dhis.schema.Klass;
 
 /**
+ * Simple class for checking if an object is one of several allowed classes, mainly used in Operator where
+ * a parameter can be type constrained.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-@Controller
-@RequestMapping( value = ValidationRuleSchemaDescriptor.API_ENDPOINT )
-public class ValidationRuleController
-    extends AbstractCrudController<ValidationRule>
+public class Typed
 {
-    @Autowired
-    private DataSetService dataSetService;
-    
-    @Autowired
-    private ValidationRuleService validationRuleService;
-    
-    @Override
-    protected List<ValidationRule> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
+    private final Class<?>[] klasses;
+
+    public Typed( Class<?>[] klasses )
     {
-        if ( options.contains( "dataSet" ) )
-        {            
-            DataSet ds = dataSetService.getDataSet( options.get( "dataSet" ) );
-            
-            if ( ds == null )
-            {
-                return null;
-            }
-            
-            return Lists.newArrayList( validationRuleService.getValidationRulesByDataElements( ds.getDataElements() ) );
+        this.klasses = klasses;
+    }
+
+    public Class<?>[] getKlasses()
+    {
+        return klasses;
+    }
+
+    public boolean isValid( Klass klass )
+    {
+        return klass == null || isValid( klass.getKlass() );
+    }
+
+    public boolean isValid( Class<?> klass )
+    {
+        if ( klasses.length == 0 || klass == null )
+        {
+            return true;
         }
-        
-        return super.getEntityList( metaData, options, filters, orders );
+
+        for ( Class<?> k : klasses )
+        {
+            if ( k != null && k.isAssignableFrom( klass ) )
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static Typed from( Class... klasses )
+    {
+        return new Typed( klasses );
+    }
+
+    public static Typed from( Iterable<? extends Class> iterable )
+    {
+        return new Typed( Iterators.toArray( iterable.iterator(), Class.class ) );
     }
 }

@@ -445,6 +445,16 @@ table.small td {
     height: 24px !important;
 }
 
+    /* Option selector */
+.ns-optionselector .x-boundlist-selected {
+    background-color: #fff;
+    border-color: #fff
+}
+.ns-optionselector .x-boundlist-selected.x-boundlist-item-over {
+    background-color: #ddd;
+    border-color: #ddd
+}
+
 
 /*----------------------------------------------------------------------------
  * PT Trigger
@@ -820,6 +830,7 @@ table.small td {
 }
 .ns-linkbutton .x-btn-inner {
     color: #4a66ae;
+    color: #3162c5;
 }
 .ns-linkbutton.x-btn-over .x-btn-inner {
     text-decoration: underline;

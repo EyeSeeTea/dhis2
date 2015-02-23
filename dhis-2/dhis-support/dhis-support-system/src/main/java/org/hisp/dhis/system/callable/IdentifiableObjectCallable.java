@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.system.callable;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,16 +28,33 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public interface QueryService
+public class IdentifiableObjectCallable<T extends IdentifiableObject>
+    implements Callable<T>
 {
-    Result query( Query query );
-
-    Result query( Query query, ResultTransformer transformer );
-
-    Query getQueryFromUrl( Class<?> klass, List<String> filters, List<Order> orders );
+    private IdentifiableObjectManager manager;
+    private Class<T> clazz;
+    private String uid;
+    
+    public IdentifiableObjectCallable( IdentifiableObjectManager manager, Class<T> clazz, String uid )
+    {
+        this.manager = manager;
+        this.clazz = clazz;
+        this.uid = uid;
+    }
+    
+    @Override
+    public T call()
+        throws ExecutionException
+    {
+        return manager.get( clazz, uid );
+    }
 }

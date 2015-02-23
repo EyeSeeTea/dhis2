@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.schema;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,16 +28,12 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.List;
-
 /**
+ * Simple interface for classes that exposes a class containment. I.e. a Property have a property class.
+ *
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface QueryService
+public interface Klass
 {
-    Result query( Query query );
-
-    Result query( Query query, ResultTransformer transformer );
-
-    Query getQueryFromUrl( Class<?> klass, List<String> filters, List<Order> orders );
+    Class<?> getKlass();
 }
