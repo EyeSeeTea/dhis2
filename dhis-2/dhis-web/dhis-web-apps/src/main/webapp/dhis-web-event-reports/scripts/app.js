@@ -125,14 +125,18 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                var record = {};
+                var record = {},
+                    isRange = (this.rangeSetCmp.getValue() !== defaultRangeSetId && this.rangeValueCmp.getValue());
 
-                record.dimension = this.dataElement.id;
+                record.dimension = this.dataElement.id + (isRange ? '-' + this.rangeSetCmp.getValue() : '');
                 record.name = this.dataElement.name;
 
-                if (this.valueCmp.getValue()) {
-					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
-				}
+                if (isRange) {
+                    record.filter = this.rangeValueCmp.getValue().join(';');
+                }
+                else if (this.rangeSetCmp.getValue() === defaultRangeSetId && this.operatorCmp.getValue() && this.valueCmp.getValue()) {
+                    record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+                }
 
 				return record;
             },
@@ -140,8 +144,11 @@ Ext.onReady( function() {
 				if (record.filter) {
 					var a = record.filter.split(':');
 
-					this.operatorCmp.setValue(a[0]);
-					this.valueCmp.setValue(a[1]);
+                    if (a.length > 1) {
+                        this.operatorCmp.setValue(a[0]);
+                        this.valueCmp.setValue(a[1]);
+                    }
+                    else {}
 				}
 			},
             initComponent: function() {
@@ -152,7 +159,6 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    //width: nameCmpWidth,
                     flex: 1,
                     style: 'padding:' + namePadding
                 });
@@ -162,7 +168,6 @@ Ext.onReady( function() {
                     style: 'padding: 0',
                     height: 18,
                     text: 'Duplicate',
-                    //width: buttonCmpWidth,
                     handler: function() {
 						container.duplicateDataElement();
 					}
@@ -173,7 +178,6 @@ Ext.onReady( function() {
                     style: 'padding: 0',
                     height: 18,
                     text: 'Remove',
-                    //width: buttonCmpWidth,
                     handler: function() {
                         container.removeDataElement();
                     }
