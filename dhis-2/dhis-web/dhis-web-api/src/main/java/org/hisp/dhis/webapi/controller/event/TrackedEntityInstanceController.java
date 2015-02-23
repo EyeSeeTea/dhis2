@@ -40,7 +40,7 @@ import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.dxf2.objectfilter.ObjectFilterService;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.node.types.CollectionNode;
@@ -307,7 +307,6 @@ public class TrackedEntityInstanceController
             else
             {
                 importSummary = new ImportSummary( ImportStatus.SUCCESS, "Empty list of tracked entity instances given." );
-                importSummary.setDataValueCount( null );
                 importSummary.setImportCount( null );
             }
 
@@ -345,7 +344,6 @@ public class TrackedEntityInstanceController
             else
             {
                 importSummary = new ImportSummary( ImportStatus.SUCCESS, "Empty list of tracked entity instances given." );
-                importSummary.setDataValueCount( null );
                 importSummary.setImportCount( null );
             }
 

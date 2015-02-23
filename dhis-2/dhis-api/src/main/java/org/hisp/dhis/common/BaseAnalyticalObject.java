@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -136,7 +136,7 @@ public abstract class BaseAnalyticalObject
     protected transient List<DimensionalObject> filters = new ArrayList<>();
 
     protected transient Map<String, String> parentGraphMap = new HashMap<>();
-
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -986,7 +986,7 @@ public abstract class BaseAnalyticalObject
     }
 
     // -------------------------------------------------------------------------
-    // Web domain properties
+    // Analytical properties
     // -------------------------------------------------------------------------
 
     @Override

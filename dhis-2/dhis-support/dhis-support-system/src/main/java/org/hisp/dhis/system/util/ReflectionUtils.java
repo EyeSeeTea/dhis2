@@ -28,11 +28,7 @@ package org.hisp.dhis.system.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import javassist.util.proxy.ProxyFactory;
-import org.hibernate.collection.spi.PersistentCollection;
-import org.hisp.dhis.system.util.functional.Function1;
-import org.hisp.dhis.system.util.functional.Predicate;
-import org.springframework.util.StringUtils;
+import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -48,7 +44,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hisp.dhis.system.util.PredicateUtils.alwaysTrue;
+import javassist.util.proxy.ProxyFactory;
+
+import org.hibernate.collection.spi.PersistentCollection;
+import org.hisp.dhis.system.util.functional.Function1;
+import org.hisp.dhis.system.util.functional.Predicate;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Lars Helge Overland
@@ -70,7 +71,15 @@ public class ReflectionUtils
 
             return (Integer) method.invoke( object );
         }
-        catch ( Exception ex )
+        catch ( NoSuchMethodException ex )
+        {
+            return -1;
+        }
+        catch ( InvocationTargetException ex )
+        {
+            return -1;
+        }
+        catch ( IllegalAccessException ex )
         {
             return -1;
         }
@@ -93,7 +102,15 @@ public class ReflectionUtils
 
             return (String) method.invoke( object );
         }
-        catch ( Exception ex )
+        catch ( NoSuchMethodException ex )
+        {
+            return null;
+        }
+        catch ( InvocationTargetException ex )
+        {
+            return null;
+        }
+        catch ( IllegalAccessException ex )
         {
             return null;
         }
@@ -273,6 +290,11 @@ public class ReflectionUtils
 
     public static Method findSetterMethod( String fieldName, Object target )
     {
+        if ( target == null || StringUtils.isEmpty( fieldName ) )
+        {
+            return null;
+        }
+
         String[] setterNames = new String[]{
             "set"
         };
@@ -412,7 +434,7 @@ public class ReflectionUtils
         return methods;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public static <T> T invokeMethod( Object target, Method method, Object... args )
     {
         if ( target == null || method == null )
@@ -435,7 +457,7 @@ public class ReflectionUtils
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( "unchecked" )
     public static <T> T getFieldObject( Field field, T target )
     {
         return (T) invokeGetterMethod( field.getName(), target );

@@ -43,7 +43,7 @@ import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
@@ -483,8 +483,6 @@ public class DataValueSMSListener
 
                 String targetDataElementId = formula.substring( 1, formula.length() );
                 String operation = String.valueOf( formula.charAt( 0 ) );
-
-                System.out.println( "Operation: " + operation );
 
                 DataElement targetDataElement = dataElementService.getDataElement( Integer
                     .parseInt( targetDataElementId ) );

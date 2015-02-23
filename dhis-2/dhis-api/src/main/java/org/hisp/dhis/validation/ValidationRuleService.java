@@ -30,9 +30,12 @@ package org.hisp.dhis.validation;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.i18n.I18nFormat;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -93,6 +96,28 @@ public interface ValidationRuleService
      * and sends results (if any) to users who should be notified.
      */
     void scheduledRun();
+    
+    /**
+     * Validate that missing data values have a corresponding comment, assuming
+     * that the given data set has the noValueRequiresComment property set to true.
+     * 
+     * @param dataSet the data set.
+     * @param period the period.
+     * @param organisationUnit the organisation unit.
+     * @param attributeOptionCombo the attribute option combo.
+     * @return a list of operands representing missing comments.
+     */
+    List<DataElementOperand> validateRequiredComments( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo );
+    
+
+    /**
+     * Returns all validation-type rules which have specified data elements
+     * assigned to them.
+     * 
+     * @param dataElements the data elements to look for.
+     * @return all validation rules which have the data elements assigned.
+     */
+    Collection<ValidationRule> getValidationTypeRulesForDataElements( Set<DataElement> dataElements );
     
     // -------------------------------------------------------------------------
     // ValidationRule

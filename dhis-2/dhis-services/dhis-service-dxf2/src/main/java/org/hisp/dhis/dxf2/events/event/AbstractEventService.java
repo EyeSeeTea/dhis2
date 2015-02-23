@@ -42,7 +42,8 @@ import org.hisp.dhis.dxf2.importsummary.ImportConflict;
 import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummaries;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.IdSchemes;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.i18n.I18nManager;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
@@ -374,11 +375,18 @@ public abstract class AbstractEventService
 
     @Override
     public Events getEvents( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp,
-        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate,
-        Date endDate, EventStatus status )
+        List<OrganisationUnit> organisationUnit, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status )
+    {
+        return getEvents( program, programStage, programStatus, followUp, organisationUnit, trackedEntityInstance, startDate, endDate, status, new IdSchemes() );
+    }
+
+    @Override
+    public Events getEvents( Program program, ProgramStage programStage, ProgramStatus programStatus, Boolean followUp,
+        List<OrganisationUnit> organisationUnits, TrackedEntityInstance trackedEntityInstance, Date startDate, Date endDate, EventStatus status, IdSchemes idSchemes )
     {
         List<Event> eventList = eventStore.getAll( program, programStage, programStatus, followUp, organisationUnits,
-            trackedEntityInstance, startDate, endDate, status );
+            trackedEntityInstance, startDate, endDate, status, idSchemes );
+
         Events events = new Events();
         events.setEvents( eventList );
 
@@ -582,6 +590,14 @@ public abstract class AbstractEventService
             programStageInstance.setStatus( EventStatus.VISITED );
         }
 
+        OrganisationUnit organisationUnit = getOrganisationUnit( null, event.getOrgUnit() );
+
+        if ( organisationUnit == null )
+        {
+            organisationUnit = programStageInstance.getOrganisationUnit();
+        }
+
+        programStageInstance.setOrganisationUnit( organisationUnit );
         programStageInstance.setExecutionDate( executionDate );
         programStageInstanceService.updateProgramStageInstance( programStageInstance );
     }
@@ -627,7 +643,12 @@ public abstract class AbstractEventService
         event.setEventDate( DateUtils.getLongDateString( programStageInstance.getExecutionDate() ) );
         event.setDueDate( DateUtils.getLongDateString( programStageInstance.getDueDate() ) );
         event.setStoredBy( programStageInstance.getCompletedUser() );
-        event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
+
+        if ( programStageInstance.getOrganisationUnit() != null )
+        {
+            event.setOrgUnit( programStageInstance.getOrganisationUnit().getUid() );
+        }
+
         event.setProgram( programStageInstance.getProgramInstance().getProgram().getUid() );
         event.setEnrollment( programStageInstance.getProgramInstance().getUid() );
         event.setProgramStage( programStageInstance.getProgramStage().getUid() );
@@ -724,7 +745,7 @@ public abstract class AbstractEventService
         if ( status != null )
         {
             importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status ) );
-            importSummary.getDataValueCount().incrementIgnored();
+            importSummary.getImportCount().incrementIgnored();
             return false;
         }
 
@@ -773,7 +794,7 @@ public abstract class AbstractEventService
 
                 if ( importSummary != null )
                 {
-                    importSummary.getDataValueCount().incrementImported();
+                    importSummary.getImportCount().incrementImported();
                 }
             }
             else
@@ -787,7 +808,7 @@ public abstract class AbstractEventService
 
                 if ( importSummary != null )
                 {
-                    importSummary.getDataValueCount().incrementUpdated();
+                    importSummary.getImportCount().incrementUpdated();
                 }
             }
         }
@@ -797,7 +818,7 @@ public abstract class AbstractEventService
 
             if ( importSummary != null )
             {
-                importSummary.getDataValueCount().incrementDeleted();
+                importSummary.getImportCount().incrementDeleted();
             }
         }
     }
@@ -921,7 +942,7 @@ public abstract class AbstractEventService
             {
                 importSummary.getConflicts().add(
                     new ImportConflict( "dataElement", dataValue.getDataElement() + " is not a valid data element" ) );
-                importSummary.getDataValueCount().incrementIgnored();
+                importSummary.getImportCount().incrementIgnored();
             }
         }
 

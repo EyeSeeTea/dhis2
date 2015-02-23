@@ -28,9 +28,18 @@ package org.hisp.dhis.dxf2.metadata.importers;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import static org.hisp.dhis.system.util.PredicateUtils.idObjectCollectionsWithScanned;
+import static org.hisp.dhis.system.util.PredicateUtils.idObjects;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -41,7 +50,6 @@ import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.MergeStrategy;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.dashboard.DashboardItem;
 import org.hisp.dhis.dataelement.CategoryOptionGroupSet;
@@ -51,10 +59,10 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.ImportUtils;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
-import org.hisp.dhis.dxf2.metadata.ImportUtils;
 import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
@@ -65,7 +73,6 @@ import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventreport.EventReport;
 import org.hisp.dhis.expression.Expression;
 import org.hisp.dhis.expression.ExpressionService;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
 import org.hisp.dhis.period.PeriodType;
@@ -78,23 +85,16 @@ import org.hisp.dhis.schema.SchemaService;
 import org.hisp.dhis.system.util.ReflectionUtils;
 import org.hisp.dhis.trackedentity.TrackedEntity;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.translation.Translation;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserService;
 import org.hisp.dhis.validation.ValidationRule;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.hisp.dhis.system.util.PredicateUtils.idObjectCollectionsWithScanned;
-import static org.hisp.dhis.system.util.PredicateUtils.idObjects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * Importer that can handle IdentifiableObject and NameableObject.
@@ -175,7 +175,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
 
         if ( objects.isEmpty() )
         {
@@ -206,7 +205,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
 
         if ( object == null )
         {
@@ -296,7 +294,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         /* disabled for 2.18 release
         if ( !validationViolations.isEmpty() )
         {
-            System.err.println( "violations: " + validationViolations );
             summaryType.getImportConflicts().add(
                 new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
 
@@ -414,7 +411,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         /* disabled for 2.18 release
         if ( !validationViolations.isEmpty() )
         {
-            System.err.println( "violations: " + validationViolations );
             summaryType.getImportConflicts().add(
                 new ImportConflict( ImportUtils.getDisplayName( object ), "Validation Violations: " + validationViolations ) );
 
@@ -595,7 +591,7 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
         }
 
         if ( (object.getName() == null || object.getName().length() == 0)
-            && !DashboardItem.class.isInstance( object ) )
+            && !DashboardItem.class.isInstance( object ) && !Translation.class.isInstance( object ) )
         {
             conflict = new ImportConflict( ImportUtils.getDisplayName( object ), "Empty name for object " + object );
         }

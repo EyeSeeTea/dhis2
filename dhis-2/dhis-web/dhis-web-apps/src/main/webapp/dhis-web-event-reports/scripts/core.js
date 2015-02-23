@@ -313,7 +313,7 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
-                // countType: string ('events') - 'events', 'tracked_entity_instance'
+                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
 
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
@@ -485,35 +485,41 @@ Ext.onReady( function() {
                         layout.endDate = config.endDate;
                     }
 
-					// properties
+					// options
 					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
 					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-					layout.countType = Ext.isString(config.countType) && !Ext.isEmpty(config.countType) ? config.countType : 'events';
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
-
+					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
-
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
 					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
-					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+                    // value
+                    if ((Ext.isObject(config.value) && Ext.isString(config.value.id)) || Ext.isString(config.value)) {
+                        layout.value = Ext.isString(config.value) ? {id: config.value} : config.value;
+                    }
 
+                    // aggregation type
+                    if (layout.value && Ext.isString(config.aggregationType)) {
+                        layout.aggregationType = config.aggregationType;
+                    }
+
+					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 					layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 
 					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
 					layout.parentOrganisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramParentOrganisationUnit) ? config.reportParams.paramParentOrganisationUnit : (Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false);
 
-					layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
-					layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
-					layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
-					layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+					//layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
+					//layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
+					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
 					if (!validateSpecialCases()) {
 						return;
@@ -974,7 +980,7 @@ Ext.onReady( function() {
 					return name;
 				}
 
-				name += metaData.optionNames[id] || metaData.names[id];
+				name += metaData.booleanNames[id] || metaData.optionNames[id] || metaData.names[id] || id;
 
 				return name;
 			};
@@ -1255,12 +1261,13 @@ Ext.onReady( function() {
                     optionMap = {};
 
                     if (header) {
-                        for (var j = 0, id; j < header.ids.length; j++) {
+                        for (var j = 0, id, name; j < header.ids.length; j++) {
                             id = header.ids[j];
+                            name = xResponse.metaData.booleanNames[id] || xResponse.metaData.optionNames[id] || xResponse.metaData.names[id] || id;
 // TODO, items used?
                             dim.items.push({
                                 id: id,
-                                name: xResponse.metaData.optionNames[id] || xResponse.metaData.names[id] || id
+                                name: name
                             });
                         }
                     }
@@ -1305,7 +1312,7 @@ Ext.onReady( function() {
                     }
                 }
 
-                // Re-layout
+                // re-layout
                 layout = api.layout.Layout(xLayout);
 
                 if (layout) {
@@ -1750,7 +1757,11 @@ Ext.onReady( function() {
                     meta = ['ou', 'pe'],
                     ouHierarchy,
                     names,
-					headers;
+					headers,
+                    booleanNameMap = {
+                        'true': ER.i18n.yes || 'Yes',
+                        'false': ER.i18n.no || 'No'
+                    };
 
 				response = Ext.clone(response);
 				headers = response.headers;
@@ -1759,6 +1770,7 @@ Ext.onReady( function() {
                 names[emptyId] = emptyId;
 
                 response.metaData.optionNames = {};
+                response.metaData.booleanNames = {};
 				response.nameHeaderMap = {};
 				response.idValueMap = {};
 
@@ -1799,8 +1811,8 @@ Ext.onReady( function() {
                         else {
 							var objects = [];
 
-                            for (var j = 0, id, fullId, name, isHierarchy; j < response.rows.length; j++) {
-                                id = response.rows[j][i] || emptyId;
+                            for (var k = 0, id, fullId, name, isHierarchy; k < response.rows.length; k++) {
+                                id = response.rows[k][i] || emptyId;
                                 fullId = header.name + id;
                                 isHierarchy = service.layout.isHierarchy(xLayout, response, id);
 
@@ -1813,12 +1825,18 @@ Ext.onReady( function() {
                                 names[fullId] = name;
 
                                 // update rows
-                                response.rows[j][i] = fullId;
+                                response.rows[k][i] = fullId;
 
                                 // update ou hierarchy
                                 if (isHierarchy) {
 									ouHierarchy[fullId] = ouHierarchy[id];
 								}
+
+                                // update boolean metadata
+                                if (header.type === 'java.lang.Boolean') {
+                                    response.metaData.booleanNames[id] = booleanNameMap[id];
+                                    response.metaData.booleanNames[fullId] = booleanNameMap[id];
+                                }
 
 								objects.push({
 									id: fullId,
@@ -1830,7 +1848,7 @@ Ext.onReady( function() {
                             if (!header.optionSet) {
                                 support.prototype.array.sort(objects, 'ASC', 'sortingId');
                             }
-                            
+
                             header.ids = Ext.Array.pluck(objects, 'id');
                         }
                     }
@@ -2052,6 +2070,19 @@ Ext.onReady( function() {
 					}
 				}
 
+                // value
+                if (Ext.isString(view.value)) {
+                    paramString += '&value=' + view.value;
+				}
+                else if (Ext.isObject(view.value) && Ext.isString(view.value.id)) {
+                    paramString += '&value=' + view.value.id;
+                }
+
+                // aggregation type
+                if (view.aggregationType) {
+                    paramString += '&aggregationType=' + view.aggregationType;
+                }
+
                 // dates
                 if (view.startDate && view.endDate) {
                     paramString += '&startDate=' + view.startDate + '&endDate=' + view.endDate;
@@ -2065,11 +2096,9 @@ Ext.onReady( function() {
                     paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
                 }
 
-                // count type
-                if (view.dataType === 'aggregated_values' && view.countType) {
-                    if (view.countType === 'tracked_entity_instances') {
-                        paramString += '&uniqueInstances=true';
-                    }
+                // output type
+                if (view.dataType === 'aggregated_values' && view.outputType) {
+                    paramString += '&outputType=' + view.outputType;
                 }
 
                 // sorting
@@ -2172,11 +2201,13 @@ Ext.onReady( function() {
 					getTotalHtmlArray,
 					getHtml,
 					getUniqueFactor = function(xAxis) {
+						var unique;
+
 						if (!xAxis) {
 							return null;
 						}
 
-						var unique = xAxis.xItems.unique;
+						unique = xAxis.xItems.unique;
 
 						if (unique) {
 							return unique.length < 2 ? 1 : (xAxis.size / unique[0].length);
@@ -2323,13 +2354,14 @@ Ext.onReady( function() {
                             cls: config.cls ? ' ' + config.cls : 'pivot-empty',
                             colSpan: config.colSpan ? config.colSpan : 1,
                             rowSpan: config.rowSpan ? config.rowSpan : 1,
-                            htmlValue: config.htmlValue ? config.htmlValue : '&nbsp;'
+                            htmlValue: config.htmlValue ? config.htmlValue : ''
                         });
                     };
 
                     getEmptyHtmlArray = function(i) {
                         var a = [];
 
+                        // if not the intersection cell
                         if (i < xColAxis.dims - 1) {
                             if (xRowAxis && xRowAxis.dims) {
                                 for (var j = 0; j < xRowAxis.dims - 1; j++) {
@@ -2356,14 +2388,31 @@ Ext.onReady( function() {
 
                             a.push(getEmptyNameTdConfig({
                                 cls: 'pivot-dim-label',
-                                htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[j]].name + ' / ' + dimConf.objectNameMap[xLayout.columnObjectNames[i]].name
+                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;/&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
                             }));
                         }
 
                         return a;
                     };
 
-					if (!(xColAxis && Ext.isObject(xColAxis))) {
+					if (!xColAxis) {
+
+                        // show row dimension labels
+                        if (xRowAxis && xLayout.showDimensionLabels) {
+                            var dimLabelHtml = [];
+
+                            // labels from row object names
+                            for (var i = 0; i < xLayout.rowObjectNames.length; i++) {
+                                dimLabelHtml.push(getEmptyNameTdConfig({
+                                    cls: 'pivot-dim-label',
+                                    htmlValue: dimConf.objectNameMap[xLayout.rowObjectNames[i]].name
+                                }));
+                            }
+
+                            // pivot-transparent-column unnecessary
+                            a.push(dimLabelHtml);
+                        }
+
 						return a;
 					}
 
@@ -2395,6 +2444,7 @@ Ext.onReady( function() {
 
 							// sortable column headers. last dim only.
 							if (i === xColAxis.dims - 1 && doSortableColumnHeaders()) {
+
 								//condoId = xColAxis.ids[j].split('-').join('');
 								condoId = xColAxis.ids[j];
 							}
@@ -2467,7 +2517,6 @@ Ext.onReady( function() {
 								obj = xRowAxis.objects.all[j][i];
 								obj.type = 'dimension';
 								obj.cls = 'pivot-dim ' + (service.layout.isHierarchy(xLayout, xResponse, obj.id) ? ' align-left' : '');
-								obj.noBreak = true;
 								obj.hidden = !(obj.rowSpan || obj.colSpan);
 								obj.htmlValue = service.layout.getItemName(xLayout, xResponse, obj.id, true);
 
@@ -2496,6 +2545,15 @@ Ext.onReady( function() {
 							}
 						}
 					}
+                    else {
+                        if (xLayout.showDimensionLabels) {
+                            axisAllObjects.push([{
+                                type: 'transparent',
+                                cls: 'pivot-transparent-row'
+                            }]);
+                        }
+                    }
+
 	//axisAllObjects = [ [ dim, dim ]
 	//				     [ dim, dim ]
 	//				     [ dim, dim ]
@@ -2773,9 +2831,9 @@ Ext.onReady( function() {
 					for (var i = 0, row; i < xValueObjects.length; i++) {
 						row = [];
 
-						if (xRowAxis) {
+						//if (xRowAxis) {
 							row = row.concat(axisAllObjects[i]);
-						}
+						//}
 
 						row = row.concat(xValueObjects[i]);
 

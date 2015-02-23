@@ -28,31 +28,6 @@ package org.hisp.dhis.dxf2.metadata;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonView;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.proxy.HibernateProxy;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.IdentifiableObjectManager;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.constant.Constant;
-import org.hisp.dhis.constant.ConstantService;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
-import org.hisp.dhis.expression.Expression;
-import org.hisp.dhis.expression.ExpressionService;
-import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
-import org.hisp.dhis.organisationunit.OrganisationUnitService;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaService;
-import org.hisp.dhis.system.util.ReflectionUtils;
-import org.hisp.dhis.validation.ValidationRule;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -65,6 +40,35 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.proxy.HibernateProxy;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.constant.Constant;
+import org.hisp.dhis.constant.ConstantService;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
+import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.Section;
+import org.hisp.dhis.expression.Expression;
+import org.hisp.dhis.expression.ExpressionService;
+import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaService;
+import org.hisp.dhis.system.util.ReflectionUtils;
+import org.hisp.dhis.user.User;
+import org.hisp.dhis.validation.ValidationRule;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.collect.Sets;
+
 /**
  * @author Ovidiu Rosu <rosu.ovi@gmail.com>
  */
@@ -73,8 +77,12 @@ public class DefaultMetaDataDependencyService
 {
     private static final Log log = LogFactory.getLog( DefaultMetaDataDependencyService.class );
 
-    private final Class<?>[] SPECIAL_CASE_CLASSES = new Class<?>[]{ DataElement.class, DataElementCategoryCombo.class, Indicator.class, OrganisationUnit.class, ValidationRule.class };
+    @SuppressWarnings("unchecked")
+    private final Set<Class<? extends BaseIdentifiableObject>> SPECIAL_CASE_CLASSES = Sets.newHashSet( DataElement.class, DataElementCategoryCombo.class, Indicator.class, OrganisationUnit.class, ValidationRule.class );
 
+    @SuppressWarnings("unchecked")
+    private final Set<Class<User>> SKIP_DEPENDENCY_CHECK_CLASSES = Sets.newHashSet( User.class );
+    
     //-------------------------------------------------------------------------------------------------------
     // Dependencies
     //-------------------------------------------------------------------------------------------------------
@@ -104,11 +112,13 @@ public class DefaultMetaDataDependencyService
     {
         Map<String, List<IdentifiableObject>> identifiableObjectMap = new HashMap<>();
 
+        List<Schema> schemas = schemaService.getMetadataSchemas();
+        
         for ( Map.Entry<String, Object> identifiableObjectUidEntry : identifiableObjectUidMap.entrySet() )
         {
             String className = identifiableObjectUidEntry.getKey();
 
-            for ( Schema schema : schemaService.getMetadataSchemas() )
+            for ( Schema schema : schemas )
             {
                 if ( className.equals( (schema.getPlural() + "_all") ) )
                 {
@@ -138,7 +148,7 @@ public class DefaultMetaDataDependencyService
     public Map<String, List<IdentifiableObject>> getIdentifiableObjectWithDependencyMap( Map<String, Object> identifiableObjectUidMap )
     {
         Map<String, List<IdentifiableObject>> identifiableObjectMap = getIdentifiableObjectMap( identifiableObjectUidMap );
-        
+
         Collection<IdentifiableObject> identifiableObjects = new HashSet<>();
 
         for ( Map.Entry<String, List<IdentifiableObject>> identifiableObjectEntry : identifiableObjectMap.entrySet() )
@@ -148,9 +158,11 @@ public class DefaultMetaDataDependencyService
 
         Set<IdentifiableObject> dependencySet = getDependencySet( identifiableObjects );
 
+        List<Schema> schemas = schemaService.getMetadataSchemas();
+        
         for ( IdentifiableObject dependency : dependencySet )
         {
-            for ( Schema schema : schemaService.getMetadataSchemas() )
+            for ( Schema schema : schemas )
             {
                 if ( schema.getKlass().equals( dependency.getClass() ) )
                 {
@@ -210,6 +222,7 @@ public class DefaultMetaDataDependencyService
     private List<IdentifiableObject> computeAllDependencies( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> finalDependencies = new ArrayList<>();
+        
         List<IdentifiableObject> dependencies = getDependencies( identifiableObject );
 
         if ( dependencies.isEmpty() )
@@ -235,11 +248,19 @@ public class DefaultMetaDataDependencyService
     private List<IdentifiableObject> getDependencies( IdentifiableObject identifiableObject )
     {
         List<IdentifiableObject> dependencies = new ArrayList<>();
+        
+        if ( identifiableObject == null || SKIP_DEPENDENCY_CHECK_CLASSES.contains( identifiableObject.getClass() ) )
+        {
+            return dependencies;
+        }
+        
         List<Field> fields = ReflectionUtils.getAllFields( identifiableObject.getClass() );
-
+        
+        List<Schema> schemas = schemaService.getMetadataSchemas();
+        
         for ( Field field : fields )
         {
-            for ( Schema schema : schemaService.getMetadataSchemas() )
+            for ( Schema schema : schemas )
             {
                 if ( ReflectionUtils.isType( field, schema.getKlass() ) )
                 {
@@ -300,15 +321,7 @@ public class DefaultMetaDataDependencyService
 
     private boolean isSpecialCase( IdentifiableObject identifiableObject )
     {
-        for ( Class<?> specialCase : SPECIAL_CASE_CLASSES )
-        {
-            if ( identifiableObject.getClass().equals( specialCase ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
+        return SPECIAL_CASE_CLASSES.contains( identifiableObject.getClass() );
     }
 
     private Set<IdentifiableObject> computeSpecialDependencyCase( IdentifiableObject identifiableObject )
@@ -374,7 +387,7 @@ public class DefaultMetaDataDependencyService
             resultSet.addAll( dataElementCategoryOptionComboSet );
             resultSet.addAll( getDependencySet( dataElementCategoryOptionComboSet ) );
 
-            return resultSet;            
+            return resultSet;
         }
         else if ( identifiableObject instanceof DataElement )
         {
@@ -386,19 +399,13 @@ public class DefaultMetaDataDependencyService
 
             return resultSet;
         }
-        else if ( identifiableObject instanceof OrganisationUnit )
+        else if ( identifiableObject instanceof DataSet )
         {
-            Set<OrganisationUnitLevel> organisationUnitLevelSet = new HashSet<>();
-            int level = ((OrganisationUnit) identifiableObject).getOrganisationUnitLevel();
+            Set<Section> sectionSet = new HashSet<>();
+            sectionSet.addAll( ((DataSet) identifiableObject).getSections() );
 
-            while ( level > 0 )
-            {
-                organisationUnitLevelSet.add( organisationUnitService.getOrganisationUnitLevelByLevel( level ) );
-                level--;
-            }
-
-            resultSet.addAll( organisationUnitLevelSet );
-            resultSet.addAll( getDependencySet( organisationUnitLevelSet ) );
+            resultSet.addAll( sectionSet );
+            resultSet.addAll( getDependencySet( sectionSet ) );
 
             return resultSet;
         }

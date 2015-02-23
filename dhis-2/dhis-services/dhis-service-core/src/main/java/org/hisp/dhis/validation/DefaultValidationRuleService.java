@@ -41,11 +41,13 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.GenericIdentifiableObjectStore;
@@ -53,7 +55,9 @@ import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementCategoryOptionCombo;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
+import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.datavalue.DataValue;
 import org.hisp.dhis.datavalue.DataValueService;
 import org.hisp.dhis.expression.ExpressionService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -281,6 +285,56 @@ public class DefaultValidationRuleService
         systemSettingManager.saveSystemSetting( SystemSettingManager.KEY_LAST_MONITORING_RUN, thisRun );
     }
 
+    @Override
+    public List<DataElementOperand> validateRequiredComments( DataSet dataSet, Period period, OrganisationUnit organisationUnit, DataElementCategoryOptionCombo attributeOptionCombo )
+    {
+        List<DataElementOperand> violations = new ArrayList<>();
+        
+        if ( dataSet.isNoValueRequiresComment() )
+        {
+            for ( DataElement de : dataSet.getDataElements() )
+            {
+                for ( DataElementCategoryOptionCombo co : de.getCategoryCombo().getOptionCombos() )
+                {
+                    DataValue dv = dataValueService.getDataValue( de, period, organisationUnit, co, attributeOptionCombo );
+                    
+                    boolean missingValue = dv == null || StringUtils.trimToNull( dv.getValue() ) == null;
+                    boolean missingComment = dv == null || StringUtils.trimToNull( dv.getComment() ) == null;
+                    
+                    if ( missingValue && missingComment )
+                    {
+                        violations.add( new DataElementOperand( de, co ) );
+                    }
+                }
+            }
+        }
+        
+        return violations;
+    }
+
+    @Override
+    public Collection<ValidationRule> getValidationTypeRulesForDataElements( Set<DataElement> dataElements )
+    {
+        Set<ValidationRule> rulesForDataElements = new HashSet<>();
+
+        for ( ValidationRule validationRule : getAllValidationRules() )
+        {
+            if ( validationRule.getRuleType().equals( ValidationRule.RULE_TYPE_VALIDATION ) )
+            {
+                Set<DataElement> validationRuleElements = new HashSet<>();
+                validationRuleElements.addAll( validationRule.getLeftSide().getDataElementsInExpression() );
+                validationRuleElements.addAll( validationRule.getRightSide().getDataElementsInExpression() );
+
+                if ( dataElements.containsAll( validationRuleElements ) )
+                {
+                    rulesForDataElements.add( validationRule );
+                }
+            }
+        }
+
+        return rulesForDataElements;
+    }
+    
     // -------------------------------------------------------------------------
     // Supportive methods - scheduled run
     // -------------------------------------------------------------------------
@@ -442,7 +496,7 @@ public class DefaultValidationRuleService
                     {
                         for ( User user : userGroup.getMembers() )
                         {
-                            if ( !ruleGroup.isAlertByOrgUnits() || canUserAccessSource( user, result.getSource() ) )
+                            if ( !ruleGroup.isAlertByOrgUnits() || canUserAccessSource( user, result.getOrgUnit() ) )
                             {
                                 SortedSet<ValidationResult> resultSet = userResults.get ( user );
 
@@ -511,7 +565,7 @@ public class DefaultValidationRuleService
         {
             ValidationRule rule = result.getValidationRule();
             
-            builder.append( result.getSource().getName() ).append( " " ).append( result.getPeriod().getName() ).
+            builder.append( result.getOrgUnit().getName() ).append( " " ).append( result.getPeriod().getName() ).
             append( result.getAttributeOptionCombo().isDefault() ? "" : " " + result.getAttributeOptionCombo().getName() ).append( LN ).
             append( rule.getName() ).append( " (" ).append( rule.getImportance() ).append( ") " ).append( LN ).
             append( rule.getLeftSide().getDescription() ).append( ": " ).append( result.getLeftsideValue() ).append( LN ).
@@ -550,40 +604,9 @@ public class DefaultValidationRuleService
     }
     
     /**
-     * Returns all validation-type rules which have specified data elements
-     * assigned to them.
-     * 
-     * @param dataElements the data elements to look for
-     * @return all validation rules which have the data elements assigned.
-     */
-    private Collection<ValidationRule> getValidationTypeRulesForDataElements( Set<DataElement> dataElements )
-    {
-        Set<ValidationRule> rulesForDataElements = new HashSet<>();
-
-        Set<DataElement> validationRuleElements = new HashSet<>();
-
-        for ( ValidationRule validationRule : getAllValidationRules() )
-        {
-            if ( validationRule.getRuleType().equals( ValidationRule.RULE_TYPE_VALIDATION ) )
-            {
-                validationRuleElements.clear();
-                validationRuleElements.addAll( validationRule.getLeftSide().getDataElementsInExpression() );
-                validationRuleElements.addAll( validationRule.getRightSide().getDataElementsInExpression() );
-
-                if ( dataElements.containsAll( validationRuleElements ) )
-                {
-                    rulesForDataElements.add( validationRule );
-                }
-            }
-        }
-
-        return rulesForDataElements;
-    }
-    
-    /**
      * Formats and sets name on the period of each result.
      * 
-     * @param results the collecion of validation results.
+     * @param results the collection of validation results.
      * @param format the i18n format.
      */
     private void formatPeriods( Collection<ValidationResult> results, I18nFormat format )

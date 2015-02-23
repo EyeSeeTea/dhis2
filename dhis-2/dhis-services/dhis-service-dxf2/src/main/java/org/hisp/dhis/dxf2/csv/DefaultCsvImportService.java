@@ -36,7 +36,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.CodeGenerator;
 import org.hisp.dhis.common.ListMap;
@@ -183,6 +183,7 @@ public class DefaultCsvImportService
             {
                 DataElement object = new DataElement();
                 setIdentifiableObject( object, values );
+                object.setCode( getSafe( values, 2, null, 230 ) ); //TODO temporary hack
                 object.setShortName( getSafe( values, 3, object.getName(), 50 ) );
                 object.setDescription( getSafe( values, 4, null, null ) );
                 object.setFormName( getSafe( values, 5, null, 230 ) );
@@ -197,6 +198,8 @@ public class DefaultCsvImportService
                 String categoryComboUid = getSafe( values, 11, null, 11 );
                 object.setUrl( getSafe( values, 12, null, 255 ) );
                 object.setZeroIsSignificant( Boolean.valueOf( getSafe( values, 13, "false", null ) ) );
+                String optionSetUid = getSafe( values, 14, null, 11 );
+                String commentOptionSetUid = getSafe( values, 15, null, 11 );
 
                 if ( categoryComboUid != null )
                 {
@@ -207,6 +210,20 @@ public class DefaultCsvImportService
                 else
                 {
                     object.setCategoryCombo( categoryCombo );
+                }
+                
+                if ( optionSetUid != null )
+                {
+                    OptionSet optionSet = new OptionSet();
+                    optionSet.setUid( optionSetUid );
+                    object.setOptionSet( optionSet );
+                }
+
+                if ( commentOptionSetUid != null )
+                {
+                    OptionSet optionSet = new OptionSet();
+                    optionSet.setUid( commentOptionSetUid );
+                    object.setCommentOptionSet( optionSet );
                 }
                 
                 list.add( object );

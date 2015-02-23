@@ -187,7 +187,7 @@ public class DefaultSecurityService
     {
         if ( credentials == null )
         {
-            log.warn( "Could not send invite message as user does is null: " + credentials );
+            log.warn( "Could not send invite message as user does is null" );
             return "no_user_credentials";
         }
         
@@ -482,6 +482,14 @@ public class DefaultSecurityService
     {
         return !aclService.isShareable( identifiableObject.getClass() )
             || aclService.canCreatePrivate( currentUserService.getCurrentUser(), identifiableObject.getClass() );
+    }
+
+    @Override
+    public boolean canView( String type )
+    {
+        boolean requireAddToView = (Boolean) systemSettingManager.getSystemSetting( SystemSettingManager.KEY_REQUIRE_ADD_TO_VIEW, false );
+        
+        return !requireAddToView || ( canCreatePrivate( type ) || canCreatePublic( type ) );
     }
 
     @Override

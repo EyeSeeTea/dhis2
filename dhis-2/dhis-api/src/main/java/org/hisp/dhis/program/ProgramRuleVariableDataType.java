@@ -39,5 +39,16 @@ import org.hisp.dhis.common.DxfNamespaces;
  */
 @JacksonXmlRootElement( localName = "programRuleVariableDataType", namespace = DxfNamespaces.DXF_2_0 )
 public enum ProgramRuleVariableDataType {
-    NUMBER, TEXT, BOOL, DATE;
+    //NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+    NUMBER( 0 ), TEXT( 1 ), BOOL( 2 ), DATE( 3 );
+    private final int value;
+    ProgramRuleVariableDataType( int value ) 
+    {
+        this.value = value;
+    }
+    
+    public int getValue()
+    {
+        return value;
+    }
 }

@@ -180,7 +180,6 @@ public abstract class AbstractTrackedEntityInstanceService
     public ImportSummary addTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         trackedEntityInstance.trimValuesToNull();
 
@@ -219,7 +218,6 @@ public abstract class AbstractTrackedEntityInstanceService
     public ImportSummary updateTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         trackedEntityInstance.trimValuesToNull();
 
@@ -353,7 +351,7 @@ public abstract class AbstractTrackedEntityInstanceService
 
         TrackedEntityInstanceQueryParams params = new TrackedEntityInstanceQueryParams();
 
-        QueryItem queryItem = new QueryItem( attribute, QueryOperator.EQ, value, attribute.isNumericType(), null );
+        QueryItem queryItem = new QueryItem( attribute, QueryOperator.EQ, value, attribute.getValueType(), null );
         params.addAttribute( queryItem );
 
         if ( attribute.getOrgunitScope() )

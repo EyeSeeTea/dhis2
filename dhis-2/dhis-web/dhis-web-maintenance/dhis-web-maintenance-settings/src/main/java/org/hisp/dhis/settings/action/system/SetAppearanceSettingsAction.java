@@ -30,7 +30,7 @@ package org.hisp.dhis.settings.action.system;
 
 import static org.hisp.dhis.setting.SystemSettingManager.*;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.i18n.I18n;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.setting.StyleManager;
@@ -136,6 +136,13 @@ public class SetAppearanceSettingsAction
         this.localeSelect = localeSelect;
     }
     
+    private boolean requireAddToView;
+    
+    public void setRequireAddToView( boolean requireAddToView )
+    {
+        this.requireAddToView = requireAddToView;
+    }
+
     private boolean customLoginPageLogo;
     
     public void setCustomLoginPageLogo( boolean customLoginPageLogo )
@@ -180,6 +187,7 @@ public class SetAppearanceSettingsAction
         systemSettingManager.saveSystemSetting( KEY_APPLICATION_FOOTER + localeSelect, applicationFooter );
         systemSettingManager.saveSystemSetting( KEY_FLAG, flag );
         systemSettingManager.saveSystemSetting( KEY_START_MODULE, startModule );
+        systemSettingManager.saveSystemSetting( KEY_REQUIRE_ADD_TO_VIEW, requireAddToView );
         systemSettingManager.saveSystemSetting( KEY_CUSTOM_LOGIN_PAGE_LOGO, customLoginPageLogo );
         systemSettingManager.saveSystemSetting( KEY_CUSTOM_TOP_MENU_LOGO, customTopMenuLogo );
         styleManager.setSystemStyle( currentStyle );
