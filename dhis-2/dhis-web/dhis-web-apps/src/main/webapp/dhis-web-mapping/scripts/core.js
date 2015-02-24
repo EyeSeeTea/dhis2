@@ -393,7 +393,6 @@ Ext.onReady( function() {
                     });
                 }
                 else {
-console.log("ajax");
                     Ext.Ajax.request({
                         url: gis.init.contextPath + '/api/analytics.json' + paramString,
                         disableCaching: false,
