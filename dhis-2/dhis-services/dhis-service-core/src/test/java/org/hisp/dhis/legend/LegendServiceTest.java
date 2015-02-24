@@ -1,4 +1,4 @@
-package org.hisp.dhis.query;
+package org.hisp.dhis.legend;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,60 +28,67 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.schema.Klass;
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Iterators;
+import static org.junit.Assert.*;
 
 /**
- * Simple class for checking if an object is one of several allowed classes, mainly used in Operator where
- * a parameter can be type constrained.
- *
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public class Typed
+public class LegendServiceTest
+    extends DhisSpringTest
 {
-    private final Class<?>[] klasses;
+    @Autowired
+    private LegendService legendService;
 
-    public Typed( Class<?>[] klasses )
+    private Legend legendA;
+    private Legend legendB;
+    
+    private LegendSet legendSetA;
+    
+    @Test
+    public void testAddGetLegend()
     {
-        this.klasses = klasses;
+        legendA = createLegend( 'A', 0d, 10d );
+        legendB = createLegend( 'B', 0d, 10d );
+        
+        int idA = legendService.addLegend( legendA );
+        int idB = legendService.addLegend( legendB );
+        
+        assertEquals( legendA, legendService.getLegend( idA ) );
+        assertEquals( legendB, legendService.getLegend( idB ) );
     }
-
-    public Class<?>[] getKlasses()
+    
+    @Test
+    public void testDeleteLegend()
     {
-        return klasses;
+        //TODO
     }
-
-    public boolean isValid( Klass klass )
+    
+    @Test
+    public void testAddGetLegendSet()
     {
-        return klass == null || isValid( klass.getKlass() );
+        legendA = createLegend( 'A', 0d, 10d );
+        legendB = createLegend( 'B', 0d, 10d );
+        
+        legendService.addLegend( legendA );
+        legendService.addLegend( legendB );
+        
+        legendSetA = createLegendSet( 'A' );
+        legendSetA.getLegends().add( legendA );
+        legendSetA.getLegends().add( legendB );
+        
+        int idA = legendService.addLegendSet( legendSetA );
+        
+        assertEquals( legendSetA, legendService.getLegendSet( idA ) );
+        assertEquals( 2, legendService.getLegendSet( idA ).getLegends().size() );
     }
-
-    public boolean isValid( Class<?> klass )
+    
+    @Test
+    public void testDeleteLegendSet()
     {
-        if ( klasses.length == 0 || klass == null )
-        {
-            return true;
-        }
-
-        for ( Class<?> k : klasses )
-        {
-            if ( k != null && k.isAssignableFrom( klass ) )
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static Typed from( Class<?>... klasses )
-    {
-        return new Typed( klasses );
-    }
-
-    public static Typed from( Iterable<? extends Class<?>> iterable )
-    {
-        return new Typed( Iterators.toArray( iterable.iterator(), Class.class ) );
-    }
+        //TODO
+    }   
 }

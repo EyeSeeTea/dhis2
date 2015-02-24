@@ -1,4 +1,6 @@
-package org.hisp.dhis.mapping;
+package org.hisp.dhis.legend;
+
+import java.util.List;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,14 +30,40 @@ package org.hisp.dhis.mapping;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.AnalyticalObjectStore;
-import org.hisp.dhis.legend.LegendSet;
-
 /**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
+ * @author Lars Helge Overland
  */
-public interface MapViewStore
-    extends AnalyticalObjectStore<MapView>
+public interface LegendService
 {
-    int countLegendSetMapViews( LegendSet legendSet );
+    // -------------------------------------------------------------------------
+    // Legend
+    // -------------------------------------------------------------------------
+
+    int addLegend( Legend legend );
+    
+    void updateLegend( Legend legend );
+    
+    Legend getLegend( int id );
+    
+    Legend getLegend( String uid );
+    
+    void deleteLegend( Legend legend );
+    
+    List<Legend> getAllLegends();
+    
+    // -------------------------------------------------------------------------
+    // LegendSet
+    // -------------------------------------------------------------------------
+
+    int addLegendSet( LegendSet legend );
+    
+    void updateLegendSet( LegendSet legend );
+    
+    LegendSet getLegendSet( int id );
+    
+    LegendSet getLegendSet( String uid );
+    
+    void deleteLegendSet( LegendSet legendSet );
+    
+    List<LegendSet> getAllLegendSets();
 }
