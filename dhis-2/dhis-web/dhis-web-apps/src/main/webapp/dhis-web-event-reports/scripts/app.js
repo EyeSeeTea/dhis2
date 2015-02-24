@@ -109,11 +109,11 @@ Ext.onReady( function() {
 
 		// data items
 	(function() {
-        var nameCmpWidth = 441,
+        var nameCmpWidth = 440,
             buttonCmpWidth = 20,
             operatorCmpWidth = 70,
             searchCmpWidth = 70,
-            triggerCmpWidth = 18,
+            triggerCmpWidth = 17,
             valueCmpWidth = 235,
             rangeSetWidth = 135,
             namePadding = '2px 3px',
@@ -588,7 +588,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Date', {
-					width: nameCmpWidth - operatorCmpWidth - 1,
+					width: nameCmpWidth - operatorCmpWidth,
 					style: 'margin-bottom:0',
 					format: 'Y-m-d'
 				});
@@ -877,7 +877,7 @@ Ext.onReady( function() {
                     enableKeyEvents: true,
                     queryMode: 'local',
                     listConfig: {
-                        minWidth: 346
+                        minWidth: nameCmpWidth - operatorCmpWidth
                     },
                     store: this.searchStore,
                     listeners: {
@@ -941,7 +941,7 @@ Ext.onReady( function() {
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     style: 'margin-bottom:0',
-					width: 226,
+					width: nameCmpWidth - operatorCmpWidth - operatorCmpWidth,
                     valueField: idProperty,
                     displayField: nameProperty,
                     emptyText: 'No selected items',
@@ -978,23 +978,6 @@ Ext.onReady( function() {
                                 container.valueStore.removeAt(container.valueStore.findExact(idProperty, id));
                             }
                         }
-                    }
-                });
-
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    style: 'font-weight:bold',
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
                     }
                 });
 
