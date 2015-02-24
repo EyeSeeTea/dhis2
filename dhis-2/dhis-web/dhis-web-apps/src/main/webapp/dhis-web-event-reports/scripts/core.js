@@ -169,7 +169,7 @@ Ext.onReady( function() {
 			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
-					'space': ' '
+					'space': '&nbsp;'
 				},
 				displayDensity: {
 					'compact': '3px',
@@ -2043,6 +2043,13 @@ Ext.onReady( function() {
 								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
 							}
 						}
+                        else if (dim.rangeSet) {
+                            paramString += '-' + dim.rangeSet;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
+                            }
+                        }
 						else {
 							paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
 						}
@@ -2062,6 +2069,13 @@ Ext.onReady( function() {
                             for (var j = 0; j < dim.items.length; j++) {
                                 paramString += encodeURIComponent(dim.items[j].id);
                                 paramString += j < dim.items.length - 1 ? ';' : '';
+                            }
+                        }
+                        else if (dim.rangeSet) {
+                            paramString += '-' + dim.rangeSet;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
                             }
                         }
                         else {

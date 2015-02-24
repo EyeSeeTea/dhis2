@@ -128,13 +128,14 @@ Ext.onReady( function() {
                 var record = {},
                     isRange = (this.rangeSetCmp.getValue() !== defaultRangeSetId && this.rangeValueCmp.getValue());
 
-                record.dimension = this.dataElement.id + (isRange ? '-' + this.rangeSetCmp.getValue() : '');
+                record.dimension = this.dataElement.id;
                 record.name = this.dataElement.name;
 
                 if (isRange) {
+                    record.rangeSet = this.rangeSetCmp.getValue();
                     record.filter = this.rangeValueCmp.getValue().join(';');
                 }
-                else if (this.rangeSetCmp.getValue() === defaultRangeSetId && this.operatorCmp.getValue() && this.valueCmp.getValue()) {
+                else {
                     record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
                 }
 
@@ -236,7 +237,7 @@ Ext.onReady( function() {
                     hidden: true,
                     store: this.rangeSearchStore,
                     listConfig: {
-                        minWidth: 346
+                        minWidth: 326
                     },
                     listeners: {
 						select: function() {
@@ -354,7 +355,7 @@ Ext.onReady( function() {
                         added: function(cb) {
                             cb.store.add({
                                 id: defaultRangeSetId,
-                                name: 'Ungrouped'
+                                name: 'No range set'
                             });
 
                             cb.setValue(defaultRangeSetId);
