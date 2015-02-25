@@ -152,7 +152,18 @@ Ext.onReady( function() {
 				return record;
             },
             setRecord: function(record) {
-				if (record.filter) {
+                if (Ext.isObject(record.legendSet) && record.legendSet.id) {
+                    this.onRangeSetSelect(record.legendSet.id);
+
+                    if (record.filter) {
+                        var a = record.filter.split(':');
+
+                        if (a.length > 1 && Ext.isString(a[1])) {
+                            this.rangeValueCmp.setValue(a[1].split(';'));
+                        }
+                    }
+                }
+                else if (record.filter) {
 					var a = record.filter.split(':');
 
                     if (a.length > 1) {
