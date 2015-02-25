@@ -29,6 +29,7 @@ package org.hisp.dhis.program;
  */
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
@@ -37,6 +38,9 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
+import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
 
 /**
@@ -254,8 +258,31 @@ public class ProgramRuleVariable
     
     
     
-    //Todo: create getters and setters for  dataType and sourcetypes. 
-    //Make serializer like JacksonPeriodTypeSerializer
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ProgramRuleVariableDataType getDataType()
+    {
+        return dataType;
+    }
+
+    public void setDataType( ProgramRuleVariableDataType dataType )
+    {
+        this.dataType = dataType;
+    }
+    
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public ProgramRuleVariableSourceType getSourceType()
+    {
+        return sourceType;
+    }
+
+    public void setSourceType( ProgramRuleVariableSourceType sourceType )
+    {
+        this.sourceType = sourceType;
+    }
     
     
 }

@@ -1079,7 +1079,31 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {uid:'rule176130t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$malariatreatedsecondtrimester',actions:[{uid:'actn176151e',action:'displaytext',location:'con',content:'Prophylactic antimalarial provided in 2nd trimester',data:null},
 {uid:'actn177151e',action:'displaytext',location:'sum',content:'Prophylactic antimalarial provided in 2nd trimester',data:null}]},
 {uid:'rule178129t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$malariatreatedthirdtrimester',actions:[{uid:'actn178151e',action:'displaytext',location:'con',content:'Prophylactic antimalarial provided in 3rd trimester',data:null},
-{uid:'actn179151e',action:'displaytext',location:'sum',content:'Prophylactic antimalarial provided in 3rd trimester',data:null}]}
+{uid:'actn179151e',action:'displaytext',location:'sum',content:'Prophylactic antimalarial provided in 3rd trimester',data:null}]},
+{uid:'rule180131t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$severeanemiatreatmentinitiated',actions:[{uid:'actn180153e',action:'displaytext',location:'sum',content:'Severe anemia; Iron and folic acid treament initiated',data:null},
+{uid:'actn181153e',action:'displaytext',location:'con',content:'Severe anemia; Iron and folic acid treament initiated',data:null}]},
+{uid:'rule182133t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$moderateanemiatreatmentinitiated',actions:[{uid:'actn182155e',action:'displaytext',location:'sum',content:'Moderate anemia; Iron and folic acid treament initiated',data:null},
+{uid:'actn183155e',action:'displaytext',location:'con',content:'Moderate anemia; Iron and folic acid treament initiated',data:null}]},
+{uid:'rule184125t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$ironsupplementsinitiated',actions:[{uid:'actn184181e',action:'displaytext',location:'sum',content:'Iron and folic acid supplementation for 6 months, with continuation for 3 months ',data:null}]},
+{uid:'rule185188t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$extremepallorcurrentevent && hemoglobincurrentevent == 0 && hematocritcurrentevent == 0',actions:[{uid:'actn185166e',action:'displaytext',location:'rem',content:'Check haemoglobin value AND/OR haematocrit value to confirm anemia',data:null}]},
+{uid:'rule186136t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivrapidteststatus === \'Positive\'',actions:[{uid:'actn186141e',action:'displaytext',location:'con',content:'HIV positive, confirmed by rapid HIV-test',data:null},
+{uid:'actn187141e',action:'displaytext',location:'sum',content:'HIV positive, confirmed by rapid HIV-test',data:null}]},
+{uid:'rule188136t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivrapidteststatus === \'Negative\'',actions:[{uid:'actn188141e',action:'displaytext',location:'sum',content:'HIV negative, confirmed by rapid HIV-test',data:null}]},
+{uid:'rule189160t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:1,programStage_uid:null,condition:'$hivrapidteststatus === \'Positive\'  || $hivpreviouslyknown',actions:[{uid:'actn189112e',action:'assignvariable',location:null,content:'$hivpositive',data:'true'}]},
+{uid:'rule190113t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'!$hivpositive',actions:[{uid:'actn190111e',action:'hidefield',location:null,content:'nhW3SZX9JaN',data:null},
+{uid:'actn191111e',action:'hidefield',location:null,content:'yEmfXF9HJ1M',data:null}]},
+{uid:'rule192136t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivrapidteststatus !== \'Negative\'',actions:[{uid:'actn192111e',action:'hidefield',location:null,content:'jRo4KlnCKeX',data:null}]},
+{uid:'rule193203t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'($hivrapidteststatus === \'\' || $hivrapidteststatus ===\'Not performed\') || ($hivtestresultsprovided)',actions:[{uid:'',action:'hidefield',location:null,content:'yq1qT0NdjYQ',data:null}]},
+{uid:'rule194137t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'Initiated\'',actions:[{uid:'actn194124e',action:'displaytext',location:'sum',content:'ARV-medication initiated',data:null},
+{uid:'actn195124e',action:'displaytext',location:'con',content:'ARV-medication initiated',data:null}]},
+{uid:'rule196135t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'Ongoing\'',actions:[{uid:'actn196121e',action:'displaytext',location:'sum',content:'Ongoing ARV-treatment',data:null},
+{uid:'actn197121e',action:'displaytext',location:'con',content:'Ongoing ARV-treatment',data:null}]},
+{uid:'rule198148t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'None\' && $hivpositive',actions:[{uid:'actn198147e',action:'displaytext',location:'rem',content:'No ARV-medication plan despite positive for HIV',data:null}]},
+{uid:'rule199123t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivcouncellingpositive',actions:[{uid:'actn199147e',action:'displaytext',location:'Con',content:'Counseling on partner treatment of HIV provided',data:null},
+{uid:'actn200147e',action:'displaytext',location:'Sum',content:'Counseling on partner treatment of HIV provided',data:null}]},
+{uid:'rule201123t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtestresultsprovided',actions:[{uid:'actn201149e',action:'displaytext',location:'con',content:'Feedback on HIV test result provided to the woman',data:null},
+{uid:'actn202149e',action:'displaytext',location:'sum',content:'Feedback on HIV test result provided to the woman',data:null}]},
+{uid:'rule203119t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivpreviouslyknown',actions:[{uid:'actn203129e',action:'displaytext',location:'con',content:'Previously known HIV Positive',data:null}]}
            
 
                     //...to here
@@ -1154,7 +1178,17 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {uid:'var140116vv',name:'hemoglobinlatest',dataType:'number',defaultValue:'0',sourceType:'dataelement_newest_event_program',dataElement_uid:'vANAXwtLwcT',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
 {uid:'var141116vv',name:'hematocritlatest',dataType:'number',defaultValue:'0',sourceType:'dataelement_newest_event_program',dataElement_uid:'X8HbdaoS9LN',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
 {uid:'var142118vv',name:'hemoglobinprevious',dataType:'number',defaultValue:'0',sourceType:'dataelement_previous_event',dataElement_uid:'vANAXwtLwcT',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
-{uid:'var143118vv',name:'hematocritprevious',dataType:'number',defaultValue:'0',sourceType:'dataelement_previous_event',dataElement_uid:'X8HbdaoS9LN',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'}
+{uid:'var143118vv',name:'hematocritprevious',dataType:'number',defaultValue:'0',sourceType:'dataelement_previous_event',dataElement_uid:'X8HbdaoS9LN',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var144130vv',name:'severeanemiatreatmentinitiated',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'nB4Ui3ckmUi',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var145132vv',name:'moderateanemiatreatmentinitiated',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'RxVNLSeTjto',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var146124vv',name:'ironsupplementsinitiated',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'Kb6kZzUCJi1',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var147118vv',name:'hivpreviouslyknown',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'VFffa31SKjH',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var148118vv',name:'hivrapidteststatus',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'Itl05OEupgQ',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var149122vv',name:'hivcouncellingnegative',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'jRo4KlnCKeX',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var150122vv',name:'hivcouncellingpositive',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'yEmfXF9HJ1M',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var151122vv',name:'hivtestresultsprovided',dataType:'bool',defaultValue:'false',sourceType:'dataelement_newest_event_program',dataElement_uid:'yq1qT0NdjYQ',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var152118vv',name:'hivtreatmentstatus',dataType:'text',defaultValue:'',sourceType:'dataelement_newest_event_program',dataElement_uid:'nhW3SZX9JaN',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'},
+{uid:'var153111vv',name:'hivpositive',dataType:'bool',defaultValue:'false',sourceType:'calculated_value',dataElement_uid:'',programStage_uid:null,program_uid:'WSGAb5XwJ3Y'}
 
 
                     //...to here

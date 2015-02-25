@@ -29,26 +29,31 @@ package org.hisp.dhis.program;
  */
 
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
-
-
 /**
  *
  * @author markusbekken
  */
-@JacksonXmlRootElement( localName = "programRuleVariableDataType", namespace = DxfNamespaces.DXF_2_0 )
 public enum ProgramRuleVariableDataType {
     //NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
-    NUMBER( 0 ), TEXT( 1 ), BOOL( 2 ), DATE( 3 );
-    private final int value;
-    ProgramRuleVariableDataType( int value ) 
+    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+
+    final String value;
+
+    private ProgramRuleVariableDataType( String value )
     {
         this.value = value;
     }
-    
-    public int getValue()
+
+    public static ProgramRuleVariableDataType fromValue( String value )
     {
-        return value;
+        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
+        {
+            if ( type.value.equalsIgnoreCase( value ) )
+            {
+                return type;
+            }
+        }
+
+        return null;
     }
 }
