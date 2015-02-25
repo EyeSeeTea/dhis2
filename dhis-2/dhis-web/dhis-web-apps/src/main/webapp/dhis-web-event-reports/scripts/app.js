@@ -109,7 +109,8 @@ Ext.onReady( function() {
 
 		// data items
 	(function() {
-        var nameCmpWidth = 440,
+        var scrollbarWidth = /\bchrome\b/.test(navigator.userAgent.toLowerCase()) ? 8 : 17,
+            nameCmpWidth = 440 - scrollbarWidth,
             buttonCmpWidth = 20,
             operatorCmpWidth = 70,
             searchCmpWidth = 70,
@@ -215,7 +216,7 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: valueCmpWidth,
+                    width: nameCmpWidth - operatorCmpWidth - rangeSetWidth,
 					style: 'margin-bottom:0'
                 });
 
@@ -284,7 +285,7 @@ Ext.onReady( function() {
                 this.rangeValueCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     style: 'margin-bottom:0',
-					width: valueCmpWidth,
+                    width: nameCmpWidth - operatorCmpWidth - rangeSetWidth,
                     valueField: idProperty,
                     displayField: nameProperty,
                     emptyText: 'No selected items',
@@ -660,7 +661,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: operatorCmpWidth + valueCmpWidth,
+                    width: nameCmpWidth,
                     style: 'margin-bottom:0',
                     value: 'true',
                     store: {
@@ -669,22 +670,6 @@ Ext.onReady( function() {
                             {id: 'true', name: ER.i18n.yes},
                             {id: 'false', name: ER.i18n.no}
                         ]
-                    }
-                });
-
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
                     }
                 });
 
