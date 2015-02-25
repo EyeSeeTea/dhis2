@@ -1093,18 +1093,19 @@ var trackerCaptureServices = angular.module('trackerCaptureServices', ['ngResour
 {uid:'rule190113t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'!$hivpositive',actions:[{uid:'actn190111e',action:'hidefield',location:null,content:'nhW3SZX9JaN',data:null},
 {uid:'actn191111e',action:'hidefield',location:null,content:'yEmfXF9HJ1M',data:null}]},
 {uid:'rule192136t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivrapidteststatus !== \'Negative\'',actions:[{uid:'actn192111e',action:'hidefield',location:null,content:'jRo4KlnCKeX',data:null}]},
-{uid:'rule193203t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'($hivrapidteststatus === \'\' || $hivrapidteststatus ===\'Not performed\') || ($hivtestresultsprovided)',actions:[{uid:'',action:'hidefield',location:null,content:'yq1qT0NdjYQ',data:null}]},
-{uid:'rule194137t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'Initiated\'',actions:[{uid:'actn194124e',action:'displaytext',location:'sum',content:'ARV-medication initiated',data:null},
+{uid:'rule193203t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'($hivrapidteststatus === \'\' || $hivrapidteststatus ===\'Not performed\') || ($hivtestresultsprovided)',actions:[{uid:'actn193111e',action:'hidefield',location:null,content:'yq1qT0NdjYQ',data:null}]},
+{uid:'rule194152t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'ARV medication initiated\'',actions:[{uid:'actn194124e',action:'displaytext',location:'sum',content:'ARV-medication initiated',data:null},
 {uid:'actn195124e',action:'displaytext',location:'con',content:'ARV-medication initiated',data:null}]},
-{uid:'rule196135t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'Ongoing\'',actions:[{uid:'actn196121e',action:'displaytext',location:'sum',content:'Ongoing ARV-treatment',data:null},
+{uid:'rule196149t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'Ongoing ARV treatment\'',actions:[{uid:'actn196121e',action:'displaytext',location:'sum',content:'Ongoing ARV-treatment',data:null},
 {uid:'actn197121e',action:'displaytext',location:'con',content:'Ongoing ARV-treatment',data:null}]},
-{uid:'rule198148t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtreatmentstatus === \'None\' && $hivpositive',actions:[{uid:'actn198147e',action:'displaytext',location:'rem',content:'No ARV-medication plan despite positive for HIV',data:null}]},
-{uid:'rule199123t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivcouncellingpositive',actions:[{uid:'actn199147e',action:'displaytext',location:'Con',content:'Counseling on partner treatment of HIV provided',data:null},
-{uid:'actn200147e',action:'displaytext',location:'Sum',content:'Counseling on partner treatment of HIV provided',data:null}]},
+{uid:'rule198199t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'($hivtreatmentstatus === \'No ARV medication plan\' || $hivtreatmentstatus === \'\')&& $hivpositive',actions:[{uid:'actn198147e',action:'displaytext',location:'rem',content:'No ARV-medication plan despite positive for HIV',data:null}]},
+{uid:'rule199123t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivcouncellingpositive',actions:[{uid:'actn199147e',action:'displaytext',location:'con',content:'Counseling on partner treatment of HIV provided',data:null},
+{uid:'actn200147e',action:'displaytext',location:'sum',content:'Counseling on partner treatment of HIV provided',data:null}]},
 {uid:'rule201123t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivtestresultsprovided',actions:[{uid:'actn201149e',action:'displaytext',location:'con',content:'Feedback on HIV test result provided to the woman',data:null},
 {uid:'actn202149e',action:'displaytext',location:'sum',content:'Feedback on HIV test result provided to the woman',data:null}]},
-{uid:'rule203119t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivpreviouslyknown',actions:[{uid:'actn203129e',action:'displaytext',location:'con',content:'Previously known HIV Positive',data:null}]}
-           
+{uid:'rule203119t',trigger:'tracker_data_changed',program_uid:'WSGAb5XwJ3Y',priority:null,programStage_uid:null,condition:'$hivpreviouslyknown',actions:[{uid:'actn203129e',action:'displaytext',location:'con',content:'Previously known HIV Positive',data:null},
+{uid:'actn204129e',action:'displaytext',location:'sum',content:'Previously known HIV Positive',data:null}]}
+         
 
                     //...to here
                 ];

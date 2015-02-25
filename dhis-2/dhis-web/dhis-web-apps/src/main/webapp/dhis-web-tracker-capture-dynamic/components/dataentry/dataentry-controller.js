@@ -111,9 +111,11 @@ trackerCapture.controller('DataEntryController',
                     $scope.selectedProgramWithStage[stage.id] = stage;
                     $scope.eventsByStage[stage.id] = [];
                 });
-                $scope.getEvents();                
+                $scope.getEvents();   
+                
             });
         }
+       
     });
     
     $scope.getEvents = function(){
@@ -153,7 +155,11 @@ trackerCapture.controller('DataEntryController',
                     }
                 });
             }
-            sortEventsByStage();                        
+            sortEventsByStage();  
+            
+            //Execute rules for the first time, to make the initial page appear correctly.
+            //Subsequent calls will be made from the "saveDataValue" function.
+            TrackerRulesExecutionService.executeRules($scope); 
         });          
     };
     
@@ -315,11 +321,7 @@ trackerCapture.controller('DataEntryController',
             }
         });
 
-        $scope.currentEventOriginal = angular.copy($scope.currentEvent);
-
-        //Execute rules for the first time, to make the initial page appear correctly.
-        //Subsequent calls will be made from the "saveDataValue" function.
-        TrackerRulesExecutionService.executeRules($scope);        
+        $scope.currentEventOriginal = angular.copy($scope.currentEvent);       
     };
     
     $scope.saveDatavalue = function(prStDe){
