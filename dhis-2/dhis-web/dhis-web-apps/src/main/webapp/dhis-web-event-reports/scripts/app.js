@@ -134,8 +134,13 @@ Ext.onReady( function() {
                 record.name = this.dataElement.name;
 
                 if (isRange) {
-                    record.rangeSet = this.rangeSetCmp.getValue();
-                    record.filter = this.rangeValueCmp.getValue().join(';');
+                    record.legendSet = {
+                        id: this.rangeSetCmp.getValue()
+                    };
+
+                    if (this.rangeValueCmp.getValue().length) {
+                        record.filter = 'IN:' + this.rangeValueCmp.getValue().join(';');
+                    }
                 }
                 else {
                     if (this.valueCmp.getValue()) {
