@@ -186,7 +186,7 @@ public class Program
 
     /**
      * Returns data elements which are part of the stages of this program which
-     * have a legend set.
+     * have a legend set and is of numeric value type.
      */
     public Set<DataElement> getDataElementsWithLegendSet()
     {
@@ -194,7 +194,7 @@ public class Program
 
         for ( DataElement element : getAllDataElements() )
         {
-            if ( element != null && element.hasLegendSet() )
+            if ( element != null && element.hasLegendSet() && element.isNumericType() )
             {
                 elements.add( element );
             }
@@ -203,20 +203,39 @@ public class Program
         return elements;
     }
     
-
     /**
      * Returns TrackedEntityAttributes from ProgramTrackedEntityAttributes. Use
      * getAttributes() to access the persisted attribute list.
      */
     public List<TrackedEntityAttribute> getTrackedEntityAttributes()
     {
-        List<TrackedEntityAttribute> entityAttributes = new ArrayList<>();
+        List<TrackedEntityAttribute> attributes = new ArrayList<>();
+        
         for ( ProgramTrackedEntityAttribute programAttribute : programAttributes )
         {
-            entityAttributes.add( programAttribute.getAttribute() );
+            attributes.add( programAttribute.getAttribute() );
         }
 
-        return entityAttributes;
+        return attributes;
+    }
+
+    /**
+     * Returns TrackedEntityAttributes from ProgramTrackedEntityAttributes which
+     * have a legend set and is of numeric value type.
+     */
+    public List<TrackedEntityAttribute> getTrackedEntityAttributesWithLegendSet()
+    {
+        List<TrackedEntityAttribute> attributes = new ArrayList<>();
+        
+        for ( TrackedEntityAttribute attribute : getTrackedEntityAttributes() )
+        {
+            if ( attribute != null && attribute.hasLegendSet() && attribute.isNumericType() )
+            {
+                attributes.add( attribute );
+            }
+        }
+        
+        return attributes;
     }
 
     public ProgramStage getProgramStageByStage( int stage )
