@@ -1,15 +1,14 @@
 
 $( document ).ready( function()
 {
-	showLoader();
-	
+    showLoader();
     $.getJSON( "getDataIntegrity.action", {}, populateIntegrityItems );
 } );
 
 function populateIntegrityItems( json )
 {
-	hideLoader();
-	
+    hideLoader();
+
     displayViolationList( json.dataElementsWithoutDataSet, "dataElementsWithoutDataSet", false );
     displayViolationList( json.dataElementsWithoutGroups, "dataElementsWithoutGroups", false );
     displayViolationList( json.dataElementsViolatingExclusiveGroupSets, "dataElementsViolatingExclusiveGroupSets", true );
@@ -38,8 +37,7 @@ function displayViolationList( list, id, lineBreak )
 {
     if ( list.length > 0 )
     {
-    	// Display image "drop-down" button
-    	
+        // Display image "drop-down" button
         $( "#" + id + "Button" )
            .attr({ src: "../images/down.png", title: "View violations" })
            .css({ cursor: "pointer" })
@@ -59,8 +57,8 @@ function displayViolationList( list, id, lineBreak )
     }
     else
     {
-    	// Display image "check" button
-    	
+        // Display image "check" button
+
         $( "#" + id + "Button" ).attr({ src: "../images/check.png", title: "No violations" });
     }
         

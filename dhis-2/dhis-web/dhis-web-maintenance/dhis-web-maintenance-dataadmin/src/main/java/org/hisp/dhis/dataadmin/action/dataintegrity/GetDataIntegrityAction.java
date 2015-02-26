@@ -88,8 +88,6 @@ public class GetDataIntegrityAction
 
         scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
 
-        System.out.println( "Done dataintegrity??" ); // TODO Remove this
-
         return SUCCESS;
     }
 }
