@@ -109,6 +109,12 @@ public abstract class AbstractTrackedEntityInstanceService
     @Override
     public TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance )
     {
+        return getTrackedEntityInstance( entityInstance, true );
+    }
+
+    @Override
+    public TrackedEntityInstance getTrackedEntityInstance( org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance, boolean expandRelative )
+    {
         if ( entityInstance == null )
         {
             return null;
@@ -131,6 +137,19 @@ public abstract class AbstractTrackedEntityInstanceService
             relationship.setTrackedEntityInstanceB( entityRelationship.getEntityInstanceB().getUid() );
 
             relationship.setRelationship( entityRelationship.getRelationshipType().getUid() );
+
+            if ( expandRelative )
+            {
+                // we might have cases where A <=> A, so we only include the relative if the UIDs do not match
+                if ( !entityRelationship.getEntityInstanceA().getUid().equals( entityInstance.getUid() ) )
+                {
+                    relationship.setRelative( getTrackedEntityInstance( entityRelationship.getEntityInstanceA(), false ) );
+                }
+                else if ( !entityRelationship.getEntityInstanceB().getUid().equals( entityInstance.getUid() ) )
+                {
+                    relationship.setRelative( getTrackedEntityInstance( entityRelationship.getEntityInstanceB(), false ) );
+                }
+            }
 
             trackedEntityInstance.getRelationships().add( relationship );
         }
@@ -180,7 +199,6 @@ public abstract class AbstractTrackedEntityInstanceService
     public ImportSummary addTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         trackedEntityInstance.trimValuesToNull();
 
@@ -219,7 +237,6 @@ public abstract class AbstractTrackedEntityInstanceService
     public ImportSummary updateTrackedEntityInstance( TrackedEntityInstance trackedEntityInstance )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         trackedEntityInstance.trimValuesToNull();
 

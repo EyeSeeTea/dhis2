@@ -39,6 +39,7 @@ import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.VersionedObject;
 import org.hisp.dhis.common.annotation.Scanned;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -65,6 +66,7 @@ import java.util.Set;
 @JacksonXmlRootElement( localName = "program", namespace = DxfNamespaces.DXF_2_0 )
 public class Program
     extends BaseIdentifiableObject
+    implements VersionedObject
 {
     public static final List<String> TYPE_LOOKUP = Arrays.asList( "", "MULTIPLE_EVENTS_WITH_REGISTRATION",
         "SINGLE_EVENT_WITH_REGISTRATION", "SINGLE_EVENT_WITHOUT_REGISTRATION" );
@@ -75,7 +77,7 @@ public class Program
 
     private String description;
 
-    private Integer version;
+    private int version;
 
     private String dateOfEnrollmentDescription;
 
@@ -183,18 +185,57 @@ public class Program
     }
 
     /**
+     * Returns data elements which are part of the stages of this program which
+     * have a legend set and is of numeric value type.
+     */
+    public Set<DataElement> getDataElementsWithLegendSet()
+    {
+        Set<DataElement> elements = new HashSet<>();
+
+        for ( DataElement element : getAllDataElements() )
+        {
+            if ( element != null && element.hasLegendSet() && element.isNumericType() )
+            {
+                elements.add( element );
+            }
+        }
+
+        return elements;
+    }
+    
+    /**
      * Returns TrackedEntityAttributes from ProgramTrackedEntityAttributes. Use
      * getAttributes() to access the persisted attribute list.
      */
     public List<TrackedEntityAttribute> getTrackedEntityAttributes()
     {
-        List<TrackedEntityAttribute> entityAttributes = new ArrayList<>();
+        List<TrackedEntityAttribute> attributes = new ArrayList<>();
+        
         for ( ProgramTrackedEntityAttribute programAttribute : programAttributes )
         {
-            entityAttributes.add( programAttribute.getAttribute() );
+            attributes.add( programAttribute.getAttribute() );
         }
 
-        return entityAttributes;
+        return attributes;
+    }
+
+    /**
+     * Returns TrackedEntityAttributes from ProgramTrackedEntityAttributes which
+     * have a legend set and is of numeric value type.
+     */
+    public List<TrackedEntityAttribute> getTrackedEntityAttributesWithLegendSet()
+    {
+        List<TrackedEntityAttribute> attributes = new ArrayList<>();
+        
+        for ( TrackedEntityAttribute attribute : getTrackedEntityAttributes() )
+        {
+            if ( attribute != null && attribute.hasLegendSet() && attribute.isNumericType() )
+            {
+                attributes.add( attribute );
+            }
+        }
+        
+        return attributes;
     }
 
     public ProgramStage getProgramStageByStage( int stage )
@@ -214,10 +255,9 @@ public class Program
         return null;
     }
 
-    public Program increaseVersion()
+    public int increaseVersion()
     {
-        version = version != null ? version + 1 : 1;
-        return this;
+        return ++version;
     }
 
     // -------------------------------------------------------------------------
@@ -241,12 +281,12 @@ public class Program
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Integer getVersion()
+    public int getVersion()
     {
         return version;
     }
 
-    public void setVersion( Integer version )
+    public void setVersion( int version )
     {
         this.version = version;
     }
@@ -480,6 +520,7 @@ public class Program
     }
 
     @JsonProperty
+    @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Program getRelatedProgram()
@@ -570,10 +611,11 @@ public class Program
         {
             Program program = (Program) other;
 
+            version = program.getVersion();
+
             if ( MergeStrategy.MERGE_ALWAYS.equals( strategy ) )
             {
                 description = program.getDescription();
-                version = program.getVersion();
                 dateOfEnrollmentDescription = program.getDateOfEnrollmentDescription();
                 dateOfIncidentDescription = program.getDateOfIncidentDescription();
                 type = program.getType();
@@ -592,7 +634,6 @@ public class Program
             else if ( MergeStrategy.MERGE_IF_NOT_NULL.equals( strategy ) )
             {
                 description = program.getDescription() == null ? description : program.getDescription();
-                version = program.getVersion() == null ? version : program.getVersion();
                 dateOfEnrollmentDescription = program.getDateOfEnrollmentDescription() == null ? dateOfEnrollmentDescription : program.getDateOfEnrollmentDescription();
                 dateOfIncidentDescription = program.getDateOfIncidentDescription() == null ? dateOfIncidentDescription : program.getDateOfIncidentDescription();
                 type = program.getType() == null ? type : program.getType();

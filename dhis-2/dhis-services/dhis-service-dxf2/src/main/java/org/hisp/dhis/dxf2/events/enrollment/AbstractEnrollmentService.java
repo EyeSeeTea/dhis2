@@ -333,7 +333,6 @@ public abstract class AbstractEnrollmentService
     public ImportSummary addEnrollment( Enrollment enrollment )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         org.hisp.dhis.trackedentity.TrackedEntityInstance entityInstance = getTrackedEntityInstance( enrollment
             .getTrackedEntityInstance() );
@@ -351,6 +350,22 @@ public abstract class AbstractEnrollmentService
             importSummary.getImportCount().incrementIgnored();
 
             return importSummary;
+        }
+
+        if ( program.getOnlyEnrollOnce() )
+        {
+            enrollments = getEnrollments( program, trackedEntityInstance, EnrollmentStatus.COMPLETED );
+
+            if ( !enrollments.getEnrollments().isEmpty() )
+            {
+                importSummary.setStatus( ImportStatus.ERROR );
+                importSummary.setDescription( "TrackedEntityInstance " + trackedEntityInstance.getTrackedEntityInstance()
+                    + " already have a completed enrollment in program " + program.getUid() + ", and this program is" +
+                    " configured to only allow enrolling one time." );
+                importSummary.getImportCount().incrementIgnored();
+
+                return importSummary;
+            }
         }
 
         List<ImportConflict> importConflicts = new ArrayList<>();
@@ -398,7 +413,6 @@ public abstract class AbstractEnrollmentService
     public ImportSummary updateEnrollment( Enrollment enrollment )
     {
         ImportSummary importSummary = new ImportSummary();
-        importSummary.setDataValueCount( null );
 
         if ( enrollment == null || enrollment.getEnrollment() == null )
         {

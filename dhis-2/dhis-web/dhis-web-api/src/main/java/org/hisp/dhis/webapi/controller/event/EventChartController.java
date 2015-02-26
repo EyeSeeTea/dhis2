@@ -28,20 +28,10 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensions;
-import static org.hisp.dhis.webapi.utils.ContextUtils.DATE_PATTERN;
-
-import java.io.IOException;
-import java.util.Date;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.hisp.dhis.chart.ChartService;
 import org.hisp.dhis.common.DimensionService;
-import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.eventchart.EventChart;
 import org.hisp.dhis.eventchart.EventChartService;
 import org.hisp.dhis.i18n.I18nFormat;
@@ -66,6 +56,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.Date;
+import java.util.Set;
+
+import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensions;
+import static org.hisp.dhis.webapi.utils.ContextUtils.DATE_PATTERN;
+
 /**
  * @author Jan Henrik Overland
  */
@@ -76,7 +75,7 @@ public class EventChartController
 {
     @Autowired
     private EventChartService eventChartService;
-    
+
     @Autowired
     private ChartService chartService;
 
@@ -88,7 +87,7 @@ public class EventChartController
 
     @Autowired
     private ProgramStageService programStageService;
-    
+
     @Autowired
     private OrganisationUnitService organisationUnitService;
 
@@ -97,14 +96,14 @@ public class EventChartController
 
     @Autowired
     private ContextUtils contextUtils;
-    
+
     //--------------------------------------------------------------------------
     // CRUD
     //--------------------------------------------------------------------------
 
     @Override
     @RequestMapping( method = RequestMethod.POST, consumes = "application/json" )
-    public void postJsonObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void postJsonObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         EventChart eventChart = JacksonUtils.fromJson( request.getInputStream(), EventChart.class );
 
@@ -117,7 +116,7 @@ public class EventChartController
 
     @Override
     @RequestMapping( value = "/{uid}", method = RequestMethod.PUT, consumes = "application/json" )
-    public void putJsonObject( @PathVariable String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void putJsonObject( ImportOptions importOptions, @PathVariable String uid, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         EventChart eventChart = eventChartService.getEventChart( uid );
 
@@ -131,7 +130,7 @@ public class EventChartController
 
         mergeEventChart( newEventChart );
 
-        eventChart.mergeWith( newEventChart, MergeStrategy.MERGE_IF_NOT_NULL );
+        eventChart.mergeWith( newEventChart, importOptions.getMergeStrategy() );
 
         eventChartService.updateEventChart( eventChart );
     }
@@ -183,7 +182,7 @@ public class EventChartController
 
         ChartUtilities.writeChartAsPNG( response.getOutputStream(), jFreeChart, width, height );
     }
-    
+
     //--------------------------------------------------------------------------
     // Hooks
     //--------------------------------------------------------------------------
@@ -195,7 +194,7 @@ public class EventChartController
         eventChart.populateAnalyticalProperties();
 
         Set<OrganisationUnit> roots = currentUserService.getCurrentUser().getDataViewOrganisationUnitsWithFallback();
-        
+
         for ( OrganisationUnit organisationUnit : eventChart.getOrganisationUnits() )
         {
             eventChart.getParentGraphMap().put( organisationUnit.getUid(), organisationUnit.getParentGraph( roots ) );
@@ -216,26 +215,27 @@ public class EventChartController
     // Supportive methods
     //--------------------------------------------------------------------------
 
-    private void mergeEventChart( EventChart eventChart )
+    private void mergeEventChart( EventChart chart )
     {
-        dimensionService.mergeAnalyticalObject( eventChart );
+        dimensionService.mergeAnalyticalObject( chart );
+        dimensionService.mergeEventAnalyticalObject( chart );
 
-        eventChart.getColumnDimensions().clear();
-        eventChart.getRowDimensions().clear();
-        eventChart.getFilterDimensions().clear();
+        chart.getColumnDimensions().clear();
+        chart.getRowDimensions().clear();
+        chart.getFilterDimensions().clear();
 
-        eventChart.getColumnDimensions().addAll( getDimensions( eventChart.getColumns() ) );
-        eventChart.getRowDimensions().addAll( getDimensions( eventChart.getRows() ) );
-        eventChart.getFilterDimensions().addAll( getDimensions( eventChart.getFilters() ) );
+        chart.getColumnDimensions().addAll( getDimensions( chart.getColumns() ) );
+        chart.getRowDimensions().addAll( getDimensions( chart.getRows() ) );
+        chart.getFilterDimensions().addAll( getDimensions( chart.getFilters() ) );
 
-        if ( eventChart.getProgram() != null )
+        if ( chart.getProgram() != null )
         {
-            eventChart.setProgram( programService.getProgram( eventChart.getProgram().getUid() ) );
+            chart.setProgram( programService.getProgram( chart.getProgram().getUid() ) );
         }
 
-        if ( eventChart.getProgramStage() != null )
+        if ( chart.getProgramStage() != null )
         {
-            eventChart.setProgramStage( programStageService.getProgramStage( eventChart.getProgramStage().getUid() ) );
+            chart.setProgramStage( programStageService.getProgramStage( chart.getProgramStage().getUid() ) );
         }
     }
 }

@@ -43,11 +43,15 @@ import org.hisp.dhis.common.IllegalQueryException;
 public interface SqlViewService
 {
     final String ID = SqlViewService.class.getName();
+    
     final String VARIABLE_EXPRESSION = "\\$\\{(\\w+)\\}";
-    final Pattern VARIABLE_PATTERN = Pattern.compile( VARIABLE_EXPRESSION );
+    final String SELECT_EXPRESSION = "^(?i)\\s*select\\s+.+";
+    
+    final Pattern VARIABLE_PATTERN = Pattern.compile( VARIABLE_EXPRESSION, Pattern.DOTALL );
+    final Pattern SELECT_PATTERN = Pattern.compile( SELECT_EXPRESSION, Pattern.DOTALL );
     
     // -------------------------------------------------------------------------
-    // SqlView
+    // CRUD
     // -------------------------------------------------------------------------
 
     int saveSqlView( SqlView sqlView );
@@ -75,13 +79,17 @@ public interface SqlViewService
     int getSqlViewCountByName( String name );
     
     // -------------------------------------------------------------------------
-    // SqlView Expanded
+    // SQL view
     // -------------------------------------------------------------------------
 
     boolean viewTableExists( String viewTableName );
 
-    String createViewTable( SqlView sqlViewInstance );
+    String createViewTable( SqlView sqlView );
 
+    void createAllSqlViews();
+    
+    void dropAllSqlViews();
+    
     void dropViewTable( String viewName );
     
     /**

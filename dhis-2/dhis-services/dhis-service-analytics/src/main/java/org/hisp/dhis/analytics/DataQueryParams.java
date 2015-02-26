@@ -57,7 +57,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseDimensionalObject;
 import org.hisp.dhis.common.CombinationGenerator;
 import org.hisp.dhis.common.DimensionType;
@@ -121,7 +121,7 @@ public class DataQueryParams
     /**
      * Indicates that full precision should be provided for values.
      */
-    private boolean skipRounding;
+    protected boolean skipRounding;
     
     /**
      * Indicates i) if the names of all ancestors of the organisation units part
@@ -574,7 +574,8 @@ public class DataQueryParams
     }
     
     /**
-     * Returns a list of dimensions which occur more than once.
+     * Returns a list of dimensions which occur more than once, not including
+     * the first duplicate.
      */
     public List<DimensionalObject> getDuplicateDimensions()
     {
@@ -635,6 +636,14 @@ public class DataQueryParams
     public boolean isAggregationType( AggregationType aggregationType )
     {
         return this.aggregationType != null && this.aggregationType.equals( aggregationType );
+    }
+    
+    /**
+     * Indicates whether an aggregation type is specified.
+     */
+    public boolean hasAggregationType()
+    {
+        return this.aggregationType != null;
     }
 
     /**

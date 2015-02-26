@@ -33,6 +33,7 @@ import static org.hisp.dhis.analytics.AnalyticsService.OU_HIERARCHY_KEY;
 import static org.hisp.dhis.common.DimensionalObject.ORGUNIT_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObject.PERIOD_DIM_ID;
 import static org.hisp.dhis.common.DimensionalObjectUtils.DIMENSION_NAME_SEP;
+import static org.hisp.dhis.common.DimensionalObjectUtils.ITEM_SEP;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionFromParam;
 import static org.hisp.dhis.common.DimensionalObjectUtils.getDimensionItemsFromParam;
 import static org.hisp.dhis.common.DimensionalObjectUtils.toDimension;
@@ -49,8 +50,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.AnalyticsSecurityManager;
 import org.hisp.dhis.analytics.AnalyticsService;
+import org.hisp.dhis.analytics.EventOutputType;
 import org.hisp.dhis.analytics.SortOrder;
 import org.hisp.dhis.analytics.event.EventAnalyticsManager;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
@@ -74,6 +77,8 @@ import org.hisp.dhis.common.QueryOperator;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.i18n.I18nFormat;
+import org.hisp.dhis.legend.LegendService;
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.program.Program;
@@ -90,6 +95,8 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import com.google.common.base.MoreObjects;
 
 /**
  * @author Lars Helge Overland
@@ -120,9 +127,12 @@ public class DefaultEventAnalyticsService
 
     @Autowired
     private TrackedEntityAttributeService attributeService;
-
+    
     @Autowired
     private OrganisationUnitService organisationUnitService;
+
+    @Autowired
+    private LegendService legendService;
 
     @Autowired
     private EventAnalyticsManager analyticsManager;
@@ -340,15 +350,18 @@ public class DefaultEventAnalyticsService
 
     @Override
     public EventQueryParams getFromUrl( String program, String stage, String startDate, String endDate,
-        Set<String> dimension, Set<String> filter, boolean skipMeta, boolean hierarchyMeta, SortOrder sortOrder, 
-        Integer limit, boolean uniqueInstances, DisplayProperty displayProperty, I18nFormat format )
+        Set<String> dimension, Set<String> filter, String value, AggregationType aggregationType, boolean skipMeta, boolean skipRounding, boolean hierarchyMeta, 
+        SortOrder sortOrder, Integer limit, EventOutputType outputType, DisplayProperty displayProperty, I18nFormat format )
     {
         EventQueryParams params = getFromUrl( program, stage, startDate, endDate, dimension, filter, null, null, null,
             skipMeta, hierarchyMeta, false, displayProperty, null, null, format );
-        
+                
+        params.setValue( getValueDimension( value ) );
+        params.setAggregationType( aggregationType );
+        params.setSkipRounding( skipRounding );
         params.setSortOrder( sortOrder );
         params.setLimit( limit );
-        params.setUniqueInstances( uniqueInstances );
+        params.setOutputType( MoreObjects.firstNonNull( outputType, EventOutputType.EVENT ) );
         params.setAggregate( true );
 
         return params;
@@ -501,12 +514,14 @@ public class DefaultEventAnalyticsService
                     params.getItemFilters().add( getQueryItem( filter.getDimension(), filter.getFilter() ) );
                 }
             }
-        }
 
-        params.setProgram( object.getProgram() );
-        params.setProgramStage( object.getProgramStage() );
-        params.setStartDate( object.getStartDate() );
-        params.setEndDate( object.getEndDate() );
+            params.setProgram( object.getProgram() );
+            params.setProgramStage( object.getProgramStage() );
+            params.setStartDate( object.getStartDate() );
+            params.setEndDate( object.getEndDate() );
+            params.setValue( object.getValue() );
+            params.setOutputType( object.getOutputType() );
+        }
         
         return params;
     }
@@ -534,7 +549,7 @@ public class DefaultEventAnalyticsService
             throw new IllegalQueryException( "Query item or filter is invalid: " + dimensionString );
         }
         
-        QueryItem queryItem = getQuryItemFromUid( split[0] );
+        QueryItem queryItem = getQueryItemFromDimension( split[0] );
         
         if ( split.length > 1 ) // Filters specified
         {   
@@ -624,7 +639,6 @@ public class DefaultEventAnalyticsService
                 {
                     map.putAll( IdentifiableObjectUtils.getUidNameMap( objects ) );
                 }
-
             }
         }
 
@@ -643,22 +657,52 @@ public class DefaultEventAnalyticsService
         return item;
     }
 
-    private QueryItem getQuryItemFromUid( String item )
+    private QueryItem getQueryItemFromDimension( String dimension )
     {
+        String[] split = dimension.split( ITEM_SEP );
+
+        String item = split[0];
+
+        LegendSet legendSet = split.length > 1 && split[1] != null ? legendService.getLegendSet( split[1] ) : null;
+        
         DataElement de = dataElementService.getDataElement( item );
 
         if ( de != null ) //TODO check if part of program
         {
-            return new QueryItem( de, de.getType(), de.hasOptionSet() ? de.getOptionSet().getUid() : null );
+            return new QueryItem( de, legendSet, de.getType(), de.hasOptionSet() ? de.getOptionSet().getUid() : null );
         }
 
         TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( item );
 
         if ( at != null )
         {
-            return new QueryItem( at, at.getValueType(), at.hasOptionSet() ? at.getOptionSet().getUid() : null );
+            return new QueryItem( at, legendSet, at.getValueType(), at.hasOptionSet() ? at.getOptionSet().getUid() : null );
         }
 
-        throw new IllegalQueryException( "Item identifier does not reference any item part of the program: " + item );
+        throw new IllegalQueryException( "Item identifier does not reference any data element or attribute part of the program: " + item );
+    }
+    
+    private NameableObject getValueDimension( String value )
+    {
+        if ( value == null )
+        {
+            return null;
+        }
+        
+        DataElement de = dataElementService.getDataElement( value );
+        
+        if ( de != null && de.isNumericType() )
+        {
+            return de;
+        }
+        
+        TrackedEntityAttribute at = attributeService.getTrackedEntityAttribute( value );
+        
+        if ( at != null && at.isNumericType() )
+        {
+            return at;
+        }
+        
+        throw new IllegalQueryException( "Value identifier does not reference any data element or attribute which are numeric type and part of the program: " + value );        
     }
 }

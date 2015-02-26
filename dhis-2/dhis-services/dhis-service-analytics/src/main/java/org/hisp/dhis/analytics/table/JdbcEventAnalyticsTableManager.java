@@ -261,11 +261,23 @@ public class JdbcEventAnalyticsTableManager
             String dataClause = dataElement.isNumericType() ? numericClause : "";
             String select = dataElement.isNumericType() ? doubleSelect : "value";
 
-            String sql = "(select " + select + " from trackedentitydatavalue where programstageinstanceid="
-                + "psi.programstageinstanceid and dataelementid=" + dataElement.getId() + dataClause + ") as "
-                + quote( dataElement.getUid() );
+            String sql = "(select " + select + " from trackedentitydatavalue where programstageinstanceid=psi.programstageinstanceid " + 
+                "and dataelementid=" + dataElement.getId() + dataClause + ") as " + quote( dataElement.getUid() );
 
             String[] col = { quote( dataElement.getUid() ), dataType, sql };
+            columns.add( col );
+        }
+
+        for ( DataElement dataElement : table.getProgram().getDataElementsWithLegendSet() )
+        {
+            String column = quote( dataElement.getUid() + PartitionUtils.SEP + dataElement.getLegendSet().getUid() );
+            
+            String sql = "(select l.name from maplegend l inner join maplegendsetmaplegend lsl on l.maplegendid=lsl.maplegendid " +
+                "inner join trackedentitydatavalue dv on l.startvalue <= " + doubleSelect + " and l.endvalue > " + doubleSelect + " " +
+                "and lsl.legendsetid=" + dataElement.getLegendSet().getId() + " and dv.programstageinstanceid=psi.programstageinstanceid " + 
+                "and dv.dataelementid=" + dataElement.getId() + numericClause + ") as " + column;
+                
+            String[] col = { column, "character varying(230)", sql };
             columns.add( col );
         }
 
@@ -275,14 +287,28 @@ public class JdbcEventAnalyticsTableManager
             String dataClause = attribute.isNumericType() ? numericClause : "";
             String select = attribute.isNumericType() ? doubleSelect : "value";
 
-            String sql = "(select " + select + " from trackedentityattributevalue where trackedentityinstanceid=pi.trackedentityinstanceid and "
-                + "trackedentityattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
+            String sql = "(select " + select + " from trackedentityattributevalue where trackedentityinstanceid=pi.trackedentityinstanceid " + 
+                "and trackedentityattributeid=" + attribute.getId() + dataClause + ") as " + quote( attribute.getUid() );
 
             String[] col = { quote( attribute.getUid() ), dataType, sql };
             columns.add( col );
         }
+        
+        for ( TrackedEntityAttribute attribute : table.getProgram().getTrackedEntityAttributesWithLegendSet() )
+        {
+            String column = quote( attribute.getUid() + PartitionUtils.SEP + attribute.getLegendSet().getUid() );
+            
+            String sql = "(select l.name from maplegend l inner join maplegendsetmaplegend lsl on l.maplegendid=lsl.maplegendid " +
+                "inner join trackedentityattributevalue av on l.startvalue <= " + doubleSelect + " and l.endvalue > " + doubleSelect + " " +
+                "and lsl.legendsetid=" + attribute.getLegendSet().getId() + " and av.trackedentityinstanceid=pi.trackedentityinstanceid " +
+                "and av.trackedentityattributeid=" + attribute.getId() + numericClause + ") as " + column;
+            
+            String[] col = { column, "character varying(230)", sql };
+            columns.add( col );
+        }
 
         String[] psi = { quote( "psi" ), "character(11) not null", "psi.uid" };
+        String[] pi = { quote( "pi" ), "character(11) not null", "pi.uid" };
         String[] ps = { quote( "ps" ), "character(11) not null", "ps.uid" };
         String[] ed = { quote( "executiondate" ), "timestamp", "psi.executiondate" };
         String[] longitude = { quote( "longitude" ), dbl, "psi.longitude" };
@@ -291,7 +317,7 @@ public class JdbcEventAnalyticsTableManager
         String[] oun = { quote( "ouname" ), "character varying(230) not null", "ou.name" };
         String[] ouc = { quote( "oucode" ), "character varying(50)", "ou.code" };
 
-        columns.addAll( Arrays.asList( psi, ps, ed, longitude, latitude, ou, oun, ouc ) );
+        columns.addAll( Arrays.asList( psi, pi, ps, ed, longitude, latitude, ou, oun, ouc ) );
 
         if ( table.hasProgram() && table.getProgram().isRegistration() )
         {

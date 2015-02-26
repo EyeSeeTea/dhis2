@@ -38,7 +38,7 @@ import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.datamart.DataMartManager;
 import org.hisp.dhis.maintenance.MaintenanceService;
-import org.hisp.dhis.resourcetable.ResourceTableService;
+import org.hisp.dhis.sqlview.SqlViewService;
 import org.hisp.dhis.user.CurrentUserService;
 
 import com.opensymphony.xwork2.Action;
@@ -71,13 +71,6 @@ public class PerformMaintenanceAction
     @Resource(name="org.hisp.dhis.analytics.EventAnalyticsTableService")
     private AnalyticsTableService eventAnalyticsTableService;
     
-    private ResourceTableService resourceTableService;
-    
-    public void setResourceTableService( ResourceTableService resourceTableService )
-    {
-        this.resourceTableService = resourceTableService;
-    }
-
     private MaintenanceService maintenanceService;
 
     public void setMaintenanceService( MaintenanceService maintenanceService )
@@ -118,6 +111,13 @@ public class PerformMaintenanceAction
     public void setCategoryService( DataElementCategoryService categoryService )
     {
         this.categoryService = categoryService;
+    }
+
+    private SqlViewService sqlViewService;
+
+    public void setSqlViewService( SqlViewService sqlViewService )
+    {
+        this.sqlViewService = sqlViewService;
     }
 
     // -------------------------------------------------------------------------
@@ -173,6 +173,20 @@ public class PerformMaintenanceAction
         this.removeExpiredInvitations = removeExpiredInvitations;
     }
 
+    private boolean dropSqlViews;
+
+    public void setDropSqlViews( boolean dropSqlViews )
+    {
+        this.dropSqlViews = dropSqlViews;
+    }
+
+    private boolean createSqlViews;
+    
+    public void setCreateSqlViews( boolean createSqlViews )
+    {
+        this.createSqlViews = createSqlViews;
+    }
+    
     private boolean updateCategoryOptionCombos;
 
     public void setUpdateCategoryOptionCombos( boolean updateCategoryOptionCombos )
@@ -192,7 +206,7 @@ public class PerformMaintenanceAction
         
         if ( clearAnalytics )
         {
-            resourceTableService.dropAllSqlViews();
+            sqlViewService.dropAllSqlViews();
             analyticsTableService.dropTables();
             completenessTableService.dropTables();
             completenessTargetTableService.dropTables();
@@ -254,6 +268,20 @@ public class PerformMaintenanceAction
             maintenanceService.removeExpiredInvitations();
             
             log.info( "'" + username + "': Removed expired invitations" );
+        }
+
+        if ( dropSqlViews )
+        {
+            sqlViewService.dropAllSqlViews();
+            
+            log.info( "'" + username + "': Dropped SQL views" );
+        }
+        
+        if ( createSqlViews )
+        {
+            sqlViewService.createAllSqlViews();
+            
+            log.info( "'" + username + "': Created SQL views" );
         }
         
         if ( updateCategoryOptionCombos )

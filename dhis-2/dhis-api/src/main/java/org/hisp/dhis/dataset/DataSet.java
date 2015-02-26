@@ -28,19 +28,16 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.hisp.dhis.attribute.AttributeValue;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.VersionedObject;
 import org.hisp.dhis.common.adapter.JacksonPeriodTypeDeserializer;
 import org.hisp.dhis.common.adapter.JacksonPeriodTypeSerializer;
 import org.hisp.dhis.common.annotation.Scanned;
@@ -55,13 +52,18 @@ import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.indicator.Indicator;
-import org.hisp.dhis.mapping.MapLegendSet;
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.user.UserGroup;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * This class is used for defining the standardized DataSets. A DataSet consists
@@ -72,6 +74,7 @@ import java.util.Set;
 @JacksonXmlRootElement( localName = "dataSet", namespace = DxfNamespaces.DXF_2_0 )
 public class DataSet
     extends BaseNameableObject
+    implements VersionedObject
 {
     public static final String TYPE_DEFAULT = "default";
     public static final String TYPE_SECTION = "section";
@@ -139,7 +142,7 @@ public class DataSet
     /**
      * Indicating version number.
      */
-    private Integer version;
+    private int version;
 
     /**
      * How many days after period is over will this dataSet auto-lock
@@ -229,7 +232,7 @@ public class DataSet
     /**
      * The legend set for this indicator.
      */
-    private MapLegendSet legendSet;
+    private LegendSet legendSet;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -397,10 +400,9 @@ public class DataSet
         return dataElements;
     }
 
-    public DataSet increaseVersion()
+    public int increaseVersion()
     {
-        version = version != null ? version + 1 : 1;
-        return this;
+        return ++version;
     }
 
     /**
@@ -576,12 +578,12 @@ public class DataSet
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public Integer getVersion()
+    public int getVersion()
     {
         return version;
     }
 
-    public void setVersion( Integer version )
+    public void setVersion( int version )
     {
         this.version = version;
     }
@@ -786,12 +788,12 @@ public class DataSet
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JsonView( { DetailedView.class, ExportView.class, WithoutOrganisationUnitsView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public MapLegendSet getLegendSet()
+    public LegendSet getLegendSet()
     {
         return legendSet;
     }
 
-    public void setLegendSet( MapLegendSet legendSet )
+    public void setLegendSet( LegendSet legendSet )
     {
         this.legendSet = legendSet;
     }
@@ -815,12 +817,12 @@ public class DataSet
             fieldCombinationRequired = dataSet.isFieldCombinationRequired();
             mobile = dataSet.isMobile();
             validCompleteOnly = dataSet.isValidCompleteOnly();
+            version = dataSet.getVersion();
 
             if ( MergeStrategy.MERGE_ALWAYS.equals( strategy ) )
             {
                 periodType = dataSet.getPeriodType();
                 dataEntryForm = dataSet.getDataEntryForm();
-                version = dataSet.getVersion();
                 legendSet = dataSet.getLegendSet();
                 notificationRecipients = dataSet.getNotificationRecipients();
             }
@@ -828,7 +830,6 @@ public class DataSet
             {
                 periodType = dataSet.getPeriodType() == null ? periodType : dataSet.getPeriodType();
                 dataEntryForm = dataSet.getDataEntryForm() == null ? dataEntryForm : dataSet.getDataEntryForm();
-                version = dataSet.getVersion() == null ? version : dataSet.getVersion();
                 legendSet = dataSet.getLegendSet() == null ? legendSet : dataSet.getLegendSet();
                 notificationRecipients = dataSet.getNotificationRecipients() == null ? notificationRecipients : dataSet.getNotificationRecipients();
             }

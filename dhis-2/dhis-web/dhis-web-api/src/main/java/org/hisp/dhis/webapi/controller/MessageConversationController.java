@@ -31,7 +31,9 @@ package org.hisp.dhis.webapi.controller;
 import com.google.common.collect.Lists;
 import org.hisp.dhis.acl.AclService;
 import org.hisp.dhis.common.Pager;
-import org.hisp.dhis.dxf2.utils.JacksonUtils;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.TranslateOptions;
+import org.hisp.dhis.dxf2.common.JacksonUtils;
 import org.hisp.dhis.hibernate.exception.DeleteAccessDeniedException;
 import org.hisp.dhis.hibernate.exception.UpdateAccessDeniedException;
 import org.hisp.dhis.message.MessageService;
@@ -40,6 +42,7 @@ import org.hisp.dhis.node.types.RootNode;
 import org.hisp.dhis.node.types.SimpleNode;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.query.Order;
 import org.hisp.dhis.schema.descriptors.MessageConversationSchemaDescriptor;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
@@ -105,7 +108,7 @@ public class MessageConversationController
     }
 
     @Override
-    public RootNode getObject( @PathVariable String uid, Map<String, String> rpParameters, HttpServletRequest request, HttpServletResponse response )
+    public RootNode getObject( @PathVariable String uid, Map<String, String> rpParameters, TranslateOptions translateOptions, HttpServletRequest request, HttpServletResponse response )
         throws Exception
     {
         org.hisp.dhis.message.MessageConversation messageConversation = messageService.getMessageConversation( uid );
@@ -123,11 +126,11 @@ public class MessageConversationController
             throw new AccessDeniedException( "Not authorized to access this conversation." );
         }
 
-        return super.getObject( uid, rpParameters, request, response );
+        return super.getObject( uid, rpParameters, translateOptions, request, response );
     }
 
     @Override
-    protected List<org.hisp.dhis.message.MessageConversation> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
+    protected List<org.hisp.dhis.message.MessageConversation> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
     {
         List<org.hisp.dhis.message.MessageConversation> entityList;
 
@@ -157,14 +160,14 @@ public class MessageConversationController
     //--------------------------------------------------------------------------
 
     @Override
-    public void postXmlObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void postXmlObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         MessageConversation messageConversation = JacksonUtils.fromXml( request.getInputStream(), MessageConversation.class );
         postObject( response, request, messageConversation );
     }
 
     @Override
-    public void postJsonObject( HttpServletRequest request, HttpServletResponse response ) throws Exception
+    public void postJsonObject( ImportOptions importOptions, HttpServletRequest request, HttpServletResponse response ) throws Exception
     {
         MessageConversation messageConversation = JacksonUtils.fromJson( request.getInputStream(), MessageConversation.class );
         postObject( response, request, messageConversation );

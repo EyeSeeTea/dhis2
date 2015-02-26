@@ -2,6 +2,7 @@ trackerCapture.controller('EnrollmentController',
         function($rootScope,
                 $scope,  
                 $location,
+                $timeout,
                 DateUtils,
                 EventUtils,
                 storage,
@@ -16,17 +17,7 @@ trackerCapture.controller('EnrollmentController',
                 DialogService) {
     
     $scope.today = DateUtils.getToday();
-    $scope.selectedOrgUnit = storage.get('SELECTED_OU');    
-      
-    AttributesFactory.getAll().then(function(atts){
-        $scope.attributes = [];  
-        $scope.attributesById = [];
-        angular.forEach(atts, function(att){
-            $scope.attributesById[att.id] = att;
-        });
-        
-        CurrentSelection.setAttributesById($scope.attributesById);
-    });
+    $scope.selectedOrgUnit = storage.get('SELECTED_OU');  
     
     //listen for the selected items
     var selections = {};
@@ -48,7 +39,7 @@ trackerCapture.controller('EnrollmentController',
         $scope.optionSets = selections.optionSets;
         $scope.programs = selections.prs;
         var selectedEnrollment = selections.selectedEnrollment;
-        $scope.enrollments = selections.enrollments ? selections.enrollments : [];        
+        $scope.enrollments = selections.enrollments;
         $scope.programExists = args.programExists;
         $scope.programNames = selections.prNames;
         $scope.programStageNames = selections.prStNames;
@@ -79,11 +70,12 @@ trackerCapture.controller('EnrollmentController',
             }
             else{
                 $scope.selectedEnrollment = null;
+                $scope.broadCastSelections('dashboardWidgets');
             }
         }
-        
-        $scope.broadCastSelections('dashboardWidgets');
-        
+        else{
+            $scope.broadCastSelections('dashboardWidgets');
+        }        
     });
     
     $scope.loadEnrollmentDetails = function(enrollment) {
@@ -103,9 +95,13 @@ trackerCapture.controller('EnrollmentController',
                         $scope.selectedProgram.displayCustomForm = $scope.selectedProgram.hasCustomForm ? true:false;
                         $scope.trackedEntityForm = teForm;
                         $scope.customForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'ENROLLMENT');
-                    }                    
+                    }
+                    $scope.broadCastSelections('dashboardWidgets');
                 });
             });                
+        }
+        else{
+            $scope.broadCastSelections('dashboardWidgets');
         }
     };
         
@@ -115,7 +111,9 @@ trackerCapture.controller('EnrollmentController',
         }
        
         $scope.showEnrollmentDiv = !$scope.showEnrollmentDiv;
-        $rootScope.$broadcast('enrollmentEditing', {enrollmentEditing: $scope.showEnrollmentDiv});
+        $timeout(function() { 
+            $rootScope.$broadcast('enrollmentEditing', {enrollmentEditing: $scope.showEnrollmentDiv});
+        }, 100);        
         
         if($scope.showEnrollmentDiv){            
             $scope.showEnrollmentHistoryDiv = false;
@@ -217,7 +215,9 @@ trackerCapture.controller('EnrollmentController',
             enrollment = $scope.selectedEnrollment;
         }
         CurrentSelection.set({tei: tei, te: $scope.selectedEntity, prs: $scope.programs, pr: pr, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: $scope.enrollments, selectedEnrollment: enrollment, optionSets: $scope.optionSets});
-        $rootScope.$broadcast(listeners, {});
+        $timeout(function() { 
+            $rootScope.$broadcast(listeners, {});
+        }, 100);
     };    
     
     var getProcessedForm = function(){        
@@ -300,7 +300,7 @@ trackerCapture.controller('EnrollmentController',
                             program: program.id,
                             programStage: stage.id,
                             orgUnit: orgUnit.id,                        
-                            dueDate: DateUtils.formatFromUserToApi( EventUtils.getEventDueDate(dhis2Events.events, stage, enrollment) ),
+                            dueDate: DateUtils.formatFromUserToApi( EventUtils.getEventDueDate(null, stage, enrollment) ),
                             status: 'SCHEDULE'
                         };
                     

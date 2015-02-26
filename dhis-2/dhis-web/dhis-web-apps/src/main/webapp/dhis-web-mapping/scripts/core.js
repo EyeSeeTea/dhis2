@@ -222,11 +222,13 @@ Ext.onReady( function() {
         };
 
         layer.registerMouseDownEvent = function() {
-            layer.events.register('mousedown', null, layer.onMouseDown);
-        };
 
-        layer.unregisterMouseDownEvent = function() {
-            layer.events.unregister('mousedown', null, layer.onMouseDown);
+            // clear mousedown listeners
+            if (layer.events && layer.events.listeners && Ext.isArray(layer.events.listeners.mousedown)) {
+                layer.events.listeners.mousedown = [];
+            }
+
+            layer.events.register('mousedown', null, layer.onMouseDown);
         };
 
 		defaultHoverSelect = function fn(feature) {
@@ -272,15 +274,13 @@ Ext.onReady( function() {
 
 		defaultHoverUnselect = function fn(feature) {
 			defaultHoverWindow.destroy();
-
-            // remove mouse click event
-            layer.unregisterMouseDownEvent();
-
-            // destroy popups
-            //destroyDataPopups();
 		};
 
         defaultLeftClickSelect = function fn(feature, e) {
+            if (!feature) {
+                return;
+            }
+
             var generator = gis.init.periodGenerator,
                 periodType = gis.init.systemSettings.infrastructuralPeriodType.name,
                 attr = feature.attributes,
@@ -2446,11 +2446,11 @@ Ext.onReady( function() {
 					legends = [];
 
 				Ext.Ajax.request({
-					url: gis.init.contextPath + '/api/mapLegendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.mapLegendSetFields.join(','),
+					url: gis.init.contextPath + '/api/legendSets/' + view.legendSet.id + '.json?fields=' + gis.conf.url.legendSetFields.join(','),
 					scope: this,
                     disableCaching: false,
 					success: function(r) {
-						legends = Ext.decode(r.responseText).mapLegends;
+						legends = Ext.decode(r.responseText).legends;
 
 						Ext.Array.sort(legends, function (a, b) {
 							return a.startValue - b.startValue;
@@ -2742,6 +2742,7 @@ Ext.onReady( function() {
 					{id: 'LAST_BIMONTH', name: GIS.i18n.last_bimonth},
 					{id: 'LAST_QUARTER', name: GIS.i18n.last_quarter},
 					{id: 'LAST_SIX_MONTH', name: GIS.i18n.last_sixmonth},
+					{id: 'THIS_FINANCIAL_YEAR', name: GIS.i18n.this_financial_year},
 					{id: 'LAST_FINANCIAL_YEAR', name: GIS.i18n.last_financial_year},
 					{id: 'THIS_YEAR', name: GIS.i18n.this_year},
 					{id: 'LAST_YEAR', name: GIS.i18n.last_year}
@@ -2820,7 +2821,7 @@ Ext.onReady( function() {
                 'mapViews[' + conf.url.analysisFields.join(',') + ']'
             ];
 
-            conf.url.mapLegendFields = [
+            conf.url.legendFields = [
                 '*',
                 '!created',
                 '!lastUpdated',
@@ -2830,8 +2831,8 @@ Ext.onReady( function() {
                 '!userGroupAccesses'
             ];
 
-            conf.url.mapLegendSetFields = [
-                'id,name,mapLegends[' + conf.url.mapLegendFields.join(',') + ']'
+            conf.url.legendSetFields = [
+                'id,name,legends[' + conf.url.legendFields.join(',') + ']'
             ];
         }());
 

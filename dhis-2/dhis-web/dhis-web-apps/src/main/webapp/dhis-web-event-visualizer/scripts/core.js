@@ -171,7 +171,7 @@ Ext.onReady( function() {
                 west_fill_accordion_indicator: 56,
                 west_fill_accordion_dataelement: 59,
                 west_fill_accordion_dataset: 31,
-                west_fill_accordion_period: 307,
+                west_fill_accordion_period: 300,
                 west_fill_accordion_organisationunit: 58,
                 west_maxheight_accordion_indicator: 450,
                 west_maxheight_accordion_dataset: 350,
@@ -343,6 +343,8 @@ Ext.onReady( function() {
                 // baseLineTitle: string
 
                 // sortOrder: number
+
+                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
 
                 // rangeAxisMaxValue: number
 
@@ -571,6 +573,7 @@ Ext.onReady( function() {
                     layout.baseLineTitle = Ext.isString(config.baseLineLabel) && !Ext.isEmpty(config.baseLineLabel) ? config.baseLineLabel :
                         (Ext.isString(config.baseLineTitle) && !Ext.isEmpty(config.baseLineTitle) ? config.baseLineTitle : null);
                     layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
 
 					layout.rangeAxisMaxValue = Ext.isNumber(config.rangeAxisMaxValue) ? config.rangeAxisMaxValue : null;
 					layout.rangeAxisMinValue = Ext.isNumber(config.rangeAxisMinValue) ? config.rangeAxisMinValue : null;
@@ -585,8 +588,17 @@ Ext.onReady( function() {
                     layout.hideTitle = Ext.isBoolean(config.hideTitle) ? config.hideTitle : false;
                     layout.title = Ext.isString(config.title) &&  !Ext.isEmpty(config.title) ? config.title : null;
 
-                    layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+                    // value
+                    if ((Ext.isObject(config.value) && Ext.isString(config.value.id)) || Ext.isString(config.value)) {
+                        layout.value = Ext.isString(config.value) ? {id: config.value} : config.value;
+                    }
 
+                    // aggregation type
+                    if (layout.value && Ext.isString(config.aggregationType)) {
+                        layout.aggregationType = config.aggregationType;
+                    }
+
+                    layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
                     layout.legend = Ext.isObject(config.legend) ? config.legend : null;
 
 					//layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
@@ -1172,9 +1184,9 @@ Ext.onReady( function() {
 				// legend set
 				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
 
-				if (layout.legendSet && layout.legendSet.mapLegends) {
+				if (layout.legendSet && layout.legendSet.legends) {
 					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
-					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
+					support.prototype.array.sort(xLayout.legendSet.legends, 'ASC', 'startValue');
 				}
 
 				// unique dimension names
@@ -2021,9 +2033,27 @@ Ext.onReady( function() {
 					}
 				}
 
+                // value
+                if (Ext.isString(layout.value)) {
+                    paramString += '&value=' + layout.value;
+				}
+                else if (Ext.isObject(layout.value) && Ext.isString(layout.value.id)) {
+                    paramString += '&value=' + layout.value.id;
+                }
+
+                // aggregation type
+                if (layout.aggregationType) {
+                    paramString += '&aggregationType=' + layout.aggregationType;
+                }
+
                 // dates
                 if (layout.startDate && layout.endDate) {
                     paramString += '&startDate=' + layout.startDate + '&endDate=' + layout.endDate;
+                }
+
+                // output type
+                if (layout.outputType) {
+                    paramString += '&outputType=' + layout.outputType;
                 }
 
                 // display property

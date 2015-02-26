@@ -40,7 +40,7 @@ import org.hisp.dhis.dataelement.DataElementCategoryOption;
 import org.hisp.dhis.dataelement.DataElementGroup;
 import org.hisp.dhis.dxf2.csv.CsvImportService;
 import org.hisp.dhis.dxf2.gml.GmlImportService;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportService;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.action.util.ImportMetaDataCsvTask;
@@ -144,6 +144,13 @@ public class MetaDataImportAction
         this.classKey = classKey;
     }
 
+    private boolean preheatCache = true;
+    
+    public void setPreheatCache( boolean preheatCache )
+    {
+        this.preheatCache = preheatCache;
+    }
+
     // -------------------------------------------------------------------------
     // Action Implementation
     // -------------------------------------------------------------------------
@@ -165,6 +172,7 @@ public class MetaDataImportAction
         ImportOptions importOptions = new ImportOptions();
         importOptions.setStrategy( strategy.toString() );
         importOptions.setDryRun( dryRun );
+        importOptions.setPreheatCache( preheatCache );
 
         String userId = user != null ? user.getUid() : null;
 

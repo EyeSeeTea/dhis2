@@ -91,10 +91,8 @@ textarea {
     line-height: inherit;
 }
 
-.empty-stage-container {
+.empty-event-container {
     display: inline-block;
-    width: 135px;
-    height: 60px;
     opacity: 1.0;
     white-space: normal;
     padding-top: 5px;
@@ -109,10 +107,29 @@ textarea {
     padding-top: 5px;
     text-align: center;
     border: 2px dotted;
+    margin: 2px;
+    padding: 5px;
+    border-radius: 4px;
 }
 
 .stage-container:hover {
     border: 2px solid;
+    font-weight: bold;
+}
+
+.event-container {
+    cursor: pointer;
+    opacity: 1.0;
+    text-align: center;
+    margin: 2px;
+    padding: 5px;
+    border: 2px dotted;
+    border-radius: 4px;    
+}
+
+.event-container:hover {
+    border: 2px solid;
+    font-weight: bold;
 }
 
 .new-event {    
@@ -133,16 +150,8 @@ textarea {
 
 .current-stage {
     border: 2px solid;
+    font-weight: bold;
 }
-
-.current-stage-color {
-    color: #b94a48;
-}
-
-.stages-color {
-    display: block;
-}
-
 
 /*----------------------------------------------------------------------------*/
 /* App - specific
@@ -494,13 +503,6 @@ div#searchOuTree h4{
 .trim {
     margin-bottom: 5px; 
     margin-top: 5px;
-}
-
-.trimmed-alert {
-	padding: 10px;
-	margin-bottom: 20px;
-	border: 1px solid transparent;
-	border-radius: 4px
 }
 
 .remove-default-padding {

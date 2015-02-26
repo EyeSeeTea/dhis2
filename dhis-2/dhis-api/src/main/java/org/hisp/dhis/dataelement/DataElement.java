@@ -28,29 +28,7 @@ package org.hisp.dhis.dataelement;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.attribute.AttributeValue;
-import org.hisp.dhis.common.BaseDimensionalObject;
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.common.IdentifiableObject;
-import org.hisp.dhis.common.MergeStrategy;
-import org.hisp.dhis.common.view.DetailedView;
-import org.hisp.dhis.common.view.ExportView;
-import org.hisp.dhis.dataset.DataSet;
-import org.hisp.dhis.dataset.comparator.DataSetFrequencyComparator;
-import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.option.OptionSet;
-import org.hisp.dhis.period.PeriodType;
-import org.hisp.dhis.period.YearlyPeriodType;
-import org.hisp.dhis.schema.PropertyType;
-import org.hisp.dhis.schema.annotation.Property;
-import org.hisp.dhis.schema.annotation.PropertyRange;
+import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -58,7 +36,30 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hisp.dhis.dataset.DataSet.NO_EXPIRY;
+import org.hisp.dhis.attribute.AttributeValue;
+import org.hisp.dhis.common.BaseDimensionalObject;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeStrategy;
+import org.hisp.dhis.common.view.DetailedView;
+import org.hisp.dhis.common.view.DimensionalView;
+import org.hisp.dhis.common.view.ExportView;
+import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.comparator.DataSetFrequencyComparator;
+import org.hisp.dhis.option.OptionSet;
+import org.hisp.dhis.period.PeriodType;
+import org.hisp.dhis.period.YearlyPeriodType;
+import org.hisp.dhis.schema.PropertyType;
+import org.hisp.dhis.schema.annotation.Property;
+import org.hisp.dhis.schema.annotation.PropertyRange;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
  * A DataElement is a definition (meta-information about) of the entities that
@@ -195,11 +196,6 @@ public class DataElement
      * The option set for comments linked to this data element.
      */
     private OptionSet commentOptionSet;
-
-    /**
-     * The legend set for this data element.
-     */
-    private MapLegendSet legendSet;
 
     // -------------------------------------------------------------------------
     // Constructors
@@ -463,6 +459,9 @@ public class DataElement
         return formName != null && !formName.isEmpty() ? getDisplayFormName() : getDisplayName();
     }
 
+    @JsonView( { DetailedView.class, DimensionalView.class } )
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDisplayFormName()
     {
         return displayFormName != null && !displayFormName.trim().isEmpty() ? displayFormName : formName;
@@ -507,6 +506,11 @@ public class DataElement
         return optionSet != null;
     }
 
+    public boolean hasLegendSet()
+    {
+        return legendSet != null;
+    }
+    
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -712,20 +716,6 @@ public class DataElement
     public void setCommentOptionSet( OptionSet commentOptionSet )
     {
         this.commentOptionSet = commentOptionSet;
-    }
-
-    @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public MapLegendSet getLegendSet()
-    {
-        return legendSet;
-    }
-
-    public void setLegendSet( MapLegendSet legendSet )
-    {
-        this.legendSet = legendSet;
     }
 
     @Override

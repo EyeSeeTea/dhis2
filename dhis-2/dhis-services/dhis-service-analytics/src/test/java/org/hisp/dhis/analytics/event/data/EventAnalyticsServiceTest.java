@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.analytics.AggregationType;
 import org.hisp.dhis.analytics.event.EventAnalyticsService;
 import org.hisp.dhis.analytics.event.EventQueryParams;
 import org.hisp.dhis.common.AnalyticsType;
@@ -157,12 +158,33 @@ public class EventAnalyticsServiceTest
         filterParams.add( "pe:201401;201402" );
         
         EventQueryParams params = analyticsService.getFromUrl( prA.getUid(), null, 
-            null, null, dimensionParams, filterParams, false, false, null, null, false, null, null );
+            null, null, dimensionParams, filterParams, null, null, false, false, false, null, null, null, null, null );
         
         assertEquals( prA, params.getProgram() );
         assertEquals( 1, params.getOrganisationUnits().size() );
         assertEquals( 1, params.getItems().size() );
         assertEquals( 2, params.getFilterPeriods().size() );
+    }
+
+    @Test
+    public void testGetFromUrlB()
+    {
+        Set<String> dimensionParams = new HashSet<>();
+        dimensionParams.add( "ou:" + ouA.getUid() + ";" + ouB.getId() );
+        dimensionParams.add( atA.getUid() + ":LE:5" );
+        
+        Set<String> filterParams = new HashSet<>();
+        filterParams.add( "pe:201401" );
+        
+        EventQueryParams params = analyticsService.getFromUrl( prA.getUid(), null, 
+            null, null, dimensionParams, filterParams, deA.getUid(), AggregationType.AVERAGE, false, false, false, null, null, null, null, null );
+        
+        assertEquals( prA, params.getProgram() );
+        assertEquals( 1, params.getOrganisationUnits().size() );
+        assertEquals( 1, params.getItems().size() );
+        assertEquals( 1, params.getFilterPeriods().size() );
+        assertEquals( deA, params.getValue() );
+        assertEquals( AggregationType.AVERAGE, params.getAggregationType() );
     }
     
     @Test
@@ -175,7 +197,7 @@ public class EventAnalyticsServiceTest
         chart.getRowDimensions().add( DimensionalObject.ORGUNIT_DIM_ID );
         chart.getFilterDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         
-        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, "LE:5" ) );
+        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, null, "LE:5" ) );
         chart.getPeriods().add( peA );
         chart.getPeriods().add( peB );
         chart.getOrganisationUnits().add( ouA );
@@ -200,8 +222,8 @@ public class EventAnalyticsServiceTest
         chart.getRowDimensions().add( DimensionalObject.PERIOD_DIM_ID );
         chart.getFilterDimensions().add( DimensionalObject.ORGUNIT_DIM_ID );
         
-        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, "LE:5" ) );
-        chart.getDataElementDimensions().add( new TrackedEntityDataElementDimension( deA, "GE:100" ) );
+        chart.getAttributeDimensions().add( new TrackedEntityAttributeDimension( atA, null, "LE:5" ) );
+        chart.getDataElementDimensions().add( new TrackedEntityDataElementDimension( deA, null, "GE:100" ) );
         chart.getPeriods().add( peA );
         chart.getPeriods().add( peB );
         chart.getOrganisationUnits().add( ouA );
@@ -220,7 +242,7 @@ public class EventAnalyticsServiceTest
     {
         TrackedEntityAttribute tea = new TrackedEntityAttribute();
 
-        TrackedEntityAttributeDimension tead = new TrackedEntityAttributeDimension( tea, "EQ:2" );
+        TrackedEntityAttributeDimension tead = new TrackedEntityAttributeDimension( tea, null, "EQ:2" );
         
         EventChart chart = new EventChart();
         chart.getColumnDimensions().add( tea.getUid() );

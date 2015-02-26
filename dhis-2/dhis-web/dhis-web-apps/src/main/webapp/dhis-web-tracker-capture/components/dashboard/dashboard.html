@@ -12,9 +12,6 @@
         </select>
 
         <div class="pull-right">
-            <span ng-if="selectedProgram && (widgetsChanged.length > 0 || orderChanged)">
-                <span class="trimmed-alert alert-danger">{{'dashboard_layout_not_saved'| translate}}</span><button type="button" class="btn btn-primary small-horizonal-spacing" ng-click="saveDashboardLayout()">{{'save'| translate}}</button>
-            </span>            
             <div class="btn-group" dropdown is-open="status.isopen">
                 <button type="button" class="btn btn-default dropdown-toggle">
                     <i class="fa fa-cog" title="{{'settings'| translate}}"></i>
@@ -30,7 +27,7 @@
     
     <div class="col-sm-12">
         <div class="row">            
-            <div class="col-sm-6 col-md-8">
+            <div ng-class="widgetSize.bigger">
                 <div id="biggerWidget"
                     d2-sortable  
                     bigger-widgets={{ dashboardWidgets  | filter: {parent: 'biggerWidget'} }} 
@@ -41,7 +38,7 @@
                     </div>                                       
                 </div>                
             </div>            
-            <div class="col-sm-6 col-md-4">
+            <div ng-class="widgetSize.smaller">
                 <div id="smallerWidget" 
                     d2-sortable 
                     bigger-widgets={{ dashboardWidgets  | filter: {parent: 'biggerWidget'} }} 

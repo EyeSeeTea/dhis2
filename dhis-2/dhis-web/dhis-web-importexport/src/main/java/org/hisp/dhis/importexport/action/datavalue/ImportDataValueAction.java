@@ -33,7 +33,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.dxf2.datavalueset.DataValueSetService;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
+import org.hisp.dhis.dxf2.common.ImportOptions;
 import org.hisp.dhis.importexport.ImportStrategy;
 import org.hisp.dhis.importexport.action.util.ImportDataValueTask;
 import org.hisp.dhis.scheduling.TaskCategory;
@@ -128,6 +128,13 @@ public class ImportDataValueAction
         this.importFormat = importFormat;
     }
 
+    private boolean preheatCache = true;
+    
+    public void setPreheatCache( boolean preheatCache )
+    {
+        this.preheatCache = preheatCache;
+    }
+
     // -------------------------------------------------------------------------
     // Action implementation
     // -------------------------------------------------------------------------
@@ -146,7 +153,7 @@ public class ImportDataValueAction
 
         in = StreamUtils.wrapAndCheckCompressionFormat( in );
 
-        ImportOptions options = new ImportOptions( idScheme, dataElementIdScheme, orgUnitIdScheme, dryRun, true, strategy, skipExistingCheck );
+        ImportOptions options = new ImportOptions( idScheme, dataElementIdScheme, orgUnitIdScheme, dryRun, preheatCache, strategy, skipExistingCheck );
 
         log.info( options );
 

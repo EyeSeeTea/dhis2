@@ -33,7 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.IdentifiableObject;
@@ -56,10 +56,9 @@ public class SqlView
     extends BaseIdentifiableObject
 {
     public static final String PREFIX_VIEWNAME = "_view";
-    public static final String REGEX_SELECT_QUERY = "^(?i)\\s*select\\s{1,}.+$";
 
     public static final Set<String> PROTECTED_TABLES = Sets.newHashSet( "users", "userinfo", 
-        "trackedentityinstance", "trackedentityattribute", "trackedentityattributevalue", "relationship" );
+        "trackedentityattribute", "trackedentityattributevalue" );
     
     public static final Set<String> ILLEGAL_KEYWORDS = Sets.newHashSet( "delete", "alter", "update", 
         "create", "drop", "commit", "createdb", "createuser", "insert", "rename", "replace", "restore", "write" );
@@ -141,7 +140,7 @@ public class SqlView
 
     public static String getProtectedTablesRegex()
     {
-        StringBuffer regex = new StringBuffer( "^.*?(" );
+        StringBuffer regex = new StringBuffer( "^.*?(\"|'|`|\\s|^)(" );
 
         for ( String table : PROTECTED_TABLES )
         {
@@ -150,12 +149,12 @@ public class SqlView
 
         regex.delete( regex.length() - 1, regex.length() );
         
-        return regex.append( ").*$" ).toString();
+        return regex.append( ")(\"|'|`|\\s|$).*$" ).toString();
     }
     
     public static String getIllegalKeywordsRegex()
     {
-        StringBuffer regex = new StringBuffer( "^.*?(" );
+        StringBuffer regex = new StringBuffer( "^.*?(\\s|^)(" );
         
         for ( String word : ILLEGAL_KEYWORDS )
         {
@@ -164,7 +163,7 @@ public class SqlView
         
         regex.delete( regex.length() - 1, regex.length() );
         
-        return regex.append( ").*$" ).toString();
+        return regex.append( ")(\\s|$).*$" ).toString();
     }
     
     public SqlView cleanSqlQuery()

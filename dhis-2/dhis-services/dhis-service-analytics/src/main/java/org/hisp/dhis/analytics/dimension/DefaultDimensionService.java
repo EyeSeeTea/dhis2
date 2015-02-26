@@ -35,6 +35,7 @@ import org.hisp.dhis.common.DimensionService;
 import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
+import org.hisp.dhis.common.EventAnalyticalObject;
 import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.MergeStrategy;
@@ -51,6 +52,7 @@ import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.indicator.Indicator;
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
@@ -342,6 +344,32 @@ public class DefaultDimensionService
             mergeDimensionalObjects( object, object.getFilters() );
         }
     }
+
+    @Override
+    public void mergeEventAnalyticalObject( EventAnalyticalObject object )
+    {
+        if ( object != null )
+        {
+            if ( object.getValue() != null )
+            {
+                String uid = object.getValue().getUid();
+                
+                DataElement dataElement = identifiableObjectManager.get( DataElement.class, uid );
+                
+                if ( dataElement != null )
+                {
+                    object.setDataElementValueDimension( dataElement );
+                }
+                
+                TrackedEntityAttribute attribute = identifiableObjectManager.get( TrackedEntityAttribute.class, uid );
+                
+                if ( attribute != null )
+                {
+                    object.setAttributeValueDimension( attribute );
+                }
+            }
+        }
+    }
     
     @Override
     public DimensionalObject getDimensionalObjectCopy( String uid, boolean filterCanRead )
@@ -508,6 +536,7 @@ public class DefaultDimensionService
                 {
                     TrackedEntityAttributeDimension attributeDimension = new TrackedEntityAttributeDimension();
                     attributeDimension.setAttribute( identifiableObjectManager.get( TrackedEntityAttribute.class, dimensionId ) );
+                    attributeDimension.setLegendSet( dimension.hasLegendSet() ? identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) : null );
                     attributeDimension.setFilter( dimension.getFilter() );
                     
                     object.getAttributeDimensions().add( attributeDimension );
@@ -516,6 +545,7 @@ public class DefaultDimensionService
                 {
                     TrackedEntityDataElementDimension dataElementDimension = new TrackedEntityDataElementDimension();
                     dataElementDimension.setDataElement( identifiableObjectManager.get( DataElement.class, dimensionId ) );
+                    dataElementDimension.setLegendSet( dimension.hasLegendSet() ? identifiableObjectManager.get( LegendSet.class, dimension.getLegendSet().getUid() ) : null );
                     dataElementDimension.setFilter( dimension.getFilter() );
                     
                     object.getDataElementDimensions().add( dataElementDimension );

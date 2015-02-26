@@ -42,11 +42,13 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dxf2.common.TranslateOptions;
 import org.hisp.dhis.node.AbstractNode;
 import org.hisp.dhis.node.Node;
 import org.hisp.dhis.node.NodeUtils;
 import org.hisp.dhis.node.types.CollectionNode;
 import org.hisp.dhis.node.types.RootNode;
+import org.hisp.dhis.query.Order;
 import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.hisp.dhis.webapi.webdomain.WebMetaData;
 import org.hisp.dhis.webapi.webdomain.WebOptions;
@@ -83,7 +85,7 @@ public class DimensionController
     // -------------------------------------------------------------------------
 
     @Override
-    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters )
+    protected List<DimensionalObject> getEntityList( WebMetaData metaData, WebOptions options, List<String> filters, List<Order> orders )
     {
         return dimensionService.getAllDimensions();
     }
@@ -96,7 +98,7 @@ public class DimensionController
 
     @RequestMapping( value = "/{uid}/items", method = RequestMethod.GET )
     public @ResponseBody RootNode getItems( @PathVariable String uid, @RequestParam Map<String, String> parameters,
-        Model model, HttpServletRequest request, HttpServletResponse response )
+        TranslateOptions translateOptions, Model model, HttpServletRequest request, HttpServletResponse response )
     {
         List<String> fields = Lists.newArrayList( contextService.getParameterValues( "fields" ) );
         List<String> filters = Lists.newArrayList( contextService.getParameterValues( "filter" ) );
@@ -107,9 +109,10 @@ public class DimensionController
         }
 
         List<NameableObject> items = dimensionService.getCanReadDimensionItems( uid );
-
         items = objectFilterService.filter( items, filters );
         Collections.sort( items, IdentifiableObjectNameComparator.INSTANCE );
+
+        translate( items, translateOptions );
 
         RootNode rootNode = NodeUtils.createMetadata();
 

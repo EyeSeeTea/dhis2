@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.hisp.dhis.legend.LegendSet;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.util.ObjectUtils;
 
@@ -44,6 +45,8 @@ import org.hisp.dhis.util.ObjectUtils;
 public class QueryItem
 {
     private NameableObject item;
+    
+    private LegendSet legendSet;
 
     private List<QueryFilter> filters = new ArrayList<>();
     
@@ -60,9 +63,10 @@ public class QueryItem
         this.item = item;
     }
 
-    public QueryItem( NameableObject item, String valueType, String optionSet )
+    public QueryItem( NameableObject item, LegendSet legendSet, String valueType, String optionSet )
     {
         this.item = item;
+        this.legendSet = legendSet;
         this.valueType = valueType;
         this.optionSet = optionSet;
     }
@@ -78,15 +82,7 @@ public class QueryItem
             this.filters.add( new QueryFilter( operator, filter ) );
         }
     }
-    
-    public QueryItem( NameableObject item, List<QueryFilter> filters, String valueType, String optionSet )
-    {
-        this.item = item;
-        this.filters = filters;
-        this.valueType = valueType;
-        this.optionSet = optionSet;
-    }
-    
+        
     // -------------------------------------------------------------------------
     // Logic
     // -------------------------------------------------------------------------
@@ -96,6 +92,18 @@ public class QueryItem
         return item.getUid();
     }
     
+    public String getItemName()
+    {
+        String itemName = item.getUid();
+        
+        if ( legendSet != null )
+        {
+            itemName += "_" + legendSet.getUid();
+        }
+        
+        return itemName;
+    }
+    
     public String getTypeAsString()
     {
         return ObjectUtils.VALUE_TYPE_JAVA_CLASS_MAP.get( valueType ).getName();
@@ -103,7 +111,7 @@ public class QueryItem
     
     public boolean isNumeric()
     {
-        return Double.class.equals( getTypeAsString() );
+        return Double.class.equals( ObjectUtils.VALUE_TYPE_JAVA_CLASS_MAP.get( valueType ) );
     }
     
     public boolean hasFilter()
@@ -117,7 +125,7 @@ public class QueryItem
         
         for ( TrackedEntityAttribute attribute : attributes )
         {
-            queryItems.add( new QueryItem( attribute, attribute.getValueType(), attribute.hasOptionSet() ? attribute.getOptionSet().getUid() : null ) );
+            queryItems.add( new QueryItem( attribute, attribute.getLegendSet(), attribute.getValueType(), attribute.hasOptionSet() ? attribute.getOptionSet().getUid() : null ) );
         }
         
         return queryItems;
@@ -174,6 +182,16 @@ public class QueryItem
     public void setItem( NameableObject item )
     {
         this.item = item;
+    }
+
+    public LegendSet getLegendSet()
+    {
+        return legendSet;
+    }
+
+    public void setLegendSet( LegendSet legendSet )
+    {
+        this.legendSet = legendSet;
     }
 
     public List<QueryFilter> getFilters()

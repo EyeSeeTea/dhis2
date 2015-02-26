@@ -12,15 +12,6 @@ trackerCapture.controller('ProfileController',
     $scope.enrollmentEditing = false;
     $scope.widget = 'PROFILE';
     
-    //attributes for profile    
-    $scope.attributes = []; 
-    $scope.attributesById = [];
-    AttributesFactory.getAll().then(function(atts){
-        angular.forEach(atts, function(att){
-            $scope.attributesById[att.id] = att;
-        });
-    });
-    
     //listen for the selected entity
     var selections = {};
     $scope.$on('dashboardWidgets', function(event, args) {
@@ -33,6 +24,7 @@ trackerCapture.controller('ProfileController',
         $scope.trackedEntityForm = null;
         $scope.customForm = null;
         $scope.attributes = [];
+        $scope.attributesById = CurrentSelection.getAttributesById();
 
         //display only those attributes that belong to the selected program
         //if no program, display attributesInNoProgram        
@@ -60,8 +52,7 @@ trackerCapture.controller('ProfileController',
     });
     
     //listen for enrollment editing
-    $scope.$on('enrollmentEditing', function(event, args) { 
-        console.log('the editing:  ', args.enrollmentEditing);
+    $scope.$on('enrollmentEditing', function(event, args){
         $scope.enrollmentEditing = args.enrollmentEditing;
     });
     

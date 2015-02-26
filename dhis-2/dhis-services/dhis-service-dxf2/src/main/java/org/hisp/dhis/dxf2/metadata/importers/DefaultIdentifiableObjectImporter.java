@@ -50,10 +50,10 @@ import org.hisp.dhis.dataelement.DataElementOperand;
 import org.hisp.dhis.dataelement.DataElementOperandService;
 import org.hisp.dhis.dataentryform.DataEntryForm;
 import org.hisp.dhis.dataentryform.DataEntryFormService;
+import org.hisp.dhis.dxf2.common.ImportOptions;
+import org.hisp.dhis.dxf2.common.ImportUtils;
 import org.hisp.dhis.dxf2.importsummary.ImportConflict;
-import org.hisp.dhis.dxf2.metadata.ImportOptions;
 import org.hisp.dhis.dxf2.metadata.ImportTypeSummary;
-import org.hisp.dhis.dxf2.metadata.ImportUtils;
 import org.hisp.dhis.dxf2.metadata.Importer;
 import org.hisp.dhis.dxf2.metadata.ObjectBridge;
 import org.hisp.dhis.dxf2.metadata.handlers.ObjectHandler;
@@ -174,7 +174,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
 
         if ( objects.isEmpty() )
         {
@@ -205,7 +204,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
     {
         this.options = options;
         this.summaryType = new ImportTypeSummary( importerClass.getSimpleName() );
-        this.summaryType.setDataValueCount( null );
 
         if ( object == null )
         {
@@ -292,7 +290,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         List<ValidationViolation> validationViolations = schemaValidator.validate( object );
 
-        /* disabled for 2.18 release
         if ( !validationViolations.isEmpty() )
         {
             summaryType.getImportConflicts().add(
@@ -300,7 +297,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             return false;
         }
-        */
 
         // make sure that the internalId is 0, so that the system will generate a ID
         object.setId( 0 );
@@ -409,7 +405,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
         List<ValidationViolation> validationViolations = schemaValidator.validate( object );
 
-        /* disabled for 2.18 release
         if ( !validationViolations.isEmpty() )
         {
             summaryType.getImportConflicts().add(
@@ -417,7 +412,6 @@ public class DefaultIdentifiableObjectImporter<T extends BaseIdentifiableObject>
 
             return false;
         }
-        */
 
         NonIdentifiableObjects nonIdentifiableObjects = new NonIdentifiableObjects( user );
         nonIdentifiableObjects.extract( object );

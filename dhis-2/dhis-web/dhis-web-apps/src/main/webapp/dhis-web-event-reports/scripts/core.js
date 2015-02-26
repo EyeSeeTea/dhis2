@@ -137,7 +137,7 @@ Ext.onReady( function() {
                 west_fill_accordion_indicator: 56,
                 west_fill_accordion_dataelement: 59,
                 west_fill_accordion_dataset: 31,
-                west_fill_accordion_period: 307,
+                west_fill_accordion_period: 300,
                 west_fill_accordion_organisationunit: 58,
                 west_maxheight_accordion_indicator: 450,
                 west_maxheight_accordion_dataset: 350,
@@ -169,7 +169,7 @@ Ext.onReady( function() {
 			conf.report = {
 				digitGroupSeparator: {
 					'comma': ',',
-					'space': ' '
+					'space': '&nbsp;'
 				},
 				displayDensity: {
 					'compact': '3px',
@@ -313,7 +313,7 @@ Ext.onReady( function() {
 
 				// hideEmptyRows: boolean (false)
 
-                // countType: string ('events') - 'events', 'tracked_entity_instance'
+                // outputType: string ('EVENT') - 'EVENT', 'TRACKED_ENTITY_INSTANCE', 'ENROLLMENT'
 
                 // aggregationType: string ('default') - 'default', 'count', 'sum'
 
@@ -485,35 +485,41 @@ Ext.onReady( function() {
                         layout.endDate = config.endDate;
                     }
 
-					// properties
+					// options
 					layout.showColTotals = Ext.isBoolean(config.colTotals) ? config.colTotals : (Ext.isBoolean(config.showColTotals) ? config.showColTotals : true);
 					layout.showRowTotals = Ext.isBoolean(config.rowTotals) ? config.rowTotals : (Ext.isBoolean(config.showRowTotals) ? config.showRowTotals : true);
 					layout.showColSubTotals = Ext.isBoolean(config.colSubTotals) ? config.colSubTotals : (Ext.isBoolean(config.showColSubTotals) ? config.showColSubTotals : true);
 					layout.showRowSubTotals = Ext.isBoolean(config.rowSubTotals) ? config.rowSubTotals : (Ext.isBoolean(config.showRowSubTotals) ? config.showRowSubTotals : true);
 					layout.showDimensionLabels = Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : (Ext.isBoolean(config.showDimensionLabels) ? config.showDimensionLabels : true);
 					layout.hideEmptyRows = Ext.isBoolean(config.hideEmptyRows) ? config.hideEmptyRows : false;
-					layout.countType = Ext.isString(config.countType) && !Ext.isEmpty(config.countType) ? config.countType : 'events';
-                    layout.aggregationType = Ext.isString(config.aggregationType) ? config.aggregationType : 'default';
-
+					layout.outputType = Ext.isString(config.outputType) && !Ext.isEmpty(config.outputType) ? config.outputType : 'EVENT';
 					layout.showHierarchy = Ext.isBoolean(config.showHierarchy) ? config.showHierarchy : false;
-
 					layout.displayDensity = Ext.isString(config.displayDensity) && !Ext.isEmpty(config.displayDensity) ? config.displayDensity : 'normal';
 					layout.fontSize = Ext.isString(config.fontSize) && !Ext.isEmpty(config.fontSize) ? config.fontSize : 'normal';
 					layout.digitGroupSeparator = Ext.isString(config.digitGroupSeparator) && !Ext.isEmpty(config.digitGroupSeparator) ? config.digitGroupSeparator : 'space';
 					layout.legendSet = Ext.isObject(config.legendSet) && Ext.isString(config.legendSet.id) ? config.legendSet : null;
 
-					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
+                    // value
+                    if ((Ext.isObject(config.value) && Ext.isString(config.value.id)) || Ext.isString(config.value)) {
+                        layout.value = Ext.isString(config.value) ? {id: config.value} : config.value;
+                    }
 
+                    // aggregation type
+                    if (layout.value && Ext.isString(config.aggregationType)) {
+                        layout.aggregationType = config.aggregationType;
+                    }
+
+					layout.parentGraphMap = Ext.isObject(config.parentGraphMap) ? config.parentGraphMap : null;
 					layout.sorting = Ext.isObject(config.sorting) && Ext.isDefined(config.sorting.id) && Ext.isString(config.sorting.direction) ? config.sorting : null;
 
 					layout.reportingPeriod = Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramReportingPeriod) ? config.reportParams.paramReportingPeriod : (Ext.isBoolean(config.reportingPeriod) ? config.reportingPeriod : false);
 					layout.organisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramOrganisationUnit) ? config.reportParams.paramOrganisationUnit : (Ext.isBoolean(config.organisationUnit) ? config.organisationUnit : false);
 					layout.parentOrganisationUnit =  Ext.isObject(config.reportParams) && Ext.isBoolean(config.reportParams.paramParentOrganisationUnit) ? config.reportParams.paramParentOrganisationUnit : (Ext.isBoolean(config.parentOrganisationUnit) ? config.parentOrganisationUnit : false);
 
-					layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
-					layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
-					layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
-					layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
+					//layout.regression = Ext.isBoolean(config.regression) ? config.regression : false;
+					//layout.cumulative = Ext.isBoolean(config.cumulative) ? config.cumulative : false;
+					//layout.sortOrder = Ext.isNumber(config.sortOrder) ? config.sortOrder : 0;
+					//layout.topLimit = Ext.isNumber(config.topLimit) ? config.topLimit : 0;
 
 					if (!validateSpecialCases()) {
 						return;
@@ -1148,9 +1154,9 @@ Ext.onReady( function() {
 				// legend set
 				xLayout.legendSet = layout.legendSet ? init.idLegendSetMap[layout.legendSet.id] : null;
 
-				if (layout.legendSet && layout.legendSet.mapLegends) {
+				if (layout.legendSet && layout.legendSet.legends) {
 					xLayout.legendSet = init.idLegendSetMap[layout.legendSet.id];
-					support.prototype.array.sort(xLayout.legendSet.mapLegends, 'ASC', 'startValue');
+					support.prototype.array.sort(xLayout.legendSet.legends, 'ASC', 'startValue');
 				}
 
 				// unique dimension names
@@ -2037,6 +2043,13 @@ Ext.onReady( function() {
 								paramString += encodeURIComponent(item.id) + ((j < (dim.items.length - 1)) ? ';' : '');
 							}
 						}
+                        else if (Ext.isObject(dim.legendSet) && dim.legendSet.id) {
+                            paramString += '-' + dim.legendSet.id;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
+                            }
+                        }
 						else {
 							paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
 						}
@@ -2058,11 +2071,31 @@ Ext.onReady( function() {
                                 paramString += j < dim.items.length - 1 ? ';' : '';
                             }
                         }
+                        else if (Ext.isObject(dim.legendSet) && dim.legendSet.id) {
+                            paramString += '-' + dim.legendSet.id;
+
+                            if (dim.filter) {
+                                paramString += ':' + encodeURIComponent(dim.filter);
+                            }
+                        }
                         else {
                             paramString += dim.filter ? ':' + encodeURIComponent(dim.filter) : '';
                         }
 					}
 				}
+
+                // value
+                if (Ext.isString(view.value)) {
+                    paramString += '&value=' + view.value;
+				}
+                else if (Ext.isObject(view.value) && Ext.isString(view.value.id)) {
+                    paramString += '&value=' + view.value.id;
+                }
+
+                // aggregation type
+                if (view.aggregationType) {
+                    paramString += '&aggregationType=' + view.aggregationType;
+                }
 
                 // dates
                 if (view.startDate && view.endDate) {
@@ -2077,11 +2110,9 @@ Ext.onReady( function() {
                     paramString += '&limit=' + view.topLimit + '&sortOrder=' + (view.sortOrder < 0 ? 'ASC' : 'DESC');
                 }
 
-                // count type
-                if (view.dataType === 'aggregated_values' && view.countType) {
-                    if (view.countType === 'tracked_entity_instances') {
-                        paramString += '&uniqueInstances=true';
-                    }
+                // output type
+                if (view.dataType === 'aggregated_values' && view.outputType) {
+                    paramString += '&outputType=' + view.outputType;
                 }
 
                 // sorting
@@ -2204,7 +2235,7 @@ Ext.onReady( function() {
 					valueObjects = [],
 					totalColObjects = [],
 					uuidDimUuidsMap = {},
-					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.mapLegends) && xLayout.legendSet.mapLegends.length,
+					isLegendSet = Ext.isObject(xLayout.legendSet) && Ext.isArray(xLayout.legendSet.legends) && xLayout.legendSet.legends.length,
                     tdCount = 0,
 					htmlArray;
 
@@ -2217,7 +2248,7 @@ Ext.onReady( function() {
 
 				getTdHtml = function(config, metaDataId) {
 					var bgColor,
-						mapLegends,
+						legends,
 						colSpan,
 						rowSpan,
 						htmlValue,
@@ -2242,11 +2273,11 @@ Ext.onReady( function() {
 					// background color from legend set
 					if (isNumeric && xLayout.legendSet) {
 						var value = parseFloat(config.value);
-						mapLegends = xLayout.legendSet.mapLegends;
+						legends = xLayout.legendSet.legends;
 
-						for (var i = 0; i < mapLegends.length; i++) {
-							if (Ext.Number.constrain(value, mapLegends[i].startValue, mapLegends[i].endValue) === value) {
-								bgColor = mapLegends[i].color;
+						for (var i = 0; i < legends.length; i++) {
+							if (Ext.Number.constrain(value, legends[i].startValue, legends[i].endValue) === value) {
+								bgColor = legends[i].color;
 							}
 						}
 					}
@@ -2371,7 +2402,7 @@ Ext.onReady( function() {
 
                             a.push(getEmptyNameTdConfig({
                                 cls: 'pivot-dim-label',
-                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;//&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
+                                htmlValue: (xRowAxis ? dimConf.objectNameMap[xLayout.rowObjectNames[j]].name : '') + (xColAxis && xRowAxis ? '&nbsp;/&nbsp;' : '') + (xColAxis ? dimConf.objectNameMap[xLayout.columnObjectNames[i]].name : '')
                             }));
                         }
 
@@ -3104,12 +3135,12 @@ Ext.onReady( function() {
 			}
 
 			// legend set map
-			//init.idLegendSetMap = {};
+			init.idLegendSetMap = {};
 
-			//for (var i = 0, set; i < init.legendSets.length; i++) {
-				//set = init.legendSets[i];
-				//init.idLegendSetMap[set.id] = set;
-			//}
+			for (var i = 0, set; i < init.legendSets.length; i++) {
+				set = init.legendSets[i];
+				init.idLegendSetMap[set.id] = set;
+			}
 		}());
 
 		// instance
