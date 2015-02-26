@@ -153,6 +153,7 @@ Ext.onReady( function() {
             },
             setRecord: function(record) {
                 if (Ext.isObject(record.legendSet) && record.legendSet.id) {
+                    this.rangeSetCmp.pendingValue = record.legendSet.id;
                     this.onRangeSetSelect(record.legendSet.id);
 
                     if (record.filter) {
@@ -369,6 +370,13 @@ Ext.onReady( function() {
                     displayField: nameProperty,
                     editable: false,
                     storage: {},
+                    pendingValue: null,
+                    setPendingValue: function() {
+                        if (this.pendingValue) {
+                            this.setValue(this.pendingValue);
+                            this.pendingValue = null;
+                        }
+                    },
                     store: Ext.create('Ext.data.Store', {
                         fields: [idProperty, nameProperty]
                     }),
@@ -388,6 +396,7 @@ Ext.onReady( function() {
 
                                     if (Ext.isObject(r) && Ext.isObject(r.legendSet)) {
                                         cb.store.add(r.legendSet);
+                                        cb.setPendingValue();
                                     }
                                 }
                             });
@@ -395,6 +404,9 @@ Ext.onReady( function() {
                         select: function(cb, r) {
                             var id = Ext.Array.from(r)[0].data.id;
                             container.onRangeSetSelect(id);
+                        },
+                        expand: function() {
+                            console.log("exp");
                         }
                     }
                 });
