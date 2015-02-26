@@ -63,11 +63,11 @@ public class GetDataIntegrityReportAction
     // Output
     // -------------------------------------------------------------------------
 
-    private DataIntegrityReport integrityReport;
+    private DataIntegrityReport dataIntegrityReport;
 
-    public DataIntegrityReport getIntegrityReport()
+    public DataIntegrityReport getDataIntegrityReport()
     {
-        return integrityReport;
+        return dataIntegrityReport;
     }
 
     @Override
@@ -75,7 +75,7 @@ public class GetDataIntegrityReportAction
     {
         TaskId taskId = new TaskId( category, currentUserService.getCurrentUser() );
 
-        integrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
+        dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
 
         return SUCCESS;
     }

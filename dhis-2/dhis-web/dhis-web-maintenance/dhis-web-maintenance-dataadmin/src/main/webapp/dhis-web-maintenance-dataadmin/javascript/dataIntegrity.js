@@ -2,8 +2,13 @@
 $( document ).ready( function()
 {
     showLoader();
-    $.getJSON( "getDataIntegrity.action", {}, populateIntegrityItems );
+    //$.getJSON( "getDataIntegrity.action", {}, populateIntegrityItems );
+    pingNotificationsTimeout();
 } );
+
+function runDataIntegrityTask() {
+    $.get("");
+}
 
 function populateIntegrityItems( json )
 {
@@ -63,4 +68,14 @@ function displayViolationList( list, id, lineBreak )
     }
         
     $( "#" + id + "Div" ).hide();
+}
+
+function displayTest() {
+    console.log("Async task is finished" );
+    $.getJSON( "getDataIntegrityReport.action", {}, populateIntegrityItems );
+}
+
+function pingNotificationsTimeout() {
+    console.log("pingnotificationstimeout");
+    pingNotifications( 'DATAINTEGRITY', 'notificationsTable', displayTest );
 }

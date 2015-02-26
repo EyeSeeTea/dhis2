@@ -118,7 +118,8 @@
 
     <!-- Data integrity -->
 
-    <action name="displayDataIntegrityForm" class="org.hisp.dhis.dataadmin.action.NoAction">
+    <!--<action name="displayDataIntegrityForm" class="org.hisp.dhis.dataadmin.action.NoAction">-->
+    <action name="displayDataIntegrityForm" class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction">
       <result name="success" type="velocity">/main.vm</result>
       <param name="menu">/dhis-web-maintenance-dataadmin/menu.vm</param>
       <param name="page">/dhis-web-maintenance-dataadmin/dataIntegrityForm.vm</param>
@@ -126,9 +127,15 @@
       <param name="requiredAuthorities">F_PERFORM_MAINTENANCE</param>
     </action>
 
-    <action name="getDataIntegrity" class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction">
-      <result name="success" type="velocity-json">/dhis-web-maintenance-dataadmin/responseDataIntegrity.vm</result>
-      <param name="requiredAuthorities">F_PERFORM_MAINTENANCE</param>
+    <!--<action name="getDataIntegrity" class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityAction">-->
+      <!--<result name="success" type="velocity-json">/dhis-web-maintenance-dataadmin/responseDataIntegrity.vm</result>-->
+      <!--<param name="requiredAuthorities">F_PERFORM_MAINTENANCE</param>-->
+    <!--</action>-->
+
+    <action name="getDataIntegrityReport" class="org.hisp.dhis.dataadmin.action.dataintegrity.GetDataIntegrityReportAction">
+      <result name="success" type="velocity">/dhis-web-maintenance-dataadmin/dataIntegrityReport.vm</result>
+      <param name="category">DATAINTEGRITY</param>
+      <param name="onExceptionReturn">plainTextError</param>
     </action>
 
     <!-- Statistics -->

@@ -84,6 +84,7 @@ public class GetDataIntegrityAction
     public String execute()
     {
         TaskId taskId = new TaskId( TaskCategory.DATAINTEGRITY, currentUserService.getCurrentUser() );
+        // Stop running task?
         notifier.clear( taskId );
 
         scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
