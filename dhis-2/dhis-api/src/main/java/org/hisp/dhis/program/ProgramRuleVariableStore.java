@@ -32,7 +32,6 @@ import java.util.Collection;
 import org.hisp.dhis.common.GenericNameableObjectStore;
 
 /**
- *
  * @author markusbekken
  */
 public interface ProgramRuleVariableStore

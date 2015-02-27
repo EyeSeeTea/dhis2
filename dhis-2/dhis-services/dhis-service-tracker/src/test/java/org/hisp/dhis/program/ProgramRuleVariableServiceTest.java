@@ -28,39 +28,44 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-/**
- * @author markusbekken
- */
-@JacksonXmlRootElement( localName = "programRuleVariableSourceType", namespace = DxfNamespaces.DXF_2_0 )
-public enum ProgramRuleVariableSourceType {
-    DATAELEMENT_NEWEST_EVENT_PROGRAM_STAGE("dataelement_newest_event_program_stage"), 
-    DATAELEMENT_NEWEST_EVENT_PROGRAM("dataelement_newest_event_program"), 
-    DATAELEMENT_CURRENT_EVENT("dataelement_current_event"), 
-    DATAELEMENT_PREVIOUS_EVENT("dataelement_previous_event"), 
-    CALCULATED_VALUE("calculated_value"), 
-    TEI_ATTRIBUTE("tei_attribute"),
-    CONTEXT_VARIABLE("context_variable");
+import static org.junit.Assert.*;
+
+public class ProgramRuleVariableServiceTest
+    extends DhisSpringTest
+{
+    private Program programA;
     
-    private final String value;
-
-    private ProgramRuleVariableSourceType( String value )
+    @Autowired
+    private ProgramService programService;
+    
+    @Autowired
+    private ProgramRuleVariableService variableService;
+    
+    @Override
+    public void setUpTest()
     {
-        this.value = value;
+        programA = createProgram( 'A', null, null );
+        
+        programService.addProgram( programA );
     }
-
-    public static ProgramRuleVariableSourceType fromValue( String value )
+    
+    @Test
+    public void testAddGet()
     {
-        for ( ProgramRuleVariableSourceType type : ProgramRuleVariableSourceType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
+        ProgramRuleVariable variableA = new ProgramRuleVariable( "RuleA", programA );
+        ProgramRuleVariable variableB = new ProgramRuleVariable( "RuleB", programA );
+        ProgramRuleVariable variableC = new ProgramRuleVariable( "RuleC", programA );
+        
+        int idA = variableService.addProgramRuleVariable( variableA );
+        int idB = variableService.addProgramRuleVariable( variableB );
+        int idC = variableService.addProgramRuleVariable( variableC );
+        
+        assertEquals( variableA, variableService.getProgramRuleVariable( idA ) );
+        assertEquals( variableB, variableService.getProgramRuleVariable( idB ) );
+        assertEquals( variableC, variableService.getProgramRuleVariable( idC ) );
     }
 }

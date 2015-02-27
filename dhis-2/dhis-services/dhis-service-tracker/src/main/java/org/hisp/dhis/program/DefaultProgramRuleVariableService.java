@@ -31,13 +31,12 @@ package org.hisp.dhis.program;
 import java.util.Collection;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
- *
  * @author markusbekken
  */
 @Transactional
-public class DefaultProgramRuleVariableService implements ProgramRuleVariableService 
+public class DefaultProgramRuleVariableService
+    implements ProgramRuleVariableService
 {
     // -------------------------------------------------------------------------
     // Dependencies
@@ -50,45 +49,43 @@ public class DefaultProgramRuleVariableService implements ProgramRuleVariableSer
         this.programRuleVariableStore = programRuleVariableStore;
     }
 
-    
     // -------------------------------------------------------------------------
     // ProgramRuleVariable implementation
     // -------------------------------------------------------------------------
 
     @Override
-    public int addProgramRuleVariable(ProgramRuleVariable programRuleVariable) 
+    public int addProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        return programRuleVariableStore.save(programRuleVariable);
+        return programRuleVariableStore.save( programRuleVariable );
     }
 
     @Override
-    public void deleteProgramRuleVariable(ProgramRuleVariable programRuleVariable) 
+    public void deleteProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        programRuleVariableStore.delete(programRuleVariable);
+        programRuleVariableStore.delete( programRuleVariable );
     }
 
     @Override
-    public void updateProgramRuleVariable(ProgramRuleVariable programRuleVariable) 
+    public void updateProgramRuleVariable( ProgramRuleVariable programRuleVariable )
     {
-        programRuleVariableStore.update(programRuleVariable);
+        programRuleVariableStore.update( programRuleVariable );
     }
 
     @Override
-    public ProgramRuleVariable getProgramRuleVariable(int id) 
+    public ProgramRuleVariable getProgramRuleVariable( int id )
     {
-        return programRuleVariableStore.get(id);
+        return programRuleVariableStore.get( id );
     }
 
     @Override
-    public Collection<ProgramRuleVariable> getAllProgramRuleVariable() 
+    public Collection<ProgramRuleVariable> getAllProgramRuleVariable()
     {
         return programRuleVariableStore.getAll();
     }
 
     @Override
-    public Collection<ProgramRuleVariable> getProgramRuleVariable(Program program) 
+    public Collection<ProgramRuleVariable> getProgramRuleVariable( Program program )
     {
-        return programRuleVariableStore.get(program);
+        return programRuleVariableStore.get( program );
     }
-    
 }

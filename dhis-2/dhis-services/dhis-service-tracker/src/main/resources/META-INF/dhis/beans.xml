@@ -116,8 +116,7 @@
 
 	<bean id="org.hisp.dhis.program.ProgramRuleVariableStore"
 		class="org.hisp.dhis.program.hibernate.HibernateProgramRuleVariableStore">
-                <property name="clazz"
-			value="org.hisp.dhis.program.ProgramRuleVariable" />
+		<property name="clazz" value="org.hisp.dhis.program.ProgramRuleVariable" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
 
@@ -405,8 +404,7 @@
 		</property>
 	</bean>
 
-	<bean
-		class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	<bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject"
 			ref="org.hisp.dhis.system.startup.StartupRoutineExecutor" />
 		<property name="targetMethod" value="addStartupRoutines" />
