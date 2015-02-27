@@ -1,8 +1,5 @@
 package org.hisp.dhis.program;
 
-import java.util.Collection;
-
-
 /*
  * Copyright (c) 2004-2015, University of Oslo
  * All rights reserved.
@@ -30,6 +27,8 @@ import java.util.Collection;
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
+import java.util.Collection;
 
 /**
  *
@@ -84,5 +83,4 @@ public interface ProgramRuleVariableService
      * @return ProgramRuleVariable list
      */
     Collection<ProgramRuleVariable> getProgramRuleVariable( Program program );
-
 }

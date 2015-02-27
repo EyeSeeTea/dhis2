@@ -28,13 +28,6 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
-import java.util.Objects;
-import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
@@ -42,74 +35,83 @@ import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
 import org.hisp.dhis.common.view.ExportView;
 import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 
 /**
- *
  * @author markusbekken
  */
 @JacksonXmlRootElement( localName = "programRuleVariable", namespace = DxfNamespaces.DXF_2_0 )
-public class ProgramRuleVariable 
-    extends BaseNameableObject {
-    
-    /* The program that the variable belongs to */
+public class ProgramRuleVariable
+    extends BaseNameableObject
+{
+    /**
+     * The program that the variable belongs to
+     */
     private Program program;
-    
-    /* The type of the variable, used by the rules engine to know how to quote 
-    * or convert the value. The allowed types are:
-    * number
-    * text
-    * bool
-    * date */
+
+    /**
+     * The type of the variable, used by the rules engine to know how to quote
+     * or convert the value. The allowed types are number, text, bool, date.
+     */
     private ProgramRuleVariableDataType dataType;
-    
-    /* The value that the variable should have initially.
-    * Usually the default value is replaced by a value of the connected dataelement,
-    * or by a calculation performed by rules. If not, the default value would be 
-    * used in evaluating rules. */
+
+    /**
+     * The value that the variable should have initially. Usually the default
+     * value is replaced by a value of the connected dataelement, or by a
+     * calculation performed by rules. If not, the default value would be used
+     * in evaluating rules.
+     * */
     private String defaultValue;
-    
-    /* The source of the variables content. Allowed values are:
-    * dataelement_newest_event_program_stage
-    *   Get a specific dataelements value from the most recent event in the 
-    *   current enrollment, but within one program stage. dataelement_uID and 
-    *   programstage_uID needs to be specified.
-    * dataelement_newest_event_program
-    *   Get a specific dataelements value from the most recent event in the 
-    *   current enrollment, regardless of program stage.datalement_uID needs to 
-    *   be specified.
-    * dataelement_current_event
-    *   Get a specific dataelements value, but only within the current event.
-    * dataelement_previous_event
-    *    Get a specific dataelements value, specifically from the event 
-    *    preceding the current event, if this exists.
-    * calculated_value
-    *   Do not assign the variable a hard-linked source, it will be populated by
-    *   rules with “assignvariable” actions(i.e. calulation rules).
-    * tei_attribute
-    *   Get a specific attribute from the current tracked entity. 
-    *   the linked attribute will be  used to lookup the attributes uID value.*/
+
+    /**
+     * The source of the variables content. Allowed values are:
+     * dataelement_newest_event_program_stage Get a specific data elements value
+     * from the most recent event in the current enrollment, but within one
+     * program stage. dataelement_uID and programstage_uID needs to be
+     * specified. dataelement_newest_event_program Get a specific data elements
+     * value from the most recent event in the current enrollment, regardless of
+     * program stage.datalement_uID needs to be specified.
+     * dataelement_current_event Get a specific data elements value, but only
+     * within the current event. dataelement_previous_event Get a specific
+     * data elements value, specifically from the event preceding the current
+     * event, if this exists. calculated_value Do not assign the variable a
+     * hard-linked source, it will be populated by rules with “assignvariable”
+     * actions(i.e. calculation rules). tei_attribute Get a specific attribute
+     * from the current tracked entity. the linked attribute will be used to
+     * lookup the attributes uID value.
+     */
     private ProgramRuleVariableSourceType sourceType;
-    
-    /* Used for sourceType tei_attribute to determine which attribute to 
-    * fetch into the variable.*/
+
+    /**
+     * Used for sourceType tei_attribute to determine which attribute to fetch
+     * into the variable.
+     */
     private TrackedEntityAttribute attribute;
-    
-    /* The dataelement that is linked to the variable. 
-    * Must de defined if the sourceType is one of the following:
-    * dataelement_newest_event_program_stage
-    * dataelement_newest_event_program
-    * dataelement_current_event */
+
+    /**
+     * The data element that is linked to the variable. Must de defined if the
+     * sourceType is one of the following:
+     * dataelement_newest_event_program_stage dataelement_newest_event_program
+     * dataelement_current_event
+     */
     private DataElement dataElement;
-    
-    /* Specification of the programstage that the variable should be fetched 
-    * from. Only used for sourcetype dataelement_newest_event_program_stage*/
+
+    /**
+     * Specification of the program stage that the variable should be fetched
+     * from. Only used for source type dataelement_newest_event_program_stage
+     */
     private ProgramStage programStage;
 
-    
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
-    
+
     public ProgramRuleVariable()
     {
         setAutoFields();
@@ -121,73 +123,7 @@ public class ProgramRuleVariable
         this.name = name;
         this.program = program;
     }
-    
-    // -------------------------------------------------------------------------
-    //  equals and hashCode
-    // -------------------------------------------------------------------------
 
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = super.hashCode();
-
-        result = prime * result + ((program == null) ? 0 : program.hashCode());
-        result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
-        result = prime * result + ((defaultValue == null) ? 0 : defaultValue.hashCode());
-        result = prime * result + ((sourceType == null) ? 0 : sourceType.hashCode());
-        result = prime * result + ((attribute == null) ? 0 : attribute.hashCode());
-        result = prime * result + ((dataElement == null) ? 0 : dataElement.hashCode());
-        result = prime * result + ((programStage == null) ? 0 : programStage.hashCode());
-
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (obj == null) 
-        {
-            return false;
-        }
-        if (getClass() != obj.getClass()) 
-        {
-            return false;
-        }
-        final ProgramRuleVariable other = (ProgramRuleVariable) obj;
-        if (!Objects.equals(this.program, other.program)) 
-        {
-            return false;
-        }
-        if (this.dataType != other.dataType) 
-        {
-            return false;
-        }
-        if (!Objects.equals(this.defaultValue, other.defaultValue)) 
-        {
-            return false;
-        }
-        if (this.sourceType != other.sourceType) 
-        {
-            return false;
-        }
-        if (!Objects.equals(this.attribute, other.attribute)) 
-        {
-            return false;
-        }
-        if (!Objects.equals(this.dataElement, other.dataElement)) 
-        {
-            return false;
-        }
-        if (!Objects.equals(this.programStage, other.programStage)) 
-        {
-            return false;
-        }
-        return true;
-    }
-    
-    
-        
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
@@ -199,12 +135,12 @@ public class ProgramRuleVariable
     {
         return program;
     }
-    
+
     public void setProgram( Program program )
     {
         this.program = program;
     }
-    
+
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -212,12 +148,12 @@ public class ProgramRuleVariable
     {
         return programStage;
     }
-    
+
     public void setProgramStage( ProgramStage programStage )
     {
         this.programStage = programStage;
     }
-    
+
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -225,12 +161,12 @@ public class ProgramRuleVariable
     {
         return dataElement;
     }
-    
+
     public void setDataElement( DataElement dataElement )
     {
         this.dataElement = dataElement;
     }
-    
+
     @JsonProperty
     @JsonSerialize( as = BaseIdentifiableObject.class )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -238,26 +174,24 @@ public class ProgramRuleVariable
     {
         return attribute;
     }
-    
-    public void setAttibute( TrackedEntityAttribute attribute )
+
+    public void setAttribute( TrackedEntityAttribute attribute )
     {
         this.attribute = attribute;
     }
-       
+
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public String getDefaultValue()
     {
         return defaultValue;
     }
-    
+
     public void setDefaultValue( String defaultValue )
     {
         this.defaultValue = defaultValue;
-    } 
-    
-    
-    
+    }
+
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -270,7 +204,7 @@ public class ProgramRuleVariable
     {
         this.dataType = dataType;
     }
-    
+
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
@@ -283,6 +217,4 @@ public class ProgramRuleVariable
     {
         this.sourceType = sourceType;
     }
-    
-    
 }
