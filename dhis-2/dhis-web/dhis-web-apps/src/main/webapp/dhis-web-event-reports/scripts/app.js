@@ -404,9 +404,6 @@ Ext.onReady( function() {
                         select: function(cb, r) {
                             var id = Ext.Array.from(r)[0].data.id;
                             container.onRangeSetSelect(id);
-                        },
-                        expand: function() {
-                            console.log("exp");
                         }
                     }
                 });
