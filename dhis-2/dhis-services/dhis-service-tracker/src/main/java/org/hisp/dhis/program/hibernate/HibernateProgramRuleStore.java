@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.program.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,29 +28,25 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
+import org.hibernate.criterion.Restrictions;
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramRule;
+import org.hisp.dhis.program.ProgramRuleStore;
+
 /**
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
-
-    final String value;
-
-    private ProgramRuleVariableDataType( String value )
+public class HibernateProgramRuleStore
+    extends HibernateIdentifiableObjectStore<ProgramRule>
+    implements ProgramRuleStore
+{
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public Collection<ProgramRule> get( Program program )
     {
-        this.value = value;
-    }
-
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
+        return getCriteria( Restrictions.eq( "program", program ) ).list();
     }
 }

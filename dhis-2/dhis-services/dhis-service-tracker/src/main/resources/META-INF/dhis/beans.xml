@@ -119,6 +119,18 @@
 		<property name="clazz" value="org.hisp.dhis.program.ProgramRuleVariable" />
 		<property name="sessionFactory" ref="sessionFactory" />
 	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleStore"
+		class="org.hisp.dhis.program.hibernate.HibernateProgramRuleStore">
+		<property name="clazz" value="org.hisp.dhis.program.ProgramRule" />
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleActionStore"
+		class="org.hisp.dhis.program.hibernate.HibernateProgramRuleActionStore">
+		<property name="clazz" value="org.hisp.dhis.program.ProgramRuleAction" />
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
 
 	<bean id="org.hisp.dhis.trackedentity.TrackedEntityAuditStore"
 		class="org.hisp.dhis.trackedentity.hibernate.HibernateTrackedEntityAuditStore">
@@ -226,6 +238,14 @@
         
 	<bean id="org.hisp.dhis.program.ProgramRuleVariableService" class="org.hisp.dhis.program.DefaultProgramRuleVariableService">
 		<property name="programRuleVariableStore" ref="org.hisp.dhis.program.ProgramRuleVariableStore" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleService" class="org.hisp.dhis.program.DefaultProgramRuleService">
+		<property name="programRuleStore" ref="org.hisp.dhis.program.ProgramRuleStore" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleActionService" class="org.hisp.dhis.program.DefaultProgramRuleActionService">
+		<property name="programRuleActionStore" ref="org.hisp.dhis.program.ProgramRuleActionStore" />
 	</bean>
 
 	<bean id="org.hisp.dhis.program.ProgramStageSectionService" class="org.hisp.dhis.program.DefaultProgramStageSectionService">

@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.schema.descriptors;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,29 +28,31 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.schema.SchemaDescriptor;
+import org.hisp.dhis.program.ProgramRuleAction;
+import org.springframework.stereotype.Component;
+
 /**
+ *
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+@Component
+public class ProgramRuleActionSchemaDescriptor implements SchemaDescriptor
+{
+    public static final String SINGULAR = "programRuleAction";
 
-    final String value;
+    public static final String PLURAL = "programRuleActions";
 
-    private ProgramRuleVariableDataType( String value )
+    public static final String API_ENDPOINT = "/" + PLURAL;
+
+    @Override
+    public Schema getSchema()
     {
-        this.value = value;
-    }
+        Schema schema = new Schema( ProgramRuleAction.class, SINGULAR, PLURAL );
+        schema.setApiEndpoint( API_ENDPOINT );
+        schema.setOrder( 1392 );
 
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
+        return schema;
     }
 }

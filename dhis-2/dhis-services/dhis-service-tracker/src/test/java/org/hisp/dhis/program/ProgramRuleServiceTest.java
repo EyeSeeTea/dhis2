@@ -28,29 +28,51 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * @author markusbekken
- */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+import org.hisp.dhis.DhisSpringTest;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
-    final String value;
+import static org.junit.Assert.*;
 
-    private ProgramRuleVariableDataType( String value )
+public class ProgramRuleServiceTest
+    extends DhisSpringTest
+{
+    private Program programA;
+    private ProgramStage programStageA;
+    
+    @Autowired
+    private ProgramService programService;
+    
+    @Autowired
+    private ProgramStageService programStageService;
+    
+    @Autowired
+    private ProgramRuleService ruleService;
+    
+    @Override
+    public void setUpTest()
     {
-        this.value = value;
+        programA = createProgram( 'A', null, null );
+        programStageA = createProgramStage( 'A', 1 );
+       
+        
+        programService.addProgram( programA );
+        programStageService.saveProgramStage( programStageA );
     }
-
-    public static ProgramRuleVariableDataType fromValue( String value )
+    
+    @Test
+    public void testAddGet()
     {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
+        ProgramRule ruleA = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null);
+        ProgramRule ruleB = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", 1);
+        ProgramRule ruleC = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", 0);
+        
+        int idA = ruleService.addProgramRule( ruleA );
+        int idB = ruleService.addProgramRule( ruleB );
+        int idC = ruleService.addProgramRule( ruleC );
+        
+        assertEquals( ruleA, ruleService.getProgramRule( idA ) );
+        assertEquals( ruleB, ruleService.getProgramRule( idB ) );
+        assertEquals( ruleC, ruleService.getProgramRule( idC ) );
     }
 }

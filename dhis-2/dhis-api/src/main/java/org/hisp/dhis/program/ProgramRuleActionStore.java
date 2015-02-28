@@ -28,29 +28,22 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import org.hisp.dhis.common.GenericNameableObjectStore;
+
 /**
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+public interface ProgramRuleActionStore
+    extends GenericNameableObjectStore<ProgramRuleAction>
+{
+    String ID = ProgramRuleActionStore.class.getName();
 
-    final String value;
-
-    private ProgramRuleVariableDataType( String value )
-    {
-        this.value = value;
-    }
-
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
-    }
+    /**
+     * Get programRuleAction by program
+     *
+     * @param program {@link Program}
+     * @return ProgramRuleActionVariable list
+     */
+    Collection<ProgramRuleAction> get( ProgramRule programRule );
 }

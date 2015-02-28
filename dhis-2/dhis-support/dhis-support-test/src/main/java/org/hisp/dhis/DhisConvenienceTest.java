@@ -84,6 +84,7 @@ import org.hisp.dhis.period.MonthlyPeriodType;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramRule;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
@@ -1132,6 +1133,14 @@ public abstract class DhisConvenienceTest
         }
         
         return program;
+    }
+    
+    public static ProgramRule createProgramRule ( char uniqueCharacter )
+    {
+        ProgramRule programRule = new ProgramRule();
+        programRule.setName( "ProgramRule" + uniqueCharacter );
+    
+        return programRule;
     }
 
     public static ProgramStage createProgramStage( char uniqueCharacter, int minDays )

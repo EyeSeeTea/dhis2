@@ -28,29 +28,64 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+import org.springframework.transaction.annotation.Transactional;
+
 /**
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+@Transactional
+public class DefaultProgramRuleService
+    implements ProgramRuleService
+{
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    final String value;
+    private ProgramRuleStore programRuleStore;
 
-    private ProgramRuleVariableDataType( String value )
+    public void setProgramRuleStore( ProgramRuleStore programRuleStore )
     {
-        this.value = value;
+        this.programRuleStore = programRuleStore;
     }
 
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
+    // -------------------------------------------------------------------------
+    // ProgramRule implementation
+    // -------------------------------------------------------------------------
 
-        return null;
+    @Override
+    public int addProgramRule( ProgramRule programRule )
+    {
+        return programRuleStore.save( programRule );
+    }
+
+    @Override
+    public void deleteProgramRule( ProgramRule programRule )
+    {
+        programRuleStore.delete( programRule );
+    }
+
+    @Override
+    public void updateProgramRule( ProgramRule programRule )
+    {
+        programRuleStore.update( programRule );
+    }
+
+    @Override
+    public ProgramRule getProgramRule( int id )
+    {
+        return programRuleStore.get( id );
+    }
+
+    @Override
+    public Collection<ProgramRule> getAllProgramRule()
+    {
+        return programRuleStore.getAll();
+    }
+
+    @Override
+    public Collection<ProgramRule> getProgramRule( Program program )
+    {
+        return programRuleStore.get( program );
     }
 }

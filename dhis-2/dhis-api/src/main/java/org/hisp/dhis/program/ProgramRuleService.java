@@ -28,29 +28,59 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 /**
+ *
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+public interface ProgramRuleService
+{
+    String ID = ProgramRuleService.class.getName();
 
-    final String value;
+    /**
+     * Adds an {@link ProgramRule}
+     *
+     * @param ProgramRule The to ProgramRule add.
+     * @return A generated unique id of the added {@link ProgramRule}.
+     */
+    int addProgramRule( ProgramRule programRule );
 
-    private ProgramRuleVariableDataType( String value )
-    {
-        this.value = value;
-    }
+    /**
+     * Deletes a {@link ProgramRule}
+     *
+     * @param ProgramRule The ProgramRule to delete.
+     */
+    void deleteProgramRule( ProgramRule programRule );
 
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
+    /**
+     * Updates an {@link ProgramRule}.
+     *
+     * @param ProgramRule The ProgramRule to update.
+     */
+    void updateProgramRule( ProgramRule programRule );
 
-        return null;
-    }
+    /**
+     * Returns a {@link ProgramRule}.
+     *
+     * @param id the id of the ProgramRule to return.
+     * @return the ProgramRule with the given id
+     */
+    ProgramRule getProgramRule( int id );
+
+    /**
+     * Returns all {@link ProgramRule}.
+     *
+     * @return a collection of all ProgramRule, or an empty collection if
+     * there are no ProgramRules.
+     */
+    Collection<ProgramRule> getAllProgramRule();
+
+    /**
+     * Get validation by {@link Program}
+     *
+     * @param program Program
+     * @return ProgramRule list
+     */
+    Collection<ProgramRule> getProgramRule( Program program );
 }

@@ -31,19 +31,24 @@ package org.hisp.dhis.program;
 /**
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+public enum ProgramRuleActionType {
+    DISPLAYTEXT( "displaytext" ),
+    DISPLAYKEYVALUEPAIR( "displaykeyvaluepair" ),
+    HIDEFIELD( "hidefield" ),
+    ASSIGNVARIABLE( "assignvariable" ),
+    SHOWWARNING( "showwarning" ),
+    SHOWERROR( "showerror" );
 
     final String value;
 
-    private ProgramRuleVariableDataType( String value )
+    private ProgramRuleActionType( String value )
     {
         this.value = value;
     }
 
-    public static ProgramRuleVariableDataType fromValue( String value )
+    public static ProgramRuleActionType fromValue( String value )
     {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
+        for ( ProgramRuleActionType type : ProgramRuleActionType.values() )
         {
             if ( type.value.equalsIgnoreCase( value ) )
             {

@@ -40,7 +40,7 @@ public interface ProgramRuleVariableStore
     String ID = ProgramRuleVariableStore.class.getName();
 
     /**
-     * Get validation by program
+     * Get programRuleVariable by program
      *
      * @param program {@link Program}
      * @return ProgramRuleVariable list

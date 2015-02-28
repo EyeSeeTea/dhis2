@@ -28,29 +28,59 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 /**
+ *
  * @author markusbekken
  */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+public interface ProgramRuleActionService
+{
+    String ID = ProgramRuleActionService.class.getName();
 
-    final String value;
+    /**
+     * Adds an {@link ProgramRuleAction}
+     *
+     * @param ProgramRuleAction The to ProgramRuleAction add.
+     * @return A generated unique id of the added {@link ProgramRuleAction}.
+     */
+    int addProgramRuleAction( ProgramRuleAction programRuleAction );
 
-    private ProgramRuleVariableDataType( String value )
-    {
-        this.value = value;
-    }
+    /**
+     * Deletes a {@link ProgramRuleAction}
+     *
+     * @param ProgramRuleAction The ProgramRuleAction to delete.
+     */
+    void deleteProgramRuleAction( ProgramRuleAction programRuleAction );
 
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
+    /**
+     * Updates an {@link ProgramRuleAction}.
+     *
+     * @param ProgramRuleAction The ProgramRuleAction to update.
+     */
+    void updateProgramRuleAction( ProgramRuleAction programRuleAction );
 
-        return null;
-    }
+    /**
+     * Returns a {@link ProgramRuleAction}.
+     *
+     * @param id the id of the ProgramRuleAction to return.
+     * @return the ProgramRuleAction with the given id
+     */
+    ProgramRuleAction getProgramRuleAction( int id );
+
+    /**
+     * Returns all {@link ProgramRuleAction}.
+     *
+     * @return a collection of all ProgramRuleAction, or an empty collection if
+     * there are no ProgramRuleActions.
+     */
+    Collection<ProgramRuleAction> getAllProgramRuleAction();
+
+    /**
+     * Get validation by {@link ProgramRule}
+     *
+     * @param program Program
+     * @return ProgramRuleAction list
+     */
+    Collection<ProgramRuleAction> getProgramRuleAction( ProgramRule programRule );
 }
