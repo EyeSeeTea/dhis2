@@ -29,6 +29,10 @@ package org.hisp.dhis.program;
  */
 
 import org.hisp.dhis.DhisSpringTest;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
+import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -38,9 +42,17 @@ public class ProgramRuleVariableServiceTest
     extends DhisSpringTest
 {
     private Program programA;
+    private DataElement dataElementA;
+    private TrackedEntityAttribute attributeA;
     
     @Autowired
     private ProgramService programService;
+    
+    @Autowired
+    private DataElementService dataElementService;
+    
+    @Autowired
+    private TrackedEntityAttributeService attributeService;
     
     @Autowired
     private ProgramRuleVariableService variableService;
@@ -49,16 +61,20 @@ public class ProgramRuleVariableServiceTest
     public void setUpTest()
     {
         programA = createProgram( 'A', null, null );
+        dataElementA = createDataElement( 'A' );
+        attributeA = createTrackedEntityAttribute( 'A' );
         
         programService.addProgram( programA );
+        dataElementService.addDataElement( dataElementA );
+        attributeService.addTrackedEntityAttribute( attributeA );
     }
     
     @Test
     public void testAddGet()
     {
-        ProgramRuleVariable variableA = new ProgramRuleVariable( "RuleA", programA );
-        ProgramRuleVariable variableB = new ProgramRuleVariable( "RuleB", programA );
-        ProgramRuleVariable variableC = new ProgramRuleVariable( "RuleC", programA );
+        ProgramRuleVariable variableA = new ProgramRuleVariable( "RuleVariableA", "RuleVariableADescription", programA, ProgramRuleVariableDataType.TEXT, "None selected", ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT, null, dataElementA, null );
+        ProgramRuleVariable variableB = new ProgramRuleVariable( "RuleVariableB", "RuleVariableADescription", programA, ProgramRuleVariableDataType.DATE, "", ProgramRuleVariableSourceType.TEI_ATTRIBUTE, attributeA, null, null );
+        ProgramRuleVariable variableC = new ProgramRuleVariable( "RuleVariableC", "RuleVariableADescription", programA, ProgramRuleVariableDataType.NUMBER, "3", ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
         
         int idA = variableService.addProgramRuleVariable( variableA );
         int idB = variableService.addProgramRuleVariable( variableB );

@@ -117,11 +117,26 @@ public class ProgramRuleVariable
         setAutoFields();
     }
 
-    public ProgramRuleVariable( String name, Program program )
+    public ProgramRuleVariable( String name, 
+            String description,
+            Program program, 
+            ProgramRuleVariableDataType dataType,
+            String defaultValue,
+            ProgramRuleVariableSourceType sourceType,
+            TrackedEntityAttribute attribute,
+            DataElement dataElement,
+            ProgramStage programStage)
     {
         this();
         this.name = name;
+        this.description = description;
         this.program = program;
+        this.dataType = dataType;
+        this.defaultValue = defaultValue;
+        this.sourceType = sourceType;
+        this.attribute = attribute;
+        this.dataElement = dataElement;
+        this.programStage = programStage;
     }
 
     // -------------------------------------------------------------------------
@@ -168,7 +183,7 @@ public class ProgramRuleVariable
     }
 
     @JsonProperty
-    @JsonSerialize( as = BaseIdentifiableObject.class )
+    @JsonView( { DetailedView.class, ExportView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public TrackedEntityAttribute getAttribute()
     {
