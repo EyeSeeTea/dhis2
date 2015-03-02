@@ -2,12 +2,35 @@
 $( document ).ready( function()
 {
     showLoader();
+    runDataIntegrityTask();
     //$.getJSON( "getDataIntegrity.action", {}, populateIntegrityItems );
-    pingNotificationsTimeout();
+    //pingNotificationsTimeout();
 } );
 
 function runDataIntegrityTask() {
-    $.get("");
+    $.ajax({
+        url: '../api/dataIntegrity',
+        method: 'POST',
+        success: registerDataIntegrityTimeout,
+        error: function( response ) {
+            throw Error( "Data integrity checks cannot be run. Request failed." );
+        }
+    } );
+}
+
+var pingTimeout = null;
+
+function registerDataIntegrityTimeout() {
+    pingNotifications( 'DATAINTEGRITY', 'notificationsTable', getDataIntegrityReport );
+    pingTimeout = setTimeout( "registerDataIntegrityTimeout()", 2500 );
+}
+
+function getDataIntegrityReport() {
+    console.log( "Getting data integrity report" );
+    $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
+        console.log( json );
+        populateIntegrityItems( json );
+    } );
 }
 
 function populateIntegrityItems( json )

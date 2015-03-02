@@ -29,6 +29,7 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
  */
 
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
+import org.hisp.dhis.dataintegrity.tasks.DataIntegrityTask;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
