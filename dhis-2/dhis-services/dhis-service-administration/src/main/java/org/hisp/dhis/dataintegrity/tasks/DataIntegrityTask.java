@@ -28,7 +28,7 @@ package org.hisp.dhis.dataintegrity.tasks;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
@@ -41,7 +41,6 @@ import org.hisp.dhis.system.timer.SystemTimer;
 import org.hisp.dhis.system.timer.Timer;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -148,28 +147,8 @@ public class DataIntegrityTask implements Runnable
 
         if ( taskId != null )
         {
-            try
-            {
-                DataIntegrityReport dir = (DataIntegrityReport) BeanUtils.cloneBean( dataIntegrityReport );
-            }
-            catch ( IllegalAccessException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( InstantiationException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( InvocationTargetException e )
-            {
-                e.printStackTrace();
-            }
-            catch ( NoSuchMethodException e )
-            {
-                e.printStackTrace();
-            }
             notifier.notify( taskId, NotificationLevel.INFO, "Data integrity checks completed in " + timer.toString() + ".", true )
-                .addTaskSummary( taskId, dir );
+                .addTaskSummary( taskId, SerializationUtils.clone( dataIntegrityReport ) );
         }
     }
 }

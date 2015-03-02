@@ -40,6 +40,7 @@ import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.validation.ValidationRule;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,7 @@ import java.util.SortedMap;
 /**
  * @author Halvdan Hoem Grelland
  */
-public class DataIntegrityReport
+public class DataIntegrityReport implements Serializable
 {
     private List<DataElement> dataElementsWithoutDataSet;
 
