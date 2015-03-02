@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataadmin.action.dataintegrity;
+package org.hisp.dhis.webapi.controller;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,61 +28,59 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.opensymphony.xwork2.Action;
-import org.hisp.dhis.dataintegrity.DataIntegrityReport;
+import org.hisp.dhis.dataintegrity.DataIntegrityService;
+import org.hisp.dhis.dataintegrity.tasks.DataIntegrityTask;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
+import org.hisp.dhis.system.scheduling.Scheduler;
 import org.hisp.dhis.user.CurrentUserService;
+import org.hisp.dhis.webapi.utils.ContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
- * @author Halvdan Hoem Grelland
+ * @author Halvdan Hoem Grelland <halvdanhg@gmail.com>
  */
-public class GetDataIntegrityReportAction
-    implements Action
+@Controller
+@RequestMapping( method = RequestMethod.GET )
+public class DataIntegrityController
 {
-    @Autowired
-    private Notifier notifier;
-
     @Autowired
     private CurrentUserService currentUserService;
 
-    // -------------------------------------------------------------------------
-    // Input
-    // -------------------------------------------------------------------------
+    @Autowired
+    private Scheduler scheduler;
 
-    private TaskCategory category;
+    @Autowired
+    private DataIntegrityService dataIntegrityService;
 
-    public void setCategory( TaskCategory category )
+    @Autowired
+    private Notifier notifier;
+
+    public static final String RESOURCE_PATH = "/dataIntegrity";
+
+    //--------------------------------------------------------------------------
+    // Run data integrity task asynchronously
+    //--------------------------------------------------------------------------
+
+    @RequestMapping( value = DataIntegrityController.RESOURCE_PATH, method = RequestMethod.POST )
+    public void runAsyncDataIntegrity( HttpServletResponse response, HttpServletRequest request )
     {
-        this.category = category;
-    }
+        TaskId taskId = new TaskId( TaskCategory.DATAINTEGRITY, currentUserService.getCurrentUser() );
 
-    // -------------------------------------------------------------------------
-    // Output
-    // -------------------------------------------------------------------------
+        // TODO get and any stop running tasks?
 
-    private DataIntegrityReport dataIntegrityReport;
+        notifier.clear( taskId );
 
-    public DataIntegrityReport getDataIntegrityReport()
-    {
-        return dataIntegrityReport;
-    }
+        scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
 
-    @Override
-    public String execute()
-    {
-        TaskId taskId = new TaskId( category, currentUserService.getCurrentUser() );
-
-        dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
-
-        if ( dataIntegrityReport == null )
-        {
-            dataIntegrityReport = new DataIntegrityReport();
-        }
-
-        return SUCCESS;
+        response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.DATAINTEGRITY );
+        response.setStatus( HttpServletResponse.SC_ACCEPTED );
     }
 }

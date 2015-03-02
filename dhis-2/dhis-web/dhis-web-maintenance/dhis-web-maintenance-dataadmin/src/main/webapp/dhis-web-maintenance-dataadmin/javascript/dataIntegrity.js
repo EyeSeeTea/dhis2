@@ -30,6 +30,7 @@ function getDataIntegrityReport() {
     $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
         console.log( json );
         populateIntegrityItems( json );
+        clearTimeout(pingTimeout);
     } );
 }
 
