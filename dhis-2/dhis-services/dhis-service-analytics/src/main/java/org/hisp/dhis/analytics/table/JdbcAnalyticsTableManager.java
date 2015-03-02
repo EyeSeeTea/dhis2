@@ -121,7 +121,7 @@ public class JdbcAnalyticsTableManager
         List<String[]> columns = getDimensionColumns( table );
         
         validateDimensionColumns( columns );
-        
+
         for ( String[] col : columns )
         {
             sqlCreate += col[0] + " " + col[1] + ",";
@@ -131,7 +131,7 @@ public class JdbcAnalyticsTableManager
         
         sqlCreate += statementBuilder.getTableOptions( false );
         
-        log.info( "Creating table: " + tableName );
+        log.info( "Creating table: " + tableName + ", columns: " + columns.size() );
         
         log.debug( "Create SQL: " + sqlCreate );
         
@@ -187,17 +187,21 @@ public class JdbcAnalyticsTableManager
         final String start = DateUtils.getMediumDateString( table.getPeriod().getStartDate() );
         final String end = DateUtils.getMediumDateString( table.getPeriod().getEndDate() );
         final String tableName = table.getTempTableName();
-        
+
         String sql = "insert into " + table.getTempTableName() + " (";
+
+        List<String[]> columns = getDimensionColumns( table );
         
-        for ( String[] col : getDimensionColumns( table ) )
+        validateDimensionColumns( columns );
+
+        for ( String[] col : columns )
         {
             sql += col[0] + ",";
         }
         
         sql += "daysxvalue, daysno, value, textvalue) select ";
         
-        for ( String[] col : getDimensionColumns( table ) )
+        for ( String[] col : columns )
         {
             sql += col[2] + ",";
         }
