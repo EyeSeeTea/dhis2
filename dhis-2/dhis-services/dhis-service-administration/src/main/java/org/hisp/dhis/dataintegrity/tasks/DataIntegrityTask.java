@@ -86,7 +86,60 @@ public class DataIntegrityTask implements Runnable
     {
         Timer timer = new SystemTimer().start();
 
-        //dataIntegrityReport = new DataIntegrityReport();
+//        dataIntegrityReport.setDataElementsWithoutDataSet( new ArrayList<>( dataIntegrityService.getDataElementsWithoutDataSet() ) );
+//
+//        dataIntegrityReport.setDataElementsWithoutGroups( new ArrayList<>( dataIntegrityService.getDataElementsWithoutGroups() ) );
+//        dataIntegrityReport.setDataElementsAssignedToDataSetsWithDifferentPeriodTypes( dataIntegrityService.getDataElementsAssignedToDataSetsWithDifferentPeriodTypes() );
+//        dataIntegrityReport.setDataElementsViolatingExclusiveGroupSets( dataIntegrityService.getDataElementsViolatingExclusiveGroupSets() );
+//        dataIntegrityReport.setDataElementsInDataSetNotInForm( dataIntegrityService.getDataElementsInDataSetNotInForm() );
+//
+//        log.info( "Checked data elements" );
+//
+//        dataIntegrityReport.setCategoryOptionCombosNotInDataElementCategoryCombo( dataIntegrityService.getCategoryOptionCombosNotInDataElementCategoryCombo() );
+//
+//        log.info( "Checked operands" );
+//
+//        dataIntegrityReport.setDataSetsNotAssignedToOrganisationUnits( new ArrayList<>( dataIntegrityService.getDataSetsNotAssignedToOrganisationUnits() ) );
+//        dataIntegrityReport.setSectionsWithInvalidCategoryCombinations( new ArrayList<>( dataIntegrityService.getSectionsWithInvalidCategoryCombinations() ) );
+//
+//        log.info( "Checked data sets" );
+//
+//        dataIntegrityReport.setIndicatorsWithIdenticalFormulas( dataIntegrityService.getIndicatorsWithIdenticalFormulas() );
+//        dataIntegrityReport.setIndicatorsWithoutGroups( new ArrayList<>( dataIntegrityService.getIndicatorsWithoutGroups() ) );
+//        dataIntegrityReport.setInvalidIndicatorNumerators( dataIntegrityService.getInvalidIndicatorNumerators() );
+//        dataIntegrityReport.setInvalidIndicatorDenominators( dataIntegrityService.getInvalidIndicatorDenominators() );
+//        dataIntegrityReport.setIndicatorsViolatingExclusiveGroupSets( dataIntegrityService.getIndicatorsViolatingExclusiveGroupSets() );
+//
+//        log.info( "Checked indicators" );
+//
+//        dataIntegrityReport.setDuplicatePeriods( dataIntegrityService.getDuplicatePeriods() );
+//
+//        log.info( "Checked periods" );
+//
+//        dataIntegrityReport.setOrganisationUnitsWithCyclicReferences( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithCyclicReferences() ) );
+//        dataIntegrityReport.setOrphanedOrganisationUnits( new ArrayList<>( dataIntegrityService.getOrphanedOrganisationUnits() ) );
+//        dataIntegrityReport.setOrganisationUnitsWithoutGroups( new ArrayList<>( dataIntegrityService.getOrganisationUnitsWithoutGroups() ) );
+//        dataIntegrityReport.setOrganisationUnitsViolatingExclusiveGroupSets( dataIntegrityService.getOrganisationUnitsViolatingExclusiveGroupSets() );
+//        dataIntegrityReport.setOrganisationUnitGroupsWithoutGroupSets( new ArrayList<>( dataIntegrityService.getOrganisationUnitGroupsWithoutGroupSets() ) );
+//        dataIntegrityReport.setValidationRulesWithoutGroups( new ArrayList<>( dataIntegrityService.getValidationRulesWithoutGroups() ) );
+//
+//        log.info( "Checked organisation units" );
+//
+//        dataIntegrityReport.setInvalidValidationRuleLeftSideExpressions( dataIntegrityService.getInvalidValidationRuleLeftSideExpressions() );
+//        dataIntegrityReport.setInvalidValidationRuleRightSideExpressions( dataIntegrityService.getInvalidValidationRuleRightSideExpressions() );
+//
+//        log.info( "Checked validation rules" );
+//
+//        Collections.sort( dataIntegrityReport.getDataElementsWithoutDataSet(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getDataElementsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getDataSetsNotAssignedToOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getSectionsWithInvalidCategoryCombinations(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getIndicatorsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getOrganisationUnitsWithCyclicReferences(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getOrphanedOrganisationUnits(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getOrganisationUnitsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getOrganisationUnitGroupsWithoutGroupSets(), IdentifiableObjectNameComparator.INSTANCE );
+//        Collections.sort( dataIntegrityReport.getValidationRulesWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
 
         dataIntegrityReport.setDataElementsWithoutDataSet( new ArrayList<>( dataIntegrityService.getDataElementsWithoutDataSet() ) );
 
@@ -148,7 +201,7 @@ public class DataIntegrityTask implements Runnable
         if ( taskId != null )
         {
             notifier.notify( taskId, NotificationLevel.INFO, "Data integrity checks completed in " + timer.toString() + ".", true )
-                .addTaskSummary( taskId, SerializationUtils.clone( dataIntegrityReport ) );
+                .addTaskSummary( taskId, dataIntegrityReport );
         }
     }
 }
