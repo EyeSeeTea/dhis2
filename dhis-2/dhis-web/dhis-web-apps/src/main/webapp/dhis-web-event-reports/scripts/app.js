@@ -160,7 +160,7 @@ Ext.onReady( function() {
                         var a = record.filter.split(':');
 
                         if (a.length > 1 && Ext.isString(a[1])) {
-                            this.rangeValueCmp.setValue(a[1].split(';'));
+                            this.onRangeSearchSelect(a[1].split(';'));
                         }
                     }
                 }
@@ -240,11 +240,40 @@ Ext.onReady( function() {
                 this.filterSearchStore = function() {
                     var selected = container.rangeValueCmp.getValue();
 
+                    // hack, using internal method to activate dropdown before filtering
+                    if (!container.rangeSearchCmp.isUserExpanded) {
+                        container.rangeSearchCmp.isUserExpanded = true;
+
+                        container.rangeSearchCmp.onTriggerClick();
+                        container.rangeSearchCmp.collapse();
+                    }
+
+                    // filter
                     container.rangeSearchStore.clearFilter();
 
                     container.rangeSearchStore.filterBy(function(record) {
                         return !Ext.Array.contains(selected, record.data[idProperty]);
                     });
+                };
+
+                // function
+                this.onRangeSearchSelect = function(ids) {
+                    ids = Ext.Array.from(ids);
+
+                    // store
+                    for (var i = 0, id; i < ids.length; i++) {
+                        id = ids[i];
+
+                        if (container.rangeValueStore.findExact(idProperty, id) === -1) {
+                            container.rangeValueStore.add(container.rangeSearchStore.getAt(container.rangeSearchStore.findExact(idProperty, id)).data);
+                        }
+                    }
+
+                    // search cmp
+                    container.rangeSearchCmp.select([]);
+
+                    // filter
+                    container.filterSearchStore();
                 };
 
                 this.rangeSearchCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -259,22 +288,12 @@ Ext.onReady( function() {
                     hidden: true,
                     store: this.rangeSearchStore,
                     listConfig: {
-                        minWidth: 326
+                        minWidth: operatorCmpWidth + (nameCmpWidth - operatorCmpWidth - rangeSetWidth)
                     },
+                    isUserExpanded: false,
                     listeners: {
 						select: function() {
-                            var id = Ext.Array.from(this.getValue())[0];
-
-                            // value
-                            if (container.rangeValueStore.findExact(idProperty, id) === -1) {
-                                container.rangeValueStore.add(container.rangeSearchStore.getAt(container.rangeSearchStore.findExact(idProperty, id)).data);
-                            }
-
-                            // search
-                            this.select([]);
-
-                            // filter
-                            container.filterSearchStore();
+                            container.onRangeSearchSelect(Ext.Array.from(this.getValue())[0]);
 						},
                         expand: function() {
                             container.filterSearchStore();
@@ -333,8 +352,6 @@ Ext.onReady( function() {
 
                 // function
                 this.onRangeSetSelect = function(id) {
-                    var ranges;
-
                     if (id === defaultRangeSetId) {
                         container.operatorCmp.show();
                         container.valueCmp.show();
@@ -342,6 +359,8 @@ Ext.onReady( function() {
                         container.rangeValueCmp.hide();
                     }
                     else {
+                        var ranges;
+
                         container.operatorCmp.hide();
                         container.valueCmp.hide();
                         container.rangeSearchCmp.show();
