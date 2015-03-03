@@ -119,6 +119,7 @@ Ext.onReady( function() {
             rangeSetWidth = 135,
             namePadding = '2px 3px',
             margin = '3px 0 1px',
+            removeCmpStyle = 'padding: 0; margin-left: 3px',
             defaultRangeSetId = 'default';
 
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
@@ -190,7 +191,7 @@ Ext.onReady( function() {
                     cls: 'ns-linkbutton',
                     style: 'padding: 0',
                     height: 18,
-                    text: 'Duplicate',
+                    text: NS.i18n.duplicate,
                     handler: function() {
 						container.duplicateDataElement();
 					}
@@ -198,9 +199,9 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
-                    style: 'padding: 0',
+                    style: removeCmpStyle,
                     height: 18,
-                    text: 'Remove',
+                    text: NS.i18n.remove,
                     handler: function() {
                         container.removeDataElement();
                     }
@@ -279,8 +280,8 @@ Ext.onReady( function() {
                 this.rangeSearchCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     width: operatorCmpWidth,
-                    style: 'margin-bottom:0',
-                    emptyText: 'Select..',
+                    style: 'margin-bottom: 0',
+                    emptyText: NS.i18n.select + '..',
                     valueField: idProperty,
                     displayField: displayProperty,
                     editable: false,
@@ -315,7 +316,7 @@ Ext.onReady( function() {
 
                 this.rangeValueCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
-                    style: 'margin-bottom:0',
+                    style: 'margin-bottom: 0',
                     width: nameCmpWidth - operatorCmpWidth - rangeSetWidth,
                     valueField: idProperty,
                     displayField: nameProperty,
@@ -381,6 +382,7 @@ Ext.onReady( function() {
 
                 this.rangeSetCmp = Ext.create('Ext.form.field.ComboBox', {
                     cls: 'ns-combo h22',
+					style: 'margin-bottom: 0',
                     width: rangeSetWidth,
                     height: 22,
                     fieldStyle: 'height: 22px',
@@ -492,7 +494,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
-                    style: 'padding: 0',
+                    style: removeCmpStyle,
                     height: 18,
                     text: 'Remove',
                     handler: function() {
@@ -589,7 +591,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
-                    style: 'padding: 0',
+                    style: removeCmpStyle,
                     height: 18,
                     text: 'Remove',
                     handler: function() {
@@ -687,7 +689,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
-                    style: 'padding: 0',
+                    style: removeCmpStyle,
                     height: 18,
                     text: 'Remove',
                     handler: function() {
@@ -798,7 +800,7 @@ Ext.onReady( function() {
 
                 this.removeCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-linkbutton',
-                    style: 'padding: 0',
+                    style: removeCmpStyle,
                     height: 18,
                     text: 'Remove',
                     handler: function() {
