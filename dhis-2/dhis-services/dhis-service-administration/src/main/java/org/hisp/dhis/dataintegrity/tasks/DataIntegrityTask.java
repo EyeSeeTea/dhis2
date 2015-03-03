@@ -34,6 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
+import org.hisp.dhis.dataintegrity.FlattenedDataIntegrityReport;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
@@ -201,7 +202,7 @@ public class DataIntegrityTask implements Runnable
         if ( taskId != null )
         {
             notifier.notify( taskId, NotificationLevel.INFO, "Data integrity checks completed in " + timer.toString() + ".", true )
-                .addTaskSummary( taskId, dataIntegrityReport );
+                .addTaskSummary( taskId, new FlattenedDataIntegrityReport( dataIntegrityReport ) );
         }
     }
 }
