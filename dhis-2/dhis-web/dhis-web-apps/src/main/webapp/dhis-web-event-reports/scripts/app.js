@@ -350,7 +350,7 @@ Ext.onReady( function() {
 
                 // function
                 this.onRangeSetSelect = function(id) {
-                    if (id === defaultRangeSetId) {
+                    if (!id || id === defaultRangeSetId) {
                         container.operatorCmp.show();
                         container.valueCmp.show();
                         container.rangeSearchCmp.hide();
@@ -390,10 +390,12 @@ Ext.onReady( function() {
                     storage: {},
                     pendingValue: null,
                     setPendingValue: function() {
-                        if (this.pendingValue) {
-                            this.setValue(this.pendingValue);
-                            this.pendingValue = null;
-                        }
+                        this.pendingValue = this.pendingValue || defaultRangeSetId;
+
+                        this.setValue(this.pendingValue);
+                        container.onRangeSetSelect(this.pendingValue);
+
+                        this.pendingValue = null;
                     },
                     store: Ext.create('Ext.data.Store', {
                         fields: [idProperty, nameProperty]
@@ -405,7 +407,7 @@ Ext.onReady( function() {
                                 name: 'No range set'
                             });
 
-                            cb.setValue(defaultRangeSetId);
+                            //cb.setValue(defaultRangeSetId);
 
                             Ext.Ajax.request({
                                 url: ns.core.init.contextPath + '/api/dataElements/' + container.dataElement.id + '.json?fields=legendSet[id,name]',
@@ -414,8 +416,15 @@ Ext.onReady( function() {
 
                                     if (Ext.isObject(r) && Ext.isObject(r.legendSet)) {
                                         cb.store.add(r.legendSet);
-                                        cb.setPendingValue();
+
+                                        cb.setValue(r.legendSet.id);
+                                        container.onRangeSetSelect(r.legendSet.id);
+console.log("success");
                                     }
+                                },
+                                callback: function() {
+                                    cb.setPendingValue();
+console.log("callback");
                                 }
                             });
                         },
