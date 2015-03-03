@@ -161,7 +161,7 @@ Ext.onReady( function() {
                         var a = record.filter.split(':');
 
                         if (a.length > 1 && Ext.isString(a[1])) {
-                            this.onRangeSearchSelect(a[1].split(';'));
+                            this.onRangeSearchSelect(a[1].split(';'), true);
                         }
                     }
                 }
@@ -238,13 +238,11 @@ Ext.onReady( function() {
                 });
 
                 // function
-                this.filterSearchStore = function() {
+                this.filterSearchStore = function(isLayout) {
                     var selected = container.rangeValueCmp.getValue();
 
                     // hack, using internal method to activate dropdown before filtering
-                    if (!container.rangeSearchCmp.isUserExpanded) {
-                        container.rangeSearchCmp.isUserExpanded = true;
-
+                    if (isLayout) {
                         container.rangeSearchCmp.onTriggerClick();
                         container.rangeSearchCmp.collapse();
                     }
@@ -258,7 +256,7 @@ Ext.onReady( function() {
                 };
 
                 // function
-                this.onRangeSearchSelect = function(ids) {
+                this.onRangeSearchSelect = function(ids, isLayout) {
                     ids = Ext.Array.from(ids);
 
                     // store
@@ -274,7 +272,7 @@ Ext.onReady( function() {
                     container.rangeSearchCmp.select([]);
 
                     // filter
-                    container.filterSearchStore();
+                    container.filterSearchStore(isLayout);
                 };
 
                 this.rangeSearchCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -291,7 +289,6 @@ Ext.onReady( function() {
                     listConfig: {
                         minWidth: operatorCmpWidth + (nameCmpWidth - operatorCmpWidth - rangeSetWidth)
                     },
-                    isUserExpanded: false,
                     listeners: {
 						select: function() {
                             container.onRangeSearchSelect(Ext.Array.from(this.getValue())[0]);
