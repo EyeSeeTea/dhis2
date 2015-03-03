@@ -1273,6 +1273,7 @@ Ext.onReady( function() {
                     optionMap = {};
 
                     if (header) {
+console.log(header);
                         for (var j = 0, id, name; j < header.ids.length; j++) {
                             id = header.ids[j];
                             name = xResponse.metaData.booleanNames[id] || xResponse.metaData.optionNames[id] || xResponse.metaData.names[id] || id;
@@ -1281,11 +1282,13 @@ Ext.onReady( function() {
                                 id: id,
                                 name: name
                             });
+console.log(name);
                         }
+console.log("");
                     }
                 }
 
-                // restore order for options
+                // restore order for user specified options/legends
                 for (var i = 0, orgDim; i < originalDimensions.length; i++) {
                     orgDim = originalDimensions[i];
 

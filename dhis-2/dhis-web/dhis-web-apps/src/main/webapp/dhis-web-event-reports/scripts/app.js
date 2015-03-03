@@ -117,7 +117,7 @@ Ext.onReady( function() {
             triggerCmpWidth = 17,
             valueCmpWidth = 235,
             rangeSetWidth = 135,
-            namePadding = '2px 3px',
+            namePadding = '3px 3px',
             margin = '3px 0 1px',
             removeCmpStyle = 'padding: 0; margin-left: 3px',
             defaultRangeSetId = 'default';
