@@ -17,24 +17,9 @@
     &identifiableProperties;
 
     <property name="name" column="name" length="230" />
-    
-    <property name="shortName" />
-    
-    <property name="description" />
 
     <many-to-one name="program" class="org.hisp.dhis.program.Program" 
        	column="programid" foreign-key="fk_programrulevariable_program" />
-
-    <!-- <property name="dataType" column="datatype" type="org.hisp.dhis.program.ProgramRuleVariableDataType" not-null="true" />-->
-    
-    <property name="dataType" column="datatype">
-        <type name="org.hibernate.type.EnumType">
-        	<param name="enumClass">org.hisp.dhis.program.ProgramRuleVariableDataType</param>
-            <param name="type">12</param>
-        </type>
-    </property>
-    
-    <property name="defaultValue" />
     
     <property name="sourceType" column="sourcetype">
         <type name="org.hibernate.type.EnumType">

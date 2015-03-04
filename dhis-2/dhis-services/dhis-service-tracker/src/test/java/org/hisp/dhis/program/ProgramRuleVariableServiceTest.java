@@ -72,9 +72,9 @@ public class ProgramRuleVariableServiceTest
     @Test
     public void testAddGet()
     {
-        ProgramRuleVariable variableA = new ProgramRuleVariable( "RuleVariableA", "RuleVariableADescription", programA, ProgramRuleVariableDataType.TEXT, "None selected", ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT, null, dataElementA, null );
-        ProgramRuleVariable variableB = new ProgramRuleVariable( "RuleVariableB", "RuleVariableADescription", programA, ProgramRuleVariableDataType.DATE, "", ProgramRuleVariableSourceType.TEI_ATTRIBUTE, attributeA, null, null );
-        ProgramRuleVariable variableC = new ProgramRuleVariable( "RuleVariableC", "RuleVariableADescription", programA, ProgramRuleVariableDataType.NUMBER, "3", ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
+        ProgramRuleVariable variableA = new ProgramRuleVariable( "RuleVariableA", programA, ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT, null, dataElementA, null );
+        ProgramRuleVariable variableB = new ProgramRuleVariable( "RuleVariableB", programA, ProgramRuleVariableSourceType.TEI_ATTRIBUTE, attributeA, null, null );
+        ProgramRuleVariable variableC = new ProgramRuleVariable( "RuleVariableC", programA, ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
         
         int idA = variableService.addProgramRuleVariable( variableA );
         int idB = variableService.addProgramRuleVariable( variableB );

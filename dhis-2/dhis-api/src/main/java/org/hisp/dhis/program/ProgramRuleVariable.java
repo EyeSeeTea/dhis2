@@ -29,7 +29,6 @@ package org.hisp.dhis.program;
  */
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.DimensionalView;
@@ -48,7 +47,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
  */
 @JacksonXmlRootElement( localName = "programRuleVariable", namespace = DxfNamespaces.DXF_2_0 )
 public class ProgramRuleVariable
-    extends BaseNameableObject
+    extends BaseIdentifiableObject
 {
     private static final long serialVersionUID = -2807997671779497354L;
 
@@ -57,19 +56,6 @@ public class ProgramRuleVariable
      */
     private Program program;
 
-    /**
-     * The type of the variable, used by the rules engine to know how to quote
-     * or convert the value. The allowed types are number, text, bool, date.
-     */
-    private ProgramRuleVariableDataType dataType;
-
-    /**
-     * The value that the variable should have initially. Usually the default
-     * value is replaced by a value of the connected dataelement, or by a
-     * calculation performed by rules. If not, the default value would be used
-     * in evaluating rules.
-     * */
-    private String defaultValue;
 
     /**
      * The source of the variables content. Allowed values are:
@@ -120,10 +106,7 @@ public class ProgramRuleVariable
     }
 
     public ProgramRuleVariable( String name, 
-            String description,
             Program program, 
-            ProgramRuleVariableDataType dataType,
-            String defaultValue,
             ProgramRuleVariableSourceType sourceType,
             TrackedEntityAttribute attribute,
             DataElement dataElement,
@@ -131,10 +114,7 @@ public class ProgramRuleVariable
     {
         this();
         this.name = name;
-        this.description = description;
         this.program = program;
-        this.dataType = dataType;
-        this.defaultValue = defaultValue;
         this.sourceType = sourceType;
         this.attribute = attribute;
         this.dataElement = dataElement;
@@ -195,31 +175,6 @@ public class ProgramRuleVariable
     public void setAttribute( TrackedEntityAttribute attribute )
     {
         this.attribute = attribute;
-    }
-
-    @JsonProperty
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public String getDefaultValue()
-    {
-        return defaultValue;
-    }
-
-    public void setDefaultValue( String defaultValue )
-    {
-        this.defaultValue = defaultValue;
-    }
-
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public ProgramRuleVariableDataType getDataType()
-    {
-        return dataType;
-    }
-
-    public void setDataType( ProgramRuleVariableDataType dataType )
-    {
-        this.dataType = dataType;
     }
 
     @JsonProperty

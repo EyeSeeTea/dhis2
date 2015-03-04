@@ -31,7 +31,6 @@ package org.hisp.dhis.program;
 import java.util.Set;
 
 import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.BaseNameableObject;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.hisp.dhis.common.view.DetailedView;
 import org.hisp.dhis.common.view.ExportView;
@@ -46,7 +45,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
  */
 
 public class ProgramRule
-    extends BaseNameableObject
+    extends BaseIdentifiableObject
 {
     private static final long serialVersionUID = -2807997671779497354L;
     
@@ -54,6 +53,11 @@ public class ProgramRule
      * The program that the rule belongs to
      */
     private Program program;
+    
+    /**
+     * The program that the rule belongs to
+     */
+    private String description;
     
     /**
      * The programStage that the rule belongs to
@@ -89,7 +93,7 @@ public class ProgramRule
     {
         this();
         this.name = name;
-        this.description = description;
+        this.setDescription( description );
         this.program = program;
         this.programStage = programStage;
         this.programRuleActions = programRuleActions;
@@ -162,5 +166,17 @@ public class ProgramRule
     public void setPriority( Integer priority )
     {
         this.priority = priority;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription( String description )
+    {
+        this.description = description;
     }
 }

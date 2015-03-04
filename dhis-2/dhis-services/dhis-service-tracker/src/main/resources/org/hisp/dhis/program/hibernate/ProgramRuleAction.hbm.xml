@@ -36,6 +36,5 @@
     <property name="content" />
     
     <property name="data" />
-
   </class>
 </hibernate-mapping>
