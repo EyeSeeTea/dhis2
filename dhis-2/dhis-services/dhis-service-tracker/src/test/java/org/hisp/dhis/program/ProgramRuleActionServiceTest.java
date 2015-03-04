@@ -28,6 +28,8 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -40,6 +42,8 @@ public class ProgramRuleActionServiceTest
     extends DhisSpringTest
 {
     private ProgramRule programRuleA;
+    private ProgramRule programRuleB;
+    private ProgramRule programRuleC;
     private DataElement dataElementA;
     
     @Autowired
@@ -55,9 +59,13 @@ public class ProgramRuleActionServiceTest
     public void setUpTest()
     {
         programRuleA = createProgramRule( 'A' );
+        programRuleB = createProgramRule( 'B' );
+        programRuleC = createProgramRule( 'C' );
         dataElementA = createDataElement( 'A' );
         
         programRuleService.addProgramRule( programRuleA );
+        programRuleService.addProgramRule( programRuleB );
+        programRuleService.addProgramRule( programRuleC );
         dataElementService.addDataElement( dataElementA );
     }
     
@@ -65,7 +73,6 @@ public class ProgramRuleActionServiceTest
     public void testAddGet()
     {
         ProgramRuleAction actionA = new ProgramRuleAction( "ActionA", programRuleA, ProgramRuleActionType.ASSIGNVARIABLE, null, null, "$myvar", "true");
-        
         ProgramRuleAction actionB = new ProgramRuleAction( "ActionB", programRuleA, ProgramRuleActionType.DISPLAYTEXT, null, "con","Hello", "$placeofliving");
         ProgramRuleAction actionC = new ProgramRuleAction( "ActionC", programRuleA, ProgramRuleActionType.HIDEFIELD, dataElementA, null, null, null);
         
@@ -76,5 +83,49 @@ public class ProgramRuleActionServiceTest
         assertEquals( actionA, actionService.getProgramRuleAction( idA ) );
         assertEquals( actionB, actionService.getProgramRuleAction( idB ) );
         assertEquals( actionC, actionService.getProgramRuleAction( idC ) );
+    }
+    
+    @Test
+    public void testGetByProgram()
+    {
+        ProgramRuleAction actionD = new ProgramRuleAction( "ActionD", programRuleB, ProgramRuleActionType.ASSIGNVARIABLE, null, null, "$myvar", "true");
+        ProgramRuleAction actionE = new ProgramRuleAction( "ActionE", programRuleB, ProgramRuleActionType.DISPLAYTEXT, null, "con","Hello", "$placeofliving");
+        ProgramRuleAction actionF = new ProgramRuleAction( "ActionF", programRuleB, ProgramRuleActionType.HIDEFIELD, dataElementA, null, null, null);
+        //Add an action that is not part of programRuleB....
+        ProgramRuleAction actionG = new ProgramRuleAction( "ActionG", programRuleC, ProgramRuleActionType.HIDEFIELD, dataElementA, null, null, null);
+        
+        actionService.addProgramRuleAction( actionD );
+        actionService.addProgramRuleAction( actionE );
+        actionService.addProgramRuleAction( actionF );
+        actionService.addProgramRuleAction( actionG );
+        
+        //Get all the 3 rules for programB
+        Collection<ProgramRuleAction> rules = actionService.getProgramRuleAction( programRuleB );
+        assertEquals( 3, rules.size() );
+        assertTrue( rules.contains( actionD ) );
+        assertTrue( rules.contains( actionE ) );
+        assertTrue( rules.contains( actionF ) );
+        //Make sure that the action connected to rule A is not returned as part of collection of actions in rule B.
+        assertFalse( rules.contains( actionG ) );
+        
+    }
+    
+    @Test
+    public void testUpdate()
+    {
+        ProgramRuleAction actionH = new ProgramRuleAction( "ActionH", programRuleB, ProgramRuleActionType.ASSIGNVARIABLE, null, null, "$myvar", "true");
+        
+        int idH = actionService.addProgramRuleAction( actionH );
+        
+        actionH.setName( "new name" );
+        actionH.setData( "$newdata" );
+        actionH.setLocation( "newlocation" );
+        actionH.setDataElement( dataElementA );
+        actionH.setProgramRule( programRuleC );
+        actionH.setProgramRuleActionType( ProgramRuleActionType.HIDEFIELD );
+        
+        actionService.updateProgramRuleAction( actionH );
+        
+        assertEquals( actionH, actionService.getProgramRuleAction( idH ) );
     }
 }

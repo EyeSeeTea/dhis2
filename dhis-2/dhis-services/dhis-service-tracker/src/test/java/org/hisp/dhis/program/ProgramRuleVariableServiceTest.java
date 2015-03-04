@@ -28,6 +28,8 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
@@ -42,6 +44,9 @@ public class ProgramRuleVariableServiceTest
     extends DhisSpringTest
 {
     private Program programA;
+    private Program programB;
+    private Program programC;
+    
     private DataElement dataElementA;
     private TrackedEntityAttribute attributeA;
     
@@ -61,10 +66,15 @@ public class ProgramRuleVariableServiceTest
     public void setUpTest()
     {
         programA = createProgram( 'A', null, null );
+        programB = createProgram( 'B', null, null );
+        programC = createProgram( 'C', null, null );
+        
         dataElementA = createDataElement( 'A' );
         attributeA = createTrackedEntityAttribute( 'A' );
         
         programService.addProgram( programA );
+        programService.addProgram( programB );
+        programService.addProgram( programC );
         dataElementService.addDataElement( dataElementA );
         attributeService.addTrackedEntityAttribute( attributeA );
     }
@@ -83,5 +93,48 @@ public class ProgramRuleVariableServiceTest
         assertEquals( variableA, variableService.getProgramRuleVariable( idA ) );
         assertEquals( variableB, variableService.getProgramRuleVariable( idB ) );
         assertEquals( variableC, variableService.getProgramRuleVariable( idC ) );
+    }
+    
+    @Test
+    public void testGetByProgram()
+    {
+        ProgramRuleVariable variableD = new ProgramRuleVariable( "RuleVariableD", programB, ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT, null, dataElementA, null );
+        ProgramRuleVariable variableE = new ProgramRuleVariable( "RuleVariableE", programB, ProgramRuleVariableSourceType.TEI_ATTRIBUTE, attributeA, null, null );
+        ProgramRuleVariable variableF = new ProgramRuleVariable( "RuleVariableF", programB, ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
+         //Add a var that is not part of programB....
+        ProgramRuleVariable variableG = new ProgramRuleVariable( "RuleVariableG", programA, ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
+        
+        variableService.addProgramRuleVariable( variableD );
+        variableService.addProgramRuleVariable( variableE );
+        variableService.addProgramRuleVariable( variableF );
+        variableService.addProgramRuleVariable( variableG );
+
+        //Get all the 3 rules for programB
+        Collection<ProgramRuleVariable> vars = variableService.getProgramRuleVariable( programB );
+        assertEquals( 3, vars.size() );
+        assertTrue( vars.contains( variableD ) );
+        assertTrue( vars.contains( variableE ) );
+        assertTrue( vars.contains( variableF ) );
+        //Make sure that the var connected to program A is not returned as part of collection of vars in program B.
+        assertFalse( vars.contains( variableG ) );
+        
+    }
+    
+    @Test
+    public void testUpdate()
+    {
+        ProgramRuleVariable variableH = new ProgramRuleVariable( "RuleVariableH", programA, ProgramRuleVariableSourceType.CALCULATED_VALUE, null, null, null );
+        
+        int idH = variableService.addProgramRuleVariable( variableH );
+        
+        variableH.setAttribute( attributeA );
+        variableH.setDataElement( dataElementA );
+        variableH.setName( "newname" );
+        variableH.setProgram( programC );
+        variableH.setSourceType( ProgramRuleVariableSourceType.DATAELEMENT_PREVIOUS_EVENT );
+                
+        variableService.updateProgramRuleVariable( variableH );
+        
+        assertEquals( variableH, variableService.getProgramRuleVariable( idH ) );
     }
 }

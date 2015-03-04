@@ -28,6 +28,8 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import java.util.Collection;
+
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class ProgramRuleServiceTest
     extends DhisSpringTest
 {
     private Program programA;
+    private Program programB;
+    private Program programC;
+    
     private ProgramStage programStageA;
     
     @Autowired
@@ -53,19 +58,24 @@ public class ProgramRuleServiceTest
     public void setUpTest()
     {
         programA = createProgram( 'A', null, null );
+        programB = createProgram( 'B', null, null );
+        programC = createProgram( 'C', null, null );
+        
         programStageA = createProgramStage( 'A', 1 );
-       
         
         programService.addProgram( programA );
+        programService.addProgram( programB );
+        programService.addProgram( programC );
+        
         programStageService.saveProgramStage( programStageA );
     }
     
     @Test
     public void testAddGet()
     {
-        ProgramRule ruleA = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null);
-        ProgramRule ruleB = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", 1);
-        ProgramRule ruleC = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", 0);
+        ProgramRule ruleA = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null );
+        ProgramRule ruleB = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "$a < 1", 1 );
+        ProgramRule ruleC = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "($a < 1 && $a > -10) && !$b", 0 );
         
         int idA = ruleService.addProgramRule( ruleA );
         int idB = ruleService.addProgramRule( ruleB );
@@ -74,5 +84,48 @@ public class ProgramRuleServiceTest
         assertEquals( ruleA, ruleService.getProgramRule( idA ) );
         assertEquals( ruleB, ruleService.getProgramRule( idB ) );
         assertEquals( ruleC, ruleService.getProgramRule( idC ) );
+    }
+    
+    @Test
+    public void testGetByProgram()
+    {
+        ProgramRule ruleD = new ProgramRule( "RuleD", "descriptionD", programB, null, null, "true", null );
+        ProgramRule ruleE = new ProgramRule( "RuleE", "descriptionE", programB, null, null, "$a < 1", 1 );
+        ProgramRule ruleF = new ProgramRule( "RuleF", "descriptionF", programB, null, null, "($a < 1 && $a > -10) && !$b", 0 );
+        //Add a rule that is not part of programB....
+        ProgramRule ruleG = new ProgramRule( "RuleG", "descriptionG", programA, null, null, "!false", 0 );
+        
+        ruleService.addProgramRule( ruleD );
+        ruleService.addProgramRule( ruleE );
+        ruleService.addProgramRule( ruleF );
+        ruleService.addProgramRule( ruleG );
+        
+        //Get all the 3 rules for programB
+        Collection<ProgramRule> rules = ruleService.getProgramRule( programB );
+        assertEquals( 3, rules.size() );
+        assertTrue( rules.contains( ruleD ) );
+        assertTrue( rules.contains( ruleE ) );
+        assertTrue( rules.contains( ruleF ) );
+        //Make sure that the rule connected to program A is not returned as part of collection of rules in program B.
+        assertFalse( rules.contains( ruleG ) );
+        
+    }
+    
+    @Test
+    public void testUpdate()
+    {
+        ProgramRule ruleH = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null );
+        
+        int idH = ruleService.addProgramRule( ruleH );
+        
+        ruleH.setCondition( "$newcondition == true" );
+        ruleH.setName( "new name" );
+        ruleH.setDescription( "new desc" );
+        ruleH.setPriority( 99 );
+        ruleH.setProgram( programC );
+        
+        ruleService.updateProgramRule( ruleH );
+        
+        assertEquals( ruleH, ruleService.getProgramRule( idH ) );
     }
 }
