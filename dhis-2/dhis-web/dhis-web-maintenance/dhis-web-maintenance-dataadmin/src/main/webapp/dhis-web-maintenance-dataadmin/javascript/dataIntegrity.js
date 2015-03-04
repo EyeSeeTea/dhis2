@@ -1,5 +1,3 @@
-var i18n_data_integrity =
-
 $( document ).ready( function() {
     showLoader();
 
