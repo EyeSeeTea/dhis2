@@ -1,3 +1,5 @@
+var i18n_data_integrity =
+
 $( document ).ready( function() {
     showLoader();
 
@@ -18,6 +20,8 @@ function registerDataIntegrityTimeout() {
     pingNotifications( 'DATAINTEGRITY', 'notificationsTable', function() {
         $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
             hideLoader();
+            $( "#di-title" ).hide();
+            $( "#di-completed" ).show();
             populateIntegrityItems( json );
             clearTimeout( checkFinishedTimeout );
         } );

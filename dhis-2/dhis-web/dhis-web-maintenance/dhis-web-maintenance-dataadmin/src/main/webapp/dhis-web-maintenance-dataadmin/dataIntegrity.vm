@@ -5,8 +5,9 @@
 <div id="${id}Div" style="border:1px solid #a0a0a0; padding:10px; width:600px"></div>
 
 #end
-
-<h3>$i18n.getString( "data_integrity_checks_performed" ) #openHelp( "dataIntegrity" )</h3>
+<h3>
+    <span id="di-title">$i18n.getString( "data_integrity" )</span><span style="display:none;" id="di-completed">$i18n.getString( "data_integrity_checks_performed" )</span> #openHelp( "dataIntegrity" )
+</h3>
 #parse( "dhis-web-commons/loader/loader.vm" )
 
 <div id="contentDiv" style="display:none">
