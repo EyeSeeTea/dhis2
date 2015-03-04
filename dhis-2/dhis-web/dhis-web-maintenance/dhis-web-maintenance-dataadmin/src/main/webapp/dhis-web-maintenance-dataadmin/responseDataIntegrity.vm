@@ -61,27 +61,3 @@
 #violationWithMap( "invalidValidationRuleLeftSideExpressions" $dataIntegrityReport.invalidValidationRuleLeftSideExpressions ),
 #violationWithMap( "invalidValidationRuleRightSideExpressions" $dataIntegrityReport.invalidValidationRuleRightSideExpressions )
 }
-##{
-##    #violation( "dataElementsWithoutDataSet" $dataElementsWithoutDataSet ),
-##    #violation( "dataElementsWithoutGroups" $dataElementsWithoutGroups ),
-##    #violationWithMapList( "dataElementsViolatingExclusiveGroupSets" $dataElementsViolatingExclusiveGroupSets ),
-##    #violationWithMapList( "dataElementsInDataSetNotInForm" $dataElementsInDataSetNotInForm ),
-##    #violationWithMapList( "dataElementsAssignedToDataSetsWithDifferentPeriodTypes" $dataElementsAssignedToDataSetsWithDifferentPeriodTypes ),
-##    #violationWithMapList( "categoryOptionCombosNotInDataElementCategoryCombo" $categoryOptionCombosNotInDataElementCategoryCombo ),
-##    #violation( "dataSetsNotAssignedToOrganisationUnits" $dataSetsNotAssignedToOrganisationUnits ),
-##    #violation( "sectionsWithInvalidCategoryCombinations" $sectionsWithInvalidCategoryCombinations ),
-##    #violationWithCollection( "indicatorsWithIdenticalFormulas" $indicatorsWithIdenticalFormulas ),
-##    #violation( "indicatorsWithoutGroups" $indicatorsWithoutGroups ),
-##    #violationWithMap( "invalidIndicatorNumerators" $invalidIndicatorNumerators ),
-##    #violationWithMap( "invalidIndicatorDenominators" $invalidIndicatorDenominators ),
-##    #violationWithMapList( "indicatorsViolatingExclusiveGroupSets" $indicatorsViolatingExclusiveGroupSets ),
-##    #violation( "duplicatePeriods" $duplicatePeriods ),
-##    #violation( "organisationUnitsWithCyclicReferences" $organisationUnitsWithCyclicReferences ),
-##    #violation( "orphanedOrganisationUnits" $orphanedOrganisationUnits ),
-##    #violation( "organisationUnitsWithoutGroups" $organisationUnitsWithoutGroups ),
-##    #violationWithMapList( "organisationUnitsViolatingExclusiveGroupSets" $organisationUnitsViolatingExclusiveGroupSets ),
-##    #violation( "organisationUnitGroupsWithoutGroupSets" $organisationUnitGroupsWithoutGroupSets ),
-##    #violation( "validationRulesWithoutGroups" $validationRulesWithoutGroups ),
-##    #violationWithMap( "invalidValidationRuleLeftSideExpressions" $invalidValidationRuleLeftSideExpressions ),
-##    #violationWithMap( "invalidValidationRuleRightSideExpressions" $invalidValidationRuleRightSideExpressions )
-##}

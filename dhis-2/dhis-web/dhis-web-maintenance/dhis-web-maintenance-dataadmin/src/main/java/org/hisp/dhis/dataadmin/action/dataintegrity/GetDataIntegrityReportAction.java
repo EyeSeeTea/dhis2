@@ -30,14 +30,11 @@ package org.hisp.dhis.dataadmin.action.dataintegrity;
 
 import com.opensymphony.xwork2.Action;
 import org.hisp.dhis.dataintegrity.DataIntegrityReport;
-import org.hisp.dhis.dataintegrity.FlattenedDataIntegrityReport;
 import org.hisp.dhis.scheduling.TaskCategory;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.xml.crypto.Data;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -72,21 +69,13 @@ public class GetDataIntegrityReportAction
     {
         return dataIntegrityReport;
     }
-//
-//    private FlattenedDataIntegrityReport flattenedReport;
-//
-//    public FlattenedDataIntegrityReport getFlattenedReport()
-//    {
-//        return flattenedReport;
-//    }
 
     @Override
     public String execute()
     {
         TaskId taskId = new TaskId( category, currentUserService.getCurrentUser() );
 
-//        flattenedReport = (FlattenedDataIntegrityReport) notifier.getTaskSummary( taskId );
-        dataIntegrityReport = ( DataIntegrityReport ) notifier.getTaskSummary( taskId );
+        dataIntegrityReport = (DataIntegrityReport) notifier.getTaskSummary( taskId );
 
         return SUCCESS;
     }

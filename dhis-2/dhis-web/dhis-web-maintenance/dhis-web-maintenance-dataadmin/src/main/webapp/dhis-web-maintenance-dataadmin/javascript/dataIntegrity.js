@@ -1,43 +1,31 @@
-
-$( document ).ready( function()
-{
+$( document ).ready( function() {
     showLoader();
-    runDataIntegrityTask();
-    //$.getJSON( "getDataIntegrity.action", {}, populateIntegrityItems );
-    //pingNotificationsTimeout();
-} );
 
-function runDataIntegrityTask() {
     $.ajax({
         url: '../api/dataIntegrity',
         method: 'POST',
         success: registerDataIntegrityTimeout,
-        error: function( response ) {
-            throw Error( "Data integrity checks cannot be run. Request failed." );
+        error: function( xhr, txtStatus, err ) {
+            showErrorMessage( "Data integrity checks cannot be run. Request failed.", 3 );
+            throw Error( xhr.responseText );
         }
     } );
-}
+} );
 
-var pingTimeout = null;
+var checkFinishedTimeout = null;
 
 function registerDataIntegrityTimeout() {
-    pingNotifications( 'DATAINTEGRITY', 'notificationsTable', getDataIntegrityReport );
-    pingTimeout = setTimeout( "registerDataIntegrityTimeout()", 2500 );
-}
-
-function getDataIntegrityReport() {
-    console.log( "Getting data integrity report" );
-    $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
-        console.log( json );
-        populateIntegrityItems( json );
-        clearTimeout(pingTimeout);
+    pingNotifications( 'DATAINTEGRITY', 'notificationsTable', function() {
+        $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
+            hideLoader();
+            populateIntegrityItems( json );
+            clearTimeout( checkFinishedTimeout );
+        } );
     } );
+    checkFinishedTimeout = setTimeout( "registerDataIntegrityTimeout()", 1500 );
 }
 
-function populateIntegrityItems( json )
-{
-    hideLoader();
-
+function populateIntegrityItems( json ) {
     displayViolationList( json.dataElementsWithoutDataSet, "dataElementsWithoutDataSet", false );
     displayViolationList( json.dataElementsWithoutGroups, "dataElementsWithoutGroups", false );
     displayViolationList( json.dataElementsViolatingExclusiveGroupSets, "dataElementsViolatingExclusiveGroupSets", true );
@@ -62,44 +50,32 @@ function populateIntegrityItems( json )
     displayViolationList( json.invalidValidationRuleRightSideExpressions, "invalidValidationRuleRightSideExpressions", true );
 }
 
-function displayViolationList( list, id, lineBreak )
-{
-    if ( list.length > 0 )
-    {
+function displayViolationList( list, id, lineBreak ) {
+    var $button = $( "#" + id + "Button" );
+    var $container = $( "#" + id + "Div" );
+
+    if ( list.length > 0 ) {
         // Display image "drop-down" button
-        $( "#" + id + "Button" )
-           .attr({ src: "../images/down.png", title: "View violations" })
-           .css({ cursor: "pointer" })
-           .click( function() { $( "#" + id + "Div" ).slideToggle( "fast" ); } );
+        $button
+           .attr( { src: "../images/down.png", title: "View violations" } )
+           .css( { cursor: "pointer" } )
+           .click( function() { $container.slideToggle( "fast" ); } );
 
         // Populate violation div
-
         var violations = "";
         
-        for ( var i = 0; i < list.length; i++ )
-        {
+        for ( var i = 0; i < list.length; i++ ) {
             violations += list[i] + "<br>";
             violations += !!lineBreak ? "<br>" : "";
         }
         
-        $( "#" + id + "Div" ).html( violations );
+        $container.html( violations );
     }
     else
     {
         // Display image "check" button
-
-        $( "#" + id + "Button" ).attr({ src: "../images/check.png", title: "No violations" });
+        $button.attr({ src: "../images/check.png", title: "No violations" });
     }
         
-    $( "#" + id + "Div" ).hide();
-}
-
-function displayTest() {
-    console.log("Async task is finished" );
-    $.getJSON( "getDataIntegrityReport.action", {}, populateIntegrityItems );
-}
-
-function pingNotificationsTimeout() {
-    console.log("pingnotificationstimeout");
-    pingNotifications( 'DATAINTEGRITY', 'notificationsTable', displayTest );
+    $container.hide();
 }

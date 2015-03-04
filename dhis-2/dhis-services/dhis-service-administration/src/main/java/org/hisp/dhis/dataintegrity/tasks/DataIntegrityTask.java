@@ -33,22 +33,15 @@ import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
 import org.hisp.dhis.dataintegrity.DataIntegrityReport;
 import org.hisp.dhis.dataintegrity.DataIntegrityService;
-import org.hisp.dhis.dataintegrity.FlattenedDataIntegrityReport;
-import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroup;
 import org.hisp.dhis.scheduling.TaskId;
 import org.hisp.dhis.system.notification.NotificationLevel;
 import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.system.timer.SystemTimer;
 import org.hisp.dhis.system.timer.Timer;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * @author Halvdan Hoem Grelland
@@ -79,8 +72,6 @@ public class DataIntegrityTask implements Runnable
         this.dataIntegrityService = dataIntegrityService;
         this.notifier = notifier;
         this.taskId = taskId;
-
-        dataIntegrityReport = new DataIntegrityReport();
     }
 
     // -------------------------------------------------------------------------

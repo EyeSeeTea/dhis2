@@ -66,16 +66,13 @@ public class DataIntegrityController
     public static final String RESOURCE_PATH = "/dataIntegrity";
 
     //--------------------------------------------------------------------------
-    // Run data integrity task asynchronously
+    // Asynchronous data integrity task
     //--------------------------------------------------------------------------
 
     @RequestMapping( value = DataIntegrityController.RESOURCE_PATH, method = RequestMethod.POST )
     public void runAsyncDataIntegrity( HttpServletResponse response, HttpServletRequest request )
     {
         TaskId taskId = new TaskId( TaskCategory.DATAINTEGRITY, currentUserService.getCurrentUser() );
-
-        // TODO get and any stop running tasks?
-
         notifier.clear( taskId );
 
         scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
