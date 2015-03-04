@@ -212,17 +212,18 @@ table.pivot {
 	-ms-user-select: all;
 	user-select: all;
 }
-table.comfortable td {
-	padding: 10px;
+
+table.pivot.displaydensity-comfortable td {
+	padding: 7px;
 }
-table.compact td {
+table.pivot.displaydensity-compact td {
 	padding: 3px;
 }
 
-table.large td {
+table.pivot.fontsize-large td {
 	font-size: 13px;
 }
-table.small td {
+table.pivot.fontsize-small td {
 	font-size: 10px;
 }
 
