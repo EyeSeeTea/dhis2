@@ -37,6 +37,8 @@ import org.hisp.dhis.system.notification.Notifier;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.xml.crypto.Data;
+
 /**
  * @author Halvdan Hoem Grelland
  */
@@ -70,20 +72,21 @@ public class GetDataIntegrityReportAction
     {
         return dataIntegrityReport;
     }
-
-    private FlattenedDataIntegrityReport flattenedReport;
-
-    public FlattenedDataIntegrityReport getFlattenedReport()
-    {
-        return flattenedReport;
-    }
+//
+//    private FlattenedDataIntegrityReport flattenedReport;
+//
+//    public FlattenedDataIntegrityReport getFlattenedReport()
+//    {
+//        return flattenedReport;
+//    }
 
     @Override
     public String execute()
     {
         TaskId taskId = new TaskId( category, currentUserService.getCurrentUser() );
 
-        flattenedReport = (FlattenedDataIntegrityReport) notifier.getTaskSummary( taskId );
+//        flattenedReport = (FlattenedDataIntegrityReport) notifier.getTaskSummary( taskId );
+        dataIntegrityReport = ( DataIntegrityReport ) notifier.getTaskSummary( taskId );
 
         return SUCCESS;
     }
