@@ -1,4 +1,3 @@
-
 #macro( integrityItem $header $id )
 <h4>${header}&nbsp;<img id="${id}Button"></h4>
 
