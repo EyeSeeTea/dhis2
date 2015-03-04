@@ -44,7 +44,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * @author Halvdan Hoem Grelland
+ * @author Halvdan Hoem Grelland <halvdanhg@gmail.com>
  */
 @Async
 public class DataIntegrityTask implements Runnable
@@ -137,6 +137,8 @@ public class DataIntegrityTask implements Runnable
         Collections.sort( dataIntegrityReport.getOrganisationUnitsWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( dataIntegrityReport.getOrganisationUnitGroupsWithoutGroupSets(), IdentifiableObjectNameComparator.INSTANCE );
         Collections.sort( dataIntegrityReport.getValidationRulesWithoutGroups(), IdentifiableObjectNameComparator.INSTANCE );
+
+        log.info( "Sorted results" );
 
         timer.stop();
 
