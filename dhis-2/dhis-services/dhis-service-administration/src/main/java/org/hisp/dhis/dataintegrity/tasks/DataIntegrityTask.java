@@ -47,7 +47,8 @@ import java.util.Collections;
  * @author Halvdan Hoem Grelland <halvdanhg@gmail.com>
  */
 @Async
-public class DataIntegrityTask implements Runnable
+public class DataIntegrityTask
+    implements Runnable
 {
     private static final Log log = LogFactory.getLog( DataIntegrityTask.class );
 
@@ -67,11 +68,11 @@ public class DataIntegrityTask implements Runnable
     // Constructors
     // -------------------------------------------------------------------------
 
-    public DataIntegrityTask( DataIntegrityService dataIntegrityService, Notifier notifier , TaskId taskId )
+    public DataIntegrityTask( TaskId taskId, DataIntegrityService dataIntegrityService, Notifier notifier )
     {
+        this.taskId = taskId;
         this.dataIntegrityService = dataIntegrityService;
         this.notifier = notifier;
-        this.taskId = taskId;
     }
 
     // -------------------------------------------------------------------------

@@ -75,7 +75,7 @@ public class DataIntegrityController
         TaskId taskId = new TaskId( TaskCategory.DATAINTEGRITY, currentUserService.getCurrentUser() );
         notifier.clear( taskId );
 
-        scheduler.executeTask( new DataIntegrityTask( dataIntegrityService, notifier, taskId ) );
+        scheduler.executeTask( new DataIntegrityTask( taskId, dataIntegrityService, notifier ) );
 
         response.setHeader( "Location", ContextUtils.getRootPath( request ) + "/system/tasks/" + TaskCategory.DATAINTEGRITY );
         response.setStatus( HttpServletResponse.SC_ACCEPTED );

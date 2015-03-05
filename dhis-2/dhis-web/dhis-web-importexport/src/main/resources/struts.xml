@@ -2,12 +2,10 @@
 <!DOCTYPE struts PUBLIC
   "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
   "http://struts.apache.org/dtds/struts-2.0.dtd">
-<!--suppress ALL, Annotator -->
 <struts>
 
   <include file="dhis-web-commons.xml" />
 
-  <!--suppress Annotator -->
   <package name="dhis-web-importexport" extends="dhis-web-commons" namespace="/dhis-web-importexport">
 
     <action name="index" class="org.hisp.dhis.importexport.action.NoAction">
