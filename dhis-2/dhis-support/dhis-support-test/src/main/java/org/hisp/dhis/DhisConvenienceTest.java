@@ -85,6 +85,8 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramRule;
+import org.hisp.dhis.program.ProgramRuleAction;
+import org.hisp.dhis.program.ProgramRuleVariable;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
@@ -1141,6 +1143,46 @@ public abstract class DhisConvenienceTest
         programRule.setName( "ProgramRule" + uniqueCharacter );
     
         return programRule;
+    }
+    
+    public static ProgramRule createProgramRule ( char uniqueCharacter, Program parentProgram )
+    {
+        ProgramRule programRule = createProgramRule( uniqueCharacter );
+        programRule.setProgram( parentProgram );
+    
+        return programRule;
+    }
+    
+    public static ProgramRuleAction createProgramRuleAction ( char uniqueCharacter )
+    {
+        ProgramRuleAction programRuleAction = new ProgramRuleAction();
+        programRuleAction.setName( "ProgramRuleAction" + uniqueCharacter );
+    
+        return programRuleAction;
+    }
+    
+    public static ProgramRuleAction createProgramRuleAction ( char uniqueCharacter, ProgramRule parentRule )
+    {
+        ProgramRuleAction programRuleAction = createProgramRuleAction( uniqueCharacter );
+        programRuleAction.setProgramRule( parentRule );
+    
+        return programRuleAction;
+    }
+    
+    public static ProgramRuleVariable createProgramRuleVariable ( char uniqueCharacter )
+    {
+        ProgramRuleVariable programRuleVariable = new ProgramRuleVariable();
+        programRuleVariable.setName( "ProgramRuleVariable" + uniqueCharacter );
+    
+        return programRuleVariable;
+    }
+    
+    public static ProgramRuleVariable createProgramRuleVariable ( char uniqueCharacter, Program parentProgram )
+    {
+        ProgramRuleVariable programRuleVariable = createProgramRuleVariable( uniqueCharacter );
+        programRuleVariable.setProgram( parentProgram );
+        
+        return programRuleVariable;
     }
 
     public static ProgramStage createProgramStage( char uniqueCharacter, int minDays )

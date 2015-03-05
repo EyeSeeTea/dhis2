@@ -137,4 +137,27 @@ public class ProgramRuleVariableServiceTest
         
         assertEquals( variableH, variableService.getProgramRuleVariable( idH ) );
     }
+    
+    @Test
+    public void testDeleteProgramRuleVariable()
+    {
+        ProgramRuleVariable ruleVariableI = new ProgramRuleVariable( "RuleVariableI", programA, ProgramRuleVariableSourceType.DATAELEMENT_CURRENT_EVENT, null, dataElementA, null );
+        ProgramRuleVariable ruleVariableJ = new ProgramRuleVariable( "RuleVariableJ", programA, ProgramRuleVariableSourceType.TEI_ATTRIBUTE, attributeA, null, null );
+
+        int idI = variableService.addProgramRuleVariable( ruleVariableI );
+        int idJ = variableService.addProgramRuleVariable( ruleVariableJ );
+        
+        assertNotNull( variableService.getProgramRuleVariable( idI ) );
+        assertNotNull( variableService.getProgramRuleVariable( idJ ) );
+
+        variableService.deleteProgramRuleVariable( ruleVariableI );
+
+        assertNull( variableService.getProgramRuleVariable( idI ) );
+        assertNotNull( variableService.getProgramRuleVariable( idJ ) );
+
+        variableService.deleteProgramRuleVariable( ruleVariableJ );
+
+        assertNull( variableService.getProgramRuleVariable( idI ) );
+        assertNull( variableService.getProgramRuleVariable( idJ ) );
+    }
 }

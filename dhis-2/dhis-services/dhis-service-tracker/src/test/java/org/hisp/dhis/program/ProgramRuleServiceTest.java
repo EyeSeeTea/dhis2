@@ -29,6 +29,8 @@ package org.hisp.dhis.program;
  */
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hisp.dhis.DhisSpringTest;
 import org.junit.Test;
@@ -44,6 +46,12 @@ public class ProgramRuleServiceTest
     private Program programC;
     
     private ProgramStage programStageA;
+    private ProgramRule programRuleA;
+    private ProgramRuleAction programRuleActionA;
+    private ProgramRuleAction programRuleActionB;
+    private ProgramRuleVariable programRuleVariableA;
+    private ProgramRuleVariable programRuleVariableB;
+    
     
     @Autowired
     private ProgramService programService;
@@ -52,7 +60,13 @@ public class ProgramRuleServiceTest
     private ProgramStageService programStageService;
     
     @Autowired
-    private ProgramRuleService ruleService;
+    private ProgramRuleService programRuleService;
+
+    @Autowired
+    private ProgramRuleActionService programRuleActonService;
+    
+    @Autowired
+    private ProgramRuleVariableService programRuleVariableService;
     
     @Override
     public void setUpTest()
@@ -62,12 +76,30 @@ public class ProgramRuleServiceTest
         programC = createProgram( 'C', null, null );
         
         programStageA = createProgramStage( 'A', 1 );
+        programStageA.setProgram( programA );
+        Set<ProgramStage> stagesA = new HashSet<ProgramStage>();
+        stagesA.add( programStageA );
+        programA.setProgramStages( stagesA );
         
         programService.addProgram( programA );
         programService.addProgram( programB );
         programService.addProgram( programC );
         
         programStageService.saveProgramStage( programStageA );
+        
+        //Add a tree of variables, rules and actions to programA:
+        programRuleA = createProgramRule( 'A', programA );
+        programRuleService.addProgramRule( programRuleA );
+        
+        programRuleActionA = createProgramRuleAction( 'A', programRuleA );
+        programRuleActionB = createProgramRuleAction( 'B', programRuleA );
+        programRuleActonService.addProgramRuleAction( programRuleActionA );
+        programRuleActonService.addProgramRuleAction( programRuleActionB );
+        
+        programRuleVariableA = createProgramRuleVariable( 'A', programA );
+        programRuleVariableB = createProgramRuleVariable( 'B', programA );
+        programRuleVariableService.addProgramRuleVariable( programRuleVariableA );
+        programRuleVariableService.addProgramRuleVariable( programRuleVariableB );  
     }
     
     @Test
@@ -77,13 +109,13 @@ public class ProgramRuleServiceTest
         ProgramRule ruleB = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "$a < 1", 1 );
         ProgramRule ruleC = new ProgramRule( "RuleA", "descriptionA", programA, null, null, "($a < 1 && $a > -10) && !$b", 0 );
         
-        int idA = ruleService.addProgramRule( ruleA );
-        int idB = ruleService.addProgramRule( ruleB );
-        int idC = ruleService.addProgramRule( ruleC );
+        int idA = programRuleService.addProgramRule( ruleA );
+        int idB = programRuleService.addProgramRule( ruleB );
+        int idC = programRuleService.addProgramRule( ruleC );
         
-        assertEquals( ruleA, ruleService.getProgramRule( idA ) );
-        assertEquals( ruleB, ruleService.getProgramRule( idB ) );
-        assertEquals( ruleC, ruleService.getProgramRule( idC ) );
+        assertEquals( ruleA, programRuleService.getProgramRule( idA ) );
+        assertEquals( ruleB, programRuleService.getProgramRule( idB ) );
+        assertEquals( ruleC, programRuleService.getProgramRule( idC ) );
     }
     
     @Test
@@ -95,13 +127,13 @@ public class ProgramRuleServiceTest
         //Add a rule that is not part of programB....
         ProgramRule ruleG = new ProgramRule( "RuleG", "descriptionG", programA, null, null, "!false", 0 );
         
-        ruleService.addProgramRule( ruleD );
-        ruleService.addProgramRule( ruleE );
-        ruleService.addProgramRule( ruleF );
-        ruleService.addProgramRule( ruleG );
+        programRuleService.addProgramRule( ruleD );
+        programRuleService.addProgramRule( ruleE );
+        programRuleService.addProgramRule( ruleF );
+        programRuleService.addProgramRule( ruleG );
         
         //Get all the 3 rules for programB
-        Collection<ProgramRule> rules = ruleService.getProgramRule( programB );
+        Collection<ProgramRule> rules = programRuleService.getProgramRule( programB );
         assertEquals( 3, rules.size() );
         assertTrue( rules.contains( ruleD ) );
         assertTrue( rules.contains( ruleE ) );
@@ -116,7 +148,7 @@ public class ProgramRuleServiceTest
     {
         ProgramRule ruleH = new ProgramRule( "RuleA", "descriptionA", programA, programStageA, null, "true", null );
         
-        int idH = ruleService.addProgramRule( ruleH );
+        int idH = programRuleService.addProgramRule( ruleH );
         
         ruleH.setCondition( "$newcondition == true" );
         ruleH.setName( "new name" );
@@ -124,8 +156,47 @@ public class ProgramRuleServiceTest
         ruleH.setPriority( 99 );
         ruleH.setProgram( programC );
         
-        ruleService.updateProgramRule( ruleH );
+        programRuleService.updateProgramRule( ruleH );
         
-        assertEquals( ruleH, ruleService.getProgramRule( idH ) );
+        assertEquals( ruleH, programRuleService.getProgramRule( idH ) );
     }
+    
+    
+
+    @Test
+    public void testDeleteProgramRule()
+    {
+        ProgramRule ruleI = new ProgramRule( "RuleI", "descriptionI", programB, null, null, "true", null );
+        ProgramRule ruleJ = new ProgramRule( "RuleJ", "descriptionJ", programB, null, null, "$a < 1", 1 );
+
+        int idI = programRuleService.addProgramRule( ruleI );
+        int idJ = programRuleService.addProgramRule( ruleJ );
+        
+        assertNotNull( programRuleService.getProgramRule( idI ) );
+        assertNotNull( programRuleService.getProgramRule( idJ ) );
+
+        programRuleService.deleteProgramRule( ruleI );
+
+        assertNull( programRuleService.getProgramRule( idI ) );
+        assertNotNull( programRuleService.getProgramRule( idJ ) );
+
+        programRuleService.deleteProgramRule( ruleJ );
+
+        assertNull( programRuleService.getProgramRule( idI ) );
+        assertNull( programRuleService.getProgramRule( idJ ) );
+    }
+    
+    /*TODO: Fix the functionality for 2 level cascading deletes.
+        
+    @Test
+    public void testCascadingDeleteProgram()
+    {
+        programService.deleteProgram( programA );
+        
+        assertNull( programRuleService.getProgramRule( programRuleA.getId() ) );
+        assertNull( programRuleActonService.getProgramRuleAction( programRuleActionA.getId() ) );
+        assertNull( programRuleActonService.getProgramRuleAction( programRuleActionB.getId() ) );
+        assertNull( programRuleVariableService.getProgramRuleVariable( programRuleVariableA.getId() ) );
+        assertNull( programRuleVariableService.getProgramRuleVariable( programRuleVariableB.getId() ) );
+    }*/
 }

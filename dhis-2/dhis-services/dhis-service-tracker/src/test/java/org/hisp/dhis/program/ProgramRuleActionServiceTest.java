@@ -128,4 +128,27 @@ public class ProgramRuleActionServiceTest
         
         assertEquals( actionH, actionService.getProgramRuleAction( idH ) );
     }
+    
+    @Test
+    public void testDeleteProgramRuleVariable()
+    {
+        ProgramRuleAction actionI = new ProgramRuleAction( "ActionI", programRuleA, ProgramRuleActionType.ASSIGNVARIABLE, null, null, "$myvar", "true");
+        ProgramRuleAction actionJ = new ProgramRuleAction( "ActionJ", programRuleA, ProgramRuleActionType.DISPLAYTEXT, null, "con","Hello", "$placeofliving");
+        
+        int idI = actionService.addProgramRuleAction( actionI );
+        int idJ = actionService.addProgramRuleAction( actionJ );
+        
+        assertNotNull( actionService.getProgramRuleAction( idI ) );
+        assertNotNull( actionService.getProgramRuleAction( idJ ) );
+
+        actionService.deleteProgramRuleAction( actionI );
+
+        assertNull( actionService.getProgramRuleAction( idI ) );
+        assertNotNull( actionService.getProgramRuleAction( idJ ) );
+
+        actionService.deleteProgramRuleAction( actionJ );
+
+        assertNull( actionService.getProgramRuleAction( idI ) );
+        assertNull( actionService.getProgramRuleAction( idJ ) );
+    }
 }

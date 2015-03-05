@@ -28,7 +28,6 @@
 		class="org.hisp.dhis.program.hibernate.HibernateProgramStageInstanceStore">
 		<property name="clazz" value="org.hisp.dhis.program.ProgramStageInstance" />
 		<property name="sessionFactory" ref="sessionFactory" />
-		<property name="jdbcTemplate" ref="jdbcTemplate" />
 		<property name="programInstanceService" ref="org.hisp.dhis.program.ProgramInstanceService" />
 	</bean>
 
@@ -485,6 +484,21 @@
 		class="org.hisp.dhis.program.ProgramStageDeletionHandler">
 		<property name="programStageService" ref="org.hisp.dhis.program.ProgramStageService" />
 	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleDeletionHandler"
+		class="org.hisp.dhis.program.ProgramRuleDeletionHandler">
+		<property name="programRuleService" ref="org.hisp.dhis.program.ProgramRuleService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleVariableDeletionHandler"
+		class="org.hisp.dhis.program.ProgramRuleVariableDeletionHandler">
+		<property name="programRuleVariableService" ref="org.hisp.dhis.program.ProgramRuleVariableService" />
+	</bean>
+	
+	<bean id="org.hisp.dhis.program.ProgramRuleActionDeletionHandler"
+		class="org.hisp.dhis.program.ProgramRuleActionDeletionHandler">
+		<property name="programRuleActionService" ref="org.hisp.dhis.program.ProgramRuleActionService" />
+	</bean>
 
 	<bean id="org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueDeletionHandler"
 		class="org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueDeletionHandler">
@@ -563,6 +577,9 @@
 					<ref bean="org.hisp.dhis.program.ProgramValidationDeletionHandler" />
 					<ref bean="org.hisp.dhis.program.ProgramDataEntryFormDeletionHandler" />
 					<ref bean="org.hisp.dhis.program.ProgramIndicatorDeletionHandler" />
+					<ref bean="org.hisp.dhis.program.ProgramRuleDeletionHandler" />
+					<ref bean="org.hisp.dhis.program.ProgramRuleVariableDeletionHandler" />
+					<ref bean="org.hisp.dhis.program.ProgramRuleActionDeletionHandler" />
 					<ref bean="org.hisp.dhis.trackedentity.TrackedEntityFormDeletionHandler" />
 					<ref bean="org.hisp.dhis.eventchart.EventChartDeletionHandler" />
 					<ref bean="org.hisp.dhis.eventreport.EventReportDeletionHandler" />

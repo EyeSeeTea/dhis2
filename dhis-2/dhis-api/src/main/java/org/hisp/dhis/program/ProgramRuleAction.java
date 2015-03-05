@@ -116,12 +116,12 @@ public class ProgramRuleAction
     // Constructors
     // -------------------------------------------------------------------------
 
-    ProgramRuleAction()
+    public ProgramRuleAction()
     {
         setAutoFields();
     }
     
-    ProgramRuleAction( String name, ProgramRule programRule, ProgramRuleActionType programRuleActionType, DataElement dataElement, String location, String content, String data )
+    public ProgramRuleAction( String name, ProgramRule programRule, ProgramRuleActionType programRuleActionType, DataElement dataElement, String location, String content, String data )
     {
         this();
         this.name = name;
