@@ -4,7 +4,7 @@ $( document ).ready( function() {
     $.ajax({
         url: '../api/dataIntegrity',
         method: 'POST',
-        success: registerDataIntegrityTimeout,
+        success: pollDataIntegrityCheckFinished,
         error: function( xhr, txtStatus, err ) {
             showErrorMessage( "Data integrity checks cannot be run. Request failed.", 3 );
             throw Error( xhr.responseText );
@@ -14,7 +14,7 @@ $( document ).ready( function() {
 
 var checkFinishedTimeout = null;
 
-function registerDataIntegrityTimeout() {
+function pollDataIntegrityCheckFinished() {
     pingNotifications( 'DATAINTEGRITY', 'notificationsTable', function() {
         $.getJSON( "getDataIntegrityReport.action", {}, function( json ) {
             hideLoader();
@@ -24,7 +24,7 @@ function registerDataIntegrityTimeout() {
             clearTimeout( checkFinishedTimeout );
         } );
     } );
-    checkFinishedTimeout = setTimeout( "registerDataIntegrityTimeout()", 1500 );
+    checkFinishedTimeout = setTimeout( "pollDataIntegrityCheckFinished()", 1500 );
 }
 
 function populateIntegrityItems( json ) {
