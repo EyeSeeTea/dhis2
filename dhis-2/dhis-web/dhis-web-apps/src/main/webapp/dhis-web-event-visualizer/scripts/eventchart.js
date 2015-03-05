@@ -4088,12 +4088,6 @@ Ext.onReady( function() {
                         chart;
 
                     // overwrite items
-                    columnIds = [columnIds[0]];
-                    failSafeColumnIds = [failSafeColumnIds[0]];
-                    rowIds = [rowIds[0]];
-
-                    // store
-                    store = getDefaultStore();
 
                     // axis
                     axis = {
