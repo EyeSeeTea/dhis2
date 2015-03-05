@@ -1538,7 +1538,11 @@ Ext.onReady( function() {
 
                 // remove ux and layout item
                 if (hasDimension(id, valueStore)) {
-                    ns.app.accordion.getUx(id).removeDataElement();
+                    var uxArray = ns.app.accordion.getUxArray(id);
+
+                    for (var i = 0; i < uxArray.length; i++) {
+                        uxArray[i].removeDataElement();
+                    }
                 }
             }
         };
@@ -4251,16 +4255,16 @@ Ext.onReady( function() {
 
 				return hasDataElement;
 			},
-            getUxById: function(dataElementId) {
-                var ux;
+            getUxArrayById: function(dataElementId) {
+                var uxArray = [];
 
                 this.items.each(function(item) {
 					if (item.dataElement.id === dataElementId) {
-						ux = item;
+						uxArray.push(item);
 					}
 				});
 
-                return ux;
+                return uxArray;
             },
 			removeAllDataElements: function(reset) {
 				var items = this.items.items,
@@ -6276,8 +6280,8 @@ Ext.onReady( function() {
 			setGui: setGui,
 			getView: getView,
 
-            getUx: function(id) {
-                return dataElementSelected.getUxById(id);
+            getUxArray: function(id) {
+                return dataElementSelected.getUxArrayById(id);
             },
 
             listeners: {
