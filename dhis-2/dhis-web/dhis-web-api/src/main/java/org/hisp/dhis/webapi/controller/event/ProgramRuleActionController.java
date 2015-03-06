@@ -28,7 +28,7 @@ package org.hisp.dhis.webapi.controller.event;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.program.ProgramRuleVariable;
+import org.hisp.dhis.program.ProgramRuleAction;
 import org.hisp.dhis.schema.descriptors.ProgramRuleActionSchemaDescriptor;
 import org.hisp.dhis.webapi.controller.AbstractCrudController;
 import org.springframework.stereotype.Controller;
@@ -41,6 +41,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping( value = ProgramRuleActionSchemaDescriptor.API_ENDPOINT )
 public class ProgramRuleActionController
-    extends AbstractCrudController<ProgramRuleVariable>
+    extends AbstractCrudController<ProgramRuleAction>
 {
 }
