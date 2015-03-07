@@ -26,7 +26,7 @@
 	<many-to-one name="programStage" class="org.hisp.dhis.program.ProgramStage" 
 		column="programstageid" foreign-key="fk_programrule_programstage" />
 
-    <set name="programRuleActions" order-by="sortOrder" cascade="all">
+    <set name="programRuleActions" cascade="all">
 		<key column="programruleid" />
 		<one-to-many class="org.hisp.dhis.program.ProgramRuleAction" />
 	</set>
