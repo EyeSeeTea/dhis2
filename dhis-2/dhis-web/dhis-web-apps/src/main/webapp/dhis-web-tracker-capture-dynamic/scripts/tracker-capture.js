@@ -26,7 +26,7 @@ if( dhis2.tc.memoryOnly ) {
 dhis2.tc.store = new dhis2.storage.Store({
     name: 'dhis2tc',
     adapters: [dhis2.storage.IndexedDBAdapter, dhis2.storage.DomSessionStorageAdapter, dhis2.storage.InMemoryAdapter],
-    objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations']      
+    objectStores: ['programs', 'programStages', 'trackedEntities', 'trackedEntityForms', 'attributes', 'relationshipTypes', 'optionSets', 'programValidations', 'programRuleVariables', 'programRules']      
 });
 
 (function($) {
@@ -165,10 +165,15 @@ function downloadMetaData()
     promise = promise.then( getOptionSetsForDataElements );
     promise = promise.then( getTrackedEntityAttributes );
     promise = promise.then( getOptionSetsForAttributes );
+    promise = promise.then( getMetaProgramRuleVariables );
+    promise = promise.then( getProgramRuleVariables );
+    promise = promise.then( getMetaProgramRules );
+    promise = promise.then( getProgramRules );
     promise = promise.then( getMetaProgramValidations );
     promise = promise.then( getProgramValidations );
     promise = promise.then( getMetaTrackedEntityForms );
     promise = promise.then( getTrackedEntityForms );
+    
     promise.done(function() {
         
         //Enable ou selection after meta-data has downloaded
@@ -605,6 +610,226 @@ function getOptionSet( id )
         }).done( function( response ){            
             _.each( _.values( response.optionSets ), function( optionSet ) {                
                 dhis2.tc.store.set( 'optionSets', optionSet );
+            });
+        });
+    };
+}
+
+function getMetaProgramRuleVariables( programs )
+{
+    if( !programs ){
+        return;
+    }
+    
+    var def = $.Deferred();
+    
+    var programIds = [];
+    _.each( _.values( programs ), function ( program ) { 
+        if( program.id ) {
+            programIds.push( program.id );
+        }
+    });
+    
+    $.ajax({
+        url: '../api/programRuleVariables.json',
+        type: 'GET',
+        data:'paging=false&fields=id,program[id]'
+    }).done( function(response) {          
+        var programRuleVariables = [];
+        _.each( _.values( response.programRuleVariables ), function ( programRuleVariable ) { 
+            if( programRuleVariable &&
+                programRuleVariable.id &&
+                programRuleVariable.program &&
+                programRuleVariable.program.id &&
+                programIds.indexOf( programRuleVariable.program.id ) !== -1) {
+            
+                programRuleVariables.push( programRuleVariable );
+            }  
+            
+        });
+        
+        def.resolve( {programRuleVariables: programRuleVariables, programs: programs} );
+        
+    }).fail(function(){
+        def.resolve( null );
+    });
+    
+    return def.promise();    
+}
+
+function getProgramRuleVariables( data )
+{
+    if( !data || !data.programRuleVariables ){
+        return;
+    }
+    
+    var mainDef = $.Deferred();
+    var mainPromise = mainDef.promise();
+
+    var def = $.Deferred();
+    var promise = def.promise();
+
+    var builder = $.Deferred();
+    var build = builder.promise();
+
+    _.each( _.values( data.programRuleVariables ), function ( programRuleVariable ) {
+        build = build.then(function() {
+            var d = $.Deferred();
+            var p = d.promise();
+            dhis2.tc.store.get('programRuleVariables', programRuleVariable.id).done(function(obj) {
+                if(!obj) {
+                    promise = promise.then( getProgramRuleVariable( programRuleVariable.id ) );
+                }
+                d.resolve();
+            });
+
+            return p;
+        });
+    });
+
+    build.done(function() {
+        def.resolve();
+
+        promise = promise.done( function () {
+            mainDef.resolve( data.programs );
+        } );
+    }).fail(function(){
+        mainDef.resolve( null );
+    });
+
+    builder.resolve();
+
+    return mainPromise;
+}
+
+function getProgramRuleVariable( id )
+{
+    return function() {
+        return $.ajax( {
+            url: '../api/programRuleVariables.json',
+            type: 'GET',
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,program[id],name,sourcetype,attribute[id],dataElement[id],programStage[id]'
+        }).done( function( response ){
+            
+            _.each( _.values( response.programRuleVariables ), function ( programRuleVariable ) { 
+                
+                if( programRuleVariable &&
+                    programRuleVariable.id &&
+                    programRuleVariable.program &&
+                    programRuleVariable.program.id ) {
+                
+                    dhis2.tc.store.set( 'programRuleVariables', programRuleVariable );
+                }
+            });
+        });
+    };
+}
+
+function getMetaProgramRules( programs )
+{
+    if( !programs ){
+        return;
+    }
+    
+    var def = $.Deferred();
+    
+    var programIds = [];
+    _.each( _.values( programs ), function ( program ) { 
+        if( program.id ) {
+            programIds.push( program.id );
+        }
+    });
+    
+    $.ajax({
+        url: '../api/programRules.json',
+        type: 'GET',
+        data:'paging=false&fields=id,program[id]'
+    }).done( function(response) {          
+        var programRules = [];
+        _.each( _.values( response.programRules ), function ( programRule ) { 
+            if( programRule &&
+                programRule.id &&
+                programRule.program &&
+                programRule.program.id &&
+                programIds.indexOf( programRule.program.id ) !== -1) {
+            
+                programRules.push( programRule );
+            }  
+            
+        });
+        
+        def.resolve( {programRules: programRules, programs: programs} );
+        
+    }).fail(function(){
+        def.resolve( null );
+    });
+    
+    return def.promise();    
+}
+
+function getProgramRules( data )
+{
+    if( !data || !data.programRules ){
+        return;
+    }
+    
+    var mainDef = $.Deferred();
+    var mainPromise = mainDef.promise();
+
+    var def = $.Deferred();
+    var promise = def.promise();
+
+    var builder = $.Deferred();
+    var build = builder.promise();
+
+    _.each( _.values( data.programRules ), function ( programRule ) {
+        build = build.then(function() {
+            var d = $.Deferred();
+            var p = d.promise();
+            dhis2.tc.store.get('programRules', programRule.id).done(function(obj) {
+                if(!obj) {
+                    promise = promise.then( getProgramRule( programRule.id ) );
+                }
+                d.resolve();
+            });
+
+            return p;
+        });
+    });
+
+    build.done(function() {
+        def.resolve();
+
+        promise = promise.done( function () {
+            mainDef.resolve( data.programs );
+        } );
+    }).fail(function(){
+        mainDef.resolve( null );
+    });
+
+    builder.resolve();
+
+    return mainPromise;
+}
+
+function getProgramRule( id )
+{
+    return function() {
+        return $.ajax( {
+            url: '../api/programRules.json',
+            type: 'GET',
+            data: 'paging=false&filter=id:eq:' + id +'&fields=id,name,description,condition,program[id],programstage[id],priority'
+        }).done( function( response ){
+            
+            _.each( _.values( response.programRules ), function ( programRule ) { 
+                
+                if( programRule &&
+                    programRule.id &&
+                    programRule.program &&
+                    programRule.program.id ) {
+                
+                    dhis2.tc.store.set( 'programRules', programRule );
+                }
             });
         });
     };
