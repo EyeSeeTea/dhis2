@@ -63,6 +63,7 @@ import org.hisp.dhis.common.DimensionType;
 import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.DimensionalObjectUtils;
 import org.hisp.dhis.common.DisplayProperty;
+import org.hisp.dhis.common.IdentifiableProperty;
 import org.hisp.dhis.common.ListMap;
 import org.hisp.dhis.common.MapMap;
 import org.hisp.dhis.common.NameableObject;
@@ -153,6 +154,11 @@ public class DataQueryParams
      */
     protected DisplayProperty displayProperty;
     
+    /**
+     * The property to use as identifier in the query response.
+     */
+    protected IdentifiableProperty outputIdScheme;
+    
     // -------------------------------------------------------------------------
     // Transient properties
     // -------------------------------------------------------------------------
@@ -183,14 +189,9 @@ public class DataQueryParams
     private transient boolean skipPartitioning;
     
     /**
-     * Organisation units which were explicitly part of the original request.
-     */
-    private List<OrganisationUnit> organisationUnits = new ArrayList<>();
-
-    /**
      * Mapping of organisation unit sub-hierarchy roots and lowest available data approval levels.
      */
-    private Map<OrganisationUnit, Integer> dataApprovalLevels = new HashMap<>();
+    private transient Map<OrganisationUnit, Integer> dataApprovalLevels = new HashMap<>();
     
     // -------------------------------------------------------------------------
     // Constructors
@@ -209,18 +210,20 @@ public class DataQueryParams
         params.aggregationType = this.aggregationType;
         params.measureCriteria = this.measureCriteria;
         params.skipMeta = this.skipMeta;
+        params.skipRounding = this.skipRounding;
         params.hierarchyMeta = this.hierarchyMeta;
         params.ignoreLimit = this.ignoreLimit;
         params.hideEmptyRows = this.hideEmptyRows;
+        params.showHierarchy = this.showHierarchy;
+        params.displayProperty = this.displayProperty;
+        params.outputIdScheme = this.outputIdScheme;
         
         params.partitions = new Partitions( this.partitions );
         params.dataType = this.dataType;
         params.periodType = this.periodType;
         params.dataPeriodType = this.dataPeriodType;
         params.skipPartitioning = this.skipPartitioning;
-        params.organisationUnits = new ArrayList<>( this.organisationUnits );
         params.dataApprovalLevels = new HashMap<>( this.dataApprovalLevels );
-        params.displayProperty = this.displayProperty;
         
         return params;
     }
@@ -502,7 +505,7 @@ public class DataQueryParams
     }
     
     /**
-     * Indicates whether organisation units are present as dimensio or filter.
+     * Indicates whether organisation units are present as dimension or filter.
      */
     public boolean hasOrganisationUnits()
     {
@@ -913,7 +916,16 @@ public class DataQueryParams
         
         return list;
     }
-    
+
+    /**
+     * Indicates whether this params defines an identifier scheme different from
+     * UID.
+     */
+    public boolean hasNonUidOutputIdScheme()
+    {
+        return outputIdScheme != null && !IdentifiableProperty.UID.equals( outputIdScheme );
+    }
+
     /**
      * Indicates whether this params specifies data approval levels.
      */
@@ -937,6 +949,21 @@ public class DataQueryParams
     public boolean isAggregation()
     {
         return !( AggregationType.NONE.equals( aggregationType ) || DataType.TEXT.equals( dataType ) );
+    }
+    
+    /**
+     * Returns all dimension items.
+     */
+    public List<NameableObject> getAllDimensionItems()
+    {
+        List<NameableObject> items = new ArrayList<NameableObject>();
+        
+        for ( DimensionalObject dim : ListUtils.union( dimensions, filters ) )
+        {
+            items.addAll( dim.getItems() );
+        }
+        
+        return items;
     }
     
     // -------------------------------------------------------------------------
@@ -1169,6 +1196,16 @@ public class DataQueryParams
     public void setDisplayProperty( DisplayProperty displayProperty )
     {
         this.displayProperty = displayProperty;
+    }
+
+    public IdentifiableProperty getOutputIdScheme()
+    {
+        return outputIdScheme;
+    }
+
+    public void setOutputIdScheme( IdentifiableProperty outputIdScheme )
+    {
+        this.outputIdScheme = outputIdScheme;
     }
 
     // -------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-package org.hisp.dhis.dataelement.hibernate;
+package org.hisp.dhis.dxf2.objectfilter.ops;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -29,42 +29,30 @@ package org.hisp.dhis.dataelement.hibernate;
  */
 
 import java.util.Collection;
-import java.util.List;
-
-import org.hibernate.criterion.Restrictions;
-import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
-import org.hisp.dhis.dataelement.CategoryStore;
-import org.hisp.dhis.dataelement.DataElementCategory;
 
 /**
- * @author Lars Helge Overland
+ * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class HibernateCategoryStore
-    extends HibernateIdentifiableObjectStore<DataElementCategory>
-    implements CategoryStore
+public class InOp extends Op
 {
     @Override
-    @SuppressWarnings("unchecked")
-    public Collection<DataElementCategory> getCategoriesByDimensionType( String dimensionType )
+    public OpStatus evaluate( Object object )
     {
-        return getSharingCriteria( Restrictions.eq( "dataDimensionType", dimensionType ) ).list();
-    }
+        Collection<String> items = getValue( Collection.class );
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Collection<DataElementCategory> getCategories( String dimensionType, boolean dataDimension )
-    {
-        return getSharingCriteria( 
-            Restrictions.eq( "dataDimensionType", dimensionType ),
-            Restrictions.eq( "dataDimension", dataDimension ) ).list();
-    }
-    
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<DataElementCategory> getCategoriesNoAcl( String dimensionType, boolean dataDimension )
-    {
-        return getCriteria( 
-            Restrictions.eq( "dataDimensionType", dimensionType ),
-            Restrictions.eq( "dataDimension", dataDimension ) ).list();
+        if ( items == null )
+        {
+            return OpStatus.INCLUDE;
+        }
+
+        for ( String item : items )
+        {
+            if ( item.equals( object ) )
+            {
+                return OpStatus.INCLUDE;
+            }
+        }
+
+        return OpStatus.IGNORE;
     }
 }
