@@ -10,20 +10,10 @@ trackerCapture.controller('ProfileController',
     
     $scope.editingDisabled = true;
     $scope.enrollmentEditing = false;
-    $scope.widget = 'PROFILE';
-    
-    //attributes for profile    
-    $scope.attributes = []; 
-    $scope.attributesById = [];
-    AttributesFactory.getAll().then(function(atts){
-        angular.forEach(atts, function(att){
-            $scope.attributesById[att.id] = att;
-        });
-    });
     
     //listen for the selected entity
     var selections = {};
-    $scope.$on('dashboardWidgets', function(event, args) {
+    $scope.$on('dashboardWidgets', function(event, args) {        
         selections = CurrentSelection.get();
         $scope.selectedTei = angular.copy(selections.tei);
         $scope.trackedEntity = selections.te;
@@ -33,6 +23,7 @@ trackerCapture.controller('ProfileController',
         $scope.trackedEntityForm = null;
         $scope.customForm = null;
         $scope.attributes = [];
+        $scope.attributesById = CurrentSelection.getAttributesById();
 
         //display only those attributes that belong to the selected program
         //if no program, display attributesInNoProgram        
@@ -43,19 +34,15 @@ trackerCapture.controller('ProfileController',
         delete $scope.selectedTei.attributes;
         
         AttributesFactory.getByProgram($scope.selectedProgram).then(function(atts){
-            $scope.attributes = atts;
-            
-            if($scope.selectedProgram && $scope.selectedProgram.id){
-                $scope.selectedProgram.hasCustomForm = false;               
-                TEFormService.getByProgram($scope.selectedProgram, atts).then(function(teForm){                    
-                    if(angular.isObject(teForm)){                        
-                        $scope.selectedProgram.hasCustomForm = true;
-                        $scope.selectedProgram.displayCustomForm = $scope.selectedProgram.hasCustomForm ? true:false;
-                        $scope.trackedEntityForm = teForm;
-                        $scope.customForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, $scope.widget);
-                    }                    
-                });
-            }            
+            $scope.attributes = atts;            
+            $scope.customFormExists = false;               
+            TEFormService.getByProgram($scope.selectedProgram, atts).then(function(teForm){                    
+                if(angular.isObject(teForm)){                        
+                    $scope.customFormExists = true;
+                    $scope.trackedEntityForm = teForm;
+                    $scope.customForm = CustomFormService.getForTrackedEntity($scope.trackedEntityForm, 'PROFILE');
+                }                    
+            });            
         });
     });
     
@@ -95,7 +82,7 @@ trackerCapture.controller('ProfileController',
             return false;
         }
                 
-        TEIService.update(tei, $scope.optionSets).then(function(updateResponse){
+        TEIService.update(tei, $scope.optionSets, $scope.attributesById).then(function(updateResponse){
             
             if(updateResponse.status !== 'SUCCESS'){//update has failed
                 var dialogOptions = {
@@ -118,6 +105,6 @@ trackerCapture.controller('ProfileController',
     };
     
     $scope.switchRegistrationForm = function(){
-        $scope.selectedProgram.displayCustomForm = !$scope.selectedProgram.displayCustomForm;
+        $scope.customFormExists = !$scope.customFormExists;
     };    
 });

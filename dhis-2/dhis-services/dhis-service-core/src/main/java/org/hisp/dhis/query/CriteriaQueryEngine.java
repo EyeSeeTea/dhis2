@@ -28,9 +28,7 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.Criteria;
-import org.hibernate.criterion.Conjunction;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Restrictions;
@@ -38,9 +36,11 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.schema.Property;
 import org.hisp.dhis.schema.Schema;
+import org.hisp.dhis.system.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +49,7 @@ import java.util.Map;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public class CriteriaQueryEngine implements QueryEngine
+public class CriteriaQueryEngine<T extends IdentifiableObject> implements QueryEngine<T>
 {
     @Autowired
     private final List<HibernateGenericStore<? extends IdentifiableObject>> hibernateGenericStores = new ArrayList<>();
@@ -58,7 +58,7 @@ public class CriteriaQueryEngine implements QueryEngine
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public List<? extends IdentifiableObject> query( Query query )
+    public List<T> query( Query query )
     {
         Schema schema = query.getSchema();
 
@@ -67,7 +67,7 @@ public class CriteriaQueryEngine implements QueryEngine
             return new ArrayList<>();
         }
 
-        HibernateGenericStore store = getStore( (Class<? extends IdentifiableObject>) schema.getKlass() );
+        HibernateGenericStore<?> store = getStore( (Class<? extends IdentifiableObject>) schema.getKlass() );
 
         if ( store == null )
         {
@@ -151,6 +151,11 @@ public class CriteriaQueryEngine implements QueryEngine
             parameters.add( getValue( property, parameter ) );
         }
 
+        if ( parameters.isEmpty() )
+        {
+            return null;
+        }
+
         switch ( restriction.getOperator() )
         {
             case EQ:
@@ -191,7 +196,12 @@ public class CriteriaQueryEngine implements QueryEngine
             }
             case IN:
             {
-                return Restrictions.in( property.getFieldName(), parameters );
+                if ( !Collection.class.isInstance( parameters.get( 0 ) ) || ((Collection) parameters.get( 0 )).isEmpty() )
+                {
+                    return null;
+                }
+
+                return Restrictions.in( property.getFieldName(), (Collection) parameters.get( 0 ) );
             }
         }
 
@@ -237,34 +247,33 @@ public class CriteriaQueryEngine implements QueryEngine
         }
     }
 
-    private HibernateGenericStore getStore( Class<? extends IdentifiableObject> klass )
+    private HibernateGenericStore<?> getStore( Class<? extends IdentifiableObject> klass )
     {
         initStoreMap();
         return stores.get( klass );
     }
 
-    @SuppressWarnings( "unchecked" )
-    private <T> T getValue( Property property, Object objectValue )
+    private Object getValue( Property property, Object objectValue )
     {
         Class<?> klass = property.getKlass();
 
         if ( !String.class.isInstance( objectValue ) )
         {
-            return (T) objectValue;
+            return objectValue;
         }
 
         String value = (String) objectValue;
 
         if ( klass.isInstance( value ) )
         {
-            return (T) value;
+            return value;
         }
 
         if ( Boolean.class.isAssignableFrom( klass ) )
         {
             try
             {
-                return (T) Boolean.valueOf( value );
+                return Boolean.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -274,7 +283,7 @@ public class CriteriaQueryEngine implements QueryEngine
         {
             try
             {
-                return (T) Integer.valueOf( value );
+                return Integer.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -284,7 +293,7 @@ public class CriteriaQueryEngine implements QueryEngine
         {
             try
             {
-                return (T) Float.valueOf( value );
+                return Float.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -294,7 +303,7 @@ public class CriteriaQueryEngine implements QueryEngine
         {
             try
             {
-                return (T) Double.valueOf( value );
+                return Double.valueOf( value );
             }
             catch ( Exception ignored )
             {
@@ -302,22 +311,7 @@ public class CriteriaQueryEngine implements QueryEngine
         }
         else if ( Date.class.isAssignableFrom( klass ) )
         {
-            try
-            {
-                return (T) DateUtils.parseDate( value,
-                    "yyyy-MM-dd'T'HH:mm:ssZ",
-                    "yyyy-MM-dd'T'HH:mm:ss",
-                    "yyyy-MM-dd'T'HH:mm",
-                    "yyyy-MM-dd'T'HH",
-                    "yyyy-MM-dd",
-                    "yyyy-MM",
-                    "yyyyMMdd",
-                    "yyyyMM",
-                    "yyyy" );
-            }
-            catch ( Exception ignored )
-            {
-            }
+            return DateUtils.parseDate( value );
         }
 
         return null;

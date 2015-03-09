@@ -28,16 +28,6 @@ package org.hisp.dhis.common;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.SessionFactory;
-import org.hisp.dhis.common.NameableObject.NameableProperty;
-import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
-import org.hisp.dhis.query.QueryService;
-import org.hisp.dhis.user.UserCredentials;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +38,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.common.NameableObject.NameableProperty;
+import org.hisp.dhis.common.comparator.IdentifiableObjectNameComparator;
+import org.hisp.dhis.organisationunit.OrganisationUnit;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
+import org.hisp.dhis.user.UserCredentials;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+
 /**
+ * Note that it is required for nameable object stores to have concrete implementation
+ * classes, not rely on the HibernateIdentifiableObjectStore class, in order to 
+ * be injected as nameable object stores.
+ * 
  * @author Lars Helge Overland
  */
 @Transactional
@@ -64,14 +70,19 @@ public class DefaultIdentifiableObjectManager
     private Set<GenericNameableObjectStore<? extends NameableObject>> nameableObjectStores;
 
     @Autowired
+    private Set<GenericDimensionalObjectStore<? extends DimensionalObject>> dimensionalObjectStores;
+
+    @Autowired
     private SessionFactory sessionFactory;
 
     @Autowired
-    private QueryService queryService;
+    private OrganisationUnitService organisationUnitService;
 
     private Map<Class<? extends IdentifiableObject>, GenericIdentifiableObjectStore<? extends IdentifiableObject>> identifiableObjectStoreMap;
 
     private Map<Class<? extends NameableObject>, GenericNameableObjectStore<? extends NameableObject>> nameableObjectStoreMap;
+
+    private Map<Class<? extends DimensionalObject>, GenericDimensionalObjectStore<? extends DimensionalObject>> dimensionalObjectStoreMap;
 
     //--------------------------------------------------------------------------
     // IdentifiableObjectManager implementation
@@ -366,9 +377,9 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
-    public <T extends IdentifiableObject> int getCountByShortName( Class<T> clazz, String shortName )
+    public <T extends NameableObject> int getCountByShortName( Class<T> clazz, String shortName )
     {
-        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+        GenericNameableObjectStore<NameableObject> store = getNameableObjectStore( clazz );
 
         if ( store != null )
         {
@@ -418,9 +429,9 @@ public class DefaultIdentifiableObjectManager
     }
 
     @Override
-    public <T extends IdentifiableObject> int getCountLikeShortName( Class<T> clazz, String shortName )
+    public <T extends NameableObject> int getCountLikeShortName( Class<T> clazz, String shortName )
     {
-        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+        GenericNameableObjectStore<NameableObject> store = getNameableObjectStore( clazz );
 
         if ( store != null )
         {
@@ -446,9 +457,9 @@ public class DefaultIdentifiableObjectManager
 
     @Override
     @SuppressWarnings( "unchecked" )
-    public <T extends IdentifiableObject> Collection<T> getLikeShortName( Class<T> clazz, String shortName )
+    public <T extends NameableObject> Collection<T> getLikeShortName( Class<T> clazz, String shortName )
     {
-        GenericIdentifiableObjectStore<IdentifiableObject> store = getIdentifiableObjectStore( clazz );
+        GenericNameableObjectStore<NameableObject> store = getNameableObjectStore( clazz );
 
         if ( store == null )
         {
@@ -698,6 +709,15 @@ public class DefaultIdentifiableObjectManager
                     map.put( object.getName(), object );
                 }
             }
+            else if ( IdentifiableProperty.UUID.equals( property ) && OrganisationUnit.class.isAssignableFrom( clazz ) )
+            {
+                OrganisationUnit organisationUnit = (OrganisationUnit) object;
+
+                if ( !StringUtils.isEmpty( organisationUnit.getUuid() ) )
+                {
+                    map.put( organisationUnit.getUuid(), (T) organisationUnit );
+                }
+            }
         }
 
         return map;
@@ -769,6 +789,10 @@ public class DefaultIdentifiableObjectManager
             else if ( IdentifiableProperty.UID.equals( property ) )
             {
                 return store.getByUid( id );
+            }
+            else if ( IdentifiableProperty.UUID.equals( property ) && OrganisationUnit.class.isAssignableFrom( clazz ) )
+            {
+                return (T) organisationUnitService.getOrganisationUnitByUuid( id );
             }
             else if ( IdentifiableProperty.CODE.equals( property ) )
             {
@@ -883,6 +907,20 @@ public class DefaultIdentifiableObjectManager
         return (Collection<T>) store.getAllNoAcl( first, max );
     }
 
+    @Override
+    @SuppressWarnings( "unchecked" )
+    public <T extends DimensionalObject> List<T> getByDataDimensionNoAcl( Class<T> clazz, boolean dataDimension )
+    {
+        GenericDimensionalObjectStore<DimensionalObject> store = getDimensionalObjectStore( clazz );
+
+        if ( store == null )
+        {
+            return new ArrayList<>();
+        }
+
+        return (List<T>) store.getByDataDimensionNoAcl( dataDimension );
+    }
+    
     //--------------------------------------------------------------------------
     // Supportive methods
     //--------------------------------------------------------------------------
@@ -927,6 +965,26 @@ public class DefaultIdentifiableObjectManager
         return (GenericNameableObjectStore<NameableObject>) store;
     }
 
+    @SuppressWarnings( "unchecked" )
+    private <T extends DimensionalObject> GenericDimensionalObjectStore<DimensionalObject> getDimensionalObjectStore( Class<T> clazz )
+    {
+        initMaps();
+
+        GenericDimensionalObjectStore<? extends DimensionalObject> store = dimensionalObjectStoreMap.get( clazz );
+
+        if ( store == null )
+        {
+            store = dimensionalObjectStoreMap.get( clazz.getSuperclass() );
+
+            if ( store == null )
+            {
+                log.warn( "No DimensionalObjectStore found for class: " + clazz );
+            }
+        }
+
+        return (GenericDimensionalObjectStore<DimensionalObject>) store;
+    }
+
     private void initMaps()
     {
         if ( identifiableObjectStoreMap != null )
@@ -946,6 +1004,13 @@ public class DefaultIdentifiableObjectManager
         for ( GenericNameableObjectStore<? extends NameableObject> store : nameableObjectStores )
         {
             nameableObjectStoreMap.put( store.getClazz(), store );
+        }
+        
+        dimensionalObjectStoreMap = new HashMap<>();
+        
+        for ( GenericDimensionalObjectStore<? extends DimensionalObject> store : dimensionalObjectStores )
+        {
+            dimensionalObjectStoreMap.put( store.getClazz(), store );
         }
     }
 }

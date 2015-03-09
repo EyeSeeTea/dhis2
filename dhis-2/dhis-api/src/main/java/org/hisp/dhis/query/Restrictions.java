@@ -28,9 +28,7 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.apache.commons.lang3.time.DateUtils;
-
-import java.util.Date;
+import java.util.Collection;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
@@ -84,6 +82,11 @@ public final class Restrictions
     }
 
     public static Restriction in( String path, Object... values )
+    {
+        return new Restriction( path, Operator.IN, values );
+    }
+
+    public static Restriction in( String path, Collection<?> values )
     {
         return new Restriction( path, Operator.IN, values );
     }

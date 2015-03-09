@@ -6,6 +6,7 @@ trackerCapture.controller('DashboardController',
                 $modal,
                 $timeout,
                 $filter,
+                TCStorageService,
                 orderByFilter,
                 storage,
                 TEIService, 
@@ -15,17 +16,26 @@ trackerCapture.controller('DashboardController',
                 TrackerWidgetsConfigurationFactory,
                 ProgramFactory,
                 DashboardLayoutService,
+                AttributesFactory,
                 CurrentSelection) {
     //selections
     $scope.selectedTeiId = ($location.search()).tei; 
     $scope.selectedProgramId = ($location.search()).program; 
     $scope.selectedOrgUnit = storage.get('SELECTED_OU');
     $scope.selectedProgram;    
-    $scope.selectedTei;  
- 
-    //dashboard items
-	var getDashboardLayout = function(){
-      	$rootScope.dashboardWidgets = []; 
+    $scope.selectedTei;
+    
+    //get ouLevels
+    TCStorageService.currentStore.open().done(function(){
+        TCStorageService.currentStore.getAll('ouLevels').done(function(response){
+            var ouLevels = angular.isObject(response) ? orderByFilter(response, '-level').reverse() : [];
+            CurrentSelection.setOuLevels(orderByFilter(ouLevels, '-level').reverse());
+        });
+    });
+    
+    //dashboard items   
+    var getDashboardLayout = function(){        
+        $rootScope.dashboardWidgets = [];    
         $scope.widgetsChanged = [];
         $scope.dashboardStatus = [];
         $scope.dashboardWidgetsOrder = {biggerWidgets: [], smallerWidgets: []};
@@ -105,57 +115,66 @@ trackerCapture.controller('DashboardController',
         
         //get option sets
         $scope.optionSets = [];
-        OptionSetService.getAll().then(function(optionSets){
-            
-            angular.forEach(optionSets, function(optionSet){                            
+        OptionSetService.getAll().then(function(optionSets){            
+            angular.forEach(optionSets, function(optionSet){
                 $scope.optionSets[optionSet.id] = optionSet;
             });
-        
-            //Fetch the selected entity
-            TEIService.get($scope.selectedTeiId, $scope.optionSets).then(function(response){
-                $scope.selectedTei = response.data;
+            
+            AttributesFactory.getAll().then(function(atts){
+                
+                $scope.attributesById = [];
+                angular.forEach(atts, function(att){
+                    $scope.attributesById[att.id] = att;
+                });
 
-                //get the entity type
-                TEService.get($scope.selectedTei.trackedEntity).then(function(te){                    
-                    $scope.trackedEntity = te;
+                CurrentSelection.setAttributesById($scope.attributesById);
+            
+                //Fetch the selected entity
+                TEIService.get($scope.selectedTeiId, $scope.optionSets, $scope.attributesById).then(function(response){
+                    $scope.selectedTei = response;
 
-                    //get enrollments for the selected tei
-                    EnrollmentService.getByEntity($scope.selectedTeiId).then(function(response){                    
+                    //get the entity type
+                    TEService.get($scope.selectedTei.trackedEntity).then(function(te){                    
+                        $scope.trackedEntity = te;
 
-                        var selectedEnrollment = null;
-                        if(angular.isObject(response) && response.enrollments && response.enrollments.length === 1 && response.enrollments[0].status === 'ACTIVE'){
-                            selectedEnrollment = response.enrollments[0];
-                        }
-                        
-                        ProgramFactory.getAll().then(function(programs){
-                            $scope.programs = [];
+                        //get enrollments for the selected tei
+                        EnrollmentService.getByEntity($scope.selectedTeiId).then(function(response){                    
+                            var enrollments = angular.isObject(response) && response.enrollments ? response.enrollments : [];
+                            var selectedEnrollment = null;
+                            if(enrollments.length === 1 && enrollments[0].status === 'ACTIVE'){
+                                selectedEnrollment = enrollments[0];
+                            }
 
-                            $scope.programNames = [];  
-                            $scope.programStageNames = [];        
-                            
-                            //get programs valid for the selected ou and tei
-                            angular.forEach(programs, function(program){
-                                $scope.programNames[program.id] = {id: program.id, name: program.name};
-                                angular.forEach(program.programStages, function(stage){                
-                                    $scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
+                            ProgramFactory.getAll().then(function(programs){
+                                $scope.programs = [];
+
+                                $scope.programNames = [];  
+                                $scope.programStageNames = [];        
+
+                                //get programs valid for the selected ou and tei
+                                angular.forEach(programs, function(program){
+                                    $scope.programNames[program.id] = {id: program.id, name: program.name};
+                                    angular.forEach(program.programStages, function(stage){                
+                                        $scope.programStageNames[stage.id] = {id: stage.id, name: stage.name};
+                                    });
+                                    if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
+                                       program.trackedEntity.id === $scope.selectedTei.trackedEntity){
+                                        $scope.programs.push(program);
+
+                                        if($scope.selectedProgramId && program.id === $scope.selectedProgramId || selectedEnrollment && selectedEnrollment.program === program.id){
+                                            $scope.selectedProgram = program;
+                                        }
+                                    }                                
                                 });
-                                if(program.organisationUnits.hasOwnProperty($scope.selectedOrgUnit.id) &&
-                                   program.trackedEntity.id === $scope.selectedTei.trackedEntity){
-                                    $scope.programs.push(program);                                    
-                                }
 
-                                if($scope.selectedProgramId && program.id === $scope.selectedProgramId || selectedEnrollment && selectedEnrollment.program === program.id){
-                                    $scope.selectedProgram = program;
-                                }
+                                //prepare selected items for broadcast
+                                CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: enrollments, selectedEnrollment: selectedEnrollment, optionSets: $scope.optionSets});                            
+                                getDashboardLayout();                    
                             });
-                            
-                            //prepare selected items for broadcast
-                            CurrentSelection.set({tei: $scope.selectedTei, te: $scope.trackedEntity, prs: $scope.programs, pr: $scope.selectedProgram, prNames: $scope.programNames, prStNames: $scope.programStageNames, enrollments: response.enrollments, selectedEnrollment: selectedEnrollment, optionSets: $scope.optionSets});                            
-                            getDashboardLayout();                    
                         });
-                    });
-                });            
-            });    
+                    });            
+                });  
+            });
         });
     }    
     
@@ -239,27 +258,36 @@ trackerCapture.controller('DashboardController',
     
     var saveDashboardLayout = function(){
         var widgets = [];
+        $scope.hasBigger = false;
+        $scope.hasSmaller = false;
         angular.forEach($rootScope.dashboardWidgets, function(widget){
             var w = angular.copy(widget);            
             if($scope.orderChanged){
                 if($scope.widgetsOrder.biggerWidgets.indexOf(w.title) !== -1){
+                    $scope.hasBigger = $scope.hasBigger || w.show;
                     w.parent = 'biggerWidget';
                     w.order = $scope.widgetsOrder.biggerWidgets.indexOf(w.title);
                 }
                 
                 if($scope.widgetsOrder.smallerWidgets.indexOf(w.title) !== -1){
+                    $scope.hasSmaller = $scope.hasSmaller || w.show;
                     w.parent = 'smallerWidget';
                     w.order = $scope.widgetsOrder.smallerWidgets.indexOf(w.title);
                 }
-            }            
+            }
             widgets.push(w);
         });
-            
+
         if($scope.selectedProgram && $scope.selectedProgram.id){
             $scope.dashboardLayouts[$scope.selectedProgram.id] = {widgets: widgets, program: $scope.selectedProgram.id};
         }
         
         DashboardLayoutService.saveLayout($scope.dashboardLayouts).then(function(){
+            if(!$scope.orderChanged){
+                $scope.hasSmaller = $filter('filter')($scope.dashboardWidgets, {parent: "smallerWidget", show: true}).length > 0;
+                $scope.hasBigger = $filter('filter')($scope.dashboardWidgets, {parent: "biggerWidget", show: true}).length > 0;                                
+            }                
+            setWidgetsSize();      
         });
     };
     

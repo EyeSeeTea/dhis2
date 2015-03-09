@@ -109,12 +109,18 @@ Ext.onReady( function() {
 
 		// data items
 	(function() {
-        var operatorCmpWidth = 70,
-            valueCmpWidth = 306,
+        var scrollbarWidth = /\bchrome\b/.test(navigator.userAgent.toLowerCase()) ? 8 : 17,
+            nameCmpWidth = 440 - scrollbarWidth,
             buttonCmpWidth = 20,
-            nameCmpWidth = 400,
-            namePadding = '2px 3px',
-            margin = '3px 0 1px';
+            operatorCmpWidth = 70,
+            searchCmpWidth = 70,
+            triggerCmpWidth = 17,
+            valueCmpWidth = 235,
+            rangeSetWidth = 135,
+            namePadding = '3px 3px',
+            margin = '3px 0 1px',
+            removeCmpStyle = 'padding: 0; margin-left: 3px',
+            defaultRangeSetId = 'default';
 
         Ext.define('Ext.ux.panel.DataElementIntegerContainer', {
 			extend: 'Ext.container.Container',
@@ -123,44 +129,96 @@ Ext.onReady( function() {
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
             getRecord: function() {
-                var record = {};
+                var record = {},
+                    isRange = this.rangeSetCmp.getValue() !== defaultRangeSetId;
 
                 record.dimension = this.dataElement.id;
                 record.name = this.dataElement.name;
 
-                if (this.valueCmp.getValue()) {
-					record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
-				}
+                if (isRange) {
+                    record.legendSet = {
+                        id: this.rangeSetCmp.getValue()
+                    };
+
+                    if (this.rangeValueCmp.getValue().length) {
+                        record.filter = 'IN:' + this.rangeValueCmp.getValue().join(';');
+                    }
+                }
+                else {
+                    if (this.valueCmp.getValue()) {
+                        record.filter = this.operatorCmp.getValue() + ':' + this.valueCmp.getValue();
+                    }
+                }
 
 				return record;
             },
             setRecord: function(record) {
-				if (record.filter) {
+                if (Ext.isObject(record.legendSet) && record.legendSet.id) {
+                    this.rangeSetCmp.pendingValue = record.legendSet.id;
+                    this.onRangeSetSelect(record.legendSet.id);
+
+                    if (record.filter) {
+                        var a = record.filter.split(':');
+
+                        if (a.length > 1 && Ext.isString(a[1])) {
+                            this.onRangeSearchSelect(a[1].split(';'), true);
+                        }
+                    }
+                }
+                else if (record.filter) {
+                    this.rangeSetCmp.pendingValue = defaultRangeSetId;
+
 					var a = record.filter.split(':');
 
-					this.operatorCmp.setValue(a[0]);
-					this.valueCmp.setValue(a[1]);
+                    if (a.length > 1) {
+                        this.operatorCmp.setValue(a[0]);
+                        this.valueCmp.setValue(a[1]);
+                    }
+                    else {}
 				}
 			},
             initComponent: function() {
-                var container = this;
+                var container = this,
+                    idProperty = 'id',
+                    nameProperty = 'name',
+                    displayProperty = 'displayName';
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
                 });
 
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: 'padding: 0',
+                    height: 18,
+                    text: NS.i18n.duplicate,
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: removeCmpStyle,
+                    height: 18,
+                    text: NS.i18n.remove,
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
-                    valueField: 'id',
-                    displayField: 'name',
+                    valueField: idProperty,
+                    displayField: nameProperty,
                     queryMode: 'local',
                     editable: false,
                     width: operatorCmpWidth,
 					style: 'margin-bottom:0',
                     value: 'EQ',
                     store: {
-                        fields: ['id', 'name'],
+                        fields: [idProperty, nameProperty],
                         data: [
                             {id: 'EQ', name: '='},
                             {id: 'GT', name: '>'},
@@ -173,32 +231,226 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Number', {
-                    width: valueCmpWidth,
+                    width: nameCmpWidth - operatorCmpWidth - rangeSetWidth,
 					style: 'margin-bottom:0'
                 });
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
+                this.rangeSearchStore = Ext.create('Ext.data.Store', {
+                    fields: [idProperty, nameProperty]
+                });
+
+                // function
+                this.filterSearchStore = function(isLayout) {
+                    var selected = container.rangeValueCmp.getValue();
+
+                    // hack, using internal method to activate dropdown before filtering
+                    if (isLayout) {
+                        container.rangeSearchCmp.onTriggerClick();
+                        container.rangeSearchCmp.collapse();
+                    }
+
+                    // filter
+                    container.rangeSearchStore.clearFilter();
+
+                    container.rangeSearchStore.filterBy(function(record) {
+                        return !Ext.Array.contains(selected, record.data[idProperty]);
+                    });
+                };
+
+                // function
+                this.onRangeSearchSelect = function(ids, isLayout) {
+                    ids = Ext.Array.from(ids);
+
+                    // store
+                    for (var i = 0, id; i < ids.length; i++) {
+                        id = ids[i];
+
+                        if (container.rangeValueStore.findExact(idProperty, id) === -1) {
+                            container.rangeValueStore.add(container.rangeSearchStore.getAt(container.rangeSearchStore.findExact(idProperty, id)).data);
+                        }
+                    }
+
+                    // search cmp
+                    container.rangeSearchCmp.select([]);
+
+                    // filter
+                    container.filterSearchStore(isLayout);
+                };
+
+                this.rangeSearchCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    width: operatorCmpWidth,
+                    style: 'margin-bottom: 0',
+                    emptyText: NS.i18n.select + '..',
+                    valueField: idProperty,
+                    displayField: displayProperty,
+                    editable: false,
+                    queryMode: 'local',
+                    hidden: true,
+                    store: this.rangeSearchStore,
+                    listConfig: {
+                        minWidth: operatorCmpWidth + (nameCmpWidth - operatorCmpWidth - rangeSetWidth)
+                    },
+                    listeners: {
+						select: function() {
+                            container.onRangeSearchSelect(Ext.Array.from(this.getValue())[0]);
+						},
+                        expand: function() {
+                            container.filterSearchStore();
+                        }
 					}
                 });
 
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
+                this.rangeValueStore = Ext.create('Ext.data.Store', {
+					fields: [idProperty, nameProperty],
+                    listeners: {
+                        add: function() {
+                            container.rangeValueCmp.select(this.getRange());
+                        },
+                        remove: function() {
+                            container.rangeValueCmp.select(this.getRange());
+                        }
+                    }
+                });
+
+                this.rangeValueCmp = Ext.create('Ext.form.field.ComboBox', {
+                    multiSelect: true,
+                    style: 'margin-bottom: 0',
+                    width: nameCmpWidth - operatorCmpWidth - rangeSetWidth,
+                    valueField: idProperty,
+                    displayField: nameProperty,
+                    emptyText: 'No selected items',
+                    editable: false,
+                    hideTrigger: true,
+                    queryMode: 'local',
+                    hidden: true,
+                    store: container.rangeValueStore,
+                    listConfig: {
+                        minWidth: valueCmpWidth,
+                        cls: 'ns-optionselector'
+                    },
+                    setOptionValues: function(records) {
+                        var me = this;
+
+                        container.rangeValueStore.removeAll();
+                        container.rangeValueStore.loadData(records);
+
+                        me.setValue(records);
+                    },
+					listeners: {
+                        change: function(cmp, newVal, oldVal) {
+                            newVal = Ext.Array.from(newVal);
+                            oldVal = Ext.Array.from(oldVal);
+
+                            if (newVal.length < oldVal.length) {
+                                var id = Ext.Array.difference(oldVal, newVal)[0];
+                                container.rangeValueStore.removeAt(container.rangeValueStore.findExact(idProperty, id));
+                            }
+                        }
+                    }
+                });
+
+                // function
+                this.onRangeSetSelect = function(id) {
+                    if (!id || id === defaultRangeSetId) {
+                        container.operatorCmp.show();
+                        container.valueCmp.show();
+                        container.rangeSearchCmp.hide();
+                        container.rangeValueCmp.hide();
+                    }
+                    else {
+                        var ranges;
+
+                        container.operatorCmp.hide();
+                        container.valueCmp.hide();
+                        container.rangeSearchCmp.show();
+                        container.rangeValueCmp.show();
+
+                        ranges = Ext.clone(ns.core.init.idLegendSetMap[id].legends);
+
+                        // display name
+                        for (var i = 0; i < ranges.length; i++) {
+                            range = ranges[i];
+                            range.displayName = range.name + ' (' + range.startValue + ' - ' + range.endValue + ')';
+                        }
+
+                        container.rangeSearchStore.loadData(ranges);
+                        container.rangeSearchStore.sort('startValue', 'ASC');
+                    }
+                };
+
+                this.rangeSetCmp = Ext.create('Ext.form.field.ComboBox', {
+                    cls: 'ns-combo h22',
+					style: 'margin-bottom: 0',
+                    width: rangeSetWidth,
+                    height: 22,
+                    fieldStyle: 'height: 22px',
+                    queryMode: 'local',
+                    valueField: idProperty,
+                    displayField: nameProperty,
+                    editable: false,
+                    storage: {},
+                    pendingValue: null,
+                    setPendingValue: function() {
+                        if (this.pendingValue) {
+                            this.setValue(this.pendingValue);
+                            container.onRangeSetSelect(this.pendingValue);
+
+                            this.pendingValue = null;
+                        }
+                    },
+                    store: Ext.create('Ext.data.Store', {
+                        fields: [idProperty, nameProperty]
+                    }),
+                    listeners: {
+                        added: function(cb) {
+                            cb.store.add({
+                                id: defaultRangeSetId,
+                                name: 'No range set'
+                            });
+
+                            //cb.setValue(defaultRangeSetId);
+
+                            Ext.Ajax.request({
+                                url: ns.core.init.contextPath + '/api/dataElements/' + container.dataElement.id + '.json?fields=legendSet[id,name]',
+                                success: function(r) {
+                                    r = Ext.decode(r.responseText);
+
+                                    if (Ext.isObject(r) && Ext.isObject(r.legendSet)) {
+                                        cb.store.add(r.legendSet);
+
+                                        cb.setValue(r.legendSet.id);
+                                        container.onRangeSetSelect(r.legendSet.id);
+                                    }
+                                },
+                                callback: function() {
+                                    cb.setPendingValue();
+                                }
+                            });
+                        },
+                        select: function(cb, r) {
+                            var id = Ext.Array.from(r)[0].data.id;
+                            container.onRangeSetSelect(id);
+                        }
                     }
                 });
 
                 this.items = [
-                    this.nameCmp,
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
+                    this.rangeSearchCmp,
+                    this.rangeValueCmp,
                     this.operatorCmp,
                     this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    this.rangeSetCmp
                 ];
 
                 this.callParent();
@@ -232,9 +484,30 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
                 });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: 'padding: 0',
+                    height: 18,
+                    text: 'Duplicate',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: removeCmpStyle,
+                    height: 18,
+                    text: 'Remove',
+                    handler: function() {
+                        container.removeDataElement();
+                    }
+                });
+
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
                     valueField: 'id',
@@ -254,32 +527,23 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Text', {
-                    width: valueCmpWidth,
+                    width: nameCmpWidth - operatorCmpWidth,
 					style: 'margin-bottom:0'
                 });
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
-                    }
-                });
-
                 this.items = [
-                    this.nameCmp,
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
                     this.operatorCmp,
-                    this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    this.valueCmp
                 ];
 
                 this.callParent();
@@ -317,8 +581,28 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: 'padding: 0',
+                    height: 18,
+                    text: 'Duplicate',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: removeCmpStyle,
+                    height: 18,
+                    text: 'Remove',
+                    handler: function() {
+                        container.removeDataElement();
+                    }
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -343,33 +627,24 @@ Ext.onReady( function() {
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.Date', {
-					width: valueCmpWidth,
+					width: nameCmpWidth - operatorCmpWidth,
 					style: 'margin-bottom:0',
 					format: 'Y-m-d'
 				});
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
-                    }
-                });
-
                 this.items = [
-                    this.nameCmp,
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
                     this.operatorCmp,
-                    this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    this.valueCmp
                 ];
 
                 this.callParent();
@@ -404,8 +679,28 @@ Ext.onReady( function() {
 
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: 'padding: 0',
+                    height: 18,
+                    text: 'Duplicate',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: removeCmpStyle,
+                    height: 18,
+                    text: 'Remove',
+                    handler: function() {
+                        container.removeDataElement();
+                    }
                 });
 
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -413,7 +708,7 @@ Ext.onReady( function() {
                     displayField: 'name',
                     queryMode: 'local',
                     editable: false,
-                    width: operatorCmpWidth + valueCmpWidth,
+                    width: nameCmpWidth,
                     style: 'margin-bottom:0',
                     value: 'true',
                     store: {
@@ -425,27 +720,18 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
-                    }
-                });
-
                 this.items = [
-                    this.nameCmp,
-                    this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
+                    this.valueCmp
                 ];
 
                 this.callParent();
@@ -458,12 +744,6 @@ Ext.onReady( function() {
 			layout: 'column',
             bodyStyle: 'border:0 none',
             style: 'margin: ' + margin,
-            addCss: function() {
-                var css = '.optionselector .x-boundlist-selected { background-color: #fff; border-color: #fff } \n';
-                css += '.optionselector .x-boundlist-selected.x-boundlist-item-over { background-color: #ddd; border-color: #ddd } \n';
-
-                Ext.util.CSS.createStyleSheet(css);
-            },
             getRecord: function() {
                 var items = this.valueCmp.getValue(),
 					record = {
@@ -508,12 +788,30 @@ Ext.onReady( function() {
                     idProperty = 'code',
                     nameProperty = 'name';
 
-                this.addCss();
-
                 this.nameCmp = Ext.create('Ext.form.Label', {
                     text: this.dataElement.name,
-                    width: nameCmpWidth,
+                    flex: 1,
                     style: 'padding:' + namePadding
+                });
+
+                this.addCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: 'padding: 0',
+                    height: 18,
+                    text: 'Duplicate',
+                    handler: function() {
+						container.duplicateDataElement();
+					}
+                });
+
+                this.removeCmp = Ext.create('Ext.button.Button', {
+                    cls: 'ns-linkbutton',
+                    style: removeCmpStyle,
+                    height: 18,
+                    text: 'Remove',
+                    handler: function() {
+                        container.removeDataElement();
+                    }
                 });
 
                 this.operatorCmp = Ext.create('Ext.form.field.ComboBox', {
@@ -593,7 +891,7 @@ Ext.onReady( function() {
 
                 this.searchCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
-                    width: 62,
+                    width: operatorCmpWidth - triggerCmpWidth,
                     style: 'margin-bottom:0',
                     emptyText: 'Search..',
                     valueField: idProperty,
@@ -602,7 +900,7 @@ Ext.onReady( function() {
                     enableKeyEvents: true,
                     queryMode: 'local',
                     listConfig: {
-                        minWidth: 346
+                        minWidth: nameCmpWidth - operatorCmpWidth
                     },
                     store: this.searchStore,
                     listeners: {
@@ -644,7 +942,7 @@ Ext.onReady( function() {
                 this.triggerCmp = Ext.create('Ext.button.Button', {
                     cls: 'ns-button-combotrigger',
                     disabledCls: 'ns-button-combotrigger-disabled',
-                    width: 18,
+                    width: triggerCmpWidth,
                     height: 22,
                     handler: function(b) {
                         container.searchStore.loadOptionSet();
@@ -666,7 +964,7 @@ Ext.onReady( function() {
                 this.valueCmp = Ext.create('Ext.form.field.ComboBox', {
                     multiSelect: true,
                     style: 'margin-bottom:0',
-					width: 226,
+					width: nameCmpWidth - operatorCmpWidth - operatorCmpWidth,
                     valueField: idProperty,
                     displayField: nameProperty,
                     emptyText: 'No selected items',
@@ -676,7 +974,7 @@ Ext.onReady( function() {
                     queryMode: 'local',
                     listConfig: {
                         minWidth: 266,
-                        cls: 'optionselector'
+                        cls: 'ns-optionselector'
                     },
                     setOptionValues: function(codeArray) {
                         var me = this,
@@ -706,31 +1004,21 @@ Ext.onReady( function() {
                     }
                 });
 
-                this.addCmp = Ext.create('Ext.button.Button', {
-                    text: '+',
-                    width: buttonCmpWidth,
-                    style: 'font-weight:bold',
-                    handler: function() {
-						container.duplicateDataElement();
-					}
-                });
-
-                this.removeCmp = Ext.create('Ext.button.Button', {
-                    text: 'x',
-                    width: buttonCmpWidth,
-                    handler: function() {
-                        container.removeDataElement();
-                    }
-                });
-
                 this.items = [
-                    this.nameCmp,
+                    {
+                        xtype: 'container',
+                        layout: 'hbox',
+                        width: nameCmpWidth,
+                        items: [
+                            this.nameCmp,
+                            this.addCmp,
+                            this.removeCmp
+                        ]
+                    },
                     this.operatorCmp,
                     this.searchCmp,
                     this.triggerCmp,
-                    this.valueCmp,
-                    this.addCmp,
-                    this.removeCmp
+                    this.valueCmp
                 ];
 
                 this.callParent();
@@ -1032,14 +1320,12 @@ Ext.onReady( function() {
 			dataType = 'aggregated_values',
             defaultValueId = 'default';
 
-		getStore = function(data) {
+		getStore = function(applyConfig) {
 			var config = {};
 
 			config.fields = ['id', 'name'];
 
-			if (data) {
-				config.data = data;
-			}
+			Ext.apply(config, applyConfig);
 
 			config.getDimensionNames = function() {
 				var dimensionNames = [];
@@ -1067,11 +1353,11 @@ Ext.onReady( function() {
 			return keys;
 		};
 
-		colStore = getStore();
-		rowStore = getStore();
-        fixedFilterStore = getStore();
-        filterStore = getStore();
-        valueStore = getStore();
+		colStore = getStore({name: 'colStore'});
+		rowStore = getStore({name: 'rowStore'});
+        fixedFilterStore = getStore({name: 'fixedFilterStore'});
+        filterStore = getStore({name: 'filterStore'});
+        valueStore = getStore({name: 'valueStore'});
 
         // store functions
         valueStore.addDefaultData = function() {
@@ -1252,7 +1538,11 @@ Ext.onReady( function() {
 
                 // remove ux and layout item
                 if (hasDimension(id, valueStore)) {
-                    ns.app.accordion.getUx(id).removeDataElement();
+                    var uxArray = ns.app.accordion.getUxArray(id);
+
+                    for (var i = 0; i < uxArray.length; i++) {
+                        uxArray[i].removeDataElement();
+                    }
                 }
             }
         };
@@ -1397,9 +1687,9 @@ Ext.onReady( function() {
                 map[record.data.id] = fixedFilterStore;
             });
 
-            valueStore.each(function(record) {
-                map[record.data.id] = valueStore;
-            });
+            //valueStore.each(function(record) {
+                //map[record.data.id] = valueStore;
+            //});
 
             return map;
         };
@@ -2467,6 +2757,11 @@ Ext.onReady( function() {
                 delete favorite.access;
                 delete favorite.lastUpdated;
                 delete favorite.created;
+
+                if (favorite.dataType === "individual_cases") {
+                    delete favorite.colSubTotals;
+                    delete favorite.rowSubTotals;
+                }
 			}
 
 			return favorite;
@@ -3960,16 +4255,16 @@ Ext.onReady( function() {
 
 				return hasDataElement;
 			},
-            getUxById: function(dataElementId) {
-                var ux;
+            getUxArrayById: function(dataElementId) {
+                var uxArray = [];
 
                 this.items.each(function(item) {
 					if (item.dataElement.id === dataElementId) {
-						ux = item;
+						uxArray.push(item);
 					}
 				});
 
-                return ux;
+                return uxArray;
             },
 			removeAllDataElements: function(reset) {
 				var items = this.items.items,
@@ -4108,7 +4403,7 @@ Ext.onReady( function() {
                 element.name = element.name || element.displayName;
                 recordMap[element.id] = element;
 
-                // add ux if not selected as value
+                // dont add ux if dim is selected as value
                 if (element.id !== aggWindow.value.getValue()) {
                     ux = addUxFromDataElement(element);
 
@@ -4123,6 +4418,7 @@ Ext.onReady( function() {
                 queryWindow.colStore.add(element);
 			}
 
+            // favorite
 			if (layout && layout.dataType === 'aggregated_values') {
 				aggWindow.reset(true);
 
@@ -4340,8 +4636,6 @@ Ext.onReady( function() {
         };
 
         weeks = Ext.create('Ext.container.Container', {
-            columnWidth: 0.34,
-            bodyStyle: 'border-style:none; padding:0 0 0 8px',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4377,8 +4671,6 @@ Ext.onReady( function() {
         });
 
         months = Ext.create('Ext.container.Container', {
-            columnWidth: 0.33,
-            bodyStyle: 'border-style:none',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4415,8 +4707,6 @@ Ext.onReady( function() {
         });
 
         biMonths = Ext.create('Ext.container.Container', {
-            columnWidth: 0.33,
-            bodyStyle: 'border-style:none',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4442,8 +4732,6 @@ Ext.onReady( function() {
         });
 
         quarters = Ext.create('Ext.container.Container', {
-            columnWidth: 0.34,
-            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4469,8 +4757,6 @@ Ext.onReady( function() {
         });
 
         sixMonths = Ext.create('Ext.container.Container', {
-            columnWidth: 0.33,
-            bodyStyle: 'border-style:none; padding:5px 0 0',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4496,8 +4782,7 @@ Ext.onReady( function() {
         });
 
         financialYears = Ext.create('Ext.container.Container', {
-            columnWidth: 0.33,
-            bodyStyle: 'border-style:none; padding:5px 0 0',
+            style: 'margin-top: 36px',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4508,6 +4793,11 @@ Ext.onReady( function() {
                     xtype: 'label',
                     text: NS.i18n.financial_years,
                     cls: 'ns-label-period-heading'
+                },
+                {
+                    xtype: 'checkbox',
+                    relativePeriodId: 'THIS_FINANCIAL_YEAR',
+                    boxLabel: NS.i18n.this_financial_year
                 },
                 {
                     xtype: 'checkbox',
@@ -4523,8 +4813,6 @@ Ext.onReady( function() {
         });
 
         years = Ext.create('Ext.container.Container', {
-            columnWidth: 0.35,
-            bodyStyle: 'border-style:none; padding:5px 0 0 8px',
             defaults: {
                 labelSeparator: '',
                 style: 'margin-bottom:0',
@@ -4555,35 +4843,44 @@ Ext.onReady( function() {
         });
 
         relativePeriod = Ext.create('Ext.container.Container', {
+            layout: 'column',
 			hideCollapseTool: true,
 			autoScroll: true,
-			style: 'border:0 none; padding:2px 0 0 7px',
+			style: 'border:0 none',
 			items: [
 				{
 					xtype: 'container',
-					layout: 'column',
+                    columnWidth: 0.34,
+                    style: 'margin-left: 8px',
+                    defaults: {
+                        style: 'margin-top: 4px'
+                    },
 					items: [
                         weeks,
-						months,
-                        biMonths
-					]
-				},
-				{
-					xtype: 'container',
-					layout: 'column',
-                    style: 'padding-top:4px',
-					items: [
 						quarters,
-						sixMonths,
-						financialYears
+                        years
 					]
 				},
 				{
 					xtype: 'container',
-					layout: 'column',
-                    style: 'padding-top:4px',
+                    columnWidth: 0.33,
+                    defaults: {
+                        style: 'margin-top: 4px'
+                    },
 					items: [
-                        years
+						months,
+						sixMonths
+					]
+				},
+				{
+					xtype: 'container',
+                    columnWidth: 0.33,
+                    defaults: {
+                        style: 'margin-top: 4px'
+                    },
+					items: [
+                        biMonths,
+						financialYears
 					]
 				}
 			],
@@ -5174,8 +5471,8 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.28,
-			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+			columnWidth: 0.25,
+			style: 'padding-top: 3px; padding-left: 5px; margin-bottom: 0',
 			boxLabel: 'User org unit',
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -5184,9 +5481,9 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.34,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: 'User OU children',
+			columnWidth: 0.26,
+			style: 'padding-top: 3px; margin-bottom: 0',
+			boxLabel: NS.i18n.user_sub_units,
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -5194,9 +5491,9 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.38,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: 'User OU grand children',
+			columnWidth: 0.4,
+			style: 'padding-top: 3px; margin-bottom: 0',
+			boxLabel: NS.i18n.user_sub_x2_units,
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -5983,8 +6280,8 @@ Ext.onReady( function() {
 			setGui: setGui,
 			getView: getView,
 
-            getUx: function(id) {
-                return dataElementSelected.getUxById(id);
+            getUxArray: function(id) {
+                return dataElementSelected.getUxArrayById(id);
             },
 
             listeners: {
@@ -7471,18 +7768,17 @@ Ext.onReady( function() {
 					ns.app.centerRegion = this;
 				},
 				afterrender: function(p) {
-					var liStyle = 'padding:3px 10px; color:#333',
-						html = '';
+					var html = '';
 
-					html += '<div style="padding:20px">';
-					html += '<div style="font-size:14px; padding-bottom:8px">' + NS.i18n.example1 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example2 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example3 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example4 + '</div>';
-					html += '<div style="font-size:14px; padding-top:20px; padding-bottom:8px">' + NS.i18n.example5 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example6 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example7 + '</div>';
-					html += '<div style="' + liStyle + '">- ' + NS.i18n.example8 + '</div>';
+					html += '<div class="ns-viewport-text" style="padding:20px">';
+					html += '<h3>' + NS.i18n.example1 + '</h3>';
+					html += '<div>- ' + NS.i18n.example2 + '</div>';
+					html += '<div>- ' + NS.i18n.example3 + '</div>';
+					html += '<div>- ' + NS.i18n.example4 + '</div>';
+					html += '<h3 style="padding-top:20px">' + NS.i18n.example5 + '</h3>';
+					html += '<div>- ' + NS.i18n.example6 + '</div>';
+					html += '<div>- ' + NS.i18n.example7 + '</div>';
+					html += '<div>- ' + NS.i18n.example8 + '</div>';
 					html += '</div>';
 
 					p.update(html);
@@ -7813,6 +8109,15 @@ Ext.onReady( function() {
                                                     alert('User is not assigned to any organisation units');
                                                 }
 
+                                                fn();
+                                            }
+                                        });
+
+                                        // legend sets
+                                        requests.push({
+                                            url: contextPath + '/api/legendSets.json?fields=id,name,legends[id,name,startValue,endValue,color]&paging=false',
+                                            success: function(r) {
+                                                init.legendSets = Ext.decode(r.responseText).legendSets || [];
                                                 fn();
                                             }
                                         });

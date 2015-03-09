@@ -154,6 +154,11 @@ public class EventReport
     private EventOutputType outputType;
     
     /**
+     * Indicates whether to collapse all data dimensions into a single dimension.
+     */
+    private boolean collapseDataDimensions;
+    
+    /**
      * Indicates rendering of empty rows for the table.
      */
     private boolean hideEmptyRows;
@@ -471,6 +476,19 @@ public class EventReport
     @JsonProperty
     @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isCollapseDataDimensions()
+    {
+        return collapseDataDimensions;
+    }
+
+    public void setCollapseDataDimensions( boolean collapseDataDimensions )
+    {
+        this.collapseDataDimensions = collapseDataDimensions;
+    }
+
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public boolean isShowHierarchy()
     {
         return showHierarchy;
@@ -560,7 +578,7 @@ public class EventReport
             showHierarchy = report.isShowHierarchy();
             showDimensionLabels = report.isShowDimensionLabels();
 
-            if ( MergeStrategy.MERGE_ALWAYS.equals( strategy ) )
+            if ( strategy.isReplace() )
             {
                 dataElementValueDimension = report.getDataElementValueDimension();
                 attributeValueDimension = report.getAttributeValueDimension();
@@ -574,7 +592,7 @@ public class EventReport
                 displayDensity = report.getDisplayDensity();
                 fontSize = report.getFontSize();
             }
-            else if ( MergeStrategy.MERGE_IF_NOT_NULL.equals( strategy ) )
+            else if ( strategy.isMerge() )
             {
                 dataElementValueDimension = report.getDataElementValueDimension() == null ? dataElementValueDimension : report.getDataElementValueDimension();
                 attributeValueDimension = report.getAttributeValueDimension() == null ? attributeValueDimension : report.getAttributeValueDimension();

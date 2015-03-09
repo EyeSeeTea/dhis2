@@ -44,10 +44,12 @@ import org.hisp.dhis.common.DimensionalObject;
 import org.hisp.dhis.common.NameableObject;
 import org.hisp.dhis.common.NameableObjectUtils;
 import org.hisp.dhis.common.QueryItem;
+import org.hisp.dhis.legend.Legend;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.system.util.ListUtils;
 
 /**
  * @author Lars Helge Overland
@@ -84,6 +86,8 @@ public class EventQueryParams
     private Integer limit;
     
     private EventOutputType outputType;
+    
+    private boolean collapseDataDimensions;
     
     private boolean coordinatesOnly;
     
@@ -132,6 +136,7 @@ public class EventQueryParams
         params.sortOrder = this.sortOrder;
         params.limit = this.limit;
         params.outputType = this.outputType;
+        params.collapseDataDimensions = this.collapseDataDimensions;
         params.coordinatesOnly = this.coordinatesOnly;
         
         params.periodType = this.periodType;
@@ -173,7 +178,8 @@ public class EventQueryParams
     }
 
     /**
-     * Returns a list of query items which occur more than once.
+     * Returns a list of query items which occur more than once, not including
+     * the first duplicate.
      */
     public List<QueryItem> getDuplicateQueryItems()
     {
@@ -192,24 +198,36 @@ public class EventQueryParams
     }
     
     /**
-     * Get NameableObjects part of items and item filters.
-     * @return
+     * Get nameable objects part of items and item filters.
      */
     public Set<NameableObject> getNameableObjectItems()
     {
         Set<NameableObject> objects = new HashSet<NameableObject>();
         
-        for ( QueryItem item : items )
+        for ( QueryItem item : ListUtils.union( items, itemFilters ) )
         {
             objects.add( item.getItem() );
         }
-        
-        for ( QueryItem item : itemFilters )
-        {
-            objects.add( item.getItem() );
-        }
-        
+                
         return objects;
+    }
+    
+    /**
+     * Get legend sets part of items and item filters.
+     */
+    public Set<Legend> getLegends()
+    {
+        Set<Legend> legends = new HashSet<>();
+        
+        for ( QueryItem item : ListUtils.union( items, itemFilters ) )
+        {
+            if ( item.hasLegendSet() )
+            {
+                legends.addAll( item.getLegendSet().getLegends() );
+            }
+        }
+        
+        return legends;
     }
     
     public boolean isOrganisationUnitMode( String mode )
@@ -472,6 +490,16 @@ public class EventQueryParams
     public void setOutputType( EventOutputType outputType )
     {
         this.outputType = outputType;
+    }
+
+    public boolean isCollapseDataDimensions()
+    {
+        return collapseDataDimensions;
+    }
+
+    public void setCollapseDataDimensions( boolean collapseDataDimensions )
+    {
+        this.collapseDataDimensions = collapseDataDimensions;
     }
 
     public boolean isCoordinatesOnly()

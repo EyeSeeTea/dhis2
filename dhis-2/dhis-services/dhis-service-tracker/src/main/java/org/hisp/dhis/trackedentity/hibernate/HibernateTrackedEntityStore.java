@@ -1,4 +1,4 @@
-package org.hisp.dhis.program;
+package org.hisp.dhis.trackedentity.hibernate;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,29 +28,13 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * @author markusbekken
- */
-public enum ProgramRuleVariableDataType {
-    NUMBER( "number" ), TEXT( "text" ), BOOL( "bool" ), DATE( "date" );
+import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.trackedentity.TrackedEntity;
+import org.hisp.dhis.trackedentity.TrackedEntityStore;
 
-    final String value;
+public class HibernateTrackedEntityStore
+    extends HibernateIdentifiableObjectStore<TrackedEntity>
+    implements TrackedEntityStore
+{
 
-    private ProgramRuleVariableDataType( String value )
-    {
-        this.value = value;
-    }
-
-    public static ProgramRuleVariableDataType fromValue( String value )
-    {
-        for ( ProgramRuleVariableDataType type : ProgramRuleVariableDataType.values() )
-        {
-            if ( type.value.equalsIgnoreCase( value ) )
-            {
-                return type;
-            }
-        }
-
-        return null;
-    }
 }

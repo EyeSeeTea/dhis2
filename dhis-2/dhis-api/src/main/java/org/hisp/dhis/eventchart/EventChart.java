@@ -73,9 +73,6 @@ public class EventChart
     extends BaseChart
     implements EventAnalyticalObject
 {
-    public static final String COUNT_TYPE_EVENTS = "events";
-    public static final String COUNT_TYPE_TRACKED_ENTITY_INSTANCES = "tracked_entity_instances";
-
     /**
      * Program. Required.
      */
@@ -126,6 +123,11 @@ public class EventChart
      */
     private EventOutputType outputType;
 
+    /**
+     * Indicates whether to collapse all data dimensions into a single dimension.
+     */
+    private boolean collapseDataDimensions;
+    
     // -------------------------------------------------------------------------
     // Analytical properties
     // -------------------------------------------------------------------------
@@ -358,6 +360,19 @@ public class EventChart
         this.outputType = outputType;
     }
 
+    @JsonProperty
+    @JsonView( { DetailedView.class, ExportView.class, DimensionalView.class } )
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isCollapseDataDimensions()
+    {
+        return collapseDataDimensions;
+    }
+
+    public void setCollapseDataDimensions( boolean collapseDataDimensions )
+    {
+        this.collapseDataDimensions = collapseDataDimensions;
+    }
+
     // -------------------------------------------------------------------------
     // Analytical properties
     // -------------------------------------------------------------------------
@@ -390,7 +405,7 @@ public class EventChart
         {
             EventChart chart = (EventChart) other;
 
-            if ( MergeStrategy.MERGE_ALWAYS.equals( strategy ) )
+            if ( strategy.isReplace() )
             {
                 dataElementValueDimension = chart.getDataElementValueDimension();
                 attributeValueDimension = chart.getAttributeValueDimension();
@@ -401,7 +416,7 @@ public class EventChart
                 endDate = chart.getEndDate();
                 outputType = chart.getOutputType();
             }
-            else if ( MergeStrategy.MERGE_IF_NOT_NULL.equals( strategy ) )
+            else if ( strategy.isMerge() )
             {
                 dataElementValueDimension = chart.getDataElementValueDimension() == null ? dataElementValueDimension : chart.getDataElementValueDimension();
                 attributeValueDimension = chart.getAttributeValueDimension() == null ? attributeValueDimension : chart.getAttributeValueDimension();

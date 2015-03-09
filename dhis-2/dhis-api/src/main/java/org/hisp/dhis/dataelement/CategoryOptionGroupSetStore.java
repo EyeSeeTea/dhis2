@@ -1,4 +1,4 @@
-package org.hisp.dhis.schema.descriptors;
+package org.hisp.dhis.dataelement;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,30 +28,9 @@ package org.hisp.dhis.schema.descriptors;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.mapping.MapLegendSet;
-import org.hisp.dhis.schema.Schema;
-import org.hisp.dhis.schema.SchemaDescriptor;
-import org.springframework.stereotype.Component;
+import org.hisp.dhis.common.GenericDimensionalObjectStore;
 
-/**
- * @author Morten Olav Hansen <mortenoh@gmail.com>
- */
-@Component
-public class MapLegendSetSchemaDescriptor implements SchemaDescriptor
+public interface CategoryOptionGroupSetStore
+    extends GenericDimensionalObjectStore<CategoryOptionGroupSet>
 {
-    public static final String SINGULAR = "mapLegendSet";
-
-    public static final String PLURAL = "mapLegendSets";
-
-    public static final String API_ENDPOINT = "/" + PLURAL;
-
-    @Override
-    public Schema getSchema()
-    {
-        Schema schema = new Schema( MapLegendSet.class, SINGULAR, PLURAL );
-        schema.setApiEndpoint( API_ENDPOINT );
-        schema.setOrder( 1080 );
-
-        return schema;
-    }
 }

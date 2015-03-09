@@ -1,4 +1,4 @@
-package org.hisp.dhis.mapping.comparator;
+package org.hisp.dhis.legend;
 
 /*
  * Copyright (c) 2004-2015, University of Oslo
@@ -28,20 +28,44 @@ package org.hisp.dhis.mapping.comparator;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.util.Comparator;
-
-import org.hisp.dhis.mapping.MapLayer;
+import org.hisp.dhis.legend.Legend;
+import org.hisp.dhis.legend.LegendService;
+import org.hisp.dhis.legend.LegendSet;
+import org.hisp.dhis.system.deletion.DeletionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * @author Lars Helge Overland
- * @version $Id$
  */
-public class MapLayerNameComparator
-    implements Comparator<MapLayer>
+public class LegendSetDeletionHandler
+    extends DeletionHandler
 {
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
+
+    @Autowired
+    private LegendService legendService;
+
+    // -------------------------------------------------------------------------
+    // DeletionHandler implementation
+    // -------------------------------------------------------------------------
+
     @Override
-    public int compare( MapLayer mapLayer0, MapLayer mapLayer1 )
+    protected String getClassName()
     {
-        return mapLayer0.getName().compareToIgnoreCase( mapLayer1.getName() );
+        return LegendSet.class.getSimpleName();
+    }
+
+    @Override
+    public void deleteLegend( Legend legend )
+    {
+        for ( LegendSet legendSet : legendService.getAllLegendSets() )
+        {
+            if ( legendSet.getLegends().remove( legend ) )
+            {
+                legendService.updateLegendSet( legendSet );
+            }
+        }
     }
 }

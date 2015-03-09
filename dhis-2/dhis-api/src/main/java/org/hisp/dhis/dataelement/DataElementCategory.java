@@ -72,8 +72,6 @@ public class DataElementCategory
     @Scanned
     private List<DataElementCategoryOption> categoryOptions = new ArrayList<>();
 
-    private boolean dataDimension;
-
     // -------------------------------------------------------------------------
     // Constructors
     // -------------------------------------------------------------------------
@@ -209,19 +207,6 @@ public class DataElementCategory
         this.categoryOptions = categoryOptions;
     }
 
-    @JsonProperty
-    @JsonView( { DetailedView.class, ExportView.class } )
-    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
-    public boolean isDataDimension()
-    {
-        return dataDimension;
-    }
-
-    public void setDataDimension( boolean dataDimension )
-    {
-        this.dataDimension = dataDimension;
-    }
-
     @Override
     public void mergeWith( IdentifiableObject other, MergeStrategy strategy )
     {
@@ -231,11 +216,11 @@ public class DataElementCategory
         {
             DataElementCategory category = (DataElementCategory) other;
 
-            if ( MergeStrategy.MERGE_ALWAYS.equals( strategy ) )
+            if ( strategy.isReplace() )
             {
                 dataDimensionType = category.getDataDimensionType();
             }
-            else if ( MergeStrategy.MERGE_IF_NOT_NULL.equals( strategy ) )
+            else if ( strategy.isMerge() )
             {
                 dataDimensionType = category.getDataDimensionType() == null ? dataDimensionType : category.getDataDimensionType();
             }

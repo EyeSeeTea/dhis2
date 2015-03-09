@@ -43,11 +43,11 @@ import org.hisp.dhis.analytics.AnalyticsIndex;
 import org.hisp.dhis.analytics.AnalyticsTable;
 import org.hisp.dhis.analytics.AnalyticsTableManager;
 import org.hisp.dhis.common.CodeGenerator;
+import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.dataapproval.DataApprovalLevelService;
 import org.hisp.dhis.dataelement.DataElementCategoryService;
 import org.hisp.dhis.dataelement.DataElementService;
 import org.hisp.dhis.jdbc.StatementBuilder;
-import org.hisp.dhis.organisationunit.OrganisationUnitGroupService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -71,15 +71,15 @@ public abstract class AbstractJdbcTableManager
     public static final String PREFIX_ORGUNITGROUPSET = "ougs_";
     public static final String PREFIX_ORGUNITLEVEL = "uidlevel";
     public static final String PREFIX_INDEX = "in_";
-    
+
+    @Autowired
+    protected IdentifiableObjectManager idObjectManager;
+   
     @Autowired
     protected OrganisationUnitService organisationUnitService;
     
     @Autowired
     protected DataElementService dataElementService;
-    
-    @Autowired
-    protected OrganisationUnitGroupService organisationUnitGroupService;
     
     @Autowired
     protected DataElementCategoryService categoryService;
@@ -223,26 +223,29 @@ public abstract class AbstractJdbcTableManager
     /**
      * Remove quotes from the given column name.
      */
-    protected String removeQuote( String column )
+    private String removeQuote( String column )
     {
         return column != null ? column.replaceAll( statementBuilder.getColumnQuote(), StringUtils.EMPTY ) : null;
     }
     
     /**
-     * Remove temp part of name from the given column name.
+     * Shortens the given table name.
      */
-    protected String removeTemp( String column )
+    private String shortenTableName( String table )
     {
-        return column != null ? column.replaceAll( TABLE_TEMP_SUFFIX, StringUtils.EMPTY ) : null;
+        table = table.replaceAll( ANALYTICS_TABLE_NAME, "ax" );
+        table = table.replaceAll( TABLE_TEMP_SUFFIX, StringUtils.EMPTY );
+        
+        return table;
     }
     
     /**
      * Returns index name for column. Purpose of code suffix is to avoid uniqueness
-     * collision between indexes for temp and real tables.
+     * collision between indexes for temporary and real tables.
      */
     protected String getIndexName( AnalyticsIndex inx )
     {
-        return quote( PREFIX_INDEX + removeQuote( removeTemp( inx.getColumn() ) ) + "_" + inx.getTable() + "_" + CodeGenerator.generateCode( 5 ) );        
+        return quote( PREFIX_INDEX + removeQuote( inx.getColumn() ) + "_" + shortenTableName( inx.getTable() ) + "_" + CodeGenerator.generateCode( 5 ) );        
     }
     
     /**
@@ -283,11 +286,13 @@ public abstract class AbstractJdbcTableManager
      * @throws IllegalStateException if not valid.
      */
     protected void validateDimensionColumns( List<String[]> dimensions )
-    {
+    {        
         if ( dimensions == null || dimensions.isEmpty() )
         {
             throw new IllegalStateException( "Analytics table dimensions are empty" );
         }
+        
+        dimensions = new ArrayList<>( dimensions );
         
         List<String> columns = new ArrayList<>();
         

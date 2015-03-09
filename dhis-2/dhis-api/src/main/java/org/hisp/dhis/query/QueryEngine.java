@@ -28,14 +28,12 @@ package org.hisp.dhis.query;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.IdentifiableObject;
-
 import java.util.List;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
-public interface QueryEngine
+public interface QueryEngine<T>
 {
-    List<? extends IdentifiableObject> query( Query query );
+    List<T> query( Query query );
 }

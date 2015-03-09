@@ -30,16 +30,16 @@ package org.hisp.dhis.schema;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.hibernate.SessionFactory;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.mapping.Collection;
 import org.hibernate.mapping.Column;
 import org.hibernate.mapping.PersistentClass;
 import org.hibernate.metadata.ClassMetadata;
-import org.hibernate.type.AnyType;
+import org.hibernate.persister.collection.CollectionPersister;
+import org.hibernate.persister.entity.Joinable;
 import org.hibernate.type.AssociationType;
 import org.hibernate.type.CollectionType;
-import org.hibernate.type.EntityType;
 import org.hibernate.type.SingleColumnType;
 import org.hibernate.type.TextType;
 import org.hibernate.type.Type;
@@ -55,6 +55,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -74,7 +75,9 @@ public abstract class AbstractPropertyIntrospectorService
         .put( AnalyticalObject.class, BaseAnalyticalObject.class )
         .build();
 
-    private Map<Class<?>, Map<String, Property>> classMapCache = Maps.newHashMap();
+    protected Map<Class<?>, Map<String, Property>> classMapCache = new HashMap<>();
+
+    protected Map<String, String> roleToRole = new HashMap<>();
 
     @Autowired
     protected ApplicationContext context;
@@ -115,6 +118,57 @@ public abstract class AbstractPropertyIntrospectorService
         return klass;
     }
 
+    protected void updateJoinTables()
+    {
+        if ( !roleToRole.isEmpty() )
+        {
+            return;
+        }
+
+        Map<String, List<String>> joinTableToRoles = new HashMap<>();
+
+        LocalSessionFactoryBean sessionFactoryBean = getLocalSessionFactoryBean();
+        SessionFactoryImplementor sessionFactoryImplementor = (SessionFactoryImplementor) sessionFactory;
+        Iterator collectionIterator = sessionFactoryBean.getConfiguration().getCollectionMappings();
+
+        while ( collectionIterator.hasNext() )
+        {
+            Collection collection = (Collection) collectionIterator.next();
+            CollectionPersister collectionPersister = sessionFactoryImplementor.getCollectionPersister( collection.getRole() );
+
+            if ( collectionPersister.isManyToMany() && collection.getType().isAssociationType() )
+            {
+                AssociationType associationType = (AssociationType) collection.getType();
+                Joinable associatedJoinable = associationType.getAssociatedJoinable( sessionFactoryImplementor );
+
+                if ( !joinTableToRoles.containsKey( associatedJoinable.getTableName() ) )
+                {
+                    joinTableToRoles.put( associatedJoinable.getTableName(), new ArrayList<String>() );
+                }
+
+                joinTableToRoles.get( associatedJoinable.getTableName() ).add( collection.getRole() );
+            }
+        }
+
+        Iterator<Map.Entry<String, List<String>>> entryIterator = joinTableToRoles.entrySet().iterator();
+
+        while ( entryIterator.hasNext() )
+        {
+            Map.Entry<String, List<String>> entry = entryIterator.next();
+
+            if ( entry.getValue().size() < 2 )
+            {
+                entryIterator.remove();
+            }
+        }
+
+        for ( Map.Entry<String, List<String>> entry : joinTableToRoles.entrySet() )
+        {
+            roleToRole.put( entry.getValue().get( 0 ), entry.getValue().get( 1 ) );
+            roleToRole.put( entry.getValue().get( 1 ), entry.getValue().get( 0 ) );
+        }
+    }
+
     /**
      * Introspect a class and return a map with key=property-name, and value=Property class.
      *
@@ -131,6 +185,7 @@ public abstract class AbstractPropertyIntrospectorService
     @SuppressWarnings( "unused" )
     protected Map<String, Property> getPropertiesFromHibernate( Class<?> klass )
     {
+        updateJoinTables();
         ClassMetadata classMetadata = sessionFactory.getClassMetadata( klass );
 
         // is class persisted with hibernate
@@ -141,6 +196,7 @@ public abstract class AbstractPropertyIntrospectorService
 
         LocalSessionFactoryBean sessionFactoryBean = getLocalSessionFactoryBean();
         PersistentClass persistentClass = sessionFactoryBean.getConfiguration().getClassMapping( klass.getName() );
+        SessionFactoryImplementor sessionFactoryImplementor = (SessionFactoryImplementor) sessionFactory;
 
         Iterator<?> propertyIterator = persistentClass.getPropertyClosureIterator();
 
@@ -158,29 +214,30 @@ public abstract class AbstractPropertyIntrospectorService
 
             property.setName( hibernateProperty.getName() );
             property.setCascade( hibernateProperty.getCascade() );
+            property.setCollection( type.isCollectionType() );
 
             property.setSetterMethod( hibernateProperty.getSetter( klass ).getMethod() );
             property.setGetterMethod( hibernateProperty.getGetter( klass ).getMethod() );
 
-            if ( type.isCollectionType() )
+            if ( property.isCollection() )
             {
                 CollectionType collectionType = (CollectionType) type;
-                property.setCollection( true );
-
                 Collection collection = sessionFactoryBean.getConfiguration().getCollectionMapping( collectionType.getRole() );
+                CollectionPersister collectionPersister = sessionFactoryImplementor.getCollectionPersister( collection.getRole() );
+
                 property.setOwner( !collection.isInverse() );
-            }
-            else if ( type.isEntityType() )
-            {
-                EntityType entityType = (EntityType) type;
-            }
-            else if ( type.isAssociationType() )
-            {
-                AssociationType associationType = (AssociationType) type;
-            }
-            else if ( type.isAnyType() )
-            {
-                AnyType anyType = (AnyType) type;
+                property.setManyToMany( collectionPersister.isManyToMany() );
+
+                if ( property.isOwner() )
+                {
+                    property.setOwningRole( collectionType.getRole() );
+                    property.setInverseRole( roleToRole.get( collectionType.getRole() ) );
+                }
+                else
+                {
+                    property.setOwningRole( roleToRole.get( collectionType.getRole() ) );
+                    property.setInverseRole( collectionType.getRole() );
+                }
             }
 
             if ( SingleColumnType.class.isInstance( type ) )

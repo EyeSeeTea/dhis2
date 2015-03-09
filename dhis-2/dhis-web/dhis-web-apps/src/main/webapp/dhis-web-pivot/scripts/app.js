@@ -4001,6 +4001,7 @@ Ext.onReady( function() {
 
 		relativePeriod = {
 			xtype: 'panel',
+            layout: 'column',
 			hideCollapseTool: true,
 			autoScroll: true,
 			bodyStyle: 'border:0 none',
@@ -4008,12 +4009,12 @@ Ext.onReady( function() {
 			items: [
 				{
 					xtype: 'container',
-					layout: 'column',
+                    columnWidth: 0.34,
 					bodyStyle: 'border-style:none',
 					items: [
 						{
 							xtype: 'panel',
-							columnWidth: 0.34,
+							//columnWidth: 0.34,
 							bodyStyle: 'border-style:none; padding:0 0 0 8px',
 							defaults: relativePeriodDefaults,
 							items: [
@@ -4046,7 +4047,65 @@ Ext.onReady( function() {
 						},
 						{
 							xtype: 'panel',
-							columnWidth: 0.33,
+							//columnWidth: 0.34,
+							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+							defaults: relativePeriodDefaults,
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.quarters,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_QUARTER',
+									boxLabel: NS.i18n.last_quarter
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_4_QUARTERS',
+									boxLabel: NS.i18n.last_4_quarters
+								}
+							]
+						},
+						{
+							xtype: 'panel',
+							//columnWidth: 0.35,
+							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
+							defaults: relativePeriodDefaults,
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.years,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'THIS_YEAR',
+									boxLabel: NS.i18n.this_year
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_YEAR',
+									boxLabel: NS.i18n.last_year
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_5_YEARS',
+									boxLabel: NS.i18n.last_5_years
+								}
+							]
+						}
+					]
+				},
+				{
+					xtype: 'container',
+                    columnWidth: 0.33,
+					bodyStyle: 'border-style:none',
+					items: [
+						{
+							xtype: 'panel',
+							//columnWidth: 0.33,
 							bodyStyle: 'border-style:none',
 							defaults: relativePeriodDefaults,
 							items: [
@@ -4079,60 +4138,7 @@ Ext.onReady( function() {
 						},
 						{
 							xtype: 'panel',
-							columnWidth: 0.33,
-							bodyStyle: 'border-style:none',
-							defaults: relativePeriodDefaults,
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.bimonths,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_BIMONTH',
-									boxLabel: NS.i18n.last_bimonth
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_6_BIMONTHS',
-									boxLabel: NS.i18n.last_6_bimonths
-								}
-							]
-						}
-					]
-				},
-				{
-					xtype: 'container',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						{
-							xtype: 'panel',
-							columnWidth: 0.34,
-							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
-							defaults: relativePeriodDefaults,
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.quarters,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_QUARTER',
-									boxLabel: NS.i18n.last_quarter
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_4_QUARTERS',
-									boxLabel: NS.i18n.last_4_quarters
-								}
-							]
-						},
-						{
-							xtype: 'panel',
-							columnWidth: 0.33,
+							//columnWidth: 0.33,
 							bodyStyle: 'border-style:none; padding:5px 0 0',
 							defaults: relativePeriodDefaults,
 							items: [
@@ -4152,10 +4158,41 @@ Ext.onReady( function() {
 									boxLabel: NS.i18n.last_2_sixmonths
 								}
 							]
+						}
+					]
+				},
+				{
+					xtype: 'container',
+                    columnWidth: 0.33,
+					bodyStyle: 'border-style:none',
+					items: [
+						{
+							xtype: 'panel',
+							//columnWidth: 0.33,
+							bodyStyle: 'border-style:none',
+                            style: 'margin-bottom: 32px',
+							defaults: relativePeriodDefaults,
+							items: [
+								{
+									xtype: 'label',
+									text: NS.i18n.bimonths,
+									cls: 'ns-label-period-heading'
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_BIMONTH',
+									boxLabel: NS.i18n.last_bimonth
+								},
+								{
+									xtype: 'checkbox',
+									relativePeriodId: 'LAST_6_BIMONTHS',
+									boxLabel: NS.i18n.last_6_bimonths
+								}
+							]
 						},
 						{
 							xtype: 'panel',
-							columnWidth: 0.33,
+							//columnWidth: 0.33,
 							bodyStyle: 'border-style:none; padding:5px 0 0',
 							defaults: relativePeriodDefaults,
 							items: [
@@ -4166,6 +4203,11 @@ Ext.onReady( function() {
 								},
 								{
 									xtype: 'checkbox',
+									relativePeriodId: 'THIS_FINANCIAL_YEAR',
+									boxLabel: NS.i18n.this_financial_year
+								},
+								{
+									xtype: 'checkbox',
 									relativePeriodId: 'LAST_FINANCIAL_YEAR',
 									boxLabel: NS.i18n.last_financial_year
 								},
@@ -4173,41 +4215,6 @@ Ext.onReady( function() {
 									xtype: 'checkbox',
 									relativePeriodId: 'LAST_5_FINANCIAL_YEARS',
 									boxLabel: NS.i18n.last_5_financial_years
-								}
-							]
-						}
-					]
-				},
-				{
-					xtype: 'container',
-					layout: 'column',
-					bodyStyle: 'border-style:none',
-					items: [
-						{
-							xtype: 'panel',
-							columnWidth: 0.35,
-							bodyStyle: 'border-style:none; padding:5px 0 0 8px',
-							defaults: relativePeriodDefaults,
-							items: [
-								{
-									xtype: 'label',
-									text: NS.i18n.years,
-									cls: 'ns-label-period-heading'
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'THIS_YEAR',
-									boxLabel: NS.i18n.this_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_YEAR',
-									boxLabel: NS.i18n.last_year
-								},
-								{
-									xtype: 'checkbox',
-									relativePeriodId: 'LAST_5_YEARS',
-									boxLabel: NS.i18n.last_5_years
 								}
 							]
 						}
@@ -4640,8 +4647,8 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnit = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.28,
-			style: 'padding-top:2px; padding-left:3px; margin-bottom:0',
+			columnWidth: 0.25,
+			style: 'padding-top: 3px; padding-left: 5px; margin-bottom: 0',
 			boxLabel: NS.i18n.user_organisation_unit,
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
@@ -4650,9 +4657,9 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.31,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: NS.i18n.user_organisation_unit_children,
+			columnWidth: 0.26,
+			style: 'padding-top: 3px; margin-bottom: 0',
+			boxLabel: NS.i18n.user_sub_units,
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitGrandChildren.getValue()]);
@@ -4660,9 +4667,9 @@ Ext.onReady( function() {
 		});
 
 		userOrganisationUnitGrandChildren = Ext.create('Ext.form.field.Checkbox', {
-			columnWidth: 0.41,
-			style: 'padding-top:2px; margin-bottom:0',
-			boxLabel: NS.i18n.user_organisation_unit_grandchildren,
+			columnWidth: 0.4,
+			style: 'padding-top: 3px; margin-bottom: 0',
+			boxLabel: NS.i18n.user_sub_x2_units,
 			labelWidth: ns.core.conf.layout.form_label_width,
 			handler: function(chb, checked) {
 				treePanel.xable([checked, userOrganisationUnit.getValue(), userOrganisationUnitChildren.getValue()]);
@@ -6658,9 +6665,9 @@ Ext.onReady( function() {
 
                                         // legend sets
                                         requests.push({
-                                            url: contextPath + '/api/mapLegendSets.json?fields=id,name,mapLegends[id,name,startValue,endValue,color]&paging=false',
+                                            url: contextPath + '/api/legendSets.json?fields=id,name,legends[id,name,startValue,endValue,color]&paging=false',
                                             success: function(r) {
-                                                init.legendSets = Ext.decode(r.responseText).mapLegendSets || [];
+                                                init.legendSets = Ext.decode(r.responseText).legendSets || [];
                                                 fn();
                                             }
                                         });

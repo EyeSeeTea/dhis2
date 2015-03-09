@@ -195,6 +195,21 @@ public class Property implements Ordered, Klass
      */
     private String cascade;
 
+    /**
+     * Is collection many-to-many.
+     */
+    private boolean manyToMany;
+
+    /**
+     * The hibernate role of the owning side.
+     */
+    private String owningRole;
+
+    /**
+     * The hibernate role of the inverse side (if many-to-many).
+     */
+    private String inverseRole;
+
     public Property()
     {
     }
@@ -211,6 +226,7 @@ public class Property implements Ordered, Klass
         this.setterMethod = setter;
     }
 
+    @Override
     @JsonProperty
     @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
     public Class<?> getKlass()
@@ -531,6 +547,42 @@ public class Property implements Ordered, Klass
     public void setCascade( String cascade )
     {
         this.cascade = cascade;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public boolean isManyToMany()
+    {
+        return manyToMany;
+    }
+
+    public void setManyToMany( boolean manyToMany )
+    {
+        this.manyToMany = manyToMany;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getOwningRole()
+    {
+        return owningRole;
+    }
+
+    public void setOwningRole( String owningRole )
+    {
+        this.owningRole = owningRole;
+    }
+
+    @JsonProperty
+    @JacksonXmlProperty( namespace = DxfNamespaces.DXF_2_0 )
+    public String getInverseRole()
+    {
+        return inverseRole;
+    }
+
+    public void setInverseRole( String inverseRole )
+    {
+        this.inverseRole = inverseRole;
     }
 
     public String key()

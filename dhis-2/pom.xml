@@ -53,32 +53,27 @@
       <id>MavenCentral</id>
       <name>Maven repository</name>
       <url>http://repo1.maven.org/maven2</url>
-      <releases>
-        <enabled>true</enabled>
-      </releases>
       <snapshots>
         <enabled>false</enabled>
       </snapshots>
     </repository>
-    <repository>
-      <id>UK</id>
-      <name>UK Central</name>
-      <url>http://uk.maven.org/maven2</url>
-    </repository>
-    <repository>
-      <id>amplecode_maven2_repo</id>
-      <name>AmpleCode Maven 2 repository</name>
-      <url>http://maven.dhis2.org/amplecode-local</url>
-    </repository>
+    <!-- GeoTools -->
     <repository>
       <id>osgeo</id>
       <name>Open Source Geospatial Foundation Repository</name>
       <url>http://download.osgeo.org/webdav/geotools/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
+    <!-- SMSLib -->
     <repository>
-      <id>freehep</id>
-      <name>FreeHEP</name>
-      <url>http://java.freehep.org/maven2</url>
+      <id>smslib</id>
+      <name>SMSLib</name>
+      <url>http://smslib.org/maven2/v3</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
     </repository>
   </repositories>
 
@@ -585,9 +580,9 @@
         <version>2.1.7</version>
       </dependency>
       <dependency>
-        <groupId>org.nfunk</groupId>
+        <groupId>org.scijava</groupId>
         <artifactId>jep</artifactId>
-        <version>2.4.0</version>
+        <version>2.4.2</version>
       </dependency>
       <dependency>
         <groupId>junit</groupId>
@@ -603,6 +598,12 @@
         <groupId>org.amplecode</groupId>
         <artifactId>cave-process</artifactId>
         <version>1.0.3</version>
+        <exclusions>
+          <exclusion>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+          </exclusion>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>joda-time</groupId>
@@ -1002,7 +1003,7 @@
     <rootDir></rootDir>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <spring.version>4.1.5.RELEASE</spring.version>
-    <spring.security.version>3.2.5.RELEASE</spring.security.version>
+    <spring.security.version>3.2.6.RELEASE</spring.security.version>
     <struts.version>2.3.16.3</struts.version>
     <hibernate.version>4.2.0.Final</hibernate.version>
     <hibernate-validator.version>4.3.1.Final</hibernate-validator.version>
