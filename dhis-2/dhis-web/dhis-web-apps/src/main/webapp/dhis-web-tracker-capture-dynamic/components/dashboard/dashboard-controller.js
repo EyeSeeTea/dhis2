@@ -47,6 +47,9 @@ trackerCapture.controller('DashboardController',
 	            unorderedWidgetConfigs,
 	            "+index");
 	    
+		$scope.hasSmaller = false;
+		$scope.hasBigger = false;
+
 	    //Create each widget based on configuration
 	    angular.forEach(orderedWidgetConfigs,function(widgetConfig){
 	        var configuredWidget  = 
@@ -97,19 +100,38 @@ trackerCapture.controller('DashboardController',
 	            $rootScope.notesWidget = configuredWidget;
 	        }  
                 
-                $rootScope.dashboardWidgets.push(configuredWidget);
-                $scope.dashboardStatus[configuredWidget.title] = angular.copy(configuredWidget);
+            $rootScope.dashboardWidgets.push(configuredWidget);
+            $scope.dashboardStatus[configuredWidget.title] = angular.copy(configuredWidget);
 
 	        if(widgetConfig.horizontalplacement==="left"){
                     configuredWidget.parent = 'biggerWidget';
 	            $scope.dashboardWidgetsOrder.biggerWidgets.push(configuredWidget.title);
+				if(widgetConfig.show) {
+					$scope.hasBigger = true;
+				}
 	        } else {
                     configuredWidget.parent = 'smallerWidget';
 	            $scope.dashboardWidgetsOrder.smallerWidgets.push(configuredWidget.title);
+				if(widgetConfig.show) {
+					$scope.hasSmaller = true;
+				}
 	        }
 	    });
-            $scope.broadCastSelections();
+		setWidgetsSize();
+        $scope.broadCastSelections();
 	};
+    var setWidgetsSize = function(){        
+        
+        $scope.widgetSize = {smaller: "col-sm-6 col-md-4", bigger: "col-sm-6 col-md-8"};
+        
+        if(!$scope.hasSmaller){
+            $scope.widgetSize = {smaller: "col-sm-1", bigger: "col-sm-11"};
+        }
+
+        if(!$scope.hasBigger){
+            $scope.widgetSize = {smaller: "col-sm-11", bigger: "col-sm-1"};
+        }
+    };
     
     if($scope.selectedTeiId){
         
