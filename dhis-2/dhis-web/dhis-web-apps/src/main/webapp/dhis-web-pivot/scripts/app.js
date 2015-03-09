@@ -5463,10 +5463,8 @@ Ext.onReady( function() {
             }
         };            
 
-        
-
 		downloadButton = Ext.create('Ext.button.Button', {
-			text: 'Download',
+            text: NS.i18n.download,
 			disabled: true,
 			menu: {},
             handler: function(b) {
