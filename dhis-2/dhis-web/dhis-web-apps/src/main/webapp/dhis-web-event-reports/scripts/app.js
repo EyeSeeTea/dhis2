@@ -1373,16 +1373,6 @@ Ext.onReady( function() {
                 });
             }
         };
-nissa = valueStore;
-        valueStore.on('datachanged', function() {
-            var s = '';
-            valueStore.each(function(record) {
-                s += record.data.name + ', ';
-            });
-
-
-                console.log(s);
-        });
 
         fixedFilterStore.setListHeight = function() {
             var fixedFilterHeight = 26 + (this.getRange().length * 21) + 1;
@@ -1574,7 +1564,6 @@ nissa = valueStore;
 			store: valueStore,
             value: defaultValueId,
             setDefaultData: function() {
-console.log("setDefaultData");
                 valueStore.addDefaultData();
                 this.setValue(defaultValueId);
                 aggregationType.resetData();
@@ -1585,7 +1574,6 @@ console.log("setDefaultData");
                 }
             },
             resetData: function() {
-console.log("resetData");
                 valueStore.removeAll();
                 this.clearValue();
                 aggregationType.resetData();
@@ -1712,7 +1700,6 @@ console.log("resetData");
         };
 
 		resetData = function() {
-console.log("resetData");
 			var map = saveState({}),
 				keys = ['ou', 'pe', 'dates'];
 
@@ -1724,8 +1711,6 @@ console.log("resetData");
 		};
 
 		reset = function(isAll) {
-
-console.log("reset");
 			colStore.removeAll();
 			rowStore.removeAll();
 			fixedFilterStore.removeAll();
